@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\Matrix\CorporalPolicyController;
+use App\Http\Middleware\VerifyMatrixCorporalToken;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -17,3 +19,8 @@ use Illuminate\Support\Facades\Route;
 Route::middleware('auth:sanctum')->get('/user', function (Request $request) {
     return $request->user();
 });
+
+// matrix-corporal Policy-Endpoint (per Bearer-Token geschützt, zustandslos).
+Route::middleware(VerifyMatrixCorporalToken::class)
+    ->get('/matrix/corporal/policy', CorporalPolicyController::class)
+    ->name('matrix.corporal.policy');

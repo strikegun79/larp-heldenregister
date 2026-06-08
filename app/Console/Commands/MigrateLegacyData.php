@@ -48,6 +48,9 @@ class MigrateLegacyData extends Command
             $this->migrateAdventures();
             $this->migrateBookings();
             $this->migrateVisits();
+            $this->migrateMatrixRooms();
+            $this->migrateMatrixAccounts();
+            $this->migrateMatrixMemberships();
         });
 
         $this->newLine();
@@ -367,6 +370,63 @@ class MigrateLegacyData extends Command
         }
     }
 
+    // ---- Matrix (corporal User-DB) ------------------------------------------
+
+    private function migrateMatrixRooms(): void
+    {
+        foreach ($this->legacy()->table('matrix_managedRoomIds')->get() as $row) {
+            DB::table('matrix_managed_rooms')->updateOrInsert(
+                ['roomid' => $row->roomid],
+                [
+                    'roomname' => $row->roomname,
+                    'roomtype' => $row->roomtype,
+                    'default_allow' => (bool) $row->default_allow,
+                    'default_deny' => (bool) $row->default_deny,
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]
+            );
+        }
+    }
+
+    private function migrateMatrixAccounts(): void
+    {
+        $players = $this->map('players');
+
+        foreach ($this->legacy()->table('matrix_account')->get() as $row) {
+            DB::table('matrix_accounts')->updateOrInsert(
+                ['mxid' => $row->id],
+                [
+                    'player_id' => $players[$row->player_id] ?? null,
+                    'display_name' => $row->displayName,
+                    'avatar_uri' => $row->avatarUri,
+                    'auth_credential' => $row->password,
+                    'active' => $this->trueFalse($row->active),
+                    'forbid_room_creation' => $this->trueFalse($row->forbidRoomCreation),
+                    'forbid_encrypted_room_creation' => $this->trueFalse($row->forbidEncryptedRoomCreation),
+                    'deleted_at' => $this->cleanDateTime($row->deleted),
+                    'created_at' => now(),
+                    'updated_at' => now(),
+                ]
+            );
+        }
+    }
+
+    private function migrateMatrixMemberships(): void
+    {
+        foreach ($this->legacy()->table('matrix_joinedRoomIds')->get() as $row) {
+            // Nur migrieren, wenn Konto und Raum vorhanden sind (FK-Integrität).
+            if (! DB::table('matrix_accounts')->where('mxid', $row->matrix_userid)->exists()
+                || ! DB::table('matrix_managed_rooms')->where('roomid', $row->roomid)->exists()) {
+                continue;
+            }
+            DB::table('matrix_room_memberships')->updateOrInsert(
+                ['mxid' => $row->matrix_userid, 'roomid' => $row->roomid],
+                ['created_at' => now(), 'updated_at' => now()]
+            );
+        }
+    }
+
     // ---- Helfer -------------------------------------------------------------
 
     /** @return array<int,int> Map [legacy_id => neue id] für eine Tabelle. */
@@ -388,6 +448,11 @@ class MigrateLegacyData extends Command
     private function onOff(?string $value): bool
     {
         return strtolower((string) $value) === 'on';
+    }
+
+    private function trueFalse(?string $value): bool
+    {
+        return strtolower((string) $value) === 'true';
     }
 
     private function looksLikeBcrypt(?string $hash): bool
@@ -427,6 +492,9 @@ class MigrateLegacyData extends Command
             'event' => 'adventures',
             'event_booking' => 'bookings',
             'event_visit' => 'event_visits',
+            'matrix_managedRoomIds' => 'matrix_managed_rooms',
+            'matrix_account' => 'matrix_accounts',
+            'matrix_joinedRoomIds' => 'matrix_room_memberships',
         ];
 
         $rows = [];
