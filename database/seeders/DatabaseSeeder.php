@@ -17,6 +17,8 @@ class DatabaseSeeder extends Seeder
             HeroClassSeeder::class,
             PerlColorSeeder::class,
             EpTransactionTypeSeeder::class,
+            LocationSeeder::class,
+            EventLookupSeeder::class,
         ]);
     }
 }

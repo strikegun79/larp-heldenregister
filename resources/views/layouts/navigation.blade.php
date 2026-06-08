@@ -18,6 +18,9 @@
                     <x-nav-link :href="route('heroes.index')" :active="request()->routeIs('heroes.*')">
                         {{ __('Heldenregister') }}
                     </x-nav-link>
+                    <x-nav-link :href="route('adventures.index')" :active="request()->routeIs('adventures.*')">
+                        {{ __('Abenteuer') }}
+                    </x-nav-link>
                 </div>
             </div>
 

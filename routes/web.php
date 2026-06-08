@@ -1,5 +1,7 @@
 <?php
 
+use App\Http\Controllers\AdventureController;
+use App\Http\Controllers\BookingController;
 use App\Http\Controllers\HeroController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
@@ -29,6 +31,13 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     Route::resource('heroes', HeroController::class);
+    Route::resource('adventures', AdventureController::class);
+
+    // Anmeldungen zu einem Abenteuer.
+    Route::post('adventures/{adventure}/bookings', [BookingController::class, 'store'])
+        ->name('adventures.bookings.store');
+    Route::delete('adventures/{adventure}/bookings/{booking}', [BookingController::class, 'destroy'])
+        ->name('adventures.bookings.destroy');
 });
 
 require __DIR__.'/auth.php';
