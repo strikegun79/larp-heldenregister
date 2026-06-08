@@ -1,0 +1,133 @@
+<?php
+
+namespace App\Http\Controllers;
+
+use App\Models\Hero;
+use App\Models\HeroClass;
+use App\Models\Player;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\View\View;
+
+class HeroController extends Controller
+{
+    public function __construct()
+    {
+        $this->middleware('auth');
+    }
+
+    /**
+     * Liste aller Helden (Heldenregister).
+     */
+    public function index(): View
+    {
+        $heroes = Hero::with(['player', 'classes'])
+            ->orderBy('character_name')
+            ->paginate(20);
+
+        return view('heroes.index', compact('heroes'));
+    }
+
+    /**
+     * Formular für einen neuen Helden.
+     */
+    public function create(): View
+    {
+        return view('heroes.create', [
+            'hero' => new Hero,
+            'players' => Player::orderBy('name')->get(),
+            'classes' => HeroClass::where('disabled', false)->orderBy('name')->get(),
+        ]);
+    }
+
+    /**
+     * Neuen Helden speichern.
+     */
+    public function store(Request $request): RedirectResponse
+    {
+        $data = $this->validateHero($request);
+
+        $hero = Hero::create($data);
+        $hero->classes()->sync($request->input('classes', []));
+
+        return redirect()
+            ->route('heroes.show', $hero)
+            ->with('status', 'Held wurde angelegt.');
+    }
+
+    /**
+     * Detailansicht eines Helden inkl. EP-Saldo und Fertigkeiten.
+     */
+    public function show(Hero $hero): View
+    {
+        $hero->load(['player', 'classes', 'skills', 'epTransactions.type']);
+
+        return view('heroes.show', compact('hero'));
+    }
+
+    /**
+     * Formular zum Bearbeiten.
+     */
+    public function edit(Hero $hero): View
+    {
+        return view('heroes.edit', [
+            'hero' => $hero,
+            'players' => Player::orderBy('name')->get(),
+            'classes' => HeroClass::where('disabled', false)->orderBy('name')->get(),
+        ]);
+    }
+
+    /**
+     * Helden aktualisieren.
+     */
+    public function update(Request $request, Hero $hero): RedirectResponse
+    {
+        $data = $this->validateHero($request);
+
+        $hero->update($data);
+        $hero->classes()->sync($request->input('classes', []));
+
+        return redirect()
+            ->route('heroes.show', $hero)
+            ->with('status', 'Held wurde aktualisiert.');
+    }
+
+    /**
+     * Helden löschen.
+     */
+    public function destroy(Hero $hero): RedirectResponse
+    {
+        $hero->delete();
+
+        return redirect()
+            ->route('heroes.index')
+            ->with('status', 'Held wurde gelöscht.');
+    }
+
+    /**
+     * Validierungsregeln für Anlegen und Bearbeiten.
+     *
+     * @return array<string, mixed>
+     */
+    private function validateHero(Request $request): array
+    {
+        $validated = $request->validate([
+            'player_id' => ['required', 'exists:players,id'],
+            'character_name' => ['nullable', 'string', 'max:150'],
+            'born' => ['nullable', 'date'],
+            'died' => ['nullable', 'date', 'after_or_equal:born'],
+            'homeplace' => ['nullable', 'string', 'max:150'],
+            'active' => ['boolean'],
+            'classes' => ['array'],
+            'classes.*' => ['exists:hero_classes,id'],
+        ]);
+
+        // Checkbox liefert nichts, wenn nicht gesetzt.
+        $validated['active'] = $request->boolean('active');
+
+        // 'classes' wird separat über die Pivot-Relation gespeichert.
+        unset($validated['classes']);
+
+        return $validated;
+    }
+}

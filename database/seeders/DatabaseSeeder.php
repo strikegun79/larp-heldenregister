@@ -14,6 +14,9 @@ class DatabaseSeeder extends Seeder
     {
         $this->call([
             RoleSeeder::class,
+            HeroClassSeeder::class,
+            PerlColorSeeder::class,
+            EpTransactionTypeSeeder::class,
         ]);
     }
 }
