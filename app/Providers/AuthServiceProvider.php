@@ -2,8 +2,10 @@
 
 namespace App\Providers;
 
-// use Illuminate\Support\Facades\Gate;
+use App\Models\Role;
+use App\Models\User;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
+use Illuminate\Support\Facades\Gate;
 
 class AuthServiceProvider extends ServiceProvider
 {
@@ -21,6 +23,12 @@ class AuthServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+        // Für jede Rolle ein gleichnamiges Gate (z.B. Gate::allows('registrar')).
+        foreach (Role::ROLE_SLUGS as $slug) {
+            Gate::define($slug, fn (User $user) => $user->hasRole($slug));
+        }
+
+        // Admins dürfen grundsätzlich alles.
+        Gate::before(fn (User $user) => $user->isAdmin() ? true : null);
     }
 }
