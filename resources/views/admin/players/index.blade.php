@@ -14,6 +14,8 @@
                             <th class="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase">Helden</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase">Betreut von</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase">Status</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase">Matrix</th>
+                            <th class="px-6 py-3"></th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-stone-200 text-stone-800">
@@ -24,6 +26,18 @@
                                 <td class="px-6 py-4">{{ $player->heroes_count }}</td>
                                 <td class="px-6 py-4 text-sm">{{ $player->users->pluck('name')->implode(', ') ?: '—' }}</td>
                                 <td class="px-6 py-4">{{ $player->trashed() ? 'gelöscht' : ($player->active ? 'aktiv' : 'inaktiv') }}</td>
+                                <td class="px-6 py-4 text-sm">
+                                    @if ($player->matrixAccount)
+                                        <span class="{{ $player->matrixAccount->active ? 'text-green-700' : 'text-stone-500' }}">
+                                            {{ $player->matrixAccount->active ? 'aktiv' : 'inaktiv' }}
+                                        </span>
+                                    @else
+                                        <span class="text-stone-400">—</span>
+                                    @endif
+                                </td>
+                                <td class="px-6 py-4 text-right">
+                                    <a href="{{ route('admin.players.matrix.edit', $player) }}" class="text-indigo-700 hover:underline">Matrix</a>
+                                </td>
                             </tr>
                         @endforeach
                     </tbody>

@@ -60,4 +60,24 @@ class Player extends Model
     {
         return trim("{$this->name} {$this->lastname}");
     }
+
+    /**
+     * Das Matrix-Konto dieses Spielers (Legacy: matrix_account.player_id).
+     */
+    public function matrixAccount(): \Illuminate\Database\Eloquent\Relations\HasOne
+    {
+        return $this->hasOne(MatrixAccount::class);
+    }
+
+    /**
+     * Leitet die Matrix-User-ID aus dem Namen ab (Legacy:
+     * "@vorname.nachname:domain"). Wird nur bei der Erstanlage genutzt –
+     * eine bestehende mxid bleibt als stabile Matrix-Identität erhalten.
+     */
+    public function deriveMatrixId(): string
+    {
+        $domain = config('matrix.domain');
+
+        return '@'.mb_strtolower($this->name).'.'.mb_strtolower($this->lastname).':'.$domain;
+    }
 }

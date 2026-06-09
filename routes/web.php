@@ -49,6 +49,11 @@ Route::middleware('auth')->group(function () {
         Route::get('users/{user}/edit', [Admin\UserController::class, 'edit'])->name('users.edit');
         Route::put('users/{user}', [Admin\UserController::class, 'update'])->name('users.update');
         Route::get('players', [Admin\PlayerController::class, 'index'])->name('players.index');
+
+        // Matrix-Konto-Provisionierung pro Spieler (corporal User-DB).
+        Route::get('players/{player}/matrix', [Admin\MatrixAccountController::class, 'edit'])->name('players.matrix.edit');
+        Route::put('players/{player}/matrix', [Admin\MatrixAccountController::class, 'update'])->name('players.matrix.update');
+        Route::delete('players/{player}/matrix', [Admin\MatrixAccountController::class, 'destroy'])->name('players.matrix.destroy');
     });
 });
 

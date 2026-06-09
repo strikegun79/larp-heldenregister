@@ -16,7 +16,7 @@ class PlayerController extends Controller
     {
         $players = Player::withTrashed()
             ->withCount('heroes')
-            ->with('users')
+            ->with(['users', 'matrixAccount'])
             ->orderBy('name')
             ->paginate(30);
 
