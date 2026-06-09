@@ -18,12 +18,16 @@
                     <x-nav-link :href="route('players.index')" :active="request()->routeIs('players.*')">
                         {{ __('Spieler') }}
                     </x-nav-link>
-                    <x-nav-link :href="route('heroes.index')" :active="request()->routeIs('heroes.*')">
-                        {{ __('Heldenregister') }}
-                    </x-nav-link>
-                    <x-nav-link :href="route('adventures.index')" :active="request()->routeIs('adventures.*')">
-                        {{ __('Abenteuer') }}
-                    </x-nav-link>
+                    @can('view-heldenregister')
+                        <x-nav-link :href="route('heroes.index')" :active="request()->routeIs('heroes.*')">
+                            {{ __('Heldenregister') }}
+                        </x-nav-link>
+                    @endcan
+                    @can('view-abenteuer')
+                        <x-nav-link :href="route('adventures.index')" :active="request()->routeIs('adventures.*')">
+                            {{ __('Abenteuer') }}
+                        </x-nav-link>
+                    @endcan
                     @can('admin')
                         <x-nav-link :href="route('admin.index')" :active="request()->routeIs('admin.*')">
                             {{ __('Verwaltung') }}
@@ -87,12 +91,16 @@
             <x-responsive-nav-link :href="route('players.index')" :active="request()->routeIs('players.*')">
                 {{ __('Spieler') }}
             </x-responsive-nav-link>
-            <x-responsive-nav-link :href="route('heroes.index')" :active="request()->routeIs('heroes.*')">
-                {{ __('Heldenregister') }}
-            </x-responsive-nav-link>
-            <x-responsive-nav-link :href="route('adventures.index')" :active="request()->routeIs('adventures.*')">
-                {{ __('Abenteuer') }}
-            </x-responsive-nav-link>
+            @can('view-heldenregister')
+                <x-responsive-nav-link :href="route('heroes.index')" :active="request()->routeIs('heroes.*')">
+                    {{ __('Heldenregister') }}
+                </x-responsive-nav-link>
+            @endcan
+            @can('view-abenteuer')
+                <x-responsive-nav-link :href="route('adventures.index')" :active="request()->routeIs('adventures.*')">
+                    {{ __('Abenteuer') }}
+                </x-responsive-nav-link>
+            @endcan
             @can('admin')
                 <x-responsive-nav-link :href="route('admin.index')" :active="request()->routeIs('admin.*')">
                     {{ __('Verwaltung') }}

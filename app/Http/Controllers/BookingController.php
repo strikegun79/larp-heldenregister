@@ -12,6 +12,8 @@ class BookingController extends Controller
     public function __construct()
     {
         $this->middleware('auth');
+        // Buchen / Buchung ändern / Abmelden: Event buchen (+Admin).
+        $this->middleware('can:book-abenteuer');
     }
 
     /**

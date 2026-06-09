@@ -2,7 +2,9 @@
     <x-slot name="header">
         <div class="flex items-center justify-between">
             <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">{{ $adventure->name }}</h2>
-            <a href="{{ route('adventures.edit', $adventure) }}"><x-secondary-button>Bearbeiten</x-secondary-button></a>
+            @can('manage-events')
+                <a href="{{ route('adventures.edit', $adventure) }}"><x-secondary-button>Bearbeiten</x-secondary-button></a>
+            @endcan
         </div>
     </x-slot>
 
@@ -41,11 +43,13 @@
                                 <td class="py-1">{{ $booking->role?->description }}</td>
                                 <td class="py-1">{{ $booking->waitlisted ? 'Warteliste' : 'regulär' }}</td>
                                 <td class="py-1 text-right">
-                                    <form method="POST" action="{{ route('adventures.bookings.destroy', [$adventure, $booking]) }}"
-                                          onsubmit="return confirm('Anmeldung stornieren?');">
-                                        @csrf @method('DELETE')
-                                        <button class="text-red-600 hover:underline">stornieren</button>
-                                    </form>
+                                    @can('book-abenteuer')
+                                        <form method="POST" action="{{ route('adventures.bookings.destroy', [$adventure, $booking]) }}"
+                                              onsubmit="return confirm('Anmeldung stornieren?');">
+                                            @csrf @method('DELETE')
+                                            <button class="text-red-600 hover:underline">stornieren</button>
+                                        </form>
+                                    @endcan
                                 </td>
                             </tr>
                         @empty
@@ -55,6 +59,7 @@
                 </table>
             </div>
 
+            @can('book-abenteuer')
             <div class="bg-white dark:bg-gray-800 shadow-sm sm:rounded-lg p-6 text-gray-800 dark:text-gray-200">
                 <h3 class="font-semibold mb-3">Anmelden</h3>
                 @if (! $adventure->registrationOpen())
@@ -113,6 +118,7 @@
                     </form>
                 @endif
             </div>
+            @endcan
 
             <a href="{{ route('adventures.index') }}" class="text-sm text-gray-600 dark:text-gray-400 hover:underline">&larr; Zurück zur Übersicht</a>
         </div>

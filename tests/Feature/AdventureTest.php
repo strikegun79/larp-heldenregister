@@ -8,6 +8,7 @@ use App\Models\Player;
 use App\Models\User;
 use Database\Seeders\EventLookupSeeder;
 use Database\Seeders\LocationSeeder;
+use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -18,7 +19,25 @@ class AdventureTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->seed([LocationSeeder::class, EventLookupSeeder::class]);
+        $this->seed([RoleSeeder::class, LocationSeeder::class, EventLookupSeeder::class]);
+    }
+
+    private function userWithRole(int $roleId): User
+    {
+        $user = User::factory()->create();
+        $user->roles()->attach($roleId);
+
+        return $user;
+    }
+
+    private function booker(): User
+    {
+        return $this->userWithRole(60); // Event buchen
+    }
+
+    private function admin(): User
+    {
+        return $this->userWithRole(10);
     }
 
     public function test_guests_cannot_access_adventures(): void
@@ -26,39 +45,49 @@ class AdventureTest extends TestCase
         $this->get(route('adventures.index'))->assertRedirect(route('login'));
     }
 
-    public function test_authenticated_user_sees_adventures(): void
+    public function test_participants_cannot_access_adventures(): void
+    {
+        $this->actingAs($this->userWithRole(70))
+            ->get(route('adventures.index'))
+            ->assertForbidden();
+    }
+
+    public function test_a_viewer_role_sees_adventures(): void
     {
         Adventure::factory()->create(['name' => 'Burg Staufenberg LARP']);
 
-        $this->actingAs(User::factory()->create())
+        $this->actingAs($this->userWithRole(40)) // Spielleiter: nur ansehen
             ->get(route('adventures.index'))
             ->assertOk()
             ->assertSee('Burg Staufenberg LARP');
     }
 
-    public function test_an_adventure_can_be_created(): void
+    public function test_only_admins_can_create_events(): void
     {
-        $response = $this->actingAs(User::factory()->create())
-            ->post(route('adventures.store'), [
-                'name' => 'Tulderon-Zeltfreizeit',
-                'location_id' => 1,
-                'start_at' => '2026-08-01 10:00',
-                'end_at' => '2026-08-05 16:00',
-                'event_status_id' => 30,
-                'event_client_id' => 1,
-                'event_category_id' => 4,
-                'max_player' => 20,
-                'fee' => 12,
-            ]);
+        $payload = [
+            'name' => 'Tulderon-Zeltfreizeit',
+            'start_at' => '2026-08-01 10:00',
+            'end_at' => '2026-08-05 16:00',
+            'event_status_id' => 30,
+            'event_client_id' => 1,
+            'event_category_id' => 0,
+            'max_player' => 20,
+            'fee' => 12,
+        ];
 
-        $adventure = Adventure::firstWhere('name', 'Tulderon-Zeltfreizeit');
-        $this->assertNotNull($adventure);
-        $response->assertRedirect(route('adventures.show', $adventure));
+        // "Event buchen" darf KEINE Events anlegen (nur über Verwaltung -> Admin).
+        $this->actingAs($this->booker())->get(route('adventures.create'))->assertForbidden();
+        $this->actingAs($this->booker())->post(route('adventures.store'), $payload)->assertForbidden();
+
+        // Admin darf.
+        $this->actingAs($this->admin())->post(route('adventures.store'), $payload)
+            ->assertRedirect();
+        $this->assertNotNull(Adventure::firstWhere('name', 'Tulderon-Zeltfreizeit'));
     }
 
     public function test_end_must_not_be_before_start(): void
     {
-        $this->actingAs(User::factory()->create())
+        $this->actingAs($this->admin())
             ->post(route('adventures.store'), [
                 'name' => 'Kaputt',
                 'start_at' => '2026-08-05 10:00',
@@ -72,22 +101,34 @@ class AdventureTest extends TestCase
             ->assertSessionHasErrors('end_at');
     }
 
-    public function test_a_player_can_book_an_open_adventure(): void
+    public function test_a_booker_can_book_an_open_adventure(): void
     {
         $adventure = Adventure::factory()->create(['max_player' => 5]);
         $player = Player::factory()->create();
 
-        $this->actingAs(User::factory()->create())
+        $this->actingAs($this->booker())
             ->post(route('adventures.bookings.store', $adventure), [
                 'player_id' => $player->id,
                 'event_role_id' => 1,
                 'agb' => '1',
-            ])
-            ->assertSessionHas('status');
+            ])->assertSessionHas('status');
 
         $booking = Booking::firstWhere('player_id', $player->id);
         $this->assertNotNull($booking);
         $this->assertFalse($booking->waitlisted);
+    }
+
+    public function test_a_viewer_without_booking_rights_cannot_book(): void
+    {
+        $adventure = Adventure::factory()->create();
+        $player = Player::factory()->create();
+
+        $this->actingAs($this->userWithRole(40)) // Spielleiter: ansehen, nicht buchen
+            ->post(route('adventures.bookings.store', $adventure), [
+                'player_id' => $player->id,
+                'event_role_id' => 1,
+                'agb' => '1',
+            ])->assertForbidden();
     }
 
     public function test_booking_a_full_adventure_goes_to_the_waitlist(): void
@@ -96,7 +137,7 @@ class AdventureTest extends TestCase
         Booking::factory()->for($adventure)->create(['waitlisted' => false]);
         $player = Player::factory()->create();
 
-        $this->actingAs(User::factory()->create())
+        $this->actingAs($this->booker())
             ->post(route('adventures.bookings.store', $adventure), [
                 'player_id' => $player->id,
                 'event_role_id' => 1,
@@ -111,13 +152,12 @@ class AdventureTest extends TestCase
         $adventure = Adventure::factory()->registrationClosed()->create();
         $player = Player::factory()->create();
 
-        $this->actingAs(User::factory()->create())
+        $this->actingAs($this->booker())
             ->post(route('adventures.bookings.store', $adventure), [
                 'player_id' => $player->id,
                 'event_role_id' => 1,
                 'agb' => '1',
-            ])
-            ->assertSessionHas('error');
+            ])->assertSessionHas('error');
 
         $this->assertDatabaseCount('bookings', 0);
     }
@@ -127,12 +167,11 @@ class AdventureTest extends TestCase
         $adventure = Adventure::factory()->create();
         $player = Player::factory()->create();
 
-        $this->actingAs(User::factory()->create())
+        $this->actingAs($this->booker())
             ->post(route('adventures.bookings.store', $adventure), [
                 'player_id' => $player->id,
                 'event_role_id' => 1,
-            ])
-            ->assertSessionHasErrors('agb');
+            ])->assertSessionHasErrors('agb');
     }
 
     public function test_a_player_cannot_book_the_same_adventure_twice(): void
@@ -141,13 +180,12 @@ class AdventureTest extends TestCase
         $player = Player::factory()->create();
         Booking::factory()->for($adventure)->create(['player_id' => $player->id]);
 
-        $this->actingAs(User::factory()->create())
+        $this->actingAs($this->booker())
             ->post(route('adventures.bookings.store', $adventure), [
                 'player_id' => $player->id,
                 'event_role_id' => 1,
                 'agb' => '1',
-            ])
-            ->assertSessionHas('error');
+            ])->assertSessionHas('error');
 
         $this->assertDatabaseCount('bookings', 1);
     }

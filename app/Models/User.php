@@ -91,4 +91,14 @@ class User extends Authenticatable implements MustVerifyEmail
     {
         return $this->hasRole('admin');
     }
+
+    /**
+     * Reiner Teilnehmer (Rolle „participant" ohne weitere, höhere Rolle).
+     * Solche Nutzer sehen nur „Dein Profil" und „Deine Spieler".
+     */
+    public function isParticipantOnly(): bool
+    {
+        return $this->hasRole('participant')
+            && ! $this->hasAnyRole('admin', 'registrar', 'project_lead', 'game_master', 'teamer', 'event_booking');
+    }
 }

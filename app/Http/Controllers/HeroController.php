@@ -14,6 +14,10 @@ class HeroController extends Controller
     public function __construct()
     {
         $this->middleware('auth');
+        // Ansehen: Registrar, Spielleiter, Teamer (+Admin). Teilnehmer ausgeschlossen.
+        $this->middleware('can:view-heldenregister')->only(['index', 'show']);
+        // Bearbeiten: nur Registrar (+Admin).
+        $this->middleware('can:manage-heldenregister')->only(['create', 'store', 'edit', 'update', 'destroy']);
     }
 
     /**

@@ -30,20 +30,22 @@
                     </div>
                 </a>
 
-                {{-- Heldenregister --}}
-                <a href="{{ route('heroes.index') }}"
-                   class="group block rounded-lg overflow-hidden border-2 border-[#5a3a22]/40 bg-white/60 shadow hover:shadow-xl hover:-translate-y-1 transition">
-                    <div class="h-44 overflow-hidden">
-                        <img src="/images/heroes_db.jpg" alt="" class="w-full h-full object-cover group-hover:scale-105 transition">
-                    </div>
-                    <div class="p-4 text-center">
-                        <div class="font-uncial text-lg text-waldritter">Heldenregister</div>
-                        <div class="text-sm text-stone-600">Auflistung aller Helden</div>
-                    </div>
-                </a>
+                {{-- Heldenregister (Registrar, Spielleiter, Teamer / Admin) --}}
+                @can('view-heldenregister')
+                    <a href="{{ route('heroes.index') }}"
+                       class="group block rounded-lg overflow-hidden border-2 border-[#5a3a22]/40 bg-white/60 shadow hover:shadow-xl hover:-translate-y-1 transition">
+                        <div class="h-44 overflow-hidden">
+                            <img src="/images/heroes_db.jpg" alt="" class="w-full h-full object-cover group-hover:scale-105 transition">
+                        </div>
+                        <div class="p-4 text-center">
+                            <div class="font-uncial text-lg text-waldritter">Heldenregister</div>
+                            <div class="text-sm text-stone-600">Auflistung aller Helden</div>
+                        </div>
+                    </a>
+                @endcan
 
-                {{-- Abenteuer (Rolle "Event buchen" / Admin) --}}
-                @can('event_booking')
+                {{-- Abenteuer (Spielleiter, Teamer, Event buchen / Admin) --}}
+                @can('view-abenteuer')
                     <a href="{{ route('adventures.index') }}"
                        class="group block rounded-lg overflow-hidden border-2 border-[#5a3a22]/40 bg-white/60 shadow hover:shadow-xl hover:-translate-y-1 transition">
                         <div class="h-44 overflow-hidden">
