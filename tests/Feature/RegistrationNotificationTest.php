@@ -43,6 +43,22 @@ class RegistrationNotificationTest extends TestCase
         Notification::assertSentTo($newUser, VerifyEmail::class);
     }
 
+    public function test_new_user_receives_the_participant_role(): void
+    {
+        $this->post('/register', [
+            'name' => 'Frisch',
+            'email' => 'frisch@example.com',
+            'password' => 'password',
+            'password_confirmation' => 'password',
+        ]);
+
+        $user = User::firstWhere('email', 'frisch@example.com');
+
+        $this->assertTrue($user->hasRole('participant'));
+        $this->assertTrue($user->hasPermission('player.view'));
+        $this->assertFalse($user->hasPermission('heldenregister.view'));
+    }
+
     public function test_non_admins_are_not_notified(): void
     {
         Notification::fake();

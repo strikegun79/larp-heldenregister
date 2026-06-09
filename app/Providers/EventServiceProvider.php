@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Listeners\AssignParticipantRole;
 use App\Listeners\NotifyAdminsOfNewUser;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
@@ -18,6 +19,7 @@ class EventServiceProvider extends ServiceProvider
     protected $listen = [
         Registered::class => [
             SendEmailVerificationNotification::class,
+            AssignParticipantRole::class,
             NotifyAdminsOfNewUser::class,
         ],
     ];
