@@ -14,7 +14,10 @@
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Uncial+Antiqua&family=MedievalSharp&family=EB+Garamond:wght@400;500&display=swap" rel="stylesheet">
 
-        <!-- Scripts -->
+        <!-- Fomantic UI (wie im Legacy) -->
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fomantic-ui@2.9.3/dist/semantic.min.css">
+
+        <!-- Scripts (Tailwind/Breeze danach, damit das Theme gewinnt) -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
 
         <style>body { font-family: 'EB Garamond', serif; }</style>
@@ -55,5 +58,31 @@
                 </div>
             </footer>
         </div>
+
+        <!-- Gemeinsames Fomantic-Modal: Inhalt wird per AJAX aus [data-modal-url] geladen -->
+        <div class="ui modal" id="app-modal">
+            <i class="close icon"></i>
+            <div class="scrolling content" id="app-modal-content"></div>
+        </div>
+
+        <!-- jQuery + Fomantic JS -->
+        <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
+        <script src="https://cdn.jsdelivr.net/npm/fomantic-ui@2.9.3/dist/semantic.min.js"></script>
+        <script>
+            // Klick auf ein Element mit data-modal-url -> Inhalt per AJAX ins Modal laden.
+            document.addEventListener('click', function (e) {
+                const trigger = e.target.closest('[data-modal-url]');
+                if (!trigger) return;
+                e.preventDefault();
+                const url = trigger.getAttribute('data-modal-url');
+                const $content = $('#app-modal-content');
+                $content.html('<div class="ui active centered inline loader" style="display:block;margin:2rem auto"></div>');
+                $('#app-modal').modal({ autofocus: false, observeChanges: true }).modal('show');
+                fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                    .then(r => r.text())
+                    .then(html => { $content.html(html); $('#app-modal').modal('refresh'); })
+                    .catch(() => $content.html('<div class="ui error message">Konnte nicht geladen werden.</div>'));
+            });
+        </script>
     </body>
 </html>

@@ -47,10 +47,14 @@ class PlayerController extends Controller
             ->with('status', 'Spieler wurde angelegt.');
     }
 
-    public function show(Player $player): View
+    public function show(Player $player, Request $request): View
     {
         $this->authorize('view', $player);
         $player->load(['heroes.classes', 'heroes.epTransactions.type']);
+
+        if ($request->ajax()) {
+            return view('players._detail', compact('player'));
+        }
 
         return view('players.show', compact('player'));
     }

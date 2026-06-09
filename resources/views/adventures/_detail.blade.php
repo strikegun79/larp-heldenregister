@@ -1,0 +1,90 @@
+<div class="flex items-center justify-between mb-4">
+    <h2 class="font-uncial text-2xl text-waldritter">{{ $adventure->name }}</h2>
+    @can('events.edit')
+        <a href="{{ route('adventures.edit', $adventure) }}" class="ui small button">Bearbeiten</a>
+    @endcan
+</div>
+
+<dl class="grid grid-cols-2 gap-4 text-stone-800">
+    <div><dt class="text-sm text-stone-500">Beginn</dt><dd>{{ optional($adventure->start_at)->format('d.m.Y H:i') }}</dd></div>
+    <div><dt class="text-sm text-stone-500">Ende</dt><dd>{{ optional($adventure->end_at)->format('d.m.Y H:i') }}</dd></div>
+    <div><dt class="text-sm text-stone-500">Ort</dt><dd>{{ $adventure->location?->titel ?? '—' }}</dd></div>
+    <div><dt class="text-sm text-stone-500">Status</dt><dd>{{ $adventure->status?->description }}</dd></div>
+    <div><dt class="text-sm text-stone-500">Kategorie</dt><dd>{{ $adventure->category?->name }}</dd></div>
+    <div><dt class="text-sm text-stone-500">Auftraggeber</dt><dd>{{ $adventure->client?->name }}</dd></div>
+    <div><dt class="text-sm text-stone-500">Beitrag</dt><dd>{{ number_format($adventure->fee, 2, ',', '.') }} €</dd></div>
+    <div><dt class="text-sm text-stone-500">Belegung</dt><dd class="font-semibold">{{ $adventure->confirmedBookings()->count() }} / {{ $adventure->max_player }} ({{ $adventure->freeSlots() }} frei)</dd></div>
+</dl>
+
+<h3 class="font-uncial text-lg text-waldritter mt-6 mb-2">Anmeldungen</h3>
+<table class="ui very basic compact table">
+    <thead><tr><th>Spieler</th><th>Rolle</th><th>Liste</th><th></th></tr></thead>
+    <tbody>
+        @forelse ($adventure->bookings as $booking)
+            <tr>
+                <td>{{ $booking->player?->full_name }}</td>
+                <td>{{ $booking->role?->description }}</td>
+                <td>{{ $booking->waitlisted ? 'Warteliste' : 'regulär' }}</td>
+                <td class="right aligned">
+                    @can('adventure.cancel')
+                        <form method="POST" action="{{ route('adventures.bookings.destroy', [$adventure, $booking]) }}"
+                              onsubmit="return confirm('Anmeldung stornieren?');">
+                            @csrf @method('DELETE')
+                            <button class="text-red-600 hover:underline">stornieren</button>
+                        </form>
+                    @endcan
+                </td>
+            </tr>
+        @empty
+            <tr><td colspan="4" class="text-stone-500">Noch keine Anmeldungen.</td></tr>
+        @endforelse
+    </tbody>
+</table>
+
+@can('adventure.book')
+    <h3 class="font-uncial text-lg text-waldritter mt-6 mb-2">Anmelden</h3>
+    @if (! $adventure->registrationOpen())
+        <p class="text-stone-500">Die Anmeldung ist derzeit nicht geöffnet (Status: {{ $adventure->status?->description }}).</p>
+    @else
+        @if ($adventure->isFull())
+            <p class="mb-3 text-orange-600">Das Abenteuer ist voll – neue Anmeldungen kommen auf die Warteliste.</p>
+        @endif
+        <form method="POST" action="{{ route('adventures.bookings.store', $adventure) }}" class="ui form">
+            @csrf
+            <div class="two fields">
+                <div class="field">
+                    <label>Spieler</label>
+                    <select name="player_id" required>
+                        <option value="">— wählen —</option>
+                        @foreach ($players as $player)
+                            <option value="{{ $player->id }}">{{ $player->full_name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div class="field">
+                    <label>Rolle</label>
+                    <select name="event_role_id" required>
+                        @foreach ($roles as $role)
+                            <option value="{{ $role->id }}">{{ $role->description }}</option>
+                        @endforeach
+                    </select>
+                </div>
+            </div>
+
+            <div class="grid grid-cols-2 gap-2 my-2">
+                @foreach (['fotoerlaubnis' => 'Fotoerlaubnis', 'vegetarier' => 'Vegetarier', 'leih_tunika' => 'Leih-Tunika', 'leih_waffe' => 'Leih-Waffe', 'nsc' => 'NSC'] as $field => $label)
+                    <label class="flex items-center gap-2"><input type="checkbox" name="{{ $field }}" value="1"> {{ $label }}</label>
+                @endforeach
+            </div>
+
+            <div class="field">
+                <label>Allergien</label>
+                <textarea name="allergien" rows="2"></textarea>
+            </div>
+
+            <label class="flex items-center gap-2 my-2"><input type="checkbox" name="agb" value="1" required> Ich akzeptiere die AGB</label>
+
+            <button type="submit" class="ui primary button">Anmeldung absenden</button>
+        </form>
+    @endif
+@endcan

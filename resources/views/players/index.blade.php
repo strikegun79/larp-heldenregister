@@ -27,7 +27,8 @@
                         <div class="rounded-lg border-2 border-[#5a3a22]/40 bg-white/70 shadow p-5">
                             <div class="flex items-start justify-between">
                                 <div>
-                                    <a href="{{ route('players.show', $player) }}" class="font-uncial text-lg text-waldritter hover:underline">
+                                    <a href="{{ route('players.show', $player) }}" data-modal-url="{{ route('players.show', $player) }}"
+                                       class="font-uncial text-lg text-waldritter hover:underline">
                                         {{ $player->full_name }}
                                     </a>
                                     @if ($player->pivot->self)

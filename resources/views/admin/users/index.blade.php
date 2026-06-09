@@ -28,7 +28,7 @@
                                 <td class="px-6 py-4 text-sm">{{ $user->roles->pluck('label')->implode(', ') ?: '—' }}</td>
                                 <td class="px-6 py-4">{{ $user->activated ? 'ja' : 'nein' }}</td>
                                 <td class="px-6 py-4 text-right">
-                                    <a href="{{ route('admin.users.edit', $user) }}" class="text-indigo-700 hover:underline">Bearbeiten</a>
+                                    <a href="{{ route('admin.users.edit', $user) }}" data-modal-url="{{ route('admin.users.edit', $user) }}" class="text-indigo-700 hover:underline">Bearbeiten</a>
                                 </td>
                             </tr>
                         @endforeach

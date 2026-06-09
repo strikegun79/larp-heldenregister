@@ -28,13 +28,19 @@ class UserController extends Controller
     /**
      * Nutzer bearbeiten: Rollen + Aktivierung.
      */
-    public function edit(User $user): View
+    public function edit(User $user, Request $request): View
     {
-        return view('admin.users.edit', [
+        $data = [
             'user' => $user,
             'roles' => Role::orderBy('id')->get(),
             'assigned' => $user->roles->pluck('id')->all(),
-        ]);
+        ];
+
+        if ($request->ajax()) {
+            return view('admin.users._form', $data);
+        }
+
+        return view('admin.users.edit', $data);
     }
 
     /**

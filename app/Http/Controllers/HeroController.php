@@ -60,9 +60,14 @@ class HeroController extends Controller
     /**
      * Detailansicht eines Helden inkl. EP-Saldo und Fertigkeiten.
      */
-    public function show(Hero $hero): View
+    public function show(Hero $hero, Request $request): View
     {
         $hero->load(['player', 'classes', 'skills', 'epTransactions.type']);
+
+        // Per AJAX (aus der Liste) nur den Modal-Inhalt liefern.
+        if ($request->ajax()) {
+            return view('heroes._detail', compact('hero'));
+        }
 
         return view('heroes.show', compact('hero'));
     }

@@ -54,6 +54,23 @@ class HeroTest extends TestCase
         ])->assertForbidden();
     }
 
+    public function test_ajax_show_returns_only_the_modal_partial(): void
+    {
+        $hero = Hero::factory()->create(['character_name' => 'Tilix']);
+        $viewer = $this->userWithRole(40);
+
+        // Normale Anfrage = volle Seite (mit Layout).
+        $this->actingAs($viewer)->get(route('heroes.show', $hero))
+            ->assertOk()->assertSee('<!DOCTYPE html>', false);
+
+        // AJAX-Anfrage = nur der Modal-Inhalt (ohne Layout).
+        $this->actingAs($viewer)
+            ->get(route('heroes.show', $hero), ['X-Requested-With' => 'XMLHttpRequest'])
+            ->assertOk()
+            ->assertSee('Tilix')
+            ->assertDontSee('<!DOCTYPE html>', false);
+    }
+
     public function test_a_registrar_can_create_a_hero_with_classes(): void
     {
         $player = Player::factory()->create();

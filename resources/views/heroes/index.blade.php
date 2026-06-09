@@ -35,7 +35,8 @@
                         @forelse ($heroes as $hero)
                             <tr>
                                 <td class="px-6 py-4">
-                                    <a href="{{ route('heroes.show', $hero) }}" class="text-indigo-600 dark:text-indigo-400 hover:underline">
+                                    <a href="{{ route('heroes.show', $hero) }}" data-modal-url="{{ route('heroes.show', $hero) }}"
+                                       class="text-indigo-600 dark:text-indigo-400 hover:underline">
                                         {{ $hero->character_name ?? '—' }}
                                     </a>
                                 </td>

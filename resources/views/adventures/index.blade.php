@@ -29,7 +29,7 @@
                         @forelse ($adventures as $adventure)
                             <tr>
                                 <td class="px-6 py-4">
-                                    <a href="{{ route('adventures.show', $adventure) }}" class="text-indigo-600 dark:text-indigo-400 hover:underline">{{ $adventure->name }}</a>
+                                    <a href="{{ route('adventures.show', $adventure) }}" data-modal-url="{{ route('adventures.show', $adventure) }}" class="text-indigo-600 dark:text-indigo-400 hover:underline">{{ $adventure->name }}</a>
                                 </td>
                                 <td class="px-6 py-4">{{ optional($adventure->start_at)->format('d.m.Y H:i') }}</td>
                                 <td class="px-6 py-4">{{ $adventure->location?->titel ?? '—' }}</td>

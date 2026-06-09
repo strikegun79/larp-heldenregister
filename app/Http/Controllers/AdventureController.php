@@ -61,11 +61,17 @@ class AdventureController extends Controller
     {
         $adventure->load(['location', 'status', 'category', 'client', 'bookings.player', 'bookings.role']);
 
-        return view('adventures.show', [
+        $data = [
             'adventure' => $adventure,
             'players' => Player::orderBy('name')->get(),
             'roles' => EventRole::orderBy('id')->get(),
-        ]);
+        ];
+
+        if (request()->ajax()) {
+            return view('adventures._detail', $data);
+        }
+
+        return view('adventures.show', $data);
     }
 
     public function edit(Adventure $adventure): View
