@@ -17,6 +17,49 @@
     <p class="text-stone-500">Keine Fertigkeiten erlernt.</p>
 @endforelse
 
+@if ($hero->classes->isNotEmpty())
+    <h3 class="font-uncial text-lg text-waldritter mt-6 mb-2">Fertigkeitsbaum</h3>
+    <div id="skilltree" data-learn-url="{{ route('heroes.skills.store', $hero) }}" data-balance="{{ $hero->ep_balance }}">
+        <div class="ui top attached tabular menu">
+            @foreach ($hero->classes as $i => $class)
+                <a class="item @if ($i === 0) active @endif" data-tab="cls-{{ $class->id }}">{{ $class->name }}</a>
+            @endforeach
+        </div>
+        @foreach ($hero->classes as $i => $class)
+            <div class="ui bottom attached tab segment @if ($i === 0) active @endif" data-tab="cls-{{ $class->id }}">
+                <img src="{{ $class->skilltreeImage() }}" alt="Fertigkeitsbaum {{ $class->name }}" class="ui fluid image" style="margin-bottom:1rem">
+                @if ($class->skills->isEmpty())
+                    <p class="text-stone-500">Für diese Klasse sind keine Fertigkeiten hinterlegt.</p>
+                @else
+                    <div class="ui middle aligned divided list">
+                        @foreach ($class->skills as $skill)
+                            @php($learned = $hero->skills->contains('id', $skill->id))
+                            <div class="item">
+                                <div class="content">
+                                    @if ($learned)
+                                        <span class="text-green-700">✓ {{ $skill->name }}</span>
+                                        <span class="text-stone-500">({{ $skill->ep_costs }} EP)</span>
+                                    @elseif (auth()->user()?->can('heldenregister.edit'))
+                                        <a class="skill-node text-indigo-700 hover:underline" style="cursor:pointer"
+                                           data-skill-id="{{ $skill->id }}"
+                                           data-skill-name="{{ $skill->name }}"
+                                           data-skill-desc="{{ $skill->description }}"
+                                           data-skill-cost="{{ $skill->ep_costs }}">
+                                            {{ $skill->name }} ({{ $skill->ep_costs }} EP)
+                                        </a>
+                                    @else
+                                        {{ $skill->name }} ({{ $skill->ep_costs }} EP)
+                                    @endif
+                                </div>
+                            </div>
+                        @endforeach
+                    </div>
+                @endif
+            </div>
+        @endforeach
+    </div>
+@endif
+
 @can('heldenregister.edit')
     <form method="POST" action="{{ route('heroes.ep.store', $hero) }}" class="ui form" data-refresh-modal style="margin-top:1rem">
         @csrf

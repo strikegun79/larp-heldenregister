@@ -64,7 +64,7 @@ class HeroController extends Controller
      */
     public function show(Hero $hero, Request $request): View
     {
-        $hero->load(['player', 'classes', 'skills', 'epTransactions.type']);
+        $hero->load(['player', 'classes.skills', 'skills', 'epTransactions.type']);
 
         $data = [
             'hero' => $hero,

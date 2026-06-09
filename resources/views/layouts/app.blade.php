@@ -69,6 +69,20 @@
             <div class="actions" id="app-modal-actions"></div>
         </div>
 
+        <!-- Bestätigungs-Modal: Fertigkeit erlernen (HERO-14) -->
+        <div class="ui small modal" id="skill-modal">
+            <div class="header" id="skill-modal-title"></div>
+            <div class="content">
+                <p id="skill-modal-desc" class="text-stone-700"></p>
+                <p>Kosten: <b id="skill-modal-cost"></b> EP · Verfügbar: <b id="skill-modal-balance"></b> EP</p>
+                <p id="skill-modal-warn" class="text-red-600" style="display:none">Nicht genug EP für diese Fertigkeit.</p>
+            </div>
+            <div class="actions">
+                <div class="ui deny button">Noch nicht</div>
+                <button type="button" class="ui positive button" id="skill-modal-accept">Fertigkeit errungen</button>
+            </div>
+        </div>
+
         <!-- jQuery + Fomantic JS -->
         <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/fomantic-ui@2.9.3/dist/semantic.min.js"></script>
@@ -95,6 +109,8 @@
                         $partActions.remove();
                         // Standard-Schließen-Button immer anbieten.
                         $actions.append('<div class="ui deny button">Schließen</div>');
+                        // Fomantic-Tabs im Modal aktivieren (z. B. Fertigkeitsbaum).
+                        $content.find('.menu .item[data-tab]').tab();
                         $('#app-modal').modal('refresh');
                     })
                     .catch(() => $content.html('<div class="ui error message">Konnte nicht geladen werden.</div>'));
@@ -154,6 +170,53 @@
                     })
                     .catch(() => showToast('Netzwerkfehler.', 'error'))
                     .finally(() => submitBtn && submitBtn.classList.remove('loading', 'disabled'));
+            });
+
+            // Skilltree: Klick auf eine Fertigkeit -> Bestätigungs-Modal (HERO-14).
+            let skillLearnUrl = null, skillCurrentId = null;
+            document.addEventListener('click', function (e) {
+                const node = e.target.closest('.skill-node');
+                if (!node) return;
+                e.preventDefault();
+                const tree = node.closest('#skilltree');
+                skillLearnUrl = tree ? tree.getAttribute('data-learn-url') : null;
+                skillCurrentId = node.getAttribute('data-skill-id');
+                const balance = parseFloat(tree ? tree.getAttribute('data-balance') : '0') || 0;
+                const cost = parseFloat(node.getAttribute('data-skill-cost')) || 0;
+                $('#skill-modal-title').text(node.getAttribute('data-skill-name') || 'Fertigkeit');
+                $('#skill-modal-desc').text(node.getAttribute('data-skill-desc') || '');
+                $('#skill-modal-cost').text(cost);
+                $('#skill-modal-balance').text(balance);
+                const enough = balance >= cost;
+                $('#skill-modal-warn').toggle(!enough);
+                $('#skill-modal-accept').toggleClass('disabled', !enough);
+                $('#skill-modal').modal({ allowMultiple: true, autofocus: false }).modal('show');
+            });
+
+            document.getElementById('skill-modal-accept').addEventListener('click', function () {
+                if (!skillLearnUrl || !skillCurrentId || this.classList.contains('disabled')) return;
+                const btn = this;
+                btn.classList.add('loading', 'disabled');
+                const fd = new FormData();
+                fd.append('skill_id', skillCurrentId);
+                fd.append('_token', document.querySelector('meta[name=csrf-token]').content);
+                fetch(skillLearnUrl, {
+                    method: 'POST',
+                    headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' },
+                    body: fd,
+                })
+                    .then(async (resp) => {
+                        const data = await resp.json().catch(() => ({}));
+                        if (resp.ok) {
+                            showToast(data.message || 'Fertigkeit erlernt.', 'success');
+                            $('#skill-modal').modal('hide');
+                            if (appModalUrl) loadModalContent(appModalUrl);
+                        } else {
+                            showToast(data.message || 'Konnte nicht erlernt werden.', 'error');
+                        }
+                    })
+                    .catch(() => showToast('Netzwerkfehler.', 'error'))
+                    .finally(() => btn.classList.remove('loading', 'disabled'));
             });
         </script>
     </body>

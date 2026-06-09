@@ -63,6 +63,7 @@ Das Hinzufügen einer Klasse soll EP kosten und gebucht werden.
 **Akzeptanzkriterien:**
 - [ ] Filter Klasse, Aktiv-Status, Spieler.
 - [ ] Server-seitig, paginierungsfest.
+- [ ] Es soll nach Namen des Spielers oder Charakters gesucht werden können
 **Abhängig von:** UI-06.
 
 ### HERO-11 · Abenteuerhistorie je Held (Vision) · ⏱ 3h · 🔲
@@ -86,12 +87,26 @@ Das Hinzufügen einer Klasse soll EP kosten und gebucht werden.
 > Modal-Teil-Refresh (`refresh_modal`) lädt EP-Historie neu und leert das
 > Formular. Tests: `EpTransactionTest` (4).
 
-### HERO-14 · Helden-Klassen-Fertigkeitsbaum · ⏱ 3h · 🔲
+### HERO-14 · Helden-Klassen-Fertigkeitsbaum · ⏱ 3h · ✅
 **Beschreibung:** In der Heldenansicht soll ein UI Fomantic Tab stehen und jeder aktivierte Klasse ist ein Tab mit dem Fertigkeitsbaum.
 **Akzeptanzkriterien:**
-- [ ] Mindestens ein Tab existiert, weil eine Klasse immer Ausgewählt werden sein muss bei der Erstellung.
-- [ ] Beim anklicken einer Fertigkeit, soll ein Modal erscheinen mit der Beschreibung der Fertigkeit und die Optionen "Fertigkeit errungen" oder "Noch nicht" (Accept/Deny).
-- [ ] Beim Accept, soll die Fertigkeit per AJAX gebucht werden und die EP entsprechend verbraucht in der Hostorie des Helden.
-- [ ] Verfügbare EP Anzahl muss im Modal angezeigt werden.
-- [ ] Fertigkeitsbäume sind JPG Bilder, für jede Klasse gibt es eins. Unter /public/images/skilltree_*.jpg
-- [ ] Tests.
+- [x] Mindestens ein Tab existiert, weil eine Klasse immer Ausgewählt werden sein muss bei der Erstellung.
+- [x] Beim anklicken einer Fertigkeit, soll ein Modal erscheinen mit der Beschreibung der Fertigkeit und die Optionen "Fertigkeit errungen" oder "Noch nicht" (Accept/Deny).
+- [x] Beim Accept, soll die Fertigkeit per AJAX gebucht werden und die EP entsprechend verbraucht in der Hostorie des Helden.
+- [x] Verfügbare EP Anzahl muss im Modal angezeigt werden.
+- [x] Fertigkeitsbäume sind JPG Bilder, für jede Klasse gibt es eins. Unter /public/images/skilltree_*.jpg
+- [x] Tests.
+
+> Umgesetzt: Fomantic-Tabs je Helden-Klasse im Detail-Modal mit dem
+> Skilltree-Bild (`HeroClass::skilltreeImage()`, Slug-Mapping wizard→mage) und
+> einer klickbaren Fertigkeitsliste (gelernte grün markiert). Klick öffnet ein
+> Bestätigungs-Modal (Beschreibung, Kosten, **verfügbare EP**, Accept/Deny).
+> Accept → `HeroSkillController@store` (`POST heroes/{hero}/skills`,
+> `heldenregister.edit`): legt Pivot an und bucht EP (Typ 20) ab, atomar; prüft
+> Doppel-Lernen & EP-Deckung. AJAX + Toast + Modal-Refresh. Tests: `HeroSkillTest` (4).
+
+### HERO-14 · Helden-Übersicht · ⏱ 3h · 🔲
+**Beschreibung:** Anpassen der Heldenübersicht
+**Akzeptanzkriterien:**
+- [ ] Der Spielername soll in der ersten Spalte stehen, dann der Charaktername, die EP gesamt und verfügbaren, dann die Klassen und dann Aktivstatus
+- [ ] Per Klick auf die Zeile soll das Modalfenster öffnen und die Heldendetails zeigen. kein Bearbeiten knopf.

@@ -36,4 +36,16 @@ class HeroClass extends Model
     {
         return $this->belongsToMany(Skill::class);
     }
+
+    /**
+     * Pfad zum Fertigkeitsbaum-Bild (public/images/skilltree_*.jpg).
+     * Slug-Sonderfall: „wizard" -> Bild „mage".
+     */
+    public function skilltreeImage(): string
+    {
+        $map = ['wizard' => 'mage'];
+        $slug = $map[$this->slug] ?? $this->slug;
+
+        return "/images/skilltree_{$slug}.jpg";
+    }
 }

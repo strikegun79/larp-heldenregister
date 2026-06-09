@@ -5,6 +5,7 @@ use App\Http\Controllers\AdventureController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\EpTransactionController;
 use App\Http\Controllers\HeroController;
+use App\Http\Controllers\HeroSkillController;
 use App\Http\Controllers\PlayerController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
@@ -37,6 +38,8 @@ Route::middleware('auth')->group(function () {
     Route::resource('heroes', HeroController::class);
     // EP-Buchung für einen Helden (HERO-12).
     Route::post('heroes/{hero}/ep', [EpTransactionController::class, 'store'])->name('heroes.ep.store');
+    // Fertigkeit erlernen (HERO-14).
+    Route::post('heroes/{hero}/skills', [HeroSkillController::class, 'store'])->name('heroes.skills.store');
     Route::resource('adventures', AdventureController::class);
 
     // Anmeldungen zu einem Abenteuer.
