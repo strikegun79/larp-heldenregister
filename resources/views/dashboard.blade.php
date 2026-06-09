@@ -56,30 +56,30 @@
                     </a>
                 @endcan
 
-                {{-- Deine Spieler (Spielerverwaltung – noch ohne Oberfläche) --}}
-                <div class="relative block rounded-lg overflow-hidden border-2 border-[#5a3a22]/30 bg-white/40 opacity-70 cursor-not-allowed">
-                    <span class="absolute top-2 right-2 z-10 rounded bg-[#5a3a22] text-amber-50 text-xs px-2 py-0.5">bald verfügbar</span>
+                {{-- Deine Spieler --}}
+                <a href="{{ route('players.index') }}"
+                   class="group block rounded-lg overflow-hidden border-2 border-[#5a3a22]/40 bg-white/60 shadow hover:shadow-xl hover:-translate-y-1 transition">
                     <div class="h-44 overflow-hidden">
-                        <img src="/images/heldenarchiv.jpg" alt="" class="w-full h-full object-cover grayscale">
+                        <img src="/images/heldenarchiv.jpg" alt="" class="w-full h-full object-cover group-hover:scale-105 transition">
                     </div>
                     <div class="p-4 text-center">
                         <div class="font-uncial text-lg text-waldritter">Deine Spieler</div>
                         <div class="text-sm text-stone-600">Spielerdatenbank</div>
                     </div>
-                </div>
+                </a>
 
-                {{-- Verwaltung (nur Admins, Adminbereich noch ohne Oberfläche) --}}
+                {{-- Verwaltung (nur Admins) --}}
                 @can('admin')
-                    <div class="relative block rounded-lg overflow-hidden border-2 border-[#5a3a22]/30 bg-white/40 opacity-70 cursor-not-allowed">
-                        <span class="absolute top-2 right-2 z-10 rounded bg-[#5a3a22] text-amber-50 text-xs px-2 py-0.5">bald verfügbar</span>
+                    <a href="{{ route('admin.index') }}"
+                       class="group block rounded-lg overflow-hidden border-2 border-[#5a3a22]/40 bg-white/60 shadow hover:shadow-xl hover:-translate-y-1 transition">
                         <div class="h-44 overflow-hidden">
-                            <img src="/images/administration.jpg" alt="" class="w-full h-full object-cover grayscale">
+                            <img src="/images/administration.jpg" alt="" class="w-full h-full object-cover group-hover:scale-105 transition">
                         </div>
                         <div class="p-4 text-center">
                             <div class="font-uncial text-lg text-waldritter">Verwaltung</div>
                             <div class="text-sm text-stone-600">Portal-Administration</div>
                         </div>
-                    </div>
+                    </a>
                 @endcan
             </div>
         </div>

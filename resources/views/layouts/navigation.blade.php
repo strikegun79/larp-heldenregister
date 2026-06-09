@@ -15,12 +15,20 @@
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                         {{ __('Dashboard') }}
                     </x-nav-link>
+                    <x-nav-link :href="route('players.index')" :active="request()->routeIs('players.*')">
+                        {{ __('Spieler') }}
+                    </x-nav-link>
                     <x-nav-link :href="route('heroes.index')" :active="request()->routeIs('heroes.*')">
                         {{ __('Heldenregister') }}
                     </x-nav-link>
                     <x-nav-link :href="route('adventures.index')" :active="request()->routeIs('adventures.*')">
                         {{ __('Abenteuer') }}
                     </x-nav-link>
+                    @can('admin')
+                        <x-nav-link :href="route('admin.index')" :active="request()->routeIs('admin.*')">
+                            {{ __('Verwaltung') }}
+                        </x-nav-link>
+                    @endcan
                 </div>
             </div>
 
@@ -76,12 +84,20 @@
             <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                 {{ __('Dashboard') }}
             </x-responsive-nav-link>
+            <x-responsive-nav-link :href="route('players.index')" :active="request()->routeIs('players.*')">
+                {{ __('Spieler') }}
+            </x-responsive-nav-link>
             <x-responsive-nav-link :href="route('heroes.index')" :active="request()->routeIs('heroes.*')">
                 {{ __('Heldenregister') }}
             </x-responsive-nav-link>
             <x-responsive-nav-link :href="route('adventures.index')" :active="request()->routeIs('adventures.*')">
                 {{ __('Abenteuer') }}
             </x-responsive-nav-link>
+            @can('admin')
+                <x-responsive-nav-link :href="route('admin.index')" :active="request()->routeIs('admin.*')">
+                    {{ __('Verwaltung') }}
+                </x-responsive-nav-link>
+            @endcan
         </div>
 
         <!-- Responsive Settings Options -->

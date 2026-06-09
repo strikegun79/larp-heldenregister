@@ -1,8 +1,10 @@
 <?php
 
+use App\Http\Controllers\Admin;
 use App\Http\Controllers\AdventureController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\HeroController;
+use App\Http\Controllers\PlayerController;
 use App\Http\Controllers\ProfileController;
 use Illuminate\Support\Facades\Route;
 
@@ -30,6 +32,7 @@ Route::middleware('auth')->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
+    Route::resource('players', PlayerController::class);
     Route::resource('heroes', HeroController::class);
     Route::resource('adventures', AdventureController::class);
 
@@ -38,6 +41,15 @@ Route::middleware('auth')->group(function () {
         ->name('adventures.bookings.store');
     Route::delete('adventures/{adventure}/bookings/{booking}', [BookingController::class, 'destroy'])
         ->name('adventures.bookings.destroy');
+
+    // Verwaltung (nur Admins, Legacy: pages/admin).
+    Route::prefix('admin')->name('admin.')->middleware('can:admin')->group(function () {
+        Route::get('/', [Admin\AdminController::class, 'index'])->name('index');
+        Route::get('users', [Admin\UserController::class, 'index'])->name('users.index');
+        Route::get('users/{user}/edit', [Admin\UserController::class, 'edit'])->name('users.edit');
+        Route::put('users/{user}', [Admin\UserController::class, 'update'])->name('users.update');
+        Route::get('players', [Admin\PlayerController::class, 'index'])->name('players.index');
+    });
 });
 
 require __DIR__.'/auth.php';
