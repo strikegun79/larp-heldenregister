@@ -83,6 +83,50 @@
                     .then(html => { $content.html(html); $('#app-modal').modal('refresh'); })
                     .catch(() => $content.html('<div class="ui error message">Konnte nicht geladen werden.</div>'));
             });
+
+            function showToast(message, type) {
+                $('body').toast({
+                    class: type === 'error' ? 'error' : 'success',
+                    showIcon: type === 'error' ? 'exclamation circle' : 'check circle',
+                    message: message,
+                    position: 'top right',
+                    displayTime: type === 'error' ? 7000 : 3000,
+                });
+            }
+
+            // Formulare innerhalb des Modals per AJAX absenden; Rückmeldung als Toast.
+            document.addEventListener('submit', function (e) {
+                const form = e.target;
+                if (!form.closest('#app-modal')) return;
+                e.preventDefault();
+
+                const submitBtn = form.querySelector('[type=submit]');
+                submitBtn && submitBtn.classList.add('loading', 'disabled');
+
+                fetch(form.action, {
+                    method: 'POST', // PUT/DELETE laufen via _method-Spoofing im FormData
+                    headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' },
+                    body: new FormData(form),
+                })
+                    .then(async (resp) => {
+                        const data = await resp.json().catch(() => ({}));
+                        if (resp.ok) {
+                            showToast(data.message || 'Gespeichert.', 'success');
+                            if (data.reload) {
+                                setTimeout(() => window.location.reload(), 700);
+                            } else {
+                                $('#app-modal').modal('hide');
+                            }
+                        } else if (resp.status === 422) {
+                            const errors = data.errors ? Object.values(data.errors).flat() : [];
+                            showToast(errors.join('<br>') || data.message || 'Bitte Eingaben prüfen.', 'error');
+                        } else {
+                            showToast(data.message || 'Fehler beim Speichern.', 'error');
+                        }
+                    })
+                    .catch(() => showToast('Netzwerkfehler.', 'error'))
+                    .finally(() => submitBtn && submitBtn.classList.remove('loading', 'disabled'));
+            });
         </script>
     </body>
 </html>

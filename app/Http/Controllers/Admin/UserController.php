@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Role;
 use App\Models\User;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -36,7 +37,7 @@ class UserController extends Controller
             'assigned' => $user->roles->pluck('id')->all(),
         ];
 
-        if ($request->ajax()) {
+        if ($request->expectsJson()) {
             return view('admin.users._form', $data);
         }
 
@@ -46,7 +47,7 @@ class UserController extends Controller
     /**
      * Rollen und Aktivierungsstatus speichern.
      */
-    public function update(Request $request, User $user): RedirectResponse
+    public function update(Request $request, User $user): RedirectResponse|JsonResponse
     {
         $data = $request->validate([
             'roles' => ['array'],
@@ -57,8 +58,10 @@ class UserController extends Controller
         $user->roles()->sync($data['roles'] ?? []);
         $user->update(['activated' => $request->boolean('activated')]);
 
-        return redirect()
-            ->route('admin.users.index')
-            ->with('status', "Nutzer „{$user->name}“ wurde aktualisiert.");
+        $message = "Nutzer „{$user->name}“ wurde aktualisiert.";
+
+        return $request->expectsJson()
+            ? response()->json(['message' => $message, 'reload' => true])
+            : redirect()->route('admin.users.index')->with('status', $message);
     }
 }

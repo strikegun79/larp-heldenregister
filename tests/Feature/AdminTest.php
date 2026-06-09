@@ -60,6 +60,19 @@ class AdminTest extends TestCase
         $this->assertFalse($target->activated);
     }
 
+    public function test_ajax_user_update_returns_json(): void
+    {
+        $admin = $this->admin();
+        $target = User::factory()->create();
+
+        $this->actingAs($admin)
+            ->putJson(route('admin.users.update', $target), ['roles' => [60], 'activated' => '1'])
+            ->assertOk()
+            ->assertJson(['reload' => true]);
+
+        $this->assertEqualsCanonicalizing([60], $target->fresh()->roles->pluck('id')->all());
+    }
+
     public function test_a_non_admin_cannot_update_users(): void
     {
         $target = User::factory()->create();

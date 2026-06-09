@@ -147,6 +147,52 @@ class AdventureTest extends TestCase
             ])->assertForbidden();
     }
 
+    public function test_ajax_booking_returns_json_on_success(): void
+    {
+        $adventure = Adventure::factory()->create(['max_player' => 5]);
+        $player = Player::factory()->create();
+
+        $this->actingAs($this->booker())
+            ->postJson(route('adventures.bookings.store', $adventure), [
+                'player_id' => $player->id,
+                'event_role_id' => 1,
+                'agb' => '1',
+            ])
+            ->assertOk()
+            ->assertJson(['reload' => true])
+            ->assertJsonStructure(['message', 'reload']);
+    }
+
+    public function test_ajax_booking_returns_422_on_validation_error(): void
+    {
+        $adventure = Adventure::factory()->create();
+        $player = Player::factory()->create();
+
+        $this->actingAs($this->booker())
+            ->postJson(route('adventures.bookings.store', $adventure), [
+                'player_id' => $player->id,
+                'event_role_id' => 1,
+                // agb fehlt -> Validierungsfehler als 422-JSON (Toast)
+            ])
+            ->assertStatus(422)
+            ->assertJsonValidationErrors('agb');
+    }
+
+    public function test_ajax_booking_returns_422_on_business_error(): void
+    {
+        $adventure = Adventure::factory()->registrationClosed()->create();
+        $player = Player::factory()->create();
+
+        $this->actingAs($this->booker())
+            ->postJson(route('adventures.bookings.store', $adventure), [
+                'player_id' => $player->id,
+                'event_role_id' => 1,
+                'agb' => '1',
+            ])
+            ->assertStatus(422)
+            ->assertJsonPath('message', 'Für dieses Abenteuer ist die Anmeldung nicht geöffnet.');
+    }
+
     public function test_booking_a_full_adventure_goes_to_the_waitlist(): void
     {
         $adventure = Adventure::factory()->create(['max_player' => 1]);

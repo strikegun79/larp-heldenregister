@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Adventure;
 use App\Models\Booking;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 
@@ -20,7 +21,7 @@ class BookingController extends Controller
     /**
      * Einen Spieler zu einem Abenteuer anmelden.
      */
-    public function store(Request $request, Adventure $adventure): RedirectResponse
+    public function store(Request $request, Adventure $adventure): RedirectResponse|JsonResponse
     {
         $data = $request->validate([
             'player_id' => ['required', 'exists:players,id'],
@@ -37,15 +38,11 @@ class BookingController extends Controller
         ]);
 
         if (! $adventure->registrationOpen()) {
-            return back()->with('error', 'Für dieses Abenteuer ist die Anmeldung nicht geöffnet.');
+            return $this->fail($request, 'Für dieses Abenteuer ist die Anmeldung nicht geöffnet.');
         }
 
-        $alreadyBooked = $adventure->bookings()
-            ->where('player_id', $data['player_id'])
-            ->exists();
-
-        if ($alreadyBooked) {
-            return back()->with('error', 'Dieser Spieler ist bereits angemeldet.');
+        if ($adventure->bookings()->where('player_id', $data['player_id'])->exists()) {
+            return $this->fail($request, 'Dieser Spieler ist bereits angemeldet.');
         }
 
         $adventure->bookings()->create([
@@ -68,18 +65,34 @@ class BookingController extends Controller
             ? 'Anmeldung erfolgt – das Abenteuer ist voll, daher auf der Warteliste.'
             : 'Anmeldung gespeichert.';
 
-        return back()->with('status', $message);
+        return $request->expectsJson()
+            ? response()->json(['message' => $message, 'reload' => true])
+            : back()->with('status', $message);
     }
 
     /**
      * Eine Anmeldung stornieren.
      */
-    public function destroy(Adventure $adventure, Booking $booking): RedirectResponse
+    public function destroy(Request $request, Adventure $adventure, Booking $booking): RedirectResponse|JsonResponse
     {
         abort_unless($booking->adventure_id === $adventure->id, 404);
 
         $booking->delete();
 
-        return back()->with('status', 'Anmeldung wurde storniert.');
+        $message = 'Anmeldung wurde storniert.';
+
+        return $request->expectsJson()
+            ? response()->json(['message' => $message, 'reload' => true])
+            : back()->with('status', $message);
+    }
+
+    /**
+     * Fachlicher Fehler: bei AJAX als 422-JSON (Toast), sonst zurück mit Flash.
+     */
+    private function fail(Request $request, string $message): RedirectResponse|JsonResponse
+    {
+        return $request->expectsJson()
+            ? response()->json(['message' => $message], 422)
+            : back()->with('error', $message);
     }
 }
