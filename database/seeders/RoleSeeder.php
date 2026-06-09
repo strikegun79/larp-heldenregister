@@ -16,8 +16,8 @@ class RoleSeeder extends Seeder
         $roles = [
             ['id' => 0,  'slug' => 'none',          'label' => 'keine'],
             ['id' => 10, 'slug' => 'admin',         'label' => 'Admin'],
-            ['id' => 20, 'slug' => 'registrar',     'label' => 'Registrar'],
-            ['id' => 30, 'slug' => 'project_lead',  'label' => 'Projektleiter'],
+            ['id' => 20, 'slug' => 'registrar',     'label' => 'Bürokrat'],
+            ['id' => 30, 'slug' => 'project_lead',  'label' => 'Projektleitung'],
             ['id' => 40, 'slug' => 'game_master',   'label' => 'Spielleiter'],
             ['id' => 50, 'slug' => 'teamer',        'label' => 'Teamer'],
             ['id' => 60, 'slug' => 'event_booking', 'label' => 'Event buchen'],

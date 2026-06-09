@@ -18,17 +18,17 @@
                     <x-nav-link :href="route('players.index')" :active="request()->routeIs('players.*')">
                         {{ __('Spieler') }}
                     </x-nav-link>
-                    @can('view-heldenregister')
+                    @can('heldenregister.view')
                         <x-nav-link :href="route('heroes.index')" :active="request()->routeIs('heroes.*')">
                             {{ __('Heldenregister') }}
                         </x-nav-link>
                     @endcan
-                    @can('view-abenteuer')
+                    @can('adventure.access')
                         <x-nav-link :href="route('adventures.index')" :active="request()->routeIs('adventures.*')">
                             {{ __('Abenteuer') }}
                         </x-nav-link>
                     @endcan
-                    @can('admin')
+                    @can('portal.manage')
                         <x-nav-link :href="route('admin.index')" :active="request()->routeIs('admin.*')">
                             {{ __('Verwaltung') }}
                         </x-nav-link>
@@ -91,17 +91,17 @@
             <x-responsive-nav-link :href="route('players.index')" :active="request()->routeIs('players.*')">
                 {{ __('Spieler') }}
             </x-responsive-nav-link>
-            @can('view-heldenregister')
+            @can('heldenregister.view')
                 <x-responsive-nav-link :href="route('heroes.index')" :active="request()->routeIs('heroes.*')">
                     {{ __('Heldenregister') }}
                 </x-responsive-nav-link>
             @endcan
-            @can('view-abenteuer')
+            @can('adventure.access')
                 <x-responsive-nav-link :href="route('adventures.index')" :active="request()->routeIs('adventures.*')">
                     {{ __('Abenteuer') }}
                 </x-responsive-nav-link>
             @endcan
-            @can('admin')
+            @can('portal.manage')
                 <x-responsive-nav-link :href="route('admin.index')" :active="request()->routeIs('admin.*')">
                     {{ __('Verwaltung') }}
                 </x-responsive-nav-link>

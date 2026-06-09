@@ -4,7 +4,7 @@
             <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
                 Heldenregister
             </h2>
-            @can('manage-heldenregister')
+            @can('heldenregister.edit')
                 <a href="{{ route('heroes.create') }}">
                     <x-primary-button>Neuer Held</x-primary-button>
                 </a>
@@ -43,7 +43,7 @@
                                 <td class="px-6 py-4">{{ $hero->class_list ?: '—' }}</td>
                                 <td class="px-6 py-4">{{ $hero->active ? 'ja' : 'nein' }}</td>
                                 <td class="px-6 py-4 text-right">
-                                    @can('manage-heldenregister')
+                                    @can('heldenregister.edit')
                                         <a href="{{ route('heroes.edit', $hero) }}" class="text-sm text-gray-600 dark:text-gray-400 hover:underline">Bearbeiten</a>
                                     @endcan
                                 </td>

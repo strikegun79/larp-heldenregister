@@ -18,10 +18,10 @@ class AdventureController extends Controller
     public function __construct()
     {
         $this->middleware('auth');
-        // Abenteuer ansehen: Spielleiter, Teamer, Event buchen (+Admin).
-        $this->middleware('can:view-abenteuer')->only(['index', 'show']);
-        // Events anlegen/bearbeiten: nur über Verwaltung -> Admin.
-        $this->middleware('can:manage-events')->only(['create', 'store', 'edit', 'update', 'destroy']);
+        // Abenteuer ansehen: events.view ODER adventure.book (siehe adventure.access).
+        $this->middleware('can:adventure.access')->only(['index', 'show']);
+        // Events anlegen/bearbeiten: events.edit (Admin, Bürokrat, Projektleitung).
+        $this->middleware('can:events.edit')->only(['create', 'store', 'edit', 'update', 'destroy']);
     }
 
     /**

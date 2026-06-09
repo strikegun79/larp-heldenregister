@@ -4,7 +4,7 @@
             <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
                 {{ $hero->character_name ?? 'Held' }}
             </h2>
-            @can('manage-heldenregister')
+            @can('heldenregister.edit')
                 <a href="{{ route('heroes.edit', $hero) }}">
                     <x-secondary-button>Bearbeiten</x-secondary-button>
                 </a>

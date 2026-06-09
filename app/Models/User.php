@@ -93,12 +93,20 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
-     * Reiner Teilnehmer (Rolle „participant" ohne weitere, höhere Rolle).
-     * Solche Nutzer sehen nur „Dein Profil" und „Deine Spieler".
+     * Prüft eine Berechtigung anhand der Rollen-Rechte-Matrix
+     * (config/permissions.php). 'admin' besitzt über '*' alle Rechte.
      */
-    public function isParticipantOnly(): bool
+    public function hasPermission(string $permission): bool
     {
-        return $this->hasRole('participant')
-            && ! $this->hasAnyRole('admin', 'registrar', 'project_lead', 'game_master', 'teamer', 'event_booking');
+        $matrix = config('permissions.roles', []);
+
+        foreach ($this->roles as $role) {
+            $granted = $matrix[$role->slug] ?? [];
+            if (in_array('*', $granted, true) || in_array($permission, $granted, true)) {
+                return true;
+            }
+        }
+
+        return false;
     }
 }

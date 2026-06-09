@@ -62,7 +62,7 @@ class AdventureTest extends TestCase
             ->assertSee('Burg Staufenberg LARP');
     }
 
-    public function test_only_admins_can_create_events(): void
+    public function test_booking_role_cannot_create_events_but_admin_can(): void
     {
         $payload = [
             'name' => 'Tulderon-Zeltfreizeit',
@@ -75,14 +75,30 @@ class AdventureTest extends TestCase
             'fee' => 12,
         ];
 
-        // "Event buchen" darf KEINE Events anlegen (nur über Verwaltung -> Admin).
+        // "Event buchen" hat kein events.edit -> darf keine Events anlegen.
         $this->actingAs($this->booker())->get(route('adventures.create'))->assertForbidden();
         $this->actingAs($this->booker())->post(route('adventures.store'), $payload)->assertForbidden();
 
-        // Admin darf.
+        // Admin (events.edit) darf.
         $this->actingAs($this->admin())->post(route('adventures.store'), $payload)
             ->assertRedirect();
         $this->assertNotNull(Adventure::firstWhere('name', 'Tulderon-Zeltfreizeit'));
+    }
+
+    public function test_a_spielleiter_can_book_but_not_create_events(): void
+    {
+        $adventure = Adventure::factory()->create(['max_player' => 5]);
+        $player = Player::factory()->create();
+        $spielleiter = $this->userWithRole(40); // hat adventure.book, aber kein events.edit
+
+        $this->actingAs($spielleiter)
+            ->post(route('adventures.bookings.store', $adventure), [
+                'player_id' => $player->id,
+                'event_role_id' => 1,
+                'agb' => '1',
+            ])->assertSessionHas('status');
+
+        $this->actingAs($spielleiter)->get(route('adventures.create'))->assertForbidden();
     }
 
     public function test_end_must_not_be_before_start(): void
@@ -118,12 +134,12 @@ class AdventureTest extends TestCase
         $this->assertFalse($booking->waitlisted);
     }
 
-    public function test_a_viewer_without_booking_rights_cannot_book(): void
+    public function test_participants_cannot_book(): void
     {
         $adventure = Adventure::factory()->create();
         $player = Player::factory()->create();
 
-        $this->actingAs($this->userWithRole(40)) // Spielleiter: ansehen, nicht buchen
+        $this->actingAs($this->userWithRole(70)) // Teilnehmer: kein adventure.book
             ->post(route('adventures.bookings.store', $adventure), [
                 'player_id' => $player->id,
                 'event_role_id' => 1,

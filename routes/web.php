@@ -42,12 +42,15 @@ Route::middleware('auth')->group(function () {
     Route::delete('adventures/{adventure}/bookings/{booking}', [BookingController::class, 'destroy'])
         ->name('adventures.bookings.destroy');
 
-    // Verwaltung (nur Admins, Legacy: pages/admin).
-    Route::prefix('admin')->name('admin.')->middleware('can:admin')->group(function () {
+    // Verwaltung (Portal-Administration, Berechtigung portal.manage).
+    Route::prefix('admin')->name('admin.')->middleware('can:portal.manage')->group(function () {
         Route::get('/', [Admin\AdminController::class, 'index'])->name('index');
-        Route::get('users', [Admin\UserController::class, 'index'])->name('users.index');
-        Route::get('users/{user}/edit', [Admin\UserController::class, 'edit'])->name('users.edit');
-        Route::put('users/{user}', [Admin\UserController::class, 'update'])->name('users.update');
+        // Nutzerverwaltung erfordert zusätzlich users.manage.
+        Route::middleware('can:users.manage')->group(function () {
+            Route::get('users', [Admin\UserController::class, 'index'])->name('users.index');
+            Route::get('users/{user}/edit', [Admin\UserController::class, 'edit'])->name('users.edit');
+            Route::put('users/{user}', [Admin\UserController::class, 'update'])->name('users.update');
+        });
         Route::get('players', [Admin\PlayerController::class, 'index'])->name('players.index');
 
         // Matrix-Konto-Provisionierung pro Spieler (corporal User-DB).

@@ -31,7 +31,7 @@
                 </a>
 
                 {{-- Heldenregister (Registrar, Spielleiter, Teamer / Admin) --}}
-                @can('view-heldenregister')
+                @can('heldenregister.view')
                     <a href="{{ route('heroes.index') }}"
                        class="group block rounded-lg overflow-hidden border-2 border-[#5a3a22]/40 bg-white/60 shadow hover:shadow-xl hover:-translate-y-1 transition">
                         <div class="h-44 overflow-hidden">
@@ -45,7 +45,7 @@
                 @endcan
 
                 {{-- Abenteuer (Spielleiter, Teamer, Event buchen / Admin) --}}
-                @can('view-abenteuer')
+                @can('adventure.access')
                     <a href="{{ route('adventures.index') }}"
                        class="group block rounded-lg overflow-hidden border-2 border-[#5a3a22]/40 bg-white/60 shadow hover:shadow-xl hover:-translate-y-1 transition">
                         <div class="h-44 overflow-hidden">
@@ -71,7 +71,7 @@
                 </a>
 
                 {{-- Verwaltung (nur Admins) --}}
-                @can('admin')
+                @can('portal.manage')
                     <a href="{{ route('admin.index') }}"
                        class="group block rounded-lg overflow-hidden border-2 border-[#5a3a22]/40 bg-white/60 shadow hover:shadow-xl hover:-translate-y-1 transition">
                         <div class="h-44 overflow-hidden">
