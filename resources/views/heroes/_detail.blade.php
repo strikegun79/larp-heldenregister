@@ -39,3 +39,26 @@
         @endforelse
     </tbody>
 </table>
+
+@can('heldenregister.edit')
+    <form method="POST" action="{{ route('heroes.ep.store', $hero) }}" class="ui form" data-refresh-modal style="margin-top:1rem">
+        @csrf
+        <div class="inline fields" style="align-items:flex-end;flex-wrap:wrap">
+            <div class="field">
+                <label>EP</label>
+                <input type="number" name="ep_count" step="0.5" min="0.5" placeholder="Anzahl" required style="width:7rem">
+            </div>
+            <div class="field" style="flex:1;min-width:12rem">
+                <label>Grund</label>
+                <select name="ep_transaction_type_id" required>
+                    @foreach ($epTypes as $type)
+                        <option value="{{ $type->id }}">{{ $type->description }} ({{ $type->is_credit ? '+' : '−' }})</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="field">
+                <button type="submit" class="ui primary button">Buchen</button>
+            </div>
+        </div>
+    </form>
+@endcan

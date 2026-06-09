@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\EpTransactionType;
 use App\Models\Hero;
 use App\Models\HeroClass;
 use App\Models\Player;
@@ -64,12 +65,17 @@ class HeroController extends Controller
     {
         $hero->load(['player', 'classes', 'skills', 'epTransactions.type']);
 
+        $data = [
+            'hero' => $hero,
+            'epTypes' => EpTransactionType::orderBy('id')->get(),
+        ];
+
         // Per AJAX (aus der Liste) nur den Modal-Inhalt liefern.
         if ($request->ajax()) {
-            return view('heroes._detail', compact('hero'));
+            return view('heroes._detail', $data);
         }
 
-        return view('heroes.show', compact('hero'));
+        return view('heroes.show', $data);
     }
 
     /**

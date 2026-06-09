@@ -73,3 +73,25 @@ Das Hinzufügen einer Klasse soll EP kosten und gebucht werden.
 - [ ] Verknüpfung zu EP-Buchungen vom Typ „Abenteuer bestritten".
 - [ ] Tests der Aggregation.
 **Abhängig von:** BOOK-08, BOOK-09.
+
+### HERO-12 · Helden-EP-anpassen · ⏱ 3h · ✅
+**Beschreibung:** In der Heldenansicht soll ein Feld für die zuweisung oder verbrauch von EP möglich sein.
+**Akzeptanzkriterien:**
+- [x] Ein Input Feld für die Anzahl von EP, Minus oder Plus. dann eine Dropdown Auswahl für den Grund. Aus der ep_transaction_types Tabelle. Dann ein Button zum eintragen, per AJAX und dann leeren der Input und dropdown auswahl. Neu laden der EP Historie.
+- [x] TEsts.
+
+> Umgesetzt: `EpTransactionController@store` (`POST heroes/{hero}/ep`, Berechtigung
+> `heldenregister.edit`); Buchungsformular im Helden-Modal (`heroes/_detail`);
+> Vorzeichen aus `ep_transaction_types.is_credit`; AJAX-Submit mit Toast +
+> Modal-Teil-Refresh (`refresh_modal`) lädt EP-Historie neu und leert das
+> Formular. Tests: `EpTransactionTest` (4).
+
+### HERO-14 · Helden-Klassen-Fertigkeitsbaum · ⏱ 3h · 🔲
+**Beschreibung:** In der Heldenansicht soll ein UI Fomantic Tab stehen und jeder aktivierte Klasse ist ein Tab mit dem Fertigkeitsbaum.
+**Akzeptanzkriterien:**
+- [ ] Mindestens ein Tab existiert, weil eine Klasse immer Ausgewählt werden sein muss bei der Erstellung.
+- [ ] Beim anklicken einer Fertigkeit, soll ein Modal erscheinen mit der Beschreibung der Fertigkeit und die Optionen "Fertigkeit errungen" oder "Noch nicht" (Accept/Deny).
+- [ ] Beim Accept, soll die Fertigkeit per AJAX gebucht werden und die EP entsprechend verbraucht in der Hostorie des Helden.
+- [ ] Verfügbare EP Anzahl muss im Modal angezeigt werden.
+- [ ] Fertigkeitsbäume sind JPG Bilder, für jede Klasse gibt es eins. Unter /public/images/skilltree_*.jpg
+- [ ] Tests.

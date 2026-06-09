@@ -69,19 +69,25 @@
         <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/fomantic-ui@2.9.3/dist/semantic.min.js"></script>
         <script>
+            let appModalUrl = null;
+
+            function loadModalContent(url) {
+                const $content = $('#app-modal-content');
+                $content.html('<div class="ui active centered inline loader" style="display:block;margin:2rem auto"></div>');
+                return fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                    .then(r => r.text())
+                    .then(html => { $content.html(html); $('#app-modal').modal('refresh'); })
+                    .catch(() => $content.html('<div class="ui error message">Konnte nicht geladen werden.</div>'));
+            }
+
             // Klick auf ein Element mit data-modal-url -> Inhalt per AJAX ins Modal laden.
             document.addEventListener('click', function (e) {
                 const trigger = e.target.closest('[data-modal-url]');
                 if (!trigger) return;
                 e.preventDefault();
-                const url = trigger.getAttribute('data-modal-url');
-                const $content = $('#app-modal-content');
-                $content.html('<div class="ui active centered inline loader" style="display:block;margin:2rem auto"></div>');
+                appModalUrl = trigger.getAttribute('data-modal-url');
                 $('#app-modal').modal({ autofocus: false, observeChanges: true }).modal('show');
-                fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
-                    .then(r => r.text())
-                    .then(html => { $content.html(html); $('#app-modal').modal('refresh'); })
-                    .catch(() => $content.html('<div class="ui error message">Konnte nicht geladen werden.</div>'));
+                loadModalContent(appModalUrl);
             });
 
             function showToast(message, type) {
@@ -114,6 +120,8 @@
                             showToast(data.message || 'Gespeichert.', 'success');
                             if (data.reload) {
                                 setTimeout(() => window.location.reload(), 700);
+                            } else if (data.refresh_modal && appModalUrl) {
+                                loadModalContent(appModalUrl); // Modal-Inhalt neu laden (z. B. EP-Historie)
                             } else {
                                 $('#app-modal').modal('hide');
                             }
