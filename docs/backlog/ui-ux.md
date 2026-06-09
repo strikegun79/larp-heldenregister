@@ -1,0 +1,68 @@
+# Backlog · Oberfläche (UI)
+
+Fomantic UI, Mittelalter-Theme, Modals, Interaktion.
+
+## Inventar (✅)
+
+### UI-01 · Mittelalter-Theme (Pergament, Fonts, Logo, Footer) · ⏱ 4h · ✅
+Aus Legacy übernommen.
+
+### UI-02 · Dashboard-Kartenmenü (rollenbasiert) · ⏱ 3h · ✅
+Profil/Spieler/Heldenregister/Abenteuer/Verwaltung.
+
+### UI-03 · Fomantic UI + gemeinsames AJAX-Modal · ⏱ 4h · ✅
+`[data-modal-url]` lädt Inhalte; vier Entitäten öffnen im Modal.
+
+### UI-04 · AJAX-Submit mit Toast-Rückmeldung · ⏱ 3h · ✅
+Modal-Formulare; Erfolg/Validierung/Fachfehler als Toast.
+
+## Offen (🔲)
+
+### UI-05 · Konsistente Fomantic-Formularkomponenten · ⏱ 4h · 🔲
+**Beschreibung:** Mischung aus Tailwind- und Fomantic-Formularen vereinheitlichen;
+Fomantic-Dropdowns/Calendar (wie Legacy) für Auswahl/Datum.
+**Akzeptanzkriterien:**
+- [ ] Wiederverwendbare Blade-Komponenten für Feld/Select/Checkbox (Fomantic).
+- [ ] Datepicker (Fomantic Calendar) für Datumsfelder.
+- [ ] Helden-/Spieler-/Event-Formulare umgestellt.
+
+### UI-06 · Such-/Filter-/Sortier-Baustein für Listen · ⏱ 4h · 🔲
+**Beschreibung:** Gemeinsames Muster für Suche/Filter/Sortierung mit
+Paginierungs-Erhalt (Query-String).
+**Akzeptanzkriterien:**
+- [ ] Wiederverwendbare Suchleiste + serverseitige Filterung.
+- [ ] In mind. einer Liste produktiv (Helden oder Spieler).
+- [ ] Tests.
+
+### UI-07 · Modal-Submit ohne Reload (Teil-Refresh) · ⏱ 4h · 🔲
+**Beschreibung:** Aktuell `reload` nach Erfolg. Stattdessen Liste/Modal gezielt
+per AJAX aktualisieren.
+**Akzeptanzkriterien:**
+- [ ] Nach Erfolg wird der betroffene Listeneintrag/Modal-Inhalt neu geladen.
+- [ ] Kein voller Seiten-Reload mehr; Toast bleibt.
+
+### UI-08 · Responsives Verhalten & Mobile-Feinschliff · ⏱ 3h · 🔲
+**Beschreibung:** Tabellen/Modals/Karten auf Mobil prüfen und anpassen.
+**Akzeptanzkriterien:**
+- [ ] Tabellen scrollbar/stacked auf kleinen Screens.
+- [ ] Modals nutzbar auf Mobil (Scroll/Fullscreen).
+
+### UI-09 · Flash-Messages global als Toast · ⏱ 2h · 🔲
+**Beschreibung:** Session-`status`/`error` (Vollseiten) ebenfalls als Toast
+darstellen (einheitliches Feedback).
+**Akzeptanzkriterien:**
+- [ ] Beim Laden vorhandene Flash-Messages als Toast ausgeben.
+- [ ] Keine doppelte Anzeige (Box + Toast).
+
+### UI-10 · Fomantic-Assets lokal bündeln (statt CDN) · ⏱ 3h · 🔲
+**Beschreibung:** Fomantic/jQuery aktuell per CDN; für Offline/Prod lokal via Vite.
+**Akzeptanzkriterien:**
+- [ ] Fomantic + jQuery über npm/Vite gebaut und eingebunden.
+- [ ] Keine externen CDN-Abhängigkeiten zur Laufzeit.
+- [ ] Build dokumentiert.
+
+### UI-11 · Accessibility-Grundlagen · ⏱ 3h · 🔲
+**Beschreibung:** Fokus-Management in Modals, Labels, Kontraste, ARIA.
+**Akzeptanzkriterien:**
+- [ ] Modale fangen Fokus, schließen mit ESC.
+- [ ] Formularfelder mit Labels; ausreichende Kontraste.
