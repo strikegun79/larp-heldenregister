@@ -66,7 +66,7 @@ class BookingController extends Controller
             : 'Anmeldung gespeichert.';
 
         return $request->expectsJson()
-            ? response()->json(['message' => $message, 'reload' => true])
+            ? response()->json(['message' => $message, 'refresh_modal' => true])
             : back()->with('status', $message);
     }
 
@@ -82,7 +82,7 @@ class BookingController extends Controller
         $message = 'Anmeldung wurde storniert.';
 
         return $request->expectsJson()
-            ? response()->json(['message' => $message, 'reload' => true])
+            ? response()->json(['message' => $message, 'refresh_modal' => true])
             : back()->with('status', $message);
     }
 

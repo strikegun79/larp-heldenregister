@@ -66,3 +66,16 @@ darstellen (einheitliches Feedback).
 **Akzeptanzkriterien:**
 - [ ] Modale fangen Fokus, schließen mit ESC.
 - [ ] Formularfelder mit Labels; ausreichende Kontraste.
+
+### UI-12 · Accessibility-UI Fomantic · ⏱ 3h · ✅
+**Beschreibung:** Verwende ui Modale für das öffnen der Details
+**Akzeptanzkriterien:**
+- [x] Modale Fenster einsetzen für Helden-Detail, Spieler-Detail, Abenteuer-buchen, Abenteuer-Editieren, Nutzer editieren 
+- [x] Modale Fenster mit Header und Footer und internes Scrollen, falls der inhalt länger ist.
+
+> Umgesetzt: ein persistentes `ui modal` (#app-modal) mit `header` /
+> `scrolling content` / `actions`-Footer. AJAX-Partials liefern per Konvention
+> `[data-modal-title]` (Header) und `[data-modal-actions]` (Footer); ein
+> „Schließen"-Button wird immer ergänzt. Abenteuer-Editieren öffnet jetzt
+> ebenfalls als Modal (`AdventureController@edit` AJAX -> `_edit_modal`,
+> `@update` liefert JSON). Booking/EP nutzen `refresh_modal` (Modal-Teil-Refresh).

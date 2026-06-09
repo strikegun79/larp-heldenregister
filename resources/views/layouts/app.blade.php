@@ -59,10 +59,14 @@
             </footer>
         </div>
 
-        <!-- Gemeinsames Fomantic-Modal: Inhalt wird per AJAX aus [data-modal-url] geladen -->
+        <!-- Gemeinsames Fomantic-Modal: Header + scrollender Inhalt + Footer.
+             Inhalt wird per AJAX aus [data-modal-url] geladen; das Partial liefert
+             [data-modal-title] (Header) und optional [data-modal-actions] (Footer). -->
         <div class="ui modal" id="app-modal">
             <i class="close icon"></i>
+            <div class="header" id="app-modal-header"></div>
             <div class="scrolling content" id="app-modal-content"></div>
+            <div class="actions" id="app-modal-actions"></div>
         </div>
 
         <!-- jQuery + Fomantic JS -->
@@ -73,10 +77,26 @@
 
             function loadModalContent(url) {
                 const $content = $('#app-modal-content');
+                const $header = $('#app-modal-header');
+                const $actions = $('#app-modal-actions');
+                $header.empty();
+                $actions.empty();
                 $content.html('<div class="ui active centered inline loader" style="display:block;margin:2rem auto"></div>');
                 return fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
                     .then(r => r.text())
-                    .then(html => { $content.html(html); $('#app-modal').modal('refresh'); })
+                    .then(html => {
+                        $content.html(html);
+                        // Titel ins Header, Aktionen in den Footer hochziehen (Konvention).
+                        const $title = $content.find('[data-modal-title]').first();
+                        $header.html($title.length ? $title.html() : '');
+                        $title.remove();
+                        const $partActions = $content.find('[data-modal-actions]').first();
+                        $actions.html($partActions.length ? $partActions.html() : '');
+                        $partActions.remove();
+                        // Standard-Schließen-Button immer anbieten.
+                        $actions.append('<div class="ui deny button">Schließen</div>');
+                        $('#app-modal').modal('refresh');
+                    })
                     .catch(() => $content.html('<div class="ui error message">Konnte nicht geladen werden.</div>'));
             }
 

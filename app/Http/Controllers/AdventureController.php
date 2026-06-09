@@ -9,6 +9,7 @@ use App\Models\EventRole;
 use App\Models\EventStatus;
 use App\Models\Location;
 use App\Models\Player;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -76,16 +77,24 @@ class AdventureController extends Controller
 
     public function edit(Adventure $adventure): View
     {
-        return view('adventures.edit', $this->formData($adventure));
+        $data = $this->formData($adventure);
+
+        if (request()->ajax()) {
+            return view('adventures._edit_modal', $data);
+        }
+
+        return view('adventures.edit', $data);
     }
 
-    public function update(Request $request, Adventure $adventure): RedirectResponse
+    public function update(Request $request, Adventure $adventure): RedirectResponse|JsonResponse
     {
         $adventure->update($this->validateAdventure($request));
 
-        return redirect()
-            ->route('adventures.show', $adventure)
-            ->with('status', 'Abenteuer wurde aktualisiert.');
+        $message = 'Abenteuer wurde aktualisiert.';
+
+        return $request->expectsJson()
+            ? response()->json(['message' => $message, 'reload' => true])
+            : redirect()->route('adventures.show', $adventure)->with('status', $message);
     }
 
     public function destroy(Adventure $adventure): RedirectResponse

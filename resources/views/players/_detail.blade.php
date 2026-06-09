@@ -1,7 +1,4 @@
-<div class="flex items-center justify-between mb-4">
-    <h2 class="font-uncial text-2xl text-waldritter">{{ $player->full_name }}</h2>
-    <a href="{{ route('players.edit', $player) }}" class="ui small button">Bearbeiten</a>
-</div>
+<span data-modal-title hidden>{{ $player->full_name }}</span>
 
 <dl class="grid grid-cols-2 gap-4 text-stone-800">
     <div><dt class="text-sm text-stone-500">Geburtsdatum</dt><dd>{{ optional($player->dayofbirth)->format('d.m.Y') ?? '—' }}</dd></div>
@@ -25,3 +22,7 @@
         @endforelse
     </tbody>
 </table>
+
+<div data-modal-actions hidden>
+    <a href="{{ route('players.edit', $player) }}" class="ui button">Bearbeiten</a>
+</div>

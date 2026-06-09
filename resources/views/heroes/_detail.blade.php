@@ -1,9 +1,4 @@
-<div class="flex items-center justify-between mb-4">
-    <h2 class="font-uncial text-2xl text-waldritter">{{ $hero->character_name ?? 'Held' }}</h2>
-    @can('heldenregister.edit')
-        <a href="{{ route('heroes.edit', $hero) }}" class="ui small button">Bearbeiten</a>
-    @endcan
-</div>
+<span data-modal-title hidden>{{ $hero->character_name ?? 'Held' }}</span>
 
 <dl class="grid grid-cols-2 gap-4 text-stone-800">
     <div><dt class="text-sm text-stone-500">Spieler</dt><dd>{{ $hero->player?->full_name ?? '—' }}</dd></div>
@@ -21,6 +16,29 @@
 @empty
     <p class="text-stone-500">Keine Fertigkeiten erlernt.</p>
 @endforelse
+
+@can('heldenregister.edit')
+    <form method="POST" action="{{ route('heroes.ep.store', $hero) }}" class="ui form" data-refresh-modal style="margin-top:1rem">
+        @csrf
+        <div class="inline fields" style="align-items:flex-end;flex-wrap:wrap">
+            <div class="field">
+                <label>EP</label>
+                <input type="number" name="ep_count" step="1" min="1" placeholder="Anzahl" required style="width:7rem">
+            </div>
+            <div class="field" style="flex:1;min-width:12rem">
+                <label>Grund</label>
+                <select name="ep_transaction_type_id" required>
+                    @foreach ($epTypes as $type)
+                        <option value="{{ $type->id }}">{{ $type->description }} ({{ $type->is_credit ? '+' : '−' }})</option>
+                    @endforeach
+                </select>
+            </div>
+            <div class="field">
+                <button type="submit" class="ui primary button">Buchen</button>
+            </div>
+        </div>
+    </form>
+@endcan
 
 <h3 class="font-uncial text-lg text-waldritter mt-6 mb-2">EP-Verlauf</h3>
 <table class="ui very basic compact table">
@@ -40,25 +58,8 @@
     </tbody>
 </table>
 
-@can('heldenregister.edit')
-    <form method="POST" action="{{ route('heroes.ep.store', $hero) }}" class="ui form" data-refresh-modal style="margin-top:1rem">
-        @csrf
-        <div class="inline fields" style="align-items:flex-end;flex-wrap:wrap">
-            <div class="field">
-                <label>EP</label>
-                <input type="number" name="ep_count" step="0.5" min="0.5" placeholder="Anzahl" required style="width:7rem">
-            </div>
-            <div class="field" style="flex:1;min-width:12rem">
-                <label>Grund</label>
-                <select name="ep_transaction_type_id" required>
-                    @foreach ($epTypes as $type)
-                        <option value="{{ $type->id }}">{{ $type->description }} ({{ $type->is_credit ? '+' : '−' }})</option>
-                    @endforeach
-                </select>
-            </div>
-            <div class="field">
-                <button type="submit" class="ui primary button">Buchen</button>
-            </div>
-        </div>
-    </form>
-@endcan
+<div data-modal-actions hidden>
+    @can('heldenregister.edit')
+        <a href="{{ route('heroes.edit', $hero) }}" class="ui button">Bearbeiten</a>
+    @endcan
+</div>

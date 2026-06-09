@@ -101,6 +101,36 @@ class AdventureTest extends TestCase
         $this->actingAs($spielleiter)->get(route('adventures.create'))->assertForbidden();
     }
 
+    public function test_ajax_edit_returns_modal_partial_and_update_returns_json(): void
+    {
+        $adventure = Adventure::factory()->create(['name' => 'Altname']);
+        $admin = $this->admin();
+
+        // Edit per AJAX = Modal-Partial ohne Layout.
+        $this->actingAs($admin)
+            ->get(route('adventures.edit', $adventure), ['X-Requested-With' => 'XMLHttpRequest'])
+            ->assertOk()
+            ->assertDontSee('<!DOCTYPE html>', false)
+            ->assertSee('data-modal-title', false);
+
+        // Update per AJAX = JSON mit reload.
+        $this->actingAs($admin)
+            ->putJson(route('adventures.update', $adventure), [
+                'name' => 'Neuname',
+                'start_at' => '2026-08-01 10:00',
+                'end_at' => '2026-08-02 10:00',
+                'event_status_id' => 30,
+                'event_client_id' => 1,
+                'event_category_id' => 0,
+                'max_player' => 10,
+                'fee' => 12,
+            ])
+            ->assertOk()
+            ->assertJson(['reload' => true]);
+
+        $this->assertSame('Neuname', $adventure->fresh()->name);
+    }
+
     public function test_end_must_not_be_before_start(): void
     {
         $this->actingAs($this->admin())
@@ -159,8 +189,8 @@ class AdventureTest extends TestCase
                 'agb' => '1',
             ])
             ->assertOk()
-            ->assertJson(['reload' => true])
-            ->assertJsonStructure(['message', 'reload']);
+            ->assertJson(['refresh_modal' => true])
+            ->assertJsonStructure(['message', 'refresh_modal']);
     }
 
     public function test_ajax_booking_returns_422_on_validation_error(): void

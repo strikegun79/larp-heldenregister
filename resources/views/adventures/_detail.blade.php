@@ -1,9 +1,4 @@
-<div class="flex items-center justify-between mb-4">
-    <h2 class="font-uncial text-2xl text-waldritter">{{ $adventure->name }}</h2>
-    @can('events.edit')
-        <a href="{{ route('adventures.edit', $adventure) }}" class="ui small button">Bearbeiten</a>
-    @endcan
-</div>
+<span data-modal-title hidden>{{ $adventure->name }}</span>
 
 <dl class="grid grid-cols-2 gap-4 text-stone-800">
     <div><dt class="text-sm text-stone-500">Beginn</dt><dd>{{ optional($adventure->start_at)->format('d.m.Y H:i') }}</dd></div>
@@ -28,7 +23,7 @@
                 <td class="right aligned">
                     @can('adventure.cancel')
                         <form method="POST" action="{{ route('adventures.bookings.destroy', [$adventure, $booking]) }}"
-                              onsubmit="return confirm('Anmeldung stornieren?');">
+                              data-refresh-modal onsubmit="return confirm('Anmeldung stornieren?');">
                             @csrf @method('DELETE')
                             <button class="text-red-600 hover:underline">stornieren</button>
                         </form>
@@ -49,7 +44,7 @@
         @if ($adventure->isFull())
             <p class="mb-3 text-orange-600">Das Abenteuer ist voll – neue Anmeldungen kommen auf die Warteliste.</p>
         @endif
-        <form method="POST" action="{{ route('adventures.bookings.store', $adventure) }}" class="ui form">
+        <form method="POST" action="{{ route('adventures.bookings.store', $adventure) }}" class="ui form" data-refresh-modal>
             @csrf
             <div class="two fields">
                 <div class="field">
@@ -88,3 +83,9 @@
         </form>
     @endif
 @endcan
+
+<div data-modal-actions hidden>
+    @can('events.edit')
+        <a href="{{ route('adventures.edit', $adventure) }}" data-modal-url="{{ route('adventures.edit', $adventure) }}" class="ui button">Bearbeiten</a>
+    @endcan
+</div>

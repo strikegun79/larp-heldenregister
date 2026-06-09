@@ -1,7 +1,7 @@
-<h2 class="font-uncial text-2xl text-waldritter mb-1">{{ trim("{$user->name} {$user->lastname}") }}</h2>
+<span data-modal-title hidden>Nutzer: {{ trim("{$user->name} {$user->lastname}") }}</span>
 <p class="text-sm text-stone-600 mb-4">{{ $user->email }}</p>
 
-<form method="POST" action="{{ route('admin.users.update', $user) }}" class="space-y-6">
+<form id="user-edit-form" method="POST" action="{{ route('admin.users.update', $user) }}" class="space-y-6">
     @csrf
     @method('PUT')
 
@@ -23,9 +23,8 @@
         <input type="checkbox" name="activated" value="1" @checked(old('activated', $user->activated))>
         Konto aktiviert
     </label>
-
-    <div class="flex items-center gap-4">
-        <button type="submit" class="ui primary button">Speichern</button>
-        <a href="{{ route('admin.users.index') }}" class="text-sm text-stone-600 hover:underline">Abbrechen</a>
-    </div>
 </form>
+
+<div data-modal-actions hidden>
+    <button type="submit" form="user-edit-form" class="ui primary button">Speichern</button>
+</div>
