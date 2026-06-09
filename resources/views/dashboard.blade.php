@@ -1,16 +1,86 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-semibold text-xl text-gray-800 leading-tight">
-            {{ __('Dashboard') }}
+        <h2 class="font-uncial text-2xl text-waldritter leading-tight">
+            Heldenregister
         </h2>
     </x-slot>
 
+    @php
+        $stunde = (int) now()->format('H');
+        $gruss = $stunde >= 6 && $stunde < 10 ? 'Guten Morgen' : ($stunde >= 10 && $stunde < 18 ? 'Guten Tag' : 'Guten Abend');
+    @endphp
+
     <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
-                <div class="p-6 text-gray-900">
-                    {{ __("You're logged in!") }}
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="bg-white/60 border-2 border-[#5a3a22]/30 rounded-lg p-6 mb-8 text-stone-800">
+                <h3 class="font-medieval text-xl text-waldritter">{{ $gruss }}, <em>{{ Auth::user()->name }}</em></h3>
+                <p class="mt-2">Willkommen im Heldenregister. Hier findest du alles rund um deine Spieler, Helden und Abenteuer.</p>
+            </div>
+
+            <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                {{-- Dein Profil --}}
+                <a href="{{ route('profile.edit') }}"
+                   class="group block rounded-lg overflow-hidden border-2 border-[#5a3a22]/40 bg-white/60 shadow hover:shadow-xl hover:-translate-y-1 transition">
+                    <div class="h-44 overflow-hidden">
+                        <img src="/images/dein_profil.jpg" alt="" class="w-full h-full object-cover group-hover:scale-105 transition">
+                    </div>
+                    <div class="p-4 text-center">
+                        <div class="font-uncial text-lg text-waldritter">Dein Profil</div>
+                        <div class="text-sm text-stone-600">Persönlich</div>
+                    </div>
+                </a>
+
+                {{-- Heldenregister --}}
+                <a href="{{ route('heroes.index') }}"
+                   class="group block rounded-lg overflow-hidden border-2 border-[#5a3a22]/40 bg-white/60 shadow hover:shadow-xl hover:-translate-y-1 transition">
+                    <div class="h-44 overflow-hidden">
+                        <img src="/images/heroes_db.jpg" alt="" class="w-full h-full object-cover group-hover:scale-105 transition">
+                    </div>
+                    <div class="p-4 text-center">
+                        <div class="font-uncial text-lg text-waldritter">Heldenregister</div>
+                        <div class="text-sm text-stone-600">Auflistung aller Helden</div>
+                    </div>
+                </a>
+
+                {{-- Abenteuer (Rolle "Event buchen" / Admin) --}}
+                @can('event_booking')
+                    <a href="{{ route('adventures.index') }}"
+                       class="group block rounded-lg overflow-hidden border-2 border-[#5a3a22]/40 bg-white/60 shadow hover:shadow-xl hover:-translate-y-1 transition">
+                        <div class="h-44 overflow-hidden">
+                            <img src="/images/abenteuer_v2.jpg" alt="" class="w-full h-full object-cover group-hover:scale-105 transition">
+                        </div>
+                        <div class="p-4 text-center">
+                            <div class="font-uncial text-lg text-waldritter">Abenteuer</div>
+                            <div class="text-sm text-stone-600">Veranstaltungen</div>
+                        </div>
+                    </a>
+                @endcan
+
+                {{-- Deine Spieler (Spielerverwaltung – noch ohne Oberfläche) --}}
+                <div class="relative block rounded-lg overflow-hidden border-2 border-[#5a3a22]/30 bg-white/40 opacity-70 cursor-not-allowed">
+                    <span class="absolute top-2 right-2 z-10 rounded bg-[#5a3a22] text-amber-50 text-xs px-2 py-0.5">bald verfügbar</span>
+                    <div class="h-44 overflow-hidden">
+                        <img src="/images/heldenarchiv.jpg" alt="" class="w-full h-full object-cover grayscale">
+                    </div>
+                    <div class="p-4 text-center">
+                        <div class="font-uncial text-lg text-waldritter">Deine Spieler</div>
+                        <div class="text-sm text-stone-600">Spielerdatenbank</div>
+                    </div>
                 </div>
+
+                {{-- Verwaltung (nur Admins, Adminbereich noch ohne Oberfläche) --}}
+                @can('admin')
+                    <div class="relative block rounded-lg overflow-hidden border-2 border-[#5a3a22]/30 bg-white/40 opacity-70 cursor-not-allowed">
+                        <span class="absolute top-2 right-2 z-10 rounded bg-[#5a3a22] text-amber-50 text-xs px-2 py-0.5">bald verfügbar</span>
+                        <div class="h-44 overflow-hidden">
+                            <img src="/images/administration.jpg" alt="" class="w-full h-full object-cover grayscale">
+                        </div>
+                        <div class="p-4 text-center">
+                            <div class="font-uncial text-lg text-waldritter">Verwaltung</div>
+                            <div class="text-sm text-stone-600">Portal-Administration</div>
+                        </div>
+                    </div>
+                @endcan
             </div>
         </div>
     </div>

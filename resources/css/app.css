@@ -1,3 +1,45 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+/* ---------------------------------------------------------------------------
+   Waldritter-Heldenregister – Mittelalter-Theme (übernommen aus dem Legacy)
+   Pergament-Hintergrund, mittelalterliche Schriften, Brauntöne.
+--------------------------------------------------------------------------- */
+@layer base {
+    body {
+        background-color: #e4cea5;
+        background-image: url('/images/paper.jpg');
+        background-attachment: fixed;
+    }
+}
+
+@layer components {
+    /* Pergament-Fläche (z. B. Seiteninhalt, Karten) */
+    .bg-parchment {
+        background-color: #e4cea5;
+        background-image: url('/images/paper.jpg');
+    }
+
+    /* Mittelalterliche Schriften (Legacy: MedievalSharp / Uncial / Cinzel) */
+    .font-medieval {
+        font-family: 'Cinzel Decorative', serif;
+    }
+
+    .font-uncial {
+        font-family: 'Uncial Antiqua', serif;
+    }
+
+    .font-script {
+        font-family: 'MedievalSharp', cursive;
+    }
+
+    /* Brauntöne des Vereins-Themes */
+    .text-waldritter {
+        color: #5a3a22;
+    }
+
+    .border-waldritter {
+        border-color: #5a3a22;
+    }
+}
