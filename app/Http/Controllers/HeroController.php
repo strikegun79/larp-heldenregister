@@ -6,6 +6,7 @@ use App\Models\EpTransactionType;
 use App\Models\Hero;
 use App\Models\HeroClass;
 use App\Models\Player;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -81,28 +82,36 @@ class HeroController extends Controller
     /**
      * Formular zum Bearbeiten.
      */
-    public function edit(Hero $hero): View
+    public function edit(Hero $hero, Request $request): View
     {
-        return view('heroes.edit', [
+        $data = [
             'hero' => $hero,
             'players' => Player::orderBy('name')->get(),
             'classes' => HeroClass::where('disabled', false)->orderBy('name')->get(),
-        ]);
+        ];
+
+        if ($request->ajax()) {
+            return view('heroes._edit_modal', $data);
+        }
+
+        return view('heroes.edit', $data);
     }
 
     /**
      * Helden aktualisieren.
      */
-    public function update(Request $request, Hero $hero): RedirectResponse
+    public function update(Request $request, Hero $hero): RedirectResponse|JsonResponse
     {
         $data = $this->validateHero($request);
 
         $hero->update($data);
         $hero->classes()->sync($request->input('classes', []));
 
-        return redirect()
-            ->route('heroes.show', $hero)
-            ->with('status', 'Held wurde aktualisiert.');
+        $message = 'Held wurde aktualisiert.';
+
+        return $request->expectsJson()
+            ? response()->json(['message' => $message, 'reload' => true])
+            : redirect()->route('heroes.show', $hero)->with('status', $message);
     }
 
     /**

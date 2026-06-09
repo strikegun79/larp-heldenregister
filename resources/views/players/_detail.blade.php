@@ -24,5 +24,5 @@
 </table>
 
 <div data-modal-actions hidden>
-    <a href="{{ route('players.edit', $player) }}" class="ui button">Bearbeiten</a>
+    <a href="{{ route('players.edit', $player) }}" data-modal-url="{{ route('players.edit', $player) }}" class="ui button">Bearbeiten</a>
 </div>

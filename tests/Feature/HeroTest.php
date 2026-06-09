@@ -71,6 +71,28 @@ class HeroTest extends TestCase
             ->assertDontSee('<!DOCTYPE html>', false);
     }
 
+    public function test_ajax_edit_returns_modal_partial_and_update_returns_json(): void
+    {
+        $hero = Hero::factory()->create(['character_name' => 'Alt']);
+        $registrar = $this->userWithRole(20);
+
+        $this->actingAs($registrar)
+            ->get(route('heroes.edit', $hero), ['X-Requested-With' => 'XMLHttpRequest'])
+            ->assertOk()
+            ->assertDontSee('<!DOCTYPE html>', false)
+            ->assertSee('data-modal-title', false);
+
+        $this->actingAs($registrar)
+            ->putJson(route('heroes.update', $hero), [
+                'player_id' => $hero->player_id,
+                'character_name' => 'Neu',
+            ])
+            ->assertOk()
+            ->assertJson(['reload' => true]);
+
+        $this->assertSame('Neu', $hero->fresh()->character_name);
+    }
+
     public function test_a_registrar_can_create_a_hero_with_classes(): void
     {
         $player = Player::factory()->create();

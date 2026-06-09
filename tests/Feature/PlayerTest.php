@@ -52,6 +52,26 @@ class PlayerTest extends TestCase
         $this->assertTrue($user->players()->whereKey($player->id)->wherePivot('self', true)->exists());
     }
 
+    public function test_ajax_edit_returns_modal_partial_and_update_returns_json(): void
+    {
+        $user = User::factory()->create();
+        $player = Player::factory()->create(['name' => 'Alt']);
+        $user->players()->attach($player->id, ['self' => false]);
+
+        $this->actingAs($user)
+            ->get(route('players.edit', $player), ['X-Requested-With' => 'XMLHttpRequest'])
+            ->assertOk()
+            ->assertDontSee('<!DOCTYPE html>', false)
+            ->assertSee('data-modal-title', false);
+
+        $this->actingAs($user)
+            ->putJson(route('players.update', $player), ['name' => 'Neu', 'lastname' => 'Name'])
+            ->assertOk()
+            ->assertJson(['reload' => true]);
+
+        $this->assertSame('Neu', $player->fresh()->name);
+    }
+
     public function test_a_user_cannot_view_a_foreign_player(): void
     {
         $player = Player::factory()->create();

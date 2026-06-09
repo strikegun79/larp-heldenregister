@@ -79,3 +79,14 @@ darstellen (einheitliches Feedback).
 > „Schließen"-Button wird immer ergänzt. Abenteuer-Editieren öffnet jetzt
 > ebenfalls als Modal (`AdventureController@edit` AJAX -> `_edit_modal`,
 > `@update` liefert JSON). Booking/EP nutzen `refresh_modal` (Modal-Teil-Refresh).
+
+### UI-13 · Accessibility-Modale Fenster für Editieren · ⏱ 3h · ✅
+**Beschreibung:** Verwende ui Modale auch beim editieren von Spieler und Helden
+**Akzeptanzkriterien:**
+- [x] Modale Fenster einsetzen für Helden-Edit und Spieler-Edit
+
+> Umgesetzt analog UI-12: `HeroController@edit` / `PlayerController@edit`
+> liefern bei AJAX ein `_edit_modal`-Partial (Titel + Formular), `@update`
+> antwortet mit JSON (`reload`). „Bearbeiten"-Links in Detail-Modal und
+> Listen tragen `data-modal-url` → Bearbeiten öffnet im Modal. Vollseiten
+> bleiben als Fallback. Tests: Hero-/Player-Edit-Modal + AJAX-Update.

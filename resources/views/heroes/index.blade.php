@@ -45,7 +45,7 @@
                                 <td class="px-6 py-4">{{ $hero->active ? 'ja' : 'nein' }}</td>
                                 <td class="px-6 py-4 text-right">
                                     @can('heldenregister.edit')
-                                        <a href="{{ route('heroes.edit', $hero) }}" class="text-sm text-gray-600 dark:text-gray-400 hover:underline">Bearbeiten</a>
+                                        <a href="{{ route('heroes.edit', $hero) }}" data-modal-url="{{ route('heroes.edit', $hero) }}" class="text-sm text-gray-600 dark:text-gray-400 hover:underline">Bearbeiten</a>
                                     @endcan
                                 </td>
                             </tr>

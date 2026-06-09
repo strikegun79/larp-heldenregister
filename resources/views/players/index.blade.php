@@ -36,7 +36,7 @@
                                     @endif
                                     <div class="text-sm text-stone-600">{{ $player->gender ?? '—' }}</div>
                                 </div>
-                                <a href="{{ route('players.edit', $player) }}" class="text-sm text-stone-600 hover:underline">Bearbeiten</a>
+                                <a href="{{ route('players.edit', $player) }}" data-modal-url="{{ route('players.edit', $player) }}" class="text-sm text-stone-600 hover:underline">Bearbeiten</a>
                             </div>
 
                             <div class="mt-3 text-sm text-stone-700">

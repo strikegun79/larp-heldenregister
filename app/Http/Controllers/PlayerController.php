@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Player;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -59,17 +60,23 @@ class PlayerController extends Controller
         return view('players.show', compact('player'));
     }
 
-    public function edit(Player $player): View
+    public function edit(Player $player, Request $request): View
     {
         $this->authorize('update', $player);
 
-        return view('players.edit', [
+        $data = [
             'player' => $player,
             'self' => $player->users()->wherePivot('user_id', auth()->id())->wherePivot('self', true)->exists(),
-        ]);
+        ];
+
+        if ($request->ajax()) {
+            return view('players._edit_modal', $data);
+        }
+
+        return view('players.edit', $data);
     }
 
-    public function update(Request $request, Player $player): RedirectResponse
+    public function update(Request $request, Player $player): RedirectResponse|JsonResponse
     {
         $this->authorize('update', $player);
 
@@ -78,9 +85,11 @@ class PlayerController extends Controller
             'self' => $request->boolean('self'),
         ]);
 
-        return redirect()
-            ->route('players.show', $player)
-            ->with('status', 'Spieler wurde aktualisiert.');
+        $message = 'Spieler wurde aktualisiert.';
+
+        return $request->expectsJson()
+            ? response()->json(['message' => $message, 'reload' => true])
+            : redirect()->route('players.show', $player)->with('status', $message);
     }
 
     public function destroy(Player $player): RedirectResponse
