@@ -85,7 +85,7 @@ Eine Admin-Eventliste mit Verwaltungsaktionen (anlegen/bearbeiten/absagen).
 **Akzeptanzkriterien:**
 - [ ] Event öffnen unter Abenteuer öffnet ein Modal für die Anmeldung an einem Event
 - [ ] Event öffnen unter der Verwaltung-Abenteuer öffnet das Modal zum editieren des Events als solches.
-- [] Event STatus dropdown soll durchnummeriert sein: 0 unbekannt, 10 in Bearbeitung, 20 geplant, 30 Anmeldung offen, 40 Anmeldung geschlossen, 50 Abrechnung, 60 Abgeschlossen, 70 abgesagt
+- [] Event Status dropdown soll durchnummeriert sein: 0 unbekannt, 10 in Bearbeitung, 20 geplant, 30 Anmeldung offen, 40 Anmeldung geschlossen, 50 Abrechnung, 60 Abgeschlossen, 70 abgesagt
 - [] die Spieler Check-In können nur nach Status 40 erfolgen und nur durch die Rollen Admin, Projektleitung und Bürokrat
 
 
@@ -108,3 +108,28 @@ Eine Admin-Eventliste mit Verwaltungsaktionen (anlegen/bearbeiten/absagen).
 > `data-modal-subview` – ohne `appModalUrl` zu überschreiben. Absenden
 > (`refresh_modal`) oder „Zurück" führen zurück aufs Event-Detail mit der neuen
 > Anmeldung. Tests: `EventLayoutTest` (6) + angepasste `BookingPlayerScopeTest`.
+### ADV-16 · Event-Layout mit Tabs · ⏱ 4h · ✅
+**Beschreibung:** ein Event zu öffnen soll übersichtlicher werden
+**Akzeptanzkriterien:**
+- [x] Der Anmelde button soll Links im Footer liegen. Auf der rechten Seite ist der Button Schliessen
+- [x] im Modal Content sollen UI tabs sein. das erste zeigt das Event. das zweite zeigt die Anmeldungen
+- [x] für die Verwaltung -> Abenteuer soll ein Modal für verwaltungszwecke genutzt werden. Also direkt in den Editor Modus mit Tabs im Modal content. Ohne Anmeldung für den Nutzer. im ersten Tab die Allgemeinen Event Daten, im zweiten die aktuellen Anmeldungen und möglichkeiten zu bestätigung, "als bezahlt", bearbeiten, stornieren. im dritten Tag soll der Checkin möglich sein.
+
+> Umgesetzt: Player-Detail (`_detail`) jetzt mit Fomantic-Tabs „Event"/
+> „Anmeldungen" (schreibgeschützte, rollengefilterte Liste). Footer per CSS
+> (`#app-modal-actions` flex): „Anmelden" links, „Schließen" rechts
+> (`margin-left:auto` auf `.deny`). Verwaltungs-Modal `_manage`
+> (`GET adventures/{adventure}/manage`, `can:events.edit`) mit 3 Tabs:
+> Event-Daten (Editor `_form`, keine Selbst-Anmeldung), Anmeldungen mit Aktionen
+> (bestätigen/bezahlt/bearbeiten/stornieren + Beitragssumme), Check-in.
+> Geteilte Partials `_bookings` (Flag `$manage`) und `_checkin`. Neue
+> Admin-Eventliste (`Admin\AdventureController`, Verwaltung → Abenteuer) öffnet
+> das Verwaltungs-Modal je Event. Tests: `EventManageModalTest` (5).
+
+### ADV-17 · Event-Exprot und unterschreiben · ⏱ 4h · 🔲
+**Beschreibung:** per Tablet soll es möglich sein, eine Unterschrift bei teilnahme zu leisten und eine PDF zu exportieren
+**Akzeptanzkriterien:**
+- [] Die Projektleitung, Admin und Bürokrat können das Event öffnen und auf dem 3. Tab für den Teilnehmer eine Unterschrift entgegen nehmen.
+- [] Tauglich mit Tablet und Stift. Ein Feld zum unterzeichnen.
+- [] eine PDF mit allen Teilnehmern die angemeldet sind soll runterladbar sein. Spalten der Liste: laufende Nr., Nachname, Vorname, Ort, Kontaktrufnummer, Unterschrift falls existiert
+- [] im Kopf der der Teilnehmerliste muss stehen, das Eventdatum, der Eventort, der Eventtyp und Anzahl von Männlich und weiblich

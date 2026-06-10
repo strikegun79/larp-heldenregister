@@ -23,7 +23,7 @@ class AdventureController extends Controller
         // Abenteuer ansehen: events.view ODER adventure.book (siehe adventure.access).
         $this->middleware('can:adventure.access')->only(['index', 'show']);
         // Events anlegen/bearbeiten: events.edit (Admin, Bürokrat, Projektleitung).
-        $this->middleware('can:events.edit')->only(['create', 'store', 'edit', 'update', 'destroy']);
+        $this->middleware('can:events.edit')->only(['create', 'store', 'edit', 'update', 'destroy', 'manage']);
     }
 
     /**
@@ -86,6 +86,18 @@ class AdventureController extends Controller
         }
 
         return view('adventures.show', $data);
+    }
+
+    /**
+     * Verwaltungs-Modal mit Tabs (ADV-16): Event-Daten (Editor), Anmeldungen
+     * mit Aktionen und Check-in. Für die Verwaltung → Abenteuer; keine
+     * Selbst-Anmeldung.
+     */
+    public function manage(Adventure $adventure): View
+    {
+        $adventure->load(['bookings.player', 'bookings.role', 'visits', 'status']);
+
+        return view('adventures._manage', $this->formData($adventure));
     }
 
     public function edit(Adventure $adventure): View

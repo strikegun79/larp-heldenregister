@@ -56,6 +56,8 @@ Route::middleware('auth')->group(function () {
     Route::get('skilltree/{heroClass}/edit', [SkilltreeController::class, 'edit'])->name('skilltree.edit');
     Route::patch('skilltree/{heroClass}', [SkilltreeController::class, 'update'])->name('skilltree.update');
     Route::resource('adventures', AdventureController::class);
+    // Verwaltungs-Modal mit Tabs (ADV-16): Editor + Anmeldungen + Check-in.
+    Route::get('adventures/{adventure}/manage', [AdventureController::class, 'manage'])->name('adventures.manage');
 
     // Anmeldungen zu einem Abenteuer.
     // Anmeldeformular als Modal-Unteransicht (ADV-15).
@@ -94,6 +96,9 @@ Route::middleware('auth')->group(function () {
             Route::put('users/{user}', [Admin\UserController::class, 'update'])->name('users.update');
         });
         Route::get('players', [Admin\PlayerController::class, 'index'])->name('players.index');
+
+        // Admin-Eventliste → Verwaltungs-Modal je Event (ADV-16).
+        Route::get('adventures', [Admin\AdventureController::class, 'index'])->name('adventures.index');
 
         // Helden-Klassen-Lookup pflegen (HERO-05).
         Route::get('hero-classes', [Admin\HeroClassController::class, 'index'])->name('hero-classes.index');

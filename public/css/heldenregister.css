@@ -87,3 +87,13 @@
         display: block;
     }
 }
+
+/* Modal-Footer (ADV-16): Primäraktionen links, „Schließen" stets ganz rechts. */
+#app-modal-actions {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+}
+#app-modal-actions .deny {
+    margin-left: auto;
+}
