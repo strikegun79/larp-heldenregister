@@ -88,6 +88,13 @@ Route::middleware('auth')->group(function () {
         });
         Route::get('players', [Admin\PlayerController::class, 'index'])->name('players.index');
 
+        // Helden-Klassen-Lookup pflegen (HERO-05).
+        Route::get('hero-classes', [Admin\HeroClassController::class, 'index'])->name('hero-classes.index');
+        Route::get('hero-classes/create', [Admin\HeroClassController::class, 'create'])->name('hero-classes.create');
+        Route::post('hero-classes', [Admin\HeroClassController::class, 'store'])->name('hero-classes.store');
+        Route::get('hero-classes/{heroClass}/edit', [Admin\HeroClassController::class, 'edit'])->name('hero-classes.edit');
+        Route::put('hero-classes/{heroClass}', [Admin\HeroClassController::class, 'update'])->name('hero-classes.update');
+
         // Matrix-Konto-Provisionierung pro Spieler (corporal User-DB).
         Route::get('players/{player}/matrix', [Admin\MatrixAccountController::class, 'edit'])->name('players.matrix.edit');
         Route::put('players/{player}/matrix', [Admin\MatrixAccountController::class, 'update'])->name('players.matrix.update');

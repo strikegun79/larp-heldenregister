@@ -19,12 +19,22 @@ Stammdaten, Fertigkeiten, EP-Verlauf im Modal.
 
 ## Offen (🔲)
 
-### HERO-05 · Helden-Klassen-Lookup-CRUD (Admin) · ⏱ 3h · 🔲
+### HERO-05 · Helden-Klassen-Lookup-CRUD (Admin) · ⏱ 3h · ✅
 **Beschreibung:** `hero_classes` ist geseedet, aber nicht pflegbar.
 **Akzeptanzkriterien:**
-- [ ] Admin kann Klassen anlegen/umbenennen/deaktivieren (`disabled`).
-- [ ] Deaktivierte Klassen erscheinen nicht mehr in Helden-Auswahl.
-- [ ] Tests.
+- [x] Admin kann Klassen anlegen/umbenennen/deaktivieren (`disabled`).
+- [x] Deaktivierte Klassen erscheinen nicht mehr in Helden-Auswahl.
+- [x] Tests.
+
+> Umgesetzt: `Admin\HeroClassController` (index/create/store/edit/update) im
+> Admin-Bereich unter `can:portal.manage` (= nur Admin). Modal-Formular
+> `admin/hero_classes/_form.blade.php` (Name, Slug, Deaktiviert); Listenseite
+> mit Heldenzähler + „Neue Klasse"; Karte „Helden-Klassen" in der Verwaltung.
+> IDs fortlaufend (`max(id)+1`, da `hero_classes.id` legacy-bedingt nicht
+> auto-inkrementiert). Slug eindeutig (Self-Ignore beim Update). Deaktivierte
+> Klassen sind in `HeroController@create/@edit` bereits durch
+> `where('disabled', false)` aus der Auswahl ausgeschlossen.
+> Tests: `HeroClassAdminTest` (6).
 
 ### HERO-06 · Klassenwechsel mit EP-Kosten verbuchen · ⏱ 4h · 🔲
 **Beschreibung:** Legacy `type_transEP` 40 = „Klasse hinzugefügt" (EP-Kosten).
