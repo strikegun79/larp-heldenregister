@@ -62,14 +62,22 @@ Erreichbarkeit) nachträglich ändern.
 > bezahlt X/Y, eingegangen €, offen € (über reguläre, nicht-Warteliste-Anmeldungen).
 > Tests: `BookingPaymentTest` (4).
 
-### BOOK-07 · Warteliste nachrücken · ⏱ 4h · 🔲
+### BOOK-07 · Warteliste nachrücken · ⏱ 4h · ✅
 **Beschreibung:** Bei Storno eines regulären Platzes rückt die erste Wartelisten-
 Buchung automatisch nach.
 **Akzeptanzkriterien:**
-- [ ] Beim Storno wird der älteste Wartelisten-Eintrag regulär gesetzt.
-- [ ] Trigger Benachrichtigung (NOTI-03).
-- [ ] Tests (Reihenfolge, kein Nachrücken wenn niemand wartet).
+- [x] Beim Storno wird der älteste Wartelisten-Eintrag regulär gesetzt.
+- [ ] Trigger Benachrichtigung (NOTI-03). → offen in NOTI-03 (Hook gesetzt).
+- [x] Tests (Reihenfolge, kein Nachrücken wenn niemand wartet).
 **Abhängig von:** BOOK-03.
+
+> Umgesetzt in `BookingController@destroy`: War die stornierte Anmeldung
+> regulär, wird die älteste Wartelisten-Buchung (`waitlisted=true`,
+> `orderBy created_at, id`) auf `waitlisted=false` gesetzt. Kein Nachrücken,
+> wenn die stornierte selbst auf der Warteliste war oder niemand wartet.
+> Erfolgsmeldung nennt den nachgerückten Spieler. NOTI-03 als Kommentar-Hook
+> vorbereitet. Tests: `BookingWaitlistPromotionTest` (Reihenfolge,
+> Warteliste-Storno ohne Nachrücken, niemand wartend).
 
 ### BOOK-08 · Teilnahme erfassen (`event_visits`) · ⏱ 4h · ✅
 **Beschreibung:** Tabelle/Model vorhanden, aber keine UI. Erfassen, wer wirklich

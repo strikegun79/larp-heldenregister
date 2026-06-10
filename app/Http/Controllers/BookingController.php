@@ -174,9 +174,29 @@ class BookingController extends Controller
     {
         abort_unless($booking->adventure_id === $adventure->id, 404);
 
+        // Wird ein regulärer Platz frei, rückt die älteste Wartelisten-Buchung nach (BOOK-07).
+        $wasRegular = ! $booking->waitlisted;
         $booking->delete();
 
+        $promoted = null;
+        if ($wasRegular) {
+            $promoted = $adventure->bookings()
+                ->where('waitlisted', true)
+                ->orderBy('created_at')
+                ->orderBy('id')
+                ->first();
+
+            if ($promoted) {
+                $promoted->update(['waitlisted' => false]);
+                // NOTI-03: Benachrichtigung an den nachgerückten Spieler.
+            }
+        }
+
         $message = 'Anmeldung wurde storniert.';
+        if ($promoted) {
+            $name = $promoted->player?->full_name ?? 'Ein Wartelistenplatz';
+            $message .= " {$name} ist von der Warteliste nachgerückt.";
+        }
 
         return $request->expectsJson()
             ? response()->json(['message' => $message, 'refresh_modal' => true])
