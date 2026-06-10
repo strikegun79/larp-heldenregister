@@ -62,6 +62,9 @@ Route::middleware('auth')->group(function () {
     // Teilnahme/Check-in erfassen (BOOK-08).
     Route::put('adventures/{adventure}/attendance', [AttendanceController::class, 'update'])
         ->name('adventures.attendance');
+    // EP für anwesende Teilnehmer verbuchen (BOOK-09).
+    Route::post('adventures/{adventure}/award-ep', [AttendanceController::class, 'awardEp'])
+        ->name('adventures.award-ep');
 
     // Verwaltung (Portal-Administration, Berechtigung portal.manage).
     Route::prefix('admin')->name('admin.')->middleware('can:portal.manage')->group(function () {

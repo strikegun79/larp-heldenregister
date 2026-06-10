@@ -62,14 +62,22 @@ da war (Grundlage für EP-Vergabe).
 > Anmeldung) im Abenteuer-Detail-Modal, AJAX + Modal-Refresh. Tests:
 > `AttendanceTest` (4). Grundlage für BOOK-09 (EP-Vergabe).
 
-### BOOK-09 · Automatische EP-Vergabe nach Teilnahme · ⏱ 4h · 🔲
+### BOOK-09 · Automatische EP-Vergabe nach Teilnahme · ⏱ 4h · ✅
 **Beschreibung:** Nach erfasster Teilnahme bekommt der aktive Held des Spielers
 EP (`loot_ep_day` × Tage, Typ 50 „Abenteuer bestritten").
 **Akzeptanzkriterien:**
-- [ ] Aktion „EP verbuchen" je Event erzeugt EP-Transaktionen für alle Anwesenden.
-- [ ] Idempotent (keine Doppelvergabe); nutzt aktiven Helden.
-- [ ] Tests (Vergabe, keine Doppelvergabe, kein aktiver Held → Hinweis).
+- [x] Aktion „EP verbuchen" je Event erzeugt EP-Transaktionen für alle Anwesenden.
+- [x] Idempotent (keine Doppelvergabe); nutzt aktiven Helden.
+- [x] Tests (Vergabe, keine Doppelvergabe, kein aktiver Held → Hinweis).
 **Abhängig von:** BOOK-08, EP-01, HERO-07.
+
+> Umgesetzt: `AttendanceController@awardEp` (`POST adventures/{adventure}/award-ep`,
+> `manage-attendance`). EP = `loot_ep_day` × Eventtage (Start–Ende inkl.),
+> Typ 50 mit `adventure_id`, an den aktiven Helden jedes anwesenden Spielers.
+> Idempotent (je Held & Abenteuer einmal); Anwesende ohne aktiven Helden werden
+> übersprungen (Hinweis in der Meldung). Button „EP für Teilnehmer verbuchen"
+> im Check-in-Block. Damit füllt sich HERO-11 (Abenteuerhistorie) live.
+> Tests: `AttendanceTest` (Vergabe+Betrag, Idempotenz, ohne aktiven Held, Recht).
 
 ### BOOK-10 · Buchungsformular: Spielerliste auf Berechtigte begrenzen · ⏱ 2h · 🔲
 **Beschreibung:** Aktuell sind im Buchungs-Modal alle Spieler wählbar; sinnvoll
