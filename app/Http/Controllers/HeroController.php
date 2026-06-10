@@ -25,7 +25,7 @@ class HeroController extends Controller
      */
     public function index(): View
     {
-        $heroes = Hero::with(['player', 'classes'])
+        $heroes = Hero::with(['player', 'classes', 'epTransactions.type'])
             ->orderBy('character_name')
             ->paginate(20);
 

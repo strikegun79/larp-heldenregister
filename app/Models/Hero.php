@@ -71,6 +71,16 @@ class Hero extends Model
     }
 
     /**
+     * Insgesamt erworbene EP (nur Gutschriften, ohne Abzüge).
+     */
+    public function getEpTotalAttribute(): float
+    {
+        return $this->epTransactions
+            ->filter(fn (EpTransaction $tx) => $tx->type?->is_credit)
+            ->sum(fn (EpTransaction $tx) => (float) $tx->ep_count);
+    }
+
+    /**
      * Komma-separierte Klassen-Slugs (ersetzt GROUP_CONCAT aus view_heroT1).
      */
     public function getClassListAttribute(): string

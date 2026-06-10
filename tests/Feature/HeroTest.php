@@ -54,6 +54,23 @@ class HeroTest extends TestCase
         ])->assertForbidden();
     }
 
+    public function test_overview_shows_player_ep_columns_and_no_edit_button(): void
+    {
+        $player = Player::factory()->create(['name' => 'Max', 'lastname' => 'Muster']);
+        $hero = Hero::factory()->create(['player_id' => $player->id, 'character_name' => 'Tilix']);
+        $hero->epTransactions()->create(['ep_transaction_type_id' => 10, 'ep_count' => 20]); // +20
+        $hero->epTransactions()->create(['ep_transaction_type_id' => 20, 'ep_count' => 5]);  // -5
+
+        $this->actingAs($this->userWithRole(20))
+            ->get(route('heroes.index'))
+            ->assertOk()
+            ->assertSeeInOrder(['Spieler', 'Charakter', 'EP gesamt', 'EP verfügbar', 'Klassen', 'Aktiv'])
+            ->assertSee('Max Muster')
+            ->assertSee('Tilix')
+            ->assertSee('data-modal-url', false) // Zeile öffnet das Detail-Modal
+            ->assertDontSee('Bearbeiten');        // kein Bearbeiten-Knopf in der Liste
+    }
+
     public function test_ajax_show_returns_only_the_modal_partial(): void
     {
         $hero = Hero::factory()->create(['character_name' => 'Tilix']);

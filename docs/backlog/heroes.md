@@ -105,8 +105,14 @@ Das Hinzufügen einer Klasse soll EP kosten und gebucht werden.
 > `heldenregister.edit`): legt Pivot an und bucht EP (Typ 20) ab, atomar; prüft
 > Doppel-Lernen & EP-Deckung. AJAX + Toast + Modal-Refresh. Tests: `HeroSkillTest` (4).
 
-### HERO-14 · Helden-Übersicht · ⏱ 3h · 🔲
-**Beschreibung:** Anpassen der Heldenübersicht
+### HERO-15 · Helden-Übersicht · ⏱ 3h · ✅
+**Beschreibung:** Anpassen der Heldenübersicht (vormals doppelt als HERO-14 geführt).
 **Akzeptanzkriterien:**
-- [ ] Der Spielername soll in der ersten Spalte stehen, dann der Charaktername, die EP gesamt und verfügbaren, dann die Klassen und dann Aktivstatus
-- [ ] Per Klick auf die Zeile soll das Modalfenster öffnen und die Heldendetails zeigen. kein Bearbeiten knopf.
+- [x] Der Spielername soll in der ersten Spalte stehen, dann der Charaktername, die EP gesamt und verfügbaren, dann die Klassen und dann Aktivstatus
+- [x] Per Klick auf die Zeile soll das Modalfenster öffnen und die Heldendetails zeigen. kein Bearbeiten knopf.
+
+> Umgesetzt: Spalten neu geordnet (Spieler · Charakter · EP gesamt · EP
+> verfügbar · Klassen · Aktiv). `Hero::ep_total` (Summe Gutschriften) neben
+> `ep_balance`. Ganze Zeile ist klickbar (`data-modal-url` am `<tr>`) und öffnet
+> das Detail-Modal; der Bearbeiten-Link in der Liste wurde entfernt
+> (Bearbeiten weiterhin im Detail-Modal). Test: HeroTest-Overview.
