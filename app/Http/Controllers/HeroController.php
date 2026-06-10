@@ -40,7 +40,9 @@ class HeroController extends Controller
                 $w->where('character_name', 'like', "%{$q}%")
                     ->orWhereHas('player', fn ($p) => $p
                         ->where('name', 'like', "%{$q}%")
-                        ->orWhere('lastname', 'like', "%{$q}%"));
+                        ->orWhere('lastname', 'like', "%{$q}%"))
+                    // auch erlernte Fertigkeiten durchsuchen (Helden, die den Skill besitzen)
+                    ->orWhereHas('skills', fn ($s) => $s->where('name', 'like', "%{$q}%"));
             }))
             ->orderBy('character_name')
             ->paginate(20)

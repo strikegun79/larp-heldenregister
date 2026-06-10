@@ -78,11 +78,13 @@ Das Hinzufügen einer Klasse soll EP kosten und gebucht werden.
 - [x] Filter Klasse, Aktiv-Status, Spieler.
 - [x] Server-seitig, paginierungsfest.
 - [x] Es soll nach Namen des Spielers oder Charakters gesucht werden können
+- [x] Suche findet auch Helden über erlernte Fertigkeiten (wer den Skill besitzt)
 
 > Umgesetzt: Filterleiste über der Liste (GET): Suche (`q`, Charakter- ODER
-> Spielername via `whereHas`), Klasse (`class_id`, `whereHas`), Spieler
-> (`player_id`), Status (`active`/`inactive`/`missing`). Alles serverseitig
-> kombinierbar, `paginate()->withQueryString()`. Tests: HeroTest (Suche,
+> Spielername ODER erlernte Fertigkeit via `whereHas('skills')`), Klasse
+> (`class_id`, `whereHas`), Spieler (`player_id`), Status
+> (`active`/`inactive`/`missing`). Alles serverseitig kombinierbar,
+> `paginate()->withQueryString()`. Tests: HeroTest (Suche inkl. Fertigkeit,
 > Klasse, Spieler, Status).
 
 ### HERO-11 · Abenteuerhistorie je Held (Vision) · ⏱ 3h · 🔲

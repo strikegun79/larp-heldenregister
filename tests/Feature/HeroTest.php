@@ -237,6 +237,20 @@ class HeroTest extends TestCase
             ->assertOk()->assertSee('Tilix')->assertDontSee('Aldebrand');
     }
 
+    public function test_index_search_finds_heroes_by_learned_skill(): void
+    {
+        $skill = Skill::create(['name' => 'Erste Hilfe', 'ep_costs' => 1, 'perl_count' => 0]);
+        $withSkill = Hero::factory()->create(['character_name' => 'Heilerheld']);
+        $withSkill->skills()->attach($skill->id, ['trained_at' => now()]);
+        Hero::factory()->create(['character_name' => 'Krieger ohne Skill']);
+
+        $this->actingAs($this->userWithRole(20))
+            ->get(route('heroes.index', ['q' => 'Erste Hilfe']))
+            ->assertOk()
+            ->assertSee('Heilerheld')
+            ->assertDontSee('Krieger ohne Skill');
+    }
+
     public function test_index_filter_by_class(): void
     {
         $warrior = Hero::factory()->create(['character_name' => 'Kriegerheld']);

@@ -24,8 +24,8 @@
             <form method="GET" action="{{ route('heroes.index') }}"
                   class="mb-4 bg-white/60 border-2 border-[#5a3a22]/30 rounded-lg p-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-5 items-end">
                 <div class="lg:col-span-2">
-                    <label class="text-sm text-stone-600">Suche (Spieler- oder Charaktername)</label>
-                    <input type="text" name="q" value="{{ $q }}" placeholder="z. B. Tilix oder Müller" class="{{ $selectClass }}">
+                    <label class="text-sm text-stone-600">Suche (Spieler-, Charakter- oder Fertigkeitsname)</label>
+                    <input type="text" name="q" value="{{ $q }}" placeholder="z. B. Tilix, Müller oder Erste Hilfe" class="{{ $selectClass }}">
                 </div>
                 <div>
                     <label class="text-sm text-stone-600">Klasse</label>
