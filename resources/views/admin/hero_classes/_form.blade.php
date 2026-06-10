@@ -20,7 +20,7 @@
 
     <div class="field">
         <label>EP-Kosten (beim Hinzufügen zu einem Helden)</label>
-        <input type="number" name="ep_cost" min="0" value="{{ old('ep_cost', $class->ep_cost ?? 50) }}" required>
+        <input type="number" name="ep_cost" min="0" value="{{ old('ep_cost', $class->ep_cost ?? 5) }}" required>
         <x-input-error :messages="$errors->get('ep_cost')" class="mt-2" />
     </div>
 

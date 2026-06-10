@@ -231,3 +231,18 @@ für das Detail-Layout vergeben).
 > und Inhalt-`min-height` 840px → kein Springen beim Tab-Wechsel. Der Button
 > „Positionen bearbeiten" steht jetzt unterhalb des Baums/der Liste je
 > Klassen-Tab. Test: HeroTest-Reihenfolge.
+
+### HERO-20 Helden-Klasse hinzufügen · ✅
+**Beschreibung:** Die EP für eine neue Klasse dem Held hinzuzufügen
+- [x] Die EP für eine neue Klasse dem Held hinzuzufügen kostet 5 EP
+- [x] Es soll abgefragt werden, ob die EP wirklich abgezogen werden soll, da wenn es ein Fehler war soll man auch für 0 EP wieder hinzufügen.
+
+> Umgesetzt: Standard-Klassenkosten auf **5 EP** gesenkt (Migration: Default 5 +
+> bestehende 50→5; Admin-Formular-Default 5). Im Helden-Detail zwei Buttons:
+> „Hinzufügen" (mit `confirm`-Abfrage „EP-Kosten wirklich abziehen?") und
+> „Korrektur (0 EP)" – Letzteres fügt über `free=1` ohne EP-Abzug/Saldo-Prüfung
+> hinzu (`HeroClassController@store`, keine Typ-40-Buchung). Modal-Submit
+> respektiert jetzt `defaultPrevented`, sodass abgebrochene `confirm`-Dialoge
+> kein AJAX auslösen (gilt auch für bestehende Storno-/EP-Bestätigungen).
+> Tests: `HeroClassAssignmentTest` (Standardkosten 5, Korrektur ohne Abzug,
+> Korrektur trotz fehlender EP).

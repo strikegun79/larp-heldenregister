@@ -58,9 +58,12 @@
 
         @can('heldenregister.edit')
             @if ($availableClasses->isNotEmpty())
-                <form method="POST" action="{{ route('heroes.classes.store', $hero) }}" data-refresh-modal class="ui form mt-3">
+                {{-- HERO-20: Hinzufügen kostet EP (Abfrage vor Abzug); Korrektur fügt 0 EP hinzu. --}}
+                <form method="POST" action="{{ route('heroes.classes.store', $hero) }}" data-refresh-modal class="ui form mt-3"
+                      onsubmit="return document.getElementById('class-free-{{ $hero->id }}').value === '1' || confirm('Sollen die EP-Kosten wirklich abgezogen werden?');">
                     @csrf
-                    <div class="flex items-end gap-2">
+                    <input type="hidden" name="free" id="class-free-{{ $hero->id }}" value="0">
+                    <div class="flex items-end gap-2 flex-wrap">
                         <div class="field !mb-0">
                             <label>Klasse hinzufügen (kostet EP)</label>
                             <select name="hero_class_id" required>
@@ -69,7 +72,11 @@
                                 @endforeach
                             </select>
                         </div>
-                        <button type="submit" class="ui button">Hinzufügen</button>
+                        <button type="submit" class="ui primary button"
+                                onclick="document.getElementById('class-free-{{ $hero->id }}').value='0'">Hinzufügen</button>
+                        <button type="submit" class="ui basic button"
+                                onclick="document.getElementById('class-free-{{ $hero->id }}').value='1'"
+                                title="Versehentlich entfernt? Ohne EP-Abzug wieder hinzufügen">Korrektur (0 EP)</button>
                     </div>
                 </form>
             @endif

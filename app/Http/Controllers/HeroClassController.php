@@ -36,6 +36,7 @@ class HeroClassController extends Controller
     {
         $data = $request->validate([
             'hero_class_id' => ['required', 'exists:hero_classes,id'],
+            'free' => ['boolean'],
         ]);
 
         $class = HeroClass::findOrFail($data['hero_class_id']);
@@ -48,21 +49,29 @@ class HeroClassController extends Controller
             return $this->fail($request, 'Diese Klasse besitzt der Held bereits.');
         }
 
+        // HERO-20: „Korrektur" fügt ohne EP-Abzug hinzu (z. B. versehentlich entfernt).
+        $free = $request->boolean('free');
+        $cost = $free ? 0 : $class->ep_cost;
+
         // Saldo-Schutz; Admin darf den Helden ins Minus setzen (Override).
-        if (! $request->user()->isAdmin() && $hero->ep_balance < $class->ep_cost) {
+        if ($cost > 0 && ! $request->user()->isAdmin() && $hero->ep_balance < $cost) {
             return $this->fail($request, 'Nicht genug EP für diese Klasse.');
         }
 
-        DB::transaction(function () use ($hero, $class) {
+        DB::transaction(function () use ($hero, $class, $cost) {
             $hero->classes()->attach($class->id);
-            $hero->epTransactions()->create([
-                'ep_transaction_type_id' => self::CLASS_COST_TYPE,
-                'ep_count' => $class->ep_cost,
-                'transacted_at' => now(),
-            ]);
+            if ($cost > 0) {
+                $hero->epTransactions()->create([
+                    'ep_transaction_type_id' => self::CLASS_COST_TYPE,
+                    'ep_count' => $cost,
+                    'transacted_at' => now(),
+                ]);
+            }
         });
 
-        $message = "Klasse „{$class->name}“ hinzugefügt (−{$class->ep_cost} EP).";
+        $message = $free
+            ? "Klasse „{$class->name}“ kostenfrei hinzugefügt (Korrektur)."
+            : "Klasse „{$class->name}“ hinzugefügt (−{$cost} EP).";
 
         return $request->expectsJson()
             ? response()->json(['message' => $message, 'refresh_modal' => true])

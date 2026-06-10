@@ -146,4 +146,49 @@ class HeroClassAssignmentTest extends TestCase
             ->postJson(route('heroes.classes.store', $hero), ['hero_class_id' => $class->id])
             ->assertForbidden();
     }
+
+    public function test_default_class_cost_is_five_ep(): void
+    {
+        // HERO-20: Standard-Kosten beim Anlegen einer Klasse sind 5 EP.
+        $class = HeroClass::create(['id' => 1, 'slug' => 'warrior', 'name' => 'Krieger']);
+
+        $this->assertSame(5, $class->fresh()->ep_cost);
+
+        $hero = $this->heroWithEp(50);
+        $this->actingAs($this->userWithRole(20))
+            ->postJson(route('heroes.classes.store', $hero), ['hero_class_id' => $class->id])
+            ->assertOk();
+
+        $this->assertEquals(45, $hero->fresh()->ep_balance); // 50 − 5
+    }
+
+    public function test_free_correction_adds_class_without_charging(): void
+    {
+        // HERO-20: Korrektur (free) fügt ohne EP-Abzug hinzu.
+        $class = HeroClass::create(['id' => 1, 'slug' => 'warrior', 'name' => 'Krieger', 'ep_cost' => 5]);
+        $hero = $this->heroWithEp(50);
+
+        $this->actingAs($this->userWithRole(20))
+            ->postJson(route('heroes.classes.store', $hero), ['hero_class_id' => $class->id, 'free' => 1])
+            ->assertOk();
+
+        $this->assertTrue($hero->classes()->whereKey($class->id)->exists());
+        $this->assertEquals(50, $hero->fresh()->ep_balance); // unverändert
+        $this->assertDatabaseMissing('ep_transactions', [
+            'hero_id' => $hero->id,
+            'ep_transaction_type_id' => 40,
+        ]);
+    }
+
+    public function test_free_correction_works_even_without_enough_ep(): void
+    {
+        $class = HeroClass::create(['id' => 1, 'slug' => 'warrior', 'name' => 'Krieger', 'ep_cost' => 5]);
+        $hero = $this->heroWithEp(0); // kein Guthaben
+
+        $this->actingAs($this->userWithRole(20)) // Bürokrat (kein Admin)
+            ->postJson(route('heroes.classes.store', $hero), ['hero_class_id' => $class->id, 'free' => 1])
+            ->assertOk();
+
+        $this->assertTrue($hero->classes()->whereKey($class->id)->exists());
+    }
 }
