@@ -8,6 +8,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Unterschrift einer Anmeldung bei Teilnahme (ADV-17). Erfassung per
@@ -45,9 +46,15 @@ class SignatureController extends Controller
             'signature' => ['required', 'string', 'starts_with:data:image/png;base64,', 'max:2000000'],
         ]);
 
-        $booking->update(['signature' => $data['signature']]);
+        // Unterschrift = Check-in-Bestätigung (ADV-19): zugleich anwesend setzen.
+        DB::transaction(function () use ($adventure, $booking, $data) {
+            $booking->update(['signature' => $data['signature']]);
+            if (! $adventure->visits()->where('player_id', $booking->player_id)->exists()) {
+                $adventure->visits()->create(['player_id' => $booking->player_id]);
+            }
+        });
 
-        $message = 'Unterschrift gespeichert.';
+        $message = 'Unterschrift gespeichert, Check-in bestätigt.';
 
         return $request->expectsJson()
             ? response()->json(['message' => $message, 'refresh_modal' => true])

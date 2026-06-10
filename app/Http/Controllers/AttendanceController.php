@@ -20,7 +20,10 @@ class AttendanceController extends Controller
     public function __construct()
     {
         $this->middleware('auth');
-        $this->middleware('can:manage-attendance');
+        // Bulk-Check-in + EP-Vergabe: Spielleiter/Teamer (BOOK-08/09).
+        $this->middleware('can:manage-attendance')->only(['update', 'awardEp']);
+        // Einzel-Check-in/Abmelden (ADV-18/19): zusätzlich Projektleitung/Bürokrat.
+        $this->middleware('can:manage-checkin')->only(['toggle', 'deregister']);
     }
 
     public function update(Request $request, Adventure $adventure): RedirectResponse|JsonResponse

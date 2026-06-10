@@ -165,3 +165,23 @@ Eine Admin-Eventliste mit Verwaltungsaktionen (anlegen/bearbeiten/absagen).
 > Grund-Auswahl (`@deregister` → Status abgemeldet + Grund, entfernt Check-in).
 > Tests: `BookingStatusTest` (7).
 
+### ADV-19 · Event-Check-in · ⏱ 4h · ✅
+**Beschreibung:** Anpassung des Checkins
+**Akzeptanzkriterien:**
+- [x] in der Teilnehmerliste soll neben der spalte Status, die Unterschrift sein.
+- [x] das Feld Abmeldungsgrund, soll im Multimodal fenster abgefragt werden, wenn man auf abmelden klickt.
+- [x] beim klick auf den Button Check-In, soll das multimodal Fenster für die Unterschrift kommen und dort wird der Check-in bestätigt.
+- [x] dadurch wird die zweite Liste für die Unteschrift unnötig
+- [x] das Modal soll stehtig auf 950px x 950px sein, damit das Fenster nicht springt beim Tab wechseln
+- [x] die Teilnehmerliste als PDF soll als Popup window erscheinen im Browser, damit mal die liste gleich sieht und nicht erst speichern muss.
+
+> Umgesetzt: Check-in-Tab ist eine einzige Teilnehmertabelle (Gate `manage-checkin`
+> = Spielleiter/Teamer/Projektleitung/Bürokrat + Admin) mit Spalten Teilnehmer,
+> Status, **Unterschrift** (Vorschaubild) und Aktionen. „Check-in" öffnet ein
+> Multimodal mit Unterschriften-Pad (`#signature-modal`, `allowMultiple`);
+> Speichern bucht Unterschrift **und** Check-in in einem (`SignatureController@update`
+> legt zugleich den `event_visit` an). „Abmelden" öffnet ein Multimodal mit
+> Grund-Auswahl (`#deregister-modal`) → `deregister`. Die separate
+> Unterschriften-Liste (ADV-17) ist entfallen. Modal fest `modal-event`
+> (950px, Content min-height 820px). Teilnehmer-PDF wird inline gestreamt
+> (`Pdf::stream`, Link `target=_blank`) statt Download. Tests: `EventCheckinTest` (4).

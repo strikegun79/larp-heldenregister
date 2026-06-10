@@ -58,6 +58,11 @@ class AuthServiceProvider extends ServiceProvider
         // Bürokrat (+ Admin via before).
         Gate::define('take-signatures', fn (User $user) => $user->hasAnyRole('project_lead', 'registrar'));
 
+        // Check-in/Abmelden je Teilnehmer (ADV-18/19): Spielleiter, Teamer,
+        // Projektleitung, Bürokrat (+ Admin) – Vereinigung aus Teilnahme- und
+        // Unterschriften-Berechtigten.
+        Gate::define('manage-checkin', fn (User $user) => $user->hasAnyRole('game_master', 'teamer', 'project_lead', 'registrar'));
+
         // Admins dürfen grundsätzlich alles.
         Gate::before(fn (User $user) => $user->isAdmin() ? true : null);
     }

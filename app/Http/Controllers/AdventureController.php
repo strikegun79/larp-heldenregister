@@ -121,7 +121,8 @@ class AdventureController extends Controller
 
         $pdf = Pdf::loadView('adventures.participants_pdf', compact('adventure', 'bookings', 'male', 'female'));
 
-        return $pdf->download('teilnehmerliste-'.$adventure->id.'.pdf');
+        // Inline (ADV-19): öffnet im Browser-Tab/Popup statt Download.
+        return $pdf->stream('teilnehmerliste-'.$adventure->id.'.pdf');
     }
 
     public function edit(Adventure $adventure): View

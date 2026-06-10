@@ -62,6 +62,16 @@
     min-height: 840px;
 }
 
+/* Verwaltungs-Modal (ADV-19): fest 950×950, springt nicht beim Tab-Wechsel. */
+#app-modal.modal-event {
+    width: 950px;
+    max-width: 95vw;
+}
+
+#app-modal.modal-event > .scrolling.content {
+    min-height: 820px;
+}
+
 /* Positions-Editor (HERO-17): nummerierte, ziehbare Marker */
 .editor-marker {
     font-size: 12px;

@@ -84,6 +84,45 @@
             </div>
         </div>
 
+        <!-- Unterschrift + Check-in als Multimodal (ADV-19) -->
+        <div class="ui modal" id="signature-modal">
+            <div class="header">Unterschrift &amp; Check-in</div>
+            <div class="content">
+                <p id="signature-modal-name" class="font-semibold"></p>
+                <p class="text-sm text-stone-500">Mit Tablet &amp; Stift im Feld unterschreiben.</p>
+                <canvas id="signature-pad" width="600" height="240"
+                        style="border:2px solid #5a3a22; border-radius:.4rem; touch-action:none; background:#fff; max-width:100%; width:600px; height:240px;"></canvas>
+            </div>
+            <div class="actions">
+                <div class="ui deny button">Abbrechen</div>
+                <button type="button" class="ui button" onclick="clearSignaturePad()">Löschen</button>
+                <button type="button" class="ui primary button" id="signature-modal-save">Check-in bestätigen</button>
+            </div>
+        </div>
+
+        <!-- Abmeldung mit Grund als Multimodal (ADV-19) -->
+        <div class="ui small modal" id="deregister-modal">
+            <div class="header">Teilnehmer abmelden</div>
+            <div class="content">
+                <p id="deregister-modal-name" class="font-semibold"></p>
+                <div class="ui form">
+                    <div class="field">
+                        <label>Grund der Abmeldung</label>
+                        <select id="deregister-reason">
+                            <option value="">— wählen —</option>
+                            @foreach (\App\Models\Booking::ABSENCE_REASONS as $key => $label)
+                                <option value="{{ $key }}">{{ $label }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                </div>
+            </div>
+            <div class="actions">
+                <div class="ui deny button">Abbrechen</div>
+                <button type="button" class="ui primary button" id="deregister-modal-save">Abmelden</button>
+            </div>
+        </div>
+
         <!-- jQuery + Fomantic JS -->
         <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/fomantic-ui@2.9.3/dist/semantic.min.js"></script>
@@ -121,8 +160,10 @@
                         }
                         // HERO-19: Helden-Detail bekommt eine feste Modal-Größe.
                         $('#app-modal').toggleClass('modal-hero', $content.find('#skilltree').length > 0);
+                        // ADV-19: Verwaltungs-Modal (3 Tabs) auf feste Größe.
+                        $('#app-modal').toggleClass('modal-event', $content.find('[data-tab="checkin"]').length > 0);
                         // ADV-17: Unterschriften-Pad aktivieren, falls vorhanden.
-                        if ($content.find('#signature-pad').length) initSignaturePad();
+                        if ($content.find('#signature-pad').length) initSignaturePad('signature-pad');
                         $('#app-modal').modal('refresh');
                     })
                     .catch(() => $content.html('<div class="ui error message">Konnte nicht geladen werden.</div>'));
@@ -147,15 +188,19 @@
                 loadModalContent(trigger.getAttribute('data-modal-subview'));
             });
 
-            // ADV-17: einfaches Unterschriften-Pad (Tablet/Stift/Maus via Pointer Events).
-            function initSignaturePad() {
-                const c = document.getElementById('signature-pad');
+            // ADV-17/19: einfaches Unterschriften-Pad (Tablet/Stift/Maus via Pointer Events).
+            // Mehrfach-Init ist idempotent (Listener nur einmal registrieren).
+            function initSignaturePad(id) {
+                const c = document.getElementById(id || 'signature-pad');
                 if (!c) return;
                 const ctx = c.getContext('2d');
                 ctx.lineWidth = 2.5;
                 ctx.lineCap = 'round';
                 ctx.lineJoin = 'round';
                 ctx.strokeStyle = '#1a1a1a';
+                c.__clear = () => ctx.clearRect(0, 0, c.width, c.height);
+                if (c.__init) return;
+                c.__init = true;
                 let drawing = false, last = null;
                 const pos = (e) => {
                     const r = c.getBoundingClientRect();
@@ -170,12 +215,69 @@
                 });
                 c.addEventListener('pointerup', () => { drawing = false; });
                 c.addEventListener('pointerleave', () => { drawing = false; });
-                c.__clear = () => ctx.clearRect(0, 0, c.width, c.height);
             }
-            function clearSignaturePad() {
-                const c = document.getElementById('signature-pad');
+            function clearSignaturePad(id) {
+                const c = document.getElementById(id || 'signature-pad');
                 if (c && c.__clear) c.__clear();
             }
+
+            // ADV-19: Check-in (Unterschrift) und Abmelden (Grund) als Multimodale.
+            // Gemeinsamer Sender: schickt FormData und lädt das Verwaltungs-Modal neu.
+            function sendModalAction(url, method, fields, $modal, btn) {
+                btn.classList.add('loading', 'disabled');
+                const fd = new FormData();
+                fd.append('_token', document.querySelector('meta[name=csrf-token]').content);
+                fd.append('_method', method);
+                Object.entries(fields).forEach(([k, v]) => fd.append(k, v));
+                fetch(url, { method: 'POST', headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' }, body: fd })
+                    .then(async (r) => {
+                        const d = await r.json().catch(() => ({}));
+                        if (r.ok) {
+                            showToast(d.message || 'Gespeichert.', 'success');
+                            $modal.modal('hide');
+                            if (appModalUrl) loadModalContent(appModalUrl, true);
+                        } else {
+                            const errs = d.errors ? Object.values(d.errors).flat().join('<br>') : '';
+                            showToast(errs || d.message || 'Aktion fehlgeschlagen.', 'error');
+                        }
+                    })
+                    .catch(() => showToast('Netzwerkfehler.', 'error'))
+                    .finally(() => btn.classList.remove('loading', 'disabled'));
+            }
+
+            let checkinUrl = null;
+            document.addEventListener('click', function (e) {
+                const t = e.target.closest('.checkin-trigger');
+                if (!t) return;
+                e.preventDefault();
+                checkinUrl = t.getAttribute('data-url');
+                document.getElementById('signature-modal-name').textContent = t.getAttribute('data-name') || '';
+                $('#signature-modal').modal({
+                    allowMultiple: true, autofocus: false,
+                    onVisible: () => { initSignaturePad('signature-pad'); clearSignaturePad('signature-pad'); },
+                }).modal('show');
+            });
+            document.getElementById('signature-modal-save').addEventListener('click', function () {
+                if (!checkinUrl) return;
+                const data = document.getElementById('signature-pad').toDataURL('image/png');
+                sendModalAction(checkinUrl, 'PUT', { signature: data }, $('#signature-modal'), this);
+            });
+
+            let deregisterUrl = null;
+            document.addEventListener('click', function (e) {
+                const t = e.target.closest('.deregister-trigger');
+                if (!t) return;
+                e.preventDefault();
+                deregisterUrl = t.getAttribute('data-url');
+                document.getElementById('deregister-modal-name').textContent = t.getAttribute('data-name') || '';
+                document.getElementById('deregister-reason').value = '';
+                $('#deregister-modal').modal({ allowMultiple: true, autofocus: false }).modal('show');
+            });
+            document.getElementById('deregister-modal-save').addEventListener('click', function () {
+                const reason = document.getElementById('deregister-reason').value;
+                if (!deregisterUrl || !reason) { showToast('Bitte einen Grund wählen.', 'error'); return; }
+                sendModalAction(deregisterUrl, 'PATCH', { absence_reason: reason }, $('#deregister-modal'), this);
+            });
 
             function showToast(message, type) {
                 $('body').toast({
