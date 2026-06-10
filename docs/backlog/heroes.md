@@ -142,11 +142,17 @@ Das Hinzufügen einer Klasse soll EP kosten und gebucht werden.
 ### HERO-17 · Helden-Detail Layout · ⏱ 3h · ✅
 **Beschreibung:** Die Heldenansicht anpassen
 **Akzeptanzkriterien:**
-- [ ] Im Modal Content sollen Tabs eingesetzt werden.
-- [ ] Erstes Tab ist die Übersicht. Spieler, Klassen, Heimatort, EP-Saldo, Geboren, Gestorben, Status, alle erworbenden Fertigkeiten.
-- [ ] Zweiter Tab die Besuchten Abenteuerübersicht.
-- [ ] weitere Tabs sind die Fertigkeitsbäume pro Klasse
-- [ ] letztes Tab ist der EP-Verlauf. Das Einstellen von EP und der EP-Verlauf soll hier angezeigt werden.
+- [x] Im Modal Content sollen Tabs eingesetzt werden.
+- [x] Erstes Tab ist die Übersicht. Spieler, Klassen, Heimatort, EP-Saldo, Geboren, Gestorben, Status, alle erworbenden Fertigkeiten.
+- [x] Zweiter Tab die Besuchten Abenteuerübersicht.
+- [x] weitere Tabs sind die Fertigkeitsbäume pro Klasse
+- [x] letztes Tab ist der EP-Verlauf. Das Einstellen von EP und der EP-Verlauf soll hier angezeigt werden.
+
+> Umgesetzt: Detail-Modal in Fomantic-Tabs gegliedert – Übersicht ·
+> Abenteuer · [Fertigkeitsbaum je Klasse] · EP-Verlauf. Abenteuer-Tab zeigt
+> die Anmeldungen des Spielers (`Player::bookings`; per-Held-Historie ⇒ HERO-11).
+> EP-Buchen + EP-Verlauf im letzten Tab. Aktiver Tab bleibt nach AJAX-Aktionen
+> (EP/Skill) erhalten (`loadModalContent(url, true)`). Test: HeroTest-Tabs.
 
 ### HERO-18 · Fertigkeitsbaum-Positions-Editor · ⏱ 3h · ✅
 **Beschreibung:** Drag&Drop-Editor zum Setzen der Marker-Positionen je Klasse
@@ -162,3 +168,9 @@ für das Detail-Layout vergeben).
 > `PATCH skilltree/{class}`); Editor-View mit Pointer-Drag (vanilla JS, via
 > `@push('scripts')`/`@stack`), Speichern per AJAX + Toast; Validierung 0–100 %.
 > Link „Positionen bearbeiten" je Klassen-Tab im Helden-Detail. Tests: `SkilltreeTest` (5).
+
+### HERO-19 · Helden-detail Modal · ⏱ 3h · 🔲
+**Beschreibung:** Die Heldenansicht Modal soll immer eine einheitliche Größe haben um zuvermeiden dass das Modal hin und her springt , wenn man die Tab wechselt.
+**Akzeptanzkriterien:**
+- [ ] Mind. 950px x 950px
+- [ ] Der button "Positionen bearbeiten" soll unterhalb der Fertigkeitenbaums stehen

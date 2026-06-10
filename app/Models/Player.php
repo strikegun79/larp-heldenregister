@@ -38,6 +38,14 @@ class Player extends Model
     }
 
     /**
+     * Anmeldungen/Buchungen des Spielers (für die Abenteuer-Übersicht).
+     */
+    public function bookings(): HasMany
+    {
+        return $this->hasMany(Booking::class);
+    }
+
+    /**
      * Der aktuell aktive Held (Legacy: player.hero_active).
      */
     public function activeHero(): BelongsTo

@@ -90,6 +90,21 @@ class HeroTest extends TestCase
             ->assertSee('data-skill-learned', false);     // Erlernt-Status am Trigger
     }
 
+    public function test_detail_modal_is_organized_in_tabs(): void
+    {
+        $hero = Hero::factory()->create();
+        $hero->classes()->attach(1); // Krieger
+
+        $this->actingAs($this->userWithRole(20))
+            ->get(route('heroes.show', $hero), ['X-Requested-With' => 'XMLHttpRequest'])
+            ->assertOk()
+            ->assertSee('data-tab="overview"', false)
+            ->assertSee('data-tab="adventures"', false)
+            ->assertSee('data-tab="cls-1"', false)
+            ->assertSee('data-tab="ep"', false)
+            ->assertSeeInOrder(['Übersicht', 'Abenteuer', 'Krieger', 'EP-Verlauf']);
+    }
+
     public function test_ajax_show_returns_only_the_modal_partial(): void
     {
         $hero = Hero::factory()->create(['character_name' => 'Tilix']);

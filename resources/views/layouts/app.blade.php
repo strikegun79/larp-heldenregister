@@ -90,10 +90,12 @@
         <script>
             let appModalUrl = null;
 
-            function loadModalContent(url) {
+            function loadModalContent(url, preserveTab) {
                 const $content = $('#app-modal-content');
                 const $header = $('#app-modal-header');
                 const $actions = $('#app-modal-actions');
+                // Aktiven Tab vor dem Neuladen merken (z. B. nach EP-/Skill-Aktion).
+                const prevTab = preserveTab ? $content.find('.menu .item.active[data-tab]').attr('data-tab') : null;
                 $header.empty();
                 $actions.empty();
                 $content.html('<div class="ui active centered inline loader" style="display:block;margin:2rem auto"></div>');
@@ -110,8 +112,13 @@
                         $partActions.remove();
                         // Standard-Schließen-Button immer anbieten.
                         $actions.append('<div class="ui deny button">Schließen</div>');
-                        // Fomantic-Tabs im Modal aktivieren (z. B. Fertigkeitsbaum).
+                        // Fomantic-Tabs im Modal aktivieren (z. B. Detail-Tabs / Fertigkeitsbaum).
                         $content.find('.menu .item[data-tab]').tab();
+                        // Zuvor aktiven Tab wiederherstellen, falls vorhanden.
+                        if (prevTab && $content.find('.menu .item[data-tab="' + prevTab + '"]').length) {
+                            $content.find('.menu .item[data-tab], .tab[data-tab]').removeClass('active');
+                            $content.find('[data-tab="' + prevTab + '"]').addClass('active');
+                        }
                         $('#app-modal').modal('refresh');
                     })
                     .catch(() => $content.html('<div class="ui error message">Konnte nicht geladen werden.</div>'));
@@ -158,7 +165,7 @@
                             if (data.reload) {
                                 setTimeout(() => window.location.reload(), 700);
                             } else if (data.refresh_modal && appModalUrl) {
-                                loadModalContent(appModalUrl); // Modal-Inhalt neu laden (z. B. EP-Historie)
+                                loadModalContent(appModalUrl, true); // Modal neu laden, aktiven Tab erhalten
                             } else {
                                 $('#app-modal').modal('hide');
                             }
@@ -229,7 +236,7 @@
                         if (resp.ok) {
                             showToast(data.message || 'Gespeichert.', 'success');
                             $('#skill-modal').modal('hide');
-                            if (appModalUrl) loadModalContent(appModalUrl);
+                            if (appModalUrl) loadModalContent(appModalUrl, true);
                         } else {
                             showToast(data.message || 'Aktion fehlgeschlagen.', 'error');
                         }
