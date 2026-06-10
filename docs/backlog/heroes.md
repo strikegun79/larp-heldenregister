@@ -169,8 +169,14 @@ für das Detail-Layout vergeben).
 > `@push('scripts')`/`@stack`), Speichern per AJAX + Toast; Validierung 0–100 %.
 > Link „Positionen bearbeiten" je Klassen-Tab im Helden-Detail. Tests: `SkilltreeTest` (5).
 
-### HERO-19 · Helden-detail Modal · ⏱ 3h · 🔲
+### HERO-19 · Helden-detail Modal · ⏱ 3h · ✅
 **Beschreibung:** Die Heldenansicht Modal soll immer eine einheitliche Größe haben um zuvermeiden dass das Modal hin und her springt , wenn man die Tab wechselt.
 **Akzeptanzkriterien:**
-- [ ] Mind. 950px x 950px
-- [ ] Der button "Positionen bearbeiten" soll unterhalb der Fertigkeitenbaums stehen
+- [x] Mind. 950px x 950px
+- [x] Der button "Positionen bearbeiten" soll unterhalb der Fertigkeitenbaums stehen
+
+> Umgesetzt: Klasse `modal-hero` (in `loadModalContent` gesetzt, sobald
+> `#skilltree` im Inhalt ist) gibt dem Detail-Modal Breite 950px (max 95vw)
+> und Inhalt-`min-height` 840px → kein Springen beim Tab-Wechsel. Der Button
+> „Positionen bearbeiten" steht jetzt unterhalb des Baums/der Liste je
+> Klassen-Tab. Test: HeroTest-Reihenfolge.

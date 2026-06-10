@@ -119,6 +119,8 @@
                             $content.find('.menu .item[data-tab], .tab[data-tab]').removeClass('active');
                             $content.find('[data-tab="' + prevTab + '"]').addClass('active');
                         }
+                        // HERO-19: Helden-Detail bekommt eine feste Modal-Größe.
+                        $('#app-modal').toggleClass('modal-hero', $content.find('#skilltree').length > 0);
                         $('#app-modal').modal('refresh');
                     })
                     .catch(() => $content.html('<div class="ui error message">Konnte nicht geladen werden.</div>'));

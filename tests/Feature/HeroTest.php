@@ -87,7 +87,8 @@ class HeroTest extends TestCase
             ->assertSee('Fertigkeitsbaum')
             ->assertSee('Schwertkampf')
             ->assertSee('skill-marker', false)            // HERO-16: Button auf dem Baum-Bild
-            ->assertSee('data-skill-learned', false);     // Erlernt-Status am Trigger
+            ->assertSee('data-skill-learned', false)      // Erlernt-Status am Trigger
+            ->assertSeeInOrder(['Schwertkampf', 'Positionen bearbeiten']); // HERO-19: Button unter dem Baum
     }
 
     public function test_detail_modal_is_organized_in_tabs(): void

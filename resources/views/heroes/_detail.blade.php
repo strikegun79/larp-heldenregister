@@ -61,9 +61,6 @@
     {{-- Tabs: Fertigkeitsbaum je Klasse --}}
     @foreach ($hero->classes as $class)
         <div class="ui bottom attached tab segment" data-tab="cls-{{ $class->id }}">
-            @can('heldenregister.edit')
-                <a href="{{ route('skilltree.edit', $class) }}" class="ui tiny basic button" style="margin-bottom:.75rem">Positionen bearbeiten</a>
-            @endcan
             <div class="skill-map">
                 <img src="{{ $class->skilltreeImage() }}" alt="Fertigkeitsbaum {{ $class->name }}" class="skill-image">
                 @foreach ($class->skills as $skill)
@@ -104,6 +101,12 @@
                     @endforeach
                 </div>
             @endif
+
+            @can('heldenregister.edit')
+                <div class="mt-3">
+                    <a href="{{ route('skilltree.edit', $class) }}" class="ui tiny basic button">Positionen bearbeiten</a>
+                </div>
+            @endcan
         </div>
     @endforeach
 
