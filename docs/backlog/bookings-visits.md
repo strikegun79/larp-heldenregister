@@ -48,11 +48,19 @@ Erreichbarkeit) nachträglich ändern.
 > Modal-Refresh. Mail-Versand als Kommentar-Hook für NOTI-02 vorbereitet.
 > `abort 404` wenn Buchung != Abenteuer. Tests: `BookingApprovalTest` (4).
 
-### BOOK-06 · Bezahlt-Status (`paid`) pflegen · ⏱ 2h · 🔲
+### BOOK-06 · Bezahlt-Status (`paid`) pflegen · ⏱ 2h · ✅
 **Beschreibung:** Teilnahmebeitrag-Status je Buchung.
 **Akzeptanzkriterien:**
-- [ ] Toggle „bezahlt" je Buchung (Bürokrat).
-- [ ] Summen-/Offen-Anzeige je Event (siehe REP).
+- [x] Toggle „bezahlt" je Buchung (Bürokrat).
+- [x] Summen-/Offen-Anzeige je Event (siehe REP).
+
+> Umgesetzt: Gate `manage-payments` (Bürokrat/`registrar` + Admin).
+> `BookingController@togglePaid` (`PATCH adventures/{adventure}/bookings/{booking}/payment`)
+> als Toggle von `paid`; 404 wenn Buchung != Abenteuer. Neue Spalte „Beitrag"
+> (bezahlt/offen) + Toggle-Button „als bezahlt"/„als offen" je Anmeldung,
+> AJAX + Modal-Refresh. Summenzeile (nur für Berechtigte) je Event: Beitrag,
+> bezahlt X/Y, eingegangen €, offen € (über reguläre, nicht-Warteliste-Anmeldungen).
+> Tests: `BookingPaymentTest` (4).
 
 ### BOOK-07 · Warteliste nachrücken · ⏱ 4h · 🔲
 **Beschreibung:** Bei Storno eines regulären Platzes rückt die erste Wartelisten-

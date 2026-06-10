@@ -13,7 +13,7 @@
 
 <h3 class="font-uncial text-lg text-waldritter mt-6 mb-2">Anmeldungen</h3>
 <table class="ui very basic compact table">
-    <thead><tr><th>Spieler</th><th>Rolle</th><th>Liste</th><th>Status</th><th></th></tr></thead>
+    <thead><tr><th>Spieler</th><th>Rolle</th><th>Liste</th><th>Status</th><th>Beitrag</th><th></th></tr></thead>
     <tbody>
         @forelse ($adventure->bookings as $booking)
             <tr>
@@ -27,6 +27,13 @@
                         <span class="text-stone-500">offen</span>
                     @endif
                 </td>
+                <td>
+                    @if ($booking->paid)
+                        <span class="text-green-700">bezahlt</span>
+                    @else
+                        <span class="text-stone-500">offen</span>
+                    @endif
+                </td>
                 <td class="right aligned">
                     <div class="flex items-center justify-end gap-3">
                         @can('approve-bookings')
@@ -34,6 +41,14 @@
                                 @csrf @method('PATCH')
                                 <button class="{{ $booking->approved_at ? 'text-stone-600' : 'text-green-700' }} hover:underline">
                                     {{ $booking->approved_at ? 'zurücknehmen' : 'bestätigen' }}
+                                </button>
+                            </form>
+                        @endcan
+                        @can('manage-payments')
+                            <form method="POST" action="{{ route('adventures.bookings.payment', [$adventure, $booking]) }}" data-refresh-modal>
+                                @csrf @method('PATCH')
+                                <button class="{{ $booking->paid ? 'text-stone-600' : 'text-green-700' }} hover:underline">
+                                    {{ $booking->paid ? 'als offen' : 'als bezahlt' }}
                                 </button>
                             </form>
                         @endcan
@@ -53,10 +68,21 @@
                 </td>
             </tr>
         @empty
-            <tr><td colspan="5" class="text-stone-500">Noch keine Anmeldungen.</td></tr>
+            <tr><td colspan="6" class="text-stone-500">Noch keine Anmeldungen.</td></tr>
         @endforelse
     </tbody>
 </table>
+
+@can('manage-payments')
+    @php($payable = $adventure->bookings->where('waitlisted', false))
+    @php($paidCount = $payable->where('paid', true)->count())
+    @php($openCount = $payable->count() - $paidCount)
+    <p class="text-stone-600 -mt-2 mb-2">
+        Beitrag {{ number_format($adventure->fee, 2, ',', '.') }} € · bezahlt {{ $paidCount }}/{{ $payable->count() }}
+        · eingegangen {{ number_format($paidCount * $adventure->fee, 2, ',', '.') }} €
+        · offen {{ number_format($openCount * $adventure->fee, 2, ',', '.') }} €
+    </p>
+@endcan
 
 @can('manage-attendance')
     <h3 class="font-uncial text-lg text-waldritter mt-6 mb-2">Teilnahme (Check-in)</h3>

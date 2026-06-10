@@ -43,6 +43,9 @@ class AuthServiceProvider extends ServiceProvider
         // Anmeldungen bestätigen/freigeben (BOOK-05): Bürokrat (+ Admin via before).
         Gate::define('approve-bookings', fn (User $user) => $user->hasRole('registrar'));
 
+        // Teilnahmebeitrag-Status pflegen (BOOK-06): Bürokrat (+ Admin via before).
+        Gate::define('manage-payments', fn (User $user) => $user->hasRole('registrar'));
+
         // Admins dürfen grundsätzlich alles.
         Gate::before(fn (User $user) => $user->isAdmin() ? true : null);
     }

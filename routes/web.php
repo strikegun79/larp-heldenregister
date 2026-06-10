@@ -64,6 +64,9 @@ Route::middleware('auth')->group(function () {
     // Anmeldung bestätigen/freigeben – Toggle approved_at (BOOK-05).
     Route::patch('adventures/{adventure}/bookings/{booking}/approval', [BookingController::class, 'approve'])
         ->name('adventures.bookings.approval');
+    // Teilnahmebeitrag-Status – Toggle paid (BOOK-06).
+    Route::patch('adventures/{adventure}/bookings/{booking}/payment', [BookingController::class, 'togglePaid'])
+        ->name('adventures.bookings.payment');
     Route::delete('adventures/{adventure}/bookings/{booking}', [BookingController::class, 'destroy'])
         ->name('adventures.bookings.destroy');
 

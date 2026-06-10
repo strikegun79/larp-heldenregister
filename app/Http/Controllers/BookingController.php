@@ -22,6 +22,8 @@ class BookingController extends Controller
         $this->middleware('can:adventure.modify')->only(['edit', 'update']);
         // Anmeldung bestätigen/freigeben (BOOK-05).
         $this->middleware('can:approve-bookings')->only('approve');
+        // Bezahlt-Status pflegen (BOOK-06).
+        $this->middleware('can:manage-payments')->only('togglePaid');
     }
 
     /**
@@ -143,6 +145,22 @@ class BookingController extends Controller
         $message = $booking->approved_at ? 'Anmeldung bestätigt.' : 'Bestätigung zurückgenommen.';
 
         // NOTI-02: optionaler Versand einer Bestätigungs-Mail an den Spieler.
+
+        return $request->expectsJson()
+            ? response()->json(['message' => $message, 'refresh_modal' => true])
+            : back()->with('status', $message);
+    }
+
+    /**
+     * Teilnahmebeitrag-Status einer Anmeldung umschalten (BOOK-06).
+     */
+    public function togglePaid(Request $request, Adventure $adventure, Booking $booking): RedirectResponse|JsonResponse
+    {
+        abort_unless($booking->adventure_id === $adventure->id, 404);
+
+        $booking->update(['paid' => ! $booking->paid]);
+
+        $message = $booking->paid ? 'Als bezahlt markiert.' : 'Als offen markiert.';
 
         return $request->expectsJson()
             ? response()->json(['message' => $message, 'refresh_modal' => true])
