@@ -36,15 +36,27 @@ Stammdaten, Fertigkeiten, EP-Verlauf im Modal.
 > `where('disabled', false)` aus der Auswahl ausgeschlossen.
 > Tests: `HeroClassAdminTest` (6).
 
-### HERO-06 · Klassenwechsel mit EP-Kosten verbuchen · ⏱ 4h · 🔲
+### HERO-06 · Klassenwechsel mit EP-Kosten verbuchen · ⏱ 4h · ✅
 **Beschreibung:** Legacy `type_transEP` 40 = „Klasse hinzugefügt" (EP-Kosten).
 Das Hinzufügen einer Klasse soll EP kosten und gebucht werden.
 **Akzeptanzkriterien:**
-- [ ] Konfigurierbare EP-Kosten je Klasse (oder Pauschale).
-- [ ] Beim Hinzufügen einer Klasse wird eine EP-Transaktion (Typ 40) erzeugt.
-- [ ] Saldo darf nicht negativ werden (Validierung) – oder Override für Admin.
-- [ ] Tests.
+- [x] Konfigurierbare EP-Kosten je Klasse (oder Pauschale).
+- [x] Beim Hinzufügen einer Klasse wird eine EP-Transaktion (Typ 40) erzeugt.
+- [x] Saldo darf nicht negativ werden (Validierung) – oder Override für Admin.
+- [x] Tests.
 **Abhängig von:** EP-02.
+
+> Umgesetzt: Spalte `hero_classes.ep_cost` (Migration, Standard 50, je Klasse
+> im Admin pflegbar – HERO-05-Formular). `HeroClassController` (analog
+> `HeroSkillController`, `can:heldenregister.edit`):
+> `POST heroes/{hero}/classes` bucht Typ-40-Kosten und hängt die Klasse an;
+> `DELETE heroes/{hero}/classes/{heroClass}` entfernt sie und erstattet (Typ 60).
+> Saldo-Schutz: Nicht-Admin wird bei zu wenig EP abgewiesen (422), **Admin
+> übersteuert** (Saldo darf ins Minus). Deaktivierte/bereits vorhandene Klassen
+> werden abgelehnt. UI: Klassenverwaltung im Helden-Detail (Chips mit Entfernen-
+> ×, Auswahl + „Hinzufügen"). Startklassen bei der Neuanlage bleiben kostenfrei
+> (Charaktererstellung); das Helden-Bearbeiten-Formular synct keine Klassen mehr.
+> Tests: `HeroClassAssignmentTest` (7) + angepasste `HeroClassAdminTest`.
 
 ### HERO-07 · Held aktiv/inaktiv + aktiver Held je Spieler · ⏱ 3h · ✅
 **Beschreibung:** `players.active_hero_id` aus Legacy; den aktiven Helden

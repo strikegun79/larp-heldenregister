@@ -86,6 +86,7 @@ class HeroClassController extends Controller
             'name' => ['required', 'string', 'max:50'],
             'slug' => ['required', 'string', 'max:50', Rule::unique('hero_classes', 'slug')->ignore($class?->id)],
             'disabled' => ['boolean'],
+            'ep_cost' => ['required', 'integer', 'min:0'],
         ]);
         $data['disabled'] = $request->boolean('disabled');
 

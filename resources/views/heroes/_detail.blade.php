@@ -38,6 +38,43 @@
             <p class="text-stone-500">Keine Fertigkeiten erlernt.</p>
         @endforelse
 
+        <h3 class="font-uncial text-lg text-waldritter mt-6 mb-2">Klassen</h3>
+        <div class="flex flex-wrap items-center gap-2">
+            @forelse ($hero->classes as $class)
+                <span class="ui label">
+                    {{ $class->name }}
+                    @can('heldenregister.edit')
+                        <form method="POST" action="{{ route('heroes.classes.destroy', [$hero, $class]) }}" data-refresh-modal class="inline"
+                              onsubmit="return confirm('Klasse „{{ $class->name }}“ entfernen? {{ $class->ep_cost }} EP werden erstattet.');">
+                            @csrf @method('DELETE')
+                            <button type="submit" class="ml-1 text-red-600" title="Entfernen">&times;</button>
+                        </form>
+                    @endcan
+                </span>
+            @empty
+                <span class="text-stone-500">Keine Klassen.</span>
+            @endforelse
+        </div>
+
+        @can('heldenregister.edit')
+            @if ($availableClasses->isNotEmpty())
+                <form method="POST" action="{{ route('heroes.classes.store', $hero) }}" data-refresh-modal class="ui form mt-3">
+                    @csrf
+                    <div class="flex items-end gap-2">
+                        <div class="field !mb-0">
+                            <label>Klasse hinzufügen (kostet EP)</label>
+                            <select name="hero_class_id" required>
+                                @foreach ($availableClasses as $class)
+                                    <option value="{{ $class->id }}">{{ $class->name }} (−{{ $class->ep_cost }} EP)</option>
+                                @endforeach
+                            </select>
+                        </div>
+                        <button type="submit" class="ui button">Hinzufügen</button>
+                    </div>
+                </form>
+            @endif
+        @endcan
+
         @can('heldenregister.edit')
             <form method="POST" action="{{ route('heroes.missing', $hero) }}" data-refresh-modal class="mt-6">
                 @csrf @method('PATCH')

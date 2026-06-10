@@ -102,6 +102,11 @@ class HeroController extends Controller
         $data = [
             'hero' => $hero,
             'epTypes' => EpTransactionType::orderBy('id')->get(),
+            // Aktive, noch nicht zugewiesene Klassen für die Klassenverwaltung (HERO-06).
+            'availableClasses' => HeroClass::where('disabled', false)
+                ->whereNotIn('id', $hero->classes->pluck('id'))
+                ->orderBy('name')
+                ->get(),
         ];
 
         // Per AJAX (aus der Liste) nur den Modal-Inhalt liefern.
@@ -138,7 +143,8 @@ class HeroController extends Controller
         $data = $this->validateHero($request);
 
         $hero->update($data);
-        $hero->classes()->sync($request->input('classes', []));
+        // Klassen werden nicht mehr über das Formular gesynct – Hinzufügen/Entfernen
+        // läuft über HeroClassController mit EP-Verbuchung (HERO-06).
 
         $message = 'Held wurde aktualisiert.';
 

@@ -15,10 +15,12 @@ class HeroClass extends Model
         'slug',
         'name',
         'disabled',
+        'ep_cost',
     ];
 
     protected $casts = [
         'disabled' => 'boolean',
+        'ep_cost' => 'integer',
     ];
 
     /**

@@ -37,6 +37,7 @@ class HeroClassAdminTest extends TestCase
             ->post(route('admin.hero-classes.store'), [
                 'slug' => 'bard',
                 'name' => 'Barde',
+                'ep_cost' => 40,
             ])
             ->assertRedirect(route('admin.hero-classes.index'));
 
@@ -57,6 +58,7 @@ class HeroClassAdminTest extends TestCase
                 'slug' => 'warrior',
                 'name' => 'Recke',
                 'disabled' => '1',
+                'ep_cost' => 25,
             ])
             ->assertRedirect(route('admin.hero-classes.index'));
 
@@ -89,6 +91,7 @@ class HeroClassAdminTest extends TestCase
             ->put(route('admin.hero-classes.update', $class), [
                 'slug' => 'warrior', // eigener Slug -> kein Unique-Konflikt
                 'name' => 'Krieger 2',
+                'ep_cost' => 30,
             ])
             ->assertSessionHasNoErrors();
     }

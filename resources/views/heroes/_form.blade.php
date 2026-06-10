@@ -44,20 +44,24 @@
         </div>
     </div>
 
-    <div>
-        <x-input-label value="Klassen" />
-        <div class="mt-1 grid grid-cols-2 gap-2">
-            @foreach ($classes as $class)
-                <label class="flex items-center gap-2 text-gray-700 dark:text-gray-300">
-                    <input type="checkbox" name="classes[]" value="{{ $class->id }}"
-                           class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500"
-                           @checked(in_array($class->id, old('classes', $hero->classes->pluck('id')->all())))>
-                    {{ $class->name }}
-                </label>
-            @endforeach
+    {{-- Startklassen nur bei der Neuanlage (kostenfrei). Spätere Klassen kosten EP
+         und werden im Helden-Detail über die Klassenverwaltung hinzugefügt (HERO-06). --}}
+    @unless ($hero->exists)
+        <div>
+            <x-input-label value="Startklassen" />
+            <div class="mt-1 grid grid-cols-2 gap-2">
+                @foreach ($classes as $class)
+                    <label class="flex items-center gap-2 text-gray-700 dark:text-gray-300">
+                        <input type="checkbox" name="classes[]" value="{{ $class->id }}"
+                               class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500"
+                               @checked(in_array($class->id, old('classes', $hero->classes->pluck('id')->all())))>
+                        {{ $class->name }}
+                    </label>
+                @endforeach
+            </div>
+            <x-input-error :messages="$errors->get('classes')" class="mt-2" />
         </div>
-        <x-input-error :messages="$errors->get('classes')" class="mt-2" />
-    </div>
+    @endunless
 
     <div>
         <label class="flex items-center gap-2 text-gray-700 dark:text-gray-300">

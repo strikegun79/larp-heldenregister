@@ -19,6 +19,7 @@
                         <tr>
                             <th class="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase">Name</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase">Slug</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase">EP-Kosten</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase">Helden</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase">Status</th>
                             <th class="px-6 py-3"></th>
@@ -29,6 +30,7 @@
                             <tr class="{{ $class->disabled ? 'opacity-60' : '' }}">
                                 <td class="px-6 py-4">{{ $class->name }}</td>
                                 <td class="px-6 py-4 text-sm text-stone-500">{{ $class->slug }}</td>
+                                <td class="px-6 py-4">{{ $class->ep_cost }} EP</td>
                                 <td class="px-6 py-4">{{ $class->heroes_count }}</td>
                                 <td class="px-6 py-4">
                                     @if ($class->disabled)
@@ -42,7 +44,7 @@
                                 </td>
                             </tr>
                         @empty
-                            <tr><td colspan="5" class="px-6 py-4 text-stone-500">Noch keine Klassen.</td></tr>
+                            <tr><td colspan="6" class="px-6 py-4 text-stone-500">Noch keine Klassen.</td></tr>
                         @endforelse
                     </tbody>
                 </table>

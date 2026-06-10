@@ -18,6 +18,12 @@
         <x-input-error :messages="$errors->get('slug')" class="mt-2" />
     </div>
 
+    <div class="field">
+        <label>EP-Kosten (beim Hinzufügen zu einem Helden)</label>
+        <input type="number" name="ep_cost" min="0" value="{{ old('ep_cost', $class->ep_cost ?? 50) }}" required>
+        <x-input-error :messages="$errors->get('ep_cost')" class="mt-2" />
+    </div>
+
     <label class="flex items-center gap-2 text-stone-700">
         <input type="checkbox" name="disabled" value="1" @checked(old('disabled', $class->disabled))>
         Deaktiviert (nicht mehr für neue Helden wählbar)
