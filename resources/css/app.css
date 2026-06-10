@@ -7,10 +7,18 @@
    Pergament-Hintergrund, mittelalterliche Schriften, Brauntöne.
 --------------------------------------------------------------------------- */
 @layer base {
+    /* Basis-Schriftgröße leicht erhöht (Standard 16px). Alle rem-basierten
+       Tailwind-Utilities (text-sm, text-base, …) skalieren automatisch mit. */
+    html {
+        font-size: 17.5px;
+    }
+
     body {
         background-color: #e4cea5;
         background-image: url('/images/paper.jpg');
         background-attachment: fixed;
+        /* überschreibt Fomantics 14px-Basis, damit auch dessen Komponenten mitwachsen */
+        font-size: 1rem;
     }
 }
 
