@@ -44,12 +44,19 @@ Das Hinzufügen einer Klasse soll EP kosten und gebucht werden.
 - [ ] Nur ein aktiver Held je Spieler.
 - [ ] Tests.
 
-### HERO-08 · Held status ändern "Erste Erblickung" & "Verschollen" als Status-Workflow · ⏱ 2h · 🔲
+### HERO-08 · Held status ändern "Erste Erblickung" & "Verschollen" als Status-Workflow · ⏱ 2h · ✅
 **Beschreibung:** `died` und 'born'-Datum existieren; Workflow + Anzeige fehlen.
 **Akzeptanzkriterien:**
-- [ ] Aktion „Held verstorben" auf "Verschollen" ändern und setzt `died` und deaktiviert ihn.
-- [ ] Verschollene Helden im Register markiert/filterbar.
-- [ ] statt geboren, soll es nun heissen: "Erste Erblickung"
+- [x] Aktion „Held verstorben" auf "Verschollen" ändern und setzt `died` und deaktiviert ihn.
+- [x] Verschollene Helden im Register markiert/filterbar.
+- [x] statt geboren, soll es nun heissen: "Erste Erblickung"
+
+> Umgesetzt: `HeroController@toggleMissing` (`PATCH heroes/{hero}/missing`,
+> `heldenregister.edit`) setzt `died` + `active=false` (bzw. macht rückgängig);
+> Button im Übersicht-Tab (AJAX, Modal-Refresh). Index: Status-Filter
+> Alle/Aktive/Verschollene (`?status=`) und „verschollen"-Markierung (rote
+> Schrift, abgedunkelte Zeile). Labels „Geboren→Erste Erblickung",
+> „Gestorben→Verschollen" in Formular & Detail. Tests: HeroTest (4).
 
 ### HERO-09 · Charakter-Steckbrief (Beschreibung/Bild) · ⏱ 4h · 🔲
 **Beschreibung:** Erweiterung um Freitext-Hintergrund und optionales Bild

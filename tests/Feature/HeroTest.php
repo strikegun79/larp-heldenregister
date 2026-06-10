@@ -179,6 +179,59 @@ class HeroTest extends TestCase
         $this->assertEquals(15.0, $hero->fresh()->ep_balance);
     }
 
+    public function test_registrar_can_toggle_missing_status(): void
+    {
+        $hero = Hero::factory()->create(['active' => true, 'died' => null]);
+        $registrar = $this->userWithRole(20);
+
+        $this->actingAs($registrar)
+            ->patchJson(route('heroes.missing', $hero))
+            ->assertOk()
+            ->assertJson(['refresh_modal' => true]);
+
+        $hero->refresh();
+        $this->assertNotNull($hero->died);   // verschollen
+        $this->assertFalse($hero->active);
+
+        // wieder zurück (wiedergefunden)
+        $this->actingAs($registrar)->patchJson(route('heroes.missing', $hero))->assertOk();
+        $hero->refresh();
+        $this->assertNull($hero->died);
+        $this->assertTrue($hero->active);
+    }
+
+    public function test_a_viewer_cannot_toggle_missing(): void
+    {
+        $hero = Hero::factory()->create();
+
+        $this->actingAs($this->userWithRole(40))
+            ->patch(route('heroes.missing', $hero))
+            ->assertForbidden();
+    }
+
+    public function test_index_can_filter_missing_heroes(): void
+    {
+        Hero::factory()->create(['character_name' => 'Verschollener', 'died' => now()]);
+        Hero::factory()->create(['character_name' => 'Lebender', 'died' => null]);
+
+        $this->actingAs($this->userWithRole(20))
+            ->get(route('heroes.index', ['status' => 'missing']))
+            ->assertOk()
+            ->assertSee('Verschollener')
+            ->assertDontSee('Lebender');
+    }
+
+    public function test_form_uses_erste_erblickung_label(): void
+    {
+        $hero = Hero::factory()->create();
+
+        $this->actingAs($this->userWithRole(20))
+            ->get(route('heroes.edit', $hero))
+            ->assertOk()
+            ->assertSee('Erste Erblickung')
+            ->assertSee('Verschollen');
+    }
+
     public function test_a_registrar_can_delete_a_hero(): void
     {
         $hero = Hero::factory()->create();

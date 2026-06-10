@@ -37,6 +37,8 @@ Route::middleware('auth')->group(function () {
 
     Route::resource('players', PlayerController::class);
     Route::resource('heroes', HeroController::class);
+    // Verschollen-Status umschalten (HERO-08).
+    Route::patch('heroes/{hero}/missing', [HeroController::class, 'toggleMissing'])->name('heroes.missing');
     // EP-Buchung für einen Helden (HERO-12).
     Route::post('heroes/{hero}/ep', [EpTransactionController::class, 'store'])->name('heroes.ep.store');
     // Fertigkeit erlernen (HERO-14) / aberkennen (HERO-16).

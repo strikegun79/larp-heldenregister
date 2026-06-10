@@ -23,9 +23,12 @@
             <div><dt class="text-sm text-stone-500">Klassen</dt><dd>{{ $hero->classes->pluck('name')->implode(', ') ?: '—' }}</dd></div>
             <div><dt class="text-sm text-stone-500">Heimatort</dt><dd>{{ $hero->homeplace ?? '—' }}</dd></div>
             <div><dt class="text-sm text-stone-500">EP-Saldo</dt><dd class="font-semibold">{{ number_format($hero->ep_balance, 0, ',', '.') }} EP</dd></div>
-            <div><dt class="text-sm text-stone-500">Geboren</dt><dd>{{ optional($hero->born)->format('d.m.Y') ?? '—' }}</dd></div>
-            <div><dt class="text-sm text-stone-500">Gestorben</dt><dd>{{ optional($hero->died)->format('d.m.Y') ?? '—' }}</dd></div>
-            <div><dt class="text-sm text-stone-500">Status</dt><dd>{{ $hero->active ? 'aktiv' : 'inaktiv' }}</dd></div>
+            <div><dt class="text-sm text-stone-500">Erste Erblickung</dt><dd>{{ optional($hero->born)->format('d.m.Y') ?? '—' }}</dd></div>
+            <div><dt class="text-sm text-stone-500">Verschollen</dt><dd>{{ optional($hero->died)->format('d.m.Y') ?? '—' }}</dd></div>
+            <div>
+                <dt class="text-sm text-stone-500">Status</dt>
+                <dd>@if ($hero->died)<span class="text-red-700">verschollen</span>@else{{ $hero->active ? 'aktiv' : 'inaktiv' }}@endif</dd>
+            </div>
         </dl>
 
         <h3 class="font-uncial text-lg text-waldritter mt-6 mb-2">Erworbene Fertigkeiten</h3>
@@ -34,6 +37,17 @@
         @empty
             <p class="text-stone-500">Keine Fertigkeiten erlernt.</p>
         @endforelse
+
+        @can('heldenregister.edit')
+            <form method="POST" action="{{ route('heroes.missing', $hero) }}" data-refresh-modal class="mt-6">
+                @csrf @method('PATCH')
+                @if ($hero->died)
+                    <button type="submit" class="ui small button">Als wiedergefunden markieren</button>
+                @else
+                    <button type="submit" class="ui small red button">Als verschollen markieren</button>
+                @endif
+            </form>
+        @endcan
     </div>
 
     {{-- Tab: Abenteuer (Anmeldungen des Spielers) --}}

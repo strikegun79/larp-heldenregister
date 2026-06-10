@@ -31,13 +31,13 @@
 
     <div class="grid grid-cols-2 gap-4">
         <div>
-            <x-input-label for="born" value="Geboren" />
+            <x-input-label for="born" value="Erste Erblickung" />
             <x-text-input id="born" name="born" type="date" class="mt-1 block w-full"
                           :value="old('born', optional($hero->born)->format('Y-m-d'))" />
             <x-input-error :messages="$errors->get('born')" class="mt-2" />
         </div>
         <div>
-            <x-input-label for="died" value="Gestorben" />
+            <x-input-label for="died" value="Verschollen" />
             <x-text-input id="died" name="died" type="date" class="mt-1 block w-full"
                           :value="old('died', optional($hero->died)->format('Y-m-d'))" />
             <x-input-error :messages="$errors->get('died')" class="mt-2" />

@@ -17,19 +17,24 @@ class HeroController extends Controller
     {
         $this->middleware('auth');
         $this->middleware('can:heldenregister.view')->only(['index', 'show']);
-        $this->middleware('can:heldenregister.edit')->only(['create', 'store', 'edit', 'update', 'destroy']);
+        $this->middleware('can:heldenregister.edit')->only(['create', 'store', 'edit', 'update', 'destroy', 'toggleMissing']);
     }
 
     /**
      * Liste aller Helden (Heldenregister).
      */
-    public function index(): View
+    public function index(Request $request): View
     {
-        $heroes = Hero::with(['player', 'classes', 'epTransactions.type'])
-            ->orderBy('character_name')
-            ->paginate(20);
+        $status = $request->query('status'); // present | missing | (null = alle)
 
-        return view('heroes.index', compact('heroes'));
+        $heroes = Hero::with(['player', 'classes', 'epTransactions.type'])
+            ->when($status === 'missing', fn ($q) => $q->whereNotNull('died'))
+            ->when($status === 'present', fn ($q) => $q->whereNull('died'))
+            ->orderBy('character_name')
+            ->paginate(20)
+            ->withQueryString();
+
+        return view('heroes.index', compact('heroes', 'status'));
     }
 
     /**
@@ -129,6 +134,25 @@ class HeroController extends Controller
         return redirect()
             ->route('heroes.index')
             ->with('status', 'Held wurde gelöscht.');
+    }
+
+    /**
+     * Schaltet den „Verschollen"-Status um: setzt `died` (Verschollen) und
+     * deaktiviert den Helden bzw. macht ihn wieder aktiv (HERO-08).
+     */
+    public function toggleMissing(Request $request, Hero $hero): RedirectResponse|JsonResponse
+    {
+        if ($hero->died === null) {
+            $hero->update(['died' => now()->toDateString(), 'active' => false]);
+            $message = "{$hero->character_name} wurde als verschollen markiert.";
+        } else {
+            $hero->update(['died' => null, 'active' => true]);
+            $message = "{$hero->character_name} ist wieder aufgetaucht.";
+        }
+
+        return $request->expectsJson()
+            ? response()->json(['message' => $message, 'refresh_modal' => true])
+            : back()->with('status', $message);
     }
 
     /**

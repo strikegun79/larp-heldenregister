@@ -20,6 +20,12 @@
                 </div>
             @endif
 
+            <div class="mb-4 flex gap-4 text-sm">
+                <a href="{{ route('heroes.index') }}" class="{{ ! $status ? 'font-semibold text-waldritter' : 'text-stone-600 hover:underline' }}">Alle</a>
+                <a href="{{ route('heroes.index', ['status' => 'present']) }}" class="{{ $status === 'present' ? 'font-semibold text-waldritter' : 'text-stone-600 hover:underline' }}">Aktive</a>
+                <a href="{{ route('heroes.index', ['status' => 'missing']) }}" class="{{ $status === 'missing' ? 'font-semibold text-waldritter' : 'text-stone-600 hover:underline' }}">Verschollene</a>
+            </div>
+
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
                 <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
                     <thead class="bg-gray-50 dark:bg-gray-900">
@@ -34,13 +40,19 @@
                     </thead>
                     <tbody class="divide-y divide-gray-200 dark:divide-gray-700 text-gray-800 dark:text-gray-200">
                         @forelse ($heroes as $hero)
-                            <tr data-modal-url="{{ route('heroes.show', $hero) }}" class="cursor-pointer hover:bg-black/5">
+                            <tr data-modal-url="{{ route('heroes.show', $hero) }}" class="cursor-pointer hover:bg-black/5 {{ $hero->died ? 'opacity-60' : '' }}">
                                 <td class="px-6 py-4">{{ $hero->player?->full_name ?? '—' }}</td>
                                 <td class="px-6 py-4 font-medium">{{ $hero->character_name ?? '—' }}</td>
                                 <td class="px-6 py-4 text-right">{{ number_format($hero->ep_total, 0, ',', '.') }}</td>
                                 <td class="px-6 py-4 text-right">{{ number_format($hero->ep_balance, 0, ',', '.') }}</td>
                                 <td class="px-6 py-4">{{ $hero->classes->pluck('name')->implode(', ') ?: '—' }}</td>
-                                <td class="px-6 py-4">{{ $hero->active ? 'ja' : 'nein' }}</td>
+                                <td class="px-6 py-4">
+                                    @if ($hero->died)
+                                        <span class="text-red-700">verschollen</span>
+                                    @else
+                                        {{ $hero->active ? 'ja' : 'nein' }}
+                                    @endif
+                                </td>
                             </tr>
                         @empty
                             <tr>
