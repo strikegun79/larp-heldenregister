@@ -40,6 +40,9 @@ class AuthServiceProvider extends ServiceProvider
         // Teilnahme/Check-in erfassen: Spielleiter, Teamer (+ Admin via before).
         Gate::define('manage-attendance', fn (User $user) => $user->hasAnyRole('game_master', 'teamer'));
 
+        // Anmeldungen bestätigen/freigeben (BOOK-05): Bürokrat (+ Admin via before).
+        Gate::define('approve-bookings', fn (User $user) => $user->hasRole('registrar'));
+
         // Admins dürfen grundsätzlich alles.
         Gate::before(fn (User $user) => $user->isAdmin() ? true : null);
     }

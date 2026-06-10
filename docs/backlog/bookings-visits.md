@@ -33,13 +33,20 @@ Erreichbarkeit) nachträglich ändern.
 > (`refresh_modal`) landet man wieder auf dem Abenteuer-Detail. `abort 404`,
 > wenn die Buchung nicht zum Abenteuer gehört. Tests: `BookingEditTest` (5).
 
-### BOOK-05 · Buchung bestätigen/freigeben (`approved_at`) · ⏱ 3h · 🔲
+### BOOK-05 · Buchung bestätigen/freigeben (`approved_at`) · ⏱ 3h · ✅
 **Beschreibung:** `approved_at` existiert, wird aber nie gesetzt. Freigabe-Workflow.
 **Akzeptanzkriterien:**
-- [ ] Admin/Bürokrat kann Buchung bestätigen (setzt `approved_at`).
-- [ ] Anzeige bestätigt/unbestätigt in Anmeldeliste.
-- [ ] Optionaler Trigger Bestätigungs-Mail (NOTI-02).
-- [ ] Tests.
+- [x] Admin/Bürokrat kann Buchung bestätigen (setzt `approved_at`).
+- [x] Anzeige bestätigt/unbestätigt in Anmeldeliste.
+- [ ] Optionaler Trigger Bestätigungs-Mail (NOTI-02). → offen in NOTI-02 (Hook gesetzt).
+- [x] Tests.
+
+> Umgesetzt: Gate `approve-bookings` (Bürokrat/`registrar` + Admin via before).
+> `BookingController@approve` (`PATCH adventures/{adventure}/bookings/{booking}/approval`)
+> als Toggle von `approved_at`. Neue Spalte „Status" (✓ bestätigt / offen) in der
+> Anmeldeliste; Button „bestätigen"/„zurücknehmen" nur für Berechtigte, AJAX +
+> Modal-Refresh. Mail-Versand als Kommentar-Hook für NOTI-02 vorbereitet.
+> `abort 404` wenn Buchung != Abenteuer. Tests: `BookingApprovalTest` (4).
 
 ### BOOK-06 · Bezahlt-Status (`paid`) pflegen · ⏱ 2h · 🔲
 **Beschreibung:** Teilnahmebeitrag-Status je Buchung.

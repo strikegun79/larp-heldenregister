@@ -13,15 +13,30 @@
 
 <h3 class="font-uncial text-lg text-waldritter mt-6 mb-2">Anmeldungen</h3>
 <table class="ui very basic compact table">
-    <thead><tr><th>Spieler</th><th>Rolle</th><th>Liste</th><th></th></tr></thead>
+    <thead><tr><th>Spieler</th><th>Rolle</th><th>Liste</th><th>Status</th><th></th></tr></thead>
     <tbody>
         @forelse ($adventure->bookings as $booking)
             <tr>
                 <td>{{ $booking->player?->full_name }}</td>
                 <td>{{ $booking->role?->description }}</td>
                 <td>{{ $booking->waitlisted ? 'Warteliste' : 'regulär' }}</td>
+                <td>
+                    @if ($booking->approved_at)
+                        <span class="text-green-700">✓ bestätigt</span>
+                    @else
+                        <span class="text-stone-500">offen</span>
+                    @endif
+                </td>
                 <td class="right aligned">
                     <div class="flex items-center justify-end gap-3">
+                        @can('approve-bookings')
+                            <form method="POST" action="{{ route('adventures.bookings.approval', [$adventure, $booking]) }}" data-refresh-modal>
+                                @csrf @method('PATCH')
+                                <button class="{{ $booking->approved_at ? 'text-stone-600' : 'text-green-700' }} hover:underline">
+                                    {{ $booking->approved_at ? 'zurücknehmen' : 'bestätigen' }}
+                                </button>
+                            </form>
+                        @endcan
                         @can('adventure.modify')
                             <a href="{{ route('adventures.bookings.edit', [$adventure, $booking]) }}"
                                data-modal-subview="{{ route('adventures.bookings.edit', [$adventure, $booking]) }}"
@@ -38,7 +53,7 @@
                 </td>
             </tr>
         @empty
-            <tr><td colspan="4" class="text-stone-500">Noch keine Anmeldungen.</td></tr>
+            <tr><td colspan="5" class="text-stone-500">Noch keine Anmeldungen.</td></tr>
         @endforelse
     </tbody>
 </table>
