@@ -103,6 +103,28 @@ class PlayerController extends Controller
     }
 
     /**
+     * Setzt den aktiven Helden des Spielers (Legacy: player.hero_active).
+     * Es kann nur ein aktiver Held je Spieler gesetzt sein (HERO-07).
+     */
+    public function setActiveHero(Request $request, Player $player): RedirectResponse|JsonResponse
+    {
+        $this->authorize('update', $player);
+
+        $data = $request->validate(['hero_id' => ['required', 'integer']]);
+
+        // Der Held muss zu diesem Spieler gehören.
+        abort_unless($player->heroes()->whereKey($data['hero_id'])->exists(), 422);
+
+        $player->update(['active_hero_id' => $data['hero_id']]);
+
+        $message = 'Aktiver Held gesetzt.';
+
+        return $request->expectsJson()
+            ? response()->json(['message' => $message, 'refresh_modal' => true])
+            : back()->with('status', $message);
+    }
+
+    /**
      * @return array<string, mixed>
      */
     private function validatePlayer(Request $request): array

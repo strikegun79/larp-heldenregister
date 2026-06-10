@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Hero;
 use App\Models\Player;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
@@ -70,6 +71,51 @@ class PlayerTest extends TestCase
             ->assertJson(['reload' => true]);
 
         $this->assertSame('Neu', $player->fresh()->name);
+    }
+
+    public function test_owner_can_set_and_replace_the_active_hero(): void
+    {
+        $user = User::factory()->create();
+        $player = Player::factory()->create();
+        $user->players()->attach($player->id, ['self' => true]);
+        $first = Hero::factory()->create(['player_id' => $player->id]);
+        $second = Hero::factory()->create(['player_id' => $player->id]);
+
+        $this->actingAs($user)
+            ->patchJson(route('players.active-hero', $player), ['hero_id' => $first->id])
+            ->assertOk()
+            ->assertJson(['refresh_modal' => true]);
+        $this->assertEquals($first->id, $player->fresh()->active_hero_id);
+
+        // Nur ein aktiver Held: Setzen ersetzt den vorherigen.
+        $this->actingAs($user)
+            ->patchJson(route('players.active-hero', $player), ['hero_id' => $second->id])
+            ->assertOk();
+        $this->assertEquals($second->id, $player->fresh()->active_hero_id);
+    }
+
+    public function test_cannot_set_a_hero_of_another_player_as_active(): void
+    {
+        $user = User::factory()->create();
+        $player = Player::factory()->create();
+        $user->players()->attach($player->id, ['self' => false]);
+        $foreignHero = Hero::factory()->create(); // gehört einem anderen Spieler
+
+        $this->actingAs($user)
+            ->patchJson(route('players.active-hero', $player), ['hero_id' => $foreignHero->id])
+            ->assertStatus(422);
+
+        $this->assertNull($player->fresh()->active_hero_id);
+    }
+
+    public function test_a_non_owner_cannot_set_the_active_hero(): void
+    {
+        $player = Player::factory()->create();
+        $hero = Hero::factory()->create(['player_id' => $player->id]);
+
+        $this->actingAs(User::factory()->create())
+            ->patch(route('players.active-hero', $player), ['hero_id' => $hero->id])
+            ->assertForbidden();
     }
 
     public function test_a_user_cannot_view_a_foreign_player(): void

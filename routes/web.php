@@ -36,6 +36,8 @@ Route::middleware('auth')->group(function () {
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
     Route::resource('players', PlayerController::class);
+    // Aktiven Helden eines Spielers setzen (HERO-07).
+    Route::patch('players/{player}/active-hero', [PlayerController::class, 'setActiveHero'])->name('players.active-hero');
     Route::resource('heroes', HeroController::class);
     // Verschollen-Status umschalten (HERO-08).
     Route::patch('heroes/{hero}/missing', [HeroController::class, 'toggleMissing'])->name('heroes.missing');

@@ -36,13 +36,19 @@ Das Hinzufügen einer Klasse soll EP kosten und gebucht werden.
 - [ ] Tests.
 **Abhängig von:** EP-02.
 
-### HERO-07 · Held aktiv/inaktiv + aktiver Held je Spieler · ⏱ 3h · 🔲
+### HERO-07 · Held aktiv/inaktiv + aktiver Held je Spieler · ⏱ 3h · ✅
 **Beschreibung:** `players.active_hero_id` aus Legacy; den aktiven Helden
 über die UI setzen.
 **Akzeptanzkriterien:**
-- [ ] Spieler-Ansicht erlaubt „als aktiven Helden setzen".
-- [ ] Nur ein aktiver Held je Spieler.
-- [ ] Tests.
+- [x] Spieler-Ansicht erlaubt „als aktiven Helden setzen".
+- [x] Nur ein aktiver Held je Spieler.
+- [x] Tests.
+
+> Umgesetzt: `PlayerController@setActiveHero` (`PATCH players/{player}/active-hero`,
+> `PlayerPolicy:update`); im Spieler-Detail je Held „Aktiv setzen" bzw.
+> grünes „aktiv"-Label. Held muss zum Spieler gehören (sonst 422). Nur ein
+> aktiver Held (single `active_hero_id`, wird beim Setzen ersetzt). AJAX +
+> Modal-Refresh. Tests: PlayerTest (3).
 
 ### HERO-08 · Held status ändern "Erste Erblickung" & "Verschollen" als Status-Workflow · ⏱ 2h · ✅
 **Beschreibung:** `died` und 'born'-Datum existieren; Workflow + Anzeige fehlen.
