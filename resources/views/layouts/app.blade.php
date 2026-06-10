@@ -245,5 +245,7 @@
                 submitSkill(this, skillBaseUrl + '/' + skillCurrentId, 'DELETE'); // DELETE .../skills/{id}
             });
         </script>
+
+        @stack('scripts')
     </body>
 </html>

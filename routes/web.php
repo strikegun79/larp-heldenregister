@@ -8,6 +8,7 @@ use App\Http\Controllers\HeroController;
 use App\Http\Controllers\HeroSkillController;
 use App\Http\Controllers\PlayerController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\SkilltreeController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -41,6 +42,10 @@ Route::middleware('auth')->group(function () {
     // Fertigkeit erlernen (HERO-14) / aberkennen (HERO-16).
     Route::post('heroes/{hero}/skills', [HeroSkillController::class, 'store'])->name('heroes.skills.store');
     Route::delete('heroes/{hero}/skills/{skill}', [HeroSkillController::class, 'destroy'])->name('heroes.skills.destroy');
+
+    // Fertigkeitsbaum-Positions-Editor je Klasse (HERO-17).
+    Route::get('skilltree/{heroClass}/edit', [SkilltreeController::class, 'edit'])->name('skilltree.edit');
+    Route::patch('skilltree/{heroClass}', [SkilltreeController::class, 'update'])->name('skilltree.update');
     Route::resource('adventures', AdventureController::class);
 
     // Anmeldungen zu einem Abenteuer.

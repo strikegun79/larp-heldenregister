@@ -31,6 +31,9 @@
         </div>
         @foreach ($hero->classes as $i => $class)
             <div class="ui bottom attached tab segment @if ($i === 0) active @endif" data-tab="cls-{{ $class->id }}">
+                @can('heldenregister.edit')
+                    <a href="{{ route('skilltree.edit', $class) }}" class="ui tiny basic button" style="margin-bottom:.75rem">Positionen bearbeiten</a>
+                @endcan
                 <div class="skill-map">
                     <img src="{{ $class->skilltreeImage() }}" alt="Fertigkeitsbaum {{ $class->name }}" class="skill-image">
                     @foreach ($class->skills as $skill)

@@ -147,3 +147,18 @@ Das Hinzufügen einer Klasse soll EP kosten und gebucht werden.
 - [ ] Zweiter Tab die Besuchten Abenteuerübersicht.
 - [ ] weitere Tabs sind die Fertigkeitsbäume pro Klasse
 - [ ] letztes Tab ist der EP-Verlauf. Das Einstellen von EP und der EP-Verlauf soll hier angezeigt werden.
+
+### HERO-18 · Fertigkeitsbaum-Positions-Editor · ⏱ 3h · ✅
+**Beschreibung:** Drag&Drop-Editor zum Setzen der Marker-Positionen je Klasse
+(ursprünglich im Chat als „HERO-17" angefragt; HERO-17 war im Backlog bereits
+für das Detail-Layout vergeben).
+**Akzeptanzkriterien:**
+- [x] Eigene Editor-Seite je Klasse mit dem Baum-Bild und ziehbaren, nummerierten Markern.
+- [x] Position wird per Drag&Drop gesetzt und als x/y-% in `skill_hero_class` gespeichert.
+- [x] Nur mit `heldenregister.edit`; Einstieg aus dem Helden-Detail je Klassen-Tab.
+- [x] Tests.
+
+> Umgesetzt: `SkilltreeController` (`GET skilltree/{class}/edit`,
+> `PATCH skilltree/{class}`); Editor-View mit Pointer-Drag (vanilla JS, via
+> `@push('scripts')`/`@stack`), Speichern per AJAX + Toast; Validierung 0–100 %.
+> Link „Positionen bearbeiten" je Klassen-Tab im Helden-Detail. Tests: `SkilltreeTest` (5).
