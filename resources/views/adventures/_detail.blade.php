@@ -36,6 +36,27 @@
     </tbody>
 </table>
 
+@can('manage-attendance')
+    <h3 class="font-uncial text-lg text-waldritter mt-6 mb-2">Teilnahme (Check-in)</h3>
+    @if ($adventure->bookings->isEmpty())
+        <p class="text-stone-500">Keine Anmeldungen zum Abhaken.</p>
+    @else
+        @php($visitedIds = $adventure->visits->pluck('player_id'))
+        <form method="POST" action="{{ route('adventures.attendance', $adventure) }}" data-refresh-modal class="ui form">
+            @csrf @method('PUT')
+            <div class="grid grid-cols-1 sm:grid-cols-2 gap-1 mb-3">
+                @foreach ($adventure->bookings as $booking)
+                    <label class="flex items-center gap-2">
+                        <input type="checkbox" name="present[]" value="{{ $booking->player_id }}" @checked($visitedIds->contains($booking->player_id))>
+                        {{ $booking->player?->full_name }}
+                    </label>
+                @endforeach
+            </div>
+            <button type="submit" class="ui primary button">Teilnahme speichern</button>
+        </form>
+    @endif
+@endcan
+
 @can('adventure.book')
     <h3 class="font-uncial text-lg text-waldritter mt-6 mb-2">Anmelden</h3>
     @if (! $adventure->registrationOpen())

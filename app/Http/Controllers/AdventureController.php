@@ -60,7 +60,7 @@ class AdventureController extends Controller
 
     public function show(Adventure $adventure): View
     {
-        $adventure->load(['location', 'status', 'category', 'client', 'bookings.player', 'bookings.role']);
+        $adventure->load(['location', 'status', 'category', 'client', 'bookings.player', 'bookings.role', 'visits']);
 
         $data = [
             'adventure' => $adventure,

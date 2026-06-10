@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin;
 use App\Http\Controllers\AdventureController;
+use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\EpTransactionController;
 use App\Http\Controllers\HeroController;
@@ -57,6 +58,10 @@ Route::middleware('auth')->group(function () {
         ->name('adventures.bookings.store');
     Route::delete('adventures/{adventure}/bookings/{booking}', [BookingController::class, 'destroy'])
         ->name('adventures.bookings.destroy');
+
+    // Teilnahme/Check-in erfassen (BOOK-08).
+    Route::put('adventures/{adventure}/attendance', [AttendanceController::class, 'update'])
+        ->name('adventures.attendance');
 
     // Verwaltung (Portal-Administration, Berechtigung portal.manage).
     Route::prefix('admin')->name('admin.')->middleware('can:portal.manage')->group(function () {

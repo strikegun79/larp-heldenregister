@@ -47,13 +47,20 @@ Buchung automatisch nach.
 - [ ] Tests (Reihenfolge, kein Nachrücken wenn niemand wartet).
 **Abhängig von:** BOOK-03.
 
-### BOOK-08 · Teilnahme erfassen (`event_visits`) · ⏱ 4h · 🔲
+### BOOK-08 · Teilnahme erfassen (`event_visits`) · ⏱ 4h · ✅
 **Beschreibung:** Tabelle/Model vorhanden, aber keine UI. Erfassen, wer wirklich
 da war (Grundlage für EP-Vergabe).
 **Akzeptanzkriterien:**
-- [ ] Check-in-Liste je Event (aus Buchungen) zum Abhaken der Anwesenden.
-- [ ] Erzeugt `event_visits`-Einträge.
-- [ ] Berechtigung (Spielleiter/Teamer/Admin); Tests.
+- [x] Check-in-Liste je Event (aus Buchungen) zum Abhaken der Anwesenden.
+- [x] Erzeugt `event_visits`-Einträge.
+- [x] Berechtigung (Spielleiter/Teamer/Admin); Tests.
+
+> Umgesetzt: Gate `manage-attendance` (game_master/teamer + Admin).
+> `AttendanceController@update` (`PUT adventures/{adventure}/attendance`):
+> synchronisiert `event_visits` aus den abgehakten Anwesenden; nur gebuchte
+> Spieler zählen; idempotent in Transaktion. Check-in-Block (Checkboxen je
+> Anmeldung) im Abenteuer-Detail-Modal, AJAX + Modal-Refresh. Tests:
+> `AttendanceTest` (4). Grundlage für BOOK-09 (EP-Vergabe).
 
 ### BOOK-09 · Automatische EP-Vergabe nach Teilnahme · ⏱ 4h · 🔲
 **Beschreibung:** Nach erfasster Teilnahme bekommt der aktive Held des Spielers
