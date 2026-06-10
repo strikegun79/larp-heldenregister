@@ -20,11 +20,45 @@
                 </div>
             @endif
 
-            <div class="mb-4 flex gap-4 text-sm">
-                <a href="{{ route('heroes.index') }}" class="{{ ! $status ? 'font-semibold text-waldritter' : 'text-stone-600 hover:underline' }}">Alle</a>
-                <a href="{{ route('heroes.index', ['status' => 'present']) }}" class="{{ $status === 'present' ? 'font-semibold text-waldritter' : 'text-stone-600 hover:underline' }}">Aktive</a>
-                <a href="{{ route('heroes.index', ['status' => 'missing']) }}" class="{{ $status === 'missing' ? 'font-semibold text-waldritter' : 'text-stone-600 hover:underline' }}">Verschollene</a>
-            </div>
+            @php($selectClass = 'mt-1 block w-full border-gray-300 rounded-md shadow-sm text-sm focus:border-indigo-500 focus:ring-indigo-500')
+            <form method="GET" action="{{ route('heroes.index') }}"
+                  class="mb-4 bg-white/60 border-2 border-[#5a3a22]/30 rounded-lg p-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-5 items-end">
+                <div class="lg:col-span-2">
+                    <label class="text-sm text-stone-600">Suche (Spieler- oder Charaktername)</label>
+                    <input type="text" name="q" value="{{ $q }}" placeholder="z. B. Tilix oder Müller" class="{{ $selectClass }}">
+                </div>
+                <div>
+                    <label class="text-sm text-stone-600">Klasse</label>
+                    <select name="class_id" class="{{ $selectClass }}">
+                        <option value="">Alle</option>
+                        @foreach ($classes as $class)
+                            <option value="{{ $class->id }}" @selected((string) $classId === (string) $class->id)>{{ $class->name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div>
+                    <label class="text-sm text-stone-600">Spieler</label>
+                    <select name="player_id" class="{{ $selectClass }}">
+                        <option value="">Alle</option>
+                        @foreach ($players as $player)
+                            <option value="{{ $player->id }}" @selected((string) $playerId === (string) $player->id)>{{ $player->full_name }}</option>
+                        @endforeach
+                    </select>
+                </div>
+                <div>
+                    <label class="text-sm text-stone-600">Status</label>
+                    <select name="status" class="{{ $selectClass }}">
+                        <option value="">Alle</option>
+                        <option value="active" @selected($status === 'active')>Aktiv</option>
+                        <option value="inactive" @selected($status === 'inactive')>Inaktiv</option>
+                        <option value="missing" @selected($status === 'missing')>Verschollen</option>
+                    </select>
+                </div>
+                <div class="sm:col-span-2 lg:col-span-5 flex items-center gap-3">
+                    <button type="submit" class="ui small primary button">Filtern</button>
+                    <a href="{{ route('heroes.index') }}" class="text-sm text-stone-600 hover:underline">Zurücksetzen</a>
+                </div>
+            </form>
 
             <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
                 <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">

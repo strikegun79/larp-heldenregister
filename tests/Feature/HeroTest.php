@@ -221,6 +221,52 @@ class HeroTest extends TestCase
             ->assertDontSee('Lebender');
     }
 
+    public function test_index_search_matches_character_and_player_name(): void
+    {
+        $p1 = Player::factory()->create(['name' => 'Max', 'lastname' => 'Mustermann']);
+        Hero::factory()->create(['player_id' => $p1->id, 'character_name' => 'Tilix']);
+        $p2 = Player::factory()->create(['name' => 'Erika', 'lastname' => 'Beispiel']);
+        Hero::factory()->create(['player_id' => $p2->id, 'character_name' => 'Aldebrand']);
+
+        $this->actingAs($this->userWithRole(20))
+            ->get(route('heroes.index', ['q' => 'Tilix']))
+            ->assertOk()->assertSee('Tilix')->assertDontSee('Aldebrand');
+
+        $this->actingAs($this->userWithRole(20))
+            ->get(route('heroes.index', ['q' => 'Mustermann']))
+            ->assertOk()->assertSee('Tilix')->assertDontSee('Aldebrand');
+    }
+
+    public function test_index_filter_by_class(): void
+    {
+        $warrior = Hero::factory()->create(['character_name' => 'Kriegerheld']);
+        $warrior->classes()->attach(1); // Krieger
+        $wizard = Hero::factory()->create(['character_name' => 'Magierheld']);
+        $wizard->classes()->attach(3); // Magier
+
+        $this->actingAs($this->userWithRole(20))
+            ->get(route('heroes.index', ['class_id' => 1]))
+            ->assertOk()->assertSee('Kriegerheld')->assertDontSee('Magierheld');
+    }
+
+    public function test_index_filter_by_player_and_status(): void
+    {
+        $player = Player::factory()->create();
+        Hero::factory()->create(['player_id' => $player->id, 'character_name' => 'Eigenheld']);
+        Hero::factory()->create(['character_name' => 'Fremdheld']);
+
+        $this->actingAs($this->userWithRole(20))
+            ->get(route('heroes.index', ['player_id' => $player->id]))
+            ->assertOk()->assertSee('Eigenheld')->assertDontSee('Fremdheld');
+
+        Hero::factory()->create(['character_name' => 'Inaktiverheld', 'active' => false, 'died' => null]);
+        Hero::factory()->create(['character_name' => 'Aktiverheld', 'active' => true, 'died' => null]);
+
+        $this->actingAs($this->userWithRole(20))
+            ->get(route('heroes.index', ['status' => 'inactive']))
+            ->assertOk()->assertSee('Inaktiverheld')->assertDontSee('Aktiverheld');
+    }
+
     public function test_form_uses_erste_erblickung_label(): void
     {
         $hero = Hero::factory()->create();

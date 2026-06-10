@@ -72,13 +72,18 @@ Das Hinzufügen einer Klasse soll EP kosten und gebucht werden.
 - [ ] Upload + Validierung (Größe/Typ), Anzeige im Helden-Modal.
 - [ ] Tests.
 
-### HERO-10 · Heldenregister: Filter nach Klasse/Spieler/aktiv · ⏱ 3h · 🔲
+### HERO-10 · Heldenregister: Filter nach Klasse/Spieler/aktiv · ⏱ 3h · ✅
 **Beschreibung:** Liste filter- und sortierbar machen.
 **Akzeptanzkriterien:**
-- [ ] Filter Klasse, Aktiv-Status, Spieler.
-- [ ] Server-seitig, paginierungsfest.
-- [ ] Es soll nach Namen des Spielers oder Charakters gesucht werden können
-**Abhängig von:** UI-06.
+- [x] Filter Klasse, Aktiv-Status, Spieler.
+- [x] Server-seitig, paginierungsfest.
+- [x] Es soll nach Namen des Spielers oder Charakters gesucht werden können
+
+> Umgesetzt: Filterleiste über der Liste (GET): Suche (`q`, Charakter- ODER
+> Spielername via `whereHas`), Klasse (`class_id`, `whereHas`), Spieler
+> (`player_id`), Status (`active`/`inactive`/`missing`). Alles serverseitig
+> kombinierbar, `paginate()->withQueryString()`. Tests: HeroTest (Suche,
+> Klasse, Spieler, Status).
 
 ### HERO-11 · Abenteuerhistorie je Held (Vision) · ⏱ 3h · 🔲
 **Beschreibung:** Welche Abenteuer ein Held bestritten hat (aus Teilnahme/

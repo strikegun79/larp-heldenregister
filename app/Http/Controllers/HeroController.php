@@ -25,16 +25,36 @@ class HeroController extends Controller
      */
     public function index(Request $request): View
     {
-        $status = $request->query('status'); // present | missing | (null = alle)
+        $status = $request->query('status');     // active | inactive | missing | (null = alle)
+        $classId = $request->query('class_id');
+        $playerId = $request->query('player_id');
+        $q = trim((string) $request->query('q'));
 
         $heroes = Hero::with(['player', 'classes', 'epTransactions.type'])
-            ->when($status === 'missing', fn ($q) => $q->whereNotNull('died'))
-            ->when($status === 'present', fn ($q) => $q->whereNull('died'))
+            ->when($status === 'missing', fn ($query) => $query->whereNotNull('died'))
+            ->when($status === 'active', fn ($query) => $query->whereNull('died')->where('active', true))
+            ->when($status === 'inactive', fn ($query) => $query->whereNull('died')->where('active', false))
+            ->when($classId, fn ($query) => $query->whereHas('classes', fn ($c) => $c->whereKey($classId)))
+            ->when($playerId, fn ($query) => $query->where('player_id', $playerId))
+            ->when($q !== '', fn ($query) => $query->where(function ($w) use ($q) {
+                $w->where('character_name', 'like', "%{$q}%")
+                    ->orWhereHas('player', fn ($p) => $p
+                        ->where('name', 'like', "%{$q}%")
+                        ->orWhere('lastname', 'like', "%{$q}%"));
+            }))
             ->orderBy('character_name')
             ->paginate(20)
             ->withQueryString();
 
-        return view('heroes.index', compact('heroes', 'status'));
+        return view('heroes.index', [
+            'heroes' => $heroes,
+            'status' => $status,
+            'classId' => $classId,
+            'playerId' => $playerId,
+            'q' => $q,
+            'classes' => HeroClass::orderBy('name')->get(),
+            'players' => Player::orderBy('name')->get(),
+        ]);
     }
 
     /**
