@@ -126,10 +126,31 @@ Eine Admin-Eventliste mit Verwaltungsaktionen (anlegen/bearbeiten/absagen).
 > Admin-Eventliste (`Admin\AdventureController`, Verwaltung → Abenteuer) öffnet
 > das Verwaltungs-Modal je Event. Tests: `EventManageModalTest` (5).
 
-### ADV-17 · Event-Exprot und unterschreiben · ⏱ 4h · 🔲
+### ADV-17 · Event-Exprot und unterschreiben · ⏱ 4h · ✅
 **Beschreibung:** per Tablet soll es möglich sein, eine Unterschrift bei teilnahme zu leisten und eine PDF zu exportieren
 **Akzeptanzkriterien:**
-- [] Die Projektleitung, Admin und Bürokrat können das Event öffnen und auf dem 3. Tab für den Teilnehmer eine Unterschrift entgegen nehmen.
-- [] Tauglich mit Tablet und Stift. Ein Feld zum unterzeichnen.
-- [] eine PDF mit allen Teilnehmern die angemeldet sind soll runterladbar sein. Spalten der Liste: laufende Nr., Nachname, Vorname, Ort, Kontaktrufnummer, Unterschrift falls existiert
-- [] im Kopf der der Teilnehmerliste muss stehen, das Eventdatum, der Eventort, der Eventtyp und Anzahl von Männlich und weiblich
+- [x] Die Projektleitung, Admin und Bürokrat können das Event öffnen und auf dem 3. Tab für den Teilnehmer eine Unterschrift entgegen nehmen.
+- [x] Tauglich mit Tablet und Stift. Ein Feld zum unterzeichnen.
+- [x] eine PDF mit allen Teilnehmern die angemeldet sind soll runterladbar sein. Spalten der Liste: laufende Nr., Nachname, Vorname, Ort, Kontaktrufnummer, Unterschrift falls existiert
+- [x] im Kopf der der Teilnehmerliste muss stehen, das Eventdatum, der Eventort, der Eventtyp und Anzahl von Männlich und weiblich
+
+> Umgesetzt: Gate `take-signatures` (Projektleitung/Bürokrat + Admin). Spalte
+> `bookings.signature` (base64-PNG). Auf dem Check-in-Tab (Tab 3) je Teilnehmer
+> „erfassen/ändern" → Unterschriften-Pad als Unteransicht (`bookings/_signature`,
+> Canvas mit Pointer-Events = Tablet/Stift/Maus, „Löschen"/„Entfernen").
+> `SignatureController` (edit/update/destroy, Validierung `starts_with:data:image/png`).
+> PDF via dompdf (`barryvdh/laravel-dompdf`): `AdventureController@participantsPdf`
+> (`GET adventures/{adventure}/participants-pdf`, `take-signatures`), View
+> `participants_pdf` mit Kopf (Datum, Ort, Typ, Anzahl männlich/weiblich/gesamt)
+> und Tabelle (Nr., Nachname, Vorname, Ort, Kontaktrufnummer = `erreichbarkeit`,
+> Unterschrift als Bild). Hinweis: „Ort" bleibt leer – Spieler haben kein
+> Wohnort-Feld (Spalte ist für später vorhanden). Tests: `EventSignaturePdfTest` (7).
+
+### ADV-18 · Event-Ansicht für Teilnehmer · ⏱ 4h · 🔲
+**Beschreibung:** kleine Korrekturen
+**Akzeptanzkriterien:**
+- [] Unter dem Tab Anmeldungen für ein Event, muss der Nutzer sehen können welcher Status und Beitrag für die einzelnen Spieler sind.
+- [] Status können sein: offen, bestätigt, abgelehnt, abgemeldet
+- [] Unter Beitrag: offen, bezahlt
+- [] Für die Verwaltung zum Checkin, sollten die Teilnehmer als Liste angezeigt werden, pro Teilnehmer eine Zeile. Am ende zwei buttons: Check-in, Abmelden (abmelden soll den Status auf "abgemeldet" setzen, z.b. weil der Teilnehmer sich abgemeldet hat, obwohl angemeldet, frage auch den Grund ab. Krank, nicht erschienen, unentschuldigt)
+

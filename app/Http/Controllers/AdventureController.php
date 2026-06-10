@@ -9,11 +9,13 @@ use App\Models\EventRole;
 use App\Models\EventStatus;
 use App\Models\Location;
 use App\Models\Player;
+use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\Response;
 
 class AdventureController extends Controller
 {
@@ -24,6 +26,8 @@ class AdventureController extends Controller
         $this->middleware('can:adventure.access')->only(['index', 'show']);
         // Events anlegen/bearbeiten: events.edit (Admin, Bürokrat, Projektleitung).
         $this->middleware('can:events.edit')->only(['create', 'store', 'edit', 'update', 'destroy', 'manage']);
+        // Teilnehmer-PDF: Projektleitung, Bürokrat, Admin (ADV-17).
+        $this->middleware('can:take-signatures')->only('participantsPdf');
     }
 
     /**
@@ -98,6 +102,26 @@ class AdventureController extends Controller
         $adventure->load(['bookings.player', 'bookings.role', 'visits', 'status']);
 
         return view('adventures._manage', $this->formData($adventure));
+    }
+
+    /**
+     * Teilnehmerliste als PDF (ADV-17): Kopf mit Datum/Ort/Typ und Anzahl
+     * männlich/weiblich, dann alle Anmeldungen inkl. Unterschrift.
+     */
+    public function participantsPdf(Adventure $adventure): Response
+    {
+        $adventure->load(['location', 'category', 'bookings.player']);
+
+        $bookings = $adventure->bookings
+            ->sortBy([['player.lastname', 'asc'], ['player.name', 'asc']])
+            ->values();
+
+        $male = $bookings->filter(fn ($b) => $b->player?->gender === 'männlich')->count();
+        $female = $bookings->filter(fn ($b) => $b->player?->gender === 'weiblich')->count();
+
+        $pdf = Pdf::loadView('adventures.participants_pdf', compact('adventure', 'bookings', 'male', 'female'));
+
+        return $pdf->download('teilnehmerliste-'.$adventure->id.'.pdf');
     }
 
     public function edit(Adventure $adventure): View

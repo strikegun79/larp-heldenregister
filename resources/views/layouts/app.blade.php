@@ -121,6 +121,8 @@
                         }
                         // HERO-19: Helden-Detail bekommt eine feste Modal-Größe.
                         $('#app-modal').toggleClass('modal-hero', $content.find('#skilltree').length > 0);
+                        // ADV-17: Unterschriften-Pad aktivieren, falls vorhanden.
+                        if ($content.find('#signature-pad').length) initSignaturePad();
                         $('#app-modal').modal('refresh');
                     })
                     .catch(() => $content.html('<div class="ui error message">Konnte nicht geladen werden.</div>'));
@@ -144,6 +146,36 @@
                 e.preventDefault();
                 loadModalContent(trigger.getAttribute('data-modal-subview'));
             });
+
+            // ADV-17: einfaches Unterschriften-Pad (Tablet/Stift/Maus via Pointer Events).
+            function initSignaturePad() {
+                const c = document.getElementById('signature-pad');
+                if (!c) return;
+                const ctx = c.getContext('2d');
+                ctx.lineWidth = 2.5;
+                ctx.lineCap = 'round';
+                ctx.lineJoin = 'round';
+                ctx.strokeStyle = '#1a1a1a';
+                let drawing = false, last = null;
+                const pos = (e) => {
+                    const r = c.getBoundingClientRect();
+                    return { x: (e.clientX - r.left) * (c.width / r.width), y: (e.clientY - r.top) * (c.height / r.height) };
+                };
+                c.addEventListener('pointerdown', (e) => { drawing = true; last = pos(e); c.setPointerCapture(e.pointerId); });
+                c.addEventListener('pointermove', (e) => {
+                    if (!drawing) return;
+                    const p = pos(e);
+                    ctx.beginPath(); ctx.moveTo(last.x, last.y); ctx.lineTo(p.x, p.y); ctx.stroke();
+                    last = p;
+                });
+                c.addEventListener('pointerup', () => { drawing = false; });
+                c.addEventListener('pointerleave', () => { drawing = false; });
+                c.__clear = () => ctx.clearRect(0, 0, c.width, c.height);
+            }
+            function clearSignaturePad() {
+                const c = document.getElementById('signature-pad');
+                if (c && c.__clear) c.__clear();
+            }
 
             function showToast(message, type) {
                 $('body').toast({

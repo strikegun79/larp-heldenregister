@@ -54,6 +54,10 @@ class AuthServiceProvider extends ServiceProvider
         // Spielleiter (+ Admin). Teamer/Event buchen/Teilnehmer sehen nur eigene.
         Gate::define('view-all-bookings', fn (User $user) => $user->hasAnyRole('registrar', 'project_lead', 'game_master'));
 
+        // Unterschriften erfassen + Teilnehmer-PDF (ADV-17): Projektleitung,
+        // Bürokrat (+ Admin via before).
+        Gate::define('take-signatures', fn (User $user) => $user->hasAnyRole('project_lead', 'registrar'));
+
         // Admins dürfen grundsätzlich alles.
         Gate::before(fn (User $user) => $user->isAdmin() ? true : null);
     }

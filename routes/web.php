@@ -10,6 +10,7 @@ use App\Http\Controllers\HeroController;
 use App\Http\Controllers\HeroSkillController;
 use App\Http\Controllers\PlayerController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\SignatureController;
 use App\Http\Controllers\SkilltreeController;
 use Illuminate\Support\Facades\Route;
 
@@ -58,6 +59,8 @@ Route::middleware('auth')->group(function () {
     Route::resource('adventures', AdventureController::class);
     // Verwaltungs-Modal mit Tabs (ADV-16): Editor + Anmeldungen + Check-in.
     Route::get('adventures/{adventure}/manage', [AdventureController::class, 'manage'])->name('adventures.manage');
+    // Teilnehmerliste als PDF (ADV-17).
+    Route::get('adventures/{adventure}/participants-pdf', [AdventureController::class, 'participantsPdf'])->name('adventures.participants-pdf');
 
     // Anmeldungen zu einem Abenteuer.
     // Anmeldeformular als Modal-Unteransicht (ADV-15).
@@ -73,6 +76,13 @@ Route::middleware('auth')->group(function () {
     // Anmeldung bestätigen/freigeben – Toggle approved_at (BOOK-05).
     Route::patch('adventures/{adventure}/bookings/{booking}/approval', [BookingController::class, 'approve'])
         ->name('adventures.bookings.approval');
+    // Unterschrift bei Teilnahme erfassen (ADV-17).
+    Route::get('adventures/{adventure}/bookings/{booking}/signature', [SignatureController::class, 'edit'])
+        ->name('adventures.bookings.signature.edit');
+    Route::put('adventures/{adventure}/bookings/{booking}/signature', [SignatureController::class, 'update'])
+        ->name('adventures.bookings.signature.update');
+    Route::delete('adventures/{adventure}/bookings/{booking}/signature', [SignatureController::class, 'destroy'])
+        ->name('adventures.bookings.signature.destroy');
     // Teilnahmebeitrag-Status – Toggle paid (BOOK-06).
     Route::patch('adventures/{adventure}/bookings/{booking}/payment', [BookingController::class, 'togglePaid'])
         ->name('adventures.bookings.payment');
