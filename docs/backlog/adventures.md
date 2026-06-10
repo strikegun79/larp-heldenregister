@@ -72,3 +72,39 @@ Eine Admin-Eventliste mit Verwaltungsaktionen (anlegen/bearbeiten/absagen).
 **Akzeptanzkriterien:**
 - [ ] Chronologische Ansicht kommender Events mit Status/Belegung.
 - [ ] Optional Monats-/Listen-Umschaltung.
+
+### ADV-13 · Event-Spieleransicht · ⏱ 4h · 🔲
+**Beschreibung:** Wer nur die Rollen Teilnehmer,Event-Buchen und Teamer hat, darf nur seine eigenen Spieler unter seinem Nutzer sehen.
+**Akzeptanzkriterien:**
+- [ ] Berücksichtigen der Rolle.
+- [ ] Filtern der Spieler die am Event angemeldet sind.
+- [ ] Spieler die schon angemeldet sind, erscheinen in der Dropdown auswahl nicht mehr.
+
+### ADV-14 · Event-unter Verwaltung · ⏱ 4h · 🔲
+**Beschreibung:** Das Öffnen eines Events unter der Verwaltung soll direkt die Editieren-Ansicht des Events zeigen.
+**Akzeptanzkriterien:**
+- [ ] Event öffnen unter Abenteuer öffnet ein Modal für die Anmeldung an einem Event
+- [ ] Event öffnen unter der Verwaltung-Abenteuer öffnet das Modal zum editieren des Events als solches.
+- [] Event STatus dropdown soll durchnummeriert sein: 0 unbekannt, 10 in Bearbeitung, 20 geplant, 30 Anmeldung offen, 40 Anmeldung geschlossen, 50 Abrechnung, 60 Abgeschlossen, 70 abgesagt
+- [] die Spieler Check-In können nur nach Status 40 erfolgen und nur durch die Rollen Admin, Projektleitung und Bürokrat
+
+
+### ADV-15 · Event-Layout · ⏱ 4h · ✅
+**Beschreibung:** Das Öffnen unter verfügbare Abenteuer 
+**Akzeptanzkriterien:**
+- [x] Beim anklicken eines Abenteuers aus "Abenteuer" öffnet ein Modal mit allen gängigen Informationen aus dem Event
+- [x] Hinzu soll eine Funktionsmail kommen, die für das Event vorgesehen ist.
+- [x] Auch die aktuelle Anmeldungen soll angezeigt werden. Beschränkt auf die Rolle. Wenn nur Teamer, Event buchen oder Teilnehmer, dürfen nur die eigenen Spieler zu sehen sein.
+- [x] Es soll ein Button geben "Anmelden", dadurch öffnet sich ein Modal zum Anmelden mit allen Anmeldungsfelder.
+- [x] wird das Anmeldemodal geschlossen oder bestätigt fällt man zurück zum Modal des Events und sieht die neuen angemeldeten Spieler.
+
+> Umgesetzt: Spalte `adventures.function_email` (Migration, im Event-Formular
+> pflegbar, im Detail als `mailto:`-Link). Gate `view-all-bookings`
+> (Bürokrat/Projektleitung/Spielleiter + Admin); Teamer/Event-buchen/Teilnehmer
+> sehen in der Anmeldeliste nur die eigenen Spieler (`AdventureController@show`
+> liefert `$visibleBookings`). „Anmelden"-Button öffnet das Formular als
+> Unteransicht (`bookings/_create.blade.php`, `GET adventures/{adventure}/
+> bookings/create`, alle Anmeldefelder inkl. Medikamente/Erreichbarkeit) per
+> `data-modal-subview` – ohne `appModalUrl` zu überschreiben. Absenden
+> (`refresh_modal`) oder „Zurück" führen zurück aufs Event-Detail mit der neuen
+> Anmeldung. Tests: `EventLayoutTest` (6) + angepasste `BookingPlayerScopeTest`.

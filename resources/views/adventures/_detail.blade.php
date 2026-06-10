@@ -9,13 +9,16 @@
     <div><dt class="text-sm text-stone-500">Auftraggeber</dt><dd>{{ $adventure->client?->name }}</dd></div>
     <div><dt class="text-sm text-stone-500">Beitrag</dt><dd>{{ number_format($adventure->fee, 2, ',', '.') }} €</dd></div>
     <div><dt class="text-sm text-stone-500">Belegung</dt><dd class="font-semibold">{{ $adventure->confirmedBookings()->count() }} / {{ $adventure->max_player }} ({{ $adventure->freeSlots() }} frei)</dd></div>
+    @if ($adventure->function_email)
+        <div><dt class="text-sm text-stone-500">Funktions-E-Mail</dt><dd><a href="mailto:{{ $adventure->function_email }}" class="text-waldritter hover:underline">{{ $adventure->function_email }}</a></dd></div>
+    @endif
 </dl>
 
 <h3 class="font-uncial text-lg text-waldritter mt-6 mb-2">Anmeldungen</h3>
 <table class="ui very basic compact table">
     <thead><tr><th>Spieler</th><th>Rolle</th><th>Liste</th><th>Status</th><th>Beitrag</th><th></th></tr></thead>
     <tbody>
-        @forelse ($adventure->bookings as $booking)
+        @forelse ($visibleBookings as $booking)
             <tr>
                 <td>{{ $booking->player?->full_name }}</td>
                 <td>{{ $booking->role?->description }}</td>
@@ -121,43 +124,11 @@
         @if ($adventure->isFull())
             <p class="mb-3 text-orange-600">Das Abenteuer ist voll – neue Anmeldungen kommen auf die Warteliste.</p>
         @endif
-        <form method="POST" action="{{ route('adventures.bookings.store', $adventure) }}" class="ui form" data-refresh-modal>
-            @csrf
-            <div class="two fields">
-                <div class="field">
-                    <label>Spieler</label>
-                    <select name="player_id" required>
-                        <option value="">— wählen —</option>
-                        @foreach ($players as $player)
-                            <option value="{{ $player->id }}">{{ $player->full_name }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div class="field">
-                    <label>Rolle</label>
-                    <select name="event_role_id" required>
-                        @foreach ($roles as $role)
-                            <option value="{{ $role->id }}">{{ $role->description }}</option>
-                        @endforeach
-                    </select>
-                </div>
-            </div>
-
-            <div class="grid grid-cols-2 gap-2 my-2">
-                @foreach (['fotoerlaubnis' => 'Fotoerlaubnis', 'vegetarier' => 'Vegetarier', 'leih_tunika' => 'Leih-Tunika', 'leih_waffe' => 'Leih-Waffe', 'nsc' => 'NSC'] as $field => $label)
-                    <label class="flex items-center gap-2"><input type="checkbox" name="{{ $field }}" value="1"> {{ $label }}</label>
-                @endforeach
-            </div>
-
-            <div class="field">
-                <label>Allergien</label>
-                <textarea name="allergien" rows="2"></textarea>
-            </div>
-
-            <label class="flex items-center gap-2 my-2"><input type="checkbox" name="agb" value="1" required> Ich akzeptiere die AGB</label>
-
-            <button type="submit" class="ui primary button">Anmeldung absenden</button>
-        </form>
+        {{-- Anmeldeformular als Unteransicht öffnen; nach dem Absenden landet man
+             via refresh_modal wieder auf diesem Event-Detail (ADV-15). --}}
+        <a href="{{ route('adventures.bookings.create', $adventure) }}"
+           data-modal-subview="{{ route('adventures.bookings.create', $adventure) }}"
+           class="ui primary button">Anmelden</a>
     @endif
 @endcan
 

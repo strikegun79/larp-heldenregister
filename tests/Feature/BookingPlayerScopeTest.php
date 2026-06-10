@@ -42,8 +42,9 @@ class BookingPlayerScopeTest extends TestCase
 
         $adventure = Adventure::factory()->create(['max_player' => 5]);
 
+        // Das Anmeldeformular (ADV-15-Unteransicht) listet die Spieler.
         $response = $this->actingAs($booker)
-            ->get(route('adventures.show', $adventure), ['X-Requested-With' => 'XMLHttpRequest'])
+            ->get(route('adventures.bookings.create', $adventure))
             ->assertOk();
 
         $response->assertSee('value="'.$own->id.'"', false);
@@ -59,7 +60,7 @@ class BookingPlayerScopeTest extends TestCase
         $adventure = Adventure::factory()->create(['max_player' => 5]);
 
         $response = $this->actingAs($registrar)
-            ->get(route('adventures.show', $adventure), ['X-Requested-With' => 'XMLHttpRequest'])
+            ->get(route('adventures.bookings.create', $adventure))
             ->assertOk();
 
         $response->assertSee('value="'.$a->id.'"', false);

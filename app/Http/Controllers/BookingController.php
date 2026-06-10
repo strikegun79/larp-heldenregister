@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Adventure;
 use App\Models\Booking;
 use App\Models\EventRole;
+use App\Models\Player;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -17,7 +18,7 @@ class BookingController extends Controller
     {
         $this->middleware('auth');
         // Buchen: adventure.book; Stornieren/Abmelden: adventure.cancel.
-        $this->middleware('can:adventure.book')->only('store');
+        $this->middleware('can:adventure.book')->only(['create', 'store']);
         $this->middleware('can:adventure.cancel')->only('destroy');
         // Anmeldedetails nachträglich ändern (BOOK-04).
         $this->middleware('can:adventure.modify')->only(['edit', 'update']);
@@ -25,6 +26,23 @@ class BookingController extends Controller
         $this->middleware('can:approve-bookings')->only('approve');
         // Bezahlt-Status pflegen (BOOK-06).
         $this->middleware('can:manage-payments')->only('togglePaid');
+    }
+
+    /**
+     * Anmeldeformular als Modal-Unteransicht (ADV-15). Spielerliste auf
+     * eigene/betreute begrenzt (BOOK-10).
+     */
+    public function create(Request $request, Adventure $adventure): View
+    {
+        $players = Gate::allows('book-any-player')
+            ? Player::orderBy('name')->get()
+            : $request->user()->players()->orderBy('name')->get();
+
+        return view('bookings._create', [
+            'adventure' => $adventure,
+            'players' => $players,
+            'roles' => EventRole::orderBy('id')->get(),
+        ]);
     }
 
     /**

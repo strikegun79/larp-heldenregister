@@ -68,10 +68,17 @@ class AdventureController extends Controller
             ? Player::orderBy('name')->get()
             : request()->user()->players()->orderBy('name')->get();
 
+        // Sichtbare Anmeldungen (ADV-15): Bürokrat/Projektleitung/Spielleiter/Admin
+        // sehen alle, Teamer/Event-buchen/Teilnehmer nur die eigenen Spieler.
+        $visibleBookings = Gate::allows('view-all-bookings')
+            ? $adventure->bookings
+            : $adventure->bookings->whereIn('player_id', request()->user()->players->pluck('id'));
+
         $data = [
             'adventure' => $adventure,
             'players' => $players,
             'roles' => EventRole::orderBy('id')->get(),
+            'visibleBookings' => $visibleBookings,
         ];
 
         if (request()->ajax()) {
@@ -135,6 +142,7 @@ class AdventureController extends Controller
     {
         return $request->validate([
             'name' => ['required', 'string', 'max:200'],
+            'function_email' => ['nullable', 'email', 'max:255'],
             'location_id' => ['nullable', 'exists:locations,id'],
             'start_at' => ['required', 'date'],
             'end_at' => ['required', 'date', 'after_or_equal:start_at'],

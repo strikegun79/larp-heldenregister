@@ -11,6 +11,13 @@
     </div>
 
     <div>
+        <x-input-label for="function_email" value="Funktions-E-Mail (Event-Kontakt)" />
+        <x-text-input id="function_email" name="function_email" type="email" class="mt-1 block w-full"
+                      :value="old('function_email', $adventure->function_email)" />
+        <x-input-error :messages="$errors->get('function_email')" class="mt-2" />
+    </div>
+
+    <div>
         <x-input-label for="location_id" value="Ort" />
         <select id="location_id" name="location_id" class="{{ $selectClass }}">
             <option value="">— ohne Ort —</option>

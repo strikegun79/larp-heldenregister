@@ -58,6 +58,9 @@ Route::middleware('auth')->group(function () {
     Route::resource('adventures', AdventureController::class);
 
     // Anmeldungen zu einem Abenteuer.
+    // Anmeldeformular als Modal-Unteransicht (ADV-15).
+    Route::get('adventures/{adventure}/bookings/create', [BookingController::class, 'create'])
+        ->name('adventures.bookings.create');
     Route::post('adventures/{adventure}/bookings', [BookingController::class, 'store'])
         ->name('adventures.bookings.store');
     // Anmeldedetails nachträglich bearbeiten (BOOK-04).
