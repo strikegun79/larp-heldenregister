@@ -15,14 +15,23 @@ Anmeldungen zu Events (`bookings`) und tatsächliche Teilnahme (`event_visits`).
 
 ## Offen (🔲)
 
-### BOOK-04 · Buchung bearbeiten (`adventure.modify`) · ⏱ 4h · 🔲
+### BOOK-04 · Buchung bearbeiten (`adventure.modify`) · ⏱ 4h · ✅
 **Beschreibung:** Die Berechtigung `adventure.modify` existiert, aber es gibt
 keine Edit-Aktion. Buchungsdetails (Rolle, Flags, Allergien, Medikamente,
 Erreichbarkeit) nachträglich ändern.
 **Akzeptanzkriterien:**
-- [ ] Route + Controller-Methode `update` (Booking) hinter `can:adventure.modify`.
-- [ ] Edit-Formular im Modal; AJAX-Submit mit Toast.
-- [ ] Tests (Erlaubt/verboten/Validierung).
+- [x] Route + Controller-Methode `update` (Booking) hinter `can:adventure.modify`.
+- [x] Edit-Formular im Modal; AJAX-Submit mit Toast.
+- [x] Tests (Erlaubt/verboten/Validierung).
+
+> Umgesetzt: `BookingController@edit` + `@update`
+> (`GET/PUT adventures/{adventure}/bookings/{booking}`, `can:adventure.modify`
+> = alle außer Teilnehmer). Edit-Partial `bookings/_edit.blade.php` (Rolle, Flags,
+> Allergien, Medikamente, Erreichbarkeit). „bearbeiten"-Link je Anmeldung im
+> Abenteuer-Detail. Neuer Modal-Mechanismus `data-modal-subview`: lädt die
+> Unteransicht, ohne `appModalUrl` zu überschreiben → nach dem Speichern
+> (`refresh_modal`) landet man wieder auf dem Abenteuer-Detail. `abort 404`,
+> wenn die Buchung nicht zum Abenteuer gehört. Tests: `BookingEditTest` (5).
 
 ### BOOK-05 · Buchung bestätigen/freigeben (`approved_at`) · ⏱ 3h · 🔲
 **Beschreibung:** `approved_at` existiert, wird aber nie gesetzt. Freigabe-Workflow.

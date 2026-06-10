@@ -56,6 +56,11 @@ Route::middleware('auth')->group(function () {
     // Anmeldungen zu einem Abenteuer.
     Route::post('adventures/{adventure}/bookings', [BookingController::class, 'store'])
         ->name('adventures.bookings.store');
+    // Anmeldedetails nachträglich bearbeiten (BOOK-04).
+    Route::get('adventures/{adventure}/bookings/{booking}/edit', [BookingController::class, 'edit'])
+        ->name('adventures.bookings.edit');
+    Route::put('adventures/{adventure}/bookings/{booking}', [BookingController::class, 'update'])
+        ->name('adventures.bookings.update');
     Route::delete('adventures/{adventure}/bookings/{booking}', [BookingController::class, 'destroy'])
         ->name('adventures.bookings.destroy');
 

@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Models\Adventure;
 use App\Models\Booking;
+use App\Models\EventRole;
+use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -16,6 +18,8 @@ class BookingController extends Controller
         // Buchen: adventure.book; Stornieren/Abmelden: adventure.cancel.
         $this->middleware('can:adventure.book')->only('store');
         $this->middleware('can:adventure.cancel')->only('destroy');
+        // Anmeldedetails nachträglich ändern (BOOK-04).
+        $this->middleware('can:adventure.modify')->only(['edit', 'update']);
     }
 
     /**
@@ -64,6 +68,60 @@ class BookingController extends Controller
         $message = $adventure->isFull()
             ? 'Anmeldung erfolgt – das Abenteuer ist voll, daher auf der Warteliste.'
             : 'Anmeldung gespeichert.';
+
+        return $request->expectsJson()
+            ? response()->json(['message' => $message, 'refresh_modal' => true])
+            : back()->with('status', $message);
+    }
+
+    /**
+     * Bearbeitungsformular einer Anmeldung im Modal (BOOK-04).
+     */
+    public function edit(Adventure $adventure, Booking $booking): View
+    {
+        abort_unless($booking->adventure_id === $adventure->id, 404);
+
+        $booking->load('player');
+
+        return view('bookings._edit', [
+            'adventure' => $adventure,
+            'booking' => $booking,
+            'roles' => EventRole::orderBy('id')->get(),
+        ]);
+    }
+
+    /**
+     * Anmeldedetails (Rolle, Flags, Allergien, …) nachträglich ändern (BOOK-04).
+     */
+    public function update(Request $request, Adventure $adventure, Booking $booking): RedirectResponse|JsonResponse
+    {
+        abort_unless($booking->adventure_id === $adventure->id, 404);
+
+        $data = $request->validate([
+            'event_role_id' => ['required', 'exists:event_roles,id'],
+            'fotoerlaubnis' => ['boolean'],
+            'vegetarier' => ['boolean'],
+            'leih_tunika' => ['boolean'],
+            'leih_waffe' => ['boolean'],
+            'nsc' => ['boolean'],
+            'allergien' => ['nullable', 'string'],
+            'medikamente' => ['nullable', 'string'],
+            'erreichbarkeit' => ['nullable', 'string'],
+        ]);
+
+        $booking->update([
+            'event_role_id' => $data['event_role_id'],
+            'fotoerlaubnis' => $request->boolean('fotoerlaubnis'),
+            'vegetarier' => $request->boolean('vegetarier'),
+            'leih_tunika' => $request->boolean('leih_tunika'),
+            'leih_waffe' => $request->boolean('leih_waffe'),
+            'nsc' => $request->boolean('nsc'),
+            'allergien' => $data['allergien'] ?? null,
+            'medikamente' => $data['medikamente'] ?? null,
+            'erreichbarkeit' => $data['erreichbarkeit'] ?? null,
+        ]);
+
+        $message = 'Anmeldung aktualisiert.';
 
         return $request->expectsJson()
             ? response()->json(['message' => $message, 'refresh_modal' => true])

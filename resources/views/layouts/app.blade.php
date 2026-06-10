@@ -136,6 +136,15 @@
                 loadModalContent(appModalUrl);
             });
 
+            // Unteransicht im Modal laden, OHNE appModalUrl zu überschreiben
+            // (z. B. Buchung bearbeiten -> nach dem Speichern zurück aufs Detail).
+            document.addEventListener('click', function (e) {
+                const trigger = e.target.closest('[data-modal-subview]');
+                if (!trigger) return;
+                e.preventDefault();
+                loadModalContent(trigger.getAttribute('data-modal-subview'));
+            });
+
             function showToast(message, type) {
                 $('body').toast({
                     class: type === 'error' ? 'error' : 'success',

@@ -21,13 +21,20 @@
                 <td>{{ $booking->role?->description }}</td>
                 <td>{{ $booking->waitlisted ? 'Warteliste' : 'regulär' }}</td>
                 <td class="right aligned">
-                    @can('adventure.cancel')
-                        <form method="POST" action="{{ route('adventures.bookings.destroy', [$adventure, $booking]) }}"
-                              data-refresh-modal onsubmit="return confirm('Anmeldung stornieren?');">
-                            @csrf @method('DELETE')
-                            <button class="text-red-600 hover:underline">stornieren</button>
-                        </form>
-                    @endcan
+                    <div class="flex items-center justify-end gap-3">
+                        @can('adventure.modify')
+                            <a href="{{ route('adventures.bookings.edit', [$adventure, $booking]) }}"
+                               data-modal-subview="{{ route('adventures.bookings.edit', [$adventure, $booking]) }}"
+                               class="text-waldritter hover:underline">bearbeiten</a>
+                        @endcan
+                        @can('adventure.cancel')
+                            <form method="POST" action="{{ route('adventures.bookings.destroy', [$adventure, $booking]) }}"
+                                  data-refresh-modal onsubmit="return confirm('Anmeldung stornieren?');">
+                                @csrf @method('DELETE')
+                                <button class="text-red-600 hover:underline">stornieren</button>
+                            </form>
+                        @endcan
+                    </div>
                 </td>
             </tr>
         @empty
