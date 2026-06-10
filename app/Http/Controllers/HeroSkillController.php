@@ -14,6 +14,9 @@ class HeroSkillController extends Controller
     /** EP-Buchungsart „Fertigkeit erworben" (Kosten). */
     private const SKILL_COST_TYPE = 20;
 
+    /** EP-Buchungsart „Allgemein" (Gutschrift) – Rückerstattung bei Aberkennung. */
+    private const SKILL_REFUND_TYPE = 60;
+
     public function __construct()
     {
         $this->middleware('auth');
@@ -50,6 +53,32 @@ class HeroSkillController extends Controller
         });
 
         $message = "„{$skill->name}“ erlernt (−{$skill->ep_costs} EP).";
+
+        return $request->expectsJson()
+            ? response()->json(['message' => $message, 'refresh_modal' => true])
+            : back()->with('status', $message);
+    }
+
+    /**
+     * Erkennt eine erlernte Fertigkeit ab: entfernt die Verknüpfung und erstattet
+     * die EP-Kosten als Gutschrift zurück (HERO-16). Atomar.
+     */
+    public function destroy(Request $request, Hero $hero, Skill $skill): JsonResponse|RedirectResponse
+    {
+        if (! $hero->skills()->whereKey($skill->id)->exists()) {
+            return $this->fail($request, 'Diese Fertigkeit ist nicht erlernt.');
+        }
+
+        DB::transaction(function () use ($hero, $skill) {
+            $hero->skills()->detach($skill->id);
+            $hero->epTransactions()->create([
+                'ep_transaction_type_id' => self::SKILL_REFUND_TYPE,
+                'ep_count' => $skill->ep_costs,
+                'transacted_at' => now(),
+            ]);
+        });
+
+        $message = "„{$skill->name}“ aberkannt (+{$skill->ep_costs} EP).";
 
         return $request->expectsJson()
             ? response()->json(['message' => $message, 'refresh_modal' => true])

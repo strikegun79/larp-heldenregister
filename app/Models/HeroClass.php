@@ -35,7 +35,8 @@ class HeroClass extends Model
      */
     public function skills(): BelongsToMany
     {
-        return $this->belongsToMany(Skill::class, 'skill_hero_class');
+        return $this->belongsToMany(Skill::class, 'skill_hero_class')
+            ->withPivot('x_percentage', 'y_percentage');
     }
 
     /**

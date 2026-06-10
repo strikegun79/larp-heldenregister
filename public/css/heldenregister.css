@@ -1,0 +1,63 @@
+/* Fertigkeitsbaum (HERO-16): Skill-Marker auf dem Baum-Bild */
+.skill-map {
+    position: relative;
+    display: inline-block;
+    max-width: 100%;
+    line-height: 0;
+}
+
+.skill-map img,
+.skill-image {
+    display: block;
+    max-width: 100%;
+    height: auto;
+}
+
+.skill-marker {
+    position: absolute;
+    z-index: 10;
+    width: 28px;
+    height: 28px;
+    margin: 0;
+    padding: 0;
+    border-radius: 50%;
+    transform: translate(-50%, -50%);
+    border: 2px solid #3b250f;
+    background: rgba(255, 230, 120, 0.85);
+    cursor: pointer;
+    box-shadow: 0 1px 3px rgba(0, 0, 0, .4);
+    transition: transform .1s ease;
+}
+
+.skill-marker:hover {
+    transform: translate(-50%, -50%) scale(1.2);
+}
+
+/* Gold = noch nicht erlernt, Grün = erlernt */
+.skill-marker.unlearned {
+    background: rgba(255, 230, 120, 0.85);
+}
+
+.skill-marker.learned {
+    background: #21ba45;
+}
+
+.skill-marker.learned::after {
+    content: "✓";
+    color: #fff;
+    font-size: 14px;
+    line-height: 24px;
+    display: block;
+    text-align: center;
+}
+
+/* Textliste unterhalb des Baums nur auf schmalen Ansichten (< 1100px) */
+.skill-list {
+    display: none;
+}
+
+@media (max-width: 1099px) {
+    .skill-list {
+        display: block;
+    }
+}

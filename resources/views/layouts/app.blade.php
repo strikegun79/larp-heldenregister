@@ -13,7 +13,7 @@
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Uncial+Antiqua&family=MedievalSharp&family=EB+Garamond:wght@400;500&display=swap" rel="stylesheet">
-
+        <link rel="stylesheet" href="{{ asset('css/heldenregister.css') }}">
         <!-- Fomantic UI (wie im Legacy) -->
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fomantic-ui@2.9.3/dist/semantic.min.css">
 
@@ -69,17 +69,18 @@
             <div class="actions" id="app-modal-actions"></div>
         </div>
 
-        <!-- Bestätigungs-Modal: Fertigkeit erlernen (HERO-14) -->
+        <!-- Bestätigungs-Modal: Fertigkeit erlernen/aberkennen (HERO-14/16) -->
         <div class="ui small modal" id="skill-modal">
             <div class="header" id="skill-modal-title"></div>
             <div class="content">
                 <p id="skill-modal-desc" class="text-stone-700"></p>
-                <p>Kosten: <b id="skill-modal-cost"></b> EP · Verfügbar: <b id="skill-modal-balance"></b> EP</p>
+                <p id="skill-modal-meta"></p>
                 <p id="skill-modal-warn" class="text-red-600" style="display:none">Nicht genug EP für diese Fertigkeit.</p>
             </div>
             <div class="actions">
-                <div class="ui deny button">Noch nicht</div>
+                <div class="ui deny button">Schließen</div>
                 <button type="button" class="ui positive button" id="skill-modal-accept">Fertigkeit errungen</button>
+                <button type="button" class="ui negative button" id="skill-modal-revoke">Fertigkeit aberkennen</button>
             </div>
         </div>
 
@@ -172,35 +173,53 @@
                     .finally(() => submitBtn && submitBtn.classList.remove('loading', 'disabled'));
             });
 
-            // Skilltree: Klick auf eine Fertigkeit -> Bestätigungs-Modal (HERO-14).
-            let skillLearnUrl = null, skillCurrentId = null;
+            // Skilltree: Klick auf eine Fertigkeit (Marker oder Liste) -> Modal (HERO-14/16).
+            let skillBaseUrl = null, skillCurrentId = null, skillCanEdit = false;
+
             document.addEventListener('click', function (e) {
-                const node = e.target.closest('.skill-node');
+                const node = e.target.closest('.skill-trigger');
                 if (!node) return;
                 e.preventDefault();
                 const tree = node.closest('#skilltree');
-                skillLearnUrl = tree ? tree.getAttribute('data-learn-url') : null;
+                skillBaseUrl = tree ? tree.getAttribute('data-learn-url') : null;
+                skillCanEdit = tree ? tree.getAttribute('data-can-edit') === '1' : false;
                 skillCurrentId = node.getAttribute('data-skill-id');
                 const balance = parseFloat(tree ? tree.getAttribute('data-balance') : '0') || 0;
                 const cost = parseFloat(node.getAttribute('data-skill-cost')) || 0;
+                const learned = node.getAttribute('data-skill-learned') === '1';
+
                 $('#skill-modal-title').text(node.getAttribute('data-skill-name') || 'Fertigkeit');
                 $('#skill-modal-desc').text(node.getAttribute('data-skill-desc') || '');
-                $('#skill-modal-cost').text(cost);
-                $('#skill-modal-balance').text(balance);
-                const enough = balance >= cost;
-                $('#skill-modal-warn').toggle(!enough);
-                $('#skill-modal-accept').toggleClass('disabled', !enough);
+
+                const $accept = $('#skill-modal-accept');
+                const $revoke = $('#skill-modal-revoke');
+                $('#skill-modal-warn').hide();
+
+                if (learned) {
+                    // Bereits erlernt -> aberkennen (EP-Rückerstattung).
+                    $('#skill-modal-meta').text('Bereits erlernt · Rückerstattung bei Aberkennung: ' + cost + ' EP');
+                    $accept.hide();
+                    $revoke.toggle(skillCanEdit);
+                } else {
+                    const enough = balance >= cost;
+                    $('#skill-modal-meta').text('Kosten: ' + cost + ' EP · Verfügbar: ' + balance + ' EP');
+                    $('#skill-modal-warn').toggle(!enough);
+                    $revoke.hide();
+                    $accept.toggle(skillCanEdit).toggleClass('disabled', !enough);
+                }
+
                 $('#skill-modal').modal({ allowMultiple: true, autofocus: false }).modal('show');
             });
 
-            document.getElementById('skill-modal-accept').addEventListener('click', function () {
-                if (!skillLearnUrl || !skillCurrentId || this.classList.contains('disabled')) return;
-                const btn = this;
+            // Gemeinsamer Helfer fürs Lernen/Aberkennen.
+            function submitSkill(btn, url, method) {
+                if (!url || !skillCurrentId || btn.classList.contains('disabled')) return;
                 btn.classList.add('loading', 'disabled');
                 const fd = new FormData();
-                fd.append('skill_id', skillCurrentId);
                 fd.append('_token', document.querySelector('meta[name=csrf-token]').content);
-                fetch(skillLearnUrl, {
+                if (method) fd.append('_method', method);
+                if (!method) fd.append('skill_id', skillCurrentId);
+                fetch(url, {
                     method: 'POST',
                     headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' },
                     body: fd,
@@ -208,15 +227,22 @@
                     .then(async (resp) => {
                         const data = await resp.json().catch(() => ({}));
                         if (resp.ok) {
-                            showToast(data.message || 'Fertigkeit erlernt.', 'success');
+                            showToast(data.message || 'Gespeichert.', 'success');
                             $('#skill-modal').modal('hide');
                             if (appModalUrl) loadModalContent(appModalUrl);
                         } else {
-                            showToast(data.message || 'Konnte nicht erlernt werden.', 'error');
+                            showToast(data.message || 'Aktion fehlgeschlagen.', 'error');
                         }
                     })
                     .catch(() => showToast('Netzwerkfehler.', 'error'))
                     .finally(() => btn.classList.remove('loading', 'disabled'));
+            }
+
+            document.getElementById('skill-modal-accept').addEventListener('click', function () {
+                submitSkill(this, skillBaseUrl, null); // POST .../skills  -> erlernen
+            });
+            document.getElementById('skill-modal-revoke').addEventListener('click', function () {
+                submitSkill(this, skillBaseUrl + '/' + skillCurrentId, 'DELETE'); // DELETE .../skills/{id}
             });
         </script>
     </body>

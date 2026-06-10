@@ -85,7 +85,9 @@ class HeroTest extends TestCase
             ->get(route('heroes.show', $hero), ['X-Requested-With' => 'XMLHttpRequest'])
             ->assertOk()
             ->assertSee('Fertigkeitsbaum')
-            ->assertSee('Schwertkampf');
+            ->assertSee('Schwertkampf')
+            ->assertSee('skill-marker', false)            // HERO-16: Button auf dem Baum-Bild
+            ->assertSee('data-skill-learned', false);     // Erlernt-Status am Trigger
     }
 
     public function test_ajax_show_returns_only_the_modal_partial(): void

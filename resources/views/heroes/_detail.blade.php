@@ -18,8 +18,12 @@
 @endforelse
 
 @if ($hero->classes->isNotEmpty())
+    @php($learnedIds = $hero->skills->pluck('id'))
     <h3 class="font-uncial text-lg text-waldritter mt-6 mb-2">Fertigkeitsbaum</h3>
-    <div id="skilltree" data-learn-url="{{ route('heroes.skills.store', $hero) }}" data-balance="{{ $hero->ep_balance }}">
+    <div id="skilltree"
+         data-learn-url="{{ route('heroes.skills.store', $hero) }}"
+         data-balance="{{ $hero->ep_balance }}"
+         data-can-edit="{{ auth()->user()?->can('heldenregister.edit') ? 1 : 0 }}">
         <div class="ui top attached tabular menu">
             @foreach ($hero->classes as $i => $class)
                 <a class="item @if ($i === 0) active @endif" data-tab="cls-{{ $class->id }}">{{ $class->name }}</a>
@@ -27,29 +31,42 @@
         </div>
         @foreach ($hero->classes as $i => $class)
             <div class="ui bottom attached tab segment @if ($i === 0) active @endif" data-tab="cls-{{ $class->id }}">
-                <img src="{{ $class->skilltreeImage() }}" alt="Fertigkeitsbaum {{ $class->name }}" class="ui fluid image" style="margin-bottom:1rem">
+                <div class="skill-map">
+                    <img src="{{ $class->skilltreeImage() }}" alt="Fertigkeitsbaum {{ $class->name }}" class="skill-image">
+                    @foreach ($class->skills as $skill)
+                        @php($learned = $learnedIds->contains($skill->id))
+                        @php($px = (int) ($skill->pivot->x_percentage ?? 0))
+                        @php($py = (int) ($skill->pivot->y_percentage ?? 0))
+                        @php($px = ($px === 0 && $py === 0) ? 6 + ($loop->index % 10) * 9 : $px)
+                        @php($py = ($skill->pivot->x_percentage == 0 && $skill->pivot->y_percentage == 0) ? 8 + intdiv($loop->index, 10) * 11 : $py)
+                        <button type="button"
+                                class="skill-marker skill-trigger {{ $learned ? 'learned' : 'unlearned' }}"
+                                style="left: {{ $px }}%; top: {{ $py }}%;"
+                                title="{{ $skill->name }} ({{ $skill->ep_costs }} EP)"
+                                data-skill-id="{{ $skill->id }}"
+                                data-skill-name="{{ $skill->name }}"
+                                data-skill-desc="{{ $skill->description }}"
+                                data-skill-cost="{{ $skill->ep_costs }}"
+                                data-skill-learned="{{ $learned ? 1 : 0 }}"></button>
+                    @endforeach
+                </div>
+
                 @if ($class->skills->isEmpty())
                     <p class="text-stone-500">Für diese Klasse sind keine Fertigkeiten hinterlegt.</p>
                 @else
-                    <div class="ui middle aligned divided list">
+                    <div class="ui middle aligned divided list skill-list">
                         @foreach ($class->skills as $skill)
-                            @php($learned = $hero->skills->contains('id', $skill->id))
+                            @php($learned = $learnedIds->contains($skill->id))
                             <div class="item">
                                 <div class="content">
-                                    @if ($learned)
-                                        <span class="text-green-700">✓ {{ $skill->name }}</span>
-                                        <span class="text-stone-500">({{ $skill->ep_costs }} EP)</span>
-                                    @elseif (auth()->user()?->can('heldenregister.edit'))
-                                        <a class="skill-node text-indigo-700 hover:underline" style="cursor:pointer"
-                                           data-skill-id="{{ $skill->id }}"
-                                           data-skill-name="{{ $skill->name }}"
-                                           data-skill-desc="{{ $skill->description }}"
-                                           data-skill-cost="{{ $skill->ep_costs }}">
-                                            {{ $skill->name }} ({{ $skill->ep_costs }} EP)
-                                        </a>
-                                    @else
-                                        {{ $skill->name }} ({{ $skill->ep_costs }} EP)
-                                    @endif
+                                    <a class="skill-trigger {{ $learned ? 'text-green-700' : 'text-indigo-700' }} hover:underline" style="cursor:pointer"
+                                       data-skill-id="{{ $skill->id }}"
+                                       data-skill-name="{{ $skill->name }}"
+                                       data-skill-desc="{{ $skill->description }}"
+                                       data-skill-cost="{{ $skill->ep_costs }}"
+                                       data-skill-learned="{{ $learned ? 1 : 0 }}">
+                                        {{ $learned ? '✓ ' : '' }}{{ $skill->name }} ({{ $skill->ep_costs }} EP)
+                                    </a>
                                 </div>
                             </div>
                         @endforeach

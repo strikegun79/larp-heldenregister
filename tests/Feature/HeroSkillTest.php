@@ -97,4 +97,49 @@ class HeroSkillTest extends TestCase
 
         $this->assertSame(1, $hero->skills()->count());
     }
+
+    public function test_registrar_revokes_a_skill_and_ep_is_refunded(): void
+    {
+        $hero = $this->heroWithEp(20);
+        $skill = $this->skill(5);
+        // erst erlernen: Pivot + EP-Kosten
+        $hero->skills()->attach($skill->id, ['trained_at' => now()]);
+        $hero->epTransactions()->create(['ep_transaction_type_id' => 20, 'ep_count' => 5]); // -5 -> Saldo 15
+
+        $this->actingAs($this->userWithRole(20))
+            ->deleteJson(route('heroes.skills.destroy', [$hero, $skill]))
+            ->assertOk()
+            ->assertJson(['refresh_modal' => true]);
+
+        $this->assertFalse($hero->skills()->whereKey($skill->id)->exists());
+        $this->assertEquals(20.0, $hero->fresh()->ep_balance); // 15 + 5 Rückerstattung
+        $this->assertDatabaseHas('ep_transactions', [
+            'hero_id' => $hero->id,
+            'ep_transaction_type_id' => 60,
+            'ep_count' => 5,
+        ]);
+    }
+
+    public function test_a_viewer_cannot_revoke_a_skill(): void
+    {
+        $hero = $this->heroWithEp(20);
+        $skill = $this->skill(5);
+        $hero->skills()->attach($skill->id, ['trained_at' => now()]);
+
+        $this->actingAs($this->userWithRole(40))
+            ->delete(route('heroes.skills.destroy', [$hero, $skill]))
+            ->assertForbidden();
+
+        $this->assertTrue($hero->skills()->whereKey($skill->id)->exists());
+    }
+
+    public function test_cannot_revoke_a_skill_that_is_not_learned(): void
+    {
+        $hero = $this->heroWithEp(20);
+        $skill = $this->skill(5);
+
+        $this->actingAs($this->userWithRole(20))
+            ->deleteJson(route('heroes.skills.destroy', [$hero, $skill]))
+            ->assertStatus(422);
+    }
 }

@@ -44,11 +44,12 @@ Das Hinzufügen einer Klasse soll EP kosten und gebucht werden.
 - [ ] Nur ein aktiver Held je Spieler.
 - [ ] Tests.
 
-### HERO-08 · Held „verstorben" (died) als Status-Workflow · ⏱ 2h · 🔲
-**Beschreibung:** `died`-Datum existiert; Workflow + Anzeige fehlen.
+### HERO-08 · Held status ändern "Erste Erblickung" & "Verschollen" als Status-Workflow · ⏱ 2h · 🔲
+**Beschreibung:** `died` und 'born'-Datum existieren; Workflow + Anzeige fehlen.
 **Akzeptanzkriterien:**
-- [ ] Aktion „Held verstorben" setzt `died` und deaktiviert ihn.
-- [ ] Verstorbene Helden im Register markiert/filterbar.
+- [ ] Aktion „Held verstorben" auf "Verschollen" ändern und setzt `died` und deaktiviert ihn.
+- [ ] Verschollene Helden im Register markiert/filterbar.
+- [ ] statt geboren, soll es nun heissen: "Erste Erblickung"
 
 ### HERO-09 · Charakter-Steckbrief (Beschreibung/Bild) · ⏱ 4h · 🔲
 **Beschreibung:** Erweiterung um Freitext-Hintergrund und optionales Bild
@@ -116,3 +117,33 @@ Das Hinzufügen einer Klasse soll EP kosten und gebucht werden.
 > `ep_balance`. Ganze Zeile ist klickbar (`data-modal-url` am `<tr>`) und öffnet
 > das Detail-Modal; der Bearbeiten-Link in der Liste wurde entfernt
 > (Bearbeiten weiterhin im Detail-Modal). Test: HeroTest-Overview.
+
+### HERO-16 · Helden-Fertigkeitsbaum Checkboxen · ⏱ 3h · ✅
+**Beschreibung:** Postion der Checkbox und aktion im Fertigkeitsbaum
+**Akzeptanzkriterien:**
+- [x] jede Fertigkeit der Klasse bekommt auf dem Bild des Fertigkeitsbaum ein button.
+- [x] wenn eine button angeklickt wird, erscheint das Modal. Egal ob aktiviert oder nicht.
+- [x] wenn die Fertigkeit schon erlernt wurde, kann diese mit dem Knopf "Fertigkeit aberkennen" deaktiviert werden und die EP werden wieder zurück gegeben.
+- [x] die Auflistung unterhalb des Fertigkeitsbaum, soll nur erscheinen, wenn die Ansicht unter 1100 pixel breite ist.
+- [x] die Postion des button auf dem Bild wird in der Datenbank unter der Tabelle skill_hero_class als x_percentage und y_percentage gespeichert, da mehrfach verwendete Skills auf Klassen unterschiedliche Positionen haben können.
+- [x] der Button soll visual anzeigen, ob die Fertigkeit erlernt ist oder nicht
+
+> Umgesetzt: Migration `add_position_to_skill_hero_class` (x/y_percentage,
+> idempotent); Relationen `withPivot`. Marker (`.skill-marker`) je Skill am
+> gespeicherten x/y-% auf dem Baum-Bild, grün=erlernt / gold=offen
+> (`public/css/heldenregister.css`). Klick (Marker oder Liste) öffnet das
+> Modal egal ob erlernt; je nach Status „Fertigkeit errungen" (Lernen) oder
+> „Fertigkeit aberkennen" (`HeroSkillController@destroy`, EP-Rückerstattung
+> Typ 60). Textliste nur < 1100 px (`.skill-list`). Tests: `HeroSkillTest` (7).
+>
+> Offen (Folgeaufgabe): UI zum **Setzen** der Marker-Positionen (Drag&Drop);
+> bislang spreizen sich unkonfigurierte Marker per Default-Raster.
+
+### HERO-17 · Helden-Detail Layout · ⏱ 3h · ✅
+**Beschreibung:** Die Heldenansicht anpassen
+**Akzeptanzkriterien:**
+- [ ] Im Modal Content sollen Tabs eingesetzt werden.
+- [ ] Erstes Tab ist die Übersicht. Spieler, Klassen, Heimatort, EP-Saldo, Geboren, Gestorben, Status, alle erworbenden Fertigkeiten.
+- [ ] Zweiter Tab die Besuchten Abenteuerübersicht.
+- [ ] weitere Tabs sind die Fertigkeitsbäume pro Klasse
+- [ ] letztes Tab ist der EP-Verlauf. Das Einstellen von EP und der EP-Verlauf soll hier angezeigt werden.

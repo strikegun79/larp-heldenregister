@@ -38,8 +38,9 @@ Route::middleware('auth')->group(function () {
     Route::resource('heroes', HeroController::class);
     // EP-Buchung für einen Helden (HERO-12).
     Route::post('heroes/{hero}/ep', [EpTransactionController::class, 'store'])->name('heroes.ep.store');
-    // Fertigkeit erlernen (HERO-14).
+    // Fertigkeit erlernen (HERO-14) / aberkennen (HERO-16).
     Route::post('heroes/{hero}/skills', [HeroSkillController::class, 'store'])->name('heroes.skills.store');
+    Route::delete('heroes/{hero}/skills/{skill}', [HeroSkillController::class, 'destroy'])->name('heroes.skills.destroy');
     Route::resource('adventures', AdventureController::class);
 
     // Anmeldungen zu einem Abenteuer.
