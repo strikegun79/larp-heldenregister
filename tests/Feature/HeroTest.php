@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Hero;
 use App\Models\Player;
+use App\Models\Skill;
 use App\Models\User;
 use Database\Seeders\EpTransactionTypeSeeder;
 use Database\Seeders\HeroClassSeeder;
@@ -69,6 +70,22 @@ class HeroTest extends TestCase
             ->assertSee('Tilix')
             ->assertSee('data-modal-url', false) // Zeile öffnet das Detail-Modal
             ->assertDontSee('Bearbeiten');        // kein Bearbeiten-Knopf in der Liste
+    }
+
+    public function test_detail_modal_loads_skilltree_for_a_class_with_skills(): void
+    {
+        // Regression: HeroClass::skills() nutzt die Pivot-Tabelle skill_hero_class
+        // (nicht den Default-Namen hero_class_skill).
+        $hero = Hero::factory()->create();
+        $hero->classes()->attach(1); // Krieger
+        $skill = Skill::create(['name' => 'Schwertkampf', 'ep_costs' => 2, 'perl_count' => 0]);
+        $skill->classes()->attach(1);
+
+        $this->actingAs($this->userWithRole(20))
+            ->get(route('heroes.show', $hero), ['X-Requested-With' => 'XMLHttpRequest'])
+            ->assertOk()
+            ->assertSee('Fertigkeitsbaum')
+            ->assertSee('Schwertkampf');
     }
 
     public function test_ajax_show_returns_only_the_modal_partial(): void

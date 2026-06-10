@@ -31,10 +31,11 @@ class HeroClass extends Model
 
     /**
      * Fertigkeiten dieser Klasse (Legacy: skills2class).
+     * Pivot-Tabelle explizit, da der Default-Name (hero_class_skill) abweicht.
      */
     public function skills(): BelongsToMany
     {
-        return $this->belongsToMany(Skill::class);
+        return $this->belongsToMany(Skill::class, 'skill_hero_class');
     }
 
     /**
