@@ -70,6 +70,30 @@ class Hero extends Model
             ->reduce(fn (float $carry, EpTransaction $tx) => $carry + $tx->signedAmount(), 0.0);
     }
 
+    /** EP-Buchungsart „Abenteuer bestritten". */
+    public const ADVENTURE_EP_TYPE = 50;
+
+    /**
+     * Abenteuerhistorie: EP-Buchungen vom Typ „Abenteuer bestritten", die mit
+     * einem Abenteuer verknüpft sind – chronologisch (neueste zuerst).
+     */
+    public function getAdventureHistoryAttribute(): \Illuminate\Support\Collection
+    {
+        return $this->epTransactions
+            ->where('ep_transaction_type_id', self::ADVENTURE_EP_TYPE)
+            ->whereNotNull('adventure_id')
+            ->sortByDesc('transacted_at')
+            ->values();
+    }
+
+    /**
+     * Summe der aus Abenteuern erhaltenen EP.
+     */
+    public function getAdventuresEpTotalAttribute(): float
+    {
+        return $this->adventure_history->sum(fn (EpTransaction $tx) => (float) $tx->ep_count);
+    }
+
     /**
      * Insgesamt erworbene EP (nur Gutschriften, ohne Abzüge).
      */

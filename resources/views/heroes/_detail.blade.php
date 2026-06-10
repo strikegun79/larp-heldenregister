@@ -50,11 +50,36 @@
         @endcan
     </div>
 
-    {{-- Tab: Abenteuer (Anmeldungen des Spielers) --}}
+    {{-- Tab: Abenteuer (bestrittene Abenteuer des Helden + Anmeldungen) --}}
     <div class="ui bottom attached tab segment" data-tab="adventures">
+        <h4 class="font-uncial text-base text-waldritter mb-2">Bestrittene Abenteuer</h4>
+        @if ($hero->adventure_history->isEmpty())
+            <p class="text-stone-500">Noch keine Abenteuer bestritten.</p>
+        @else
+            <table class="ui very basic compact table">
+                <thead><tr><th>Datum</th><th>Abenteuer</th><th class="right aligned">EP</th></tr></thead>
+                <tbody>
+                    @foreach ($hero->adventure_history as $tx)
+                        <tr>
+                            <td>{{ optional($tx->transacted_at)->format('d.m.Y') }}</td>
+                            <td>{{ $tx->adventure?->name ?? '—' }}</td>
+                            <td class="right aligned text-green-600">+{{ number_format($tx->ep_count, 0, ',', '.') }}</td>
+                        </tr>
+                    @endforeach
+                </tbody>
+                <tfoot>
+                    <tr>
+                        <th colspan="2" class="right aligned">EP aus Abenteuern gesamt</th>
+                        <th class="right aligned">{{ number_format($hero->adventures_ep_total, 0, ',', '.') }}</th>
+                    </tr>
+                </tfoot>
+            </table>
+        @endif
+
         @php($bookings = $hero->player?->bookings?->sortByDesc(fn ($b) => optional($b->adventure)->start_at) ?? collect())
+        <h4 class="font-uncial text-base text-waldritter mt-6 mb-2">Anmeldungen des Spielers</h4>
         @if ($bookings->isEmpty())
-            <p class="text-stone-500">Keine Abenteuer.</p>
+            <p class="text-stone-500">Keine Anmeldungen.</p>
         @else
             <table class="ui very basic compact table">
                 <thead><tr><th>Abenteuer</th><th>Beginn</th><th>Liste</th></tr></thead>
@@ -68,7 +93,7 @@
                     @endforeach
                 </tbody>
             </table>
-            <p class="text-xs text-stone-400 mt-2">Anmeldungen des Spielers (spielerbezogen).</p>
+            <p class="text-xs text-stone-400 mt-2">Anmeldungen sind spielerbezogen (alle Helden des Spielers).</p>
         @endif
     </div>
 

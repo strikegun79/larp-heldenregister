@@ -96,6 +96,7 @@ class HeroController extends Controller
             'classes.skills',
             'skills',
             'epTransactions.type',
+            'epTransactions.adventure',
         ]);
 
         $data = [

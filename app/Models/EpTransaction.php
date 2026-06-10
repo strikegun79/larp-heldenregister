@@ -12,6 +12,7 @@ class EpTransaction extends Model
 
     protected $fillable = [
         'hero_id',
+        'adventure_id',
         'ep_transaction_type_id',
         'ep_count',
         'transacted_at',
@@ -31,6 +32,14 @@ class EpTransaction extends Model
     public function type(): BelongsTo
     {
         return $this->belongsTo(EpTransactionType::class, 'ep_transaction_type_id');
+    }
+
+    /**
+     * Das Abenteuer, aus dem die EP stammen (nur bei „Abenteuer bestritten").
+     */
+    public function adventure(): BelongsTo
+    {
+        return $this->belongsTo(Adventure::class);
     }
 
     /**

@@ -87,14 +87,23 @@ Das Hinzufügen einer Klasse soll EP kosten und gebucht werden.
 > `paginate()->withQueryString()`. Tests: HeroTest (Suche inkl. Fertigkeit,
 > Klasse, Spieler, Status).
 
-### HERO-11 · Abenteuerhistorie je Held (Vision) · ⏱ 3h · 🔲
+### HERO-11 · Abenteuerhistorie je Held (Vision) · ⏱ 3h · ✅
 **Beschreibung:** Welche Abenteuer ein Held bestritten hat (aus Teilnahme/
 `event_visits` bzw. Buchungen des Spielers), chronologisch.
 **Akzeptanzkriterien:**
-- [ ] Helden-Detail listet besuchte Abenteuer (Datum, Event, ggf. erhaltene EP).
-- [ ] Verknüpfung zu EP-Buchungen vom Typ „Abenteuer bestritten".
-- [ ] Tests der Aggregation.
+- [x] Helden-Detail listet besuchte Abenteuer (Datum, Event, ggf. erhaltene EP).
+- [x] Verknüpfung zu EP-Buchungen vom Typ „Abenteuer bestritten".
+- [x] Tests der Aggregation.
 **Abhängig von:** BOOK-08, BOOK-09.
+
+> Umgesetzt: Migration `add_adventure_id_to_ep_transactions` (nullable FK) +
+> `EpTransaction::adventure()`. `Hero::adventure_history` (EP-Buchungen Typ 50
+> mit Abenteuer, chronologisch) + `adventures_ep_total`. Abenteuer-Tab im
+> Detail zeigt „Bestrittene Abenteuer" (Datum/Event/EP + Summe) und darunter
+> die Spieler-Anmeldungen. Tests: HeroTest-Aggregation.
+>
+> Hinweis: Befüllt wird die Historie, sobald BOOK-09 nach Teilnahme EP vom
+> Typ 50 mit `adventure_id` bucht (Fundament dafür hiermit gelegt).
 
 ### HERO-12 · Helden-EP-anpassen · ⏱ 3h · ✅
 **Beschreibung:** In der Heldenansicht soll ein Feld für die zuweisung oder verbrauch von EP möglich sein.

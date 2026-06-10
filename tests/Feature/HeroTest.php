@@ -2,12 +2,15 @@
 
 namespace Tests\Feature;
 
+use App\Models\Adventure;
 use App\Models\Hero;
 use App\Models\Player;
 use App\Models\Skill;
 use App\Models\User;
 use Database\Seeders\EpTransactionTypeSeeder;
+use Database\Seeders\EventLookupSeeder;
 use Database\Seeders\HeroClassSeeder;
+use Database\Seeders\LocationSeeder;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -104,6 +107,33 @@ class HeroTest extends TestCase
             ->assertSee('data-tab="cls-1"', false)
             ->assertSee('data-tab="ep"', false)
             ->assertSeeInOrder(['Übersicht', 'Abenteuer', 'Krieger', 'EP-Verlauf']);
+    }
+
+    public function test_adventure_history_aggregates_type50_ep_with_adventures(): void
+    {
+        $this->seed([LocationSeeder::class, EventLookupSeeder::class]);
+        $hero = Hero::factory()->create();
+        $a1 = Adventure::factory()->create(['name' => 'Burg Staufenberg']);
+        $a2 = Adventure::factory()->create(['name' => 'Lollar Camp']);
+
+        // „Abenteuer bestritten" (Typ 50), mit Abenteuer verknüpft
+        $hero->epTransactions()->create(['ep_transaction_type_id' => 50, 'ep_count' => 3, 'adventure_id' => $a1->id, 'transacted_at' => now()->subDays(2)]);
+        $hero->epTransactions()->create(['ep_transaction_type_id' => 50, 'ep_count' => 2, 'adventure_id' => $a2->id, 'transacted_at' => now()]);
+        // andere Buchung ohne Abenteuer -> nicht in der Historie
+        $hero->epTransactions()->create(['ep_transaction_type_id' => 10, 'ep_count' => 20]);
+
+        $hero->load('epTransactions.adventure');
+
+        $this->assertCount(2, $hero->adventure_history);
+        $this->assertEquals(5.0, $hero->adventures_ep_total);
+        $this->assertEquals($a2->id, $hero->adventure_history->first()->adventure_id); // neuestes zuerst
+
+        $this->actingAs($this->userWithRole(20))
+            ->get(route('heroes.show', $hero), ['X-Requested-With' => 'XMLHttpRequest'])
+            ->assertOk()
+            ->assertSee('Bestrittene Abenteuer')
+            ->assertSee('Burg Staufenberg')
+            ->assertSee('Lollar Camp');
     }
 
     public function test_ajax_show_returns_only_the_modal_partial(): void
