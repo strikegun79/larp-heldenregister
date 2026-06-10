@@ -9,6 +9,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 
 class BookingController extends Controller
 {
@@ -44,6 +45,12 @@ class BookingController extends Controller
             'medikamente' => ['nullable', 'string'],
             'erreichbarkeit' => ['nullable', 'string'],
         ]);
+
+        // Ohne book-any-player nur eigene/betreute Spieler buchen (BOOK-10).
+        if (! Gate::allows('book-any-player')
+            && ! $request->user()->players()->where('players.id', $data['player_id'])->exists()) {
+            return $this->fail($request, 'Für diesen Spieler darfst du keine Buchung anlegen.');
+        }
 
         if (! $adventure->registrationOpen()) {
             return $this->fail($request, 'Für dieses Abenteuer ist die Anmeldung nicht geöffnet.');

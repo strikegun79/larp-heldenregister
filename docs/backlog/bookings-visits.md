@@ -111,9 +111,18 @@ EP (`loot_ep_day` × Tage, Typ 50 „Abenteuer bestritten").
 > im Check-in-Block. Damit füllt sich HERO-11 (Abenteuerhistorie) live.
 > Tests: `AttendanceTest` (Vergabe+Betrag, Idempotenz, ohne aktiven Held, Recht).
 
-### BOOK-10 · Buchungsformular: Spielerliste auf Berechtigte begrenzen · ⏱ 2h · 🔲
+### BOOK-10 · Buchungsformular: Spielerliste auf Berechtigte begrenzen · ⏱ 2h · ✅
 **Beschreibung:** Aktuell sind im Buchungs-Modal alle Spieler wählbar; sinnvoll
 sind die eigenen (bzw. für Bürokrat alle).
 **Akzeptanzkriterien:**
-- [ ] Nicht-Admin sieht nur eigene/betreute Spieler.
-- [ ] Tests.
+- [x] Nicht-Admin sieht nur eigene/betreute Spieler.
+- [x] Tests.
+
+> Umgesetzt: Gate `book-any-player` (Bürokrat/`registrar` + Admin). In
+> `AdventureController@show` wird die Spielerliste für Nicht-Berechtigte auf
+> `request()->user()->players()` (eigene/betreute via Pivot) begrenzt; Bürokrat/
+> Admin sehen alle. Zusätzlich serverseitige Durchsetzung in
+> `BookingController@store` (422, wenn ein fremder Spieler gebucht wird) –
+> rein kosmetisches Filtern wäre umgehbar. Bestehende `AdventureTest`-Buchungs-
+> tests ordnen den Spieler jetzt dem Bucher zu. Tests: `BookingPlayerScopeTest`
+> (Liste eigene/alle, Buchen fremd verboten/Bürokrat erlaubt).

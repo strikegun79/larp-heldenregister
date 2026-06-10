@@ -12,6 +12,7 @@ use App\Models\Player;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\View\View;
 
 class AdventureController extends Controller
@@ -62,9 +63,14 @@ class AdventureController extends Controller
     {
         $adventure->load(['location', 'status', 'category', 'client', 'bookings.player', 'bookings.role', 'visits']);
 
+        // Buchbare Spieler: Bürokrat/Admin alle, sonst nur eigene/betreute (BOOK-10).
+        $players = Gate::allows('book-any-player')
+            ? Player::orderBy('name')->get()
+            : request()->user()->players()->orderBy('name')->get();
+
         $data = [
             'adventure' => $adventure,
-            'players' => Player::orderBy('name')->get(),
+            'players' => $players,
             'roles' => EventRole::orderBy('id')->get(),
         ];
 

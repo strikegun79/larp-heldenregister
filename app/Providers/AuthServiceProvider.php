@@ -46,6 +46,10 @@ class AuthServiceProvider extends ServiceProvider
         // Teilnahmebeitrag-Status pflegen (BOOK-06): Bürokrat (+ Admin via before).
         Gate::define('manage-payments', fn (User $user) => $user->hasRole('registrar'));
 
+        // Für beliebige Spieler buchen (BOOK-10): Bürokrat (+ Admin via before);
+        // alle anderen dürfen nur eigene/betreute Spieler buchen.
+        Gate::define('book-any-player', fn (User $user) => $user->hasRole('registrar'));
+
         // Admins dürfen grundsätzlich alles.
         Gate::before(fn (User $user) => $user->isAdmin() ? true : null);
     }

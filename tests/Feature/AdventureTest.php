@@ -35,6 +35,15 @@ class AdventureTest extends TestCase
         return $this->userWithRole(60); // Event buchen
     }
 
+    /** Event-Buchen-Nutzer, dem der gegebene Spieler zugeordnet ist (BOOK-10). */
+    private function bookerOwning(Player $player): User
+    {
+        $booker = $this->booker();
+        $booker->players()->attach($player->id, ['self' => true]);
+
+        return $booker;
+    }
+
     private function admin(): User
     {
         return $this->userWithRole(10);
@@ -90,6 +99,7 @@ class AdventureTest extends TestCase
         $adventure = Adventure::factory()->create(['max_player' => 5]);
         $player = Player::factory()->create();
         $spielleiter = $this->userWithRole(40); // hat adventure.book, aber kein events.edit
+        $spielleiter->players()->attach($player->id, ['self' => true]); // eigener Spieler (BOOK-10)
 
         $this->actingAs($spielleiter)
             ->post(route('adventures.bookings.store', $adventure), [
@@ -152,7 +162,7 @@ class AdventureTest extends TestCase
         $adventure = Adventure::factory()->create(['max_player' => 5]);
         $player = Player::factory()->create();
 
-        $this->actingAs($this->booker())
+        $this->actingAs($this->bookerOwning($player))
             ->post(route('adventures.bookings.store', $adventure), [
                 'player_id' => $player->id,
                 'event_role_id' => 1,
@@ -182,7 +192,7 @@ class AdventureTest extends TestCase
         $adventure = Adventure::factory()->create(['max_player' => 5]);
         $player = Player::factory()->create();
 
-        $this->actingAs($this->booker())
+        $this->actingAs($this->bookerOwning($player))
             ->postJson(route('adventures.bookings.store', $adventure), [
                 'player_id' => $player->id,
                 'event_role_id' => 1,
@@ -198,7 +208,7 @@ class AdventureTest extends TestCase
         $adventure = Adventure::factory()->create();
         $player = Player::factory()->create();
 
-        $this->actingAs($this->booker())
+        $this->actingAs($this->bookerOwning($player))
             ->postJson(route('adventures.bookings.store', $adventure), [
                 'player_id' => $player->id,
                 'event_role_id' => 1,
@@ -213,7 +223,7 @@ class AdventureTest extends TestCase
         $adventure = Adventure::factory()->registrationClosed()->create();
         $player = Player::factory()->create();
 
-        $this->actingAs($this->booker())
+        $this->actingAs($this->bookerOwning($player))
             ->postJson(route('adventures.bookings.store', $adventure), [
                 'player_id' => $player->id,
                 'event_role_id' => 1,
@@ -229,7 +239,7 @@ class AdventureTest extends TestCase
         Booking::factory()->for($adventure)->create(['waitlisted' => false]);
         $player = Player::factory()->create();
 
-        $this->actingAs($this->booker())
+        $this->actingAs($this->bookerOwning($player))
             ->post(route('adventures.bookings.store', $adventure), [
                 'player_id' => $player->id,
                 'event_role_id' => 1,
@@ -244,7 +254,7 @@ class AdventureTest extends TestCase
         $adventure = Adventure::factory()->registrationClosed()->create();
         $player = Player::factory()->create();
 
-        $this->actingAs($this->booker())
+        $this->actingAs($this->bookerOwning($player))
             ->post(route('adventures.bookings.store', $adventure), [
                 'player_id' => $player->id,
                 'event_role_id' => 1,
@@ -272,7 +282,7 @@ class AdventureTest extends TestCase
         $player = Player::factory()->create();
         Booking::factory()->for($adventure)->create(['player_id' => $player->id]);
 
-        $this->actingAs($this->booker())
+        $this->actingAs($this->bookerOwning($player))
             ->post(route('adventures.bookings.store', $adventure), [
                 'player_id' => $player->id,
                 'event_role_id' => 1,
