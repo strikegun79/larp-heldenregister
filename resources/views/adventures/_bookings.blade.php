@@ -1,8 +1,8 @@
 @php($manage = $manage ?? false)
 <table class="ui very basic compact table">
     <thead><tr>
-        <th>Spieler</th><th>Rolle</th><th>Liste</th>
-        @if ($manage)<th>Status</th><th>Beitrag</th><th></th>@endif
+        <th>Spieler</th><th>Rolle</th><th>Liste</th><th>Status</th><th>Beitrag</th>
+        @if ($manage)<th></th>@endif
     </tr></thead>
     <tbody>
         @forelse ($bookings as $booking)
@@ -10,28 +10,38 @@
                 <td>{{ $booking->player?->full_name }}</td>
                 <td>{{ $booking->role?->description }}</td>
                 <td>{{ $booking->waitlisted ? 'Warteliste' : 'regulär' }}</td>
+                <td>
+                    @if ($booking->status === 'bestaetigt')
+                        <span class="text-green-700">✓ bestätigt</span>
+                    @elseif ($booking->status === 'abgelehnt')
+                        <span class="text-red-600">abgelehnt</span>
+                    @elseif ($booking->status === 'abgemeldet')
+                        <span class="text-orange-600">abgemeldet{{ $booking->absence_reason_label ? ' ('.$booking->absence_reason_label.')' : '' }}</span>
+                    @else
+                        <span class="text-stone-500">offen</span>
+                    @endif
+                </td>
+                <td>
+                    @if ($booking->paid)
+                        <span class="text-green-700">bezahlt</span>
+                    @else
+                        <span class="text-stone-500">offen</span>
+                    @endif
+                </td>
                 @if ($manage)
-                    <td>
-                        @if ($booking->approved_at)
-                            <span class="text-green-700">✓ bestätigt</span>
-                        @else
-                            <span class="text-stone-500">offen</span>
-                        @endif
-                    </td>
-                    <td>
-                        @if ($booking->paid)
-                            <span class="text-green-700">bezahlt</span>
-                        @else
-                            <span class="text-stone-500">offen</span>
-                        @endif
-                    </td>
                     <td class="right aligned">
                         <div class="flex items-center justify-end gap-3">
                             @can('approve-bookings')
                                 <form method="POST" action="{{ route('adventures.bookings.approval', [$adventure, $booking]) }}" data-refresh-modal>
                                     @csrf @method('PATCH')
-                                    <button class="{{ $booking->approved_at ? 'text-stone-600' : 'text-green-700' }} hover:underline">
-                                        {{ $booking->approved_at ? 'zurücknehmen' : 'bestätigen' }}
+                                    <button class="{{ $booking->status === 'bestaetigt' ? 'text-stone-600' : 'text-green-700' }} hover:underline">
+                                        {{ $booking->status === 'bestaetigt' ? 'zurücknehmen' : 'bestätigen' }}
+                                    </button>
+                                </form>
+                                <form method="POST" action="{{ route('adventures.bookings.rejection', [$adventure, $booking]) }}" data-refresh-modal>
+                                    @csrf @method('PATCH')
+                                    <button class="{{ $booking->status === 'abgelehnt' ? 'text-stone-600' : 'text-red-600' }} hover:underline">
+                                        {{ $booking->status === 'abgelehnt' ? 'zurücknehmen' : 'ablehnen' }}
                                     </button>
                                 </form>
                             @endcan
@@ -60,7 +70,7 @@
                 @endif
             </tr>
         @empty
-            <tr><td colspan="{{ $manage ? 6 : 3 }}" class="text-stone-500">Noch keine Anmeldungen.</td></tr>
+            <tr><td colspan="{{ $manage ? 6 : 5 }}" class="text-stone-500">Noch keine Anmeldungen.</td></tr>
         @endforelse
     </tbody>
 </table>

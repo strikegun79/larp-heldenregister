@@ -146,11 +146,22 @@ Eine Admin-Eventliste mit Verwaltungsaktionen (anlegen/bearbeiten/absagen).
 > Unterschrift als Bild). Hinweis: „Ort" bleibt leer – Spieler haben kein
 > Wohnort-Feld (Spalte ist für später vorhanden). Tests: `EventSignaturePdfTest` (7).
 
-### ADV-18 · Event-Ansicht für Teilnehmer · ⏱ 4h · 🔲
+### ADV-18 · Event-Ansicht für Teilnehmer · ⏱ 4h · ✅
 **Beschreibung:** kleine Korrekturen
 **Akzeptanzkriterien:**
-- [] Unter dem Tab Anmeldungen für ein Event, muss der Nutzer sehen können welcher Status und Beitrag für die einzelnen Spieler sind.
-- [] Status können sein: offen, bestätigt, abgelehnt, abgemeldet
-- [] Unter Beitrag: offen, bezahlt
-- [] Für die Verwaltung zum Checkin, sollten die Teilnehmer als Liste angezeigt werden, pro Teilnehmer eine Zeile. Am ende zwei buttons: Check-in, Abmelden (abmelden soll den Status auf "abgemeldet" setzen, z.b. weil der Teilnehmer sich abgemeldet hat, obwohl angemeldet, frage auch den Grund ab. Krank, nicht erschienen, unentschuldigt)
+- [x] Unter dem Tab Anmeldungen für ein Event, muss der Nutzer sehen können welcher Status und Beitrag für die einzelnen Spieler sind.
+- [x] Status können sein: offen, bestätigt, abgelehnt, abgemeldet
+- [x] Unter Beitrag: offen, bezahlt
+- [x] Für die Verwaltung zum Checkin, sollten die Teilnehmer als Liste angezeigt werden, pro Teilnehmer eine Zeile. Am ende zwei buttons: Check-in, Abmelden (abmelden soll den Status auf "abgemeldet" setzen, z.b. weil der Teilnehmer sich abgemeldet hat, obwohl angemeldet, frage auch den Grund ab. Krank, nicht erschienen, unentschuldigt)
+
+> Umgesetzt: Migration `bookings.status` (offen/bestaetigt/abgelehnt/abgemeldet,
+> Backfill aus `approved_at`) + `absence_reason` (krank/nicht_erschienen/
+> unentschuldigt); Label-Accessoren am Booking-Model. Der Anmeldungen-Tab
+> (`_bookings`) zeigt jetzt für **alle** (auch Teilnehmer) Spalten Status und
+> Beitrag (offen/bezahlt). Bestätigen (BOOK-05) setzt Status `bestaetigt`;
+> neue `BookingController@reject` (Toggle abgelehnt/offen, `approve-bookings`).
+> Check-in-Tab als Teilnehmer-Tabelle: je Zeile Buttons „Check-in"
+> (`AttendanceController@toggle`, Einzel-`event_visit`) und „Abmelden" mit
+> Grund-Auswahl (`@deregister` → Status abgemeldet + Grund, entfernt Check-in).
+> Tests: `BookingStatusTest` (7).
 

@@ -76,6 +76,9 @@ Route::middleware('auth')->group(function () {
     // Anmeldung bestätigen/freigeben – Toggle approved_at (BOOK-05).
     Route::patch('adventures/{adventure}/bookings/{booking}/approval', [BookingController::class, 'approve'])
         ->name('adventures.bookings.approval');
+    // Anmeldung ablehnen – Toggle (ADV-18).
+    Route::patch('adventures/{adventure}/bookings/{booking}/rejection', [BookingController::class, 'reject'])
+        ->name('adventures.bookings.rejection');
     // Unterschrift bei Teilnahme erfassen (ADV-17).
     Route::get('adventures/{adventure}/bookings/{booking}/signature', [SignatureController::class, 'edit'])
         ->name('adventures.bookings.signature.edit');
@@ -95,6 +98,11 @@ Route::middleware('auth')->group(function () {
     // EP für anwesende Teilnehmer verbuchen (BOOK-09).
     Route::post('adventures/{adventure}/award-ep', [AttendanceController::class, 'awardEp'])
         ->name('adventures.award-ep');
+    // Einzel-Check-in umschalten / Teilnehmer abmelden (ADV-18).
+    Route::patch('adventures/{adventure}/bookings/{booking}/checkin', [AttendanceController::class, 'toggle'])
+        ->name('adventures.bookings.checkin');
+    Route::patch('adventures/{adventure}/bookings/{booking}/deregister', [AttendanceController::class, 'deregister'])
+        ->name('adventures.bookings.deregister');
 
     // Verwaltung (Portal-Administration, Berechtigung portal.manage).
     Route::prefix('admin')->name('admin.')->middleware('can:portal.manage')->group(function () {

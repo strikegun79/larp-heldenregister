@@ -27,6 +27,23 @@ class Booking extends Model
         'signature',
         'waitlisted',
         'approved_at',
+        'status',
+        'absence_reason',
+    ];
+
+    /** Anmelde-Status (ADV-18) → Anzeige-Label. */
+    public const STATUS_LABELS = [
+        'offen' => 'offen',
+        'bestaetigt' => 'bestätigt',
+        'abgelehnt' => 'abgelehnt',
+        'abgemeldet' => 'abgemeldet',
+    ];
+
+    /** Abwesenheitsgründe bei „abgemeldet". */
+    public const ABSENCE_REASONS = [
+        'krank' => 'Krank',
+        'nicht_erschienen' => 'nicht erschienen',
+        'unentschuldigt' => 'unentschuldigt',
     ];
 
     protected $casts = [
@@ -40,6 +57,18 @@ class Booking extends Model
         'waitlisted' => 'boolean',
         'approved_at' => 'datetime',
     ];
+
+    /** Lesbares Status-Label (ADV-18). */
+    public function getStatusLabelAttribute(): string
+    {
+        return self::STATUS_LABELS[$this->status] ?? $this->status ?? 'offen';
+    }
+
+    /** Lesbarer Abwesenheitsgrund. */
+    public function getAbsenceReasonLabelAttribute(): ?string
+    {
+        return $this->absence_reason ? (self::ABSENCE_REASONS[$this->absence_reason] ?? $this->absence_reason) : null;
+    }
 
     public function adventure(): BelongsTo
     {

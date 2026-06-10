@@ -3,18 +3,45 @@
         <p class="text-stone-500">Keine Anmeldungen zum Abhaken.</p>
     @else
         @php($visitedIds = $adventure->visits->pluck('player_id'))
-        <form method="POST" action="{{ route('adventures.attendance', $adventure) }}" data-refresh-modal class="ui form">
-            @csrf @method('PUT')
-            <div class="grid grid-cols-1 sm:grid-cols-2 gap-1 mb-3">
+        <table class="ui very basic compact table">
+            <thead><tr><th>Teilnehmer</th><th>Anwesend</th><th>Status</th><th></th></tr></thead>
+            <tbody>
                 @foreach ($adventure->bookings as $booking)
-                    <label class="flex items-center gap-2">
-                        <input type="checkbox" name="present[]" value="{{ $booking->player_id }}" @checked($visitedIds->contains($booking->player_id))>
-                        {{ $booking->player?->full_name }}
-                    </label>
+                    @php($present = $visitedIds->contains($booking->player_id))
+                    <tr>
+                        <td>{{ $booking->player?->full_name }}</td>
+                        <td>@if ($present)<span class="text-green-700">✓ anwesend</span>@else<span class="text-stone-500">—</span>@endif</td>
+                        <td>
+                            @if ($booking->status === 'abgemeldet')
+                                <span class="text-orange-600">abgemeldet{{ $booking->absence_reason_label ? ' ('.$booking->absence_reason_label.')' : '' }}</span>
+                            @else
+                                <span class="text-stone-500">{{ $booking->status_label }}</span>
+                            @endif
+                        </td>
+                        <td class="right aligned">
+                            <div class="flex items-center justify-end gap-2">
+                                <form method="POST" action="{{ route('adventures.bookings.checkin', [$adventure, $booking]) }}" data-refresh-modal>
+                                    @csrf @method('PATCH')
+                                    <button type="submit" class="ui mini {{ $present ? '' : 'primary' }} button">{{ $present ? 'auschecken' : 'Check-in' }}</button>
+                                </form>
+                                <form method="POST" action="{{ route('adventures.bookings.deregister', [$adventure, $booking]) }}" data-refresh-modal class="ui form">
+                                    @csrf @method('PATCH')
+                                    <div class="flex items-center gap-1">
+                                        <select name="absence_reason" required class="!w-auto">
+                                            <option value="">Grund…</option>
+                                            @foreach (\App\Models\Booking::ABSENCE_REASONS as $key => $label)
+                                                <option value="{{ $key }}">{{ $label }}</option>
+                                            @endforeach
+                                        </select>
+                                        <button type="submit" class="ui mini button">Abmelden</button>
+                                    </div>
+                                </form>
+                            </div>
+                        </td>
+                    </tr>
                 @endforeach
-            </div>
-            <button type="submit" class="ui primary button">Teilnahme speichern</button>
-        </form>
+            </tbody>
+        </table>
 
         @php($days = $adventure->start_at && $adventure->end_at ? max(1, (int) $adventure->start_at->copy()->startOfDay()->diffInDays($adventure->end_at->copy()->startOfDay()) + 1) : 1)
         @php($epPerHero = $adventure->loot_ep_day * $days)

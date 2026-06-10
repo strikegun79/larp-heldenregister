@@ -22,8 +22,8 @@ class BookingController extends Controller
         $this->middleware('can:adventure.cancel')->only('destroy');
         // Anmeldedetails nachträglich ändern (BOOK-04).
         $this->middleware('can:adventure.modify')->only(['edit', 'update']);
-        // Anmeldung bestätigen/freigeben (BOOK-05).
-        $this->middleware('can:approve-bookings')->only('approve');
+        // Anmeldung bestätigen/freigeben (BOOK-05) bzw. ablehnen (ADV-18).
+        $this->middleware('can:approve-bookings')->only(['approve', 'reject']);
         // Bezahlt-Status pflegen (BOOK-06).
         $this->middleware('can:manage-payments')->only('togglePaid');
     }
@@ -165,11 +165,37 @@ class BookingController extends Controller
     {
         abort_unless($booking->adventure_id === $adventure->id, 404);
 
-        $booking->update(['approved_at' => $booking->approved_at ? null : now()]);
+        // Toggle bestätigt/offen; Status (ADV-18) und approved_at synchron halten.
+        $confirm = ! $booking->approved_at;
+        $booking->update([
+            'approved_at' => $confirm ? now() : null,
+            'status' => $confirm ? 'bestaetigt' : 'offen',
+        ]);
 
-        $message = $booking->approved_at ? 'Anmeldung bestätigt.' : 'Bestätigung zurückgenommen.';
+        $message = $confirm ? 'Anmeldung bestätigt.' : 'Bestätigung zurückgenommen.';
 
         // NOTI-02: optionaler Versand einer Bestätigungs-Mail an den Spieler.
+
+        return $request->expectsJson()
+            ? response()->json(['message' => $message, 'refresh_modal' => true])
+            : back()->with('status', $message);
+    }
+
+    /**
+     * Anmeldung ablehnen bzw. Ablehnung zurücknehmen (ADV-18). Toggle
+     * abgelehnt/offen; entfernt eine etwaige Bestätigung.
+     */
+    public function reject(Request $request, Adventure $adventure, Booking $booking): RedirectResponse|JsonResponse
+    {
+        abort_unless($booking->adventure_id === $adventure->id, 404);
+
+        $reject = $booking->status !== 'abgelehnt';
+        $booking->update([
+            'status' => $reject ? 'abgelehnt' : 'offen',
+            'approved_at' => null,
+        ]);
+
+        $message = $reject ? 'Anmeldung abgelehnt.' : 'Ablehnung zurückgenommen.';
 
         return $request->expectsJson()
             ? response()->json(['message' => $message, 'refresh_modal' => true])

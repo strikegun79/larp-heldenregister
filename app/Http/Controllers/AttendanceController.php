@@ -3,11 +3,13 @@
 namespace App\Http\Controllers;
 
 use App\Models\Adventure;
+use App\Models\Booking;
 use App\Models\Hero;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 
 /**
  * Teilnahme-Erfassung („Check-in") je Abenteuer (BOOK-08): hakt aus den
@@ -49,6 +51,58 @@ class AttendanceController extends Controller
         });
 
         $message = 'Teilnahme gespeichert ('.$present->count().' anwesend).';
+
+        return $request->expectsJson()
+            ? response()->json(['message' => $message, 'refresh_modal' => true])
+            : back()->with('status', $message);
+    }
+
+    /**
+     * Check-in eines einzelnen Teilnehmers umschalten (ADV-18): legt einen
+     * `event_visit` an bzw. entfernt ihn.
+     */
+    public function toggle(Request $request, Adventure $adventure, Booking $booking): RedirectResponse|JsonResponse
+    {
+        abort_unless($booking->adventure_id === $adventure->id, 404);
+
+        $visit = $adventure->visits()->where('player_id', $booking->player_id)->first();
+
+        if ($visit) {
+            $visit->delete();
+            $message = 'Check-in entfernt.';
+        } else {
+            $adventure->visits()->create(['player_id' => $booking->player_id]);
+            $message = 'Eingecheckt.';
+        }
+
+        return $request->expectsJson()
+            ? response()->json(['message' => $message, 'refresh_modal' => true])
+            : back()->with('status', $message);
+    }
+
+    /**
+     * Teilnehmer abmelden (ADV-18): Status „abgemeldet" mit Grund (krank,
+     * nicht erschienen, unentschuldigt); etwaiger Check-in wird entfernt.
+     */
+    public function deregister(Request $request, Adventure $adventure, Booking $booking): RedirectResponse|JsonResponse
+    {
+        abort_unless($booking->adventure_id === $adventure->id, 404);
+
+        $data = $request->validate([
+            'absence_reason' => ['required', Rule::in(array_keys(Booking::ABSENCE_REASONS))],
+        ]);
+
+        DB::transaction(function () use ($adventure, $booking, $data) {
+            $booking->update([
+                'status' => 'abgemeldet',
+                'absence_reason' => $data['absence_reason'],
+                'approved_at' => null,
+            ]);
+            // Abgemeldete gelten nicht als anwesend.
+            $adventure->visits()->where('player_id', $booking->player_id)->delete();
+        });
+
+        $message = 'Teilnehmer abgemeldet ('.$booking->absence_reason_label.').';
 
         return $request->expectsJson()
             ? response()->json(['message' => $message, 'refresh_modal' => true])
