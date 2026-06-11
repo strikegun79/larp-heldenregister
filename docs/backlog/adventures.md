@@ -140,12 +140,20 @@ Eine Admin-Eventliste mit Verwaltungsaktionen (anlegen/bearbeiten/absagen).
 > Event-Modal), Uhrzeit/Ort, Status-Badge und Belegung. Verlinkung „Kalender ⇄
 > Listenansicht" in den Kopfzeilen. Tests: `EventCalendarTest` (3).
 
-### ADV-13 · Event-Spieleransicht · ⏱ 4h · 🔲
+### ADV-13 · Event-Spieleransicht · ⏱ 4h · ✅
 **Beschreibung:** Wer nur die Rollen Teilnehmer,Event-Buchen und Teamer hat, darf nur seine eigenen Spieler unter seinem Nutzer sehen.
 **Akzeptanzkriterien:**
-- [ ] Berücksichtigen der Rolle.
-- [ ] Filtern der Spieler die am Event angemeldet sind.
-- [ ] Spieler die schon angemeldet sind, erscheinen in der Dropdown auswahl nicht mehr.
+- [x] Berücksichtigen der Rolle.
+- [x] Filtern der Spieler die am Event angemeldet sind.
+- [x] Spieler die schon angemeldet sind, erscheinen in der Dropdown auswahl nicht mehr.
+
+> Umgesetzt: Rolle berücksichtigt (BOOK-10 `book-any-player`: nur Bürokrat/Admin
+> sehen alle, sonst eigene/betreute Spieler; Anmeldeliste rollengefiltert via
+> `view-all-bookings`, ADV-15). Neu: `BookingController@create` blendet bereits
+> für das Event angemeldete Spieler aus dem Dropdown aus (`whereNotIn`
+> player_id); Hinweis, wenn alle wählbaren Spieler schon angemeldet sind.
+> Doppelbuchung war serverseitig bereits abgewiesen. Tests:
+> `BookingPlayerExclusionTest` (3) + angepasste `EventLayoutTest`.
 
 ### ADV-14 · Event-unter Verwaltung · ⏱ 4h · ✅
 **Beschreibung:** Das Öffnen eines Events unter der Verwaltung soll direkt die Editieren-Ansicht des Events zeigen.

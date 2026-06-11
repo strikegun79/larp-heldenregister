@@ -2,6 +2,8 @@
 
 @if (! $adventure->registrationOpen())
     <p class="text-stone-500">Die Anmeldung ist derzeit nicht geöffnet (Status: {{ $adventure->status?->description }}).</p>
+@elseif ($players->isEmpty())
+    <p class="text-stone-500">Alle wählbaren Spieler sind für dieses Abenteuer bereits angemeldet.</p>
 @else
     @if ($adventure->isFull())
         <p class="mb-3 text-orange-600">Das Abenteuer ist voll – neue Anmeldungen kommen auf die Warteliste.</p>

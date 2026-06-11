@@ -91,8 +91,10 @@ class EventLayoutTest extends TestCase
             ->assertSee('data-modal-subview', false)
             ->assertSee(route('adventures.bookings.create', $adventure), false);
 
-        // Die Unteransicht selbst liefert das Anmeldeformular.
-        $this->actingAs($this->userWithRole(60))
+        // Die Unteransicht selbst liefert das Anmeldeformular (Bucher mit eigenem Spieler).
+        $booker = $this->userWithRole(60);
+        $booker->players()->attach(\App\Models\Player::factory()->create()->id, ['self' => true]);
+        $this->actingAs($booker)
             ->get(route('adventures.bookings.create', $adventure))
             ->assertOk()
             ->assertSee('Anmeldung absenden');

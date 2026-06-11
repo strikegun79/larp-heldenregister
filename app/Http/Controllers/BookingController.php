@@ -34,9 +34,12 @@ class BookingController extends Controller
      */
     public function create(Request $request, Adventure $adventure): View
     {
+        // Bereits angemeldete Spieler nicht mehr zur Auswahl anbieten (ADV-13).
+        $bookedPlayerIds = $adventure->bookings()->pluck('player_id');
+
         $players = Gate::allows('book-any-player')
-            ? Player::orderBy('name')->get()
-            : $request->user()->players()->orderBy('name')->get();
+            ? Player::whereNotIn('id', $bookedPlayerIds)->orderBy('name')->get()
+            : $request->user()->players()->whereNotIn('players.id', $bookedPlayerIds)->orderBy('name')->get();
 
         return view('bookings._create', [
             'adventure' => $adventure,
