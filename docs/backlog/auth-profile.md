@@ -52,3 +52,11 @@ Klartext-Passwort; Login schlägt fehl. Erzwungener Reset nötig.
 - [ ] Selbstlöschung soft-deleted das Konto und loggt aus (bereits Verhalten – Test absichern).
 - [ ] Soft-gelöschte Nutzer erscheinen nicht in Auswahl-/Login-Listen.
 - [ ] Admin kann ein soft-gelöschtes Konto wiederherstellen (optionale Teilaufgabe).
+
+### AUTH-09 · Registrieren als Nutzer  · ⏱ 2h · 🔲
+**Beschreibung:** Neuer User kann sich registrieren als für Teilnehmer und Buchen von Events
+**Akzeptanzkriterien:**
+- [ ] Email verifizieren, beachte alle gängingen sinnvollen Sicherheitsmechanismen
+- [ ] Neuer Nutzer wird nur als Teilnehmer und Event-Buchen Rolle erstellt.
+- [ ] Ein Eltern-Account für mehrere Kinder, aber Kinder sollen auch ihren Account sehen können oder anmelden?
+- [ ] Wenn Kinder rauswachsen, wie kann man ein Kinder vom Eltern-Account abkoppeln ohne die Daten zum Spieler und Helden zu verlieren?

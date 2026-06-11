@@ -52,6 +52,9 @@
                     </x-slot>
 
                     <x-slot name="content">
+                        <div class="px-4 py-2 text-xs text-gray-500 border-b border-gray-100">
+                            {{ __('Rollen') }}: {{ Auth::user()->roles->pluck('label')->implode(', ') ?: __('keine') }}
+                        </div>
                         <x-dropdown-link :href="route('profile.edit')">
                             {{ __('Profile') }}
                         </x-dropdown-link>

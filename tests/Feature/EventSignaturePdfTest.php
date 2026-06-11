@@ -56,7 +56,7 @@ class EventSignaturePdfTest extends TestCase
 
     public function test_authorized_role_can_save_signature(): void
     {
-        $adventure = Adventure::factory()->create();
+        $adventure = Adventure::factory()->registrationClosed()->create();
         $booking = $this->bookingFor($adventure);
 
         $this->actingAs($this->userWithRole(20)) // Bürokrat
@@ -71,7 +71,7 @@ class EventSignaturePdfTest extends TestCase
 
     public function test_signature_must_be_png_data_url(): void
     {
-        $adventure = Adventure::factory()->create();
+        $adventure = Adventure::factory()->registrationClosed()->create();
         $booking = $this->bookingFor($adventure);
 
         $this->actingAs($this->userWithRole(20))

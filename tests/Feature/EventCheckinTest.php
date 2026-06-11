@@ -45,7 +45,7 @@ class EventCheckinTest extends TestCase
 
     public function test_saving_signature_also_checks_the_participant_in(): void
     {
-        $adventure = Adventure::factory()->create();
+        $adventure = Adventure::factory()->registrationClosed()->create();
         $booking = $this->bookingFor($adventure);
 
         $this->actingAs($this->userWithRole(30)) // Projektleitung (take-signatures)
@@ -65,7 +65,7 @@ class EventCheckinTest extends TestCase
 
     public function test_checkin_tab_lists_signature_column_and_triggers(): void
     {
-        $adventure = Adventure::factory()->create();
+        $adventure = Adventure::factory()->registrationClosed()->create();
         $booking = $this->bookingFor($adventure);
 
         $response = $this->actingAs($this->userWithRole(20)) // Bürokrat

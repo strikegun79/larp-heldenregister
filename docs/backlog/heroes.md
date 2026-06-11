@@ -246,3 +246,8 @@ für das Detail-Layout vergeben).
 > kein AJAX auslösen (gilt auch für bestehende Storno-/EP-Bestätigungen).
 > Tests: `HeroClassAssignmentTest` (Standardkosten 5, Korrektur ohne Abzug,
 > Korrektur trotz fehlender EP).
+### HERO-21 Helden-aktiver Held pro Spieler · 
+**Beschreibung:** es kann immer nur einen aktiven Helden geben
+- [] wenn ein Held auf aktiv gesetzt wird, müssen alle anderen Helden des Spielers auf inaktiv gesetzt werden.
+- [] entferne die Auswahl aus dem Eventanmeldung, dass man einen Helden auswählen kann. Dies ist nicht nötig, da der Bürokrat der einzige ist, der einen Held als Aktiv festlegt.
+- [] EP die in einem Event zugeteilt werden müssen an den aktiven Helden zugeordnet werden.

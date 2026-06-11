@@ -42,6 +42,15 @@ class SignatureController extends Controller
     {
         abort_unless($booking->adventure_id === $adventure->id, 404);
 
+        // Unterschrift bestätigt den Check-in – erst ab Status ≥ 40 (ADV-14).
+        if (! $adventure->checkinAllowed()) {
+            $message = 'Check-in ist erst ab Status „Anmeldung geschlossen" möglich.';
+
+            return $request->expectsJson()
+                ? response()->json(['message' => $message], 422)
+                : back()->with('error', $message);
+        }
+
         $data = $request->validate([
             'signature' => ['required', 'string', 'starts_with:data:image/png;base64,', 'max:2000000'],
         ]);

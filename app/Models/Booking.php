@@ -13,6 +13,7 @@ class Booking extends Model
     protected $fillable = [
         'adventure_id',
         'player_id',
+        'hero_id',
         'event_role_id',
         'fotoerlaubnis',
         'vegetarier',
@@ -78,6 +79,11 @@ class Booking extends Model
     public function player(): BelongsTo
     {
         return $this->belongsTo(Player::class);
+    }
+
+    public function hero(): BelongsTo
+    {
+        return $this->belongsTo(Hero::class);
     }
 
     public function role(): BelongsTo

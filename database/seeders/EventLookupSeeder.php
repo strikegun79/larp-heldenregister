@@ -32,9 +32,9 @@ class EventLookupSeeder extends Seeder
             ['id' => 20, 'description' => 'geplant',               'color' => '#ffeb52'],
             ['id' => 30, 'description' => 'Anmeldung offen',       'color' => '#a2de00'],
             ['id' => 40, 'description' => 'Anmeldung geschlossen', 'color' => '#a2de00'],
-            ['id' => 50, 'description' => 'abgesagt',              'color' => '#f2711c'],
-            ['id' => 60, 'description' => 'Abrechnung',            'color' => '#54c8ff'],
-            ['id' => 70, 'description' => 'Abgeschlossen',         'color' => '#23d9c9'],
+            ['id' => 50, 'description' => 'Abrechnung',            'color' => '#54c8ff'],
+            ['id' => 60, 'description' => 'Abgeschlossen',         'color' => '#23d9c9'],
+            ['id' => 70, 'description' => 'abgesagt',              'color' => '#f2711c'],
         ];
         foreach ($statuses as $row) {
             EventStatus::updateOrCreate(['id' => $row['id']], $row);

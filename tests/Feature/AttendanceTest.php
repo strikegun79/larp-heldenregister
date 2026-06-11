@@ -35,7 +35,8 @@ class AttendanceTest extends TestCase
 
     private function adventureWithBookings(int $count = 2): array
     {
-        $adventure = Adventure::factory()->create();
+        // Check-in erst ab Status „Anmeldung geschlossen" (ADV-14).
+        $adventure = Adventure::factory()->registrationClosed()->create();
         $players = Player::factory()->count($count)->create();
         foreach ($players as $player) {
             Booking::factory()->for($adventure)->create(['player_id' => $player->id]);
@@ -47,7 +48,7 @@ class AttendanceTest extends TestCase
     public function test_spielleiter_records_and_clears_attendance(): void
     {
         [$adventure, $players] = $this->adventureWithBookings(2);
-        $gm = $this->userWithRole(40); // Spielleiter
+        $gm = $this->userWithRole(30); // Projektleitung (manage-checkin)
 
         $this->actingAs($gm)
             ->putJson(route('adventures.attendance', $adventure), ['present' => [$players[0]->id]])
@@ -69,7 +70,7 @@ class AttendanceTest extends TestCase
         [$adventure, $players] = $this->adventureWithBookings(1);
         $stranger = Player::factory()->create(); // nicht gebucht
 
-        $this->actingAs($this->userWithRole(40))
+        $this->actingAs($this->userWithRole(30))
             ->putJson(route('adventures.attendance', $adventure), [
                 'present' => [$players[0]->id, $stranger->id],
             ])
@@ -103,7 +104,7 @@ class AttendanceTest extends TestCase
 
     public function test_awards_ep_to_active_heroes_and_is_idempotent(): void
     {
-        $adventure = Adventure::factory()->create([
+        $adventure = Adventure::factory()->registrationClosed()->create([
             'loot_ep_day' => 3,
             'start_at' => '2026-08-01 10:00',
             'end_at' => '2026-08-02 16:00', // 2 Tage
@@ -114,7 +115,7 @@ class AttendanceTest extends TestCase
         $player->update(['active_hero_id' => $hero->id]);
         $adventure->visits()->create(['player_id' => $player->id]);
 
-        $this->actingAs($this->userWithRole(40))
+        $this->actingAs($this->userWithRole(30))
             ->postJson(route('adventures.award-ep', $adventure))
             ->assertOk()
             ->assertJson(['refresh_modal' => true]);
@@ -128,13 +129,13 @@ class AttendanceTest extends TestCase
         ]);
 
         // Idempotent: zweiter Lauf vergibt nicht erneut.
-        $this->actingAs($this->userWithRole(40))->postJson(route('adventures.award-ep', $adventure))->assertOk();
+        $this->actingAs($this->userWithRole(30))->postJson(route('adventures.award-ep', $adventure))->assertOk();
         $this->assertEquals(1, EpTransaction::where('hero_id', $hero->id)->where('adventure_id', $adventure->id)->count());
     }
 
     public function test_attendee_without_active_hero_is_skipped(): void
     {
-        $adventure = Adventure::factory()->create([
+        $adventure = Adventure::factory()->registrationClosed()->create([
             'loot_ep_day' => 2,
             'start_at' => '2026-08-01 10:00',
             'end_at' => '2026-08-01 18:00',
@@ -143,7 +144,7 @@ class AttendanceTest extends TestCase
         Booking::factory()->for($adventure)->create(['player_id' => $player->id]);
         $adventure->visits()->create(['player_id' => $player->id]);
 
-        $this->actingAs($this->userWithRole(40))
+        $this->actingAs($this->userWithRole(30))
             ->postJson(route('adventures.award-ep', $adventure))
             ->assertOk();
 

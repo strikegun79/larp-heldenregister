@@ -95,6 +95,14 @@ class Adventure extends Model
     }
 
     /**
+     * Ist der Check-in erlaubt? Erst ab „Anmeldung geschlossen" (Status ≥ 40, ADV-14).
+     */
+    public function checkinAllowed(): bool
+    {
+        return (int) $this->event_status_id >= EventStatus::REGISTRATION_CLOSED;
+    }
+
+    /**
      * Anzahl freier regulärer Plätze.
      */
     public function freeSlots(): int

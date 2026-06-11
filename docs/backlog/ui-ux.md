@@ -90,3 +90,9 @@ darstellen (einheitliches Feedback).
 > antwortet mit JSON (`reload`). „Bearbeiten"-Links in Detail-Modal und
 > Listen tragen `data-modal-url` → Bearbeiten öffnet im Modal. Vollseiten
 > bleiben als Fallback. Tests: Hero-/Player-Edit-Modal + AJAX-Update.
+
+### UI-14 · Accessibility-Rollen anzeigen · ⏱ 3h · 🔲
+**Beschreibung:** Unter Profil soll sichtbar sein, welche Rollen der aktuelle Nutzer hat.
+**Akzeptanzkriterien:**
+- [ ] Anzeigen der aktivierten Rollen unter dem User-Profil
+- [ ] alternativ auch in der Headleiste?

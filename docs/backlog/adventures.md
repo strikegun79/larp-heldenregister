@@ -80,13 +80,29 @@ Eine Admin-Eventliste mit Verwaltungsaktionen (anlegen/bearbeiten/absagen).
 - [ ] Filtern der Spieler die am Event angemeldet sind.
 - [ ] Spieler die schon angemeldet sind, erscheinen in der Dropdown auswahl nicht mehr.
 
-### ADV-14 · Event-unter Verwaltung · ⏱ 4h · 🔲
+### ADV-14 · Event-unter Verwaltung · ⏱ 4h · ✅
 **Beschreibung:** Das Öffnen eines Events unter der Verwaltung soll direkt die Editieren-Ansicht des Events zeigen.
 **Akzeptanzkriterien:**
-- [ ] Event öffnen unter Abenteuer öffnet ein Modal für die Anmeldung an einem Event
-- [ ] Event öffnen unter der Verwaltung-Abenteuer öffnet das Modal zum editieren des Events als solches.
-- [] Event Status dropdown soll durchnummeriert sein: 0 unbekannt, 10 in Bearbeitung, 20 geplant, 30 Anmeldung offen, 40 Anmeldung geschlossen, 50 Abrechnung, 60 Abgeschlossen, 70 abgesagt
-- [] die Spieler Check-In können nur nach Status 40 erfolgen und nur durch die Rollen Admin, Projektleitung und Bürokrat
+- [x] Event öffnen unter Abenteuer öffnet ein Modal für die Anmeldung an einem Event
+- [x] Event öffnen unter der Verwaltung-Abenteuer öffnet das Modal zum editieren des Events als solches.
+- [x] Event Status dropdown soll durchnummeriert sein: 0 unbekannt, 10 in Bearbeitung, 20 geplant, 30 Anmeldung offen, 40 Anmeldung geschlossen, 50 Abrechnung, 60 Abgeschlossen, 70 abgesagt
+- [x] die Spieler Check-In können nur nach Status 40 erfolgen und nur durch die Rollen Admin, Projektleitung und Bürokrat
+- [x] wenn im Check-in der Button zum zuordnen von anwesenden Spielern die EP zugesichert bekommen soll, muss das auch passieren. Und im EP-Verlauf des aktiven Helden zu finden sein.
+- [x] Bei der event Anmeldung vom Teilnehmer, muss neben den Spieler der passende Held, falls es einen gibt, ausgewählt werden. Wenn es keinen Helden gibt, bleibt das Feld leer mit dem Hinweis, Wende dich im nächsten Spiel an den Bürokraten.
+
+> Umgesetzt: Anmelde-Modal (ADV-15) und Verwaltungs-Modal (ADV-16) bestanden
+> bereits. Status-Nummerierung korrigiert (Migration + Seeder: 50 Abrechnung,
+> 60 Abgeschlossen, 70 abgesagt; Dropdown `orderBy id`). Check-in nur ab Status
+> ≥ 40 (`Adventure::checkinAllowed()`, `EventStatus::REGISTRATION_CLOSED`):
+> Guard in `AttendanceController` (toggle/update/awardEp) und
+> `SignatureController@update`; UI blendet Check-in-Aktionen sonst aus +
+> Hinweis. Gate `manage-checkin` auf **Projektleitung/Bürokrat + Admin**
+> verengt (Spielleiter/Teamer raus). EP-Vergabe (BOOK-09) bucht Typ 50 an den
+> aktiven Helden → erscheint im EP-Verlauf/der Abenteuerhistorie. Anmeldung:
+> Spalte `bookings.hero_id`; im Formular wird der aktive Held des gewählten
+> Spielers per JS vorgewählt (ohne Held → Hinweis „… an den Bürokraten");
+> Server prüft Held↔Spieler. Tests: `EventCheckinRulesTest` (5),
+> `BookingHeroTest` (4) + angepasste Attendance-/Signature-/Status-Tests.
 
 
 ### ADV-15 · Event-Layout · ⏱ 4h · ✅

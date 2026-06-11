@@ -90,7 +90,7 @@ class BookingStatusTest extends TestCase
         $booking = $this->bookingFor($adventure);
         $adventure->visits()->create(['player_id' => $booking->player_id]); // war eingecheckt
 
-        $this->actingAs($this->userWithRole(40)) // Spielleiter: manage-attendance
+        $this->actingAs($this->userWithRole(30)) // Projektleitung: manage-checkin
             ->patchJson(route('adventures.bookings.deregister', [$adventure, $booking]), [
                 'absence_reason' => 'krank',
             ])
@@ -110,7 +110,7 @@ class BookingStatusTest extends TestCase
         $adventure = Adventure::factory()->create();
         $booking = $this->bookingFor($adventure);
 
-        $this->actingAs($this->userWithRole(40))
+        $this->actingAs($this->userWithRole(30))
             ->patchJson(route('adventures.bookings.deregister', [$adventure, $booking]), [
                 'absence_reason' => 'unsinn',
             ])
@@ -120,15 +120,15 @@ class BookingStatusTest extends TestCase
 
     public function test_single_checkin_toggle(): void
     {
-        $adventure = Adventure::factory()->create();
+        $adventure = Adventure::factory()->registrationClosed()->create();
         $booking = $this->bookingFor($adventure);
         $route = route('adventures.bookings.checkin', [$adventure, $booking]);
 
-        $this->actingAs($this->userWithRole(40))->patchJson($route)->assertOk();
+        $this->actingAs($this->userWithRole(30))->patchJson($route)->assertOk();
         $this->assertDatabaseHas('event_visits', ['adventure_id' => $adventure->id, 'player_id' => $booking->player_id]);
 
         // Erneut -> ausgecheckt.
-        $this->actingAs($this->userWithRole(40))->patchJson($route)->assertOk();
+        $this->actingAs($this->userWithRole(30))->patchJson($route)->assertOk();
         $this->assertDatabaseMissing('event_visits', ['adventure_id' => $adventure->id, 'player_id' => $booking->player_id]);
     }
 

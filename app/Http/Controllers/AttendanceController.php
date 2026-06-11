@@ -20,14 +20,32 @@ class AttendanceController extends Controller
     public function __construct()
     {
         $this->middleware('auth');
-        // Bulk-Check-in + EP-Vergabe: Spielleiter/Teamer (BOOK-08/09).
-        $this->middleware('can:manage-attendance')->only(['update', 'awardEp']);
-        // Einzel-Check-in/Abmelden (ADV-18/19): zusätzlich Projektleitung/Bürokrat.
-        $this->middleware('can:manage-checkin')->only(['toggle', 'deregister']);
+        // Check-in, Abmelden und EP-Vergabe: Admin/Projektleitung/Bürokrat (ADV-14).
+        $this->middleware('can:manage-checkin');
+    }
+
+    /**
+     * Check-in ist erst ab Status „Anmeldung geschlossen" (≥ 40) erlaubt (ADV-14).
+     */
+    private function denyIfCheckinClosed(Request $request, Adventure $adventure): RedirectResponse|JsonResponse|null
+    {
+        if ($adventure->checkinAllowed()) {
+            return null;
+        }
+
+        $message = 'Check-in ist erst ab Status „Anmeldung geschlossen" möglich.';
+
+        return $request->expectsJson()
+            ? response()->json(['message' => $message], 422)
+            : back()->with('error', $message);
     }
 
     public function update(Request $request, Adventure $adventure): RedirectResponse|JsonResponse
     {
+        if ($deny = $this->denyIfCheckinClosed($request, $adventure)) {
+            return $deny;
+        }
+
         $request->validate([
             'present' => ['array'],
             'present.*' => ['integer'],
@@ -67,6 +85,10 @@ class AttendanceController extends Controller
     public function toggle(Request $request, Adventure $adventure, Booking $booking): RedirectResponse|JsonResponse
     {
         abort_unless($booking->adventure_id === $adventure->id, 404);
+
+        if ($deny = $this->denyIfCheckinClosed($request, $adventure)) {
+            return $deny;
+        }
 
         $visit = $adventure->visits()->where('player_id', $booking->player_id)->first();
 
@@ -120,6 +142,10 @@ class AttendanceController extends Controller
      */
     public function awardEp(Request $request, Adventure $adventure): RedirectResponse|JsonResponse
     {
+        if ($deny = $this->denyIfCheckinClosed($request, $adventure)) {
+            return $deny;
+        }
+
         $days = $this->eventDays($adventure);
         $ep = $adventure->loot_ep_day * $days;
 

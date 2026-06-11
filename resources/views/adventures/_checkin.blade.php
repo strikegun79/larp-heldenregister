@@ -3,6 +3,12 @@
         Teilnehmerliste als PDF
     </a>
 
+    @unless ($adventure->checkinAllowed())
+        <div class="ui warning message" style="display:block">
+            Check-in ist erst ab Status „Anmeldung geschlossen" möglich (aktuell: {{ $adventure->status?->description }}).
+        </div>
+    @endunless
+
     @if ($adventure->bookings->isEmpty())
         <p class="text-stone-500">Keine Anmeldungen.</p>
     @else
@@ -32,15 +38,17 @@
                         </td>
                         <td class="right aligned">
                             <div class="flex items-center justify-end gap-2">
-                                @if ($present)
-                                    <form method="POST" action="{{ route('adventures.bookings.checkin', [$adventure, $booking]) }}" data-refresh-modal>
-                                        @csrf @method('PATCH')
-                                        <button type="submit" class="ui mini button">auschecken</button>
-                                    </form>
-                                @else
-                                    <button type="button" class="ui mini primary button checkin-trigger"
-                                            data-url="{{ route('adventures.bookings.signature.update', [$adventure, $booking]) }}"
-                                            data-name="{{ $booking->player?->full_name }}">Check-in</button>
+                                @if ($adventure->checkinAllowed())
+                                    @if ($present)
+                                        <form method="POST" action="{{ route('adventures.bookings.checkin', [$adventure, $booking]) }}" data-refresh-modal>
+                                            @csrf @method('PATCH')
+                                            <button type="submit" class="ui mini button">auschecken</button>
+                                        </form>
+                                    @else
+                                        <button type="button" class="ui mini primary button checkin-trigger"
+                                                data-url="{{ route('adventures.bookings.signature.update', [$adventure, $booking]) }}"
+                                                data-name="{{ $booking->player?->full_name }}">Check-in</button>
+                                    @endif
                                 @endif
                                 <button type="button" class="ui mini button deregister-trigger"
                                         data-url="{{ route('adventures.bookings.deregister', [$adventure, $booking]) }}"
@@ -52,14 +60,14 @@
             </tbody>
         </table>
 
-        @can('manage-attendance')
+        @if ($adventure->checkinAllowed())
             @php($days = $adventure->start_at && $adventure->end_at ? max(1, (int) $adventure->start_at->copy()->startOfDay()->diffInDays($adventure->end_at->copy()->startOfDay()) + 1) : 1)
             @php($epPerHero = $adventure->loot_ep_day * $days)
             <form method="POST" action="{{ route('adventures.award-ep', $adventure) }}" data-refresh-modal class="mt-3"
-                  onsubmit="return confirm('Allen anwesenden aktiven Helden je {{ $epPerHero }} EP gutschreiben?');">
+                  onsubmit="return confirm('Allen anwesenden aktiven Helden je {{ $epPerHero }} EP gutschreiben? Die EP landen im EP-Verlauf des aktiven Helden.');">
                 @csrf
                 <button type="submit" class="ui button">EP für Teilnehmer verbuchen ({{ $epPerHero }} EP/Held)</button>
             </form>
-        @endcan
+        @endif
     @endif
 @endcan
