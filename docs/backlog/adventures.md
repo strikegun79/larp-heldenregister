@@ -45,13 +45,22 @@ Eine Admin-Eventliste mit Verwaltungsaktionen (anlegen/bearbeiten/absagen).
 - [ ] Admin-Eventliste mit Status, Belegung, Aktionen.
 - [ ] Trennung Browsen (Spieler) vs. Verwalten (Admin) klar.
 
-### ADV-07 · Event absagen (mit Folgeaktionen) · ⏱ 3h · 🔲
+### ADV-07 · Event absagen (mit Folgeaktionen) · ⏱ 3h · ✅
 **Beschreibung:** Status „abgesagt" inkl. Benachrichtigung der Gebuchten.
 **Akzeptanzkriterien:**
-- [ ] Aktion „Event absagen" setzt Status + sperrt Buchungen.
-- [ ] Trigger für Absage-Mails (siehe NOTI-04).
-- [ ] Tests.
+- [x] Aktion „Event absagen" setzt Status + sperrt Buchungen.
+- [ ] Trigger für Absage-Mails (siehe NOTI-04). → offen in NOTI-04 (Hook gesetzt).
+- [x] Tests.
 **Abhängig von:** ADV-05, NOTI-04.
+
+> Umgesetzt: `AdventureController@cancel` (`PATCH adventures/{adventure}/cancel`,
+> `can:events.edit`) setzt Status 70 „abgesagt" (respektiert ADV-05-Workflow:
+> aus aktiven Status erlaubt, aus „Abgeschlossen"/60 abgelehnt; doppelte Absage
+> abgewiesen). Da Status ≠ 30, sind danach keine neuen Anmeldungen mehr möglich
+> (`registrationOpen`/`BookingController@store`). Button „Event absagen" im
+> Verwaltungs-Modal (Event-Daten-Tab) mit Bestätigung; abgesagte Events zeigen
+> einen Hinweis. NOTI-04 als Kommentar-Hook vorbereitet. Tests:
+> `EventCancelTest` (5).
 
 ### ADV-08 · Orte-Lookup-CRUD (locations) · ⏱ 3h · 🔲
 **Beschreibung:** Veranstaltungsorte pflegbar (Titel, GPS, PLZ, Stadt, Adresse, Bild).

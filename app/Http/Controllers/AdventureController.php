@@ -24,8 +24,8 @@ class AdventureController extends Controller
         $this->middleware('auth');
         // Abenteuer ansehen: events.view ODER adventure.book (siehe adventure.access).
         $this->middleware('can:adventure.access')->only(['index', 'show']);
-        // Events anlegen/bearbeiten: events.edit (Admin, Bürokrat, Projektleitung).
-        $this->middleware('can:events.edit')->only(['create', 'store', 'edit', 'update', 'destroy', 'manage']);
+        // Events anlegen/bearbeiten/absagen: events.edit (Admin, Bürokrat, Projektleitung).
+        $this->middleware('can:events.edit')->only(['create', 'store', 'edit', 'update', 'destroy', 'manage', 'cancel']);
         // Teilnehmer-PDF: Projektleitung, Bürokrat, Admin (ADV-17).
         $this->middleware('can:take-signatures')->only('participantsPdf');
     }
@@ -123,6 +123,38 @@ class AdventureController extends Controller
 
         // Inline (ADV-19): öffnet im Browser-Tab/Popup statt Download.
         return $pdf->stream('teilnehmerliste-'.$adventure->id.'.pdf');
+    }
+
+    /**
+     * Event absagen (ADV-07): Status „abgesagt" (70) setzen. Da Status ≠ 30,
+     * sind damit automatisch keine neuen Anmeldungen mehr möglich.
+     */
+    public function cancel(Request $request, Adventure $adventure): RedirectResponse|JsonResponse
+    {
+        if ($adventure->event_status_id === EventStatus::CANCELLED) {
+            return $this->cancelFail($request, 'Das Event ist bereits abgesagt.');
+        }
+
+        if (! $adventure->canTransitionTo(EventStatus::CANCELLED)) {
+            return $this->cancelFail($request, 'Dieses Event kann nicht (mehr) abgesagt werden.');
+        }
+
+        $adventure->update(['event_status_id' => EventStatus::CANCELLED]);
+
+        // NOTI-04: Absage-Mails an alle gebuchten Spieler auslösen.
+
+        $message = 'Event wurde abgesagt.';
+
+        return $request->expectsJson()
+            ? response()->json(['message' => $message, 'refresh_modal' => true])
+            : back()->with('status', $message);
+    }
+
+    private function cancelFail(Request $request, string $message): RedirectResponse|JsonResponse
+    {
+        return $request->expectsJson()
+            ? response()->json(['message' => $message], 422)
+            : back()->with('error', $message);
     }
 
     public function edit(Adventure $adventure): View

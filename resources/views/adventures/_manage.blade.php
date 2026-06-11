@@ -12,6 +12,18 @@
         @method('PUT')
         @include('adventures._form')
     </form>
+
+    @if ($adventure->event_status_id !== \App\Models\EventStatus::CANCELLED)
+        <div class="mt-4 pt-4 border-t border-stone-300">
+            <form method="POST" action="{{ route('adventures.cancel', $adventure) }}" data-refresh-modal
+                  onsubmit="return confirm('Event wirklich absagen? Es sind danach keine Anmeldungen mehr möglich.');">
+                @csrf @method('PATCH')
+                <button type="submit" class="ui red basic button">Event absagen</button>
+            </form>
+        </div>
+    @else
+        <div class="ui warning message mt-4" style="display:block">Dieses Event ist abgesagt.</div>
+    @endif
 </div>
 
 {{-- Tab 2: Anmeldungen mit Verwaltungsaktionen --}}

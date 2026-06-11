@@ -61,6 +61,8 @@ Route::middleware('auth')->group(function () {
     Route::get('adventures/{adventure}/manage', [AdventureController::class, 'manage'])->name('adventures.manage');
     // Teilnehmerliste als PDF (ADV-17).
     Route::get('adventures/{adventure}/participants-pdf', [AdventureController::class, 'participantsPdf'])->name('adventures.participants-pdf');
+    // Event absagen (ADV-07).
+    Route::patch('adventures/{adventure}/cancel', [AdventureController::class, 'cancel'])->name('adventures.cancel');
 
     // Anmeldungen zu einem Abenteuer.
     // Anmeldeformular als Modal-Unteransicht (ADV-15).
