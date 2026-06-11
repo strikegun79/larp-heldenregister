@@ -57,6 +57,8 @@ Route::middleware('auth')->group(function () {
     Route::get('skilltree/{heroClass}/edit', [SkilltreeController::class, 'edit'])->name('skilltree.edit');
     Route::patch('skilltree/{heroClass}', [SkilltreeController::class, 'update'])->name('skilltree.update');
     Route::resource('adventures', AdventureController::class);
+    // Kalenderansicht kommender Events (ADV-12).
+    Route::get('adventures-calendar', [AdventureController::class, 'calendar'])->name('adventures.calendar');
     // Verwaltungsliste der Events (ADV-06): getrennt von der Browse-Liste.
     Route::get('adventures-manage', [AdventureController::class, 'manageIndex'])->name('adventures.manage-index');
     // Verwaltungs-Modal mit Tabs (ADV-16): Editor + Anmeldungen + Check-in.

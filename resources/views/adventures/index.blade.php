@@ -2,9 +2,12 @@
     <x-slot name="header">
         <div class="flex items-center justify-between">
             <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">Abenteuer</h2>
-            @can('events.edit')
-                <a href="{{ route('adventures.manage-index') }}" class="text-sm text-indigo-600 dark:text-indigo-400 hover:underline">Zur Event-Verwaltung →</a>
-            @endcan
+            <div class="flex items-center gap-4">
+                <a href="{{ route('adventures.calendar') }}" class="text-sm text-indigo-600 dark:text-indigo-400 hover:underline">Kalender →</a>
+                @can('events.edit')
+                    <a href="{{ route('adventures.manage-index') }}" class="text-sm text-indigo-600 dark:text-indigo-400 hover:underline">Zur Event-Verwaltung →</a>
+                @endcan
+            </div>
         </div>
     </x-slot>
 

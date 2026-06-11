@@ -24,7 +24,7 @@ class AdventureController extends Controller
     {
         $this->middleware('auth');
         // Abenteuer ansehen: events.view ODER adventure.book (siehe adventure.access).
-        $this->middleware('can:adventure.access')->only(['index', 'show']);
+        $this->middleware('can:adventure.access')->only(['index', 'show', 'calendar']);
         // Events anlegen/bearbeiten/absagen + Verwaltungsliste: events.edit
         // (Admin, Bürokrat, Projektleitung).
         $this->middleware('can:events.edit')->only(['create', 'store', 'edit', 'update', 'destroy', 'manage', 'cancel', 'manageIndex']);
@@ -43,6 +43,23 @@ class AdventureController extends Controller
             ->paginate(20);
 
         return view('adventures.index', compact('adventures'));
+    }
+
+    /**
+     * Kalender-/Listenansicht kommender Events, chronologisch nach Monat
+     * gruppiert (ADV-12).
+     */
+    public function calendar(): View
+    {
+        $events = Adventure::with(['location', 'status'])
+            ->withCount('confirmedBookings')
+            ->whereNotNull('start_at')
+            ->where('start_at', '>=', now()->startOfDay())
+            ->orderBy('start_at')
+            ->get()
+            ->groupBy(fn (Adventure $a) => $a->start_at->format('Y-m'));
+
+        return view('adventures.calendar', compact('events'));
     }
 
     /**

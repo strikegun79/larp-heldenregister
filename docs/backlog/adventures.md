@@ -127,11 +127,18 @@ Eine Admin-Eventliste mit Verwaltungsaktionen (anlegen/bearbeiten/absagen).
 > Auswahl wird zu null. Anzeige im Event-Detail (Event-Tab: Spielleiter,
 > Eventleiter). `show()` lädt die Relationen. Tests: `EventStaffTest` (4).
 
-### ADV-12 · Event-Kalenderansicht · ⏱ 4h · 🔲
+### ADV-12 · Event-Kalenderansicht · ⏱ 4h · ✅
 **Beschreibung:** Kommende Events als Kalender/Liste nach Datum.
 **Akzeptanzkriterien:**
-- [ ] Chronologische Ansicht kommender Events mit Status/Belegung.
-- [ ] Optional Monats-/Listen-Umschaltung.
+- [x] Chronologische Ansicht kommender Events mit Status/Belegung.
+- [x] Optional Monats-/Listen-Umschaltung.
+
+> Umgesetzt: `AdventureController@calendar` (`GET adventures-calendar`,
+> `adventure.access`) lädt kommende Events (`start_at >= heute`) chronologisch
+> und gruppiert sie nach Monat. View `adventures/calendar.blade.php`:
+> Monatsüberschriften (deutsche Namen), je Event Datum-Kachel, Name (öffnet das
+> Event-Modal), Uhrzeit/Ort, Status-Badge und Belegung. Verlinkung „Kalender ⇄
+> Listenansicht" in den Kopfzeilen. Tests: `EventCalendarTest` (3).
 
 ### ADV-13 · Event-Spieleransicht · ⏱ 4h · 🔲
 **Beschreibung:** Wer nur die Rollen Teilnehmer,Event-Buchen und Teamer hat, darf nur seine eigenen Spieler unter seinem Nutzer sehen.
