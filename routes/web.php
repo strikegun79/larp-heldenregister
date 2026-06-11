@@ -120,6 +120,14 @@ Route::middleware('auth')->group(function () {
         Route::get('players', [Admin\PlayerController::class, 'index'])->name('players.index');
 
         // Helden-Klassen-Lookup pflegen (HERO-05).
+        // Veranstaltungsorte pflegen (ADV-08).
+        Route::get('locations', [Admin\LocationController::class, 'index'])->name('locations.index');
+        Route::get('locations/create', [Admin\LocationController::class, 'create'])->name('locations.create');
+        Route::post('locations', [Admin\LocationController::class, 'store'])->name('locations.store');
+        Route::get('locations/{location}/edit', [Admin\LocationController::class, 'edit'])->name('locations.edit');
+        Route::put('locations/{location}', [Admin\LocationController::class, 'update'])->name('locations.update');
+        Route::delete('locations/{location}', [Admin\LocationController::class, 'destroy'])->name('locations.destroy');
+
         Route::get('hero-classes', [Admin\HeroClassController::class, 'index'])->name('hero-classes.index');
         Route::get('hero-classes/create', [Admin\HeroClassController::class, 'create'])->name('hero-classes.create');
         Route::post('hero-classes', [Admin\HeroClassController::class, 'store'])->name('hero-classes.store');

@@ -72,11 +72,19 @@ Eine Admin-Eventliste mit Verwaltungsaktionen (anlegen/bearbeiten/absagen).
 > einen Hinweis. NOTI-04 als Kommentar-Hook vorbereitet. Tests:
 > `EventCancelTest` (5).
 
-### ADV-08 · Orte-Lookup-CRUD (locations) · ⏱ 3h · 🔲
+### ADV-08 · Orte-Lookup-CRUD (locations) · ⏱ 3h · ✅
 **Beschreibung:** Veranstaltungsorte pflegbar (Titel, GPS, PLZ, Stadt, Adresse, Bild).
 **Akzeptanzkriterien:**
-- [ ] Admin-CRUD; Ort im Event-Formular wählbar.
-- [ ] Tests.
+- [x] Admin-CRUD; Ort im Event-Formular wählbar.
+- [x] Tests.
+
+> Umgesetzt: `Admin\LocationController` (index/create/store/edit/update/destroy)
+> im Admin-Bereich unter `can:portal.manage`. Modal-Formular
+> `admin/locations/_form.blade.php` (Titel, PLZ, Stadt, Adresse, GPS, Bild);
+> Listenseite mit Event-Zähler + „Neuer Ort"; Karte „Orte" in der Verwaltung.
+> Löschen setzt `adventures.location_id` per `nullOnDelete` (Events bleiben
+> erhalten). Ort ist im Event-Formular bereits wählbar (`_form` location-Select).
+> Tests: `LocationAdminTest` (6).
 
 ### ADV-09 · Event-Kategorien & Auftraggeber CRUD · ⏱ 3h · 🔲
 **Beschreibung:** `event_categories` (Soft-Delete) + `event_clients` pflegbar.
