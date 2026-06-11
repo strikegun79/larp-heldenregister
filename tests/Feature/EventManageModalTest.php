@@ -74,22 +74,22 @@ class EventManageModalTest extends TestCase
             ->assertForbidden();
     }
 
-    public function test_admin_event_list_links_to_manage_modal(): void
+    public function test_manage_list_links_to_manage_modal(): void
     {
         $adventure = Adventure::factory()->create(['name' => 'Verwaltungs-Event']);
 
-        $this->actingAs($this->userWithRole(10)) // Admin: portal.manage
-            ->get(route('admin.adventures.index'))
+        $this->actingAs($this->userWithRole(20)) // Bürokrat: events.edit
+            ->get(route('adventures.manage-index'))
             ->assertOk()
             ->assertSee('Verwaltungs-Event')
             ->assertSee(route('adventures.manage', $adventure), false);
     }
 
-    public function test_admin_event_list_requires_portal_manage(): void
+    public function test_manage_list_requires_events_edit(): void
     {
-        // Bürokrat verwaltet Events, hat aber kein portal.manage.
-        $this->actingAs($this->userWithRole(20))
-            ->get(route('admin.adventures.index'))
+        // „Event buchen" darf browsen, aber nicht verwalten.
+        $this->actingAs($this->userWithRole(60))
+            ->get(route('adventures.manage-index'))
             ->assertForbidden();
     }
 }

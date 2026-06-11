@@ -24,8 +24,9 @@ class AdventureController extends Controller
         $this->middleware('auth');
         // Abenteuer ansehen: events.view ODER adventure.book (siehe adventure.access).
         $this->middleware('can:adventure.access')->only(['index', 'show']);
-        // Events anlegen/bearbeiten/absagen: events.edit (Admin, Bürokrat, Projektleitung).
-        $this->middleware('can:events.edit')->only(['create', 'store', 'edit', 'update', 'destroy', 'manage', 'cancel']);
+        // Events anlegen/bearbeiten/absagen + Verwaltungsliste: events.edit
+        // (Admin, Bürokrat, Projektleitung).
+        $this->middleware('can:events.edit')->only(['create', 'store', 'edit', 'update', 'destroy', 'manage', 'cancel', 'manageIndex']);
         // Teilnehmer-PDF: Projektleitung, Bürokrat, Admin (ADV-17).
         $this->middleware('can:take-signatures')->only('participantsPdf');
     }
@@ -41,6 +42,20 @@ class AdventureController extends Controller
             ->paginate(20);
 
         return view('adventures.index', compact('adventures'));
+    }
+
+    /**
+     * Verwaltungsliste der Events (ADV-06): Status, Belegung, Aktionen.
+     * Für alle Event-Verwalter (events.edit), getrennt von der Browse-Liste.
+     */
+    public function manageIndex(): View
+    {
+        $adventures = Adventure::with('status')
+            ->withCount('confirmedBookings')
+            ->orderByDesc('start_at')
+            ->paginate(25);
+
+        return view('adventures.manage_index', compact('adventures'));
     }
 
     public function create(): View

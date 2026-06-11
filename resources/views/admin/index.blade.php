@@ -14,7 +14,7 @@
                     $cards = [
                         ['Portal-Nutzer', 'Nutzer & Rollen', 'admin_users.jpg', route('admin.users.index')],
                         ['Spieler', 'Alle Spieler/Teilnehmer', 'admin_players.jpg', route('admin.players.index')],
-                        ['Veranstaltungen', 'Abenteuer administrieren', 'admin_events.jpg', route('admin.adventures.index')],
+                        ['Veranstaltungen', 'Abenteuer administrieren', 'admin_events.jpg', route('adventures.manage-index')],
                         ['Helden-Klassen', 'Klassen anlegen & pflegen', 'admin_events.jpg', route('admin.hero-classes.index')],
                     ];
                 @endphp

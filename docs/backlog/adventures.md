@@ -38,12 +38,22 @@ Abgeschlossen) als geführter Workflow statt freier Auswahl.
 > nutzt `color`) in Liste, Admin-Liste und Event-Detail. Tests:
 > `EventStatusWorkflowTest` (6).
 
-### ADV-06 · Event-Verwaltung in der Verwaltung verlinken · ⏱ 2h · 🔲
+### ADV-06 · Event-Verwaltung in der Verwaltung verlinken · ⏱ 2h · ✅
 **Beschreibung:** „Verwaltung → Veranstaltungen" zeigt aktuell die normale Liste.
 Eine Admin-Eventliste mit Verwaltungsaktionen (anlegen/bearbeiten/absagen).
 **Akzeptanzkriterien:**
-- [ ] Admin-Eventliste mit Status, Belegung, Aktionen.
-- [ ] Trennung Browsen (Spieler) vs. Verwalten (Admin) klar.
+- [x] Admin-Eventliste mit Status, Belegung, Aktionen.
+- [x] Trennung Browsen (Spieler) vs. Verwalten (Admin) klar.
+
+> Umgesetzt: Eigene Verwaltungsliste `AdventureController@manageIndex`
+> (`GET adventures-manage`, `adventures.manage-index`, `can:events.edit` – also
+> alle Event-Verwalter, nicht nur Admin) mit Status-Badge, Belegung und Aktionen
+> je Zeile: „Neues Abenteuer" (anlegen), „Verwalten" (Modal/Editor), „Absagen"
+> (ADV-07, nur wenn erlaubt). Der frühere admin-only `Admin\AdventureController`
+> + View wurden dadurch ersetzt. Klare Trennung: Browse-Liste (`adventures.index`,
+> `adventure.access`) ohne Management-Buttons – nur Link „Zur Event-Verwaltung";
+> Verwaltungsliste für `events.edit`. Verwaltungs-Karte verweist auf die neue
+> Liste. Tests: `EventManageListTest` (3) + angepasste `EventManageModalTest`.
 
 ### ADV-07 · Event absagen (mit Folgeaktionen) · ⏱ 3h · ✅
 **Beschreibung:** Status „abgesagt" inkl. Benachrichtigung der Gebuchten.
