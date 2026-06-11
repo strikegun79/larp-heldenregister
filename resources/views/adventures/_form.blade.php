@@ -48,11 +48,15 @@
     <div class="grid grid-cols-3 gap-4">
         <div>
             <x-input-label for="event_status_id" value="Status" />
+            {{-- Geführter Workflow (ADV-05): nur erlaubte Folgestatus anbieten. --}}
+            @php($allowedStatusIds = $allowedStatusIds ?? null)
             <select id="event_status_id" name="event_status_id" class="{{ $selectClass }}">
                 @foreach ($statuses as $status)
-                    <option value="{{ $status->id }}" @selected(old('event_status_id', $adventure->event_status_id) == $status->id)>
-                        {{ $status->description }}
-                    </option>
+                    @if (is_null($allowedStatusIds) || in_array($status->id, $allowedStatusIds))
+                        <option value="{{ $status->id }}" @selected(old('event_status_id', $adventure->event_status_id) == $status->id)>
+                            {{ $status->description }}
+                        </option>
+                    @endif
                 @endforeach
             </select>
         </div>

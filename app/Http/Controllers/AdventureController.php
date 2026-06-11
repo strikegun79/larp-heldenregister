@@ -138,7 +138,18 @@ class AdventureController extends Controller
 
     public function update(Request $request, Adventure $adventure): RedirectResponse|JsonResponse
     {
-        $adventure->update($this->validateAdventure($request));
+        $data = $this->validateAdventure($request);
+
+        // Geführter Status-Workflow: nur erlaubte Übergänge (ADV-05).
+        if (! $adventure->canTransitionTo((int) $data['event_status_id'])) {
+            $message = 'Dieser Status-Übergang ist nicht erlaubt.';
+
+            return $request->expectsJson()
+                ? response()->json(['message' => $message, 'errors' => ['event_status_id' => [$message]]], 422)
+                : back()->withErrors(['event_status_id' => $message])->withInput();
+        }
+
+        $adventure->update($data);
 
         $message = 'Abenteuer wurde aktualisiert.';
 
@@ -169,6 +180,9 @@ class AdventureController extends Controller
             'statuses' => EventStatus::orderBy('id')->get(),
             'categories' => EventCategory::orderBy('name')->get(),
             'clients' => EventClient::orderBy('name')->get(),
+            // Geführter Workflow: bei bestehendem Event nur erlaubte Ziel-Status,
+            // bei der Neuanlage alle (ADV-05).
+            'allowedStatusIds' => $adventure->exists ? $adventure->allowedStatusIds() : null,
         ];
     }
 

@@ -19,14 +19,24 @@ Detail, Anmeldungen, Anmeldeformular per AJAX.
 
 ## Offen (🔲)
 
-### ADV-05 · Event-Status-Workflow · ⏱ 4h · 🔲
+### ADV-05 · Event-Status-Workflow · ⏱ 4h · ✅
 **Beschreibung:** `type_eventStatus` (unbekannt→geplant→Anmeldung offen→…→
 Abgeschlossen) als geführter Workflow statt freier Auswahl.
 **Akzeptanzkriterien:**
-- [ ] Erlaubte Status-Übergänge definiert; ungültige Sprünge unterbunden.
-- [ ] Statusabhängige Aktionen (Anmeldung nur bei „offen", Abrechnung bei „Abrechnung").
-- [ ] Statusfarbe (`color`) in Liste/Detail.
-- [ ] Tests.
+- [x] Erlaubte Status-Übergänge definiert; ungültige Sprünge unterbunden.
+- [x] Statusabhängige Aktionen (Anmeldung nur bei „offen", Abrechnung bei „Abrechnung").
+- [x] Statusfarbe (`color`) in Liste/Detail.
+- [x] Tests.
+
+> Umgesetzt: `EventStatus::TRANSITIONS` (erlaubte Übergänge; „abgesagt"/70 aus
+> jedem aktiven Status, „Abgeschlossen"/60 terminal). `Adventure::allowedStatusIds()`
+> / `canTransitionTo()`. `AdventureController@update` weist ungültige Sprünge mit
+> 422 ab; das Status-Dropdown (`_form`) zeigt bei bestehenden Events nur erlaubte
+> Folgestatus (Neuanlage: alle). Statusabhängige Aktionen bestehen bereits:
+> Anmeldung nur bei Status 30 (`registrationOpen`), Check-in/EP erst ab 40
+> (`checkinAllowed`, ADV-14). Statusfarbe als Badge (`_status_badge.blade.php`,
+> nutzt `color`) in Liste, Admin-Liste und Event-Detail. Tests:
+> `EventStatusWorkflowTest` (6).
 
 ### ADV-06 · Event-Verwaltung in der Verwaltung verlinken · ⏱ 2h · 🔲
 **Beschreibung:** „Verwaltung → Veranstaltungen" zeigt aktuell die normale Liste.
@@ -201,3 +211,8 @@ Eine Admin-Eventliste mit Verwaltungsaktionen (anlegen/bearbeiten/absagen).
 > Unterschriften-Liste (ADV-17) ist entfallen. Modal fest `modal-event`
 > (950px, Content min-height 820px). Teilnehmer-PDF wird inline gestreamt
 > (`Pdf::stream`, Link `target=_blank`) statt Download. Tests: `EventCheckinTest` (4).
+
+### ADV-20 · Event-PDf Listen Anpassung · ⏱ 4h · 
+**Beschreibung:** Anpassung des PDF
+**Akzeptanzkriterien:**
+- [] ergänze zu den geschlechtern auch "Divers"

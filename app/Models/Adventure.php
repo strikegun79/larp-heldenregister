@@ -103,6 +103,26 @@ class Adventure extends Model
     }
 
     /**
+     * Vom aktuellen Status erlaubte Ziel-Status inkl. des aktuellen (ADV-05).
+     *
+     * @return array<int>
+     */
+    public function allowedStatusIds(): array
+    {
+        $current = (int) $this->event_status_id;
+
+        return array_values(array_unique(array_merge([$current], EventStatus::TRANSITIONS[$current] ?? [])));
+    }
+
+    /**
+     * Ist der Wechsel auf den Zielstatus erlaubt? Gleicher Status ist immer ok.
+     */
+    public function canTransitionTo(int $statusId): bool
+    {
+        return in_array($statusId, $this->allowedStatusIds(), true);
+    }
+
+    /**
      * Anzahl freier regulärer Plätze.
      */
     public function freeSlots(): int

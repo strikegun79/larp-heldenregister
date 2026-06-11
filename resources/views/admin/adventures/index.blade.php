@@ -29,7 +29,7 @@
                             <tr>
                                 <td class="px-6 py-4">{{ $adventure->name }}</td>
                                 <td class="px-6 py-4">{{ optional($adventure->start_at)->format('d.m.Y H:i') }}</td>
-                                <td class="px-6 py-4">{{ $adventure->status?->description }}</td>
+                                <td class="px-6 py-4">@include('adventures._status_badge', ['status' => $adventure->status])</td>
                                 <td class="px-6 py-4">{{ $adventure->confirmed_bookings_count }} / {{ $adventure->max_player }}</td>
                                 <td class="px-6 py-4 text-right">
                                     <a href="{{ route('adventures.manage', $adventure) }}" data-modal-url="{{ route('adventures.manage', $adventure) }}" class="text-indigo-700 hover:underline">Verwalten</a>

@@ -25,6 +25,22 @@ class EventStatus extends Model
     /** Status „abgesagt" (ADV-14-Nummerierung). */
     public const CANCELLED = 70;
 
+    /**
+     * Erlaubte Status-Übergänge (ADV-05): von jedem Status zu welchen Zielen.
+     * „abgesagt" (70) ist aus jedem aktiven Status erreichbar; „Abgeschlossen"
+     * (60) ist terminal.
+     */
+    public const TRANSITIONS = [
+        0 => [10, 20],
+        10 => [20, 70],
+        20 => [30, 70],
+        30 => [40, 70],
+        40 => [30, 50, 70],
+        50 => [60, 70],
+        60 => [],
+        70 => [20],
+    ];
+
     public function adventures(): HasMany
     {
         return $this->hasMany(Adventure::class);
