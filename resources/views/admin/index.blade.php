@@ -17,6 +17,8 @@
                         ['Veranstaltungen', 'Abenteuer administrieren', 'admin_events.jpg', route('adventures.manage-index')],
                         ['Helden-Klassen', 'Klassen anlegen & pflegen', 'admin_events.jpg', route('admin.hero-classes.index')],
                         ['Orte', 'Veranstaltungsorte pflegen', 'admin_events.jpg', route('admin.locations.index')],
+                        ['Kategorien', 'Event-Kategorien pflegen', 'admin_events.jpg', route('admin.event-categories.index')],
+                        ['Auftraggeber', 'Auftraggeber pflegen', 'admin_events.jpg', route('admin.event-clients.index')],
                     ];
                 @endphp
                 @foreach ($cards as [$title, $subtitle, $img, $href])

@@ -128,6 +128,21 @@ Route::middleware('auth')->group(function () {
         Route::put('locations/{location}', [Admin\LocationController::class, 'update'])->name('locations.update');
         Route::delete('locations/{location}', [Admin\LocationController::class, 'destroy'])->name('locations.destroy');
 
+        // Event-Kategorien (Soft-Delete) & Auftraggeber pflegen (ADV-09).
+        Route::get('event-categories', [Admin\EventCategoryController::class, 'index'])->name('event-categories.index');
+        Route::get('event-categories/create', [Admin\EventCategoryController::class, 'create'])->name('event-categories.create');
+        Route::post('event-categories', [Admin\EventCategoryController::class, 'store'])->name('event-categories.store');
+        Route::get('event-categories/{eventCategory}/edit', [Admin\EventCategoryController::class, 'edit'])->name('event-categories.edit');
+        Route::put('event-categories/{eventCategory}', [Admin\EventCategoryController::class, 'update'])->name('event-categories.update');
+        Route::delete('event-categories/{eventCategory}', [Admin\EventCategoryController::class, 'destroy'])->name('event-categories.destroy');
+
+        Route::get('event-clients', [Admin\EventClientController::class, 'index'])->name('event-clients.index');
+        Route::get('event-clients/create', [Admin\EventClientController::class, 'create'])->name('event-clients.create');
+        Route::post('event-clients', [Admin\EventClientController::class, 'store'])->name('event-clients.store');
+        Route::get('event-clients/{eventClient}/edit', [Admin\EventClientController::class, 'edit'])->name('event-clients.edit');
+        Route::put('event-clients/{eventClient}', [Admin\EventClientController::class, 'update'])->name('event-clients.update');
+        Route::delete('event-clients/{eventClient}', [Admin\EventClientController::class, 'destroy'])->name('event-clients.destroy');
+
         Route::get('hero-classes', [Admin\HeroClassController::class, 'index'])->name('hero-classes.index');
         Route::get('hero-classes/create', [Admin\HeroClassController::class, 'create'])->name('hero-classes.create');
         Route::post('hero-classes', [Admin\HeroClassController::class, 'store'])->name('hero-classes.store');

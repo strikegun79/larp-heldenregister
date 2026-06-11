@@ -86,11 +86,20 @@ Eine Admin-Eventliste mit Verwaltungsaktionen (anlegen/bearbeiten/absagen).
 > erhalten). Ort ist im Event-Formular bereits wählbar (`_form` location-Select).
 > Tests: `LocationAdminTest` (6).
 
-### ADV-09 · Event-Kategorien & Auftraggeber CRUD · ⏱ 3h · 🔲
+### ADV-09 · Event-Kategorien & Auftraggeber CRUD · ⏱ 3h · ✅
 **Beschreibung:** `event_categories` (Soft-Delete) + `event_clients` pflegbar.
 **Akzeptanzkriterien:**
-- [ ] Admin-CRUD für beide Lookups.
-- [ ] Kategorie-Soft-Delete respektiert; Auswahl im Event-Formular.
+- [x] Admin-CRUD für beide Lookups.
+- [x] Kategorie-Soft-Delete respektiert; Auswahl im Event-Formular.
+
+> Umgesetzt: `Admin\EventCategoryController` + `Admin\EventClientController`
+> (index/create/store/edit/update/destroy) unter `can:portal.manage`, Modal-
+> Formulare + Listen mit Event-Zähler; Karten „Kategorien"/„Auftraggeber" in der
+> Verwaltung. IDs fortlaufend (`max(id)+1`, Lookups nicht auto-inkrementiert).
+> Kategorie-Löschung ist Soft-Delete → verschwindet aus der Event-Auswahl
+> (`EventCategory::orderBy` nutzt Default-Scope), bestehende Events bleiben gültig.
+> Auftraggeber-Löschung nur ohne referenzierende Events (FK RESTRICT, 422-Hinweis).
+> Tests: `EventLookupAdminTest` (7).
 
 ### ADV-10 · Event-Rollen-Lookup-CRUD (event_roles) · ⏱ 2h · 🔲
 **Beschreibung:** Teilnahme-Rollen (Spieler, NSC, Teamer A–C) pflegbar.
