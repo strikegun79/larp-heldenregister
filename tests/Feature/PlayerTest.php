@@ -94,6 +94,24 @@ class PlayerTest extends TestCase
         $this->assertEquals($second->id, $player->fresh()->active_hero_id);
     }
 
+    public function test_setting_active_hero_marks_only_that_hero_active(): void
+    {
+        // HERO-21: aktiv setzen aktiviert genau diesen Helden, alle anderen werden inaktiv.
+        $user = User::factory()->create();
+        $player = Player::factory()->create();
+        $user->players()->attach($player->id, ['self' => true]);
+        $first = Hero::factory()->create(['player_id' => $player->id, 'active' => true]);
+        $second = Hero::factory()->create(['player_id' => $player->id, 'active' => true]);
+
+        $this->actingAs($user)
+            ->patchJson(route('players.active-hero', $player), ['hero_id' => $second->id])
+            ->assertOk();
+
+        $this->assertFalse($first->fresh()->active);
+        $this->assertTrue($second->fresh()->active);
+        $this->assertEquals($second->id, $player->fresh()->active_hero_id);
+    }
+
     public function test_cannot_set_a_hero_of_another_player_as_active(): void
     {
         $user = User::factory()->create();

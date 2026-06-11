@@ -13,8 +13,8 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 /**
- * ADV-14: Bei der Event-Anmeldung wird der aktive Held des Spielers vorgewählt
- * und mitgespeichert; ohne aktiven Helden ein Hinweis.
+ * HERO-21: Bei der Event-Anmeldung wird automatisch der aktive Held des
+ * Spielers mitgespeichert – ohne Auswahlmöglichkeit.
  */
 class BookingHeroTest extends TestCase
 {
@@ -35,33 +35,19 @@ class BookingHeroTest extends TestCase
         return $user;
     }
 
-    public function test_create_form_preselects_active_hero(): void
+    public function test_create_form_has_no_hero_selection(): void
     {
         $player = Player::factory()->create();
-        $hero = Hero::factory()->create(['player_id' => $player->id, 'character_name' => 'Thorgal']);
-        $player->update(['active_hero_id' => $hero->id]);
-
+        Hero::factory()->create(['player_id' => $player->id]);
         $adventure = Adventure::factory()->create(['max_player' => 5]);
 
         $this->actingAs($this->bookerWithPlayer($player))
             ->get(route('adventures.bookings.create', $adventure))
             ->assertOk()
-            ->assertSee('data-hero-id="'.$hero->id.'"', false)
-            ->assertSee('Thorgal');
+            ->assertDontSee('name="hero_id"', false);
     }
 
-    public function test_create_form_shows_hint_when_no_active_hero(): void
-    {
-        $player = Player::factory()->create();
-        $adventure = Adventure::factory()->create(['max_player' => 5]);
-
-        $this->actingAs($this->bookerWithPlayer($player))
-            ->get(route('adventures.bookings.create', $adventure))
-            ->assertOk()
-            ->assertSee('wende dich im nächsten Spiel an den Bürokraten', false);
-    }
-
-    public function test_booking_stores_the_chosen_hero(): void
+    public function test_booking_auto_assigns_active_hero(): void
     {
         $player = Player::factory()->create();
         $hero = Hero::factory()->create(['player_id' => $player->id]);
@@ -72,7 +58,6 @@ class BookingHeroTest extends TestCase
         $this->actingAs($this->bookerWithPlayer($player))
             ->postJson(route('adventures.bookings.store', $adventure), [
                 'player_id' => $player->id,
-                'hero_id' => $hero->id,
                 'event_role_id' => 1,
                 'agb' => '1',
             ])
@@ -85,23 +70,23 @@ class BookingHeroTest extends TestCase
         ]);
     }
 
-    public function test_booking_rejects_hero_of_other_player(): void
+    public function test_booking_without_active_hero_stores_null(): void
     {
-        $player = Player::factory()->create();
-        $otherHero = Hero::factory()->create(['player_id' => Player::factory()->create()->id]);
-
+        $player = Player::factory()->create(); // kein aktiver Held
         $adventure = Adventure::factory()->create(['max_player' => 5]);
 
         $this->actingAs($this->bookerWithPlayer($player))
             ->postJson(route('adventures.bookings.store', $adventure), [
                 'player_id' => $player->id,
-                'hero_id' => $otherHero->id,
                 'event_role_id' => 1,
                 'agb' => '1',
             ])
-            ->assertStatus(422)
-            ->assertJsonPath('message', 'Der gewählte Held gehört nicht zum Spieler.');
+            ->assertOk();
 
-        $this->assertDatabaseCount('bookings', 0);
+        $this->assertDatabaseHas('bookings', [
+            'adventure_id' => $adventure->id,
+            'player_id' => $player->id,
+            'hero_id' => null,
+        ]);
     }
 }

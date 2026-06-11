@@ -12,12 +12,10 @@
         <div class="two fields">
             <div class="field">
                 <label>Spieler</label>
-                <select name="player_id" id="booking-player" required>
+                <select name="player_id" required>
                     <option value="">— wählen —</option>
                     @foreach ($players as $player)
-                        <option value="{{ $player->id }}"
-                                data-hero-id="{{ $player->activeHero?->id }}"
-                                data-hero-name="{{ $player->activeHero?->character_name }}">{{ $player->full_name }}</option>
+                        <option value="{{ $player->id }}">{{ $player->full_name }}</option>
                     @endforeach
                 </select>
             </div>
@@ -31,15 +29,9 @@
             </div>
         </div>
 
-        {{-- Passender (aktiver) Held wird zum Spieler vorausgewählt (ADV-14). --}}
-        <div class="field">
-            <label>Held</label>
-            <input type="hidden" name="hero_id" id="booking-hero-id">
-            <input type="text" id="booking-hero-name" readonly placeholder="—">
-            <small id="booking-hero-hint" class="text-orange-600" style="display:none">
-                Kein aktiver Held hinterlegt – wende dich im nächsten Spiel an den Bürokraten.
-            </small>
-        </div>
+        {{-- Der teilnehmende Held ist automatisch der aktive Held des Spielers
+             (HERO-21); eine Auswahl ist nicht nötig – der Bürokrat legt den
+             aktiven Helden fest. --}}
 
         <div class="grid grid-cols-2 gap-2 my-2">
             @foreach (['fotoerlaubnis' => 'Fotoerlaubnis', 'vegetarier' => 'Vegetarier', 'leih_tunika' => 'Leih-Tunika', 'leih_waffe' => 'Leih-Waffe', 'nsc' => 'NSC'] as $field => $label)

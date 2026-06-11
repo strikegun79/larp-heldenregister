@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Models\Adventure;
 use App\Models\Booking;
 use App\Models\EventRole;
-use App\Models\Hero;
 use App\Models\Player;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
@@ -36,8 +35,8 @@ class BookingController extends Controller
     public function create(Request $request, Adventure $adventure): View
     {
         $players = Gate::allows('book-any-player')
-            ? Player::with('activeHero')->orderBy('name')->get()
-            : $request->user()->players()->with('activeHero')->orderBy('name')->get();
+            ? Player::orderBy('name')->get()
+            : $request->user()->players()->orderBy('name')->get();
 
         return view('bookings._create', [
             'adventure' => $adventure,
@@ -53,7 +52,6 @@ class BookingController extends Controller
     {
         $data = $request->validate([
             'player_id' => ['required', 'exists:players,id'],
-            'hero_id' => ['nullable', 'exists:heroes,id'],
             'event_role_id' => ['required', 'exists:event_roles,id'],
             'agb' => ['accepted'],
             'fotoerlaubnis' => ['boolean'],
@@ -80,15 +78,12 @@ class BookingController extends Controller
             return $this->fail($request, 'Dieser Spieler ist bereits angemeldet.');
         }
 
-        // Der mitgeführte Held muss zum Spieler gehören (ADV-14).
-        if (! empty($data['hero_id'])
-            && ! Hero::where('id', $data['hero_id'])->where('player_id', $data['player_id'])->exists()) {
-            return $this->fail($request, 'Der gewählte Held gehört nicht zum Spieler.');
-        }
+        // Der teilnehmende Held ist automatisch der aktive Held des Spielers (HERO-21).
+        $activeHeroId = Player::find($data['player_id'])?->active_hero_id;
 
         $adventure->bookings()->create([
             'player_id' => $data['player_id'],
-            'hero_id' => $data['hero_id'] ?? null,
+            'hero_id' => $activeHeroId,
             'event_role_id' => $data['event_role_id'],
             'agb' => true,
             'fotoerlaubnis' => $request->boolean('fotoerlaubnis'),

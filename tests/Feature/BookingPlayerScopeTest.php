@@ -47,8 +47,9 @@ class BookingPlayerScopeTest extends TestCase
             ->get(route('adventures.bookings.create', $adventure))
             ->assertOk();
 
-        $response->assertSee('value="'.$own->id.'"', false);
-        $response->assertDontSee('value="'.$foreign->id.'"', false);
+        // Spielername-basiert prüfen (Option-Values kollidieren sonst mit Rollen-IDs).
+        $response->assertSee($own->full_name);
+        $response->assertDontSee($foreign->full_name);
     }
 
     public function test_registrar_form_lists_all_players(): void

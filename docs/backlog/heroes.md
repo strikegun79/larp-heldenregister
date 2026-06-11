@@ -246,8 +246,16 @@ für das Detail-Layout vergeben).
 > kein AJAX auslösen (gilt auch für bestehende Storno-/EP-Bestätigungen).
 > Tests: `HeroClassAssignmentTest` (Standardkosten 5, Korrektur ohne Abzug,
 > Korrektur trotz fehlender EP).
-### HERO-21 Helden-aktiver Held pro Spieler · 
+### HERO-21 Helden-aktiver Held pro Spieler · ✅
 **Beschreibung:** es kann immer nur einen aktiven Helden geben
-- [] wenn ein Held auf aktiv gesetzt wird, müssen alle anderen Helden des Spielers auf inaktiv gesetzt werden.
-- [] entferne die Auswahl aus dem Eventanmeldung, dass man einen Helden auswählen kann. Dies ist nicht nötig, da der Bürokrat der einzige ist, der einen Held als Aktiv festlegt.
-- [] EP die in einem Event zugeteilt werden müssen an den aktiven Helden zugeordnet werden.
+- [x] wenn ein Held auf aktiv gesetzt wird, müssen alle anderen Helden des Spielers auf inaktiv gesetzt werden.
+- [x] entferne die Auswahl aus dem Eventanmeldung, dass man einen Helden auswählen kann. Dies ist nicht nötig, da der Bürokrat der einzige ist, der einen Held als Aktiv festlegt.
+- [x] EP die in einem Event zugeteilt werden müssen an den aktiven Helden zugeordnet werden.
+
+> Umgesetzt: `PlayerController@setActiveHero` setzt in einer Transaktion alle
+> Helden des Spielers auf `active=false`, den gewählten auf `active=true` und
+> `active_hero_id`. Helden-Auswahl aus dem Anmeldeformular entfernt (ADV-14-Feld
+> rückgebaut); `BookingController@store` setzt `hero_id` automatisch auf den
+> aktiven Helden des Spielers (null, wenn keiner). EP-Vergabe (BOOK-09) läuft
+> weiterhin über `player.activeHero` → landet im EP-Verlauf des aktiven Helden.
+> Tests: `BookingHeroTest` (3, Auto-Zuordnung), `PlayerTest` (exklusiv-aktiv).

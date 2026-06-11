@@ -279,20 +279,6 @@
                 sendModalAction(deregisterUrl, 'PATCH', { absence_reason: reason }, $('#deregister-modal'), this);
             });
 
-            // ADV-14: Bei der Event-Anmeldung den aktiven Helden des Spielers vorwählen.
-            document.addEventListener('change', function (e) {
-                if (e.target.id !== 'booking-player') return;
-                const opt = e.target.selectedOptions[0];
-                const heroId = opt ? (opt.getAttribute('data-hero-id') || '') : '';
-                const heroName = opt ? (opt.getAttribute('data-hero-name') || '') : '';
-                const idField = document.getElementById('booking-hero-id');
-                const nameField = document.getElementById('booking-hero-name');
-                const hint = document.getElementById('booking-hero-hint');
-                if (idField) idField.value = heroId;
-                if (nameField) nameField.value = heroName;
-                if (hint) hint.style.display = (!heroId && e.target.value) ? 'block' : 'none';
-            });
-
             function showToast(message, type) {
                 $('body').toast({
                     class: type === 'error' ? 'error' : 'success',

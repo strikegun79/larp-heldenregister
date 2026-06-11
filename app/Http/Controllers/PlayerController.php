@@ -6,6 +6,7 @@ use App\Models\Player;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 class PlayerController extends Controller
@@ -115,7 +116,13 @@ class PlayerController extends Controller
         // Der Held muss zu diesem Spieler gehören.
         abort_unless($player->heroes()->whereKey($data['hero_id'])->exists(), 422);
 
-        $player->update(['active_hero_id' => $data['hero_id']]);
+        // Es kann nur einen aktiven Helden geben (HERO-21): alle anderen
+        // Helden des Spielers werden auf inaktiv gesetzt.
+        DB::transaction(function () use ($player, $data) {
+            $player->heroes()->update(['active' => false]);
+            $player->heroes()->whereKey($data['hero_id'])->update(['active' => true]);
+            $player->update(['active_hero_id' => $data['hero_id']]);
+        });
 
         $message = 'Aktiver Held gesetzt.';
 
