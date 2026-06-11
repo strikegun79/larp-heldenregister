@@ -101,10 +101,17 @@ Eine Admin-Eventliste mit Verwaltungsaktionen (anlegen/bearbeiten/absagen).
 > Auftraggeber-Löschung nur ohne referenzierende Events (FK RESTRICT, 422-Hinweis).
 > Tests: `EventLookupAdminTest` (7).
 
-### ADV-10 · Event-Rollen-Lookup-CRUD (event_roles) · ⏱ 2h · 🔲
+### ADV-10 · Event-Rollen-Lookup-CRUD (event_roles) · ⏱ 2h · ✅
 **Beschreibung:** Teilnahme-Rollen (Spieler, NSC, Teamer A–C) pflegbar.
 **Akzeptanzkriterien:**
-- [ ] Admin-CRUD; Verwendung im Buchungsformular.
+- [x] Admin-CRUD; Verwendung im Buchungsformular.
+
+> Umgesetzt: `Admin\EventRoleController` (index/create/store/edit/update/destroy)
+> unter `can:portal.manage`; Modal-Formular + Liste mit Anmeldungszähler; Karte
+> „Teilnahme-Rollen" in der Verwaltung. IDs fortlaufend (`max(id)+1`). Löschen
+> nur ohne referenzierende Anmeldungen (FK RESTRICT, 422-Hinweis). Rollen sind
+> im Buchungsformular bereits wählbar (`bookings/_create`). Tests:
+> `EventRoleAdminTest` (6).
 
 ### ADV-11 · Gamemaster/Eventleiter zuweisen · ⏱ 3h · 🔲
 **Beschreibung:** `gamemaster_id`/`eventleader_id` (FK users) im Formular setzbar.

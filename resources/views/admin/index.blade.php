@@ -19,6 +19,7 @@
                         ['Orte', 'Veranstaltungsorte pflegen', 'admin_events.jpg', route('admin.locations.index')],
                         ['Kategorien', 'Event-Kategorien pflegen', 'admin_events.jpg', route('admin.event-categories.index')],
                         ['Auftraggeber', 'Auftraggeber pflegen', 'admin_events.jpg', route('admin.event-clients.index')],
+                        ['Teilnahme-Rollen', 'Event-Rollen pflegen', 'admin_events.jpg', route('admin.event-roles.index')],
                     ];
                 @endphp
                 @foreach ($cards as [$title, $subtitle, $img, $href])

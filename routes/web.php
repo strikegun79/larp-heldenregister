@@ -136,6 +136,14 @@ Route::middleware('auth')->group(function () {
         Route::put('event-categories/{eventCategory}', [Admin\EventCategoryController::class, 'update'])->name('event-categories.update');
         Route::delete('event-categories/{eventCategory}', [Admin\EventCategoryController::class, 'destroy'])->name('event-categories.destroy');
 
+        // Teilnahme-Rollen pflegen (ADV-10).
+        Route::get('event-roles', [Admin\EventRoleController::class, 'index'])->name('event-roles.index');
+        Route::get('event-roles/create', [Admin\EventRoleController::class, 'create'])->name('event-roles.create');
+        Route::post('event-roles', [Admin\EventRoleController::class, 'store'])->name('event-roles.store');
+        Route::get('event-roles/{eventRole}/edit', [Admin\EventRoleController::class, 'edit'])->name('event-roles.edit');
+        Route::put('event-roles/{eventRole}', [Admin\EventRoleController::class, 'update'])->name('event-roles.update');
+        Route::delete('event-roles/{eventRole}', [Admin\EventRoleController::class, 'destroy'])->name('event-roles.destroy');
+
         Route::get('event-clients', [Admin\EventClientController::class, 'index'])->name('event-clients.index');
         Route::get('event-clients/create', [Admin\EventClientController::class, 'create'])->name('event-clients.create');
         Route::post('event-clients', [Admin\EventClientController::class, 'store'])->name('event-clients.store');
