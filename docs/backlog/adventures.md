@@ -113,12 +113,19 @@ Eine Admin-Eventliste mit Verwaltungsaktionen (anlegen/bearbeiten/absagen).
 > im Buchungsformular bereits wählbar (`bookings/_create`). Tests:
 > `EventRoleAdminTest` (6).
 
-### ADV-11 · Gamemaster/Eventleiter zuweisen · ⏱ 3h · 🔲
+### ADV-11 · Gamemaster/Eventleiter zuweisen · ⏱ 3h · ✅
 **Beschreibung:** `gamemaster_id`/`eventleader_id` (FK users) im Formular setzbar.
 **Akzeptanzkriterien:**
-- [ ] Auswahl berechtigter Nutzer (z. B. Spielleiter-Rolle).
-- [ ] Anzeige in Event-Detail.
-- [ ] Tests.
+- [x] Auswahl berechtigter Nutzer (z. B. Spielleiter-Rolle).
+- [x] Anzeige in Event-Detail.
+- [x] Tests.
+
+> Umgesetzt: Spielleiter- und Eventleiter-Select im Event-Formular (`_form`),
+> befüllt mit berechtigten Nutzern (`eligibleUsers` = Rollen Spielleiter/
+> Projektleitung/Teamer/Admin) inkl. „— keine(r) —"-Option. `validateAdventure`
+> validiert `gamemaster_id`/`eventleader_id` (nullable, `exists:users`); leere
+> Auswahl wird zu null. Anzeige im Event-Detail (Event-Tab: Spielleiter,
+> Eventleiter). `show()` lädt die Relationen. Tests: `EventStaffTest` (4).
 
 ### ADV-12 · Event-Kalenderansicht · ⏱ 4h · 🔲
 **Beschreibung:** Kommende Events als Kalender/Liste nach Datum.

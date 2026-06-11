@@ -82,6 +82,28 @@
         </div>
     </div>
 
+    {{-- Spielleiter & Eventleiter (ADV-11): berechtigte Nutzer. --}}
+    <div class="grid grid-cols-2 gap-4">
+        <div>
+            <x-input-label for="gamemaster_id" value="Spielleiter" />
+            <select id="gamemaster_id" name="gamemaster_id" class="{{ $selectClass }}">
+                <option value="">— keine(r) —</option>
+                @foreach ($eligibleUsers as $u)
+                    <option value="{{ $u->id }}" @selected(old('gamemaster_id', $adventure->gamemaster_id) == $u->id)>{{ trim("{$u->name} {$u->lastname}") }}</option>
+                @endforeach
+            </select>
+        </div>
+        <div>
+            <x-input-label for="eventleader_id" value="Eventleiter" />
+            <select id="eventleader_id" name="eventleader_id" class="{{ $selectClass }}">
+                <option value="">— keine(r) —</option>
+                @foreach ($eligibleUsers as $u)
+                    <option value="{{ $u->id }}" @selected(old('eventleader_id', $adventure->eventleader_id) == $u->id)>{{ trim("{$u->name} {$u->lastname}") }}</option>
+                @endforeach
+            </select>
+        </div>
+    </div>
+
     <div class="grid grid-cols-3 gap-4">
         <div>
             <x-input-label for="max_player" value="Max. Spieler" />

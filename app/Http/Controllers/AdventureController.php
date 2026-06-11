@@ -9,6 +9,7 @@ use App\Models\EventRole;
 use App\Models\EventStatus;
 use App\Models\Location;
 use App\Models\Player;
+use App\Models\User;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -80,7 +81,7 @@ class AdventureController extends Controller
 
     public function show(Adventure $adventure): View
     {
-        $adventure->load(['location', 'status', 'category', 'client', 'bookings.player', 'bookings.role', 'visits']);
+        $adventure->load(['location', 'status', 'category', 'client', 'bookings.player', 'bookings.role', 'visits', 'gamemaster', 'eventleader']);
 
         // Buchbare Spieler: Bürokrat/Admin alle, sonst nur eigene/betreute (BOOK-10).
         $players = Gate::allows('book-any-player')
@@ -227,6 +228,10 @@ class AdventureController extends Controller
             'statuses' => EventStatus::orderBy('id')->get(),
             'categories' => EventCategory::orderBy('name')->get(),
             'clients' => EventClient::orderBy('name')->get(),
+            // Berechtigte Nutzer für GM/Eventleiter (ADV-11): Spielleiter,
+            // Projektleitung, Teamer, Admin.
+            'eligibleUsers' => User::whereHas('roles', fn ($q) => $q->whereIn('roles.id', [10, 30, 40, 50]))
+                ->orderBy('name')->get(),
             // Geführter Workflow: bei bestehendem Event nur erlaubte Ziel-Status,
             // bei der Neuanlage alle (ADV-05).
             'allowedStatusIds' => $adventure->exists ? $adventure->allowedStatusIds() : null,
@@ -241,6 +246,8 @@ class AdventureController extends Controller
         return $request->validate([
             'name' => ['required', 'string', 'max:200'],
             'function_email' => ['nullable', 'email', 'max:255'],
+            'gamemaster_id' => ['nullable', 'exists:users,id'],
+            'eventleader_id' => ['nullable', 'exists:users,id'],
             'location_id' => ['nullable', 'exists:locations,id'],
             'start_at' => ['required', 'date'],
             'end_at' => ['required', 'date', 'after_or_equal:start_at'],
