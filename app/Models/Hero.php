@@ -18,6 +18,8 @@ class Hero extends Model
         'born',
         'died',
         'homeplace',
+        'description',
+        'image',
         'active',
         'legacy_id',
     ];
@@ -27,6 +29,12 @@ class Hero extends Model
         'died' => 'date',
         'active' => 'boolean',
     ];
+
+    /** Öffentliche URL des Avatar-Bilds (HERO-09) bzw. null. */
+    public function getImageUrlAttribute(): ?string
+    {
+        return $this->image ? \Illuminate\Support\Facades\Storage::disk('public')->url($this->image) : null;
+    }
 
     /**
      * Spieler hinter dem Helden.

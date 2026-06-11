@@ -80,6 +80,7 @@ class HeroController extends Controller
 
         $hero = Hero::create($data);
         $hero->classes()->sync($request->input('classes', []));
+        $this->handleImageUpload($request, $hero);
 
         return redirect()
             ->route('heroes.show', $hero)
@@ -143,6 +144,7 @@ class HeroController extends Controller
         $data = $this->validateHero($request);
 
         $hero->update($data);
+        $this->handleImageUpload($request, $hero);
         // Klassen werden nicht mehr über das Formular gesynct – Hinzufügen/Entfernen
         // läuft über HeroClassController mit EP-Verbuchung (HERO-06).
 
@@ -197,6 +199,8 @@ class HeroController extends Controller
             'born' => ['nullable', 'date'],
             'died' => ['nullable', 'date', 'after_or_equal:born'],
             'homeplace' => ['nullable', 'string', 'max:150'],
+            'description' => ['nullable', 'string', 'max:5000'],
+            'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
             'active' => ['boolean'],
             'classes' => ['array'],
             'classes.*' => ['exists:hero_classes,id'],
@@ -205,9 +209,22 @@ class HeroController extends Controller
         // Checkbox liefert nichts, wenn nicht gesetzt.
         $validated['active'] = $request->boolean('active');
 
-        // 'classes' wird separat über die Pivot-Relation gespeichert.
-        unset($validated['classes']);
+        // 'classes' (Pivot) und 'image' (Datei-Upload) werden separat behandelt.
+        unset($validated['classes'], $validated['image']);
 
         return $validated;
+    }
+
+    /**
+     * Avatar-Upload verarbeiten (HERO-09): altes Bild ersetzen, Pfad speichern.
+     */
+    private function handleImageUpload(Request $request, Hero $hero): void
+    {
+        if ($request->hasFile('image')) {
+            if ($hero->image) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($hero->image);
+            }
+            $hero->update(['image' => $request->file('image')->store('heroes', 'public')]);
+        }
     }
 }

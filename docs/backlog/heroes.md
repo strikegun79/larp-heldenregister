@@ -86,13 +86,22 @@ Das Hinzufügen einer Klasse soll EP kosten und gebucht werden.
 > Schrift, abgedunkelte Zeile). Labels „Geboren→Erste Erblickung",
 > „Gestorben→Verschollen" in Formular & Detail. Tests: HeroTest (4).
 
-### HERO-09 · Charakter-Steckbrief (Beschreibung/Bild) · ⏱ 4h · 🔲
+### HERO-09 · Charakter-Steckbrief (Beschreibung/Bild) · ⏱ 4h · ✅
 **Beschreibung:** Erweiterung um Freitext-Hintergrund und optionales Bild
 (Avatar) je Held.
 **Akzeptanzkriterien:**
-- [ ] Migration: `description` (text), `image` (Pfad/Disk).
-- [ ] Upload + Validierung (Größe/Typ), Anzeige im Helden-Modal.
-- [ ] Tests.
+- [x] Migration: `description` (text), `image` (Pfad/Disk).
+- [x] Upload + Validierung (Größe/Typ), Anzeige im Helden-Modal.
+- [x] Tests.
+
+> Umgesetzt: Migration `heroes.description` (text) + `heroes.image` (Pfad auf
+> „public"-Disk). `HeroController@validateHero` validiert Beschreibung
+> (≤5000) und Bild (`image|mimes:jpg,jpeg,png,webp|max:4096`); `handleImageUpload`
+> speichert in `heroes/` (public), ersetzt/löscht das alte Bild. Formular-Felder
+> (Textarea + Datei-Input, `enctype=multipart/form-data` in create/edit/Modal);
+> Datei-Upload läuft auch im Modal (FormData/fetch). Anzeige im Helden-Detail:
+> Avatar + Steckbrief-Freitext. `Hero::image_url`-Accessor (Storage public).
+> `storage:link` gesetzt. Tests: `HeroSteckbriefTest` (4, mit `Storage::fake`).
 
 ### HERO-10 · Heldenregister: Filter nach Klasse/Spieler/aktiv · ⏱ 3h · ✅
 **Beschreibung:** Liste filter- und sortierbar machen.

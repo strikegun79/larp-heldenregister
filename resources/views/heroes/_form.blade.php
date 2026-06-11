@@ -29,6 +29,23 @@
         <x-input-error :messages="$errors->get('homeplace')" class="mt-2" />
     </div>
 
+    {{-- Steckbrief: Hintergrund-Freitext + Avatar-Bild (HERO-09). --}}
+    <div>
+        <x-input-label for="description" value="Steckbrief / Hintergrund" />
+        <textarea id="description" name="description" rows="4"
+                  class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">{{ old('description', $hero->description) }}</textarea>
+        <x-input-error :messages="$errors->get('description')" class="mt-2" />
+    </div>
+
+    <div>
+        <x-input-label for="image" value="Bild (JPG/PNG/WebP, max. 4 MB)" />
+        @if ($hero->image_url)
+            <img src="{{ $hero->image_url }}" alt="Avatar" class="mb-2 h-24 w-24 object-cover rounded border">
+        @endif
+        <input id="image" name="image" type="file" accept="image/jpeg,image/png,image/webp" class="mt-1 block w-full text-sm">
+        <x-input-error :messages="$errors->get('image')" class="mt-2" />
+    </div>
+
     <div class="grid grid-cols-2 gap-4">
         <div>
             <x-input-label for="born" value="Erste Erblickung" />

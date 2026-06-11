@@ -18,6 +18,9 @@
 
     {{-- Tab: Übersicht --}}
     <div class="ui bottom attached tab segment active" data-tab="overview">
+        @if ($hero->image_url)
+            <img src="{{ $hero->image_url }}" alt="{{ $hero->character_name }}" class="float-right ml-4 mb-2 h-32 w-32 object-cover rounded border-2 border-[#5a3a22]/40">
+        @endif
         <dl class="grid grid-cols-2 gap-4 text-stone-800">
             <div><dt class="text-sm text-stone-500">Spieler</dt><dd>{{ $hero->player?->full_name ?? '—' }}</dd></div>
             <div><dt class="text-sm text-stone-500">Klassen</dt><dd>{{ $hero->classes->pluck('name')->implode(', ') ?: '—' }}</dd></div>
@@ -30,6 +33,11 @@
                 <dd>@if ($hero->died)<span class="text-red-700">verschollen</span>@else{{ $hero->active ? 'aktiv' : 'inaktiv' }}@endif</dd>
             </div>
         </dl>
+
+        @if ($hero->description)
+            <h3 class="font-uncial text-lg text-waldritter mt-6 mb-2">Steckbrief</h3>
+            <p class="text-stone-700 whitespace-pre-line">{{ $hero->description }}</p>
+        @endif
 
         <h3 class="font-uncial text-lg text-waldritter mt-6 mb-2">Erworbene Fertigkeiten</h3>
         @forelse ($hero->skills as $skill)
