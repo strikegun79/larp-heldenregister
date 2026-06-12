@@ -8,6 +8,7 @@ use App\Http\Controllers\EpTransactionController;
 use App\Http\Controllers\HeroClassController;
 use App\Http\Controllers\HeroController;
 use App\Http\Controllers\HeroSkillController;
+use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PlayerController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SignatureController;
@@ -34,6 +35,10 @@ Route::get('/dashboard', function () {
 })->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
+    // In-App-Benachrichtigungen (NOTI-07).
+    Route::get('notifications/{notification}/read', [NotificationController::class, 'read'])->name('notifications.read');
+    Route::post('notifications/read-all', [NotificationController::class, 'readAll'])->name('notifications.read-all');
+
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');

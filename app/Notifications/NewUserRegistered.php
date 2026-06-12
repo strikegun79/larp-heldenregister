@@ -22,7 +22,20 @@ class NewUserRegistered extends Notification
      */
     public function via(object $notifiable): array
     {
-        return ['mail'];
+        return ['mail', 'database'];
+    }
+
+    /**
+     * In-App-Benachrichtigung (NOTI-07): Payload für die Glocke im Header.
+     *
+     * @return array<string, string>
+     */
+    public function toArray(object $notifiable): array
+    {
+        return [
+            'message' => 'Neuer Benutzer: '.trim("{$this->newUser->name} {$this->newUser->lastname}"),
+            'url' => route('admin.users.index'),
+        ];
     }
 
     public function toMail(object $notifiable): MailMessage

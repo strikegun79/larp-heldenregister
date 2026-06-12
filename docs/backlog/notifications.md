@@ -67,8 +67,16 @@ E-Mail-Benachrichtigungen (Mailables/Notifications, via Queue).
 > `MAIL_PORT=1025` auf Mailpit zeigen; Registrierung/„Passwort vergessen"
 > auslösen und Betreff/Layout im Mailpit-UI (http://localhost:8025) prüfen.
 
-### NOTI-07 · In-App-Benachrichtigungen (optional) · ⏱ 4h · 🔲
+### NOTI-07 · In-App-Benachrichtigungen (optional) · ⏱ 4h · ✅
 **Beschreibung:** Datenbank-Notifications + Glocke in der Navigation.
 **Akzeptanzkriterien:**
-- [ ] `notifications`-Tabelle; Anzeige ungelesener im Header.
-- [ ] Markieren als gelesen; Test.
+- [x] `notifications`-Tabelle; Anzeige ungelesener im Header.
+- [x] Markieren als gelesen; Test.
+
+> Umgesetzt: `notifications`-Tabelle (`notifications:table`). `NewUserRegistered`
+> nutzt jetzt zusätzlich den `database`-Channel (`toArray` = message + url).
+> Glocke im Header (`navigation`) mit Ungelesen-Badge + Dropdown der ungelesenen
+> Benachrichtigungen (Nachricht → Ziel-Link) und „Alle als gelesen markieren".
+> `NotificationController@read` (markiert eine als gelesen + Redirect zum Ziel,
+> 404 bei fremder Notification) und `@readAll`. Tests: `InAppNotificationTest`
+> (5): DB-Speicherung, Badge/Anzeige, Einzel-/Alle-gelesen, Fremdschutz.
