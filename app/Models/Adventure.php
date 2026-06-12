@@ -21,6 +21,7 @@ class Adventure extends Model
         'gamemaster_id',
         'eventleader_id',
         'event_status_id',
+        'reminder_sent_at',
         'event_client_id',
         'event_category_id',
         'max_player',
@@ -32,6 +33,7 @@ class Adventure extends Model
     protected $casts = [
         'start_at' => 'datetime',
         'end_at' => 'datetime',
+        'reminder_sent_at' => 'datetime',
         'fee' => 'decimal:2',
         'loot_ep_day' => 'integer',
         'max_player' => 'integer',

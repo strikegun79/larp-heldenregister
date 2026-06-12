@@ -32,11 +32,16 @@ Produktivbetrieb, Pipeline, Umgebung.
 - [ ] Worker als Supervisor/systemd-Service dokumentiert.
 - [ ] Mailables `ShouldQueue`.
 
-### INFRA-05 · Scheduler einrichten · ⏱ 2h · 🔲
+### INFRA-05 · Scheduler einrichten · ⏱ 2h · ✅
 **Beschreibung:** `schedule:run` Cron für Erinnerungen/Pflegejobs.
 **Akzeptanzkriterien:**
-- [ ] Cron-Eintrag dokumentiert; Beispiel-Task registriert.
-- [ ] Funktioniert mit NOTI-05.
+- [x] Cron-Eintrag dokumentiert; Beispiel-Task registriert.
+- [x] Funktioniert mit NOTI-05.
+
+> Umgesetzt: `Console\Kernel::schedule` registriert `events:send-reminders`
+> täglich um 08:00 (NOTI-05). Cron-Eintrag (im Kernel dokumentiert):
+> `* * * * * cd /var/www/heldenregister && php artisan schedule:run >> /dev/null 2>&1`.
+> `php artisan schedule:list` zeigt den Task. Verifiziert über die NOTI-05-Tests.
 
 ### INFRA-06 · Backups (DB + Uploads) · ⏱ 3h · 🔲
 **Beschreibung:** Regelmäßige Sicherung der Produktiv-DB und Uploads.

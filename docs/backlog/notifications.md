@@ -40,13 +40,21 @@ E-Mail-Benachrichtigungen (Mailables/Notifications, via Queue).
 > Umgesetzt: `EventCancelled` (queued), in `AdventureController@cancel` an alle
 > gebuchten Spieler mit E-Mail (dedupliziert). Test mit `Notification::fake`.
 
-### NOTI-05 · Event-Erinnerung (X Tage vorher) · ⏱ 4h · 🔲
+### NOTI-05 · Event-Erinnerung (X Tage vorher) · ⏱ 4h · ✅
 **Beschreibung:** Geplante Erinnerung vor Eventbeginn.
 **Akzeptanzkriterien:**
-- [ ] Scheduled Command (`schedule:run`) selektiert anstehende Events.
-- [ ] Erinnerung an bestätigte Buchungen; idempotent (kein Doppelversand).
-- [ ] Test.
+- [x] Scheduled Command (`schedule:run`) selektiert anstehende Events.
+- [x] Erinnerung an bestätigte Buchungen; idempotent (kein Doppelversand).
+- [x] Test.
 **Abhängig von:** INFRA-05 (Scheduler).
+
+> Umgesetzt: Command `events:send-reminders {--days=3}` (App\Console\Commands\
+> SendEventReminders) selektiert Events mit Start innerhalb des Vorlaufs (Default
+> 3 Tage), nicht abgesagt, noch ohne `reminder_sent_at`. Versendet `EventReminder`
+> (queued) an bestätigte Anmeldungen (Status `bestaetigt`) mit E-Mail; setzt
+> danach `reminder_sent_at` → idempotent. Täglich um 08:00 geplant (INFRA-05).
+> Tests: `EventReminderTest` (5): Versand, Idempotenz, ferne Events, abgesagt,
+> unbestätigt.
 
 ### NOTI-06 · Passwort-Reset-/Aktivierungsmails auf Deutsch & gebrandet · ⏱ 3h · ✅
 **Beschreibung:** Mail-Templates im Vereins-Layout (statt Default-Breeze).
