@@ -10,11 +10,13 @@ use App\Models\EventStatus;
 use App\Models\Location;
 use App\Models\Player;
 use App\Models\User;
+use App\Notifications\EventCancelled;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Notification;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\Response;
 
@@ -174,7 +176,14 @@ class AdventureController extends Controller
 
         $adventure->update(['event_status_id' => EventStatus::CANCELLED]);
 
-        // NOTI-04: Absage-Mails an alle gebuchten Spieler auslösen.
+        // NOTI-04: Absage-Mails an alle gebuchten Spieler mit E-Mail.
+        $recipients = $adventure->bookings()->with('player')->get()
+            ->map(fn ($b) => $b->player?->email)
+            ->filter()
+            ->unique();
+        foreach ($recipients as $email) {
+            Notification::route('mail', $email)->notify(new EventCancelled($adventure));
+        }
 
         $message = 'Event wurde abgesagt.';
 

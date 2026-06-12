@@ -6,11 +6,14 @@ use App\Models\Adventure;
 use App\Models\Booking;
 use App\Models\EventRole;
 use App\Models\Player;
+use App\Notifications\BookingReceived;
+use App\Notifications\WaitlistPromoted;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\Notification;
 
 class BookingController extends Controller
 {
@@ -82,11 +85,11 @@ class BookingController extends Controller
         }
 
         // Der teilnehmende Held ist automatisch der aktive Held des Spielers (HERO-21).
-        $activeHeroId = Player::find($data['player_id'])?->active_hero_id;
+        $player = Player::find($data['player_id']);
 
-        $adventure->bookings()->create([
+        $booking = $adventure->bookings()->create([
             'player_id' => $data['player_id'],
-            'hero_id' => $activeHeroId,
+            'hero_id' => $player?->active_hero_id,
             'event_role_id' => $data['event_role_id'],
             'agb' => true,
             'fotoerlaubnis' => $request->boolean('fotoerlaubnis'),
@@ -100,6 +103,11 @@ class BookingController extends Controller
             // Volles Event -> automatisch auf die Warteliste.
             'waitlisted' => $adventure->isFull(),
         ]);
+
+        // NOTI-02: Bestätigung an den Spieler (sofern E-Mail hinterlegt).
+        if ($player?->email) {
+            Notification::route('mail', $player->email)->notify(new BookingReceived($booking));
+        }
 
         $message = $adventure->isFull()
             ? 'Anmeldung erfolgt – das Abenteuer ist voll, daher auf der Warteliste.'
@@ -247,6 +255,9 @@ class BookingController extends Controller
             if ($promoted) {
                 $promoted->update(['waitlisted' => false]);
                 // NOTI-03: Benachrichtigung an den nachgerückten Spieler.
+                if ($promoted->player?->email) {
+                    Notification::route('mail', $promoted->player->email)->notify(new WaitlistPromoted($promoted));
+                }
             }
         }
 
