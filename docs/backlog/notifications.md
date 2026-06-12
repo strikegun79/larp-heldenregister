@@ -48,12 +48,24 @@ E-Mail-Benachrichtigungen (Mailables/Notifications, via Queue).
 - [ ] Test.
 **Abhängig von:** INFRA-05 (Scheduler).
 
-### NOTI-06 · Passwort-Reset-/Aktivierungsmails auf Deutsch & gebrandet · ⏱ 3h · 🔲
+### NOTI-06 · Passwort-Reset-/Aktivierungsmails auf Deutsch & gebrandet · ⏱ 3h · ✅
 **Beschreibung:** Mail-Templates im Vereins-Layout (statt Default-Breeze).
 **Akzeptanzkriterien:**
-- [ ] Gemeinsames Mail-Layout (Logo, Footer) wie Legacy `email_footer_system`.
-- [ ] Verifizierungs-/Reset-/Admin-Mails nutzen es; Deutsch.
-- [ ] Visuelle Prüfung (Mailpit) dokumentiert.
+- [x] Gemeinsames Mail-Layout (Logo, Footer) wie Legacy `email_footer_system`.
+- [x] Verifizierungs-/Reset-/Admin-Mails nutzen es; Deutsch.
+- [x] Visuelle Prüfung (Mailpit) dokumentiert.
+
+> Umgesetzt: Mail-Komponenten publiziert (`resources/views/vendor/mail`),
+> Header (Vereinsname/Branding) und Footer (Verein, Hinweis) angepasst – greift
+> für **alle** Markdown-Mails (Auth + Notifications). Verifizierungs- und
+> Reset-Mail auf Deutsch via `VerifyEmail::toMailUsing`/`ResetPassword::toMailUsing`
+> in `AppServiceProvider` (deutsche Betreffs, Texte, Grußformel). Admin-/
+> Buchungs-Mails sind bereits deutsch. Tests: `BrandedMailTest` (4): deutsche
+> Verify-/Reset-Mail, gebrandetes Layout im gerenderten HTML, Footer-Branding.
+>
+> Mailpit-Prüfung: lokal `MAIL_MAILER=smtp`, `MAIL_HOST=127.0.0.1`,
+> `MAIL_PORT=1025` auf Mailpit zeigen; Registrierung/„Passwort vergessen"
+> auslösen und Betreff/Layout im Mailpit-UI (http://localhost:8025) prüfen.
 
 ### NOTI-07 · In-App-Benachrichtigungen (optional) · ⏱ 4h · 🔲
 **Beschreibung:** Datenbank-Notifications + Glocke in der Navigation.
