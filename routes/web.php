@@ -140,6 +140,10 @@ Route::middleware('auth')->group(function () {
         });
         Route::get('players', [Admin\PlayerController::class, 'index'])->name('players.index');
         Route::get('players/export', [Admin\PlayerController::class, 'export'])->name('players.export'); // REP-04
+        // Betreuer je Spieler verwalten (PLAY-06).
+        Route::get('players/{player}/caretakers', [Admin\PlayerController::class, 'caretakers'])->name('players.caretakers');
+        Route::post('players/{player}/caretakers', [Admin\PlayerController::class, 'attachCaretaker'])->name('players.caretakers.store');
+        Route::delete('players/{player}/caretakers/{user}', [Admin\PlayerController::class, 'detachCaretaker'])->name('players.caretakers.destroy');
 
         // Helden-Klassen-Lookup pflegen (HERO-05).
         // Veranstaltungsorte pflegen (ADV-08).

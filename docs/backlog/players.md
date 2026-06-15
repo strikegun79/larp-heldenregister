@@ -30,13 +30,21 @@ es höchstens einen geben.
 > auf false gesetzt, dann der gewählte Spieler auf true. Pro Nutzer; fremde
 > Betreuer/Nutzer bleiben unberührt. Tests: `PlayerSelfFlagTest` (3).
 
-### PLAY-06 · Mehrere Betreuer je Spieler verwalten · ⏱ 3h · 🔲
+### PLAY-06 · Mehrere Betreuer je Spieler verwalten · ⏱ 3h · ✅
 **Beschreibung:** Legacy `user2player` erlaubt mehrere Nutzer pro Spieler
 (z. B. Eltern). Aktuell wird nur der anlegende Nutzer verknüpft.
 **Akzeptanzkriterien:**
-- [ ] Admin kann einem Spieler weitere Betreuer zuordnen/entfernen.
-- [ ] Betreuer sehen den Spieler in „Deine Spieler".
-- [ ] Tests für Zuordnung/Entfernen.
+- [x] Admin kann einem Spieler weitere Betreuer zuordnen/entfernen.
+- [x] Betreuer sehen den Spieler in „Deine Spieler".
+- [x] Tests für Zuordnung/Entfernen.
+
+> Umgesetzt: `Admin\PlayerController@caretakers/attachCaretaker/detachCaretaker`
+> (Admin-Bereich, `portal.manage`). Betreuer-Modal `admin/players/_caretakers`
+> (Liste mit Entfernen + Hinzufügen-Auswahl der noch nicht zugeordneten Nutzer);
+> „Betreuer"-Link je Zeile in der Admin-Spielerliste. Zuordnung über das Pivot
+> `player_user` (kein Duplikat, `self=false`); zugeordnete Betreuer sehen den
+> Spieler automatisch unter „Deine Spieler" (`user->players()`). Tests:
+> `PlayerCaretakerTest` (5).
 
 ### PLAY-07 · Pflichtangaben für Minderjährige (Geburtsdatum) · ⏱ 3h · 🔲
 **Beschreibung:** Jugend-LARP – Alter ist relevant (Event-Kategorien nach Alter).

@@ -39,7 +39,10 @@
                                     @endif
                                 </td>
                                 <td class="px-6 py-4 text-right">
-                                    <a href="{{ route('admin.players.matrix.edit', $player) }}" class="text-indigo-700 hover:underline">Matrix</a>
+                                    <div class="flex items-center justify-end gap-3">
+                                        <a href="{{ route('admin.players.caretakers', $player) }}" data-modal-url="{{ route('admin.players.caretakers', $player) }}" class="text-indigo-700 hover:underline">Betreuer</a>
+                                        <a href="{{ route('admin.players.matrix.edit', $player) }}" class="text-indigo-700 hover:underline">Matrix</a>
+                                    </div>
                                 </td>
                             </tr>
                         @endforeach
