@@ -69,6 +69,15 @@
             <div class="actions" id="app-modal-actions"></div>
         </div>
 
+        <!-- Gestapeltes Modal (ADV-22): öffnet über #app-modal (z. B. Anmeldung,
+             Gast-Anmeldung, Anmeldung bearbeiten). Kein Schließ-Icon; nur über
+             Speichern oder „Schließen" zu schließen. -->
+        <div class="ui modal" id="app-modal-2">
+            <div class="header" id="app-modal-2-header"></div>
+            <div class="scrolling content" id="app-modal-2-content"></div>
+            <div class="actions" id="app-modal-2-actions"></div>
+        </div>
+
         <!-- Bestätigungs-Modal: Fertigkeit erlernen/aberkennen (HERO-14/16) -->
         <div class="ui small modal" id="skill-modal">
             <div class="header" id="skill-modal-title"></div>
@@ -188,6 +197,39 @@
                 loadModalContent(trigger.getAttribute('data-modal-subview'));
             });
 
+            // ADV-22: Inhalt in das gestapelte Modal (#app-modal-2) über dem
+            // Event-Modal laden. Kein Schließ-Icon, nur Speichern/Schließen.
+            function loadStackContent(url) {
+                const $content = $('#app-modal-2-content');
+                const $header = $('#app-modal-2-header');
+                const $actions = $('#app-modal-2-actions');
+                $header.empty();
+                $actions.empty();
+                $content.html('<div class="ui active centered inline loader" style="display:block;margin:2rem auto"></div>');
+                return fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                    .then(r => r.text())
+                    .then(html => {
+                        $content.html(html);
+                        const $title = $content.find('[data-modal-title]').first();
+                        $header.html($title.length ? $title.html() : '');
+                        $title.remove();
+                        const $partActions = $content.find('[data-modal-actions]').first();
+                        $actions.html($partActions.length ? $partActions.html() : '');
+                        $partActions.remove();
+                        $actions.append('<div class="ui deny button">Schließen</div>');
+                        $('#app-modal-2').modal('refresh');
+                    })
+                    .catch(() => $content.html('<div class="ui error message">Konnte nicht geladen werden.</div>'));
+            }
+
+            document.addEventListener('click', function (e) {
+                const trigger = e.target.closest('[data-modal-stack]');
+                if (!trigger) return;
+                e.preventDefault();
+                loadStackContent(trigger.getAttribute('data-modal-stack'));
+                $('#app-modal-2').modal({ allowMultiple: true, closable: false, autofocus: false }).modal('show');
+            });
+
             // ADV-17/19: einfaches Unterschriften-Pad (Tablet/Stift/Maus via Pointer Events).
             // Mehrfach-Init ist idempotent (Listener nur einmal registrieren).
             function initSignaturePad(id) {
@@ -292,12 +334,13 @@
             // Formulare innerhalb des Modals per AJAX absenden; Rückmeldung als Toast.
             document.addEventListener('submit', function (e) {
                 const form = e.target;
-                if (!form.closest('#app-modal')) return;
+                const inStack = !! form.closest('#app-modal-2');
+                if (! inStack && ! form.closest('#app-modal')) return;
                 // Inline-onsubmit (z. B. confirm() == false) respektieren.
                 if (e.defaultPrevented) return;
                 e.preventDefault();
 
-                const submitBtn = form.querySelector('[type=submit]');
+                const submitBtn = e.submitter || form.querySelector('[type=submit]');
                 submitBtn && submitBtn.classList.add('loading', 'disabled');
 
                 fetch(form.action, {
@@ -311,6 +354,10 @@
                             showToast(data.message || 'Gespeichert.', 'success');
                             if (data.reload) {
                                 setTimeout(() => window.location.reload(), 700);
+                            } else if (inStack) {
+                                // ADV-22: gestapeltes Modal schließen, Event-Modal aktualisieren.
+                                $('#app-modal-2').modal('hide');
+                                if (appModalUrl) loadModalContent(appModalUrl, true);
                             } else if (data.refresh_modal && appModalUrl) {
                                 loadModalContent(appModalUrl, true); // Modal neu laden, aktiven Tab erhalten
                             } else {

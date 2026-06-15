@@ -1,9 +1,9 @@
-<span data-modal-title hidden>Anmeldung bearbeiten · {{ $booking->player?->full_name }}</span>
+<span data-modal-title hidden>Anmeldung bearbeiten · {{ $booking->participant_name }}</span>
 
 <p class="text-stone-500 mb-3">{{ $adventure->name }}</p>
 
-<form method="POST" action="{{ route('adventures.bookings.update', [$adventure, $booking]) }}"
-      class="ui form" data-refresh-modal>
+<form id="booking-edit-form" method="POST" action="{{ route('adventures.bookings.update', [$adventure, $booking]) }}"
+      class="ui form">
     @csrf @method('PUT')
 
     <div class="field">
@@ -36,9 +36,8 @@
         <textarea name="erreichbarkeit" rows="2">{{ $booking->erreichbarkeit }}</textarea>
     </div>
 
-    <div class="flex items-center gap-2 mt-3">
-        <button type="submit" class="ui primary button">Speichern</button>
-        <a href="{{ route('adventures.show', $adventure) }}" data-modal-subview="{{ route('adventures.show', $adventure) }}"
-           class="ui basic button">Zurück</a>
-    </div>
-</form>
+    </form>
+
+<div data-modal-actions hidden>
+    <button type="submit" form="booking-edit-form" class="ui primary button">Speichern</button>
+</div>

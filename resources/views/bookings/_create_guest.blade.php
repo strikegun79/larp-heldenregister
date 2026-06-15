@@ -11,7 +11,7 @@
         <p class="mb-3 text-orange-600">Das Abenteuer ist voll – Gäste kommen auf die Warteliste.</p>
     @endif
 
-    <form method="POST" action="{{ route('adventures.bookings.store-guest', $adventure) }}" class="ui form" data-refresh-modal>
+    <form id="booking-guest-form" method="POST" action="{{ route('adventures.bookings.store-guest', $adventure) }}" class="ui form">
         @csrf
         <div class="two fields">
             <div class="field">
@@ -57,11 +57,9 @@
         </div>
 
         <label class="flex items-center gap-2 my-2"><input type="checkbox" name="agb" value="1" required> Ich akzeptiere die AGB</label>
-
-        <div class="flex items-center gap-2 mt-3">
-            <button type="submit" class="ui primary button">Gast anmelden</button>
-            <a href="{{ route('adventures.show', $adventure) }}" data-modal-subview="{{ route('adventures.show', $adventure) }}"
-               class="ui basic button">Zurück</a>
-        </div>
     </form>
+
+    <div data-modal-actions hidden>
+        <button type="submit" form="booking-guest-form" class="ui primary button">Gast anmelden</button>
+    </div>
 @endif

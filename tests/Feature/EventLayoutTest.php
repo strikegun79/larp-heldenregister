@@ -85,10 +85,10 @@ class EventLayoutTest extends TestCase
     {
         $adventure = Adventure::factory()->create(['max_player' => 5]);
 
-        // Das Detail bietet den Anmelden-Button als Unteransicht an.
+        // Das Detail bietet den Anmelden-Button als gestapeltes Modal an (ADV-22).
         $this->detail($this->userWithRole(60), $adventure)
             ->assertOk()
-            ->assertSee('data-modal-subview', false)
+            ->assertSee('data-modal-stack', false)
             ->assertSee(route('adventures.bookings.create', $adventure), false);
 
         // Die Unteransicht selbst liefert das Anmeldeformular (Bucher mit eigenem Spieler).

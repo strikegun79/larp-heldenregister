@@ -59,7 +59,7 @@
                         @endcan
                         @can('adventure.modify')
                             <a href="{{ route('adventures.bookings.edit', [$adventure, $booking]) }}"
-                               data-modal-subview="{{ route('adventures.bookings.edit', [$adventure, $booking]) }}"
+                               data-modal-stack="{{ route('adventures.bookings.edit', [$adventure, $booking]) }}"
                                class="ui mini icon button" data-tooltip="Bearbeiten" data-position="top center">
                                 <i class="edit icon"></i>
                             </a>

@@ -312,3 +312,19 @@ Eine Admin-Eventliste mit Verwaltungsaktionen (anlegen/bearbeiten/absagen).
 > übersprungen; aus dem Check-in-Tab ausgeblendet. Eigene Gäste sind für den
 > Bucher sichtbar (`booked_by_user_id` in `$visibleBookings`). Tests:
 > `EventGuestBookingTest` (7).
+
+### ADV-22 · Event-Anmeldung als Multiples modal Fenster · ⏱ 4h · ✅
+**Beschreibung:** Anmeldung als Multiples Modal Fenster
+**Akzeptanzkriterien:**
+- [x] beim klicken auf Anmeldung, GAST-Anmeldung, Editieren-Button erscheint das Anmeldungs-Modal über dem Event-Modal. 
+- [x] kein Schliess Icon oben rechts. Nur schliessbar durch Speichern oder Schließen Button
+- [x] Speichern und Schließen Button sollen in den Footer des Modals zu Anmeldung.
+
+> Umgesetzt: Zweites, gestapeltes Modal `#app-modal-2` (ohne Schließ-Icon,
+> `closable:false`, `allowMultiple:true`). Neuer Trigger `data-modal-stack` lädt
+> Anmeldung/Gast/Editieren als Overlay über dem Event-Modal (statt
+> Content-Ersatz). Partials liefern `[data-modal-title]` (Header) und
+> `[data-modal-actions]` (Speichern, per `form="…"` mit dem Formular verknüpft);
+> „Schließen" wird automatisch im Footer ergänzt. Globaler Submit-Handler
+> behandelt Stack-Formulare: bei Erfolg `#app-modal-2` schließen und Event-Modal
+> aktualisieren. „Zurück"-Links entfernt. Tests: `EventStackedModalTest` (4).
