@@ -1,8 +1,7 @@
 @php($manage = $manage ?? false)
 <table class="ui very basic compact table">
     <thead><tr>
-        <th>Spieler</th><th>Rolle</th><th>Liste</th><th>Status</th><th>Beitrag</th>
-        @if ($manage)<th></th>@endif
+        <th>Spieler</th><th>Rolle</th><th>Liste</th><th>Status</th><th>Beitrag</th><th></th>
     </tr></thead>
     <tbody>
         @forelse ($bookings as $booking)
@@ -31,49 +30,54 @@
                         <span class="text-stone-500">offen</span>
                     @endif
                 </td>
-                @if ($manage)
-                    <td class="right aligned">
-                        <div class="flex items-center justify-end gap-3">
-                            @can('approve-bookings')
-                                <form method="POST" action="{{ route('adventures.bookings.approval', [$adventure, $booking]) }}" data-refresh-modal>
-                                    @csrf @method('PATCH')
-                                    <button class="{{ $booking->status === 'bestaetigt' ? 'text-stone-600' : 'text-green-700' }} hover:underline">
-                                        {{ $booking->status === 'bestaetigt' ? 'zurücknehmen' : 'bestätigen' }}
-                                    </button>
-                                </form>
-                                <form method="POST" action="{{ route('adventures.bookings.rejection', [$adventure, $booking]) }}" data-refresh-modal>
-                                    @csrf @method('PATCH')
-                                    <button class="{{ $booking->status === 'abgelehnt' ? 'text-stone-600' : 'text-red-600' }} hover:underline">
-                                        {{ $booking->status === 'abgelehnt' ? 'zurücknehmen' : 'ablehnen' }}
-                                    </button>
-                                </form>
-                            @endcan
-                            @can('manage-payments')
-                                <form method="POST" action="{{ route('adventures.bookings.payment', [$adventure, $booking]) }}" data-refresh-modal>
-                                    @csrf @method('PATCH')
-                                    <button class="{{ $booking->paid ? 'text-stone-600' : 'text-green-700' }} hover:underline">
-                                        {{ $booking->paid ? 'als offen' : 'als bezahlt' }}
-                                    </button>
-                                </form>
-                            @endcan
-                            @can('adventure.modify')
-                                <a href="{{ route('adventures.bookings.edit', [$adventure, $booking]) }}"
-                                   data-modal-subview="{{ route('adventures.bookings.edit', [$adventure, $booking]) }}"
-                                   class="text-waldritter hover:underline">bearbeiten</a>
-                            @endcan
-                            @can('adventure.cancel')
-                                <form method="POST" action="{{ route('adventures.bookings.destroy', [$adventure, $booking]) }}"
-                                      data-refresh-modal onsubmit="return confirm('Anmeldung stornieren?');">
-                                    @csrf @method('DELETE')
-                                    <button class="text-red-600 hover:underline">stornieren</button>
-                                </form>
-                            @endcan
-                        </div>
-                    </td>
-                @endif
+                <td class="right aligned">
+                    <div class="flex items-center justify-end gap-1">
+                        @can('approve-bookings')
+                            <form method="POST" action="{{ route('adventures.bookings.approval', [$adventure, $booking]) }}" data-refresh-modal>
+                                @csrf @method('PATCH')
+                                <button type="submit" class="ui mini icon button {{ $booking->status === 'bestaetigt' ? '' : 'green' }}"
+                                        data-tooltip="{{ $booking->status === 'bestaetigt' ? 'Bestätigung zurücknehmen' : 'Bestätigen' }}" data-position="top center">
+                                    <i class="check icon"></i>
+                                </button>
+                            </form>
+                            <form method="POST" action="{{ route('adventures.bookings.rejection', [$adventure, $booking]) }}" data-refresh-modal>
+                                @csrf @method('PATCH')
+                                <button type="submit" class="ui mini icon button {{ $booking->status === 'abgelehnt' ? '' : 'orange' }}"
+                                        data-tooltip="{{ $booking->status === 'abgelehnt' ? 'Ablehnung zurücknehmen' : 'Ablehnen' }}" data-position="top center">
+                                    <i class="hand paper outline icon"></i>
+                                </button>
+                            </form>
+                        @endcan
+                        @can('manage-payments')
+                            <form method="POST" action="{{ route('adventures.bookings.payment', [$adventure, $booking]) }}" data-refresh-modal>
+                                @csrf @method('PATCH')
+                                <button type="submit" class="ui mini icon button {{ $booking->paid ? '' : 'yellow' }}"
+                                        data-tooltip="{{ $booking->paid ? 'Als offen markieren' : 'Als bezahlt markieren' }}" data-position="top center">
+                                    <i class="coins icon"></i>
+                                </button>
+                            </form>
+                        @endcan
+                        @can('adventure.modify')
+                            <a href="{{ route('adventures.bookings.edit', [$adventure, $booking]) }}"
+                               data-modal-subview="{{ route('adventures.bookings.edit', [$adventure, $booking]) }}"
+                               class="ui mini icon button" data-tooltip="Bearbeiten" data-position="top center">
+                                <i class="edit icon"></i>
+                            </a>
+                        @endcan
+                        @can('adventure.cancel')
+                            <form method="POST" action="{{ route('adventures.bookings.destroy', [$adventure, $booking]) }}"
+                                  data-refresh-modal onsubmit="return confirm('Anmeldung stornieren?');">
+                                @csrf @method('DELETE')
+                                <button type="submit" class="ui mini icon button red" data-tooltip="Stornieren" data-position="top center">
+                                    <i class="times icon"></i>
+                                </button>
+                            </form>
+                        @endcan
+                    </div>
+                </td>
             </tr>
         @empty
-            <tr><td colspan="{{ $manage ? 6 : 5 }}" class="text-stone-500">Noch keine Anmeldungen.</td></tr>
+            <tr><td colspan="6" class="text-stone-500">Noch keine Anmeldungen.</td></tr>
         @endforelse
     </tbody>
 </table>
