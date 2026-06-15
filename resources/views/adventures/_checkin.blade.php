@@ -9,14 +9,15 @@
         </div>
     @endunless
 
-    @if ($adventure->bookings->isEmpty())
-        <p class="text-stone-500">Keine Anmeldungen.</p>
+    @php($checkinBookings = $adventure->bookings->whereNotNull('player_id'))
+    @if ($checkinBookings->isEmpty())
+        <p class="text-stone-500">Keine Anmeldungen mit Check-in (Gäste sammeln keine EP).</p>
     @else
         @php($visitedIds = $adventure->visits->pluck('player_id'))
         <table class="ui very basic compact table">
             <thead><tr><th>Teilnehmer</th><th>Status</th><th>Unterschrift</th><th></th></tr></thead>
             <tbody>
-                @foreach ($adventure->bookings as $booking)
+                @foreach ($checkinBookings as $booking)
                     @php($present = $visitedIds->contains($booking->player_id))
                     <tr>
                         <td>{{ $booking->player?->full_name }}</td>

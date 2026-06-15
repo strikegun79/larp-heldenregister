@@ -14,6 +14,11 @@ class Booking extends Model
         'adventure_id',
         'player_id',
         'hero_id',
+        'booked_by_user_id',
+        'guest_name',
+        'guest_lastname',
+        'guest_age',
+        'guest_place',
         'event_role_id',
         'fotoerlaubnis',
         'vegetarier',
@@ -58,6 +63,20 @@ class Booking extends Model
         'waitlisted' => 'boolean',
         'approved_at' => 'datetime',
     ];
+
+    /** Gast-Anmeldung ohne hinterlegten Spieler (ADV-21). */
+    public function getIsGuestAttribute(): bool
+    {
+        return $this->player_id === null;
+    }
+
+    /** Anzeigename: Spieler oder Gast (ADV-21). */
+    public function getParticipantNameAttribute(): string
+    {
+        return $this->is_guest
+            ? trim("{$this->guest_name} {$this->guest_lastname}")
+            : ($this->player?->full_name ?? '—');
+    }
 
     /** Lesbares Status-Label (ADV-18). */
     public function getStatusLabelAttribute(): string

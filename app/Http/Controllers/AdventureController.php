@@ -110,10 +110,14 @@ class AdventureController extends Controller
             : request()->user()->players()->orderBy('name')->get();
 
         // Sichtbare Anmeldungen (ADV-15): Bürokrat/Projektleitung/Spielleiter/Admin
-        // sehen alle, Teamer/Event-buchen/Teilnehmer nur die eigenen Spieler.
+        // sehen alle, sonst nur eigene Spieler + selbst angemeldete Gäste (ADV-21).
+        $user = request()->user();
+        $ownPlayerIds = $user->players->pluck('id');
         $visibleBookings = Gate::allows('view-all-bookings')
             ? $adventure->bookings
-            : $adventure->bookings->whereIn('player_id', request()->user()->players->pluck('id'));
+            : $adventure->bookings->filter(
+                fn ($b) => $ownPlayerIds->contains($b->player_id) || $b->booked_by_user_id === $user->id
+            )->values();
 
         $data = [
             'adventure' => $adventure,
@@ -155,8 +159,9 @@ class AdventureController extends Controller
 
         $male = $bookings->filter(fn ($b) => $b->player?->gender === 'männlich')->count();
         $female = $bookings->filter(fn ($b) => $b->player?->gender === 'weiblich')->count();
+        $diverse = $bookings->filter(fn ($b) => $b->player?->gender === 'divers')->count();
 
-        $pdf = Pdf::loadView('adventures.participants_pdf', compact('adventure', 'bookings', 'male', 'female'));
+        $pdf = Pdf::loadView('adventures.participants_pdf', compact('adventure', 'bookings', 'male', 'female', 'diverse'));
 
         // Inline (ADV-19): öffnet im Browser-Tab/Popup statt Download.
         return $pdf->stream('teilnehmerliste-'.$adventure->id.'.pdf');
@@ -217,7 +222,7 @@ class AdventureController extends Controller
 
             foreach ($adventure->bookings as $b) {
                 fputcsv($out, [
-                    $b->player?->full_name,
+                    $b->participant_name.($b->is_guest ? ' (Gast)' : ''),
                     $b->role?->description,
                     $b->waitlisted ? 'Warteliste' : 'regulär',
                     $b->status_label,

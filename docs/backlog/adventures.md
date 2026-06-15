@@ -277,7 +277,38 @@ Eine Admin-Eventliste mit Verwaltungsaktionen (anlegen/bearbeiten/absagen).
 > (950px, Content min-height 820px). Teilnehmer-PDF wird inline gestreamt
 > (`Pdf::stream`, Link `target=_blank`) statt Download. Tests: `EventCheckinTest` (4).
 
-### ADV-20 · Event-PDf Listen Anpassung · ⏱ 4h · 
+### ADV-20 · Event-PDf Listen Anpassung · ⏱ 4h · ✅
 **Beschreibung:** Anpassung des PDF
 **Akzeptanzkriterien:**
-- [] ergänze zu den geschlechtern auch "Divers"
+- [x] ergänze zu den Geschlechtern auch "Divers"
+
+> Umgesetzt: `participantsPdf` zählt zusätzlich `$diverse` (gender „divers"); die
+> PDF-Kopfzeile zeigt Männlich/Weiblich/**Divers**/Gesamt. Test:
+> `EventGuestBookingTest::test_participants_pdf_view_shows_diverse_count`.
+
+### ADV-21 · Event-Nutzer Anmeldung stornieren und Gäste · ⏱ 4h · ✅
+**Beschreibung:** Nutzer dürfen eine Anmeldung stornieren und Gäste
+**Akzeptanzkriterien:**
+- [x] angemeldete User auch wenn diese schon bezahlt sind, dürfen storniert werden.
+- [x] Info an den Projektleiter bei stornierung
+- [x] Nutzer darf auch Gäste anmnelden, die nicht als Spieler im Account hinterlegt ist
+- [x] Wenn ein Gast angemeldet werden soll, wird mit einem Freien Textfelder nach Name, Nachname, Alter, Ort abgefragt.
+- [x] Es soll ein Hinweis angezeigt werden, das für Gäste kein Erfahrungspunkte gesammelt werden kann.
+- [x] Unterscheidung soll über den "Anmeldung" und "GAST-Anmeldung" mit Hinweis-Popup um anzumelden im Event-Modal
+- [x] Es können mehrere Gäste pro Nutzer und Event angemeldet werden.
+- [x] in der Anmeldungsübersicht und im PDF Export soll eine Markierung/Hinweis auf den GAST-Status geben
+- [x] bei der EP Zuteilung nach einem Event, werden Gäste nicht mit berücksichtig.
+
+> Umgesetzt: Migration – `bookings.player_id` nullable + Gastfelder
+> (`guest_name/lastname/age/place`) + `booked_by_user_id`. Stornieren (auch
+> bezahlter) Anmeldungen funktioniert weiterhin (kein Block); `destroy`
+> benachrichtigt die Projektleitung (`BookingCancelled`, Rolle Projektleitung +
+> ggf. Eventleiter). Gast-Anmeldung über eigenen „GAST-Anmeldung"-Button →
+> Unteransicht `bookings/_create_guest` (Freitext Name/Nachname/Alter/Ort +
+> Rolle/Flags/AGB) mit prominentem EP-Hinweis; mehrere Gäste je Nutzer/Event
+> möglich (player_id NULL, kein Unique-Konflikt). „Gast"-Label in der
+> Anmeldeliste (`participant_name`/`is_guest`) und im PDF (+ Ort). Gäste haben
+> keinen `event_visit`/aktiven Helden → werden bei der EP-Vergabe automatisch
+> übersprungen; aus dem Check-in-Tab ausgeblendet. Eigene Gäste sind für den
+> Bucher sichtbar (`booked_by_user_id` in `$visibleBookings`). Tests:
+> `EventGuestBookingTest` (7).

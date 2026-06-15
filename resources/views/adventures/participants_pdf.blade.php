@@ -25,7 +25,7 @@
         </tr>
         <tr>
             <td><strong>Typ:</strong> {{ $adventure->category?->name ?? '—' }}</td>
-            <td><strong>Männlich:</strong> {{ $male }} &nbsp;·&nbsp; <strong>Weiblich:</strong> {{ $female }} &nbsp;·&nbsp; <strong>Gesamt:</strong> {{ $bookings->count() }}</td>
+            <td><strong>Männlich:</strong> {{ $male }} &nbsp;·&nbsp; <strong>Weiblich:</strong> {{ $female }} &nbsp;·&nbsp; <strong>Divers:</strong> {{ $diverse }} &nbsp;·&nbsp; <strong>Gesamt:</strong> {{ $bookings->count() }}</td>
         </tr>
     </table>
 
@@ -44,9 +44,9 @@
             @forelse ($bookings as $i => $booking)
                 <tr>
                     <td class="nr">{{ $i + 1 }}</td>
-                    <td>{{ $booking->player?->lastname }}</td>
-                    <td>{{ $booking->player?->name }}</td>
-                    <td></td>
+                    <td>{{ $booking->is_guest ? $booking->guest_lastname : $booking->player?->lastname }}@if ($booking->is_guest) <strong>(Gast)</strong>@endif</td>
+                    <td>{{ $booking->is_guest ? $booking->guest_name : $booking->player?->name }}</td>
+                    <td>{{ $booking->is_guest ? $booking->guest_place : '' }}</td>
                     <td>{{ $booking->erreichbarkeit }}</td>
                     <td class="sig">
                         @if ($booking->signature)

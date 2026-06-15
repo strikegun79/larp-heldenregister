@@ -6,6 +6,8 @@ use App\Models\Adventure;
 use App\Models\Booking;
 use App\Models\EventRole;
 use App\Models\Player;
+use App\Models\User;
+use App\Notifications\BookingCancelled;
 use App\Notifications\BookingReceived;
 use App\Notifications\WaitlistPromoted;
 use Illuminate\Contracts\View\View;
@@ -21,7 +23,7 @@ class BookingController extends Controller
     {
         $this->middleware('auth');
         // Buchen: adventure.book; Stornieren/Abmelden: adventure.cancel.
-        $this->middleware('can:adventure.book')->only(['create', 'store']);
+        $this->middleware('can:adventure.book')->only(['create', 'store', 'createGuest', 'storeGuest']);
         $this->middleware('can:adventure.cancel')->only('destroy');
         // Anmeldedetails nachträglich ändern (BOOK-04).
         $this->middleware('can:adventure.modify')->only(['edit', 'update']);
@@ -90,6 +92,7 @@ class BookingController extends Controller
         $booking = $adventure->bookings()->create([
             'player_id' => $data['player_id'],
             'hero_id' => $player?->active_hero_id,
+            'booked_by_user_id' => $request->user()->id,
             'event_role_id' => $data['event_role_id'],
             'agb' => true,
             'fotoerlaubnis' => $request->boolean('fotoerlaubnis'),
@@ -112,6 +115,63 @@ class BookingController extends Controller
         $message = $adventure->isFull()
             ? 'Anmeldung erfolgt – das Abenteuer ist voll, daher auf der Warteliste.'
             : 'Anmeldung gespeichert.';
+
+        return $request->expectsJson()
+            ? response()->json(['message' => $message, 'refresh_modal' => true])
+            : back()->with('status', $message);
+    }
+
+    /**
+     * Gast-Anmeldeformular als Modal-Unteransicht (ADV-21).
+     */
+    public function createGuest(Adventure $adventure): View
+    {
+        return view('bookings._create_guest', [
+            'adventure' => $adventure,
+            'roles' => EventRole::orderBy('id')->get(),
+        ]);
+    }
+
+    /**
+     * Gast (ohne hinterlegten Spieler) zu einem Abenteuer anmelden (ADV-21).
+     * Gäste sammeln keine EP. Mehrere Gäste je Nutzer/Event möglich.
+     */
+    public function storeGuest(Request $request, Adventure $adventure): RedirectResponse|JsonResponse
+    {
+        $data = $request->validate([
+            'guest_name' => ['required', 'string', 'max:100'],
+            'guest_lastname' => ['required', 'string', 'max:100'],
+            'guest_age' => ['nullable', 'integer', 'min:0', 'max:120'],
+            'guest_place' => ['nullable', 'string', 'max:100'],
+            'event_role_id' => ['required', 'exists:event_roles,id'],
+            'agb' => ['accepted'],
+            'fotoerlaubnis' => ['boolean'],
+            'vegetarier' => ['boolean'],
+            'allergien' => ['nullable', 'string'],
+            'erreichbarkeit' => ['nullable', 'string'],
+        ]);
+
+        if (! $adventure->registrationOpen()) {
+            return $this->fail($request, 'Für dieses Abenteuer ist die Anmeldung nicht geöffnet.');
+        }
+
+        $adventure->bookings()->create([
+            'player_id' => null,
+            'booked_by_user_id' => $request->user()->id,
+            'guest_name' => $data['guest_name'],
+            'guest_lastname' => $data['guest_lastname'],
+            'guest_age' => $data['guest_age'] ?? null,
+            'guest_place' => $data['guest_place'] ?? null,
+            'event_role_id' => $data['event_role_id'],
+            'agb' => true,
+            'fotoerlaubnis' => $request->boolean('fotoerlaubnis'),
+            'vegetarier' => $request->boolean('vegetarier'),
+            'allergien' => $data['allergien'] ?? null,
+            'erreichbarkeit' => $data['erreichbarkeit'] ?? null,
+            'waitlisted' => $adventure->isFull(),
+        ]);
+
+        $message = 'Gast angemeldet.'.($adventure->isFull() ? ' (Warteliste – Event voll.)' : '');
 
         return $request->expectsJson()
             ? response()->json(['message' => $message, 'refresh_modal' => true])
@@ -240,9 +300,24 @@ class BookingController extends Controller
     {
         abort_unless($booking->adventure_id === $adventure->id, 404);
 
+        // Auch bezahlte Anmeldungen dürfen storniert werden (ADV-21) – kein Block.
+        $participant = $booking->participant_name;
+
         // Wird ein regulärer Platz frei, rückt die älteste Wartelisten-Buchung nach (BOOK-07).
         $wasRegular = ! $booking->waitlisted;
         $booking->delete();
+
+        // ADV-21: Projektleitung über die Stornierung informieren.
+        $leaders = User::whereHas('roles', fn ($q) => $q->where('roles.id', 30))->get();
+        if ($adventure->eventleader_id && ! $leaders->contains('id', $adventure->eventleader_id)) {
+            $adventure->loadMissing('eventleader');
+            if ($adventure->eventleader) {
+                $leaders->push($adventure->eventleader);
+            }
+        }
+        if ($leaders->isNotEmpty()) {
+            Notification::send($leaders, new BookingCancelled($adventure, $participant));
+        }
 
         $promoted = null;
         if ($wasRegular) {

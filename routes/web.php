@@ -82,6 +82,11 @@ Route::middleware('auth')->group(function () {
     // Anmeldeformular als Modal-Unteransicht (ADV-15).
     Route::get('adventures/{adventure}/bookings/create', [BookingController::class, 'create'])
         ->name('adventures.bookings.create');
+    // Gast-Anmeldung (ADV-21).
+    Route::get('adventures/{adventure}/bookings/create-guest', [BookingController::class, 'createGuest'])
+        ->name('adventures.bookings.create-guest');
+    Route::post('adventures/{adventure}/bookings/guest', [BookingController::class, 'storeGuest'])
+        ->name('adventures.bookings.store-guest');
     Route::post('adventures/{adventure}/bookings', [BookingController::class, 'store'])
         ->name('adventures.bookings.store');
     // Anmeldedetails nachträglich bearbeiten (BOOK-04).

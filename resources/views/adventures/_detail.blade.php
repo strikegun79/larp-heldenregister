@@ -35,6 +35,9 @@
             <a href="{{ route('adventures.bookings.create', $adventure) }}"
                data-modal-subview="{{ route('adventures.bookings.create', $adventure) }}"
                class="ui primary button">Anmelden</a>
+            <a href="{{ route('adventures.bookings.create-guest', $adventure) }}"
+               data-modal-subview="{{ route('adventures.bookings.create-guest', $adventure) }}"
+               class="ui button" title="Für Gäste werden keine EP gesammelt">GAST-Anmeldung</a>
         @endif
     @endcan
     @can('events.edit')

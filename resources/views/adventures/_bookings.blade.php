@@ -7,7 +7,10 @@
     <tbody>
         @forelse ($bookings as $booking)
             <tr>
-                <td>{{ $booking->player?->full_name }}</td>
+                <td>
+                    {{ $booking->participant_name }}
+                    @if ($booking->is_guest)<span class="ui mini label">Gast</span>@endif
+                </td>
                 <td>{{ $booking->role?->description }}</td>
                 <td>{{ $booking->waitlisted ? 'Warteliste' : 'regulär' }}</td>
                 <td>
