@@ -2,7 +2,7 @@
 
 <p class="text-stone-500 mb-3">{{ $adventure->name }}</p>
 
-<form id="booking-edit-form" method="POST" action="{{ route('adventures.bookings.update', [$adventure, $booking]) }}"
+<form id="booking-edit-form" data-stack-close method="POST" action="{{ route('adventures.bookings.update', [$adventure, $booking]) }}"
       class="ui form">
     @csrf @method('PUT')
 

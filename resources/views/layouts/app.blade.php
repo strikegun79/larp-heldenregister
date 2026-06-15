@@ -197,12 +197,16 @@
                 loadModalContent(trigger.getAttribute('data-modal-subview'));
             });
 
-            // ADV-22: Inhalt in das gestapelte Modal (#app-modal-2) über dem
-            // Event-Modal laden. Kein Schließ-Icon, nur Speichern/Schließen.
-            function loadStackContent(url) {
+            // ADV-22/PLAY-11: Inhalt in das gestapelte Modal (#app-modal-2) über dem
+            // Haupt-Modal laden. Kein Schließ-Icon, nur Speichern/Schließen.
+            let appModal2Url = null;
+
+            function loadStackContent(url, preserveTab) {
                 const $content = $('#app-modal-2-content');
                 const $header = $('#app-modal-2-header');
                 const $actions = $('#app-modal-2-actions');
+                appModal2Url = url;
+                const prevTab = preserveTab ? $content.find('.menu .item.active[data-tab]').attr('data-tab') : null;
                 $header.empty();
                 $actions.empty();
                 $content.html('<div class="ui active centered inline loader" style="display:block;margin:2rem auto"></div>');
@@ -217,6 +221,13 @@
                         $actions.html($partActions.length ? $partActions.html() : '');
                         $partActions.remove();
                         $actions.append('<div class="ui deny button">Schließen</div>');
+                        // Tabs (z. B. Helden-Detail) im gestapelten Modal aktivieren.
+                        $content.find('.menu .item[data-tab]').tab();
+                        if (prevTab && $content.find('.menu .item[data-tab="' + prevTab + '"]').length) {
+                            $content.find('.menu .item[data-tab], .tab[data-tab]').removeClass('active');
+                            $content.find('[data-tab="' + prevTab + '"]').addClass('active');
+                        }
+                        $('#app-modal-2').toggleClass('modal-hero', $content.find('#skilltree').length > 0);
                         $('#app-modal-2').modal('refresh');
                     })
                     .catch(() => $content.html('<div class="ui error message">Konnte nicht geladen werden.</div>'));
@@ -355,9 +366,16 @@
                             if (data.reload) {
                                 setTimeout(() => window.location.reload(), 700);
                             } else if (inStack) {
-                                // ADV-22: gestapeltes Modal schließen, Event-Modal aktualisieren.
-                                $('#app-modal-2').modal('hide');
-                                if (appModalUrl) loadModalContent(appModalUrl, true);
+                                // Einmalige Formulare (z. B. Anmeldung) schließen den Stack
+                                // und aktualisieren das Haupt-Modal; sonst Stack selbst neu laden.
+                                if (form.hasAttribute('data-stack-close')) {
+                                    $('#app-modal-2').modal('hide');
+                                    if (appModalUrl) loadModalContent(appModalUrl, true);
+                                } else if (data.refresh_modal && appModal2Url) {
+                                    loadStackContent(appModal2Url, true);
+                                } else {
+                                    $('#app-modal-2').modal('hide');
+                                }
                             } else if (data.refresh_modal && appModalUrl) {
                                 loadModalContent(appModalUrl, true); // Modal neu laden, aktiven Tab erhalten
                             } else {

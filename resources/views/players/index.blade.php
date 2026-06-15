@@ -27,11 +27,12 @@
                     </div>
                 </a>
 
-                {{-- Spielerkarten --}}
+                {{-- Spielerkarten (Steckbrief-Papyrus als Karten-Hintergrund, PLAY-11) --}}
                 @foreach ($players as $player)
                     <a href="{{ route('players.show', $player) }}" data-modal-url="{{ route('players.show', $player) }}"
-                       class="group block rounded-lg overflow-hidden border-2 border-[#5a3a22]/40 bg-white/70 shadow hover:shadow-xl hover:-translate-y-1 transition">
-                        <div class="h-48 overflow-hidden bg-stone-100">
+                       class="group block rounded-lg overflow-hidden border-2 border-[#5a3a22]/40 shadow hover:shadow-xl hover:-translate-y-1 transition"
+                       style="background-image:url('/images/player_background.png'); background-size:cover; background-position:center; background-color:#efe4cf;">
+                        <div class="h-48 overflow-hidden">
                             <img src="{{ $player->avatar_url }}" alt="{{ $player->full_name }}" class="w-full h-full object-cover group-hover:scale-105 transition">
                         </div>
                         <div class="p-4">

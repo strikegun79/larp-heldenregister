@@ -90,15 +90,19 @@ es höchstens einen geben.
 - [x] für die Helden soll es auch eine Möglichkeit geben ein separates Helden-Foto pro Held hochzuladen, das wird dann in der Helden-Übersicht im Spieler-Detail auch mit angezeigt.
 
 > Umgesetzt: Spieler-Detail mit Fomantic-Tabs (Allgemeines/Helden/Abenteuer/
-> Avatar). Allgemeines-Tab mit Papyrus-Hintergrund (`/images/player_background.png`)
-> und 1:1-Avatar; Alter hinter dem Geburtsdatum „(X Jahre)". Close-X aus
+> Avatar) und 1:1-Avatar; Alter hinter dem Geburtsdatum „(X Jahre)". Close-X aus
 > `#app-modal` entfernt – Schließen nur über den „Schließen"-Button. Abenteuer-Tab
 > listet besuchte Veranstaltungen (`player->visits.adventure`), Klick öffnet das
 > Event-Modal. Avatar-Tab: Upload (JPG/PNG ≤ 2 MB) über `players.avatar`; Bild
 > wird per GD zentriert auf 1:1 zugeschnitten (`AvatarStorage::storeSquare`).
-> Helden-Tab zeigt das Helden-Foto und erlaubt je Held einen Foto-Upload
-> (`heroes.photo`, autorisiert über den Spieler-Eigentümer). Tests:
-> `PlayerDetailTest` (6).
+> Tests: `PlayerDetailTest` (7).
+>
+> Korrekturen: Der Papyrus-Hintergrund (`/images/player_background.png`) liegt
+> auf den **Spielerkarten der Übersicht** (nicht im Modal). Der **Helden-Foto-
+> Upload** sitzt im **Helden-Detail** (als gestapeltes Modal geöffnet) und ist
+> nur für Bürokrat/Admin (`heldenregister.edit`) sichtbar; der Spieler-Eigentümer
+> darf die Helden-Ansicht **lesend** öffnen (`HeroController@show` erlaubt
+> `heldenregister.view` ODER Spieler-Eigentümer).
 >
 > Hinweis: Die interaktive Bildanpassung ist als automatisches Zentrier-Cropping
 > (1:1) umgesetzt; `/images/player_background.png` aus dem Legacy bitte ablegen.

@@ -9,7 +9,7 @@
         <p class="mb-3 text-orange-600">Das Abenteuer ist voll – neue Anmeldungen kommen auf die Warteliste.</p>
     @endif
 
-    <form id="booking-create-form" method="POST" action="{{ route('adventures.bookings.store', $adventure) }}" class="ui form">
+    <form id="booking-create-form" data-stack-close method="POST" action="{{ route('adventures.bookings.store', $adventure) }}" class="ui form">
         @csrf
         <div class="two fields">
             <div class="field">

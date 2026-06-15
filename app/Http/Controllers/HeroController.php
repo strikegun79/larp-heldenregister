@@ -18,8 +18,8 @@ class HeroController extends Controller
     public function __construct()
     {
         $this->middleware('auth');
-        $this->middleware('can:heldenregister.view')->only(['index', 'show', 'epExport', 'sheetPdf']);
-        $this->middleware('can:heldenregister.edit')->only(['create', 'store', 'edit', 'update', 'destroy', 'toggleMissing']);
+        $this->middleware('can:heldenregister.view')->only(['index', 'epExport', 'sheetPdf']);
+        $this->middleware('can:heldenregister.edit')->only(['create', 'store', 'edit', 'update', 'destroy', 'toggleMissing', 'uploadPhoto']);
     }
 
     /**
@@ -92,14 +92,11 @@ class HeroController extends Controller
     }
 
     /**
-     * Separates Helden-Foto hochladen (PLAY-11): vom Spieler-Detail aus durch
-     * den Spieler-Eigentümer (oder Admin), nur Bild (JPG/PNG, max 2 MB, 1:1).
+     * Separates Helden-Foto hochladen (PLAY-11): im Helden-Detail, nur für
+     * Bürokrat/Admin (`heldenregister.edit`); Bild (JPG/PNG, max 2 MB, 1:1).
      */
     public function uploadPhoto(Request $request, Hero $hero): RedirectResponse|JsonResponse
     {
-        abort_unless($hero->player !== null, 404);
-        $this->authorize('update', $hero->player);
-
         $request->validate([
             'image' => ['required', 'image', 'mimes:jpg,jpeg,png', 'max:2048'],
         ]);
@@ -162,6 +159,13 @@ class HeroController extends Controller
      */
     public function show(Hero $hero, Request $request): View
     {
+        // Sichtbar für Heldenregister-Berechtigte ODER den Spieler-Eigentümer
+        // (lesend); bearbeiten nur mit heldenregister.edit (PLAY-11).
+        abort_unless(
+            $request->user()->can('heldenregister.view') || ($hero->player && $request->user()->can('view', $hero->player)),
+            403
+        );
+
         $hero->load([
             'player.bookings.adventure',
             'classes.skills',

@@ -18,9 +18,19 @@
 
     {{-- Tab: Übersicht --}}
     <div class="ui bottom attached tab segment active" data-tab="overview">
-        @if ($hero->image_url)
-            <img src="{{ $hero->image_url }}" alt="{{ $hero->character_name }}" class="float-right ml-4 mb-2 h-32 w-32 object-cover rounded border-2 border-[#5a3a22]/40">
-        @endif
+        <div class="float-right ml-4 mb-2 text-center">
+            @if ($hero->image_url)
+                <img src="{{ $hero->image_url }}" alt="{{ $hero->character_name }}" class="h-32 w-32 object-cover rounded border-2 border-[#5a3a22]/40">
+            @endif
+            {{-- Helden-Foto-Upload nur für Bürokrat/Admin (PLAY-11). --}}
+            @can('heldenregister.edit')
+                <form method="POST" action="{{ route('heroes.photo', $hero) }}" enctype="multipart/form-data" data-refresh-modal class="ui form mt-2">
+                    @csrf
+                    <input type="file" name="image" accept="image/jpeg,image/png" required class="text-xs" style="max-width:8rem">
+                    <button type="submit" class="ui mini button mt-1">Foto hochladen</button>
+                </form>
+            @endcan
+        </div>
         <dl class="grid grid-cols-2 gap-4 text-stone-800">
             <div><dt class="text-sm text-stone-500">Spieler</dt><dd>{{ $hero->player?->full_name ?? '—' }}</dd></div>
             <div><dt class="text-sm text-stone-500">Klassen</dt><dd>{{ $hero->classes->pluck('name')->implode(', ') ?: '—' }}</dd></div>

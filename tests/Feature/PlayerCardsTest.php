@@ -47,6 +47,9 @@ class PlayerCardsTest extends TestCase
         $response->assertSee('/images/wewantyou_poster4.jpg', false);
         $response->assertSee('data-modal-url="'.route('players.create').'"', false);
 
+        // Papyrus-Hintergrund gehört auf die Spielerkarten (Korrektur PLAY-11).
+        $response->assertSee('/images/player_background.png', false);
+
         // Spielerkarte mit Feldern
         $response->assertSee('Mira Tan');
         $response->assertSee('Erstellt:');

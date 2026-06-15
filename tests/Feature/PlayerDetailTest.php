@@ -41,7 +41,7 @@ class PlayerDetailTest extends TestCase
         return $this->actingAs($user)->get(route('players.show', $player), ['X-Requested-With' => 'XMLHttpRequest']);
     }
 
-    public function test_detail_has_tabs_papyrus_and_age(): void
+    public function test_detail_has_tabs_and_age(): void
     {
         $player = Player::factory()->create(['dayofbirth' => now()->subYears(12)->toDateString()]);
 
@@ -51,8 +51,9 @@ class PlayerDetailTest extends TestCase
         $response->assertSee('data-tab="p-helden"', false);
         $response->assertSee('data-tab="p-abenteuer"', false);
         $response->assertSee('data-tab="p-avatar"', false);
-        $response->assertSee('/images/player_background.png', false);
         $response->assertSee('(12 Jahre)');
+        // Papyrus-Hintergrund gehört auf die Kartei-Übersicht, nicht ins Detail (Korrektur).
+        $response->assertDontSee('/images/player_background.png', false);
     }
 
     public function test_avatar_upload_is_cropped_to_square(): void
@@ -99,13 +100,15 @@ class PlayerDetailTest extends TestCase
             ->assertSee(route('adventures.show', $adventure), false);
     }
 
-    public function test_owner_can_upload_hero_photo(): void
+    public function test_registrar_can_upload_hero_photo(): void
     {
         Storage::fake('public');
-        $player = Player::factory()->create();
-        $hero = Hero::factory()->create(['player_id' => $player->id]);
+        $hero = Hero::factory()->create(['player_id' => Player::factory()->create()->id]);
 
-        $this->actingAs($this->ownerOf($player))
+        $registrar = User::factory()->create();
+        $registrar->roles()->attach(20); // Bürokrat: heldenregister.edit
+
+        $this->actingAs($registrar)
             ->post(route('heroes.photo', $hero), [
                 'image' => UploadedFile::fake()->image('hero.jpg', 500, 500),
             ], ['Accept' => 'application/json'])
@@ -115,19 +118,30 @@ class PlayerDetailTest extends TestCase
         Storage::disk('public')->assertExists($hero->fresh()->image);
     }
 
-    public function test_non_owner_cannot_upload_hero_photo(): void
+    public function test_player_owner_cannot_upload_hero_photo(): void
     {
         Storage::fake('public');
         $player = Player::factory()->create();
         $hero = Hero::factory()->create(['player_id' => $player->id]);
 
-        $stranger = User::factory()->create();
-        $stranger->roles()->attach(70);
-
-        $this->actingAs($stranger)
+        // Spieler-Eigentümer (Teilnehmer) hat kein heldenregister.edit -> nur lesend.
+        $this->actingAs($this->ownerOf($player))
             ->post(route('heroes.photo', $hero), [
                 'image' => UploadedFile::fake()->image('hero.jpg'),
             ])
             ->assertForbidden();
+    }
+
+    public function test_owner_can_view_hero_detail_readonly(): void
+    {
+        $player = Player::factory()->create();
+        $hero = Hero::factory()->create(['player_id' => $player->id, 'character_name' => 'Eldric']);
+
+        // Eigentümer darf die Helden-Ansicht öffnen, sieht aber keinen Foto-Upload.
+        $this->actingAs($this->ownerOf($player))
+            ->get(route('heroes.show', $hero), ['X-Requested-With' => 'XMLHttpRequest'])
+            ->assertOk()
+            ->assertSee('Eldric')
+            ->assertDontSee(route('heroes.photo', $hero), false);
     }
 }

@@ -9,9 +9,8 @@
     @if ($canEdit)<a class="item" data-tab="p-avatar">Avatar</a>@endif
 </div>
 
-{{-- Tab: Allgemeines (Steckbrief-Papyrus als Hintergrund) --}}
-<div class="ui bottom attached tab segment active" data-tab="p-allg"
-     style="background-image:url('/images/player_background.png'); background-size:cover; background-position:center;">
+{{-- Tab: Allgemeines --}}
+<div class="ui bottom attached tab segment active" data-tab="p-allg">
     <div class="flex gap-4 items-start">
         <img src="{{ $player->avatar_url }}" alt="{{ $player->full_name }}"
              class="w-40 h-40 object-cover rounded border-2 border-[#5a3a22]/40 shrink-0" style="aspect-ratio:1/1;">
@@ -40,7 +39,8 @@
                             <span class="text-stone-400">—</span>
                         @endif
                     </td>
-                    <td><a href="{{ route('heroes.show', $hero) }}" data-modal-url="{{ route('heroes.show', $hero) }}" class="text-indigo-700 hover:underline">{{ $hero->character_name ?? '—' }}</a></td>
+                    {{-- Helden-Ansicht als gestapeltes Modal (PLAY-11). --}}
+                    <td><a href="{{ route('heroes.show', $hero) }}" data-modal-stack="{{ route('heroes.show', $hero) }}" class="text-indigo-700 hover:underline">{{ $hero->character_name ?? '—' }}</a></td>
                     <td>{{ $hero->classes->pluck('name')->implode(', ') ?: '—' }}</td>
                     <td class="right aligned">{{ number_format($hero->ep_balance, 0, ',', '.') }}</td>
                     <td>
@@ -55,19 +55,6 @@
                         @endif
                     </td>
                 </tr>
-                @if ($canEdit)
-                    <tr>
-                        <td colspan="5" class="!pt-0">
-                            <form method="POST" action="{{ route('heroes.photo', $hero) }}" enctype="multipart/form-data" data-refresh-modal class="ui form">
-                                @csrf
-                                <div class="flex items-center gap-2">
-                                    <input type="file" name="image" accept="image/jpeg,image/png" required class="text-xs">
-                                    <button type="submit" class="ui mini button">Helden-Foto hochladen</button>
-                                </div>
-                            </form>
-                        </td>
-                    </tr>
-                @endif
             @empty
                 <tr><td colspan="5" class="text-stone-500">Noch keine Helden.</td></tr>
             @endforelse
