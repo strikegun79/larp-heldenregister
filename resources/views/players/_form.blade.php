@@ -35,11 +35,19 @@
         </div>
     </div>
 
-    <div>
-        <x-input-label for="email" value="E-Mail (optional)" />
-        <x-text-input id="email" name="email" type="email" class="mt-1 block w-full"
-                      :value="old('email', $player->email)" />
-        <x-input-error :messages="$errors->get('email')" class="mt-2" />
+    <div class="grid grid-cols-2 gap-4">
+        <div>
+            <x-input-label for="email" value="E-Mail (optional)" />
+            <x-text-input id="email" name="email" type="email" class="mt-1 block w-full"
+                          :value="old('email', $player->email)" />
+            <x-input-error :messages="$errors->get('email')" class="mt-2" />
+        </div>
+        <div>
+            <x-input-label for="place" value="Wohnort (optional)" />
+            <x-text-input id="place" name="place" type="text" class="mt-1 block w-full"
+                          :value="old('place', $player->place)" />
+            <x-input-error :messages="$errors->get('place')" class="mt-2" />
+        </div>
     </div>
 
     <div>
@@ -57,9 +65,4 @@
                @checked(old('self', $self ?? false))>
         Das bin ich selbst (eigener Spieler)
     </label>
-
-    <div class="flex items-center gap-4">
-        <x-primary-button>Speichern</x-primary-button>
-        <a href="{{ route('players.index') }}" class="text-sm text-stone-600 hover:underline">Abbrechen</a>
-    </div>
 </div>

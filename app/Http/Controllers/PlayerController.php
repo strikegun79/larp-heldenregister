@@ -186,6 +186,7 @@ class PlayerController extends Controller
             'email' => ['nullable', 'email', 'max:150'],
             'dayofbirth' => ['nullable', 'date'],
             'gender' => ['nullable', 'in:weiblich,männlich,divers'],
+            'place' => ['nullable', 'string', 'max:100'],
             'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
         ]);
 

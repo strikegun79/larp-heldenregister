@@ -9,6 +9,9 @@
                 <form method="POST" action="{{ route('players.update', $player) }}" enctype="multipart/form-data">
                     @method('PUT')
                     @include('players._form')
+                    <div class="mt-6">
+                        <x-primary-button>Speichern</x-primary-button>
+                    </div>
                 </form>
             </div>
 

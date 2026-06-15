@@ -46,7 +46,7 @@
                     <td class="nr">{{ $i + 1 }}</td>
                     <td>{{ $booking->is_guest ? $booking->guest_lastname : $booking->player?->lastname }}@if ($booking->is_guest) <strong>(Gast)</strong>@endif</td>
                     <td>{{ $booking->is_guest ? $booking->guest_name : $booking->player?->name }}</td>
-                    <td>{{ $booking->is_guest ? $booking->guest_place : '' }}</td>
+                    <td>{{ $booking->is_guest ? $booking->guest_place : $booking->player?->place }}</td>
                     <td>{{ $booking->erreichbarkeit }}</td>
                     <td class="sig">
                         @if ($booking->signature)

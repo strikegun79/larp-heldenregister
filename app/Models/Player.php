@@ -19,6 +19,7 @@ class Player extends Model
         'email',
         'dayofbirth',
         'gender',
+        'place',
         'image',
         'active',
         'active_hero_id',
