@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Player;
+use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -47,15 +48,30 @@ class PlayerController extends Controller
         $player = Player::create($data);
         $this->handleImageUpload($request, $player);
         // Spieler dem Benutzer zuordnen (Legacy: user2player, self-Flag).
-        $request->user()->players()->attach($player->id, [
-            'self' => $request->boolean('self'),
-        ]);
+        $request->user()->players()->attach($player->id, ['self' => false]);
+        $this->enforceSingleSelf($request->user(), $player, $request->boolean('self'));
 
         $message = 'Spieler wurde angelegt.';
 
         return $request->expectsJson()
             ? response()->json(['message' => $message, 'reload' => true])
             : redirect()->route('players.show', $player)->with('status', $message);
+    }
+
+    /**
+     * Genau einen „self"-Spieler je Nutzer erzwingen (PLAY-05): wird ein Spieler
+     * als „self" markiert, werden alle anderen self-Markierungen des Nutzers
+     * zurückgesetzt.
+     */
+    private function enforceSingleSelf(User $user, Player $player, bool $self): void
+    {
+        if ($self) {
+            DB::table($user->players()->getTable())
+                ->where('user_id', $user->id)
+                ->update(['self' => false]);
+        }
+
+        $user->players()->updateExistingPivot($player->id, ['self' => $self]);
     }
 
     /**
@@ -126,9 +142,7 @@ class PlayerController extends Controller
 
         $player->update($this->validatePlayer($request));
         $this->handleImageUpload($request, $player);
-        $player->users()->updateExistingPivot($request->user()->id, [
-            'self' => $request->boolean('self'),
-        ]);
+        $this->enforceSingleSelf($request->user(), $player, $request->boolean('self'));
 
         $message = 'Spieler wurde aktualisiert.';
 

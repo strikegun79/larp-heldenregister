@@ -18,12 +18,17 @@ Alle Spieler (inkl. soft-deleted), Heldenzahl, Betreuer, Matrix-Status.
 
 ## Offen (🔲)
 
-### PLAY-05 · „self"-Spieler eindeutig erzwingen · ⏱ 2h · 🔲
+### PLAY-05 · „self"-Spieler eindeutig erzwingen · ⏱ 2h · ✅
 **Beschreibung:** Das self-Flag markiert den eigenen Spieler; pro Nutzer sollte
 es höchstens einen geben.
 **Akzeptanzkriterien:**
-- [ ] Beim Setzen von `self=true` werden andere self-Markierungen des Nutzers zurückgesetzt.
-- [ ] Test: nur ein self-Spieler pro Nutzer.
+- [x] Beim Setzen von `self=true` werden andere self-Markierungen des Nutzers zurückgesetzt.
+- [x] Test: nur ein self-Spieler pro Nutzer.
+
+> Umgesetzt: `PlayerController@enforceSingleSelf` (genutzt in `store`/`update`):
+> beim Setzen von `self=true` werden alle `self`-Pivots des Nutzers (`player_user`)
+> auf false gesetzt, dann der gewählte Spieler auf true. Pro Nutzer; fremde
+> Betreuer/Nutzer bleiben unberührt. Tests: `PlayerSelfFlagTest` (3).
 
 ### PLAY-06 · Mehrere Betreuer je Spieler verwalten · ⏱ 3h · 🔲
 **Beschreibung:** Legacy `user2player` erlaubt mehrere Nutzer pro Spieler
