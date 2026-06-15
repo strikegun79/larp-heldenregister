@@ -51,3 +51,127 @@
         border-color: #5a3a22;
     }
 }
+
+/* ===========================================================================
+   Freundliches Mittelalter-Theme (Layout-Politur, nur CSS)
+   Wärmere Akzente, runde & verspielte Formen, einladend für Kinder – aber
+   weiterhin mittelalterlich. Steht NACH @tailwind utilities, gewinnt also
+   gegen Fomantic/Utility-Konflikte.
+   =========================================================================== */
+:root {
+    --wr-ink: #5a3a22;       /* Tinte/Braun */
+    --wr-gold: #c8962a;      /* Gold-Akzent */
+    --wr-gold-light: #e0b552;
+    --wr-green: #6f8f3a;     /* freundliches Grün */
+    --wr-red: #b4513a;       /* warmes Rot */
+}
+
+/* --- Überschriften: mittelalterlich, mit kleiner Pergament-Aura ---------- */
+.font-uncial,
+.font-medieval {
+    text-shadow: 0 1px 0 rgba(255, 255, 255, .55);
+    letter-spacing: .3px;
+}
+
+/* Seiten-Header als helles Pergament-Banner mit goldener Bordüre */
+header.bg-white\/50 {
+    background: linear-gradient(180deg, rgba(255, 250, 238, .85), rgba(228, 206, 165, .55));
+    border-bottom: 3px double rgba(200, 150, 42, .55) !important;
+}
+
+/* --- Karten & Pergament-Panels: weiche Rundung, warmer Schatten, Hover --- */
+.bg-white\/70,
+.bg-white\/60 {
+    border-radius: 16px;
+    box-shadow: 0 2px 0 rgba(90, 58, 34, .12), 0 8px 20px rgba(90, 58, 34, .12);
+}
+
+/* Verlinkte Karten (z. B. Dashboard/Spieler) heben sich verspielt an */
+a.group:hover {
+    transform: translateY(-3px) rotate(-.4deg);
+}
+
+/* --- Buttons: rund, warm, mit kleinem „Pop" beim Hover ------------------- */
+.ui.button {
+    border-radius: 999px;
+    font-family: 'EB Garamond', serif;
+    font-weight: 600;
+    letter-spacing: .2px;
+    box-shadow: 0 2px 0 rgba(0, 0, 0, .12);
+    transition: transform .12s ease, filter .12s ease, box-shadow .12s ease;
+}
+.ui.button:hover { transform: translateY(-1px) scale(1.02); filter: brightness(1.05); }
+.ui.button:active { transform: translateY(0) scale(.99); }
+.ui.primary.button {
+    background: linear-gradient(180deg, var(--wr-gold-light), var(--wr-gold));
+    color: #3a2410;
+}
+.ui.primary.button:hover { background: linear-gradient(180deg, #ecc267, var(--wr-gold)); }
+.ui.red.button { background: linear-gradient(180deg, #cd6650, var(--wr-red)); }
+.ui.green.button { background: linear-gradient(180deg, #88a851, var(--wr-green)); }
+.ui.basic.button { box-shadow: 0 0 0 1px rgba(90, 58, 34, .35) inset; color: var(--wr-ink) !important; }
+
+/* Breeze-Primary-Button (Tailwind) ans warme Theme angleichen */
+.bg-gray-800 {
+    background: linear-gradient(180deg, var(--wr-gold-light), var(--wr-gold)) !important;
+    color: #3a2410 !important;
+    border-radius: 999px !important;
+}
+.bg-gray-800:hover { filter: brightness(1.05); }
+
+/* --- Links wärmer (Gold beim Hover) ------------------------------------- */
+a.text-indigo-600, a.text-indigo-700 { color: var(--wr-ink); }
+a.text-indigo-600:hover, a.text-indigo-700:hover,
+a.text-waldritter:hover { color: var(--wr-gold); }
+
+/* --- Eingabefelder: runder, goldener Fokusring -------------------------- */
+.ui.form input, .ui.form select, .ui.form textarea,
+input[type="text"], input[type="email"], input[type="number"],
+input[type="date"], input[type="datetime-local"], select, textarea {
+    border-radius: 10px;
+}
+.ui.form input:focus, .ui.form select:focus, .ui.form textarea:focus,
+input:focus, select:focus, textarea:focus {
+    border-color: var(--wr-gold) !important;
+    box-shadow: 0 0 0 3px rgba(200, 150, 42, .25) !important;
+}
+
+/* --- Modal: runde Ecken, Pergament-Kopf in Uncial ---------------------- */
+.ui.modal { border-radius: 16px; }
+.ui.modal > .header {
+    font-family: 'Uncial Antiqua', serif !important;
+    color: var(--wr-ink) !important;
+    background: linear-gradient(180deg, #fff8ea, #f1e4c7) !important;
+    border-top-left-radius: 16px;
+    border-top-right-radius: 16px;
+    border-bottom: 2px solid rgba(200, 150, 42, .4);
+}
+.ui.modal > .actions {
+    background: rgba(241, 228, 199, .6);
+    border-bottom-left-radius: 16px;
+    border-bottom-right-radius: 16px;
+}
+
+/* --- Labels/Badges & Tabs runder, freundlicher ------------------------- */
+.ui.label { border-radius: 999px; }
+.ui.tabular.menu .item.active {
+    color: var(--wr-ink);
+    border-color: rgba(200, 150, 42, .6);
+    border-top-width: 3px;
+}
+
+/* --- Tabellenköpfe in Tinte ------------------------------------------- */
+.ui.table thead th { color: var(--wr-ink); }
+
+/* --- Toast-Benachrichtigungen ans Theme ------------------------------- */
+.ui.toast, .ui.message { border-radius: 12px; }
+
+/* --- Footer: dezente goldene Trennlinie ------------------------------- */
+footer {
+    border-top: 3px double rgba(200, 150, 42, .45);
+}
+
+/* --- Sanfter, warmer Scrollbalken ------------------------------------- */
+* { scrollbar-color: var(--wr-gold) transparent; }
+::-webkit-scrollbar { width: 12px; height: 12px; }
+::-webkit-scrollbar-thumb { background: var(--wr-gold); border-radius: 999px; border: 3px solid transparent; background-clip: content-box; }
