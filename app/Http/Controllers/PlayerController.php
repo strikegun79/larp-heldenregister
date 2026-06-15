@@ -23,30 +23,52 @@ class PlayerController extends Controller
     {
         $players = $request->user()->players()
             ->with(['heroes.classes', 'activeHero'])
+            ->withCount('visits')
             ->orderBy('name')
             ->get();
 
         return view('players.index', compact('players'));
     }
 
-    public function create(): View
+    public function create(Request $request): View
     {
-        return view('players.create', ['player' => new Player]);
+        $data = ['player' => new Player];
+
+        // Für das Modal (PLAY-10) nur das Formular liefern.
+        return $request->ajax()
+            ? view('players._create_modal', $data)
+            : view('players.create', $data);
     }
 
-    public function store(Request $request): RedirectResponse
+    public function store(Request $request): RedirectResponse|JsonResponse
     {
         $data = $this->validatePlayer($request);
 
         $player = Player::create($data);
+        $this->handleImageUpload($request, $player);
         // Spieler dem Benutzer zuordnen (Legacy: user2player, self-Flag).
         $request->user()->players()->attach($player->id, [
             'self' => $request->boolean('self'),
         ]);
 
-        return redirect()
-            ->route('players.show', $player)
-            ->with('status', 'Spieler wurde angelegt.');
+        $message = 'Spieler wurde angelegt.';
+
+        return $request->expectsJson()
+            ? response()->json(['message' => $message, 'reload' => true])
+            : redirect()->route('players.show', $player)->with('status', $message);
+    }
+
+    /**
+     * Avatar-Upload verarbeiten (PLAY-10): altes Bild ersetzen, Pfad speichern.
+     */
+    private function handleImageUpload(Request $request, Player $player): void
+    {
+        if ($request->hasFile('image')) {
+            if ($player->image) {
+                \Illuminate\Support\Facades\Storage::disk('public')->delete($player->image);
+            }
+            $player->update(['image' => $request->file('image')->store('players', 'public')]);
+        }
     }
 
     public function show(Player $player, Request $request): View
@@ -82,6 +104,7 @@ class PlayerController extends Controller
         $this->authorize('update', $player);
 
         $player->update($this->validatePlayer($request));
+        $this->handleImageUpload($request, $player);
         $player->users()->updateExistingPivot($request->user()->id, [
             'self' => $request->boolean('self'),
         ]);
@@ -136,12 +159,18 @@ class PlayerController extends Controller
      */
     private function validatePlayer(Request $request): array
     {
-        return $request->validate([
+        $validated = $request->validate([
             'name' => ['required', 'string', 'max:50'],
             'lastname' => ['required', 'string', 'max:50'],
             'email' => ['nullable', 'email', 'max:150'],
             'dayofbirth' => ['nullable', 'date'],
             'gender' => ['nullable', 'in:weiblich,männlich,divers'],
+            'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
         ]);
+
+        // Bild wird separat als Datei-Upload behandelt.
+        unset($validated['image']);
+
+        return $validated;
     }
 }

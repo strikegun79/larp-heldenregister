@@ -1,9 +1,6 @@
 <x-app-layout>
     <x-slot name="header">
-        <div class="flex items-center justify-between">
-            <h2 class="font-uncial text-2xl text-waldritter leading-tight">Deine Spieler</h2>
-            <a href="{{ route('players.create') }}"><x-primary-button>Neuer Spieler</x-primary-button></a>
-        </div>
+        <h2 class="font-uncial text-2xl text-waldritter leading-tight">Deine Spieler</h2>
     </x-slot>
 
     <div class="py-12">
@@ -17,42 +14,43 @@
                 Bevor ein Held oder eine Anmeldung möglich ist, muss ein Spieler existieren.
             </div>
 
-            @if ($players->isEmpty())
-                <div class="bg-white/60 border-2 border-[#5a3a22]/30 rounded-lg p-6 text-center text-stone-600">
-                    Noch keine Spieler angelegt.
-                </div>
-            @else
-                <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                    @foreach ($players as $player)
-                        <div class="rounded-lg border-2 border-[#5a3a22]/40 bg-white/70 shadow p-5">
-                            <div class="flex items-start justify-between">
-                                <div>
-                                    <a href="{{ route('players.show', $player) }}" data-modal-url="{{ route('players.show', $player) }}"
-                                       class="font-uncial text-lg text-waldritter hover:underline">
-                                        {{ $player->full_name }}
-                                    </a>
-                                    @if ($player->pivot->self)
-                                        <span class="ml-1 align-middle rounded bg-[#5a3a22] text-amber-50 text-xs px-2 py-0.5">Du</span>
-                                    @endif
-                                    <div class="text-sm text-stone-600">{{ $player->gender ?? '—' }}</div>
-                                </div>
-                                <a href="{{ route('players.edit', $player) }}" data-modal-url="{{ route('players.edit', $player) }}" class="text-sm text-stone-600 hover:underline">Bearbeiten</a>
-                            </div>
+            <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
+                {{-- Karte „Neuer Spieler" (PLAY-10) --}}
+                <a href="{{ route('players.create') }}" data-modal-url="{{ route('players.create') }}"
+                   class="group block rounded-lg overflow-hidden border-2 border-dashed border-[#5a3a22]/50 bg-white/50 shadow hover:shadow-xl hover:-translate-y-1 transition">
+                    <div class="h-48 overflow-hidden">
+                        <img src="/images/wewantyou_poster4.jpg" alt="Neuer Spieler" class="w-full h-full object-cover group-hover:scale-105 transition">
+                    </div>
+                    <div class="p-4 text-center">
+                        <div class="font-uncial text-lg text-waldritter">Neuer Spieler</div>
+                        <div class="text-sm text-stone-600">Neuen Spieler erstellen</div>
+                    </div>
+                </a>
 
-                            <div class="mt-3 text-sm text-stone-700">
-                                <div class="font-semibold">Helden:</div>
-                                @forelse ($player->heroes as $hero)
-                                    <div>• {{ $hero->character_name ?? '—' }}
-                                        <span class="text-stone-500">({{ $hero->class_list ?: 'keine Klasse' }})</span>
-                                    </div>
-                                @empty
-                                    <div class="text-stone-500">noch keine Helden</div>
-                                @endforelse
-                            </div>
+                {{-- Spielerkarten --}}
+                @foreach ($players as $player)
+                    <a href="{{ route('players.show', $player) }}" data-modal-url="{{ route('players.show', $player) }}"
+                       class="group block rounded-lg overflow-hidden border-2 border-[#5a3a22]/40 bg-white/70 shadow hover:shadow-xl hover:-translate-y-1 transition">
+                        <div class="h-48 overflow-hidden bg-stone-100">
+                            <img src="{{ $player->avatar_url }}" alt="{{ $player->full_name }}" class="w-full h-full object-cover group-hover:scale-105 transition">
                         </div>
-                    @endforeach
-                </div>
-            @endif
+                        <div class="p-4">
+                            <div class="font-uncial text-lg text-waldritter">
+                                {{ $player->full_name }}
+                                @if ($player->pivot->self)
+                                    <span class="align-middle rounded bg-[#5a3a22] text-amber-50 text-xs px-2 py-0.5">Du</span>
+                                @endif
+                            </div>
+                            <dl class="mt-2 text-sm text-stone-700 space-y-0.5">
+                                <div><span class="text-stone-500">Erstellt:</span> {{ optional($player->created_at)->format('d.m.Y') ?? '—' }}</div>
+                                <div><span class="text-stone-500">Alter:</span> {{ $player->dayofbirth ? $player->dayofbirth->age.' Jahre' : '—' }}</div>
+                                <div><span class="text-stone-500">Geschlecht:</span> {{ $player->gender ?? '—' }}</div>
+                                <div><span class="text-stone-500">Besuchte Events:</span> {{ $player->visits_count }}</div>
+                            </dl>
+                        </div>
+                    </a>
+                @endforeach
+            </div>
         </div>
     </div>
 </x-app-layout>

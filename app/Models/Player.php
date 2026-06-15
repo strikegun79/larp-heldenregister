@@ -19,6 +19,7 @@ class Player extends Model
         'email',
         'dayofbirth',
         'gender',
+        'image',
         'active',
         'active_hero_id',
         'legacy_id',
@@ -28,6 +29,20 @@ class Player extends Model
         'dayofbirth' => 'date',
         'active' => 'boolean',
     ];
+
+    /** Avatar-URL: hochgeladenes Bild oder Standardbild (PLAY-10). */
+    public function getAvatarUrlAttribute(): string
+    {
+        return $this->image
+            ? \Illuminate\Support\Facades\Storage::disk('public')->url($this->image)
+            : '/images/player_default_avatar.jpg';
+    }
+
+    /** Teilnahmen (besuchte Events) des Spielers (PLAY-10). */
+    public function visits(): HasMany
+    {
+        return $this->hasMany(EventVisit::class);
+    }
 
     /**
      * Helden dieses Spielers.

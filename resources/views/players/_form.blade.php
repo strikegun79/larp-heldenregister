@@ -42,6 +42,15 @@
         <x-input-error :messages="$errors->get('email')" class="mt-2" />
     </div>
 
+    <div>
+        <x-input-label for="image" value="Steckbriefbild (optional, JPG/PNG/WebP)" />
+        @if ($player->exists && $player->image)
+            <img src="{{ $player->avatar_url }}" alt="Avatar" class="mb-2 h-24 w-24 object-cover rounded border">
+        @endif
+        <input id="image" name="image" type="file" accept="image/jpeg,image/png,image/webp" class="mt-1 block w-full text-sm">
+        <x-input-error :messages="$errors->get('image')" class="mt-2" />
+    </div>
+
     <label class="flex items-center gap-2 text-stone-700">
         <input type="checkbox" name="self" value="1"
                class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500"
