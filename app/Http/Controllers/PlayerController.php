@@ -198,7 +198,8 @@ class PlayerController extends Controller
             'name' => ['required', 'string', 'max:50'],
             'lastname' => ['required', 'string', 'max:50'],
             'email' => ['nullable', 'email', 'max:150'],
-            'dayofbirth' => ['nullable', 'date'],
+            // Plausibles Geburtsdatum: nicht in der Zukunft, nicht vor 1900 (PLAY-07).
+            'dayofbirth' => ['nullable', 'date', 'before_or_equal:today', 'after:1900-01-01'],
             'gender' => ['nullable', 'in:weiblich,männlich,divers'],
             'place' => ['nullable', 'string', 'max:100'],
             'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],

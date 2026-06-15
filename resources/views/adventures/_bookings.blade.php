@@ -1,7 +1,7 @@
 @php($manage = $manage ?? false)
 <table class="ui very basic compact table">
     <thead><tr>
-        <th>Spieler</th><th>Rolle</th><th>Liste</th><th>Status</th><th>Beitrag</th><th></th>
+        <th>Spieler</th><th>Alter</th><th>Rolle</th><th>Liste</th><th>Status</th><th>Beitrag</th><th></th>
     </tr></thead>
     <tbody>
         @forelse ($bookings as $booking)
@@ -10,6 +10,7 @@
                     {{ $booking->participant_name }}
                     @if ($booking->is_guest)<span class="ui mini label">Gast</span>@endif
                 </td>
+                <td>{{ $booking->participant_age ?? '—' }}</td>
                 <td>{{ $booking->role?->description }}</td>
                 <td>{{ $booking->waitlisted ? 'Warteliste' : 'regulär' }}</td>
                 <td>
@@ -77,7 +78,7 @@
                 </td>
             </tr>
         @empty
-            <tr><td colspan="6" class="text-stone-500">Noch keine Anmeldungen.</td></tr>
+            <tr><td colspan="7" class="text-stone-500">Noch keine Anmeldungen.</td></tr>
         @endforelse
     </tbody>
 </table>

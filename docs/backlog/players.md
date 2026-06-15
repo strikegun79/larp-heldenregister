@@ -46,15 +46,22 @@ es höchstens einen geben.
 > Spieler automatisch unter „Deine Spieler" (`user->players()`). Tests:
 > `PlayerCaretakerTest` (5).
 
-### PLAY-07 · Pflichtangaben für Minderjährige (Geburtsdatum) · ⏱ 3h · 🔲
+### PLAY-07 · Pflichtangaben für Minderjährige (Geburtsdatum) · ⏱ 3h · ✅
 **Beschreibung:** Jugend-LARP – Alter ist relevant (Event-Kategorien nach Alter).
 **Akzeptanzkriterien:**
-- [ ] Geburtsdatum-Validierung (plausibel, nicht Zukunft).
-- [ ] Helper `Player::age()` (Accessor) verfügbar.
-- [ ] Anzeige des Alters in Spieler-Modal/Admin-Liste.
-- [] Wohnort ist nötig, da nicht immer die Eltern und Kinder zusammenleben
-- [] Alter sollte in der Anmeldungsübersicht einer Veranstaltung zu sehen sein, sowie auch in der PDF-Teilnehmerliste
-- [] unter Spielerdetail soll das Alter nicht nur das Geburtsdatum zu sehen sein. z.b Bespiel: (12 Jahre)
+- [x] Geburtsdatum-Validierung (plausibel, nicht Zukunft).
+- [x] Helper `Player::age()` (Accessor) verfügbar.
+- [x] Anzeige des Alters in Spieler-Modal/Admin-Liste.
+- [x] Wohnort ist nötig, da nicht immer die Eltern und Kinder zusammenleben
+- [x] Alter sollte in der Anmeldungsübersicht einer Veranstaltung zu sehen sein, sowie auch in der PDF-Teilnehmerliste
+- [x] unter Spielerdetail soll das Alter nicht nur das Geburtsdatum zu sehen sein. z.b Bespiel: (12 Jahre)
+
+> Umgesetzt: `dayofbirth`-Validierung (`before_or_equal:today`, `after:1900-01-01`).
+> Accessor `Player::age` (Jahre/null) + `Booking::participant_age` (Spieler- bzw.
+> Gast-Alter). Alter angezeigt in Spieler-Detail „(X Jahre)", Spielerkarten,
+> Admin-Spielerliste (neue Spalte), Anmeldungsübersicht (`_bookings`, neue
+> Spalte) und Teilnehmer-PDF (neue Spalte). Wohnort (`players.place`) bereits
+> ergänzt (Formular/Detail/PDF). Tests: `PlayerAgeTest` (6).
 
 ### PLAY-08 · Spieler-Soft-Delete + Wiederherstellung im Admin · ⏱ 3h · 🔲
 **Beschreibung:** Gelöschte Spieler erscheinen in der Admin-Liste; Restore fehlt.

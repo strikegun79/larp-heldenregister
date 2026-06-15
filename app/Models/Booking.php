@@ -78,6 +78,12 @@ class Booking extends Model
             : ($this->player?->full_name ?? '—');
     }
 
+    /** Alter des Teilnehmers: Spieler-Alter oder Gast-Alter (PLAY-07). */
+    public function getParticipantAgeAttribute(): ?int
+    {
+        return $this->is_guest ? $this->guest_age : $this->player?->age;
+    }
+
     /** Lesbares Status-Label (ADV-18). */
     public function getStatusLabelAttribute(): string
     {

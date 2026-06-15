@@ -16,7 +16,7 @@
              class="w-40 h-40 object-cover rounded border-2 border-[#5a3a22]/40 shrink-0" style="aspect-ratio:1/1;">
         <dl class="grid grid-cols-1 gap-2 text-stone-800">
             <div><dt class="text-sm text-stone-500">Geburtsdatum</dt>
-                <dd>{{ optional($player->dayofbirth)->format('d.m.Y') ?? '—' }}@if ($player->dayofbirth) ({{ $player->dayofbirth->age }} Jahre)@endif</dd></div>
+                <dd>{{ optional($player->dayofbirth)->format('d.m.Y') ?? '—' }}@if ($player->dayofbirth) ({{ $player->age }} Jahre)@endif</dd></div>
             <div><dt class="text-sm text-stone-500">Geschlecht</dt><dd>{{ $player->gender ?? '—' }}</dd></div>
             <div><dt class="text-sm text-stone-500">Wohnort</dt><dd>{{ $player->place ?? '—' }}</dd></div>
             <div><dt class="text-sm text-stone-500">E-Mail</dt><dd>{{ $player->email ?? '—' }}</dd></div>

@@ -31,6 +31,12 @@ class Player extends Model
         'active' => 'boolean',
     ];
 
+    /** Aktuelles Alter in Jahren bzw. null (PLAY-07). */
+    public function getAgeAttribute(): ?int
+    {
+        return $this->dayofbirth?->age;
+    }
+
     /** Avatar-URL: hochgeladenes Bild oder Standardbild (PLAY-10). */
     public function getAvatarUrlAttribute(): string
     {

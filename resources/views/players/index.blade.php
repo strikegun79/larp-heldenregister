@@ -44,7 +44,7 @@
                             </div>
                             <dl class="mt-2 text-sm text-stone-700 space-y-0.5">
                                 <div><span class="text-stone-500">Erstellt:</span> {{ optional($player->created_at)->format('d.m.Y') ?? '—' }}</div>
-                                <div><span class="text-stone-500">Alter:</span> {{ $player->dayofbirth ? $player->dayofbirth->age.' Jahre' : '—' }}</div>
+                                <div><span class="text-stone-500">Alter:</span> {{ $player->age !== null ? $player->age.' Jahre' : '—' }}</div>
                                 <div><span class="text-stone-500">Geschlecht:</span> {{ $player->gender ?? '—' }}</div>
                                 <div><span class="text-stone-500">Besuchte Events:</span> {{ $player->visits_count }}</div>
                             </dl>

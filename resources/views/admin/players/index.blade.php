@@ -13,6 +13,7 @@
                     <thead class="bg-black/5">
                         <tr>
                             <th class="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase">Name</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase">Alter</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase">Geschlecht</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase">Helden</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase">Betreut von</th>
@@ -25,6 +26,7 @@
                         @foreach ($players as $player)
                             <tr class="{{ $player->trashed() ? 'opacity-50' : '' }}">
                                 <td class="px-6 py-4">{{ $player->full_name }}</td>
+                                <td class="px-6 py-4">{{ $player->age !== null ? $player->age.' J.' : '—' }}</td>
                                 <td class="px-6 py-4">{{ $player->gender ?? '—' }}</td>
                                 <td class="px-6 py-4">{{ $player->heroes_count }}</td>
                                 <td class="px-6 py-4 text-sm">{{ $player->users->pluck('name')->implode(', ') ?: '—' }}</td>
