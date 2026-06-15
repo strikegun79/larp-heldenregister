@@ -45,6 +45,8 @@ Route::middleware('auth')->group(function () {
     Route::resource('players', PlayerController::class);
     // Aktiven Helden eines Spielers setzen (HERO-07).
     Route::patch('players/{player}/active-hero', [PlayerController::class, 'setActiveHero'])->name('players.active-hero');
+    // Avatar-Upload im Avatar-Tab (PLAY-11).
+    Route::post('players/{player}/avatar', [PlayerController::class, 'uploadAvatar'])->name('players.avatar');
     Route::resource('heroes', HeroController::class);
     // Verschollen-Status umschalten (HERO-08).
     Route::patch('heroes/{hero}/missing', [HeroController::class, 'toggleMissing'])->name('heroes.missing');
@@ -54,6 +56,8 @@ Route::middleware('auth')->group(function () {
     Route::get('heroes/{hero}/ep-export', [HeroController::class, 'epExport'])->name('heroes.ep.export');
     // Charakterbogen als PDF (REP-05).
     Route::get('heroes/{hero}/sheet-pdf', [HeroController::class, 'sheetPdf'])->name('heroes.sheet-pdf');
+    // Helden-Foto-Upload (PLAY-11).
+    Route::post('heroes/{hero}/photo', [HeroController::class, 'uploadPhoto'])->name('heroes.photo');
     // Fertigkeit erlernen (HERO-14) / aberkennen (HERO-16).
     Route::post('heroes/{hero}/skills', [HeroSkillController::class, 'store'])->name('heroes.skills.store');
     Route::delete('heroes/{hero}/skills/{skill}', [HeroSkillController::class, 'destroy'])->name('heroes.skills.destroy');

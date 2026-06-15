@@ -76,3 +76,29 @@ es höchstens einen geben.
 > Avatar-Upload im Spieler-Formular (`handleImageUpload`, enctype). Tests:
 > `PlayerCardsTest` (5).
 
+### PLAY-11 · Spieler-Detail Layout · ⏱ 4h · ✅
+**Beschreibung:** Anpassung der Spieler-Ansicht
+**Akzeptanzkriterien:**
+- [x] in der Übersicht soll ein Steck-brief Papyrus zu sehen sein als Hintergrund der Spielerkarte. wie im Legacy: /images/player_background.png
+- [x] das Avatar Bild soll im Format 1:1 auf der Spielerkarte zu sehen sein.
+- [x] Entferne das Close-Kreuz in der rechten oberen Ecke. Geschlossen wird über den Button "Schließen"
+- [x] Im modal Content sollen Tabs verwendet werden: Allgemeines, Helden, Abenteuer, Avatar
+- [x] unter Abenteuer sollen die besuchten Veranstaltungen aufgelistet sein. Mit Klick auf das Abenteuer kann die Veranstaltung geöffnet werden.
+- [x] Zeige das aktuelle Alter hinter dem Geburtsdatum an. In Klammern z.b. (12 Jahre)
+- [x] im Tab Avatar kann mein ein Bild vom Spieler hochladen. nut JPG oder PNG, maximal 2 MB. 
+- [x] ermögliche eine Bildanpassung zum zentrieren des Bild für das Avatar. 1:1 Format
+- [x] für die Helden soll es auch eine Möglichkeit geben ein separates Helden-Foto pro Held hochzuladen, das wird dann in der Helden-Übersicht im Spieler-Detail auch mit angezeigt.
+
+> Umgesetzt: Spieler-Detail mit Fomantic-Tabs (Allgemeines/Helden/Abenteuer/
+> Avatar). Allgemeines-Tab mit Papyrus-Hintergrund (`/images/player_background.png`)
+> und 1:1-Avatar; Alter hinter dem Geburtsdatum „(X Jahre)". Close-X aus
+> `#app-modal` entfernt – Schließen nur über den „Schließen"-Button. Abenteuer-Tab
+> listet besuchte Veranstaltungen (`player->visits.adventure`), Klick öffnet das
+> Event-Modal. Avatar-Tab: Upload (JPG/PNG ≤ 2 MB) über `players.avatar`; Bild
+> wird per GD zentriert auf 1:1 zugeschnitten (`AvatarStorage::storeSquare`).
+> Helden-Tab zeigt das Helden-Foto und erlaubt je Held einen Foto-Upload
+> (`heroes.photo`, autorisiert über den Spieler-Eigentümer). Tests:
+> `PlayerDetailTest` (6).
+>
+> Hinweis: Die interaktive Bildanpassung ist als automatisches Zentrier-Cropping
+> (1:1) umgesetzt; `/images/player_background.png` aus dem Legacy bitte ablegen.

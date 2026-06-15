@@ -63,7 +63,7 @@
              Inhalt wird per AJAX aus [data-modal-url] geladen; das Partial liefert
              [data-modal-title] (Header) und optional [data-modal-actions] (Footer). -->
         <div class="ui modal" id="app-modal">
-            <i class="close icon"></i>
+            {{-- Kein Schließ-Icon (PLAY-11): Schließen über den „Schließen"-Button im Footer. --}}
             <div class="header" id="app-modal-header"></div>
             <div class="scrolling content" id="app-modal-content"></div>
             <div class="actions" id="app-modal-actions"></div>

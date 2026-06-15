@@ -67,14 +67,35 @@ class PlayerController extends Controller
             if ($player->image) {
                 \Illuminate\Support\Facades\Storage::disk('public')->delete($player->image);
             }
-            $player->update(['image' => $request->file('image')->store('players', 'public')]);
+            $player->update(['image' => \App\Support\AvatarStorage::storeSquare($request->file('image'), 'players')]);
         }
+    }
+
+    /**
+     * Avatar separat über den Avatar-Tab hochladen (PLAY-11): nur Bild,
+     * JPG/PNG bis 2 MB, zentriert auf 1:1 zugeschnitten.
+     */
+    public function uploadAvatar(Request $request, Player $player): RedirectResponse|JsonResponse
+    {
+        $this->authorize('update', $player);
+
+        $request->validate([
+            'image' => ['required', 'image', 'mimes:jpg,jpeg,png', 'max:2048'],
+        ]);
+
+        $this->handleImageUpload($request, $player);
+
+        $message = 'Avatar aktualisiert.';
+
+        return $request->expectsJson()
+            ? response()->json(['message' => $message, 'refresh_modal' => true])
+            : back()->with('status', $message);
     }
 
     public function show(Player $player, Request $request): View
     {
         $this->authorize('view', $player);
-        $player->load(['heroes.classes', 'heroes.epTransactions.type']);
+        $player->load(['heroes.classes', 'heroes.epTransactions.type', 'visits.adventure']);
 
         if ($request->ajax()) {
             return view('players._detail', compact('player'));

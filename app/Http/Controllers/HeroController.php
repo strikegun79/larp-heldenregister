@@ -92,6 +92,31 @@ class HeroController extends Controller
     }
 
     /**
+     * Separates Helden-Foto hochladen (PLAY-11): vom Spieler-Detail aus durch
+     * den Spieler-Eigentümer (oder Admin), nur Bild (JPG/PNG, max 2 MB, 1:1).
+     */
+    public function uploadPhoto(Request $request, Hero $hero): RedirectResponse|JsonResponse
+    {
+        abort_unless($hero->player !== null, 404);
+        $this->authorize('update', $hero->player);
+
+        $request->validate([
+            'image' => ['required', 'image', 'mimes:jpg,jpeg,png', 'max:2048'],
+        ]);
+
+        if ($hero->image) {
+            \Illuminate\Support\Facades\Storage::disk('public')->delete($hero->image);
+        }
+        $hero->update(['image' => \App\Support\AvatarStorage::storeSquare($request->file('image'), 'heroes')]);
+
+        $message = 'Helden-Foto aktualisiert.';
+
+        return $request->expectsJson()
+            ? response()->json(['message' => $message, 'refresh_modal' => true])
+            : back()->with('status', $message);
+    }
+
+    /**
      * Charakterbogen eines Helden als PDF (REP-05): Stammdaten, Klassen,
      * Fertigkeiten und EP im Vereins-Layout.
      */
