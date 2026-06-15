@@ -1,6 +1,9 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-uncial text-2xl text-waldritter leading-tight">Alle Spieler</h2>
+        <div class="flex items-center justify-between">
+            <h2 class="font-uncial text-2xl text-waldritter leading-tight">Alle Spieler</h2>
+            <a href="{{ route('admin.players.export') }}" class="ui small button" target="_blank" rel="noopener">Export (CSV)</a>
+        </div>
     </x-slot>
 
     <div class="py-12">

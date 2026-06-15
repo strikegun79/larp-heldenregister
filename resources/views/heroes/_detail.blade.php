@@ -26,6 +26,8 @@
             <div><dt class="text-sm text-stone-500">Klassen</dt><dd>{{ $hero->classes->pluck('name')->implode(', ') ?: '—' }}</dd></div>
             <div><dt class="text-sm text-stone-500">Heimatort</dt><dd>{{ $hero->homeplace ?? '—' }}</dd></div>
             <div><dt class="text-sm text-stone-500">EP-Saldo</dt><dd class="font-semibold">{{ number_format($hero->ep_balance, 0, ',', '.') }} EP</dd></div>
+            <div><dt class="text-sm text-stone-500">EP gesamt / ausgegeben</dt><dd>{{ number_format($hero->ep_total, 0, ',', '.') }} / {{ number_format($hero->ep_spent, 0, ',', '.') }}</dd></div>
+            <div><dt class="text-sm text-stone-500">Fertigkeiten / Klassen</dt><dd>{{ $hero->skills_count }} / {{ $hero->classes_count }}</dd></div>
             <div><dt class="text-sm text-stone-500">Erste Erblickung</dt><dd>{{ optional($hero->born)->format('d.m.Y') ?? '—' }}</dd></div>
             <div><dt class="text-sm text-stone-500">Verschollen</dt><dd>{{ optional($hero->died)->format('d.m.Y') ?? '—' }}</dd></div>
             <div>
@@ -33,6 +35,8 @@
                 <dd>@if ($hero->died)<span class="text-red-700">verschollen</span>@else{{ $hero->active ? 'aktiv' : 'inaktiv' }}@endif</dd>
             </div>
         </dl>
+
+        <a href="{{ route('heroes.sheet-pdf', $hero) }}" class="ui small button mt-3" target="_blank" rel="noopener">Charakterbogen (PDF)</a>
 
         @if ($hero->description)
             <h3 class="font-uncial text-lg text-waldritter mt-6 mb-2">Steckbrief</h3>
@@ -203,6 +207,8 @@
 
     {{-- Tab: EP-Verlauf (Buchen + Historie) --}}
     <div class="ui bottom attached tab segment" data-tab="ep">
+        <a href="{{ route('heroes.ep.export', $hero) }}" class="ui small button mb-3" target="_blank" rel="noopener">EP-Auszug (CSV)</a>
+
         @can('heldenregister.edit')
             <form method="POST" action="{{ route('heroes.ep.store', $hero) }}" class="ui form" data-refresh-modal style="margin-bottom:1rem">
                 @csrf

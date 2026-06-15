@@ -32,6 +32,8 @@ class AdventureController extends Controller
         $this->middleware('can:events.edit')->only(['create', 'store', 'edit', 'update', 'destroy', 'manage', 'cancel', 'manageIndex']);
         // Teilnehmer-PDF: Projektleitung, Bürokrat, Admin (ADV-17).
         $this->middleware('can:take-signatures')->only('participantsPdf');
+        // Teilnahme-/Belegungsreport (REP-03): Event-Verwalter.
+        $this->middleware('can:events.edit')->only('participationCsv');
     }
 
     /**
@@ -197,6 +199,43 @@ class AdventureController extends Controller
         return $request->expectsJson()
             ? response()->json(['message' => $message], 422)
             : back()->with('error', $message);
+    }
+
+    /**
+     * Teilnahme-/Belegungsreport eines Events als CSV (REP-03): je Anmeldung
+     * Spieler/Rolle/Liste/Status/Beitrag/Anwesend, plus Summenzeile.
+     */
+    public function participationCsv(Adventure $adventure): \Symfony\Component\HttpFoundation\StreamedResponse
+    {
+        $adventure->load(['bookings.player', 'bookings.role', 'visits']);
+        $visitedIds = $adventure->visits->pluck('player_id');
+
+        return response()->streamDownload(function () use ($adventure, $visitedIds) {
+            $out = fopen('php://output', 'w');
+            fwrite($out, "\xEF\xBB\xBF");
+            fputcsv($out, ['Spieler', 'Rolle', 'Liste', 'Status', 'Beitrag', 'Anwesend'], ';');
+
+            foreach ($adventure->bookings as $b) {
+                fputcsv($out, [
+                    $b->player?->full_name,
+                    $b->role?->description,
+                    $b->waitlisted ? 'Warteliste' : 'regulär',
+                    $b->status_label,
+                    $b->paid ? 'bezahlt' : 'offen',
+                    $visitedIds->contains($b->player_id) ? 'ja' : 'nein',
+                ], ';');
+            }
+
+            $payable = $adventure->bookings->where('waitlisted', false);
+            fputcsv($out, [], ';');
+            fputcsv($out, ['Summen'], ';');
+            fputcsv($out, ['Regulär', $payable->count()], ';');
+            fputcsv($out, ['Warteliste', $adventure->bookings->where('waitlisted', true)->count()], ';');
+            fputcsv($out, ['Bezahlt', $payable->where('paid', true)->count()], ';');
+            fputcsv($out, ['Offen', $payable->where('paid', false)->count()], ';');
+            fputcsv($out, ['Anwesend', $adventure->visits->count()], ';');
+            fclose($out);
+        }, 'belegung-'.$adventure->id.'.csv', ['Content-Type' => 'text/csv; charset=UTF-8']);
     }
 
     public function edit(Adventure $adventure): View

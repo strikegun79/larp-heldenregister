@@ -17,6 +17,23 @@
                 <p class="mt-2">Willkommen im Heldenregister. Hier findest du alles rund um deine Spieler, Helden und Abenteuer.</p>
             </div>
 
+            {{-- Admin-Kennzahlen (REP-06) --}}
+            @if (! empty($metrics))
+                <div class="grid gap-4 grid-cols-2 lg:grid-cols-4 mb-8">
+                    @foreach ([
+                        ['Spieler', $metrics['players']],
+                        ['Helden', $metrics['heroes']],
+                        ['Kommende Events', $metrics['upcoming_events']],
+                        ['Offene Anmeldungen', $metrics['open_bookings']],
+                    ] as [$label, $value])
+                        <div class="bg-white/70 border-2 border-[#5a3a22]/40 rounded-lg p-4 text-center">
+                            <div class="text-3xl font-semibold text-waldritter">{{ $value }}</div>
+                            <div class="text-sm text-stone-600">{{ $label }}</div>
+                        </div>
+                    @endforeach
+                </div>
+            @endif
+
             <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                 {{-- Dein Profil --}}
                 <a href="{{ route('profile.edit') }}"

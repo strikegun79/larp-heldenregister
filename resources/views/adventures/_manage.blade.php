@@ -28,6 +28,7 @@
 
 {{-- Tab 2: Anmeldungen mit Verwaltungsaktionen --}}
 <div class="ui bottom attached tab segment" data-tab="bookings">
+    <a href="{{ route('adventures.participation-csv', $adventure) }}" class="ui small button mb-3" target="_blank" rel="noopener">Belegungsreport (CSV)</a>
     @include('adventures._bookings', ['bookings' => $adventure->bookings, 'manage' => true])
 </div>
 

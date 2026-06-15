@@ -113,6 +113,26 @@ class Hero extends Model
     }
 
     /**
+     * Ausgegebene EP (Abzüge): erworbene minus aktuell verfügbare (REP-01).
+     */
+    public function getEpSpentAttribute(): float
+    {
+        return $this->ep_total - $this->ep_balance;
+    }
+
+    /** Anzahl erlernter Fertigkeiten (REP-01). */
+    public function getSkillsCountAttribute(): int
+    {
+        return $this->skills->count();
+    }
+
+    /** Anzahl Klassen (REP-01). */
+    public function getClassesCountAttribute(): int
+    {
+        return $this->classes->count();
+    }
+
+    /**
      * Komma-separierte Klassen-Slugs (ersetzt GROUP_CONCAT aus view_heroT1).
      */
     public function getClassListAttribute(): string

@@ -2,46 +2,62 @@
 
 Statistiken und Exporte (ersetzt u. a. Legacy-View `view_heroT1Statistic`).
 
-## Offen (🔲)
+## Erledigt (✅)
 
-### REP-01 · Helden-Statistik (EP, Fertigkeiten, Klassen) · ⏱ 4h · 🔲
-**Beschreibung:** Kennzahlen je Held (Gesamt-EP, ausgegebene EP, Anzahl
-Fertigkeiten, Klassen) – ersetzt die Legacy-Statistik-View.
+### REP-01 · Helden-Statistik (EP, Fertigkeiten, Klassen) · ⏱ 4h · ✅
 **Akzeptanzkriterien:**
-- [ ] Aggregierte Kennzahlen je Held (über Accessoren/Query).
-- [ ] Anzeige im Helden-Modal/Detail.
-- [ ] Tests der Aggregationslogik.
+- [x] Aggregierte Kennzahlen je Held (über Accessoren/Query).
+- [x] Anzeige im Helden-Modal/Detail.
+- [x] Tests der Aggregationslogik.
 
-### REP-02 · EP-Konto-Auszug (Export) · ⏱ 3h · 🔲
-**Beschreibung:** Buchungsverlauf eines Helden als CSV/PDF exportieren.
-**Akzeptanzkriterien:**
-- [ ] Export-Endpoint (CSV mind.); Spalten Datum/Art/Betrag/Saldo.
-- [ ] Berechtigung; Test.
+> Accessoren `Hero::ep_spent` (= ep_total − ep_balance), `skills_count`,
+> `classes_count` (zusätzlich zu bestehenden ep_total/ep_balance). Anzeige im
+> Übersicht-Tab (EP gesamt/ausgegeben, Fertigkeiten/Klassen). Tests:
+> `HeroStatisticsTest` (2).
 
-### REP-03 · Teilnahme-/Belegungsreport je Event · ⏱ 3h · 🔲
-**Beschreibung:** Übersicht Buchungen vs. Teilnahme, bezahlt/offen, Warteliste.
+### REP-02 · EP-Konto-Auszug (Export) · ⏱ 3h · ✅
 **Akzeptanzkriterien:**
-- [ ] Report je Event mit Summen (Plätze, Warteliste, bezahlt, offen).
-- [ ] Export (CSV).
-**Abhängig von:** BOOK-06, BOOK-08.
+- [x] Export-Endpoint (CSV mind.); Spalten Datum/Art/Betrag/Saldo.
+- [x] Berechtigung; Test.
 
-### REP-04 · Mitglieder-/Spielerübersicht (Export) · ⏱ 3h · 🔲
-**Beschreibung:** Liste aller Spieler mit Helden/Alter für Orga.
-**Akzeptanzkriterien:**
-- [ ] Gefilterte Liste exportierbar (CSV).
-- [ ] DSGVO-konform (nur nötige Felder); Berechtigung.
+> `HeroController@epExport` (`GET heroes/{hero}/ep-export`, `heldenregister.view`):
+> CSV (`;`, UTF-8-BOM) mit laufendem Saldo. Link im EP-Verlauf-Tab. Tests:
+> `HeroEpExportTest` (2).
 
-### REP-05 · Charakterbogen-PDF je Held · ⏱ 4h · 🔲
-**Beschreibung:** Druckbarer Charakterbogen (Stammdaten, Klassen, Fertigkeiten,
-Perlen, EP) als PDF.
+### REP-03 · Teilnahme-/Belegungsreport je Event · ⏱ 3h · ✅
 **Akzeptanzkriterien:**
-- [ ] PDF-Generierung (z. B. dompdf) mit Vereins-Layout.
-- [ ] Download im Helden-Detail; Test (PDF wird erzeugt).
-**Abhängig von:** EP-07.
+- [x] Report je Event mit Summen (Plätze, Warteliste, bezahlt, offen).
+- [x] Export (CSV).
 
-### REP-06 · Dashboard-Kennzahlen für Admin · ⏱ 3h · 🔲
-**Beschreibung:** Startseiten-Widgets (Anzahl Spieler/Helden/kommende Events/
-offene Buchungen) für Admin.
+> `AdventureController@participationCsv` (`GET adventures/{adventure}/participation-csv`,
+> `events.edit`): Zeilen je Anmeldung (Spieler/Rolle/Liste/Status/Beitrag/Anwesend)
+> + Summenblock. Link im Verwaltungs-Modal (Anmeldungen-Tab). Tests:
+> `ReportExportTest` (2).
+
+### REP-04 · Mitglieder-/Spielerübersicht (Export) · ⏱ 3h · ✅
 **Akzeptanzkriterien:**
-- [ ] Kennzahl-Karten auf dem Dashboard (nur Admin).
-- [ ] Effiziente Queries (kein N+1); Test.
+- [x] Gefilterte Liste exportierbar (CSV).
+- [x] DSGVO-konform (nur nötige Felder); Berechtigung.
+
+> `Admin\PlayerController@export` (`admin.players.export`, `portal.manage`):
+> CSV (Nachname, Vorname, E-Mail, Geburtsdatum, Geschlecht, Helden). Export-Button
+> in der Admin-Spielerliste. Tests: `ReportExportTest` (2).
+
+### REP-05 · Charakterbogen-PDF je Held · ⏱ 4h · ✅
+**Akzeptanzkriterien:**
+- [x] PDF-Generierung (dompdf) mit Vereins-Layout.
+- [x] Download im Helden-Detail; Test (PDF wird erzeugt).
+
+> `HeroController@sheetPdf` (`GET heroes/{hero}/sheet-pdf`, `heldenregister.view`):
+> dompdf-View `heroes/sheet_pdf.blade.php` (Stammdaten, Klassen, EP, Fertigkeiten
+> inkl. Perlen). Inline-Stream; Button im Übersicht-Tab. Tests:
+> `CharacterSheetAndDashboardTest` (2).
+
+### REP-06 · Dashboard-Kennzahlen für Admin · ⏱ 3h · ✅
+**Akzeptanzkriterien:**
+- [x] Kennzahl-Karten auf dem Dashboard (nur Admin).
+- [x] Effiziente Queries (kein N+1); Test.
+
+> `DashboardController@index` liefert für Admins `count()`-Kennzahlen (Spieler,
+> Helden, kommende Events, offene Anmeldungen); Karten im Dashboard nur bei
+> Admin. Tests: `CharacterSheetAndDashboardTest` (2).

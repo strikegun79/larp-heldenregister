@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\EpTransaction;
 use App\Models\EpTransactionType;
 use App\Models\Hero;
 use App\Models\HeroClass;
@@ -10,13 +11,14 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class HeroController extends Controller
 {
     public function __construct()
     {
         $this->middleware('auth');
-        $this->middleware('can:heldenregister.view')->only(['index', 'show']);
+        $this->middleware('can:heldenregister.view')->only(['index', 'show', 'epExport', 'sheetPdf']);
         $this->middleware('can:heldenregister.edit')->only(['create', 'store', 'edit', 'update', 'destroy', 'toggleMissing']);
     }
 
@@ -57,6 +59,49 @@ class HeroController extends Controller
             'classes' => HeroClass::orderBy('name')->get(),
             'players' => Player::orderBy('name')->get(),
         ]);
+    }
+
+    /**
+     * EP-Konto-Auszug eines Helden als CSV (REP-02): Datum, Art, Betrag, Saldo.
+     */
+    public function epExport(Hero $hero): StreamedResponse
+    {
+        $transactions = $hero->epTransactions()->with('type')
+            ->orderBy('transacted_at')->orderBy('id')->get();
+
+        $filename = 'ep-auszug-'.$hero->id.'.csv';
+
+        return response()->streamDownload(function () use ($transactions) {
+            $out = fopen('php://output', 'w');
+            fwrite($out, "\xEF\xBB\xBF"); // UTF-8 BOM für Excel
+            fputcsv($out, ['Datum', 'Art', 'Betrag', 'Saldo'], ';');
+
+            $balance = 0.0;
+            foreach ($transactions as $tx) {
+                /** @var EpTransaction $tx */
+                $balance += $tx->signedAmount();
+                fputcsv($out, [
+                    optional($tx->transacted_at)->format('d.m.Y H:i'),
+                    $tx->type?->description ?? '—',
+                    number_format($tx->signedAmount(), 0, ',', ''),
+                    number_format($balance, 0, ',', ''),
+                ], ';');
+            }
+            fclose($out);
+        }, $filename, ['Content-Type' => 'text/csv; charset=UTF-8']);
+    }
+
+    /**
+     * Charakterbogen eines Helden als PDF (REP-05): Stammdaten, Klassen,
+     * Fertigkeiten und EP im Vereins-Layout.
+     */
+    public function sheetPdf(Hero $hero): \Symfony\Component\HttpFoundation\Response
+    {
+        $hero->load(['player', 'classes', 'skills', 'epTransactions.type']);
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('heroes.sheet_pdf', ['hero' => $hero]);
+
+        return $pdf->stream('charakterbogen-'.$hero->id.'.pdf');
     }
 
     /**

@@ -30,9 +30,8 @@ Route::get('/', function () {
     return redirect()->route('dashboard');
 });
 
-Route::get('/dashboard', function () {
-    return view('dashboard');
-})->middleware(['auth', 'verified'])->name('dashboard');
+Route::get('/dashboard', [\App\Http\Controllers\DashboardController::class, 'index'])
+    ->middleware(['auth', 'verified'])->name('dashboard');
 
 Route::middleware('auth')->group(function () {
     // In-App-Benachrichtigungen (NOTI-07).
@@ -51,6 +50,10 @@ Route::middleware('auth')->group(function () {
     Route::patch('heroes/{hero}/missing', [HeroController::class, 'toggleMissing'])->name('heroes.missing');
     // EP-Buchung für einen Helden (HERO-12).
     Route::post('heroes/{hero}/ep', [EpTransactionController::class, 'store'])->name('heroes.ep.store');
+    // EP-Konto-Auszug als CSV (REP-02).
+    Route::get('heroes/{hero}/ep-export', [HeroController::class, 'epExport'])->name('heroes.ep.export');
+    // Charakterbogen als PDF (REP-05).
+    Route::get('heroes/{hero}/sheet-pdf', [HeroController::class, 'sheetPdf'])->name('heroes.sheet-pdf');
     // Fertigkeit erlernen (HERO-14) / aberkennen (HERO-16).
     Route::post('heroes/{hero}/skills', [HeroSkillController::class, 'store'])->name('heroes.skills.store');
     Route::delete('heroes/{hero}/skills/{skill}', [HeroSkillController::class, 'destroy'])->name('heroes.skills.destroy');
@@ -70,6 +73,8 @@ Route::middleware('auth')->group(function () {
     Route::get('adventures/{adventure}/manage', [AdventureController::class, 'manage'])->name('adventures.manage');
     // Teilnehmerliste als PDF (ADV-17).
     Route::get('adventures/{adventure}/participants-pdf', [AdventureController::class, 'participantsPdf'])->name('adventures.participants-pdf');
+    // Teilnahme-/Belegungsreport als CSV (REP-03).
+    Route::get('adventures/{adventure}/participation-csv', [AdventureController::class, 'participationCsv'])->name('adventures.participation-csv');
     // Event absagen (ADV-07).
     Route::patch('adventures/{adventure}/cancel', [AdventureController::class, 'cancel'])->name('adventures.cancel');
 
@@ -125,6 +130,7 @@ Route::middleware('auth')->group(function () {
             Route::put('users/{user}', [Admin\UserController::class, 'update'])->name('users.update');
         });
         Route::get('players', [Admin\PlayerController::class, 'index'])->name('players.index');
+        Route::get('players/export', [Admin\PlayerController::class, 'export'])->name('players.export'); // REP-04
 
         // Helden-Klassen-Lookup pflegen (HERO-05).
         // Veranstaltungsorte pflegen (ADV-08).
