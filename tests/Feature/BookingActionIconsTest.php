@@ -66,6 +66,25 @@ class BookingActionIconsTest extends TestCase
         $this->assertDatabaseMissing('bookings', ['id' => $booking->id]);
     }
 
+    public function test_event_booking_user_cannot_cancel_foreign_booking(): void
+    {
+        $user = User::factory()->create();
+        $user->roles()->attach(60); // Event buchen (adventure.cancel, aber kein view-all)
+
+        $adventure = Adventure::factory()->create();
+        // Fremde Anmeldung (anderer Spieler, von jemand anderem gebucht).
+        $foreign = Booking::factory()->for($adventure)->create([
+            'player_id' => Player::factory()->create()->id,
+            'booked_by_user_id' => User::factory()->create()->id,
+        ]);
+
+        $this->actingAs($user)
+            ->deleteJson(route('adventures.bookings.destroy', [$adventure, $foreign]))
+            ->assertForbidden();
+
+        $this->assertDatabaseHas('bookings', ['id' => $foreign->id]);
+    }
+
     public function test_management_actions_use_icon_tooltips(): void
     {
         $registrar = User::factory()->create();

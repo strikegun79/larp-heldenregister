@@ -300,6 +300,11 @@ class BookingController extends Controller
     {
         abort_unless($booking->adventure_id === $adventure->id, 404);
 
+        // Nur eigene Anmeldungen stornieren – außer man darf alle sehen/verwalten.
+        if (! Gate::allows('view-all-bookings') && ! $this->ownsBooking($request->user(), $booking)) {
+            abort(403);
+        }
+
         // Auch bezahlte Anmeldungen dürfen storniert werden (ADV-21) – kein Block.
         $participant = $booking->participant_name;
 
@@ -355,5 +360,14 @@ class BookingController extends Controller
         return $request->expectsJson()
             ? response()->json(['message' => $message], 422)
             : back()->with('error', $message);
+    }
+
+    /**
+     * Gehört die Anmeldung dem Nutzer (selbst angemeldet oder eigener Spieler)?
+     */
+    private function ownsBooking(User $user, Booking $booking): bool
+    {
+        return $booking->booked_by_user_id === $user->id
+            || ($booking->player_id !== null && $user->players()->where('players.id', $booking->player_id)->exists());
     }
 }
