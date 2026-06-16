@@ -97,6 +97,23 @@ class PlayerController extends Controller
         }
     }
 
+    /** Avatar löschen und auf Standard-Bild zurücksetzen. */
+    public function deleteAvatar(Request $request, Player $player): RedirectResponse|JsonResponse
+    {
+        $this->authorize('update', $player);
+
+        if ($player->image) {
+            \Illuminate\Support\Facades\Storage::disk('public')->delete($player->image);
+            $player->update(['image' => null]);
+        }
+
+        $message = 'Avatar gelöscht.';
+
+        return $request->expectsJson()
+            ? response()->json(['message' => $message, 'refresh_modal' => true])
+            : back()->with('status', $message);
+    }
+
     /**
      * Avatar separat über den Avatar-Tab hochladen (PLAY-11): nur Bild,
      * JPG/PNG bis 2 MB, zentriert auf 1:1 zugeschnitten.

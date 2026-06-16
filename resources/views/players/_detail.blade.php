@@ -87,9 +87,21 @@
         {{-- Avatar-Vorschau + Datei-Auswahl; Crop-Editor im gestapelten Modal --}}
         <img src="{{ $player->avatar_url }}" alt="Avatar"
              class="w-40 h-40 object-cover rounded border-2 border-[#5a3a22]/40 mb-3" style="aspect-ratio:1/1;">
-        <label class="ui button" for="avatar-file-input" style="cursor:pointer;">
-            <i class="upload icon"></i> Bild auswählen (JPG/PNG, max. 20 MB)
-        </label>
+        <div class="flex gap-2 flex-wrap mt-1">
+            <label class="ui button" for="avatar-file-input" style="cursor:pointer;">
+                <i class="upload icon"></i> Bild auswählen (JPG/PNG, max. 20 MB)
+            </label>
+            @if ($player->image)
+                <form method="POST" action="{{ route('players.avatar.destroy', $player) }}"
+                      data-refresh-modal
+                      onsubmit="return confirm('Avatar wirklich löschen?');">
+                    @csrf @method('DELETE')
+                    <button type="submit" class="ui red button">
+                        <i class="trash icon"></i> Avatar löschen
+                    </button>
+                </form>
+            @endif
+        </div>
         <input type="file" id="avatar-file-input" accept="image/jpeg,image/png"
                style="display:none"
                data-upload-url="{{ route('players.avatar', $player) }}">

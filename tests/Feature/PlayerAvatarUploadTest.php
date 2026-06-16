@@ -113,6 +113,51 @@ class PlayerAvatarUploadTest extends TestCase
         Storage::disk('public')->assertExists($player->image);
     }
 
+    public function test_owner_can_delete_avatar(): void
+    {
+        Storage::disk('public')->put('players/old.jpg', 'fake');
+        $player = Player::factory()->create(['image' => 'players/old.jpg']);
+        $user = $this->ownerOf($player);
+
+        $this->actingAs($user)
+            ->delete(route('players.avatar.destroy', $player), [], ['Accept' => 'application/json'])
+            ->assertOk()
+            ->assertJson(['refresh_modal' => true]);
+
+        $this->assertNull($player->fresh()->image);
+        Storage::disk('public')->assertMissing('players/old.jpg');
+    }
+
+    public function test_delete_on_player_without_avatar_is_harmless(): void
+    {
+        $player = Player::factory()->create(['image' => null]);
+        $user = $this->ownerOf($player);
+
+        $this->actingAs($user)
+            ->delete(route('players.avatar.destroy', $player), [], ['Accept' => 'application/json'])
+            ->assertOk();
+
+        $this->assertNull($player->fresh()->image);
+    }
+
+    public function test_non_owner_cannot_delete_avatar(): void
+    {
+        $player = Player::factory()->create(['image' => 'players/test.jpg']);
+        $other = User::factory()->create();
+        $other->roles()->attach(70);
+
+        $this->actingAs($other)
+            ->delete(route('players.avatar.destroy', $player), [], ['Accept' => 'application/json'])
+            ->assertForbidden();
+    }
+
+    public function test_avatar_url_returns_default_when_image_null(): void
+    {
+        $player = Player::factory()->create(['image' => null]);
+
+        $this->assertSame('/images/player_default_avatar.jpg', $player->avatar_url);
+    }
+
     public function test_player_card_shows_avatar_image(): void
     {
         $user = User::factory()->create();

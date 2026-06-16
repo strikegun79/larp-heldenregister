@@ -45,8 +45,9 @@ Route::middleware('auth')->group(function () {
     Route::resource('players', PlayerController::class);
     // Aktiven Helden eines Spielers setzen (HERO-07).
     Route::patch('players/{player}/active-hero', [PlayerController::class, 'setActiveHero'])->name('players.active-hero');
-    // Avatar-Upload im Avatar-Tab (PLAY-11).
+    // Avatar-Upload und -Löschen im Avatar-Tab (PLAY-11).
     Route::post('players/{player}/avatar', [PlayerController::class, 'uploadAvatar'])->name('players.avatar');
+    Route::delete('players/{player}/avatar', [PlayerController::class, 'deleteAvatar'])->name('players.avatar.destroy');
     Route::resource('heroes', HeroController::class);
     // Verschollen-Status umschalten (HERO-08).
     Route::patch('heroes/{hero}/missing', [HeroController::class, 'toggleMissing'])->name('heroes.missing');
