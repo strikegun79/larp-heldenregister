@@ -32,12 +32,12 @@ Klartext-Passwort; Login schlägt fehl. Erzwungener Reset nötig.
 - [ ] Dokumentiert in `MIGRATION_PLAN.md` Go-Live-Checkliste.
 **Abhängig von:** ETL-Bereich.
 
-### AUTH-06 · Lokalisierung der Auth-Texte (DE) · ⏱ 3h · 🔲
+### AUTH-06 · Lokalisierung der Auth-Texte (DE) · ⏱ 3h · ✅
 **Beschreibung:** Breeze-Views/Mails sind teils Englisch.
 **Akzeptanzkriterien:**
-- [ ] `lang/de` für Auth, Validation, Pagination angelegt; `APP_LOCALE=de`.
-- [ ] Login/Registrierung/Reset/Verifizierungsmail auf Deutsch.
-- [ ] Keine englischen Reststrings in Auth-Flows.
+- [x] `lang/de` für Auth, Validation, Pagination angelegt; `APP_LOCALE=de`.
+- [x] Login/Registrierung/Reset/Verifizierungsmail auf Deutsch.
+- [x] Keine englischen Reststrings in Auth-Flows.
 
 ### AUTH-07 · Konto-Deaktivierung (`activated`) im Login durchsetzen · ⏱ 3h · 🔲
 **Beschreibung:** `users.activated` existiert, wird beim Login aber nicht geprüft.
