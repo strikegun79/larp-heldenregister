@@ -51,25 +51,44 @@
     text-align: center;
 }
 
+/* ===========================================================================
+   Modal-Höhenbegrenzung (Tablet-Tauglichkeit)
+   ---------------------------------------------------------------------------
+   Fomantic begrenzt .scrolling.content bereits auf max-height: calc(80vh-10rem)
+   mit overflow:auto; zusammen mit dem starren Header und Footer (.actions)
+   bleibt ein Modal damit von Haus aus unter ~80vh – also klar unter 95vh.
+
+   Das Show/Hide steuert Fomantic über `display` (none ⇄ block !important).
+   Deshalb darf hier KEINE globale `.ui.modal { display: ... !important }`-
+   Regel gesetzt werden – sie würde versteckte Modale sichtbar machen bzw.
+   beim Anzeigen ohnehin von Fomantic überschrieben.
+
+   Der eigentliche Auslöser für das Überlaufen auf Tablets war die feste
+   min-height der Detail-Modale (unten): sie zwang den Inhalt über die
+   Fomantic-Scrollgrenze hinaus. Diese ist jetzt auf min(N, 60vh) gedeckelt.
+   =========================================================================== */
+
 /* HERO-19: Helden-Detail-Modal mit einheitlicher Mindestgröße,
-   damit es beim Tab-Wechsel nicht springt. */
+   damit es beim Tab-Wechsel nicht springt.
+   min-height ist auf 60vh gedeckelt, damit das Modal auf Tablets
+   (~800px Viewport-Höhe) nicht aus dem sichtbaren Bereich läuft. */
 #app-modal.modal-hero {
     width: 950px;
     max-width: 95vw;
 }
 
 #app-modal.modal-hero > .scrolling.content {
-    min-height: 840px;
+    min-height: min(840px, 60vh);
 }
 
-/* Verwaltungs-Modal (ADV-19): fest 950×950, springt nicht beim Tab-Wechsel. */
+/* Verwaltungs-Modal (ADV-19): fest 950 px breit, springt nicht beim Tab-Wechsel. */
 #app-modal.modal-event {
     width: 950px;
     max-width: 95vw;
 }
 
 #app-modal.modal-event > .scrolling.content {
-    min-height: 820px;
+    min-height: min(820px, 60vh);
 }
 
 /* Positions-Editor (HERO-17): nummerierte, ziehbare Marker */

@@ -152,6 +152,26 @@ input:focus, select:focus, textarea:focus {
     border-bottom-right-radius: 16px;
 }
 
+/* --- Kontrast-Verbesserung (WCAG AA, 4.5:1) ---------------------------
+   Die schwachen Grautöne erreichen auf hellem/Papyrus-Hintergrund zu
+   wenig Kontrast:
+     text-stone-400 (#a8a29e) ≈ 2.2:1  → #57534e (stone-600) ≈ 5.9:1
+     text-stone-500 (#78716c) ≈ 3.5:1  → #44403c (stone-700) ≈ 10:1
+   Die natürliche Helligkeitsstaffel (400 heller als 500) bleibt erhalten,
+   die Texte wirken weiterhin „gedämpft", aber lesbar.
+
+   Innerhalb von Modalen wird stone-500 zusätzlich per !important gesetzt,
+   da Fomantic-Inhalte eigene, hellere Farben mitbringen können. Farbige
+   Hinweise (rot/grün/…) werden bewusst NICHT überschrieben. */
+.ui.modal .text-stone-500,
+.ui.modal .text-stone-400 {
+    color: #44403c !important;
+}
+
+/* Globale Anhebung der Hilfstexte (auch außerhalb von Modalen). */
+.text-stone-500 { color: #44403c; }
+.text-stone-400 { color: #57534e; }
+
 /* --- Labels/Badges & Tabs runder, freundlicher ------------------------- */
 .ui.label { border-radius: 999px; }
 .ui.tabular.menu .item.active {

@@ -87,7 +87,7 @@
                 <div style="max-height:400px; overflow:hidden; background:#111; border-radius:.4rem;">
                     <img id="photo-crop-img" src="" alt="Zuschnitt" style="display:block; max-width:100%;">
                 </div>
-                <p class="text-sm text-stone-500 mt-2">Rahmen verschieben und anpassen, dann „Übernehmen" klicken.</p>
+                <p class="text-sm text-stone-700 mt-2">Rahmen verschieben und anpassen, dann „Übernehmen" klicken.</p>
             </div>
             <div class="actions">
                 <div class="ui deny button">Abbrechen</div>
@@ -117,7 +117,7 @@
             <div class="header">Unterschrift &amp; Check-in</div>
             <div class="content">
                 <p id="signature-modal-name" class="font-semibold"></p>
-                <p class="text-sm text-stone-500">Mit Tablet &amp; Stift im Feld unterschreiben.</p>
+                <p class="text-sm text-stone-700">Mit Tablet &amp; Stift im Feld unterschreiben.</p>
                 <canvas id="signature-pad" width="600" height="240"
                         style="border:2px solid #5a3a22; border-radius:.4rem; touch-action:none; background:#fff; max-width:100%; width:600px; height:240px;"></canvas>
             </div>
