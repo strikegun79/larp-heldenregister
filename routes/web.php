@@ -56,8 +56,9 @@ Route::middleware('auth')->group(function () {
     Route::get('heroes/{hero}/ep-export', [HeroController::class, 'epExport'])->name('heroes.ep.export');
     // Charakterbogen als PDF (REP-05).
     Route::get('heroes/{hero}/sheet-pdf', [HeroController::class, 'sheetPdf'])->name('heroes.sheet-pdf');
-    // Helden-Foto-Upload (PLAY-11).
+    // Helden-Foto Upload + Löschen (HERO-22).
     Route::post('heroes/{hero}/photo', [HeroController::class, 'uploadPhoto'])->name('heroes.photo');
+    Route::delete('heroes/{hero}/photo', [HeroController::class, 'deletePhoto'])->name('heroes.photo.destroy');
     // Fertigkeit erlernen (HERO-14) / aberkennen (HERO-16).
     Route::post('heroes/{hero}/skills', [HeroSkillController::class, 'store'])->name('heroes.skills.store');
     Route::delete('heroes/{hero}/skills/{skill}', [HeroSkillController::class, 'destroy'])->name('heroes.skills.destroy');

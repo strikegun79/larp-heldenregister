@@ -34,11 +34,8 @@
             @forelse ($player->heroes as $hero)
                 <tr>
                     <td>
-                        @if ($hero->image_url)
-                            <img src="{{ $hero->image_url }}" alt="" class="w-12 h-12 object-cover rounded border">
-                        @else
-                            <span class="text-stone-400">—</span>
-                        @endif
+                        <img src="{{ $hero->image_url }}" alt="{{ $hero->character_name }}"
+                             class="w-12 h-12 object-cover rounded border">
                     </td>
                     {{-- Helden-Ansicht als gestapeltes Modal (PLAY-11). --}}
                     <td><a href="{{ route('heroes.show', $hero) }}" data-modal-stack="{{ route('heroes.show', $hero) }}" class="text-indigo-700 hover:underline">{{ $hero->character_name ?? '—' }}</a></td>

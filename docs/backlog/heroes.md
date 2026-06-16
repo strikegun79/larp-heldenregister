@@ -268,3 +268,10 @@ für das Detail-Layout vergeben).
 > aktiven Helden des Spielers (null, wenn keiner). EP-Vergabe (BOOK-09) läuft
 > weiterhin über `player.activeHero` → landet im EP-Verlauf des aktiven Helden.
 > Tests: `BookingHeroTest` (3, Auto-Zuordnung), `PlayerTest` (exklusiv-aktiv).
+### HERO-22 · Helden-Avatar Upload · ⏱ 3h · ✅
+**Beschreibung:** Optimierung des Helden-Avatar Uploads
+**Akzeptanzkriterien:**
+- [x] Setze ein Dummy Bild für einen Helden ein, wenn es kein Avatarbild für einen Helden gibt. in der Übersicht sowohl auch in der Helden-Detailansicht
+- [x] in der Helden-Detailansicht unterhalb des Avatars ein Button zum Ändern und löschen des Bildes.
+- [x] Das Bild-Hochladen soll genauso funktionieren wie beim Spieler-Avatar. Samt 20MB maximale Upload größe und Editor auf 1:1 Format.
+

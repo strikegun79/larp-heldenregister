@@ -19,7 +19,7 @@ class HeroController extends Controller
     {
         $this->middleware('auth');
         $this->middleware('can:heldenregister.view')->only(['index', 'epExport', 'sheetPdf']);
-        $this->middleware('can:heldenregister.edit')->only(['create', 'store', 'edit', 'update', 'destroy', 'toggleMissing', 'uploadPhoto']);
+        $this->middleware('can:heldenregister.edit')->only(['create', 'store', 'edit', 'update', 'destroy', 'toggleMissing', 'uploadPhoto', 'deletePhoto']);
     }
 
     /**
@@ -92,13 +92,12 @@ class HeroController extends Controller
     }
 
     /**
-     * Separates Helden-Foto hochladen (PLAY-11): im Helden-Detail, nur für
-     * Bürokrat/Admin (`heldenregister.edit`); Bild (JPG/PNG, max 2 MB, 1:1).
+     * Helden-Foto hochladen (HERO-22): Crop-Editor-kompatibel, JPG/PNG bis 20 MB.
      */
     public function uploadPhoto(Request $request, Hero $hero): RedirectResponse|JsonResponse
     {
         $request->validate([
-            'image' => ['required', 'image', 'mimes:jpg,jpeg,png', 'max:2048'],
+            'image' => ['required', 'image', 'mimes:jpg,jpeg,png', 'max:20480'],
         ]);
 
         if ($hero->image) {
@@ -109,6 +108,23 @@ class HeroController extends Controller
         $message = 'Helden-Foto aktualisiert.';
 
         return $request->expectsJson()
+            ? response()->json(['message' => $message, 'refresh_modal' => true])
+            : back()->with('status', $message);
+    }
+
+    /**
+     * Helden-Foto löschen (HERO-22).
+     */
+    public function deletePhoto(Hero $hero): RedirectResponse|JsonResponse
+    {
+        if ($hero->image) {
+            \Illuminate\Support\Facades\Storage::disk('public')->delete($hero->image);
+            $hero->update(['image' => null]);
+        }
+
+        $message = 'Helden-Foto gelöscht.';
+
+        return request()->expectsJson()
             ? response()->json(['message' => $message, 'refresh_modal' => true])
             : back()->with('status', $message);
     }

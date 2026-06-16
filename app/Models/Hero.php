@@ -30,10 +30,10 @@ class Hero extends Model
         'active' => 'boolean',
     ];
 
-    /** Öffentliche URL des Avatar-Bilds (HERO-09) bzw. null. */
-    public function getImageUrlAttribute(): ?string
+    /** Öffentliche URL des Helden-Fotos; Standardbild wenn keins hochgeladen (HERO-22). */
+    public function getImageUrlAttribute(): string
     {
-        return $this->image ? '/storage/' . $this->image : null;
+        return $this->image ? '/storage/'.$this->image : '/images/heroes_db.jpg';
     }
 
     /**
