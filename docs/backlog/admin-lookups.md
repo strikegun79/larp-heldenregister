@@ -17,13 +17,13 @@ Rollen/Aktivierung im Modal.
 
 ## Offen (🔲)
 
-### ADM-04 · Zentrales Stammdaten-Dashboard · ⏱ 2h · 🔲
+### ADM-04 · Zentrales Stammdaten-Dashboard · ⏱ 2h · ✅
 **Beschreibung:** Eine „Stammdaten"-Übersicht in der Verwaltung, die alle
 Lookup-CRUDs (Orte, Kategorien, Status, Event-Rollen, Klassen, Perlenfarben,
 EP-Arten, Matrix-Räume) bündelt.
 **Akzeptanzkriterien:**
-- [ ] Karten/Links zu allen Lookup-Verwaltungen.
-- [ ] Nur mit `portal.manage`.
+- [x] Karten/Links zu allen Lookup-Verwaltungen.
+- [x] Nur mit `portal.manage`.
 
 ### ADM-05 · Generischer Lookup-CRUD-Baustein · ⏱ 4h · 🔲
 **Beschreibung:** Wiederverwendbares Muster (Controller-Trait + Blade-Partial)

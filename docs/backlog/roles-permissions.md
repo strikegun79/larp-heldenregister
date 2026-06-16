@@ -15,13 +15,13 @@ Schreibt die komplette Rolle×Permission-Matrix fest.
 
 ## Offen (🔲)
 
-### ROLE-04 · Rollen-Verwaltung im Admin (Lesen) · ⏱ 2h · 🔲
+### ROLE-04 · Rollen-Verwaltung im Admin (Lesen) · ⏱ 2h · ✅
 **Beschreibung:** Übersicht aller Rollen samt zugeordneter Rechte (read-only),
 damit Admins die Matrix einsehen können.
 **Akzeptanzkriterien:**
-- [ ] Admin-Seite listet Rollen mit ihren Permissions (aus Config).
-- [ ] Anzahl Nutzer je Rolle wird angezeigt.
-- [ ] Nur mit `portal.manage` erreichbar.
+- [x] Admin-Seite listet Rollen mit ihren Permissions (aus Config).
+- [x] Anzahl Nutzer je Rolle wird angezeigt.
+- [x] Nur mit `portal.manage` erreichbar.
 
 ### ROLE-05 · Projektleitung-Rechte verifizieren/abschließen · ⏱ 2h · 🔲
 **Beschreibung:** Projektleitung wurde in der YAML ergänzt; End-to-End prüfen,

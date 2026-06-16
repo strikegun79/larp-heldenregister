@@ -15,11 +15,12 @@
                         ['Portal-Nutzer', 'Nutzer & Rollen', 'admin_users.jpg', route('admin.users.index')],
                         ['Spieler', 'Alle Spieler/Teilnehmer', 'admin_players.jpg', route('admin.players.index')],
                         ['Veranstaltungen', 'Abenteuer administrieren', 'admin_events.jpg', route('adventures.manage-index')],
-                        ['Helden-Klassen', 'Klassen anlegen & pflegen', 'admin_events.jpg', route('admin.hero-classes.index')],
-                        ['Orte', 'Veranstaltungsorte pflegen', 'admin_events.jpg', route('admin.locations.index')],
-                        ['Kategorien', 'Event-Kategorien pflegen', 'admin_events.jpg', route('admin.event-categories.index')],
-                        ['Auftraggeber', 'Auftraggeber pflegen', 'admin_events.jpg', route('admin.event-clients.index')],
-                        ['Teilnahme-Rollen', 'Event-Rollen pflegen', 'admin_events.jpg', route('admin.event-roles.index')],
+                        ['Helden-Klassen', 'Klassen anlegen & pflegen', 'admin_classes.jpg', route('admin.hero-classes.index')],
+                        ['Orte', 'Veranstaltungsorte pflegen', 'admin_orte.jpg', route('admin.locations.index')],
+                        ['Kategorien', 'Event-Kategorien pflegen', 'admin_katagorien.jpg', route('admin.event-categories.index')],
+                        ['Auftraggeber', 'Auftraggeber pflegen', 'admin_auftraggeber.jpg', route('admin.event-clients.index')],
+                        ['Teilnahme-Rollen', 'Event-Rollen pflegen', 'admin_rollen.jpg', route('admin.event-roles.index')],
+                        ['Rollen & Rechte', 'Berechtigungsübersicht', 'admin_players.jpg', route('admin.roles.index')],
                     ];
                 @endphp
                 @foreach ($cards as [$title, $subtitle, $img, $href])

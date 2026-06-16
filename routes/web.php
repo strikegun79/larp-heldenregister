@@ -134,6 +134,7 @@ Route::middleware('auth')->group(function () {
     // Verwaltung (Portal-Administration, Berechtigung portal.manage).
     Route::prefix('admin')->name('admin.')->middleware('can:portal.manage')->group(function () {
         Route::get('/', [Admin\AdminController::class, 'index'])->name('index');
+        Route::get('roles', [Admin\RoleController::class, 'index'])->name('roles.index');
         // Nutzerverwaltung erfordert zusätzlich users.manage.
         Route::middleware('can:users.manage')->group(function () {
             Route::get('users', [Admin\UserController::class, 'index'])->name('users.index');
