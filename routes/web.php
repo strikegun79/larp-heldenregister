@@ -33,7 +33,8 @@ Route::get('/', function () {
 Route::get('/dashboard', [\App\Http\Controllers\DashboardController::class, 'index'])
     ->middleware(['auth', 'verified'])->name('dashboard');
 
-Route::middleware('auth')->group(function () {
+// Alle Portal-Routen erfordern Login UND verifizierte E-Mail-Adresse (AUTH-07/AUTH-02).
+Route::middleware(['auth', 'verified'])->group(function () {
     // In-App-Benachrichtigungen (NOTI-07).
     Route::get('notifications/{notification}/read', [NotificationController::class, 'read'])->name('notifications.read');
     Route::post('notifications/read-all', [NotificationController::class, 'readAll'])->name('notifications.read-all');

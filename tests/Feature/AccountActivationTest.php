@@ -51,13 +51,27 @@ class AccountActivationTest extends TestCase
     {
         $user = User::factory()->create();
 
-        // Konto nachträglich deaktivieren (simuliert Admin-Aktion während aktiver Session)
-        $user->update(['activated' => false]);
+        // Konto nachträglich deaktivieren – direkte Zuweisung (activated nicht in $fillable).
+        $user->activated = false;
+        $user->save();
         $user->refresh();
 
         $response = $this->actingAs($user)->get('/profile');
 
         $this->assertGuest();
         $response->assertRedirect(route('login'));
+    }
+
+    public function test_unverified_user_cannot_access_portal_routes(): void
+    {
+        // Registriert aber E-Mail noch nicht bestätigt.
+        $user = User::factory()->unverified()->create();
+
+        // Alle wesentlichen Portal-Routen müssen auf Verifikations-Hinweis umleiten.
+        foreach (['/players', '/heroes', '/adventures', '/profile'] as $path) {
+            $this->actingAs($user)
+                ->get($path)
+                ->assertRedirect(route('verification.notice'));
+        }
     }
 }

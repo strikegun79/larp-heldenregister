@@ -68,7 +68,9 @@ class UserController extends Controller
         ]);
 
         $user->roles()->sync($data['roles'] ?? []);
-        $user->update(['activated' => $request->boolean('activated')]);
+        // Direktzuweisung, da activated nicht in $fillable (Mass-Assignment-Schutz).
+        $user->activated = $request->boolean('activated');
+        $user->save();
 
         $message = "Nutzer „{$user->name}“ wurde aktualisiert.";
 
