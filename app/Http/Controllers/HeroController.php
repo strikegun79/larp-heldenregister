@@ -19,7 +19,7 @@ class HeroController extends Controller
     {
         $this->middleware('auth');
         $this->middleware('can:heldenregister.view')->only(['index', 'epExport', 'sheetPdf']);
-        $this->middleware('can:heldenregister.edit')->only(['create', 'store', 'edit', 'update', 'destroy', 'toggleMissing', 'uploadPhoto', 'deletePhoto']);
+        $this->middleware('can:heldenregister.edit')->only(['create', 'store', 'edit', 'update', 'destroy', 'toggleMissing']);
     }
 
     /**
@@ -92,10 +92,13 @@ class HeroController extends Controller
     }
 
     /**
-     * Helden-Foto hochladen (HERO-22): Crop-Editor-kompatibel, JPG/PNG bis 20 MB.
+     * Helden-Foto hochladen (HERO-22): erlaubt für heldenregister.edit ODER
+     * den Spieler-Eigentümer (Teilnehmer, der diesen Helden besitzt).
      */
     public function uploadPhoto(Request $request, Hero $hero): RedirectResponse|JsonResponse
     {
+        $this->authorizePhotoAccess($request, $hero);
+
         $request->validate([
             'image' => ['required', 'image', 'mimes:jpg,jpeg,png', 'max:20480'],
         ]);
@@ -115,8 +118,10 @@ class HeroController extends Controller
     /**
      * Helden-Foto löschen (HERO-22).
      */
-    public function deletePhoto(Hero $hero): RedirectResponse|JsonResponse
+    public function deletePhoto(Request $request, Hero $hero): RedirectResponse|JsonResponse
     {
+        $this->authorizePhotoAccess($request, $hero);
+
         if ($hero->image) {
             \Illuminate\Support\Facades\Storage::disk('public')->delete($hero->image);
             $hero->update(['image' => null]);
@@ -124,9 +129,27 @@ class HeroController extends Controller
 
         $message = 'Helden-Foto gelöscht.';
 
-        return request()->expectsJson()
+        return $request->expectsJson()
             ? response()->json(['message' => $message, 'refresh_modal' => true])
             : back()->with('status', $message);
+    }
+
+    /**
+     * Foto-Berechtigung: heldenregister.edit (Bürokrat/Admin) ODER
+     * der Nutzer ist Betreuer des Spielers, dem dieser Held gehört.
+     */
+    private function authorizePhotoAccess(Request $request, Hero $hero): void
+    {
+        if ($request->user()->can('heldenregister.edit')) {
+            return;
+        }
+
+        $isOwner = $hero->player_id && \Illuminate\Support\Facades\DB::table('player_user')
+            ->where('player_id', $hero->player_id)
+            ->where('user_id', $request->user()->id)
+            ->exists();
+
+        abort_unless($isOwner, 403);
     }
 
     /**
@@ -184,6 +207,7 @@ class HeroController extends Controller
 
         $hero->load([
             'player.bookings.adventure',
+            'player.users',
             'classes.skills',
             'skills',
             'epTransactions.type',

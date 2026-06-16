@@ -1,6 +1,8 @@
 <span data-modal-title hidden>{{ $hero->character_name ?? 'Held' }}</span>
 
 @php($learnedIds = $hero->skills->pluck('id'))
+@php($canEditPhoto = auth()->user()?->can('heldenregister.edit')
+    || optional($hero->player)->users->contains('id', auth()->id()))
 
 <div id="skilltree"
      data-learn-url="{{ route('heroes.skills.store', $hero) }}"
@@ -19,124 +21,39 @@
     {{-- Tab: Übersicht --}}
     <div class="ui bottom attached tab segment active" data-tab="overview">
         <div class="float-right ml-4 mb-4 text-center" style="min-width:8rem;">
-
             {{-- Helden-Foto (Dummy-Bild wenn keins, HERO-22) --}}
-            <div id="hero-photo-preview-wrap">
-                <img id="hero-photo-current-img" src="{{ $hero->image_url }}" alt="{{ $hero->character_name }}"
-                     class="h-32 w-32 object-cover rounded border-2 border-[#5a3a22]/40">
-                @can('heldenregister.edit')
-                    <div class="flex gap-1 mt-2 justify-center">
-                        <label for="hero-photo-file-input" class="ui mini button" style="cursor:pointer;">
-                            <i class="upload icon"></i> Ändern
-                        </label>
-                        <input type="file" id="hero-photo-file-input" accept="image/jpeg,image/png" style="display:none">
-                        @if ($hero->image)
-                            <form method="POST" action="{{ route('heroes.photo.destroy', $hero) }}"
-                                  data-refresh-modal
-                                  onsubmit="return confirm('Helden-Foto wirklich löschen?');">
-                                @csrf @method('DELETE')
-                                <button type="submit" class="ui mini red icon button"
-                                        data-tooltip="Foto löschen" data-position="top center">
-                                    <i class="trash icon"></i>
-                                </button>
-                            </form>
-                        @endif
-                    </div>
-                @endcan
-            </div>
+            <img src="{{ $hero->image_url }}" alt="{{ $hero->character_name }}"
+                 class="h-32 w-32 object-cover rounded border-2 border-[#5a3a22]/40">
 
-            {{-- Crop-Editor (HERO-22, analog zu Spieler-Avatar) --}}
-            @can('heldenregister.edit')
-                <div id="hero-photo-editor-wrap" style="display:none; width:200px;">
-                    <div style="height:200px; overflow:hidden; background:#111; border-radius:.4rem;">
-                        <img id="hero-photo-editor-img" src="" alt="Zuschnitt" style="display:block; max-width:100%;">
-                    </div>
-                    <p class="text-xs text-stone-500 mt-1">Rahmen anpassen, dann übernehmen.</p>
-                    <div class="flex gap-1 mt-1 justify-center">
-                        <button type="button" id="hero-photo-crop-save" class="ui mini primary button">
-                            <i class="check icon"></i> Übernehmen
-                        </button>
-                        <button type="button" id="hero-photo-crop-cancel" class="ui mini button">Abbrechen</button>
-                    </div>
+            @if ($canEditPhoto)
+                <div class="flex gap-1 mt-2 justify-center">
+                    {{-- Ändern: öffnet Crop-Editor im gestapelten Modal --}}
+                    <label for="hero-photo-file-input" class="ui mini button" style="cursor:pointer;">
+                        <i class="upload icon"></i> Ändern
+                    </label>
+                    <input type="file" id="hero-photo-file-input" accept="image/jpeg,image/png"
+                           style="display:none"
+                           onchange="(function(f){
+                               if(!f) return;
+                               this.value='';
+                               openPhotoCropper(f, @json(route('heroes.photo', $hero)), function(){
+                                   if(appModal2Url) loadStackContent(appModal2Url, true);
+                                   else if(appModalUrl) loadModalContent(appModalUrl, true);
+                               });
+                           }).call(this, this.files[0])">
+                    @if ($hero->image)
+                        <form method="POST" action="{{ route('heroes.photo.destroy', $hero) }}"
+                              data-refresh-modal
+                              onsubmit="return confirm('Helden-Foto wirklich löschen?');">
+                            @csrf @method('DELETE')
+                            <button type="submit" class="ui mini red icon button"
+                                    data-tooltip="Foto löschen" data-position="top center">
+                                <i class="trash icon"></i>
+                            </button>
+                        </form>
+                    @endif
                 </div>
-
-                <script>
-                (function () {
-                    var uploadUrl = @json(route('heroes.photo', $hero));
-                    var cropper   = null;
-                    var fileInput = document.getElementById('hero-photo-file-input');
-                    var previewEl = document.getElementById('hero-photo-preview-wrap');
-                    var editorEl  = document.getElementById('hero-photo-editor-wrap');
-                    var editorImg = document.getElementById('hero-photo-editor-img');
-
-                    fileInput.addEventListener('change', function () {
-                        var file = this.files[0];
-                        if (!file) return;
-                        if (file.size > 20 * 1024 * 1024) {
-                            showToast('Bild zu groß (max. 20 MB).', 'error');
-                            this.value = '';
-                            return;
-                        }
-                        var reader = new FileReader();
-                        reader.onload = function (e) {
-                            editorImg.src = e.target.result;
-                            previewEl.style.display = 'none';
-                            editorEl.style.display  = '';
-                            if (cropper) { cropper.destroy(); }
-                            cropper = new Cropper(editorImg, {
-                                aspectRatio:  1,
-                                viewMode:     1,
-                                autoCropArea: 1,
-                                background:   false,
-                                responsive:   true,
-                            });
-                            // Gestapeltes Modal oder Haupt-Modal aktualisieren.
-                            setTimeout(function () {
-                                var $m = $('#app-modal-2-content').children().length
-                                    ? $('#app-modal-2') : $('#app-modal');
-                                $m.modal('refresh');
-                            }, 300);
-                        };
-                        reader.readAsDataURL(file);
-                    });
-
-                    document.getElementById('hero-photo-crop-cancel').addEventListener('click', function () {
-                        if (cropper) { cropper.destroy(); cropper = null; }
-                        editorImg.src = '';
-                        editorEl.style.display  = 'none';
-                        previewEl.style.display = '';
-                        fileInput.value = '';
-                    });
-
-                    document.getElementById('hero-photo-crop-save').addEventListener('click', function () {
-                        if (!cropper) return;
-                        var btn = this;
-                        btn.classList.add('loading', 'disabled');
-                        cropper.getCroppedCanvas({ width: 400, height: 400 }).toBlob(function (blob) {
-                            var fd = new FormData();
-                            fd.append('_token', document.querySelector('meta[name=csrf-token]').content);
-                            fd.append('image', blob, 'hero_photo.jpg');
-                            fetch(uploadUrl, {
-                                method:  'POST',
-                                headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' },
-                                body:    fd,
-                            })
-                            .then(function (r) { return r.json().catch(function () { return {}; }); })
-                            .then(function (data) {
-                                showToast(data.message || 'Foto gespeichert.', 'success');
-                                if (appModal2Url) {
-                                    loadStackContent(appModal2Url, true);
-                                } else if (appModalUrl) {
-                                    loadModalContent(appModalUrl, true);
-                                }
-                            })
-                            .catch(function () { showToast('Netzwerkfehler.', 'error'); })
-                            .finally(function () { btn.classList.remove('loading', 'disabled'); });
-                        }, 'image/jpeg', 0.85);
-                    });
-                })();
-                </script>
-            @endcan
+            @endif
         </div>
         <dl class="grid grid-cols-2 gap-4 text-stone-800">
             <div><dt class="text-sm text-stone-500">Spieler</dt><dd>{{ $hero->player?->full_name ?? '—' }}</dd></div>

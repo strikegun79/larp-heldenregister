@@ -118,18 +118,18 @@ class PlayerDetailTest extends TestCase
         Storage::disk('public')->assertExists($hero->fresh()->image);
     }
 
-    public function test_player_owner_cannot_upload_hero_photo(): void
+    public function test_player_owner_can_upload_hero_photo(): void
     {
         Storage::fake('public');
         $player = Player::factory()->create();
         $hero = Hero::factory()->create(['player_id' => $player->id]);
 
-        // Spieler-Eigentümer (Teilnehmer) hat kein heldenregister.edit -> nur lesend.
+        // Spieler-Eigentümer (Teilnehmer) darf seit HERO-22 das Helden-Foto ändern.
         $this->actingAs($this->ownerOf($player))
             ->post(route('heroes.photo', $hero), [
-                'image' => UploadedFile::fake()->image('hero.jpg'),
-            ])
-            ->assertForbidden();
+                'image' => UploadedFile::fake()->image('hero.jpg', 400, 400),
+            ], ['Accept' => 'application/json'])
+            ->assertOk();
     }
 
     public function test_owner_can_view_hero_detail_readonly(): void

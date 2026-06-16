@@ -98,26 +98,58 @@ class HeroPhotoTest extends TestCase
             ->assertOk();
     }
 
-    public function test_participant_cannot_upload_hero_photo(): void
+    public function test_owner_participant_can_upload_hero_photo(): void
+    {
+        $player = Player::factory()->create();
+        $hero = Hero::factory()->for($player)->create();
+        $owner = User::factory()->create();
+        $owner->roles()->attach(70);
+        $owner->players()->attach($player->id, ['self' => true]);
+
+        $this->actingAs($owner)
+            ->post(route('heroes.photo', $hero), [
+                'image' => UploadedFile::fake()->image('hero.jpg', 400, 400),
+            ], ['Accept' => 'application/json'])
+            ->assertOk()
+            ->assertJson(['refresh_modal' => true]);
+    }
+
+    public function test_owner_participant_can_delete_hero_photo(): void
+    {
+        Storage::disk('public')->put('heroes/own.jpg', 'fake');
+        $player = Player::factory()->create();
+        $hero = Hero::factory()->for($player)->create(['image' => 'heroes/own.jpg']);
+        $owner = User::factory()->create();
+        $owner->roles()->attach(70);
+        $owner->players()->attach($player->id, ['self' => true]);
+
+        $this->actingAs($owner)
+            ->delete(route('heroes.photo.destroy', $hero), [], ['Accept' => 'application/json'])
+            ->assertOk();
+
+        $this->assertNull($hero->refresh()->image);
+    }
+
+    public function test_unrelated_participant_cannot_upload_hero_photo(): void
     {
         $hero = Hero::factory()->create();
-        $user = User::factory()->create();
-        $user->roles()->attach(70); // Teilnehmer: kein heldenregister.edit
+        $other = User::factory()->create();
+        $other->roles()->attach(70); // kein Bezug zu diesem Helden
 
-        $this->actingAs($user)
+        $this->actingAs($other)
             ->post(route('heroes.photo', $hero), [
                 'image' => UploadedFile::fake()->image('hero.jpg'),
             ], ['Accept' => 'application/json'])
             ->assertForbidden();
     }
 
-    public function test_participant_cannot_delete_hero_photo(): void
+    public function test_unrelated_participant_cannot_delete_hero_photo(): void
     {
         $hero = Hero::factory()->create(['image' => 'heroes/test.jpg']);
-        $user = User::factory()->create();
-        $user->roles()->attach(70);
+        $other = User::factory()->create();
+        $other->roles()->attach(70);
 
-        $this->actingAs($user)
+        $this->actingAs($other)
             ->delete(route('heroes.photo.destroy', $hero), [], ['Accept' => 'application/json'])
             ->assertForbidden();
     }

@@ -80,6 +80,23 @@
             <div class="actions" id="app-modal-2-actions"></div>
         </div>
 
+        <!-- Foto-Crop-Modal: Helden-Foto zuschneiden (HERO-22) -->
+        <div class="ui modal" id="photo-crop-modal">
+            <div class="header">Foto zuschneiden</div>
+            <div class="scrolling content">
+                <div style="max-height:400px; overflow:hidden; background:#111; border-radius:.4rem;">
+                    <img id="photo-crop-img" src="" alt="Zuschnitt" style="display:block; max-width:100%;">
+                </div>
+                <p class="text-sm text-stone-500 mt-2">Rahmen verschieben und anpassen, dann „Übernehmen" klicken.</p>
+            </div>
+            <div class="actions">
+                <div class="ui deny button">Abbrechen</div>
+                <button type="button" id="photo-crop-save-btn" class="ui primary button">
+                    <i class="check icon"></i> Übernehmen
+                </button>
+            </div>
+        </div>
+
         <!-- Bestätigungs-Modal: Fertigkeit erlernen/aberkennen (HERO-14/16) -->
         <div class="ui small modal" id="skill-modal">
             <div class="header" id="skill-modal-title"></div>
@@ -466,6 +483,67 @@
             });
             document.getElementById('skill-modal-revoke').addEventListener('click', function () {
                 submitSkill(this, skillBaseUrl + '/' + skillCurrentId, 'DELETE'); // DELETE .../skills/{id}
+            });
+        </script>
+
+        <script>
+            // Gemeinsamer Foto-Crop-Editor im gestapelten Modal (HERO-22).
+            var photoCropper      = null;
+            var photoCropUrl      = null;
+            var photoCropCallback = null;
+
+            function openPhotoCropper(file, uploadUrl, onSuccess) {
+                if (file.size > 20 * 1024 * 1024) {
+                    showToast('Bild zu groß (max. 20 MB).', 'error');
+                    return;
+                }
+                photoCropUrl      = uploadUrl;
+                photoCropCallback = onSuccess || null;
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    var img = document.getElementById('photo-crop-img');
+                    img.src = e.target.result;
+                    if (photoCropper) { photoCropper.destroy(); }
+                    photoCropper = new Cropper(img, {
+                        aspectRatio: 1, viewMode: 1, autoCropArea: 1,
+                        background: false, responsive: true,
+                    });
+                    setTimeout(function () { $('#photo-crop-modal').modal('refresh'); }, 300);
+                };
+                reader.readAsDataURL(file);
+                $('#photo-crop-modal').modal({
+                    allowMultiple: true,
+                    closable: false,
+                    autofocus: false,
+                    onHidden: function () {
+                        if (photoCropper) { photoCropper.destroy(); photoCropper = null; }
+                        document.getElementById('photo-crop-img').src = '';
+                    },
+                }).modal('show');
+            }
+
+            document.getElementById('photo-crop-save-btn').addEventListener('click', function () {
+                if (!photoCropper || !photoCropUrl) return;
+                var btn = this;
+                btn.classList.add('loading', 'disabled');
+                photoCropper.getCroppedCanvas({ width: 400, height: 400 }).toBlob(function (blob) {
+                    var fd = new FormData();
+                    fd.append('_token', document.querySelector('meta[name=csrf-token]').content);
+                    fd.append('image', blob, 'photo.jpg');
+                    fetch(photoCropUrl, {
+                        method:  'POST',
+                        headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' },
+                        body:    fd,
+                    })
+                    .then(function (r) { return r.json().catch(function () { return {}; }); })
+                    .then(function (data) {
+                        showToast(data.message || 'Foto gespeichert.', 'success');
+                        $('#photo-crop-modal').modal('hide');
+                        if (photoCropCallback) photoCropCallback();
+                    })
+                    .catch(function () { showToast('Netzwerkfehler.', 'error'); })
+                    .finally(function () { btn.classList.remove('loading', 'disabled'); });
+                }, 'image/jpeg', 0.85);
             });
         </script>
 
