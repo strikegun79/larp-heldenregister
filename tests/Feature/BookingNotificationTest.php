@@ -48,7 +48,7 @@ class BookingNotificationTest extends TestCase
             ->postJson(route('adventures.bookings.store', $adventure), [
                 'player_id' => $player->id,
                 'event_role_id' => 1,
-                'agb' => '1',
+                'agb' => '1', 'kontakt_telefon' => '+49 123 456789',
             ])->assertOk();
 
         Notification::assertSentOnDemand(
@@ -67,7 +67,7 @@ class BookingNotificationTest extends TestCase
             ->postJson(route('adventures.bookings.store', $adventure), [
                 'player_id' => $player->id,
                 'event_role_id' => 1,
-                'agb' => '1',
+                'agb' => '1', 'kontakt_telefon' => '+49 123 456789',
             ])->assertOk();
 
         Notification::assertNothingSent();

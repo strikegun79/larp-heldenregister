@@ -59,7 +59,7 @@ class EventCancelTest extends TestCase
             ->postJson(route('adventures.bookings.store', $adventure), [
                 'player_id' => $player->id,
                 'event_role_id' => 1,
-                'agb' => '1',
+                'agb' => '1', 'kontakt_telefon' => '+49 123 456789',
             ])
             ->assertStatus(422)
             ->assertJsonPath('message', 'Für dieses Abenteuer ist die Anmeldung nicht geöffnet.');

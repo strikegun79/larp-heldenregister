@@ -59,7 +59,7 @@ class BookingHeroTest extends TestCase
             ->postJson(route('adventures.bookings.store', $adventure), [
                 'player_id' => $player->id,
                 'event_role_id' => 1,
-                'agb' => '1',
+                'agb' => '1', 'kontakt_telefon' => '+49 123 456789',
             ])
             ->assertOk();
 
@@ -79,7 +79,7 @@ class BookingHeroTest extends TestCase
             ->postJson(route('adventures.bookings.store', $adventure), [
                 'player_id' => $player->id,
                 'event_role_id' => 1,
-                'agb' => '1',
+                'agb' => '1', 'kontakt_telefon' => '+49 123 456789',
             ])
             ->assertOk();
 

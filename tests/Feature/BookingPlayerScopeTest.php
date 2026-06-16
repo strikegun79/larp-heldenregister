@@ -78,7 +78,7 @@ class BookingPlayerScopeTest extends TestCase
             ->postJson(route('adventures.bookings.store', $adventure), [
                 'player_id' => $foreign->id,
                 'event_role_id' => 1,
-                'agb' => '1',
+                'agb' => '1', 'kontakt_telefon' => '+49 123 456789',
             ])
             ->assertStatus(422)
             ->assertJsonPath('message', 'Für diesen Spieler darfst du keine Buchung anlegen.');
@@ -96,7 +96,7 @@ class BookingPlayerScopeTest extends TestCase
             ->postJson(route('adventures.bookings.store', $adventure), [
                 'player_id' => $foreign->id,
                 'event_role_id' => 1,
-                'agb' => '1',
+                'agb' => '1', 'kontakt_telefon' => '+49 123 456789',
             ])
             ->assertOk();
 

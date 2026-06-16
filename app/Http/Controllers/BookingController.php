@@ -50,6 +50,7 @@ class BookingController extends Controller
             'adventure' => $adventure,
             'players' => $players,
             'roles' => EventRole::orderBy('id')->get(),
+            'userPhone' => $request->user()->phone,
         ]);
     }
 
@@ -70,6 +71,7 @@ class BookingController extends Controller
             'allergien' => ['nullable', 'string'],
             'medikamente' => ['nullable', 'string'],
             'erreichbarkeit' => ['nullable', 'string'],
+            'kontakt_telefon' => ['required', 'string', 'max:100'],
         ]);
 
         // Ohne book-any-player nur eigene/betreute Spieler buchen (BOOK-10).
@@ -103,6 +105,7 @@ class BookingController extends Controller
             'allergien' => $data['allergien'] ?? null,
             'medikamente' => $data['medikamente'] ?? null,
             'erreichbarkeit' => $data['erreichbarkeit'] ?? null,
+            'kontakt_telefon' => $data['kontakt_telefon'],
             // Volles Event -> automatisch auf die Warteliste.
             'waitlisted' => $adventure->isFull(),
         ]);
@@ -149,6 +152,7 @@ class BookingController extends Controller
             'vegetarier' => ['boolean'],
             'allergien' => ['nullable', 'string'],
             'erreichbarkeit' => ['nullable', 'string'],
+            'kontakt_telefon' => ['required', 'string', 'max:100'],
         ]);
 
         if (! $adventure->registrationOpen()) {
@@ -168,6 +172,7 @@ class BookingController extends Controller
             'vegetarier' => $request->boolean('vegetarier'),
             'allergien' => $data['allergien'] ?? null,
             'erreichbarkeit' => $data['erreichbarkeit'] ?? null,
+            'kontakt_telefon' => $data['kontakt_telefon'],
             'waitlisted' => $adventure->isFull(),
         ]);
 
@@ -211,6 +216,7 @@ class BookingController extends Controller
             'allergien' => ['nullable', 'string'],
             'medikamente' => ['nullable', 'string'],
             'erreichbarkeit' => ['nullable', 'string'],
+            'kontakt_telefon' => ['required', 'string', 'max:100'],
         ]);
 
         $booking->update([
@@ -223,6 +229,7 @@ class BookingController extends Controller
             'allergien' => $data['allergien'] ?? null,
             'medikamente' => $data['medikamente'] ?? null,
             'erreichbarkeit' => $data['erreichbarkeit'] ?? null,
+            'kontakt_telefon' => $data['kontakt_telefon'],
         ]);
 
         $message = 'Anmeldung aktualisiert.';

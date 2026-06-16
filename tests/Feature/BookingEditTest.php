@@ -54,6 +54,7 @@ class BookingEditTest extends TestCase
                 'event_role_id' => $newRole->id,
                 'vegetarier' => 1,
                 'allergien' => 'Nüsse',
+                'kontakt_telefon' => '+49 123 456789',
             ])
             ->assertOk()
             ->assertJson(['refresh_modal' => true]);

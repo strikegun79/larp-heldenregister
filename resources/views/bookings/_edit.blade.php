@@ -36,6 +36,13 @@
         <textarea name="erreichbarkeit" rows="2">{{ $booking->erreichbarkeit }}</textarea>
     </div>
 
+    <div class="field required">
+        <label>Kontaktrufnummer (Notfallkontakt)</label>
+        <input type="tel" name="kontakt_telefon" maxlength="100" required
+               value="{{ old('kontakt_telefon', $booking->kontakt_telefon) }}"
+               placeholder="z. B. +49 123 456789">
+    </div>
+
     </form>
 
 <div data-modal-actions hidden>

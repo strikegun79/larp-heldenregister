@@ -43,7 +43,7 @@ class EventGuestBookingTest extends TestCase
         $this->actingAs($booker)
             ->postJson(route('adventures.bookings.store-guest', $adventure), [
                 'guest_name' => 'Gerd', 'guest_lastname' => 'Gast', 'guest_age' => 42, 'guest_place' => 'Gießen',
-                'event_role_id' => 1, 'agb' => '1',
+                'event_role_id' => 1, 'agb' => '1', 'kontakt_telefon' => '+49 123 456789',
             ])
             ->assertOk();
 
@@ -63,7 +63,7 @@ class EventGuestBookingTest extends TestCase
 
         foreach (['Anna', 'Bob'] as $name) {
             $this->actingAs($booker)->postJson(route('adventures.bookings.store-guest', $adventure), [
-                'guest_name' => $name, 'guest_lastname' => 'Gast', 'event_role_id' => 1, 'agb' => '1',
+                'guest_name' => $name, 'guest_lastname' => 'Gast', 'event_role_id' => 1, 'agb' => '1', 'kontakt_telefon' => '+49 123 456789',
             ])->assertOk();
         }
 

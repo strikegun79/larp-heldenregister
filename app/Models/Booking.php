@@ -30,6 +30,7 @@ class Booking extends Model
         'allergien',
         'medikamente',
         'erreichbarkeit',
+        'kontakt_telefon',
         'signature',
         'waitlisted',
         'approved_at',
