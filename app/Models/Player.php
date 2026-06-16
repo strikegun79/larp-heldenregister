@@ -41,7 +41,7 @@ class Player extends Model
     public function getAvatarUrlAttribute(): string
     {
         return $this->image
-            ? \Illuminate\Support\Facades\Storage::disk('public')->url($this->image)
+            ? '/storage/' . $this->image
             : '/images/player_default_avatar.jpg';
     }
 

@@ -33,7 +33,7 @@ class Hero extends Model
     /** Öffentliche URL des Avatar-Bilds (HERO-09) bzw. null. */
     public function getImageUrlAttribute(): ?string
     {
-        return $this->image ? \Illuminate\Support\Facades\Storage::disk('public')->url($this->image) : null;
+        return $this->image ? '/storage/' . $this->image : null;
     }
 
     /**
