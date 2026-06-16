@@ -28,6 +28,8 @@ class AvatarStorage
 
         $dst = imagecreatetruecolor($size, $size);
         imagecopyresampled($dst, $src, 0, 0, $sx, $sy, $size, $size, $side, $side);
+        // 72 DPI für Browser-Anzeige setzen.
+        imageresolution($dst, 72, 72);
 
         ob_start();
         imagejpeg($dst, null, 85);

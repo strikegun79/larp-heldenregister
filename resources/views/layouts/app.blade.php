@@ -16,6 +16,8 @@
         <link rel="stylesheet" href="{{ asset('css/heldenregister.css') }}">
         <!-- Fomantic UI (wie im Legacy) -->
         <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fomantic-ui@2.9.3/dist/semantic.min.css">
+        <!-- Cropper.js für Avatar-Editor (PLAY-11) -->
+        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.css">
 
         <!-- Scripts (Tailwind/Breeze danach, damit das Theme gewinnt) -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -135,6 +137,8 @@
         <!-- jQuery + Fomantic JS -->
         <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
         <script src="https://cdn.jsdelivr.net/npm/fomantic-ui@2.9.3/dist/semantic.min.js"></script>
+        <!-- Cropper.js für Avatar-Editor (PLAY-11) -->
+        <script src="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.js"></script>
         <script>
             let appModalUrl = null;
 

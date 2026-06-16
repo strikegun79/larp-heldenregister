@@ -25,29 +25,35 @@
                 @endif
             </form>
 
-            <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                {{-- Karte „Neuer Spieler" (PLAY-10) --}}
+            {{-- Spielerkarten: Avatar links (150×150), Daten rechts (PLAY-11) --}}
+            <div class="grid gap-4 grid-cols-1 md:grid-cols-2">
+
+                {{-- Karte „Neuer Spieler" --}}
                 <a href="{{ route('players.create') }}" data-modal-url="{{ route('players.create') }}"
-                   class="group block rounded-lg overflow-hidden border-2 border-dashed border-[#5a3a22]/50 bg-white/50 shadow hover:shadow-xl hover:-translate-y-1 transition">
-                    <div class="h-48 overflow-hidden">
-                        <img src="/images/wewantyou_poster4.jpg" alt="Neuer Spieler" class="w-full h-full object-cover group-hover:scale-105 transition">
+                   class="group flex rounded-lg overflow-hidden border-2 border-dashed border-[#5a3a22]/50 bg-white/50 shadow hover:shadow-xl hover:-translate-y-1 transition min-h-[150px]">
+                    <div class="shrink-0 overflow-hidden" style="width:150px; min-height:150px;">
+                        <img src="/images/wewantyou_poster4.jpg" alt="Neuer Spieler"
+                             class="w-full h-full object-cover group-hover:scale-105 transition" style="min-height:150px;">
                     </div>
-                    <div class="p-4 text-center">
-                        <div class="font-uncial text-lg text-waldritter">Neuer Spieler</div>
-                        <div class="text-sm text-stone-600">Neuen Spieler erstellen</div>
+                    <div class="p-4 flex-1 flex flex-col justify-center">
+                        <div class="font-uncial text-xl text-waldritter">Neuer Spieler</div>
+                        <div class="text-sm text-stone-600 mt-1">Neuen Spieler erstellen</div>
                     </div>
                 </a>
 
-                {{-- Spielerkarten (Steckbrief-Papyrus als Karten-Hintergrund, PLAY-11) --}}
+                {{-- Spielerkarten mit Papyrus-Hintergrund --}}
                 @foreach ($players as $player)
                     <a href="{{ route('players.show', $player) }}" data-modal-url="{{ route('players.show', $player) }}"
-                       class="group block rounded-lg overflow-hidden border-2 border-[#5a3a22]/40 shadow hover:shadow-xl hover:-translate-y-1 transition"
+                       class="group flex rounded-lg overflow-hidden border-2 border-[#5a3a22]/40 shadow hover:shadow-xl hover:-translate-y-1 transition min-h-[150px]"
                        style="background-image:url('/images/player_background.png'); background-size:cover; background-position:center; background-color:#efe4cf;">
-                        <div class="h-48 overflow-hidden">
-                            <img src="{{ $player->avatar_url }}" alt="{{ $player->full_name }}" class="w-full h-full object-cover group-hover:scale-105 transition">
+                        {{-- Avatar 1:1, linksbündig --}}
+                        <div class="shrink-0 overflow-hidden" style="width:150px; min-height:150px;">
+                            <img src="{{ $player->avatar_url }}" alt="{{ $player->full_name }}"
+                                 class="w-full h-full object-cover group-hover:scale-105 transition" style="min-height:150px;">
                         </div>
-                        <div class="p-4">
-                            <div class="font-uncial text-lg text-waldritter">
+                        {{-- Name + Spielerdaten --}}
+                        <div class="p-4 flex-1">
+                            <div class="font-uncial text-lg text-waldritter leading-snug">
                                 {{ $player->full_name }}
                                 @if ($player->pivot->self)
                                     <span class="align-middle rounded bg-[#5a3a22] text-amber-50 text-xs px-2 py-0.5">Du</span>

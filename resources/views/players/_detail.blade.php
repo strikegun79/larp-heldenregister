@@ -84,18 +84,101 @@
     @endif
 </div>
 
-{{-- Tab: Avatar (Upload) --}}
+{{-- Tab: Avatar (Crop-Editor, PLAY-11) --}}
 @if ($canEdit)
     <div class="ui bottom attached tab segment" data-tab="p-avatar">
-        <img src="{{ $player->avatar_url }}" alt="Avatar" class="w-40 h-40 object-cover rounded border-2 border-[#5a3a22]/40 mb-3" style="aspect-ratio:1/1;">
-        <form method="POST" action="{{ route('players.avatar', $player) }}" enctype="multipart/form-data" data-refresh-modal class="ui form">
-            @csrf
-            <p class="text-sm text-stone-600">JPG oder PNG, max. 2 MB. Das Bild wird zentriert auf 1:1 zugeschnitten.</p>
-            <div class="flex items-center gap-2 mt-2">
-                <input type="file" name="image" accept="image/jpeg,image/png" required class="text-sm">
-                <button type="submit" class="ui primary button">Avatar speichern</button>
+        {{-- Vorschau des aktuellen Avatars + Datei-Auswahl --}}
+        <div id="avatar-preview-wrap">
+            <img id="avatar-current-img" src="{{ $player->avatar_url }}" alt="Avatar"
+                 class="w-40 h-40 object-cover rounded border-2 border-[#5a3a22]/40 mb-3" style="aspect-ratio:1/1;">
+            <label class="ui button" for="avatar-file-input" style="cursor:pointer;">
+                <i class="upload icon"></i> Bild auswählen (JPG/PNG, max. 20 MB)
+            </label>
+            <input type="file" id="avatar-file-input" accept="image/jpeg,image/png" class="hidden" style="display:none">
+        </div>
+
+        {{-- Crop-Editor (zunächst versteckt) --}}
+        <div id="avatar-editor-wrap" style="display:none">
+            <div style="max-height:340px; overflow:hidden; background:#111; border-radius:.4rem;">
+                <img id="avatar-editor-img" src="" alt="Zuschnitt" style="display:block; max-width:100%;">
             </div>
-        </form>
+            <p class="text-sm text-stone-500 mt-2">Rahmen verschieben und anpassen, dann „Übernehmen" klicken.</p>
+            <div class="flex gap-2 mt-2">
+                <button type="button" id="avatar-crop-save" class="ui primary button">
+                    <i class="check icon"></i> Übernehmen
+                </button>
+                <button type="button" id="avatar-crop-cancel" class="ui button">Abbrechen</button>
+            </div>
+        </div>
+
+        <script>
+        (function () {
+            var uploadUrl  = @json(route('players.avatar', $player));
+            var cropper    = null;
+            var fileInput  = document.getElementById('avatar-file-input');
+            var previewEl  = document.getElementById('avatar-preview-wrap');
+            var editorEl   = document.getElementById('avatar-editor-wrap');
+            var editorImg  = document.getElementById('avatar-editor-img');
+
+            fileInput.addEventListener('change', function () {
+                var file = this.files[0];
+                if (!file) return;
+                if (file.size > 20 * 1024 * 1024) {
+                    showToast('Bild zu groß (max. 20 MB).', 'error');
+                    this.value = '';
+                    return;
+                }
+                var reader = new FileReader();
+                reader.onload = function (e) {
+                    editorImg.src = e.target.result;
+                    previewEl.style.display = 'none';
+                    editorEl.style.display  = '';
+                    if (cropper) { cropper.destroy(); }
+                    cropper = new Cropper(editorImg, {
+                        aspectRatio:  1,
+                        viewMode:     1,
+                        autoCropArea: 1,
+                        background:   false,
+                        responsive:   true,
+                    });
+                    // Modal-Größe nach Inhaltswechsel aktualisieren.
+                    setTimeout(function () { $('#app-modal').modal('refresh'); }, 300);
+                };
+                reader.readAsDataURL(file);
+            });
+
+            document.getElementById('avatar-crop-cancel').addEventListener('click', function () {
+                if (cropper) { cropper.destroy(); cropper = null; }
+                editorImg.src      = '';
+                editorEl.style.display  = 'none';
+                previewEl.style.display = '';
+                fileInput.value = '';
+            });
+
+            document.getElementById('avatar-crop-save').addEventListener('click', function () {
+                if (!cropper) return;
+                var btn = this;
+                btn.classList.add('loading', 'disabled');
+                cropper.getCroppedCanvas({ width: 400, height: 400 }).toBlob(function (blob) {
+                    var fd = new FormData();
+                    fd.append('_token', document.querySelector('meta[name=csrf-token]').content);
+                    fd.append('image', blob, 'avatar.jpg');
+                    fetch(uploadUrl, {
+                        method:  'POST',
+                        headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' },
+                        body:    fd,
+                    })
+                    .then(function (r) { return r.json().catch(function () { return {}; }); })
+                    .then(function (data) {
+                        showToast(data.message || 'Avatar gespeichert.', 'success');
+                        if (appModalUrl) loadModalContent(appModalUrl, true);
+                    })
+                    .catch(function () { showToast('Netzwerkfehler.', 'error'); })
+                    .finally(function () { btn.classList.remove('loading', 'disabled'); });
+                }, 'image/jpeg', 0.85);
+            });
+        })();
+        </script>
     </div>
 @endif
 

@@ -126,3 +126,31 @@ es höchstens einen geben.
 >
 > Hinweis: Die interaktive Bildanpassung ist als automatisches Zentrier-Cropping
 > (1:1) umgesetzt; `/images/player_background.png` aus dem Legacy bitte ablegen.
+
+### PLAY-12 · Spieler-Avatar · ⏱ 4h · ✅
+**Beschreibung:** Hochladen des Avatars für den Spieler
+**Akzeptanzkriterien:**
+- [x] ermögliche das Hochladen von Fotos bis zu 20MB
+- [x] wandle das Bild um auf 72dpi damit man es im Browser im Avatar Editor verwenden kann
+- [x] zeige eine Maske als Avatar Editor an um dann im 1:1 Format das neuhochgelandene Bild verschieben kann.
+- [x] nach bestätigung wird das Bild so im Backend gespeichert
+- [x] Die Spieler-Übersicht soll in jeder Spieler-Karte das Avatar 1:1 linksbündig anzeigen. Rechts daneben der Name und die Spielerdaten. ungefähr so: <div class="ui card player">
+	<div class="image">
+	  <img src="avatar1.jpg" width="150px" height="150px">
+	</div>
+	<div class="content" style="height:190px">
+		<div class="header">
+			Dummy Tester
+		</div>
+	  <div class="meta">
+		
+	  </div>
+	  <div class="description">
+		Erstellt: <br>
+		Alter: 17<br>
+		Geschlecht: divers<br>
+		Besuchte Events: 
+	  </div>
+	</div>
+</div>
+
