@@ -23,12 +23,12 @@ damit Admins die Matrix einsehen können.
 - [x] Anzahl Nutzer je Rolle wird angezeigt.
 - [x] Nur mit `portal.manage` erreichbar.
 
-### ROLE-05 · Projektleitung-Rechte verifizieren/abschließen · ⏱ 2h · 🔲
+### ROLE-05 · Projektleitung-Rechte verifizieren/abschließen · ⏱ 2h · ✅
 **Beschreibung:** Projektleitung wurde in der YAML ergänzt; End-to-End prüfen,
 dass alle UI-Pfade (Events anlegen via `events.edit`) für sie funktionieren.
 **Akzeptanzkriterien:**
-- [ ] Feature-Tests: Projektleitung kann Events anlegen/bearbeiten, buchen, Helden ansehen.
-- [ ] Dashboard-/Nav-Sichtbarkeit für Projektleitung korrekt.
+- [x] Feature-Tests: Projektleitung kann Events anlegen/bearbeiten, buchen, Helden ansehen.
+- [x] Dashboard-/Nav-Sichtbarkeit für Projektleitung korrekt.
 
 ### ROLE-06 · Permission-gestützte Sichtbarkeit für Profil/Spieler entscheiden · ⏱ 3h · 🔲
 **Beschreibung:** `profile.view`/`player.view` sind aktuell nicht per Middleware
