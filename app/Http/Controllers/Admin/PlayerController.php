@@ -67,6 +67,65 @@ class PlayerController extends Controller
         return $this->respond($request, 'Betreuer entfernt.');
     }
 
+    /**
+     * Spieler soft-löschen (PLAY-08).
+     * Ohne ?force=1: bei offenen Buchungen/aktiven Helden Warnung und Abbruch.
+     * Mit ?force=1: Löschen trotz Warnung (Admin-Override).
+     */
+    public function destroy(Request $request, int $id): RedirectResponse
+    {
+        $player = Player::withTrashed()->findOrFail($id);
+
+        if (! $request->boolean('force')) {
+            $blockers = $this->collectBlockers($player);
+
+            if ($blockers !== []) {
+                return redirect()
+                    ->route('admin.players.index')
+                    ->with('warning', implode(' ', $blockers))
+                    ->with('force_delete_id', $player->id)
+                    ->with('force_delete_name', $player->full_name);
+            }
+        }
+
+        $player->delete();
+
+        return redirect()->route('admin.players.index')
+            ->with('status', 'Spieler "'.$player->full_name.'" wurde gelöscht.');
+    }
+
+    /**
+     * Soft-Delete eines Spielers rückgängig machen (PLAY-08).
+     */
+    public function restore(int $id): RedirectResponse
+    {
+        $player = Player::withTrashed()->findOrFail($id);
+        $player->restore();
+
+        return redirect()->route('admin.players.index')
+            ->with('status', 'Spieler "'.$player->full_name.'" wurde wiederhergestellt.');
+    }
+
+    /** Offene Buchungen und aktive Helden als Warnhinweis-Texte sammeln. */
+    private function collectBlockers(Player $player): array
+    {
+        $blockers = [];
+
+        $openBookings = $player->bookings()
+            ->whereNotIn('status', ['abgemeldet', 'abgelehnt'])
+            ->count();
+        if ($openBookings > 0) {
+            $blockers[] = "Der Spieler hat {$openBookings} offene/bestätigte Anmeldung(en).";
+        }
+
+        $activeHeroes = $player->heroes()->count();
+        if ($activeHeroes > 0) {
+            $blockers[] = "Der Spieler hat {$activeHeroes} aktiven Helden.";
+        }
+
+        return $blockers;
+    }
+
     private function respond(Request $request, string $message): RedirectResponse|JsonResponse
     {
         return $request->expectsJson()

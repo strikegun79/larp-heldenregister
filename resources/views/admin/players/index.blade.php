@@ -8,6 +8,26 @@
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+            @if (session('status'))
+                <div class="ui success message mb-4">{{ session('status') }}</div>
+            @endif
+
+            @if (session('warning'))
+                <div class="ui warning message mb-4">
+                    <div class="header">Hinweis vor dem Löschen</div>
+                    <p>{{ session('warning') }}</p>
+                    @if (session('force_delete_id'))
+                        <form method="POST" action="{{ route('admin.players.destroy', session('force_delete_id')) }}"
+                              class="mt-2" onsubmit="return confirm('Spieler „{{ session('force_delete_name') }}" trotzdem löschen?');">
+                            @csrf @method('DELETE')
+                            <input type="hidden" name="force" value="1">
+                            <button type="submit" class="ui mini red button">Trotzdem löschen</button>
+                        </form>
+                    @endif
+                </div>
+            @endif
+
             <div class="bg-white/70 border-2 border-[#5a3a22]/40 shadow sm:rounded-lg overflow-hidden">
                 <table class="min-w-full divide-y divide-stone-200">
                     <thead class="bg-black/5">
@@ -42,8 +62,29 @@
                                 </td>
                                 <td class="px-6 py-4 text-right">
                                     <div class="flex items-center justify-end gap-3">
-                                        <a href="{{ route('admin.players.caretakers', $player) }}" data-modal-url="{{ route('admin.players.caretakers', $player) }}" class="text-indigo-700 hover:underline">Betreuer</a>
-                                        <a href="{{ route('admin.players.matrix.edit', $player) }}" class="text-indigo-700 hover:underline">Matrix</a>
+                                        @if ($player->trashed())
+                                            <form method="POST" action="{{ route('admin.players.restore', $player->id) }}">
+                                                @csrf @method('PATCH')
+                                                <button type="submit" class="ui mini green button"
+                                                        data-tooltip="Wiederherstellen" data-position="top center">
+                                                    <i class="undo icon"></i> Wiederherstellen
+                                                </button>
+                                            </form>
+                                        @else
+                                            <a href="{{ route('admin.players.caretakers', $player) }}"
+                                               data-modal-url="{{ route('admin.players.caretakers', $player) }}"
+                                               class="text-indigo-700 hover:underline">Betreuer</a>
+                                            <a href="{{ route('admin.players.matrix.edit', $player) }}"
+                                               class="text-indigo-700 hover:underline">Matrix</a>
+                                            <form method="POST" action="{{ route('admin.players.destroy', $player->id) }}"
+                                                  onsubmit="return confirm('Spieler „{{ $player->full_name }}" löschen?');">
+                                                @csrf @method('DELETE')
+                                                <button type="submit" class="ui mini red icon button"
+                                                        data-tooltip="Löschen" data-position="top center">
+                                                    <i class="trash icon"></i>
+                                                </button>
+                                            </form>
+                                        @endif
                                     </div>
                                 </td>
                             </tr>

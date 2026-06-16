@@ -63,12 +63,12 @@ es höchstens einen geben.
 > Spalte) und Teilnehmer-PDF (neue Spalte). Wohnort (`players.place`) bereits
 > ergänzt (Formular/Detail/PDF). Tests: `PlayerAgeTest` (6).
 
-### PLAY-08 · Spieler-Soft-Delete + Wiederherstellung im Admin · ⏱ 3h · 🔲
+### PLAY-08 · Spieler-Soft-Delete + Wiederherstellung im Admin · ⏱ 3h · ✅
 **Beschreibung:** Gelöschte Spieler erscheinen in der Admin-Liste; Restore fehlt.
 **Akzeptanzkriterien:**
-- [ ] Admin kann soft-gelöschte Spieler wiederherstellen.
-- [ ] Löschen prüft offene Buchungen/aktive Helden (Warnung).
-- [ ] Tests.
+- [x] Admin kann soft-gelöschte Spieler wiederherstellen.
+- [x] Löschen prüft offene Buchungen/aktive Helden (Warnung).
+- [x] Tests.
 
 ### PLAY-09 · Spielerliste: Suche & Sortierung · ⏱ 3h · 🔲
 **Beschreibung:** Filter nach Name/aktiv; Sortierung.

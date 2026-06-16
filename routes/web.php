@@ -140,6 +140,9 @@ Route::middleware('auth')->group(function () {
         });
         Route::get('players', [Admin\PlayerController::class, 'index'])->name('players.index');
         Route::get('players/export', [Admin\PlayerController::class, 'export'])->name('players.export'); // REP-04
+        // Soft-Delete + Wiederherstellung (PLAY-08).
+        Route::delete('players/{id}', [Admin\PlayerController::class, 'destroy'])->name('players.destroy');
+        Route::patch('players/{id}/restore', [Admin\PlayerController::class, 'restore'])->name('players.restore');
         // Betreuer je Spieler verwalten (PLAY-06).
         Route::get('players/{player}/caretakers', [Admin\PlayerController::class, 'caretakers'])->name('players.caretakers');
         Route::post('players/{player}/caretakers', [Admin\PlayerController::class, 'attachCaretaker'])->name('players.caretakers.store');
