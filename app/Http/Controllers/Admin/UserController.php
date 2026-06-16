@@ -17,11 +17,11 @@ use Illuminate\View\View;
 class UserController extends Controller
 {
     /**
-     * Liste aller Portal-Nutzer.
+     * Liste aller Portal-Nutzer inkl. soft-gelöschter (AUTH-08).
      */
     public function index(): View
     {
-        $users = User::with('roles')->orderBy('name')->paginate(25);
+        $users = User::withTrashed()->with('roles')->orderBy('name')->paginate(25);
 
         return view('admin.users.index', compact('users'));
     }
@@ -42,6 +42,18 @@ class UserController extends Controller
         }
 
         return view('admin.users.edit', $data);
+    }
+
+    /**
+     * Soft-gelöschtes Konto wiederherstellen (AUTH-08).
+     */
+    public function restore(int $id): RedirectResponse
+    {
+        $user = User::withTrashed()->findOrFail($id);
+        $user->restore();
+
+        return redirect()->route('admin.users.index')
+            ->with('status', 'Konto '.$user->name.' wurde wiederhergestellt.');
     }
 
     /**

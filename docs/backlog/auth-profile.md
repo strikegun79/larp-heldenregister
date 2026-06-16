@@ -46,12 +46,12 @@ Klartext-Passwort; Login schlägt fehl. Erzwungener Reset nötig.
 - [x] Bereits eingeloggte deaktivierte Nutzer werden ausgeloggt (Middleware).
 - [x] Feature-Tests für aktiv/inaktiv.
 
-### AUTH-08 · „Profil löschen" auf Soft-Delete + Re-Aktivierung prüfen · ⏱ 2h · 🔲
+### AUTH-08 · „Profil löschen" auf Soft-Delete + Re-Aktivierung prüfen · ⏱ 2h · ✅
 **Beschreibung:** User nutzt SoftDeletes; Selbstlöschung und Admin-Sicht klären.
 **Akzeptanzkriterien:**
-- [ ] Selbstlöschung soft-deleted das Konto und loggt aus (bereits Verhalten – Test absichern).
-- [ ] Soft-gelöschte Nutzer erscheinen nicht in Auswahl-/Login-Listen.
-- [ ] Admin kann ein soft-gelöschtes Konto wiederherstellen (optionale Teilaufgabe).
+- [x] Selbstlöschung soft-deleted das Konto und loggt aus (bereits Verhalten – Test absichern).
+- [x] Soft-gelöschte Nutzer erscheinen nicht in Auswahl-/Login-Listen.
+- [x] Admin kann ein soft-gelöschtes Konto wiederherstellen (optionale Teilaufgabe).
 
 ### AUTH-09 · Registrieren als Nutzer  · ⏱ 2h · 🔲
 **Beschreibung:** Neuer User kann sich registrieren als für Teilnehmer und Buchen von Events

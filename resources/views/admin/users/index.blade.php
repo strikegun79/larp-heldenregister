@@ -22,13 +22,28 @@
                     </thead>
                     <tbody class="divide-y divide-stone-200 text-stone-800">
                         @foreach ($users as $user)
-                            <tr>
-                                <td class="px-6 py-4">{{ trim("{$user->name} {$user->lastname}") }}</td>
+                            <tr class="{{ $user->trashed() ? 'opacity-50 bg-stone-50' : '' }}">
+                                <td class="px-6 py-4">
+                                    {{ trim("{$user->name} {$user->lastname}") }}
+                                    @if ($user->trashed())
+                                        <span class="ml-2 text-xs text-red-600 font-semibold">[gelöscht]</span>
+                                    @endif
+                                </td>
                                 <td class="px-6 py-4">{{ $user->email }}</td>
                                 <td class="px-6 py-4 text-sm">{{ $user->roles->pluck('label')->implode(', ') ?: '—' }}</td>
                                 <td class="px-6 py-4">{{ $user->activated ? 'ja' : 'nein' }}</td>
                                 <td class="px-6 py-4 text-right">
-                                    <a href="{{ route('admin.users.edit', $user) }}" data-modal-url="{{ route('admin.users.edit', $user) }}" class="text-indigo-700 hover:underline">Bearbeiten</a>
+                                    @if ($user->trashed())
+                                        <form method="POST" action="{{ route('admin.users.restore', $user->id) }}" class="inline"
+                                              onsubmit="return confirm('Konto von {{ addslashes(trim($user->name . ' ' . $user->lastname)) }} wiederherstellen?')">
+                                            @csrf @method('PATCH')
+                                            <button type="submit" class="text-green-700 hover:underline">Wiederherstellen</button>
+                                        </form>
+                                    @else
+                                        <a href="{{ route('admin.users.edit', $user) }}"
+                                           data-modal-url="{{ route('admin.users.edit', $user) }}"
+                                           class="text-indigo-700 hover:underline">Bearbeiten</a>
+                                    @endif
                                 </td>
                             </tr>
                         @endforeach
@@ -37,7 +52,10 @@
             </div>
 
             <div class="mt-4">{{ $users->links() }}</div>
-            <a href="{{ route('admin.index') }}" class="inline-block mt-4 text-sm text-stone-600 hover:underline">&larr; Zur Verwaltung</a>
+            <br>
+            <a href="{{ route('admin.index') }}">
+                <x-primary-button>Zurück zur Verwaltung</x-primary-button>
+            </a>
         </div>
     </div>
 </x-app-layout>

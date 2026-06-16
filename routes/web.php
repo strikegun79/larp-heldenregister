@@ -139,6 +139,7 @@ Route::middleware('auth')->group(function () {
             Route::get('users', [Admin\UserController::class, 'index'])->name('users.index');
             Route::get('users/{user}/edit', [Admin\UserController::class, 'edit'])->name('users.edit');
             Route::put('users/{user}', [Admin\UserController::class, 'update'])->name('users.update');
+            Route::patch('users/{id}/restore', [Admin\UserController::class, 'restore'])->name('users.restore');
         });
         Route::get('players', [Admin\PlayerController::class, 'index'])->name('players.index');
         Route::get('players/export', [Admin\PlayerController::class, 'export'])->name('players.export'); // REP-04
