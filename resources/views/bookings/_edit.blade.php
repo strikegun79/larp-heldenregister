@@ -39,8 +39,11 @@
     <div class="field required">
         <label>Kontaktrufnummer (Notfallkontakt)</label>
         <input type="tel" name="kontakt_telefon" maxlength="100" required
-               value="{{ old('kontakt_telefon', $booking->kontakt_telefon) }}"
+               value="{{ old('kontakt_telefon', $booking->kontakt_telefon ?? $userPhone ?? '') }}"
                placeholder="z. B. +49 123 456789">
+        @if (!$booking->kontakt_telefon && $userPhone)
+            <small class="text-stone-400">Aus dem Spielerprofil übernommen – du kannst die Nummer ändern.</small>
+        @endif
     </div>
 
     </form>

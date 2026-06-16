@@ -190,12 +190,15 @@ class BookingController extends Controller
     {
         abort_unless($booking->adventure_id === $adventure->id, 404);
 
-        $booking->load('player');
+        $booking->load('player.users');
+
+        $userPhone = $booking->player?->users->first()?->phone;
 
         return view('bookings._edit', [
             'adventure' => $adventure,
-            'booking' => $booking,
-            'roles' => EventRole::orderBy('id')->get(),
+            'booking'   => $booking,
+            'roles'     => EventRole::orderBy('id')->get(),
+            'userPhone' => $userPhone,
         ]);
     }
 
