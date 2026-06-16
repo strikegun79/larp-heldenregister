@@ -22,13 +22,23 @@ class PlayerController extends Controller
      */
     public function index(Request $request): View
     {
-        $players = $request->user()->players()
+        $q = trim($request->string('q'));
+
+        $query = $request->user()->players()
             ->with(['heroes.classes', 'activeHero'])
             ->withCount('visits')
-            ->orderBy('name')
-            ->get();
+            ->orderBy('name');
 
-        return view('players.index', compact('players'));
+        if ($q !== '') {
+            $query->where(function ($builder) use ($q) {
+                $builder->where('name', 'like', "%{$q}%")
+                    ->orWhere('lastname', 'like', "%{$q}%");
+            });
+        }
+
+        $players = $query->get();
+
+        return view('players.index', compact('players', 'q'));
     }
 
     public function create(Request $request): View

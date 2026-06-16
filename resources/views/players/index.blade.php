@@ -14,6 +14,17 @@
                 Bevor ein Held oder eine Anmeldung möglich ist, muss ein Spieler existieren.
             </div>
 
+            {{-- Suche (PLAY-09) --}}
+            <form method="GET" action="{{ route('players.index') }}" class="ui form mb-6">
+                <div class="ui action input w-full sm:w-80">
+                    <input type="search" name="q" value="{{ $q }}" placeholder="Name suchen…" class="!rounded-l-full">
+                    <button type="submit" class="ui icon button" aria-label="Suchen"><i class="search icon"></i></button>
+                </div>
+                @if ($q !== '')
+                    <a href="{{ route('players.index') }}" class="ml-3 text-sm text-stone-500 hover:underline">Filter zurücksetzen</a>
+                @endif
+            </form>
+
             <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
                 {{-- Karte „Neuer Spieler" (PLAY-10) --}}
                 <a href="{{ route('players.create') }}" data-modal-url="{{ route('players.create') }}"

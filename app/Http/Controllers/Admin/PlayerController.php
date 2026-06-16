@@ -17,15 +17,38 @@ use Symfony\Component\HttpFoundation\StreamedResponse;
  */
 class PlayerController extends Controller
 {
-    public function index(): View
-    {
-        $players = Player::withTrashed()
-            ->withCount('heroes')
-            ->with(['users', 'matrixAccount'])
-            ->orderBy('name')
-            ->paginate(30);
+    /** Erlaubte Sortierspalten (PLAY-09). */
+    private const SORT_COLUMNS = ['name', 'lastname', 'dayofbirth', 'heroes_count'];
 
-        return view('admin.players.index', compact('players'));
+    public function index(Request $request): View
+    {
+        $q = trim($request->string('q'));
+        $sort = in_array($request->query('sort'), self::SORT_COLUMNS, true)
+            ? $request->query('sort')
+            : 'name';
+        $dir = $request->query('dir') === 'desc' ? 'desc' : 'asc';
+
+        $query = Player::withTrashed()
+            ->withCount('heroes')
+            ->with(['users', 'matrixAccount']);
+
+        if ($q !== '') {
+            $query->where(function ($builder) use ($q) {
+                $builder->where('name', 'like', "%{$q}%")
+                    ->orWhere('lastname', 'like', "%{$q}%");
+            });
+        }
+
+        // heroes_count ist ein aggregiertes Alias → orderByRaw nötig.
+        if ($sort === 'heroes_count') {
+            $query->orderByRaw("heroes_count {$dir}");
+        } else {
+            $query->orderBy($sort, $dir);
+        }
+
+        $players = $query->paginate(30)->withQueryString();
+
+        return view('admin.players.index', compact('players', 'q', 'sort', 'dir'));
     }
 
     /**

@@ -26,13 +26,13 @@ Fomantic-Dropdowns/Calendar (wie Legacy) für Auswahl/Datum.
 - [ ] Datepicker (Fomantic Calendar) für Datumsfelder.
 - [ ] Helden-/Spieler-/Event-Formulare umgestellt.
 
-### UI-06 · Such-/Filter-/Sortier-Baustein für Listen · ⏱ 4h · 🔲
+### UI-06 · Such-/Filter-/Sortier-Baustein für Listen · ⏱ 4h · ✅
 **Beschreibung:** Gemeinsames Muster für Suche/Filter/Sortierung mit
 Paginierungs-Erhalt (Query-String).
 **Akzeptanzkriterien:**
-- [ ] Wiederverwendbare Suchleiste + serverseitige Filterung.
-- [ ] In mind. einer Liste produktiv (Helden oder Spieler).
-- [ ] Tests.
+- [x] Wiederverwendbare Suchleiste + serverseitige Filterung.
+- [x] In mind. einer Liste produktiv (Helden oder Spieler). (umgesetzt in PLAY-09)
+- [x] Tests.
 
 ### UI-07 · Modal-Submit ohne Reload (Teil-Refresh) · ⏱ 4h · 🔲
 **Beschreibung:** Aktuell `reload` nach Erfolg. Stattdessen Liste/Modal gezielt

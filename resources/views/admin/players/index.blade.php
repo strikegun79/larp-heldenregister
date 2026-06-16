@@ -19,7 +19,7 @@
                     <p>{{ session('warning') }}</p>
                     @if (session('force_delete_id'))
                         <form method="POST" action="{{ route('admin.players.destroy', session('force_delete_id')) }}"
-                              class="mt-2" onsubmit="return confirm('Spieler „{{ session('force_delete_name') }}" trotzdem löschen?');">
+                              class="mt-2" onsubmit="return confirm('Spieler trotzdem loeschen?');">
                             @csrf @method('DELETE')
                             <input type="hidden" name="force" value="1">
                             <button type="submit" class="ui mini red button">Trotzdem löschen</button>
@@ -28,14 +28,46 @@
                 </div>
             @endif
 
+            {{-- Suche (PLAY-09) --}}
+            <form method="GET" action="{{ route('admin.players.index') }}" class="ui form mb-4">
+                <div class="flex items-center gap-3">
+                    <div class="ui action input">
+                        <input type="search" name="q" value="{{ $q }}" placeholder="Name / Nachname suchen…" style="min-width:220px">
+                        <button type="submit" class="ui icon button" aria-label="Suchen"><i class="search icon"></i></button>
+                    </div>
+                    @if ($q !== '')
+                        <a href="{{ route('admin.players.index') }}" class="text-sm text-stone-500 hover:underline">Filter zurücksetzen</a>
+                    @endif
+                </div>
+            </form>
+
             <div class="bg-white/70 border-2 border-[#5a3a22]/40 shadow sm:rounded-lg overflow-hidden">
                 <table class="min-w-full divide-y divide-stone-200">
                     <thead class="bg-black/5">
                         <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase">Name</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase">Alter</th>
+                            @php
+                                /* Sortierspalten-Link-Helper (PLAY-09) */
+                                $sortUrl = fn(string $col) => route('admin.players.index', array_filter([
+                                    'q' => $q ?: null,
+                                    'sort' => $col,
+                                    'dir' => ($sort === $col && $dir === 'asc') ? 'desc' : 'asc',
+                                ]));
+                                $sortIcon = fn(string $col) => $sort === $col
+                                    ? ($dir === 'asc' ? ' ↑' : ' ↓')
+                                    : '';
+                            @endphp
+                            <th class="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase">
+                                <a href="{{ $sortUrl('name') }}" class="hover:text-stone-800">Name{{ $sortIcon('name') }}</a>
+                                /
+                                <a href="{{ $sortUrl('lastname') }}" class="hover:text-stone-800">Nachname{{ $sortIcon('lastname') }}</a>
+                            </th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase">
+                                <a href="{{ $sortUrl('dayofbirth') }}" class="hover:text-stone-800">Alter{{ $sortIcon('dayofbirth') }}</a>
+                            </th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase">Geschlecht</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase">Helden</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase">
+                                <a href="{{ $sortUrl('heroes_count') }}" class="hover:text-stone-800">Helden{{ $sortIcon('heroes_count') }}</a>
+                            </th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase">Betreut von</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase">Status</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase">Matrix</th>
@@ -77,7 +109,7 @@
                                             <a href="{{ route('admin.players.matrix.edit', $player) }}"
                                                class="text-indigo-700 hover:underline">Matrix</a>
                                             <form method="POST" action="{{ route('admin.players.destroy', $player->id) }}"
-                                                  onsubmit="return confirm('Spieler „{{ $player->full_name }}" löschen?');">
+                                                  onsubmit="return confirm('Spieler loeschen?');">
                                                 @csrf @method('DELETE')
                                                 <button type="submit" class="ui mini red icon button"
                                                         data-tooltip="Löschen" data-position="top center">

@@ -70,11 +70,11 @@ es höchstens einen geben.
 - [x] Löschen prüft offene Buchungen/aktive Helden (Warnung).
 - [x] Tests.
 
-### PLAY-09 · Spielerliste: Suche & Sortierung · ⏱ 3h · 🔲
+### PLAY-09 · Spielerliste: Suche & Sortierung · ⏱ 3h · ✅
 **Beschreibung:** Filter nach Name/aktiv; Sortierung.
 **Akzeptanzkriterien:**
-- [ ] Volltext-Suche (Name/Nachname) in eigener + Admin-Liste.
-- [ ] Sortierbare Spalten, paginierte Ergebnisse bleiben erhalten.
+- [x] Volltext-Suche (Name/Nachname) in eigener + Admin-Liste.
+- [x] Sortierbare Spalten, paginierte Ergebnisse bleiben erhalten.
 **Abhängig von:** UI-Suche (UI-06).
 
 ### PLAY-10 · Spielerliste: Layout und Teckbriefbild · ⏱ 3h · ✅
