@@ -8,9 +8,9 @@
 
 {{-- Tab 1: Allgemeine Event-Daten (Editor) --}}
 <div class="ui bottom attached tab segment active" data-tab="data">
-    <form method="POST" action="{{ route('adventures.update', $adventure) }}" data-reload>
+    <form id="manage-adventure-form" method="POST" action="{{ route('adventures.update', $adventure) }}" data-reload>
         @method('PUT')
-        @include('adventures._form')
+        @include('adventures._form', ['inModal' => true])
     </form>
 
     @if ($adventure->event_status_id !== \App\Models\EventStatus::CANCELLED)
@@ -35,4 +35,10 @@
 {{-- Tab 3: Check-in --}}
 <div class="ui bottom attached tab segment" data-tab="checkin">
     @include('adventures._checkin')
+</div>
+
+<div data-modal-actions hidden>
+    <button type="submit" form="manage-adventure-form" class="ui primary button">
+        <i class="save icon"></i> Speichern
+    </button>
 </div>
