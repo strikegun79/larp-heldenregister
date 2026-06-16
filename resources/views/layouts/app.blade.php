@@ -487,11 +487,16 @@
         </script>
 
         <script>
-            // Gemeinsamer Foto-Crop-Editor im gestapelten Modal (HERO-22).
+            // Gemeinsamer Foto-Crop-Editor im gestapelten Modal (HERO-22 / PLAY-11).
             var photoCropper      = null;
             var photoCropUrl      = null;
             var photoCropCallback = null;
 
+            /**
+             * Öffnet #photo-crop-modal mit Cropper.js.
+             * Wartet auf FileReader, öffnet Modal erst dann; Cropper wird in
+             * onVisible initialisiert (erst dann hat das Element Dimensionen).
+             */
             function openPhotoCropper(file, uploadUrl, onSuccess) {
                 if (file.size > 20 * 1024 * 1024) {
                     showToast('Bild zu groß (max. 20 MB).', 'error');
@@ -499,27 +504,33 @@
                 }
                 photoCropUrl      = uploadUrl;
                 photoCropCallback = onSuccess || null;
+
                 var reader = new FileReader();
                 reader.onload = function (e) {
                     var img = document.getElementById('photo-crop-img');
                     img.src = e.target.result;
-                    if (photoCropper) { photoCropper.destroy(); }
-                    photoCropper = new Cropper(img, {
-                        aspectRatio: 1, viewMode: 1, autoCropArea: 1,
-                        background: false, responsive: true,
-                    });
-                    setTimeout(function () { $('#photo-crop-modal').modal('refresh'); }, 300);
+                    // Modal erst öffnen wenn src gesetzt → onVisible kann Cropper korrekt messen
+                    $('#photo-crop-modal').modal({
+                        allowMultiple: true,
+                        closable:      false,
+                        autofocus:     false,
+                        onVisible: function () {
+                            if (photoCropper) { photoCropper.destroy(); }
+                            photoCropper = new Cropper(img, {
+                                aspectRatio:  1,
+                                viewMode:     1,
+                                autoCropArea: 1,
+                                background:   false,
+                                responsive:   true,
+                            });
+                        },
+                        onHidden: function () {
+                            if (photoCropper) { photoCropper.destroy(); photoCropper = null; }
+                            img.src = '';
+                        },
+                    }).modal('show');
                 };
                 reader.readAsDataURL(file);
-                $('#photo-crop-modal').modal({
-                    allowMultiple: true,
-                    closable: false,
-                    autofocus: false,
-                    onHidden: function () {
-                        if (photoCropper) { photoCropper.destroy(); photoCropper = null; }
-                        document.getElementById('photo-crop-img').src = '';
-                    },
-                }).modal('show');
             }
 
             document.getElementById('photo-crop-save-btn').addEventListener('click', function () {

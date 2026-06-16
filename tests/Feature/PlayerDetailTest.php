@@ -132,16 +132,16 @@ class PlayerDetailTest extends TestCase
             ->assertOk();
     }
 
-    public function test_owner_can_view_hero_detail_readonly(): void
+    public function test_owner_can_view_hero_detail_with_photo_upload(): void
     {
         $player = Player::factory()->create();
         $hero = Hero::factory()->create(['player_id' => $player->id, 'character_name' => 'Eldric']);
 
-        // Eigentümer darf die Helden-Ansicht öffnen, sieht aber keinen Foto-Upload.
+        // Eigentümer darf die Helden-Ansicht öffnen und seit HERO-22 auch das Foto hochladen.
         $this->actingAs($this->ownerOf($player))
             ->get(route('heroes.show', $hero), ['X-Requested-With' => 'XMLHttpRequest'])
             ->assertOk()
             ->assertSee('Eldric')
-            ->assertDontSee(route('heroes.photo', $hero), false);
+            ->assertSee(route('heroes.photo', $hero), false);
     }
 }

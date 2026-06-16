@@ -33,14 +33,21 @@
                     </label>
                     <input type="file" id="hero-photo-file-input" accept="image/jpeg,image/png"
                            style="display:none"
-                           onchange="(function(f){
-                               if(!f) return;
-                               this.value='';
-                               openPhotoCropper(f, @json(route('heroes.photo', $hero)), function(){
-                                   if(appModal2Url) loadStackContent(appModal2Url, true);
-                                   else if(appModalUrl) loadModalContent(appModalUrl, true);
-                               });
-                           }).call(this, this.files[0])">
+                           data-upload-url="{{ route('heroes.photo', $hero) }}">
+                    <script>
+                    (function () {
+                        var inp = document.getElementById('hero-photo-file-input');
+                        inp.addEventListener('change', function () {
+                            var file = this.files[0];
+                            if (!file) return;
+                            this.value = '';
+                            openPhotoCropper(file, inp.dataset.uploadUrl, function () {
+                                if (appModal2Url) loadStackContent(appModal2Url, true);
+                                else if (appModalUrl) loadModalContent(appModalUrl, true);
+                            });
+                        });
+                    })();
+                    </script>
                     @if ($hero->image)
                         <form method="POST" action="{{ route('heroes.photo.destroy', $hero) }}"
                               data-refresh-modal
