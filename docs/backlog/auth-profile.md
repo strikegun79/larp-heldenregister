@@ -15,13 +15,13 @@ Listener `AssignParticipantRole` am `Registered`-Event (defensiv).
 
 ## Offen (🔲)
 
-### AUTH-04 · Profilformular um `lastname` + `phone` erweitern · ⏱ 3h · 🔲
+### AUTH-04 · Profilformular um `lastname` + `phone` erweitern · ⏱ 3h · ✅
 **Beschreibung:** Die `users`-Tabelle hat `lastname` und `phone` (aus Legacy),
 das Breeze-Profilformular pflegt sie aber nicht.
 **Akzeptanzkriterien:**
-- [ ] `ProfileUpdateRequest` validiert `lastname` (nullable, max 255) und `phone` (nullable, max 50).
-- [ ] Felder im Profil-Blade vorhanden und vorbefüllt.
-- [ ] Feature-Test deckt Aktualisierung beider Felder ab.
+- [x] `ProfileUpdateRequest` validiert `lastname` (nullable, max 255) und `phone` (nullable, max 50).
+- [x] Felder im Profil-Blade vorhanden und vorbefüllt.
+- [x] Feature-Test deckt Aktualisierung beider Felder ab.
 
 ### AUTH-05 · Passwort-Migration Legacy-Klartext-Konto · ⏱ 2h · 🔲
 **Beschreibung:** Mind. ein migriertes Konto (`richy@strikegun.de`) hat ein
