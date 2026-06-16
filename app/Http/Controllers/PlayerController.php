@@ -56,7 +56,6 @@ class PlayerController extends Controller
         $data = $this->validatePlayer($request);
 
         $player = Player::create($data);
-        $this->handleImageUpload($request, $player);
         // Spieler dem Benutzer zuordnen (Legacy: user2player, self-Flag).
         $request->user()->players()->attach($player->id, ['self' => false]);
         $this->enforceSingleSelf($request->user(), $player, $request->boolean('self'));
@@ -168,7 +167,6 @@ class PlayerController extends Controller
         $this->authorize('update', $player);
 
         $player->update($this->validatePlayer($request));
-        $this->handleImageUpload($request, $player);
         $this->enforceSingleSelf($request->user(), $player, $request->boolean('self'));
 
         $message = 'Spieler wurde aktualisiert.';
@@ -229,11 +227,7 @@ class PlayerController extends Controller
             'dayofbirth' => ['nullable', 'date', 'before_or_equal:today', 'after:1900-01-01'],
             'gender' => ['nullable', 'in:weiblich,männlich,divers'],
             'place' => ['nullable', 'string', 'max:100'],
-            'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
         ]);
-
-        // Bild wird separat als Datei-Upload behandelt.
-        unset($validated['image']);
 
         return $validated;
     }

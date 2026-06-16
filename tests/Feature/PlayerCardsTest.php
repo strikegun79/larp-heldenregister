@@ -9,8 +9,6 @@ use Database\Seeders\EventLookupSeeder;
 use Database\Seeders\LocationSeeder;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
-use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Storage;
 use Tests\TestCase;
 
 /**
@@ -77,23 +75,22 @@ class PlayerCardsTest extends TestCase
             ->assertSee('data-modal-title', false);
     }
 
-    public function test_can_create_player_with_avatar(): void
+    public function test_can_create_player_without_avatar(): void
     {
-        Storage::fake('public');
+        // Avatar-Upload beim Anlegen entfernt (PLAY-12); Upload erfolgt über den Avatar-Tab.
         $user = User::factory()->create();
         $user->roles()->attach(70);
 
         $this->actingAs($user)
             ->post(route('players.store'), [
                 'name' => 'Lea', 'lastname' => 'Berg',
-                'image' => UploadedFile::fake()->image('avatar.jpg', 200, 200),
             ])
             ->assertRedirect();
 
         $player = Player::firstWhere('name', 'Lea');
-        $this->assertNotNull($player->image);
-        Storage::disk('public')->assertExists($player->image);
-        $this->assertStringContainsString('/storage/', $player->avatar_url);
+        $this->assertNotNull($player);
+        $this->assertNull($player->image);
+        $this->assertSame('/images/player_default_avatar.jpg', $player->avatar_url);
     }
 
     public function test_visits_count_reflects_attended_events(): void
