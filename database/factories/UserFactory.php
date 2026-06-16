@@ -29,6 +29,7 @@ class UserFactory extends Factory
             'email_verified_at' => now(),
             'password' => static::$password ??= Hash::make('password'),
             'remember_token' => Str::random(10),
+            'activated' => true,
         ];
     }
 
@@ -39,6 +40,16 @@ class UserFactory extends Factory
     {
         return $this->state(fn (array $attributes) => [
             'email_verified_at' => null,
+        ]);
+    }
+
+    /**
+     * Konto deaktiviert (activated = false).
+     */
+    public function deactivated(): static
+    {
+        return $this->state(fn (array $attributes) => [
+            'activated' => false,
         ]);
     }
 }

@@ -39,12 +39,12 @@ Klartext-Passwort; Login schlägt fehl. Erzwungener Reset nötig.
 - [x] Login/Registrierung/Reset/Verifizierungsmail auf Deutsch.
 - [x] Keine englischen Reststrings in Auth-Flows.
 
-### AUTH-07 · Konto-Deaktivierung (`activated`) im Login durchsetzen · ⏱ 3h · 🔲
+### AUTH-07 · Konto-Deaktivierung (`activated`) im Login durchsetzen · ⏱ 3h · ✅
 **Beschreibung:** `users.activated` existiert, wird beim Login aber nicht geprüft.
 **Akzeptanzkriterien:**
-- [ ] Deaktivierte Nutzer können sich nicht anmelden (klare Meldung).
-- [ ] Bereits eingeloggte deaktivierte Nutzer werden ausgeloggt (Middleware).
-- [ ] Feature-Tests für aktiv/inaktiv.
+- [x] Deaktivierte Nutzer können sich nicht anmelden (klare Meldung).
+- [x] Bereits eingeloggte deaktivierte Nutzer werden ausgeloggt (Middleware).
+- [x] Feature-Tests für aktiv/inaktiv.
 
 ### AUTH-08 · „Profil löschen" auf Soft-Delete + Re-Aktivierung prüfen · ⏱ 2h · 🔲
 **Beschreibung:** User nutzt SoftDeletes; Selbstlöschung und Admin-Sicht klären.

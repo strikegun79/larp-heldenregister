@@ -49,6 +49,16 @@ class LoginRequest extends FormRequest
             ]);
         }
 
+        // Deaktivierte Konten direkt nach Login wieder abmelden.
+        if (! Auth::user()->activated) {
+            Auth::logout();
+            RateLimiter::hit($this->throttleKey());
+
+            throw ValidationException::withMessages([
+                'email' => trans('auth.deactivated'),
+            ]);
+        }
+
         RateLimiter::clear($this->throttleKey());
     }
 
