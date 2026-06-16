@@ -328,3 +328,9 @@ Eine Admin-Eventliste mit Verwaltungsaktionen (anlegen/bearbeiten/absagen).
 > „Schließen" wird automatisch im Footer ergänzt. Globaler Submit-Handler
 > behandelt Stack-Formulare: bei Erfolg `#app-modal-2` schließen und Event-Modal
 > aktualisieren. „Zurück"-Links entfernt. Tests: `EventStackedModalTest` (4).
+### ADV-23 · Event-Listen verhalten und Speichern · ✅
+**Beschreibung:** Event-Liste verhalten
+**Akzeptanzkriterien:**
+- [x] das Event-Modal soll sich beim Klick auf die Zeile des Events öffnen, nicht beim Titel
+- [x] Das selbe Verhalten soll auch in der Kalenderansicht der Events sein
+- [x] Beim editieren eines Event, soll der Speicher-Button im Footer des Modals sein. ein Abbrechen ist nicht nötig, das der Schließen-Button schon existiert.

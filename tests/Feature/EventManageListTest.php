@@ -62,11 +62,12 @@ class EventManageListTest extends TestCase
     {
         Adventure::factory()->create();
 
-        // Browse-Liste (auch für Verwalter) zeigt keinen „Neues Abenteuer"-Button.
+        // Browse-Liste (auch für Verwalter) zeigt keinen „Neues Abenteuer"-Button,
+        // aber den Link zur Event-Verwaltung.
         $this->actingAs($this->userWithRole(30))
             ->get(route('adventures.index'))
             ->assertOk()
             ->assertDontSee('Neues Abenteuer')
-            ->assertSee('Zur Event-Verwaltung');
+            ->assertSee('Event-Verwaltung');
     }
 }

@@ -124,8 +124,10 @@
         </div>
     </div>
 
+    @unless($inModal ?? false)
     <div class="flex items-center gap-4">
         <x-primary-button>Speichern</x-primary-button>
         <a href="{{ route('adventures.index') }}" class="text-sm text-gray-600 dark:text-gray-400 hover:underline">Abbrechen</a>
     </div>
+    @endunless
 </div>

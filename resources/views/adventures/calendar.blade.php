@@ -1,8 +1,11 @@
 <x-app-layout>
     <x-slot name="header">
         <div class="flex items-center justify-between">
-            <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">Kommende Events</h2>
-            <a href="{{ route('adventures.index') }}" class="text-sm text-indigo-600 dark:text-indigo-400 hover:underline">Listenansicht →</a>
+            <h2 class="font-uncial text-2xl text-waldritter leading-tight">Kommende Events</h2>
+            <a href="{{ route('adventures.index') }}">
+                    <x-primary-button>Listenansicht</x-primary-button>
+                </a>
+
         </div>
     </x-slot>
 
@@ -15,14 +18,14 @@
                 <h3 class="font-uncial text-xl text-waldritter mt-6 mb-2">{{ $monthNames[(int) $month] }} {{ $year }}</h3>
                 <div class="bg-white/70 dark:bg-gray-800 border-2 border-[#5a3a22]/30 shadow-sm sm:rounded-lg divide-y divide-stone-200 dark:divide-gray-700">
                     @foreach ($monthEvents as $event)
-                        <div class="flex items-center gap-4 px-4 py-3">
+                        <div class="flex items-center gap-4 px-4 py-3 cursor-pointer hover:bg-stone-50 dark:hover:bg-gray-700 transition-colors rounded"
+                             data-modal-url="{{ route('adventures.show', $event) }}">
                             <div class="w-16 text-center shrink-0">
                                 <div class="text-2xl font-semibold text-waldritter leading-none">{{ $event->start_at->format('d') }}</div>
                                 <div class="text-xs uppercase text-stone-500">{{ $event->start_at->isoFormat('dd') }}</div>
                             </div>
                             <div class="flex-1 min-w-0">
-                                <a href="{{ route('adventures.show', $event) }}" data-modal-url="{{ route('adventures.show', $event) }}"
-                                   class="font-medium text-indigo-700 dark:text-indigo-400 hover:underline">{{ $event->name }}</a>
+                                <div class="font-medium text-stone-800 dark:text-gray-200">{{ $event->name }}</div>
                                 <div class="text-sm text-stone-500">
                                     {{ $event->start_at->format('H:i') }} Uhr · {{ $event->location?->titel ?? 'Ort offen' }}
                                 </div>

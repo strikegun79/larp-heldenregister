@@ -1,11 +1,18 @@
 <x-app-layout>
     <x-slot name="header">
         <div class="flex items-center justify-between">
-            <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">Abenteuer</h2>
+            <h2 class="font-uncial text-2xl text-waldritter leading-tight">Abenteuer</h2>
             <div class="flex items-center gap-4">
-                <a href="{{ route('adventures.calendar') }}" class="text-sm text-indigo-600 dark:text-indigo-400 hover:underline">Kalender →</a>
+                <a href="{{ route('adventures.calendar') }}">
+                    <x-primary-button>Kalender</x-primary-button>
+                </a>
+
+
                 @can('events.edit')
-                    <a href="{{ route('adventures.manage-index') }}" class="text-sm text-indigo-600 dark:text-indigo-400 hover:underline">Zur Event-Verwaltung →</a>
+                <a href="{{ route('adventures.manage-index') }}">
+                    <x-primary-button>Event-Verwaltung</x-primary-button>
+                </a>
+
                 @endcan
             </div>
         </div>
@@ -30,10 +37,9 @@
                     </thead>
                     <tbody class="divide-y divide-gray-200 dark:divide-gray-700 text-gray-800 dark:text-gray-200">
                         @forelse ($adventures as $adventure)
-                            <tr>
-                                <td class="px-6 py-4">
-                                    <a href="{{ route('adventures.show', $adventure) }}" data-modal-url="{{ route('adventures.show', $adventure) }}" class="text-indigo-600 dark:text-indigo-400 hover:underline">{{ $adventure->name }}</a>
-                                </td>
+                            <tr data-modal-url="{{ route('adventures.show', $adventure) }}"
+                                style="cursor:pointer;" class="hover:bg-stone-50 dark:hover:bg-gray-700 transition-colors">
+                                <td class="px-6 py-4 font-medium text-stone-800 dark:text-gray-200">{{ $adventure->name }}</td>
                                 <td class="px-6 py-4">{{ optional($adventure->start_at)->format('d.m.Y H:i') }}</td>
                                 <td class="px-6 py-4">{{ $adventure->location?->titel ?? '—' }}</td>
                                 <td class="px-6 py-4">
