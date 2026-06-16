@@ -45,6 +45,27 @@ class UserController extends Controller
     }
 
     /**
+     * Nutzer soft-löschen. Schutz: kein Selbst-Löschen, keine Admins löschen.
+     */
+    public function destroy(int $id, Request $request): RedirectResponse
+    {
+        $user = User::findOrFail($id);
+
+        if ($user->id === $request->user()->id) {
+            return back()->withErrors(['delete' => 'Du kannst dein eigenes Konto hier nicht löschen.']);
+        }
+
+        if ($user->hasRole('admin')) {
+            return back()->withErrors(['delete' => 'Admin-Konten können nicht gelöscht werden.']);
+        }
+
+        $user->delete();
+
+        return redirect()->route('admin.users.index')
+            ->with('status', 'Konto '.$user->name.' wurde gelöscht.');
+    }
+
+    /**
      * Soft-gelöschtes Konto wiederherstellen (AUTH-08).
      */
     public function restore(int $id): RedirectResponse

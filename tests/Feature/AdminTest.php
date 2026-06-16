@@ -83,4 +83,40 @@ class AdminTest extends TestCase
 
         $this->assertCount(0, $target->fresh()->roles);
     }
+
+    public function test_admin_can_soft_delete_a_user(): void
+    {
+        $admin = $this->admin();
+        $target = User::factory()->create();
+
+        $this->actingAs($admin)
+            ->delete(route('admin.users.destroy', $target->id))
+            ->assertRedirect(route('admin.users.index'));
+
+        $this->assertSoftDeleted('users', ['id' => $target->id]);
+    }
+
+    public function test_admin_cannot_delete_themselves(): void
+    {
+        $admin = $this->admin();
+
+        $this->actingAs($admin)
+            ->delete(route('admin.users.destroy', $admin->id))
+            ->assertRedirect();
+
+        $this->assertNotSoftDeleted('users', ['id' => $admin->id]);
+    }
+
+    public function test_admin_cannot_delete_another_admin(): void
+    {
+        $admin = $this->admin();
+        $other = User::factory()->create();
+        $other->roles()->attach(10);
+
+        $this->actingAs($admin)
+            ->delete(route('admin.users.destroy', $other->id))
+            ->assertRedirect();
+
+        $this->assertNotSoftDeleted('users', ['id' => $other->id]);
+    }
 }

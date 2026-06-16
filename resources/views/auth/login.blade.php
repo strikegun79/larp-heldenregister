@@ -38,4 +38,14 @@
             <x-primary-button class="ms-3">Anmelden</x-primary-button>
         </div>
     </form>
+
+    @if (Route::has('register'))
+        <div class="mt-6 text-center text-sm text-gray-600">
+            Noch kein Konto?
+            <a href="{{ route('register') }}"
+               class="underline text-waldritter hover:text-[#3a200e] rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                Jetzt registrieren
+            </a>
+        </div>
+    @endif
 </x-guest-layout>

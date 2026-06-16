@@ -43,6 +43,14 @@
                                         <a href="{{ route('admin.users.edit', $user) }}"
                                            data-modal-url="{{ route('admin.users.edit', $user) }}"
                                            class="text-indigo-700 hover:underline">Bearbeiten</a>
+                                        @if (! $user->hasRole('admin') && $user->id !== Auth::id())
+                                            <form method="POST" action="{{ route('admin.users.destroy', $user->id) }}"
+                                                  class="inline ms-3"
+                                                  onsubmit="return confirm('Konto von {{ addslashes(trim($user->name . ' ' . $user->lastname)) }} löschen?')">
+                                                @csrf @method('DELETE')
+                                                <button type="submit" class="text-red-600 hover:underline">Löschen</button>
+                                            </form>
+                                        @endif
                                     @endif
                                 </td>
                             </tr>
