@@ -196,8 +196,8 @@ class BookingController extends Controller
 
         return view('bookings._edit', [
             'adventure' => $adventure,
-            'booking'   => $booking,
-            'roles'     => EventRole::orderBy('id')->get(),
+            'booking' => $booking,
+            'roles' => EventRole::orderBy('id')->get(),
             'userPhone' => $userPhone,
         ]);
     }

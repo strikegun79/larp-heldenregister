@@ -1,19 +1,20 @@
 <x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-uncial text-2xl text-waldritter leading-tight">
-            Heldenregister
-        </h2>
-    </x-slot>
-
     @php
         $stunde = (int) now()->format('H');
         $gruss = $stunde >= 6 && $stunde < 10 ? 'Guten Morgen' : ($stunde >= 10 && $stunde < 18 ? 'Guten Tag' : 'Guten Abend');
     @endphp
+    <x-slot name="header">
+        <h2 class="font-uncial text-2xl text-waldritter leading-tight">
+            {{ $gruss }}, <em>{{ Auth::user()->name }}</em>
+        </h2>
+    </x-slot>
+
+
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="bg-white/60 border-2 border-[#5a3a22]/30 rounded-lg p-6 mb-8 text-stone-800">
-                <h3 class="font-medieval text-xl text-waldritter">{{ $gruss }}, <em>{{ Auth::user()->name }}</em></h3>
+
                 <p class="mt-2">Willkommen im Heldenregister. Hier findest du alles rund um deine Spieler, Helden und Abenteuer.</p>
             </div>
 

@@ -47,12 +47,12 @@ per AJAX aktualisieren.
 - [ ] Tabellen scrollbar/stacked auf kleinen Screens.
 - [ ] Modals nutzbar auf Mobil (Scroll/Fullscreen).
 
-### UI-09 · Flash-Messages global als Toast · ⏱ 2h · 🔲
+### UI-09 · Flash-Messages global als Toast · ⏱ 2h · ✅
 **Beschreibung:** Session-`status`/`error` (Vollseiten) ebenfalls als Toast
 darstellen (einheitliches Feedback).
 **Akzeptanzkriterien:**
-- [ ] Beim Laden vorhandene Flash-Messages als Toast ausgeben.
-- [ ] Keine doppelte Anzeige (Box + Toast).
+- [x] Beim Laden vorhandene Flash-Messages als Toast ausgeben.
+- [x] Keine doppelte Anzeige (Box + Toast).
 
 ### UI-10 · Fomantic-Assets lokal bündeln (statt CDN) · ⏱ 3h · 🔲
 **Beschreibung:** Fomantic/jQuery aktuell per CDN; für Offline/Prod lokal via Vite.

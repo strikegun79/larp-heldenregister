@@ -533,6 +533,20 @@
                 reader.readAsDataURL(file);
             }
 
+            // UI-09: Session-Flash als Toast (Vollseiten-Redirects).
+            // Profil-spezifische Werte haben eigene Inline-Darstellung und werden übersprungen.
+            @php
+                $flashStatus = session('status');
+                $flashError  = session('error');
+                $reserved    = ['profile-updated', 'verification-link-sent', 'password-updated'];
+            @endphp
+            @if ($flashStatus && ! in_array($flashStatus, $reserved))
+                showToast(@json($flashStatus), 'success');
+            @endif
+            @if ($flashError)
+                showToast(@json($flashError), 'error');
+            @endif
+
             document.getElementById('photo-crop-save-btn').addEventListener('click', function () {
                 if (!photoCropper || !photoCropUrl) return;
                 var btn = this;

@@ -7,10 +7,6 @@
 
     <div class="py-12">
         <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
-            @if (session('status'))
-                <div class="rounded bg-green-100 px-4 py-2 text-green-800">{{ session('status') }}</div>
-            @endif
-
             <div class="bg-white/70 border-2 border-[#5a3a22]/40 shadow sm:rounded-lg p-6">
                 <p class="text-sm text-stone-600 mb-1">Matrix-User-ID</p>
                 <p class="font-mono text-stone-800 mb-4">{{ $mxid }}</p>

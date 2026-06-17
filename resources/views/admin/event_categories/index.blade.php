@@ -5,10 +5,6 @@
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            @if (session('status'))
-                <div class="mb-4 rounded bg-green-100 px-4 py-2 text-green-800">{{ session('status') }}</div>
-            @endif
-
             <div class="mb-4">
                 <a href="{{ route('admin.event-categories.create') }}" data-modal-url="{{ route('admin.event-categories.create') }}" class="ui primary button">Neue Kategorie</a>
             </div>
@@ -46,8 +42,10 @@
                     </tbody>
                 </table>
             </div>
-
-            <a href="{{ route('admin.index') }}" class="inline-block mt-4 text-sm text-stone-600 hover:underline">&larr; Zur Verwaltung</a>
+            <br>
+            <a href="{{ route('admin.index') }}">
+                <x-primary-button>Zurück zur Verwaltung</x-primary-button>
+            </a>
         </div>
     </div>
 </x-app-layout>

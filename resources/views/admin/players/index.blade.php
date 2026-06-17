@@ -9,10 +9,6 @@
     <div class="py-12">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
-            @if (session('status'))
-                <div class="ui success message mb-4">{{ session('status') }}</div>
-            @endif
-
             @if (session('warning'))
                 <div class="ui warning message mb-4">
                     <div class="header">Hinweis vor dem Löschen</div>
@@ -126,7 +122,10 @@
             </div>
 
             <div class="mt-4">{{ $players->links() }}</div>
-            <a href="{{ route('admin.index') }}" class="inline-block mt-4 text-sm text-stone-600 hover:underline">&larr; Zur Verwaltung</a>
+            <br>
+            <a href="{{ route('admin.index') }}">
+                <x-primary-button>Zurück zur Verwaltung</x-primary-button>
+            </a>
         </div>
     </div>
 </x-app-layout>

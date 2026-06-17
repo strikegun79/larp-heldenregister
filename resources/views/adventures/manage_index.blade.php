@@ -8,14 +8,10 @@
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            @if (session('status'))
-                <div class="mb-4 rounded bg-green-100 px-4 py-2 text-green-800">{{ session('status') }}</div>
-            @endif
-            @if (session('error'))
-                <div class="mb-4 rounded bg-red-100 px-4 py-2 text-red-800">{{ session('error') }}</div>
-            @endif
+            <div class="bg-white/60 border-2 border-[#5a3a22]/30 rounded-lg p-4 mb-6 text-stone-700">
+                Verwaltungsansicht – zum Browsen/Anmelden siehe <a href="{{ route('adventures.index') }}" class="text-waldritter hover:underline">Abenteuer</a>.
+            </div>
 
-            <p class="mb-4 text-sm text-stone-600">Verwaltungsansicht – zum Browsen/Anmelden siehe <a href="{{ route('adventures.index') }}" class="text-waldritter hover:underline">Abenteuer</a>.</p>
 
             <div class="bg-white/70 border-2 border-[#5a3a22]/40 shadow sm:rounded-lg overflow-hidden">
                 <table class="min-w-full divide-y divide-stone-200">
@@ -54,7 +50,10 @@
                     </tbody>
                 </table>
             </div>
-
+            <br>
+            <a href="{{ route('admin.index') }}">
+                <x-primary-button>Zurück zur Verwaltung</x-primary-button>
+            </a>
             <div class="mt-4">{{ $adventures->links() }}</div>
         </div>
     </div>

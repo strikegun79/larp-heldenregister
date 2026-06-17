@@ -1,7 +1,7 @@
 <x-app-layout>
     <x-slot name="header">
         <div class="flex items-center justify-between">
-            <h2 class="font-semibold text-xl text-gray-800 dark:text-gray-200 leading-tight">
+            <h2 class="font-uncial text-2xl text-waldritter leading-tight">
                 Heldenregister
             </h2>
             @can('heldenregister.edit')
@@ -14,12 +14,6 @@
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            @if (session('status'))
-                <div class="mb-4 rounded bg-green-100 dark:bg-green-900 px-4 py-2 text-green-800 dark:text-green-200">
-                    {{ session('status') }}
-                </div>
-            @endif
-
             @php($selectClass = 'mt-1 block w-full border-gray-300 rounded-md shadow-sm text-sm focus:border-indigo-500 focus:ring-indigo-500')
             <form method="GET" action="{{ route('heroes.index') }}"
                   class="mb-4 bg-white/60 border-2 border-[#5a3a22]/30 rounded-lg p-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-5 items-end">
