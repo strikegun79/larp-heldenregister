@@ -334,3 +334,34 @@ Eine Admin-Eventliste mit Verwaltungsaktionen (anlegen/bearbeiten/absagen).
 - [x] das Event-Modal soll sich beim Klick auf die Zeile des Events öffnen, nicht beim Titel
 - [x] Das selbe Verhalten soll auch in der Kalenderansicht der Events sein
 - [x] Beim editieren eines Event, soll der Speicher-Button im Footer des Modals sein. ein Abbrechen ist nicht nötig, das der Schließen-Button schon existiert.
+
+### ADV-24 Anmeldung zu Abenteuer/Events prüft Elternanschrift 🔲
+**Beschreibung:** Vor der Anmeldung zu einer Veranstaltung muss geprüft werden, ob die Anschrift der erziehungsberechtigten Person vollständig ist.
+**Akzeptanzkriterien:**
+- [] Anmeldung ist nur möglich, wenn das Benutzerprofil vollständig ist.
+- [] Bei fehlenden Daten erscheint ein Hinweis mit Link zum Profil.
+- [] Fehlermeldung nennt konkret fehlende Felder.
+- [] Keine Anmeldung mit unvollständigen Pflichtdaten.
+
+### ADV-25 Teilnehmerdaten bei Anmeldung korrekt speichern ✅
+**Beschreibung:** Bei der Anmeldung soll gespeichert werden, welche Anschrift zum Zeitpunkt der Anmeldung relevant war.
+**Akzeptanzkriterien:**
+- [x] Anmeldung referenziert Benutzer/Erziehungsberechtigten (`booked_by_user_id`).
+- [x] Anmeldung referenziert Kind/Spieler (`player_id`).
+- [x] System kann erkennen: `Booking::usesGuardianAddress()` / `effective_city`.
+Kind nutzt Elternanschrift
+Kind hat abweichende Anschrift
+- [x] Keine doppelte Speicherung unnötiger Adressdaten, außer wenn historisch erforderlich.
+
+### ADV-26 Admin-Ansicht für Eventteilnehmer erweitern 🔲
+**Beschreibung:** In der Teilnehmerverwaltung eines Abenteuers sollen relevante Kontaktdaten sichtbar sein.
+**Akzeptanzkriterien:**
+- [] Admin sieht:
+Name des Kindes
+Name der erziehungsberechtigten Person
+E-Mail
+Mobiltelefon
+Anschrift der erziehungsberechtigten Person
+- [] Hinweis, falls Kind abweichende Anschrift hat
+- [] Export enthält diese Angaben ebenfalls.
+- [] Datenschutz: Nur Admins und Projektleiter mit Berechtigung sehen diese Daten.

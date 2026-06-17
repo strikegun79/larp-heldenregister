@@ -123,6 +123,46 @@ class Booking extends Model
         return $this->belongsTo(User::class, 'booked_by_user_id');
     }
 
+    /**
+     * Gibt den Erziehungsberechtigten zurück (ADV-25):
+     * bevorzugt den anmeldenden Nutzer, Fallback auf den ersten
+     * zugeordneten Betreuer des Spielers.
+     */
+    public function guardian(): ?User
+    {
+        return $this->bookedBy ?? $this->player?->users->first();
+    }
+
+    /**
+     * Gibt an, ob für diesen Teilnehmer die Elternanschrift gilt (ADV-25).
+     * Für Gäste immer false (haben keine Spieler-Verknüpfung).
+     */
+    public function usesGuardianAddress(): bool
+    {
+        if ($this->is_guest || $this->player === null) {
+            return false;
+        }
+
+        return (bool) $this->player->address_same_as_guardian;
+    }
+
+    /**
+     * Stadt/Ort für die Teilnehmerliste (ADV-25 / PDF):
+     * Kinder-Ort bei abweichender Anschrift, sonst Ort der erziehungsberechtigten Person.
+     */
+    public function getEffectiveCityAttribute(): ?string
+    {
+        if ($this->is_guest) {
+            return $this->guest_place;
+        }
+
+        if (! $this->usesGuardianAddress() && filled($this->player?->city)) {
+            return $this->player->city;
+        }
+
+        return $this->guardian()?->city;
+    }
+
     public function isApproved(): bool
     {
         return $this->approved_at !== null;

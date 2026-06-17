@@ -48,15 +48,7 @@
                     <td>{{ $booking->is_guest ? $booking->guest_lastname : $booking->player?->lastname }}@if ($booking->is_guest) <strong>(Gast)</strong>@endif</td>
                     <td>{{ $booking->is_guest ? $booking->guest_name : $booking->player?->name }}</td>
                     <td>{{ $booking->participant_age ?? '' }}</td>
-                    <td>
-                        @if ($booking->is_guest)
-                            {{ $booking->guest_place }}
-                        @elseif ($booking->player && ! $booking->player->address_same_as_guardian && $booking->player->city)
-                            {{ $booking->player->city }}
-                        @else
-                            {{ ($booking->bookedBy ?? $booking->player?->users->first())?->city ?? '—' }}
-                        @endif
-                    </td>
+                    <td>{{ $booking->effective_city ?? '—' }}</td>
                     <td>{{ $booking->erreichbarkeit }}</td>
                     <td class="sig">
                         @if ($booking->signature)
