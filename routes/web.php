@@ -191,6 +191,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::put('event-clients/{eventClient}', [Admin\EventClientController::class, 'update'])->name('event-clients.update');
         Route::delete('event-clients/{eventClient}', [Admin\EventClientController::class, 'destroy'])->name('event-clients.destroy');
 
+        Route::get('event-statuses', [Admin\EventStatusController::class, 'index'])->name('event-statuses.index');
+        Route::get('event-statuses/{eventStatus}/edit', [Admin\EventStatusController::class, 'edit'])->name('event-statuses.edit');
+        Route::put('event-statuses/{eventStatus}', [Admin\EventStatusController::class, 'update'])->name('event-statuses.update');
+        Route::delete('event-statuses/{eventStatus}', [Admin\EventStatusController::class, 'destroy'])->name('event-statuses.destroy');
+
         Route::get('hero-classes', [Admin\HeroClassController::class, 'index'])->name('hero-classes.index');
         Route::get('hero-classes/create', [Admin\HeroClassController::class, 'create'])->name('hero-classes.create');
         Route::post('hero-classes', [Admin\HeroClassController::class, 'store'])->name('hero-classes.store');

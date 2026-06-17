@@ -20,6 +20,7 @@
                         ['Kategorien', 'Event-Kategorien pflegen', 'admin_katagorien.jpg', route('admin.event-categories.index')],
                         ['Auftraggeber', 'Auftraggeber pflegen', 'admin_auftraggeber.jpg', route('admin.event-clients.index')],
                         ['Teilnahme-Rollen', 'Event-Rollen pflegen', 'admin_rollen.jpg', route('admin.event-roles.index')],
+                        ['Event-Status', 'Status-Lookups pflegen', 'admin_katagorien.jpg', route('admin.event-statuses.index')],
                         ['Rollen & Rechte', 'Berechtigungsübersicht', 'admin_players.jpg', route('admin.roles.index')],
                         ['Fertigkeiten', 'Fertigkeiten-Katalog pflegen', 'admin_classes.jpg', route('admin.skills.index')],
                         ['Perlenfarben', 'Perlenfarben pflegen', 'admin_classes.jpg', route('admin.perl-colors.index')],

@@ -40,10 +40,10 @@ Selbstregistrierung).
 - [x] Formular Anlegen (Name, E-Mail, Rolle) + Einladungs-/Set-Password-Mail.
 - [x] Tests.
 
-### ADM-07 · Event-Status-Lookup-CRUD · ⏱ 2h · 🔲
+### ADM-07 · Event-Status-Lookup-CRUD · ⏱ 2h · ✅
 **Beschreibung:** `event_statuses` (Beschreibung, Farbe) pflegbar.
 **Akzeptanzkriterien:**
-- [ ] Admin-CRUD; System-IDs vor Löschung geschützt.
+- [x] Admin-CRUD; System-IDs vor Löschung geschützt (Sperre wenn adventures_count > 0).
 
 ### ADM-08 · Audit-Log (Grundgerüst) · ⏱ 4h · 🔲
 **Beschreibung:** Protokoll wichtiger Admin-Aktionen (Rollen, Aktivierung,
