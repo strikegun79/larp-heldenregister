@@ -219,7 +219,9 @@ class PlayerController extends Controller
      */
     private function validatePlayer(Request $request): array
     {
-        $validated = $request->validate([
+        $sameAsGuardian = filter_var($request->input('address_same_as_guardian', '1'), FILTER_VALIDATE_BOOLEAN);
+
+        return $request->validate([
             'name' => ['required', 'string', 'max:50'],
             'lastname' => ['required', 'string', 'max:50'],
             'email' => ['nullable', 'email', 'max:150'],
@@ -227,8 +229,12 @@ class PlayerController extends Controller
             'dayofbirth' => ['nullable', 'date', 'before_or_equal:today', 'after:1900-01-01'],
             'gender' => ['nullable', 'in:weiblich,männlich,divers'],
             'place' => ['nullable', 'string', 'max:100'],
+            // Kinder-Anschrift (PLAY-14 / ORGA-01): nur Pflicht bei abweichender Anschrift.
+            'address_same_as_guardian' => ['boolean'],
+            'street' => [$sameAsGuardian ? 'nullable' : 'required', 'string', 'max:100'],
+            'house_number' => [$sameAsGuardian ? 'nullable' : 'required', 'string', 'max:10'],
+            'zip' => [$sameAsGuardian ? 'nullable' : 'required', 'string', 'max:10'],
+            'city' => [$sameAsGuardian ? 'nullable' : 'required', 'string', 'max:100'],
         ]);
-
-        return $validated;
     }
 }
