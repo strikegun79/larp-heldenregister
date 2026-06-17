@@ -60,3 +60,32 @@ Klartext-Passwort; Login schlägt fehl. Erzwungener Reset nötig.
 - [ ] Neuer Nutzer wird nur als Teilnehmer und Event-Buchen Rolle erstellt.
 - [ ] Ein Eltern-Account für mehrere Kinder, aber Kinder sollen auch ihren Account sehen können oder anmelden?
 - [ ] Wenn Kinder rauswachsen, wie kann man ein Kinder vom Eltern-Account abkoppeln ohne die Daten zum Spieler und Helden zu verlieren?
+
+### AUTH-10 Anschrift der erziehungsberechtigten Person als Pflichtdaten 🔲
+**Beschreibung:**Im Benutzerprofil müssen die Kontaktdaten der erziehungsberechtigten Person vollständig gepflegt werden.
+**Akzeptanzkriterien:**
+- [] Pflichtfelder:
+Vorname
+Nachname
+Straße
+Hausnummer
+PLZ
+Ort
+E-Mail
+Mobiltelefon
+- [] Validierung verhindert unvollständige Profile bei Veranstaltungsanmeldung.
+- [] Bestehende Benutzer ohne Anschrift werden zur Ergänzung aufgefordert.
+
+### AUTH-11 Rechtliche Rollenbezeichnung im Profil verbessern ✅
+**Beschreibung:**Die Benutzerangaben sollen klar als Angaben der erziehungsberechtigten Person gekennzeichnet werden.
+**Akzeptanzkriterien:**Formularüberschrift: „Angaben der erziehungsberechtigten Person”.
+- [x] Hilfetext: „Diese Anschrift wird für Anmeldung, Kontakt und rechtliche Einwilligungen verwendet.”
+- [x] Keine Formulierung, die nahelegt, dass hier die Anschrift des Kindes gemeint ist.
+
+### AUTH-12 Datenschutz-Hinweis ergänzen ✅
+**Beschreibung:**Bei der Adresseingabe soll kurz erklärt werden, warum die Daten benötigt werden.
+**Akzeptanzkriterien:**
+- [x] Hinweistext unter dem Adressblock:
+„Wir benötigen diese Daten zur Durchführung der Veranstaltung, zur Kontaktaufnahme und für rechtlich erforderliche Einwilligungen.”
+- [x] Der Hinweis ist verständlich und nicht zu lang.
+- [x] Keine zusätzlichen Einwilligungs-Checkboxen, sofern nicht notwendig.

@@ -1,7 +1,7 @@
 <section>
     <header>
-        <h2 class="text-lg font-medium text-gray-900">Profil-Informationen</h2>
-        <p class="mt-1 text-sm text-gray-600">Name, Kontaktdaten und Anschrift der erziehungsberechtigten Person aktualisieren.</p>
+        <h2 class="text-lg font-medium text-gray-900">Angaben der erziehungsberechtigten Person</h2>
+        <p class="mt-1 text-sm text-gray-600">Diese Angaben beziehen sich auf die erziehungsberechtigte Person – nicht auf das Kind.</p>
     </header>
 
     <form id="send-verification" method="post" action="{{ route('verification.send') }}">
@@ -35,8 +35,8 @@
         </div>
 
         <div class="pt-2">
-            <h3 class="text-base font-medium text-gray-800">Anschrift (erziehungsberechtigte Person)</h3>
-            <p class="text-sm text-gray-500 mb-3">Wird für die Eventanmeldung benötigt.</p>
+            <h3 class="text-base font-medium text-gray-800">Anschrift</h3>
+            <p class="text-sm text-gray-500 mb-3">Diese Anschrift wird für Anmeldung, Kontakt und rechtliche Einwilligungen verwendet.</p>
 
             @if (! auth()->user()->hasCompleteAddress())
                 <div class="mb-3 p-3 bg-amber-50 border border-amber-300 rounded text-sm text-amber-800">
@@ -70,6 +70,10 @@
                     <x-input-error class="mt-2" :messages="$errors->get('city')" />
                 </div>
             </div>
+
+            <p class="mt-3 text-xs text-gray-400">
+                Wir benötigen diese Daten zur Durchführung der Veranstaltung, zur Kontaktaufnahme und für rechtlich erforderliche Einwilligungen.
+            </p>
         </div>
 
         <div>
