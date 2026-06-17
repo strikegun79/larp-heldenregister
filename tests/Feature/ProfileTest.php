@@ -2,6 +2,7 @@
 
 namespace Tests\Feature;
 
+use App\Models\Role;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -130,6 +131,29 @@ class ProfileTest extends TestCase
         // User nutzt SoftDeletes (Legacy: portal_user.deleted), daher wird der
         // Datensatz als gelöscht markiert statt physisch entfernt.
         $this->assertSoftDeleted($user);
+    }
+
+    public function test_profile_page_shows_assigned_roles(): void
+    {
+        $this->seed(\Database\Seeders\RoleSeeder::class);
+        $user = User::factory()->create();
+        $user->roles()->attach(Role::where('slug', 'participant')->first());
+
+        $this->actingAs($user)
+            ->get('/profile')
+            ->assertOk()
+            ->assertSee('Deine Rollen')
+            ->assertSee('Teilnehmer');
+    }
+
+    public function test_profile_page_shows_fallback_when_no_roles_assigned(): void
+    {
+        $user = User::factory()->create();
+
+        $this->actingAs($user)
+            ->get('/profile')
+            ->assertOk()
+            ->assertSee('Keine Rolle zugewiesen.');
     }
 
     public function test_correct_password_must_be_provided_to_delete_account(): void
