@@ -151,7 +151,7 @@ class AdventureController extends Controller
      */
     public function participantsPdf(Adventure $adventure): Response
     {
-        $adventure->load(['location', 'category', 'bookings.player']);
+        $adventure->load(['location', 'category', 'bookings.player.users', 'bookings.bookedBy']);
 
         $bookings = $adventure->bookings
             ->sortBy([['player.lastname', 'asc'], ['player.name', 'asc']])

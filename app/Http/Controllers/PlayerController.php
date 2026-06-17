@@ -228,7 +228,6 @@ class PlayerController extends Controller
             // Plausibles Geburtsdatum: nicht in der Zukunft, nicht vor 1900 (PLAY-07).
             'dayofbirth' => ['nullable', 'date', 'before_or_equal:today', 'after:1900-01-01'],
             'gender' => ['nullable', 'in:weiblich,männlich,divers'],
-            'place' => ['nullable', 'string', 'max:100'],
             // Kinder-Anschrift (PLAY-14 / ORGA-01): nur Pflicht bei abweichender Anschrift.
             'address_same_as_guardian' => ['boolean'],
             'street' => [$sameAsGuardian ? 'nullable' : 'required', 'string', 'max:100'],

@@ -35,19 +35,11 @@
         </div>
     </div>
 
-    <div class="grid grid-cols-2 gap-4">
-        <div>
-            <x-input-label for="email" value="E-Mail (optional)" />
-            <x-text-input id="email" name="email" type="email" class="mt-1 block w-full"
-                          :value="old('email', $player->email)" />
-            <x-input-error :messages="$errors->get('email')" class="mt-2" />
-        </div>
-        <div>
-            <x-input-label for="place" value="Wohnort (optional)" />
-            <x-text-input id="place" name="place" type="text" class="mt-1 block w-full"
-                          :value="old('place', $player->place)" />
-            <x-input-error :messages="$errors->get('place')" class="mt-2" />
-        </div>
+    <div>
+        <x-input-label for="email" value="E-Mail (optional)" />
+        <x-text-input id="email" name="email" type="email" class="mt-1 block w-full"
+                      :value="old('email', $player->email)" />
+        <x-input-error :messages="$errors->get('email')" class="mt-2" />
     </div>
 
     {{-- Kinder-Anschrift (PLAY-14 / ORGA-01) --}}

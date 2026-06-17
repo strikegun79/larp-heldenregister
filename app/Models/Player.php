@@ -19,7 +19,6 @@ class Player extends Model
         'email',
         'dayofbirth',
         'gender',
-        'place',
         'image',
         'active',
         'address_same_as_guardian',

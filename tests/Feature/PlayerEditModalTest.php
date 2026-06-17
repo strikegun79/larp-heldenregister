@@ -45,35 +45,42 @@ class PlayerEditModalTest extends TestCase
         $response->assertDontSee('Abbrechen');
     }
 
-    public function test_edit_form_has_wohnort_field(): void
+    public function test_edit_form_has_address_checkbox(): void
     {
-        $player = Player::factory()->create(['place' => 'Gießen']);
+        $player = Player::factory()->create(['address_same_as_guardian' => true]);
 
         $this->actingAs($this->ownerOf($player))
             ->get(route('players.edit', $player), ['X-Requested-With' => 'XMLHttpRequest'])
             ->assertOk()
-            ->assertSee('Wohnort')
-            ->assertSee('name="place"', false)
-            ->assertSee('value="Gießen"', false);
+            ->assertSee('erziehungsberechtigten Person')
+            ->assertSee('name="address_same_as_guardian"', false);
     }
 
-    public function test_wohnort_is_saved_and_shown_in_detail(): void
+    public function test_detail_shows_guardian_address_fallback_by_default(): void
     {
-        $player = Player::factory()->create();
+        $player = Player::factory()->create(['address_same_as_guardian' => true]);
         $owner = $this->ownerOf($player);
-
-        $this->actingAs($owner)
-            ->putJson(route('players.update', $player), [
-                'name' => $player->name, 'lastname' => $player->lastname, 'place' => 'Wetzlar',
-            ])
-            ->assertOk();
-
-        $this->assertSame('Wetzlar', $player->fresh()->place);
 
         $this->actingAs($owner)
             ->get(route('players.show', $player), ['X-Requested-With' => 'XMLHttpRequest'])
             ->assertOk()
-            ->assertSee('Wohnort')
-            ->assertSee('Wetzlar');
+            ->assertSee('wie erziehungsberechtigte Person');
+    }
+
+    public function test_detail_shows_child_address_when_different(): void
+    {
+        $player = Player::factory()->create([
+            'address_same_as_guardian' => false,
+            'street' => 'Kinderstraße',
+            'house_number' => '7',
+            'zip' => '35390',
+            'city' => 'Gießen',
+        ]);
+
+        $this->actingAs($this->ownerOf($player))
+            ->get(route('players.show', $player), ['X-Requested-With' => 'XMLHttpRequest'])
+            ->assertOk()
+            ->assertSee('Kinderstraße')
+            ->assertSee('abweichend');
     }
 }

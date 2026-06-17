@@ -18,7 +18,17 @@
             <div><dt class="text-sm text-stone-500">Geburtsdatum</dt>
                 <dd>{{ optional($player->dayofbirth)->format('d.m.Y') ?? '—' }}@if ($player->dayofbirth) ({{ $player->age }} Jahre)@endif</dd></div>
             <div><dt class="text-sm text-stone-500">Geschlecht</dt><dd>{{ $player->gender ?? '—' }}</dd></div>
-            <div><dt class="text-sm text-stone-500">Wohnort</dt><dd>{{ $player->place ?? '—' }}</dd></div>
+            <div>
+                <dt class="text-sm text-stone-500">Anschrift</dt>
+                <dd>
+                    @if (! $player->address_same_as_guardian && $player->street)
+                        {{ $player->street }} {{ $player->house_number }}, {{ $player->zip }} {{ $player->city }}
+                        <span class="text-xs text-stone-400">(abweichend)</span>
+                    @else
+                        <span class="text-stone-400 text-sm">wie erziehungsberechtigte Person</span>
+                    @endif
+                </dd>
+            </div>
             <div><dt class="text-sm text-stone-500">E-Mail</dt><dd>{{ $player->email ?? '—' }}</dd></div>
             <div><dt class="text-sm text-stone-500">Erstellt</dt><dd>{{ optional($player->created_at)->format('d.m.Y') ?? '—' }}</dd></div>
             <div><dt class="text-sm text-stone-500">Status</dt><dd>{{ $player->active ? 'aktiv' : 'inaktiv' }}</dd></div>
