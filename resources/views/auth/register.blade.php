@@ -5,8 +5,15 @@
         <div>
             <x-input-label for="name" value="Vorname" />
             <x-text-input id="name" class="block mt-1 w-full" type="text" name="name"
-                          :value="old('name')" required autofocus autocomplete="name" />
+                          :value="old('name')" required autofocus autocomplete="given-name" />
             <x-input-error :messages="$errors->get('name')" class="mt-2" />
+        </div>
+
+        <div class="mt-4">
+            <x-input-label for="lastname" value="Nachname" />
+            <x-text-input id="lastname" class="block mt-1 w-full" type="text" name="lastname"
+                          :value="old('lastname')" required autocomplete="family-name" />
+            <x-input-error :messages="$errors->get('lastname')" class="mt-2" />
         </div>
 
         <div class="mt-4">

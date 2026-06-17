@@ -29,6 +29,7 @@ class RegistrationNotificationTest extends TestCase
 
         $this->post('/register', [
             'name' => 'Neuer',
+            'lastname' => 'Nutzer',
             'email' => 'neuer@example.com',
             'password' => 'password',
             'password_confirmation' => 'password',
@@ -47,6 +48,7 @@ class RegistrationNotificationTest extends TestCase
     {
         $this->post('/register', [
             'name' => 'Frisch',
+            'lastname' => 'Gemeldet',
             'email' => 'frisch@example.com',
             'password' => 'password',
             'password_confirmation' => 'password',
@@ -68,6 +70,7 @@ class RegistrationNotificationTest extends TestCase
 
         $this->post('/register', [
             'name' => 'Noch Einer',
+            'lastname' => 'Dazu',
             'email' => 'noch.einer@example.com',
             'password' => 'password',
             'password_confirmation' => 'password',

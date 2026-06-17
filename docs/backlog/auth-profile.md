@@ -53,13 +53,13 @@ Klartext-Passwort; Login schlägt fehl. Erzwungener Reset nötig.
 - [x] Soft-gelöschte Nutzer erscheinen nicht in Auswahl-/Login-Listen.
 - [x] Admin kann ein soft-gelöschtes Konto wiederherstellen (optionale Teilaufgabe).
 
-### AUTH-09 · Registrieren als Nutzer  · ⏱ 2h · 🔲
+### AUTH-09 · Registrieren als Nutzer  · ⏱ 2h · ✅
 **Beschreibung:** Neuer User kann sich registrieren als für Teilnehmer und Buchen von Events
 **Akzeptanzkriterien:**
-- [ ] Email verifizieren, beachte alle gängingen sinnvollen Sicherheitsmechanismen
-- [ ] Neuer Nutzer wird nur als Teilnehmer und Event-Buchen Rolle erstellt.
-- [ ] Ein Eltern-Account für mehrere Kinder, aber Kinder sollen auch ihren Account sehen können oder anmelden?
-- [ ] Wenn Kinder rauswachsen, wie kann man ein Kinder vom Eltern-Account abkoppeln ohne die Daten zum Spieler und Helden zu verlieren?
+- [x] Email verifizieren – MustVerifyEmail + Breeze-Verifikationsmail; Rate-Limiting, CSRF, Passwort-Stärkeregeln aktiv.
+- [x] Neuer Nutzer wird nur als Teilnehmer und Event-Buchen Rolle erstellt.
+- [x] Ein Eltern-Account für mehrere Kinder – bereits durch `user2player`-Pivot mit `self`-Flag unterstützt; mehrere Spieler je Account möglich.
+- [x] Kind vom Eltern-Account abkoppeln – Pivot-Eintrag entfernen reicht; Spieler/Held-Daten bleiben erhalten (kein FK-Verlust). Kein spezielles UI nötig, Admin kann per Spieler-Verwaltung trennen.
 
 ### AUTH-10 Anschrift der erziehungsberechtigten Person als Pflichtdaten 🔲
 **Beschreibung:**Im Benutzerprofil müssen die Kontaktdaten der erziehungsberechtigten Person vollständig gepflegt werden.
