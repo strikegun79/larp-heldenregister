@@ -99,6 +99,12 @@
                                                 </button>
                                             </form>
                                         @else
+                                            <a href="{{ route('admin.players.edit', $player) }}"
+                                               data-modal-url="{{ route('admin.players.edit', $player) }}"
+                                               class="text-indigo-700 hover:underline"
+                                               title="{{ $player->address_same_as_guardian ? 'Elternanschrift' : 'Abweichende Anschrift' }}">
+                                                Anschrift{{ $player->address_same_as_guardian ? '' : ' *' }}
+                                            </a>
                                             <a href="{{ route('admin.players.caretakers', $player) }}"
                                                data-modal-url="{{ route('admin.players.caretakers', $player) }}"
                                                class="text-indigo-700 hover:underline">Betreuer</a>

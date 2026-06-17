@@ -1,7 +1,7 @@
 <section>
     <header>
         <h2 class="text-lg font-medium text-gray-900">Profil-Informationen</h2>
-        <p class="mt-1 text-sm text-gray-600">Name, Kontaktdaten und E-Mail-Adresse aktualisieren.</p>
+        <p class="mt-1 text-sm text-gray-600">Name, Kontaktdaten und Anschrift der erziehungsberechtigten Person aktualisieren.</p>
     </header>
 
     <form id="send-verification" method="post" action="{{ route('verification.send') }}">
@@ -28,10 +28,48 @@
         </div>
 
         <div>
-            <x-input-label for="phone" value="Telefon (optional)" />
+            <x-input-label for="phone" value="Mobil / Telefon" />
             <x-text-input id="phone" name="phone" type="tel" class="mt-1 block w-full"
                           :value="old('phone', $user->phone)" autocomplete="tel" />
             <x-input-error class="mt-2" :messages="$errors->get('phone')" />
+        </div>
+
+        <div class="pt-2">
+            <h3 class="text-base font-medium text-gray-800">Anschrift (erziehungsberechtigte Person)</h3>
+            <p class="text-sm text-gray-500 mb-3">Wird für die Eventanmeldung benötigt.</p>
+
+            @if (! auth()->user()->hasCompleteAddress())
+                <div class="mb-3 p-3 bg-amber-50 border border-amber-300 rounded text-sm text-amber-800">
+                    Deine Kontaktdaten sind unvollständig. Bitte ergänze sie, um Spieler zu Abenteuern anmelden zu können.
+                </div>
+            @endif
+
+            <div class="grid grid-cols-2 gap-4">
+                <div>
+                    <x-input-label for="street" value="Straße" />
+                    <x-text-input id="street" name="street" type="text" class="mt-1 block w-full"
+                                  :value="old('street', $user->street)" autocomplete="street-address" />
+                    <x-input-error class="mt-2" :messages="$errors->get('street')" />
+                </div>
+                <div>
+                    <x-input-label for="house_number" value="Hausnummer" />
+                    <x-text-input id="house_number" name="house_number" type="text" class="mt-1 block w-full"
+                                  :value="old('house_number', $user->house_number)" />
+                    <x-input-error class="mt-2" :messages="$errors->get('house_number')" />
+                </div>
+                <div>
+                    <x-input-label for="zip" value="PLZ" />
+                    <x-text-input id="zip" name="zip" type="text" class="mt-1 block w-full"
+                                  :value="old('zip', $user->zip)" autocomplete="postal-code" maxlength="10" />
+                    <x-input-error class="mt-2" :messages="$errors->get('zip')" />
+                </div>
+                <div>
+                    <x-input-label for="city" value="Ort" />
+                    <x-text-input id="city" name="city" type="text" class="mt-1 block w-full"
+                                  :value="old('city', $user->city)" autocomplete="address-level2" />
+                    <x-input-error class="mt-2" :messages="$errors->get('city')" />
+                </div>
+            </div>
         </div>
 
         <div>

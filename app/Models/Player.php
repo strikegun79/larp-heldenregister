@@ -22,6 +22,11 @@ class Player extends Model
         'place',
         'image',
         'active',
+        'address_same_as_guardian',
+        'street',
+        'house_number',
+        'zip',
+        'city',
         'active_hero_id',
         'legacy_id',
     ];
@@ -29,6 +34,7 @@ class Player extends Model
     protected $casts = [
         'dayofbirth' => 'date',
         'active' => 'boolean',
+        'address_same_as_guardian' => 'boolean',
     ];
 
     /** Aktuelles Alter in Jahren bzw. null (PLAY-07). */

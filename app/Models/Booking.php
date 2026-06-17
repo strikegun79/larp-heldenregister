@@ -117,6 +117,12 @@ class Booking extends Model
         return $this->belongsTo(EventRole::class, 'event_role_id');
     }
 
+    /** Erziehungsberechtigte Person, die die Anmeldung vorgenommen hat (ORGA-01). */
+    public function bookedBy(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'booked_by_user_id');
+    }
+
     public function isApproved(): bool
     {
         return $this->approved_at !== null;

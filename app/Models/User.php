@@ -24,6 +24,10 @@ class User extends Authenticatable implements MustVerifyEmail
         'lastname',
         'email',
         'phone',
+        'street',
+        'house_number',
+        'zip',
+        'city',
         'password',
         'lastlogin_at',
         'legacy_id',
@@ -89,6 +93,20 @@ class User extends Authenticatable implements MustVerifyEmail
     public function isAdmin(): bool
     {
         return $this->hasRole('admin');
+    }
+
+    /**
+     * Prüft ob Pflichtdaten der erziehungsberechtigten Person vollständig sind (ORGA-01).
+     * Voraussetzung für die Eventanmeldung (ADV-24).
+     */
+    public function hasCompleteAddress(): bool
+    {
+        return filled($this->name)
+            && filled($this->lastname)
+            && filled($this->street)
+            && filled($this->house_number)
+            && filled($this->zip)
+            && filled($this->city);
     }
 
     /**

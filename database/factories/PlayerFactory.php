@@ -18,6 +18,7 @@ class PlayerFactory extends Factory
             'dayofbirth' => fake()->date(),
             'gender' => fake()->randomElement(['männlich', 'weiblich', 'divers']),
             'active' => true,
+            'address_same_as_guardian' => true,
         ];
     }
 }

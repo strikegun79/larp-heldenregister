@@ -91,6 +91,50 @@ class PlayerController extends Controller
     }
 
     /**
+     * Spieler-Adressformular als Modal (PLAY-13 / ORGA-01).
+     */
+    public function edit(Request $request, Player $player): View
+    {
+        return $request->expectsJson()
+            ? view('admin.players._form', compact('player'))
+            : view('admin.players.edit', compact('player'));
+    }
+
+    /**
+     * Kinder-Anschrift speichern (PLAY-13 / ORGA-01).
+     */
+    public function update(Request $request, Player $player): RedirectResponse|JsonResponse
+    {
+        $data = $request->validate([
+            'address_same_as_guardian' => ['boolean'],
+            'street' => ['nullable', 'string', 'max:100'],
+            'house_number' => ['nullable', 'string', 'max:10'],
+            'zip' => ['nullable', 'string', 'max:10'],
+            'city' => ['nullable', 'string', 'max:100'],
+        ]);
+
+        // Adressfelder nur Pflicht wenn abweichende Anschrift gewählt.
+        $sameAsGuardian = (bool) ($data['address_same_as_guardian'] ?? true);
+        if (! $sameAsGuardian) {
+            $validator = \Illuminate\Support\Facades\Validator::make($data, [
+                'street' => ['required', 'string', 'max:100'],
+                'house_number' => ['required', 'string', 'max:10'],
+                'zip' => ['required', 'string', 'max:10'],
+                'city' => ['required', 'string', 'max:100'],
+            ]);
+            if ($validator->fails()) {
+                return $request->expectsJson()
+                    ? response()->json(['errors' => $validator->errors()], 422)
+                    : back()->withErrors($validator)->withInput();
+            }
+        }
+
+        $player->update($data);
+
+        return $this->respond($request, 'Anschrift gespeichert.');
+    }
+
+    /**
      * Spieler soft-löschen (PLAY-08).
      * Ohne ?force=1: bei offenen Buchungen/aktiven Helden Warnung und Abbruch.
      * Mit ?force=1: Löschen trotz Warnung (Admin-Override).

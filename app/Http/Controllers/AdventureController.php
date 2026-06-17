@@ -140,7 +140,7 @@ class AdventureController extends Controller
      */
     public function manage(Adventure $adventure): View
     {
-        $adventure->load(['bookings.player', 'bookings.role', 'visits', 'status']);
+        $adventure->load(['bookings.player.users', 'bookings.bookedBy', 'bookings.role', 'visits', 'status']);
 
         return view('adventures._manage', $this->formData($adventure));
     }

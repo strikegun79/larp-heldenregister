@@ -151,6 +151,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         // Soft-Delete + Wiederherstellung (PLAY-08).
         Route::delete('players/{id}', [Admin\PlayerController::class, 'destroy'])->name('players.destroy');
         Route::patch('players/{id}/restore', [Admin\PlayerController::class, 'restore'])->name('players.restore');
+        // Kinder-Anschrift bearbeiten (PLAY-13 / ORGA-01).
+        Route::get('players/{player}/edit', [Admin\PlayerController::class, 'edit'])->name('players.edit');
+        Route::put('players/{player}', [Admin\PlayerController::class, 'update'])->name('players.update');
         // Betreuer je Spieler verwalten (PLAY-06).
         Route::get('players/{player}/caretakers', [Admin\PlayerController::class, 'caretakers'])->name('players.caretakers');
         Route::post('players/{player}/caretakers', [Admin\PlayerController::class, 'attachCaretaker'])->name('players.caretakers.store');

@@ -9,6 +9,23 @@
                 <td>
                     {{ $booking->participant_name }}
                     @if ($booking->is_guest)<span class="ui mini label">Gast</span>@endif
+                    @if ($manage)
+                        @canany(['approve-bookings', 'manage-payments'])
+                            @php($guardian = $booking->bookedBy ?? $booking->player?->users->first())
+                            @if ($guardian)
+                                <div class="text-xs text-stone-500 mt-0.5">
+                                    {{ $guardian->name }} {{ $guardian->lastname }}
+                                    @if ($guardian->phone) · {{ $guardian->phone }} @endif
+                                    @if ($guardian->street)
+                                        · {{ $guardian->street }} {{ $guardian->house_number }}, {{ $guardian->zip }} {{ $guardian->city }}
+                                    @endif
+                                    @if ($booking->player && ! $booking->player->address_same_as_guardian && $booking->player->street)
+                                        <span class="text-amber-700">(Kind abw.: {{ $booking->player->street }} {{ $booking->player->house_number }}, {{ $booking->player->zip }} {{ $booking->player->city }})</span>
+                                    @endif
+                                </div>
+                            @endif
+                        @endcanany
+                    @endif
                 </td>
                 <td>{{ $booking->participant_age ?? '—' }}</td>
                 <td>{{ $booking->role?->description }}</td>

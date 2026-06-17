@@ -80,6 +80,11 @@ class BookingController extends Controller
             return $this->fail($request, 'Für diesen Spieler darfst du keine Buchung anlegen.');
         }
 
+        // Kontaktdaten der erziehungsberechtigten Person müssen vollständig sein (ADV-24 / ORGA-01).
+        if (! Gate::allows('book-any-player') && ! $request->user()->hasCompleteAddress()) {
+            return $this->fail($request, 'Deine Kontaktdaten (Anschrift) sind unvollständig. Bitte ergänze sie zuerst im Profil.');
+        }
+
         if (! $adventure->registrationOpen()) {
             return $this->fail($request, 'Für dieses Abenteuer ist die Anmeldung nicht geöffnet.');
         }
