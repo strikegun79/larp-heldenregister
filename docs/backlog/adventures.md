@@ -353,15 +353,15 @@ Kind nutzt Elternanschrift
 Kind hat abweichende Anschrift
 - [x] Keine doppelte Speicherung unnötiger Adressdaten, außer wenn historisch erforderlich.
 
-### ADV-26 Admin-Ansicht für Eventteilnehmer erweitern 🔲
+### ADV-26 Admin-Ansicht für Eventteilnehmer erweitern ✅
 **Beschreibung:** In der Teilnehmerverwaltung eines Abenteuers sollen relevante Kontaktdaten sichtbar sein.
 **Akzeptanzkriterien:**
-- [] Admin sieht:
+- [x] Admin sieht:
 Name des Kindes
 Name der erziehungsberechtigten Person
 E-Mail
 Mobiltelefon
 Anschrift der erziehungsberechtigten Person
-- [] Hinweis, falls Kind abweichende Anschrift hat
-- [] Export enthält diese Angaben ebenfalls.
-- [] Datenschutz: Nur Admins und Projektleiter mit Berechtigung sehen diese Daten.
+- [x] Hinweis, falls Kind abweichende Anschrift hat
+- [x] Export enthält diese Angaben ebenfalls.
+- [x] Datenschutz: Nur Admins und Projektleiter mit Berechtigung sehen diese Daten.

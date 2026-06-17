@@ -15,6 +15,7 @@
                             @if ($guardian)
                                 <div class="text-xs text-stone-500 mt-0.5">
                                     {{ $guardian->name }} {{ $guardian->lastname }}
+                                    @if ($guardian->email) · {{ $guardian->email }} @endif
                                     @if ($guardian->phone) · {{ $guardian->phone }} @endif
                                     @if ($guardian->street)
                                         · {{ $guardian->street }} {{ $guardian->house_number }}, {{ $guardian->zip }} {{ $guardian->city }}
