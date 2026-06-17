@@ -335,13 +335,13 @@ Eine Admin-Eventliste mit Verwaltungsaktionen (anlegen/bearbeiten/absagen).
 - [x] Das selbe Verhalten soll auch in der Kalenderansicht der Events sein
 - [x] Beim editieren eines Event, soll der Speicher-Button im Footer des Modals sein. ein Abbrechen ist nicht nötig, das der Schließen-Button schon existiert.
 
-### ADV-24 Anmeldung zu Abenteuer/Events prüft Elternanschrift 🔲
+### ADV-24 Anmeldung zu Abenteuer/Events prüft Elternanschrift ✅
 **Beschreibung:** Vor der Anmeldung zu einer Veranstaltung muss geprüft werden, ob die Anschrift der erziehungsberechtigten Person vollständig ist.
 **Akzeptanzkriterien:**
-- [] Anmeldung ist nur möglich, wenn das Benutzerprofil vollständig ist.
-- [] Bei fehlenden Daten erscheint ein Hinweis mit Link zum Profil.
-- [] Fehlermeldung nennt konkret fehlende Felder.
-- [] Keine Anmeldung mit unvollständigen Pflichtdaten.
+- [x] Anmeldung ist nur möglich, wenn das Benutzerprofil vollständig ist.
+- [x] Bei fehlenden Daten erscheint ein Hinweis mit Link zum Profil.
+- [x] Fehlermeldung nennt konkret fehlende Felder.
+- [x] Keine Anmeldung mit unvollständigen Pflichtdaten.
 
 ### ADV-25 Teilnehmerdaten bei Anmeldung korrekt speichern ✅
 **Beschreibung:** Bei der Anmeldung soll gespeichert werden, welche Anschrift zum Zeitpunkt der Anmeldung relevant war.

@@ -153,18 +153,18 @@ es höchstens einen geben.
 	  </div>
 	</div>
 </div>
-### PLAY-13: Adressmodell für Spieler/Kinder erweitern 🔲
+### PLAY-13: Adressmodell für Spieler/Kinder erweitern ✅
 **Beschreibung:** Beim Kind soll optional eine eigene Anschrift gespeichert werden können, falls diese von der Anschrift der erziehungsberechtigten Person abweicht.
 **Akzeptanzkriterien:**
-- [] Spieler/Kinder haben ein Feld address_same_as_guardian.
-- [] Standardwert ist true.
-- [] Wenn false, müssen kindbezogene Adressfelder vorhanden sein:
+- [x] Spieler/Kinder haben ein Feld address_same_as_guardian.
+- [x] Standardwert ist true.
+- [x] Wenn false, müssen kindbezogene Adressfelder vorhanden sein:
 Straße
 Hausnummer
 PLZ
 Ort
-- [] Die Kinderanschrift ist nur Pflicht, wenn sie abweichend ist.
-- [] Bestehende Spieler bleiben kompatibel.
+- [x] Die Kinderanschrift ist nur Pflicht, wenn sie abweichend ist.
+- [x] Bestehende Spieler bleiben kompatibel.
 
 ### PLAY-14: Formular „Kind anlegen/bearbeiten” anpassen ✅
 **Beschreibung:** Im Formular für Spieler/Kinder soll eine Auswahl erscheinen: „Anschrift entspricht der Anschrift der erziehungsberechtigten Person”.
@@ -175,9 +175,9 @@ Ort
 - [x] Validierung greift nur bei abweichender Anschrift.
 - [x] UI bleibt mobil nutzbar.
 
-### PLAY-15: Anzeige im Spielerprofil ergänzen 🔲
+### PLAY-15: Anzeige im Spielerprofil ergänzen ✅
 **Beschreibung:** Im Spielerprofil soll sichtbar sein, ob das Kind eine eigene Anschrift hat.
 **Akzeptanzkriterien:**
-- [] Bei gleicher Anschrift: Anzeige „Anschrift wie erziehungsberechtigte Person“.
-- [] Bei abweichender Anschrift: Anzeige der Kinderanschrift.
-- [] Keine unnötigen leeren Felder anzeigen.
+- [x] Bei gleicher Anschrift: Anzeige „Anschrift wie erziehungsberechtigte Person”.
+- [x] Bei abweichender Anschrift: Anzeige der Kinderanschrift.
+- [x] Keine unnötigen leeren Felder anzeigen.

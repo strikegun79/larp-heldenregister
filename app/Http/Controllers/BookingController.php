@@ -82,7 +82,13 @@ class BookingController extends Controller
 
         // Kontaktdaten der erziehungsberechtigten Person müssen vollständig sein (ADV-24 / ORGA-01).
         if (! Gate::allows('book-any-player') && ! $request->user()->hasCompleteAddress()) {
-            return $this->fail($request, 'Deine Kontaktdaten (Anschrift) sind unvollständig. Bitte ergänze sie zuerst im Profil.');
+            $missing = $request->user()->missingAddressFields();
+            $fieldStr = implode(', ', $missing);
+            $url = route('profile.edit');
+            $msg = "Deine Kontaktdaten sind unvollständig ({$fieldStr}). "
+                      ."Bitte ergänze sie in deinem <a href=\"{$url}\">Profil</a>.";
+
+            return $this->fail($request, $msg);
         }
 
         if (! $adventure->registrationOpen()) {

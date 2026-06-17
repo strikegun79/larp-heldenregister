@@ -101,12 +101,38 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     public function hasCompleteAddress(): bool
     {
-        return filled($this->name)
-            && filled($this->lastname)
-            && filled($this->street)
-            && filled($this->house_number)
-            && filled($this->zip)
-            && filled($this->city);
+        return $this->missingAddressFields() === [];
+    }
+
+    /**
+     * Gibt die deutschen Labels aller fehlenden Pflichtadressfelder zurück (ADV-24).
+     *
+     * @return string[]
+     */
+    public function missingAddressFields(): array
+    {
+        $missing = [];
+
+        if (! filled($this->name)) {
+            $missing[] = 'Vorname';
+        }
+        if (! filled($this->lastname)) {
+            $missing[] = 'Nachname';
+        }
+        if (! filled($this->street)) {
+            $missing[] = 'Straße';
+        }
+        if (! filled($this->house_number)) {
+            $missing[] = 'Hausnummer';
+        }
+        if (! filled($this->zip)) {
+            $missing[] = 'PLZ';
+        }
+        if (! filled($this->city)) {
+            $missing[] = 'Ort';
+        }
+
+        return $missing;
     }
 
     /**
