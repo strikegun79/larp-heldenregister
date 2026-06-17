@@ -194,6 +194,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('hero-classes/{heroClass}/edit', [Admin\HeroClassController::class, 'edit'])->name('hero-classes.edit');
         Route::put('hero-classes/{heroClass}', [Admin\HeroClassController::class, 'update'])->name('hero-classes.update');
 
+        // Fertigkeiten-Verwaltung (SKILL-02 + SKILL-03).
+        Route::get('skills', [Admin\SkillController::class, 'index'])->name('skills.index');
+        Route::get('skills/create', [Admin\SkillController::class, 'create'])->name('skills.create');
+        Route::post('skills', [Admin\SkillController::class, 'store'])->name('skills.store');
+        Route::get('skills/{skill}/edit', [Admin\SkillController::class, 'edit'])->name('skills.edit');
+        Route::put('skills/{skill}', [Admin\SkillController::class, 'update'])->name('skills.update');
+        Route::delete('skills/{skill}', [Admin\SkillController::class, 'destroy'])->name('skills.destroy');
+
         // Perlenfarben pflegen (EP-05).
         Route::get('perl-colors', [Admin\PerlColorController::class, 'index'])->name('perl-colors.index');
         Route::get('perl-colors/create', [Admin\PerlColorController::class, 'create'])->name('perl-colors.create');

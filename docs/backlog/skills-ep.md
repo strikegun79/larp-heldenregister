@@ -15,21 +15,21 @@ Datenmodell vorhanden (`skills`, `hero_skill`, `skills2class` →
 
 ## Offen (🔲)
 
-### SKILL-02 · Fertigkeiten-Verwaltung CRUD (Admin) · ⏱ 4h · 🔲
+### SKILL-02 · Fertigkeiten-Verwaltung CRUD (Admin) · ⏱ 4h · ✅
 **Beschreibung:** `SkillController` ausbauen (aktuell Stub): Liste + Anlegen/
 Bearbeiten/Löschen von Fertigkeiten.
 **Akzeptanzkriterien:**
-- [ ] Routen + Controller-Methoden + Views (Liste, Formular, Modal).
-- [ ] Felder: Name, Beschreibung, EP-Kosten, Level, Masterclass, Perlenfarbe, Perlenanzahl.
-- [ ] Nur mit `heldenregister.edit` (oder eigener `skills.manage`) editierbar.
-- [ ] Tests.
+- [x] Routen + Controller-Methoden + Views (Liste, Formular, Modal).
+- [x] Felder: Name, Beschreibung, EP-Kosten, Level, Masterclass, Perlenfarbe, Perlenanzahl.
+- [x] Nur mit `heldenregister.edit` (oder eigener `skills.manage`) editierbar.
+- [x] Tests.
 
-### SKILL-03 · Skill↔Klasse-Zuordnung pflegen · ⏱ 3h · 🔲
+### SKILL-03 · Skill↔Klasse-Zuordnung pflegen · ⏱ 3h · ✅
 **Beschreibung:** `skill_hero_class` (welche Klasse welche Fertigkeit lernen darf).
 **Akzeptanzkriterien:**
-- [ ] Im Skill-Formular Klassen-Mehrfachauswahl.
-- [ ] Fertigkeitsliste je Klasse filterbar.
-- [ ] Tests für Sync.
+- [x] Im Skill-Formular Klassen-Mehrfachauswahl.
+- [x] Fertigkeitsliste je Klasse filterbar.
+- [x] Tests für Sync.
 
 ### SKILL-04 · Fertigkeiten-Katalog (read-only, nach Klasse) · ⏱ 3h · 🔲
 **Beschreibung:** Übersichtsseite aller Fertigkeiten gruppiert nach Klasse/Level,
