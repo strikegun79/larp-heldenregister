@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\EpTransactionType;
 use App\Models\Hero;
+use App\Services\AuditLogger;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -32,6 +34,14 @@ class EpTransactionController extends Controller
             'ep_transaction_type_id' => $data['ep_transaction_type_id'],
             'ep_count' => $data['ep_count'],
             'transacted_at' => now(),
+        ]);
+
+        $type = EpTransactionType::find($data['ep_transaction_type_id']);
+
+        AuditLogger::log('ep.booked', $hero, [
+            'ep_count' => $data['ep_count'],
+            'typ' => $type?->description,
+            'gutschrift' => $type?->is_credit,
         ]);
 
         $message = 'EP-Buchung gespeichert.';

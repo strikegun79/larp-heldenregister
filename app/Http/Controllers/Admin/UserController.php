@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Role;
 use App\Models\User;
+use App\Services\AuditLogger;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -71,6 +72,11 @@ class UserController extends Controller
         // Einladungsmail: Nutzer erhält Link zum Setzen seines Passworts.
         Password::sendResetLink(['email' => $user->email]);
 
+        AuditLogger::log('user.created', $user, [
+            'email' => $user->email,
+            'roles' => $data['roles'] ?? [],
+        ]);
+
         $message = "Konto für \"{$user->name}\" angelegt – Einladungsmail wurde verschickt.";
 
         return $request->expectsJson()
@@ -113,6 +119,8 @@ class UserController extends Controller
 
         $user->delete();
 
+        AuditLogger::log('user.deleted', $user);
+
         return redirect()->route('admin.users.index')
             ->with('status', 'Konto '.$user->name.' wurde gelöscht.');
     }
@@ -124,6 +132,8 @@ class UserController extends Controller
     {
         $user = User::withTrashed()->findOrFail($id);
         $user->restore();
+
+        AuditLogger::log('user.restored', $user);
 
         return redirect()->route('admin.users.index')
             ->with('status', 'Konto '.$user->name.' wurde wiederhergestellt.');
@@ -140,10 +150,21 @@ class UserController extends Controller
             'activated' => ['boolean'],
         ]);
 
+        $oldRoles = $user->roles->pluck('id')->sort()->values()->all();
+        $oldActivated = $user->activated;
+
         $user->roles()->sync($data['roles'] ?? []);
         // Direktzuweisung, da activated nicht in $fillable (Mass-Assignment-Schutz).
         $user->activated = $request->boolean('activated');
         $user->save();
+
+        $newRoles = array_values(array_map('intval', $data['roles'] ?? []));
+        sort($newRoles);
+
+        AuditLogger::log('user.updated', $user, [
+            'roles' => ['von' => $oldRoles, 'auf' => $newRoles],
+            'activated' => ['von' => $oldActivated, 'auf' => $user->activated],
+        ]);
 
         $message = "Nutzer „{$user->name}“ wurde aktualisiert.";
 

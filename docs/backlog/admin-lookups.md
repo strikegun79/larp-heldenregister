@@ -45,13 +45,14 @@ Selbstregistrierung).
 **Akzeptanzkriterien:**
 - [x] Admin-CRUD; System-IDs vor Löschung geschützt (Sperre wenn adventures_count > 0).
 
-### ADM-08 · Audit-Log (Grundgerüst) · ⏱ 4h · 🔲
+### ADM-08 · Audit-Log (Grundgerüst) · ⏱ 4h · ✅
 **Beschreibung:** Protokoll wichtiger Admin-Aktionen (Rollen, Aktivierung,
 Matrix, EP-Buchungen).
 **Akzeptanzkriterien:**
-- [ ] `audit_logs` (actor, action, subject, changes JSON, timestamp).
-- [ ] Schreib-Helper/Observer; Admin-Ansicht mit Filter.
-- [ ] Tests.
+- [x] `audit_logs` (actor_id, actor_name, action, subject_type/id/label, changes JSON, created_at).
+- [x] `AuditLogger::log()` statischer Helper; Admin-Ansicht mit Filter (Aktion, Akteur).
+- [x] Logs bei user.created/updated/deleted/restored (UserController) und ep.booked (EpTransactionController).
+- [x] Tests.
 
 ### ADM-09 · Portal-Konfiguration (Key/Value) · ⏱ 3h · 🔲
 **Beschreibung:** Legacy `portal_config` (Logo, URL, Version). In Laravel als

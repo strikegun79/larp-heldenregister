@@ -196,6 +196,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::put('event-statuses/{eventStatus}', [Admin\EventStatusController::class, 'update'])->name('event-statuses.update');
         Route::delete('event-statuses/{eventStatus}', [Admin\EventStatusController::class, 'destroy'])->name('event-statuses.destroy');
 
+        Route::get('audit-logs', [Admin\AuditLogController::class, 'index'])->name('audit-logs.index');
+
         Route::get('hero-classes', [Admin\HeroClassController::class, 'index'])->name('hero-classes.index');
         Route::get('hero-classes/create', [Admin\HeroClassController::class, 'create'])->name('hero-classes.create');
         Route::post('hero-classes', [Admin\HeroClassController::class, 'store'])->name('hero-classes.store');
