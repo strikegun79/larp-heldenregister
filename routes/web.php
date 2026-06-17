@@ -194,6 +194,22 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('hero-classes/{heroClass}/edit', [Admin\HeroClassController::class, 'edit'])->name('hero-classes.edit');
         Route::put('hero-classes/{heroClass}', [Admin\HeroClassController::class, 'update'])->name('hero-classes.update');
 
+        // Perlenfarben pflegen (EP-05).
+        Route::get('perl-colors', [Admin\PerlColorController::class, 'index'])->name('perl-colors.index');
+        Route::get('perl-colors/create', [Admin\PerlColorController::class, 'create'])->name('perl-colors.create');
+        Route::post('perl-colors', [Admin\PerlColorController::class, 'store'])->name('perl-colors.store');
+        Route::get('perl-colors/{perlColor}/edit', [Admin\PerlColorController::class, 'edit'])->name('perl-colors.edit');
+        Route::put('perl-colors/{perlColor}', [Admin\PerlColorController::class, 'update'])->name('perl-colors.update');
+        Route::delete('perl-colors/{perlColor}', [Admin\PerlColorController::class, 'destroy'])->name('perl-colors.destroy');
+
+        // EP-Buchungsarten pflegen (EP-06).
+        Route::get('ep-transaction-types', [Admin\EpTransactionTypeController::class, 'index'])->name('ep-transaction-types.index');
+        Route::get('ep-transaction-types/create', [Admin\EpTransactionTypeController::class, 'create'])->name('ep-transaction-types.create');
+        Route::post('ep-transaction-types', [Admin\EpTransactionTypeController::class, 'store'])->name('ep-transaction-types.store');
+        Route::get('ep-transaction-types/{epTransactionType}/edit', [Admin\EpTransactionTypeController::class, 'edit'])->name('ep-transaction-types.edit');
+        Route::put('ep-transaction-types/{epTransactionType}', [Admin\EpTransactionTypeController::class, 'update'])->name('ep-transaction-types.update');
+        Route::delete('ep-transaction-types/{epTransactionType}', [Admin\EpTransactionTypeController::class, 'destroy'])->name('ep-transaction-types.destroy');
+
         // Matrix-Konto-Provisionierung pro Spieler (corporal User-DB).
         Route::get('players/{player}/matrix', [Admin\MatrixAccountController::class, 'edit'])->name('players.matrix.edit');
         Route::put('players/{player}/matrix', [Admin\MatrixAccountController::class, 'update'])->name('players.matrix.update');

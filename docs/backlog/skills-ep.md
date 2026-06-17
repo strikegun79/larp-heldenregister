@@ -64,13 +64,13 @@ und ggf. EP-Korrektur.
 - [ ] Optionale Rückbuchung/Strafbuchung als EP-Transaktion.
 - [ ] Tests.
 
-### EP-05 · Perlenfarben-Lookup-CRUD · ⏱ 2h · 🔲
+### EP-05 · Perlenfarben-Lookup-CRUD · ⏱ 2h · ✅
 **Beschreibung:** `perl_colors` pflegbar machen (für Fertigkeits-Visualisierung).
 **Akzeptanzkriterien:**
 - [ ] Admin-CRUD für Perlenfarben (Code/Hex + Name).
 - [ ] Verwendung in Skill-Formular und Katalog.
 
-### EP-06 · EP-Buchungsarten-Lookup-CRUD · ⏱ 2h · 🔲
+### EP-06 · EP-Buchungsarten-Lookup-CRUD · ⏱ 2h · ✅
 **Beschreibung:** `ep_transaction_types` pflegbar (Beschreibung, is_credit).
 **Akzeptanzkriterien:**
 - [ ] Admin-CRUD; Schutz der system-genutzten IDs (10–70) vor Löschung.

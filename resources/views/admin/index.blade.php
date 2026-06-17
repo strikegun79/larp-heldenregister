@@ -21,6 +21,8 @@
                         ['Auftraggeber', 'Auftraggeber pflegen', 'admin_auftraggeber.jpg', route('admin.event-clients.index')],
                         ['Teilnahme-Rollen', 'Event-Rollen pflegen', 'admin_rollen.jpg', route('admin.event-roles.index')],
                         ['Rollen & Rechte', 'Berechtigungsübersicht', 'admin_players.jpg', route('admin.roles.index')],
+                        ['Perlenfarben', 'Perlenfarben pflegen', 'admin_classes.jpg', route('admin.perl-colors.index')],
+                        ['EP-Buchungsarten', 'EP-Buchungsarten pflegen', 'admin_katagorien.jpg', route('admin.ep-transaction-types.index')],
                     ];
                 @endphp
                 @foreach ($cards as [$title, $subtitle, $img, $href])
