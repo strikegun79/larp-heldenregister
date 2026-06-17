@@ -182,11 +182,11 @@ Boolean statt „on/off“, echte FKs + Soft‑Deletes (`deleted_at`) wo das Leg
 1. `.env` für Produktion: `APP_ENV=production`, `APP_DEBUG=false`, `APP_URL=https://heldenregister.waldritter-giessen.de`, echte Mail-Credentials (statt Mailpit), DB-Zugang.
 2. `composer install --no-dev --optimize-autoloader`, `npm ci && npm run build`.
 3. `php artisan migrate --force` und einmalig `php artisan migrate:legacy` (ETL der Echtdaten).
-4. `php artisan config:cache route:cache view:cache`, Storage-/Bootstrap-Cache-Rechte für `www-data`.
-5. Queue-Worker einrichten (Notifications laufen sonst synchron) **oder** `QUEUE_CONNECTION=sync` belassen.
-6. Webserver-Docroot auf `/var/www/heldenregister/public` umstellen (vhost), TLS prüfen.
-7. Legacy unter `/var/www/html/larp-heldenregister/` read-only/offline nehmen (Backup behalten).
-8. **Hinweis:** Benutzer `richy@strikegun.de` (Legacy-Klartext-Passwort) muss „Passwort vergessen" nutzen.
+4. **Legacy-Passwörter bereinigen:** `php artisan app:migrate-legacy-passwords` ausführen. Das Command erkennt alle Non-bcrypt-Passwörter (Klartext aus der ETL-Migration), setzt sie auf `null`, markiert die Konten (`needs_password_reset=true`) und verschickt automatisch Reset-Mails. Betroffene Nutzer werden beim nächsten Login-Versuch auf „Passwort vergessen" hingewiesen. Dry-Run vorab möglich: `--dry-run`.
+5. `php artisan config:cache route:cache view:cache`, Storage-/Bootstrap-Cache-Rechte für `www-data`.
+6. Queue-Worker einrichten (Notifications laufen sonst synchron) **oder** `QUEUE_CONNECTION=sync` belassen.
+7. Webserver-Docroot auf `/var/www/heldenregister/public` umstellen (vhost), TLS prüfen.
+8. Legacy unter `/var/www/html/larp-heldenregister/` read-only/offline nehmen (Backup behalten).
 
 ---
 

@@ -23,13 +23,13 @@ das Breeze-Profilformular pflegt sie aber nicht.
 - [x] Felder im Profil-Blade vorhanden und vorbefüllt.
 - [x] Feature-Test deckt Aktualisierung beider Felder ab.
 
-### AUTH-05 · Passwort-Migration Legacy-Klartext-Konto · ⏱ 2h · 🔲
+### AUTH-05 · Passwort-Migration Legacy-Klartext-Konto · ⏱ 2h · ✅
 **Beschreibung:** Mind. ein migriertes Konto (`richy@strikegun.de`) hat ein
 Klartext-Passwort; Login schlägt fehl. Erzwungener Reset nötig.
 **Akzeptanzkriterien:**
-- [ ] Artisan-Command markiert Non-bcrypt-Passwörter (z. B. `password=null` + Flag) und triggert „Passwort vergessen".
-- [ ] Betroffene Nutzer werden beim Login auf den Reset-Flow geleitet.
-- [ ] Dokumentiert in `MIGRATION_PLAN.md` Go-Live-Checkliste.
+- [x] Artisan-Command markiert Non-bcrypt-Passwörter (z. B. `password=null` + Flag) und triggert „Passwort vergessen".
+- [x] Betroffene Nutzer werden beim Login auf den Reset-Flow geleitet.
+- [x] Dokumentiert in `MIGRATION_PLAN.md` Go-Live-Checkliste.
 **Abhängig von:** ETL-Bereich.
 
 ### AUTH-06 · Lokalisierung der Auth-Texte (DE) · ⏱ 3h · ✅

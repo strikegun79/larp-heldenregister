@@ -29,6 +29,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'zip',
         'city',
         'password',
+        'needs_password_reset',
         'lastlogin_at',
         'legacy_id',
     ];
@@ -52,6 +53,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'email_verified_at' => 'datetime',
         'lastlogin_at' => 'datetime',
         'activated' => 'boolean',
+        'needs_password_reset' => 'boolean',
         'password' => 'hashed',
     ];
 

@@ -44,6 +44,8 @@ class NewPasswordController extends Controller
                 $user->forceFill([
                     'password' => Hash::make($request->password),
                     'remember_token' => Str::random(60),
+                    // Legacy-Flag nach erfolgreichem Reset löschen (AUTH-05).
+                    'needs_password_reset' => false,
                 ])->save();
 
                 event(new PasswordReset($user));
