@@ -1,6 +1,11 @@
 <x-app-layout>
     <x-slot name="header">
-        <h2 class="font-uncial text-2xl text-waldritter leading-tight">Portal-Nutzer</h2>
+        <div class="flex items-center justify-between">
+            <h2 class="font-uncial text-2xl text-waldritter leading-tight">Portal-Nutzer</h2>
+            <a href="{{ route('admin.users.create') }}"
+               data-modal-url="{{ route('admin.users.create') }}"
+               class="ui primary button">Nutzer einladen</a>
+        </div>
     </x-slot>
 
     <div class="py-12">

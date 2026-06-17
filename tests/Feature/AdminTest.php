@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Support\Facades\Notification;
 use Tests\TestCase;
 
 class AdminTest extends TestCase
@@ -118,5 +119,58 @@ class AdminTest extends TestCase
             ->assertRedirect();
 
         $this->assertNotSoftDeleted('users', ['id' => $other->id]);
+    }
+
+    public function test_admin_can_invite_a_new_user(): void
+    {
+        Notification::fake();
+
+        $admin = $this->admin();
+
+        $this->actingAs($admin)
+            ->post(route('admin.users.store'), [
+                'name' => 'Neuer',
+                'lastname' => 'Nutzer',
+                'email' => 'neu@example.com',
+                'roles' => [70], // Teilnehmer
+            ])
+            ->assertRedirect(route('admin.users.index'));
+
+        $user = User::where('email', 'neu@example.com')->first();
+        $this->assertNotNull($user);
+        $this->assertTrue($user->activated);
+        $this->assertNotNull($user->email_verified_at);
+        $this->assertEqualsCanonicalizing([70], $user->roles->pluck('id')->all());
+    }
+
+    public function test_invite_fails_with_duplicate_email(): void
+    {
+        $admin = $this->admin();
+        $existing = User::factory()->create(['email' => 'vorhanden@example.com']);
+
+        $this->actingAs($admin)
+            ->post(route('admin.users.store'), [
+                'name' => 'Test',
+                'email' => 'vorhanden@example.com',
+            ])
+            ->assertSessionHasErrors('email');
+    }
+
+    public function test_ajax_invite_returns_json(): void
+    {
+        Notification::fake();
+
+        $admin = $this->admin();
+
+        $this->actingAs($admin)
+            ->postJson(route('admin.users.store'), [
+                'name' => 'Ajax',
+                'email' => 'ajax@example.com',
+                'roles' => [70],
+            ])
+            ->assertOk()
+            ->assertJson(['reload' => true]);
+
+        $this->assertDatabaseHas('users', ['email' => 'ajax@example.com']);
     }
 }

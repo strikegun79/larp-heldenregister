@@ -33,12 +33,12 @@ für einfache Lookups, um ADV-08/09/10, EP-05/06, HERO-05 nicht zu duplizieren.
 - [ ] Mind. ein Lookup darauf umgestellt (Proof).
 - [ ] Tests.
 
-### ADM-06 · Nutzer im Admin anlegen/einladen · ⏱ 3h · 🔲
+### ADM-06 · Nutzer im Admin anlegen/einladen · ⏱ 3h · ✅
 **Beschreibung:** Admin kann Nutzer manuell anlegen/einladen (statt nur
 Selbstregistrierung).
 **Akzeptanzkriterien:**
-- [ ] Formular Anlegen (Name, E-Mail, Rolle) + Einladungs-/Set-Password-Mail.
-- [ ] Tests.
+- [x] Formular Anlegen (Name, E-Mail, Rolle) + Einladungs-/Set-Password-Mail.
+- [x] Tests.
 
 ### ADM-07 · Event-Status-Lookup-CRUD · ⏱ 2h · 🔲
 **Beschreibung:** `event_statuses` (Beschreibung, Farbe) pflegbar.

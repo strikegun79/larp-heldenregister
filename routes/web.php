@@ -139,6 +139,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         // Nutzerverwaltung erfordert zusätzlich users.manage.
         Route::middleware('can:users.manage')->group(function () {
             Route::get('users', [Admin\UserController::class, 'index'])->name('users.index');
+            Route::get('users/create', [Admin\UserController::class, 'create'])->name('users.create');
+            Route::post('users', [Admin\UserController::class, 'store'])->name('users.store');
             Route::get('users/{user}/edit', [Admin\UserController::class, 'edit'])->name('users.edit');
             Route::put('users/{user}', [Admin\UserController::class, 'update'])->name('users.update');
             Route::delete('users/{id}', [Admin\UserController::class, 'destroy'])->name('users.destroy');
