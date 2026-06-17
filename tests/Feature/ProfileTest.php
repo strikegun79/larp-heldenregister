@@ -32,6 +32,7 @@ class ProfileTest extends TestCase
                 'name' => 'Test User',
                 'lastname' => 'Mustermann',
                 'email' => 'test@example.com',
+                'phone' => $user->phone,
             ]);
 
         $response
@@ -65,7 +66,7 @@ class ProfileTest extends TestCase
         $this->assertSame('+49 123 456789', $user->phone);
     }
 
-    public function test_phone_can_be_cleared(): void
+    public function test_phone_is_required(): void
     {
         $user = User::factory()->create(['phone' => '123']);
 
@@ -76,9 +77,7 @@ class ProfileTest extends TestCase
                 'email' => $user->email,
                 'phone' => '',
             ])
-            ->assertSessionHasNoErrors();
-
-        $this->assertNull($user->fresh()->phone);
+            ->assertSessionHasErrors('phone');
     }
 
     public function test_lastname_is_required(): void
@@ -90,6 +89,7 @@ class ProfileTest extends TestCase
                 'name' => $user->name,
                 'lastname' => '',
                 'email' => $user->email,
+                'phone' => $user->phone,
             ])
             ->assertSessionHasErrors('lastname');
     }
@@ -118,6 +118,7 @@ class ProfileTest extends TestCase
                 'name' => 'Test User',
                 'lastname' => $user->lastname,
                 'email' => $user->email,
+                'phone' => $user->phone,
             ]);
 
         $response

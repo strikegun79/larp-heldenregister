@@ -60,7 +60,7 @@ class LegacyPasswordMigrationTest extends TestCase
     {
         $user = User::factory()->create();
         DB::table('users')->where('id', $user->id)->update([
-            'password'             => null,
+            'password' => null,
             'needs_password_reset' => true,
         ]);
 
@@ -88,12 +88,12 @@ class LegacyPasswordMigrationTest extends TestCase
     {
         $user = User::factory()->create();
         DB::table('users')->where('id', $user->id)->update([
-            'password'             => null,
+            'password' => null,
             'needs_password_reset' => true,
         ]);
 
         $response = $this->post('/login', [
-            'email'    => $user->email,
+            'email' => $user->email,
             'password' => 'irgendwas',
         ]);
 
@@ -107,7 +107,7 @@ class LegacyPasswordMigrationTest extends TestCase
         $user = User::factory()->create();
 
         $response = $this->post('/login', [
-            'email'    => $user->email,
+            'email' => $user->email,
             'password' => 'falsch',
         ]);
 
@@ -124,16 +124,16 @@ class LegacyPasswordMigrationTest extends TestCase
 
         $user = User::factory()->create();
         DB::table('users')->where('id', $user->id)->update([
-            'password'             => null,
+            'password' => null,
             'needs_password_reset' => true,
         ]);
 
         $token = Password::broker()->createToken($user);
 
         $this->post('/reset-password', [
-            'token'                 => $token,
-            'email'                 => $user->email,
-            'password'              => 'NeuesPasswort1!',
+            'token' => $token,
+            'email' => $user->email,
+            'password' => 'NeuesPasswort1!',
             'password_confirmation' => 'NeuesPasswort1!',
         ]);
 

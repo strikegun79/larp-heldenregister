@@ -121,6 +121,9 @@ class User extends Authenticatable implements MustVerifyEmail
         if (! filled($this->lastname)) {
             $missing[] = 'Nachname';
         }
+        if (! filled($this->phone)) {
+            $missing[] = 'Mobil / Telefon';
+        }
         if (! filled($this->street)) {
             $missing[] = 'Straße';
         }

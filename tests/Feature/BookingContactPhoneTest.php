@@ -55,7 +55,7 @@ class BookingContactPhoneTest extends TestCase
 
     public function test_booking_requires_kontakt_telefon(): void
     {
-        $user = $this->booker(null); // kein Profil-Telefon
+        $user = $this->booker('+49 123 456789'); // Profil-Telefon vorhanden, kontakt_telefon im Payload fehlt
         $adventure = $this->openAdventure();
         $player = Player::factory()->create();
         $user->players()->attach($player->id);
@@ -68,7 +68,7 @@ class BookingContactPhoneTest extends TestCase
 
     public function test_booking_saves_kontakt_telefon(): void
     {
-        $user = $this->booker(null);
+        $user = $this->booker('+49 123 456789');
         $adventure = $this->openAdventure();
         $player = Player::factory()->create();
         $user->players()->attach($player->id);

@@ -61,10 +61,10 @@ Klartext-Passwort; Login schlägt fehl. Erzwungener Reset nötig.
 - [x] Ein Eltern-Account für mehrere Kinder – bereits durch `user2player`-Pivot mit `self`-Flag unterstützt; mehrere Spieler je Account möglich.
 - [x] Kind vom Eltern-Account abkoppeln – Pivot-Eintrag entfernen reicht; Spieler/Held-Daten bleiben erhalten (kein FK-Verlust). Kein spezielles UI nötig, Admin kann per Spieler-Verwaltung trennen.
 
-### AUTH-10 Anschrift der erziehungsberechtigten Person als Pflichtdaten 🔲
+### AUTH-10 Anschrift der erziehungsberechtigten Person als Pflichtdaten ✅
 **Beschreibung:**Im Benutzerprofil müssen die Kontaktdaten der erziehungsberechtigten Person vollständig gepflegt werden.
 **Akzeptanzkriterien:**
-- [] Pflichtfelder:
+- [x] Pflichtfelder:
 Vorname
 Nachname
 Straße
@@ -73,8 +73,8 @@ PLZ
 Ort
 E-Mail
 Mobiltelefon
-- [] Validierung verhindert unvollständige Profile bei Veranstaltungsanmeldung.
-- [] Bestehende Benutzer ohne Anschrift werden zur Ergänzung aufgefordert.
+- [x] Validierung verhindert unvollständige Profile bei Veranstaltungsanmeldung.
+- [x] Bestehende Benutzer ohne Anschrift werden zur Ergänzung aufgefordert.
 
 ### AUTH-11 Rechtliche Rollenbezeichnung im Profil verbessern ✅
 **Beschreibung:**Die Benutzerangaben sollen klar als Angaben der erziehungsberechtigten Person gekennzeichnet werden.
