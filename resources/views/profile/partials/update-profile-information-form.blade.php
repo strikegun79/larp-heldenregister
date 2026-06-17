@@ -20,9 +20,9 @@
                 <x-input-error class="mt-2" :messages="$errors->get('name')" />
             </div>
             <div>
-                <x-input-label for="lastname" value="Nachname (optional)" />
+                <x-input-label for="lastname" value="Nachname" />
                 <x-text-input id="lastname" name="lastname" type="text" class="mt-1 block w-full"
-                              :value="old('lastname', $user->lastname)" autocomplete="family-name" />
+                              :value="old('lastname', $user->lastname)" required autocomplete="family-name" />
                 <x-input-error class="mt-2" :messages="$errors->get('lastname')" />
             </div>
         </div>

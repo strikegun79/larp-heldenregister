@@ -30,6 +30,7 @@ class ProfileTest extends TestCase
             ->actingAs($user)
             ->patch('/profile', [
                 'name' => 'Test User',
+                'lastname' => 'Mustermann',
                 'email' => 'test@example.com',
             ]);
 
@@ -40,6 +41,7 @@ class ProfileTest extends TestCase
         $user->refresh();
 
         $this->assertSame('Test User', $user->name);
+        $this->assertSame('Mustermann', $user->lastname);
         $this->assertSame('test@example.com', $user->email);
         $this->assertNull($user->email_verified_at);
     }
@@ -63,23 +65,33 @@ class ProfileTest extends TestCase
         $this->assertSame('+49 123 456789', $user->phone);
     }
 
-    public function test_lastname_and_phone_can_be_cleared(): void
+    public function test_phone_can_be_cleared(): void
     {
-        $user = User::factory()->create(['lastname' => 'Alt', 'phone' => '123']);
+        $user = User::factory()->create(['phone' => '123']);
 
-        // Leere Strings → nullable konvertiert zu null.
         $this->actingAs($user)
             ->patch('/profile', [
                 'name' => $user->name,
+                'lastname' => $user->lastname,
                 'email' => $user->email,
-                'lastname' => '',
                 'phone' => '',
             ])
             ->assertSessionHasNoErrors();
 
-        $user->refresh();
-        $this->assertNull($user->lastname);
-        $this->assertNull($user->phone);
+        $this->assertNull($user->fresh()->phone);
+    }
+
+    public function test_lastname_is_required(): void
+    {
+        $user = User::factory()->create();
+
+        $this->actingAs($user)
+            ->patch('/profile', [
+                'name' => $user->name,
+                'lastname' => '',
+                'email' => $user->email,
+            ])
+            ->assertSessionHasErrors('lastname');
     }
 
     public function test_phone_max_length_is_validated(): void
@@ -89,6 +101,7 @@ class ProfileTest extends TestCase
         $this->actingAs($user)
             ->patch('/profile', [
                 'name' => $user->name,
+                'lastname' => $user->lastname,
                 'email' => $user->email,
                 'phone' => str_repeat('0', 51),
             ])
@@ -103,6 +116,7 @@ class ProfileTest extends TestCase
             ->actingAs($user)
             ->patch('/profile', [
                 'name' => 'Test User',
+                'lastname' => $user->lastname,
                 'email' => $user->email,
             ]);
 
