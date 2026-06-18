@@ -31,12 +31,12 @@ Bearbeiten/Löschen von Fertigkeiten.
 - [x] Fertigkeitsliste je Klasse filterbar.
 - [x] Tests für Sync.
 
-### SKILL-04 · Fertigkeiten-Katalog (read-only, nach Klasse) · ⏱ 3h · 🔲
+### SKILL-04 · Fertigkeiten-Katalog (read-only, nach Klasse) · ⏱ 3h · ✅
 **Beschreibung:** Übersichtsseite aller Fertigkeiten gruppiert nach Klasse/Level,
 inkl. Perlenfarbe – für Spieler zum Stöbern.
 **Akzeptanzkriterien:**
-- [ ] Gruppierte, durchsuchbare Ansicht.
-- [ ] Perlenfarbe visuell (Farbpunkt) dargestellt.
+- [x] Gruppierte Ansicht nach Klasse, je Klasse nach Level/Name sortiert; filterbar per Klassen-Dropdown.
+- [x] Perlenfarbe visuell (Farbpunkt + Name) dargestellt.
 
 ### EP-02 · EP-Buchung manuell (Admin/Bürokrat) · ⏱ 4h · 🔲
 **Beschreibung:** Oberfläche zum Gutschreiben/Abziehen von EP mit Buchungsart

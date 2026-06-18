@@ -22,6 +22,9 @@
                         <x-nav-link :href="route('heroes.index')" :active="request()->routeIs('heroes.*')">
                             {{ __('Heldenregister') }}
                         </x-nav-link>
+                        <x-nav-link :href="route('skills.catalog')" :active="request()->routeIs('skills.catalog')">
+                            {{ __('Fertigkeiten') }}
+                        </x-nav-link>
                     @endcan
                     @can('adventure.access')
                         <x-nav-link :href="route('adventures.index')" :active="request()->routeIs('adventures.*')">
@@ -131,6 +134,9 @@
             @can('heldenregister.view')
                 <x-responsive-nav-link :href="route('heroes.index')" :active="request()->routeIs('heroes.*')">
                     {{ __('Heldenregister') }}
+                </x-responsive-nav-link>
+                <x-responsive-nav-link :href="route('skills.catalog')" :active="request()->routeIs('skills.catalog')">
+                    {{ __('Fertigkeiten') }}
                 </x-responsive-nav-link>
             @endcan
             @can('adventure.access')

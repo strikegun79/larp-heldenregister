@@ -2,64 +2,37 @@
 
 namespace App\Http\Controllers;
 
+use App\Models\HeroClass;
 use App\Models\Skill;
 use Illuminate\Http\Request;
+use Illuminate\View\View;
 
 class SkillController extends Controller
 {
-    /**
-     * Display a listing of the resource.
-     */
-    public function index()
+    public function __construct()
     {
-        //
+        $this->middleware(['auth', 'verified', 'can:heldenregister.view']);
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Fertigkeiten-Katalog: alle Fertigkeiten gruppiert nach Klasse (SKILL-04).
+     * Filterbar per ?class_id=; innerhalb einer Klasse nach Level, dann Name sortiert.
      */
-    public function create()
+    public function index(Request $request): View
     {
-        //
-    }
+        $classId = $request->integer('class_id') ?: null;
 
-    /**
-     * Store a newly created resource in storage.
-     */
-    public function store(Request $request)
-    {
-        //
-    }
+        $heroClasses = HeroClass::where('disabled', false)
+            ->with(['skills' => function ($q) {
+                $q->with('perlColor')->orderBy('level')->orderBy('name');
+            }])
+            ->when($classId, fn ($q) => $q->where('id', $classId))
+            ->orderBy('name')
+            ->get()
+            ->filter(fn ($c) => $c->skills->isNotEmpty());
 
-    /**
-     * Display the specified resource.
-     */
-    public function show(Skill $skill)
-    {
-        //
-    }
+        $allClasses = HeroClass::where('disabled', false)->orderBy('name')->get();
 
-    /**
-     * Show the form for editing the specified resource.
-     */
-    public function edit(Skill $skill)
-    {
-        //
-    }
-
-    /**
-     * Update the specified resource in storage.
-     */
-    public function update(Request $request, Skill $skill)
-    {
-        //
-    }
-
-    /**
-     * Remove the specified resource from storage.
-     */
-    public function destroy(Skill $skill)
-    {
-        //
+        return view('skills.index', compact('heroClasses', 'allClasses', 'classId'));
     }
 }

@@ -12,6 +12,7 @@ use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PlayerController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\SignatureController;
+use App\Http\Controllers\SkillController;
 use App\Http\Controllers\SkilltreeController;
 use Illuminate\Support\Facades\Route;
 
@@ -42,6 +43,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+
+    // Fertigkeiten-Katalog (SKILL-04).
+    Route::get('skills', [SkillController::class, 'index'])->name('skills.catalog');
 
     Route::resource('players', PlayerController::class);
     // Aktiven Helden eines Spielers setzen (HERO-07).
