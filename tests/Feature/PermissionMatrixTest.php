@@ -57,6 +57,7 @@ class PermissionMatrixTest extends TestCase
             'Bürokrat' => [20, [
                 'profile.view', 'player.view', 'heldenregister.view', 'heldenregister.edit',
                 'adventure.book', 'adventure.modify', 'adventure.cancel', 'events.view', 'events.edit',
+                'groups.manage',
             ]],
             'Projektleitung' => [30, [
                 'profile.view', 'player.view', 'heldenregister.view',
@@ -65,6 +66,7 @@ class PermissionMatrixTest extends TestCase
             'Spielleiter' => [40, [
                 'profile.view', 'player.view', 'heldenregister.view',
                 'adventure.book', 'adventure.modify', 'adventure.cancel', 'events.view',
+                'groups.manage',
             ]],
             'Lehrmeister' => [45, [
                 'profile.view', 'player.view', 'heldenregister.view',

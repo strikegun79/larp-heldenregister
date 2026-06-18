@@ -13,12 +13,12 @@ neues Datenmodell.
 - [x] Entscheidung: Heldenebene (`group_hero`) — Gruppen sind LARP-Gilden/Trupps für Charaktere.
 - [x] Factory + 7 Tests (Erstellung, Relationen, Pivot, Cascade-Delete).
 
-### GRP-02 · Gruppen-CRUD (Verwaltung) · ⏱ 3h · 🔲
+### GRP-02 · Gruppen-CRUD (Verwaltung) · ⏱ 3h · ✅
 **Beschreibung:** Anlegen/Bearbeiten/Löschen von Gruppen.
 **Akzeptanzkriterien:**
-- [ ] Controller + Views (Liste/Modal/Formular).
-- [ ] Berechtigung (z. B. `groups.manage` oder Spielleiter/Admin).
-- [ ] Tests.
+- [x] Controller + Views (Liste/Modal/Formular) unter `/admin/groups`.
+- [x] Berechtigung `groups.manage` (Admin, Bürokrat, Spielleiter); eigener Route-Block außerhalb `portal.manage`.
+- [x] 12 Tests (CRUD, Zugriffsschutz, AJAX-Formular, Cascade).
 **Abhängig von:** GRP-01.
 
 ### GRP-03 · Mitglieder verwalten · ⏱ 3h · 🔲

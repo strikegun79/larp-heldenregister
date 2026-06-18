@@ -244,6 +244,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::put('players/{player}/matrix', [Admin\MatrixAccountController::class, 'update'])->name('players.matrix.update');
         Route::delete('players/{player}/matrix', [Admin\MatrixAccountController::class, 'destroy'])->name('players.matrix.destroy');
     });
+
+    // Gruppen-CRUD (GRP-02): eigene Berechtigung groups.manage (Admin, Bürokrat, Spielleiter).
+    Route::prefix('admin')->name('admin.')->middleware('can:groups.manage')->group(function () {
+        Route::get('groups', [Admin\GroupController::class, 'index'])->name('groups.index');
+        Route::get('groups/create', [Admin\GroupController::class, 'create'])->name('groups.create');
+        Route::post('groups', [Admin\GroupController::class, 'store'])->name('groups.store');
+        Route::get('groups/{group}/edit', [Admin\GroupController::class, 'edit'])->name('groups.edit');
+        Route::put('groups/{group}', [Admin\GroupController::class, 'update'])->name('groups.update');
+        Route::delete('groups/{group}', [Admin\GroupController::class, 'destroy'])->name('groups.destroy');
+    });
 });
 
 require __DIR__.'/auth.php';

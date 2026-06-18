@@ -21,6 +21,7 @@
                         ['Auftraggeber', 'Auftraggeber pflegen', 'admin_auftraggeber.jpg', route('admin.event-clients.index')],
                         ['Teilnahme-Rollen', 'Event-Rollen pflegen', 'admin_rollen.jpg', route('admin.event-roles.index')],
                         ['Event-Status', 'Status-Lookups pflegen', 'admin_katagorien.jpg', route('admin.event-statuses.index')],
+                        ['Gruppen', 'Gilden & Trupps verwalten', 'admin_players.jpg', route('admin.groups.index')],
                         ['Audit-Log', 'Admin-Aktionen protokolliert', 'admin_users.jpg', route('admin.audit-logs.index')],
                         ['Portal-Einstellungen', 'Vereins-Settings bearbeiten', 'admin_katagorien.jpg', route('admin.settings.index')],
                         ['Rollen & Rechte', 'Berechtigungsübersicht', 'admin_players.jpg', route('admin.roles.index')],

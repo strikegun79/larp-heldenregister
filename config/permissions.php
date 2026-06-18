@@ -23,6 +23,7 @@ return [
         'events.edit',
         'users.manage',
         'portal.manage',
+        'groups.manage',
     ],
 
     'roles' => [
@@ -35,6 +36,7 @@ return [
             'heldenregister.view', 'heldenregister.edit',
             'adventure.book', 'adventure.modify', 'adventure.cancel',
             'events.view', 'events.edit',
+            'groups.manage',
         ],
 
         // Projektleitung
@@ -51,6 +53,7 @@ return [
             'heldenregister.view',
             'adventure.book', 'adventure.modify', 'adventure.cancel',
             'events.view',
+            'groups.manage',
         ],
 
         // Lehrmeister (erweiterter Teamer mit Helden-Einsicht, ROLE-09)
