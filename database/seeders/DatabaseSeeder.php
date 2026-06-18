@@ -19,6 +19,7 @@ class DatabaseSeeder extends Seeder
             EpTransactionTypeSeeder::class,
             LocationSeeder::class,
             EventLookupSeeder::class,
+            SettingsSeeder::class,
         ]);
     }
 }

@@ -198,6 +198,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
         Route::get('audit-logs', [Admin\AuditLogController::class, 'index'])->name('audit-logs.index');
 
+        Route::get('settings', [Admin\SettingController::class, 'index'])->name('settings.index');
+        Route::put('settings', [Admin\SettingController::class, 'update'])->name('settings.update');
+
         Route::get('hero-classes', [Admin\HeroClassController::class, 'index'])->name('hero-classes.index');
         Route::get('hero-classes/create', [Admin\HeroClassController::class, 'create'])->name('hero-classes.create');
         Route::post('hero-classes', [Admin\HeroClassController::class, 'store'])->name('hero-classes.store');

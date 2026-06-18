@@ -54,10 +54,11 @@ Matrix, EP-Buchungen).
 - [x] Logs bei user.created/updated/deleted/restored (UserController) und ep.booked (EpTransactionController).
 - [x] Tests.
 
-### ADM-09 · Portal-Konfiguration (Key/Value) · ⏱ 3h · 🔲
+### ADM-09 · Portal-Konfiguration (Key/Value) · ⏱ 3h · ✅
 **Beschreibung:** Legacy `portal_config` (Logo, URL, Version). In Laravel als
 `config` + ggf. editierbare Settings-Tabelle.
 **Akzeptanzkriterien:**
-- [ ] Settings-Quelle definiert (config vs. DB).
-- [ ] Editierbare Vereins-Settings (Name, Logo, Kontakt) im Admin.
-- [ ] Tests.
+- [x] Settings-Quelle definiert: `settings`-Tabelle (Key/Value) für Laufzeit-Werte; deployment-spezifisches (APP_URL, APP_NAME) bleibt in `.env`.
+- [x] Editierbare Vereins-Settings (Vereinsname, Kontakt-E-Mail, Logo-Dateiname) im Admin.
+- [x] `Setting::get()` / `Setting::set()` als statische Helper; `SettingsSeeder` mit Defaults.
+- [x] Tests.
