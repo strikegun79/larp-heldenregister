@@ -46,23 +46,23 @@ inkl. Perlenfarbe – für Spieler zum Stöbern.
 - [x] Erzeugt `ep_transactions`-Eintrag; Saldo aktualisiert sich.
 - [x] Berechtigung (`heldenregister.edit`/Admin); Tests.
 
-### EP-03 · Fertigkeit lernen mit EP-Abzug · ⏱ 4h · 🔲
+### EP-03 · Fertigkeit lernen mit EP-Abzug · ⏱ 4h · ✅
 **Beschreibung:** Held lernt eine Fertigkeit → Pivot `hero_skill` + EP-Transaktion
 (Typ 20 „Fertigkeit erworben") über die EP-Kosten.
 **Akzeptanzkriterien:**
-- [ ] Auswahl nur erlaubter (Klassen-passender, noch nicht gelernter) Fertigkeiten.
-- [ ] Saldo-Prüfung (genug EP) – sonst Fehler-Toast.
-- [ ] `trained_at` gesetzt; Transaktion verbucht; atomar (DB-Transaktion).
-- [ ] Tests (Erfolg, zu wenig EP, Doppel-Lernen).
+- [x] Auswahl nur erlaubter (Klassen-passender, noch nicht gelernter) Fertigkeiten.
+- [x] Saldo-Prüfung (genug EP) – sonst Fehler-Toast.
+- [x] `trained_at` gesetzt; Transaktion verbucht; atomar (DB-Transaktion).
+- [x] Tests (Erfolg, zu wenig EP, Doppel-Lernen).
 **Abhängig von:** SKILL-02, EP-01.
 
-### EP-04 · Fertigkeit entfernen / EP-Korrektur · ⏱ 3h · 🔲
+### EP-04 · Fertigkeit entfernen / EP-Korrektur · ⏱ 3h · ✅
 **Beschreibung:** Legacy „Bändchen verloren" (Typ 30). Entfernen einer Fertigkeit
 und ggf. EP-Korrektur.
 **Akzeptanzkriterien:**
-- [ ] Admin kann gelernte Fertigkeit entfernen.
-- [ ] Optionale Rückbuchung/Strafbuchung als EP-Transaktion.
-- [ ] Tests.
+- [x] Admin kann gelernte Fertigkeit entfernen.
+- [x] Optionale Rückbuchung als EP-Transaktion (Typ 60 Allgemein-Gutschrift).
+- [x] Tests.
 
 ### EP-05 · Perlenfarben-Lookup-CRUD · ⏱ 2h · ✅
 **Beschreibung:** `perl_colors` pflegbar machen (für Fertigkeits-Visualisierung).
@@ -76,12 +76,12 @@ und ggf. EP-Korrektur.
 - [ ] Admin-CRUD; Schutz der system-genutzten IDs (10–70) vor Löschung.
 - [ ] Tests.
 
-### EP-07 · Perlen-Übersicht je Held (Bändchen-Liste) · ⏱ 3h · 🔲
+### EP-07 · Perlen-Übersicht je Held (Bändchen-Liste) · ⏱ 3h · ✅
 **Beschreibung:** Aus gelernten Fertigkeiten die benötigten Perlen/Bändchen je
 Farbe summieren (LARP-Repräsentation).
 **Akzeptanzkriterien:**
-- [ ] Helden-Modal zeigt Perlen je Farbe (Anzahl).
-- [ ] Summenlogik getestet.
+- [x] Helden-Modal zeigt Perlen je Farbe (Anzahl).
+- [x] Summenlogik getestet.
 
 ## Fertigkeiten-Baum (Vision: „Fertigkeiten-Baum pro Klasse")
 
@@ -110,3 +110,10 @@ beim Helden erfüllt sind.
 - [ ] Für einen Helden: gelernt / lernbar / gesperrt farblich unterschieden.
 - [ ] Perlenfarbe je Knoten dargestellt.
 **Abhängig von:** SKILL-05, SKILL-03.
+
+### SKILL-08 · Fertigkeiten-Katalog mit Symbolen · ⏱ 3h · ✅
+**Beschreibung:** Übersichtsseite aller Fertigkeiten mit den passenden Symbolen ergänzen.
+**Akzeptanzkriterien:**
+- [] möglichkeit zum hochladen des Symbols für die Fertigkeit
+- [] nur png oder jpg
+- [] reduziere das Symbol beim hochladen auf 100x100 pixel

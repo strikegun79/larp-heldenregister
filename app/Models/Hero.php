@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Collection;
 
 class Hero extends Model
 {
@@ -130,6 +131,26 @@ class Hero extends Model
     public function getClassesCountAttribute(): int
     {
         return $this->classes->count();
+    }
+
+    /**
+     * Perlen-/Bändchen-Zusammenfassung je Farbe (EP-07).
+     * Gibt eine Collection von stdClass {color: PerlColor, count: int} zurück,
+     * sortiert nach Farbname. Fertigkeiten ohne Perlenfarbe werden ignoriert.
+     */
+    public function getPerlSummaryAttribute(): Collection
+    {
+        $this->loadMissing('skills.perlColor');
+
+        return $this->skills
+            ->filter(fn ($s) => $s->perlColor !== null)
+            ->groupBy('perl_color_id')
+            ->map(fn ($group) => (object) [
+                'color' => $group->first()->perlColor,
+                'count' => $group->count(),
+            ])
+            ->sortBy('color.name')
+            ->values();
     }
 
     /**

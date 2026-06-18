@@ -209,7 +209,7 @@ class HeroController extends Controller
             'player.bookings.adventure',
             'player.users',
             'classes.skills',
-            'skills',
+            'skills.perlColor',
             'epTransactions.type',
             'epTransactions.adventure',
         ]);
