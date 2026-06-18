@@ -38,13 +38,13 @@ inkl. Perlenfarbe – für Spieler zum Stöbern.
 - [x] Gruppierte Ansicht nach Klasse, je Klasse nach Level/Name sortiert; filterbar per Klassen-Dropdown.
 - [x] Perlenfarbe visuell (Farbpunkt + Name) dargestellt.
 
-### EP-02 · EP-Buchung manuell (Admin/Bürokrat) · ⏱ 4h · 🔲
+### EP-02 · EP-Buchung manuell (Admin/Bürokrat) · ⏱ 4h · ✅
 **Beschreibung:** Oberfläche zum Gutschreiben/Abziehen von EP mit Buchungsart
 (`type_transEP`).
 **Akzeptanzkriterien:**
-- [ ] Formular: Held, Betrag, Buchungsart, Datum.
-- [ ] Erzeugt `ep_transactions`-Eintrag; Saldo aktualisiert sich.
-- [ ] Berechtigung (`heldenregister.edit`/Admin); Tests.
+- [x] Formular: Held, Betrag, Buchungsart, Datum.
+- [x] Erzeugt `ep_transactions`-Eintrag; Saldo aktualisiert sich.
+- [x] Berechtigung (`heldenregister.edit`/Admin); Tests.
 
 ### EP-03 · Fertigkeit lernen mit EP-Abzug · ⏱ 4h · 🔲
 **Beschreibung:** Held lernt eine Fertigkeit → Pivot `hero_skill` + EP-Transaktion

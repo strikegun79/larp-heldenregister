@@ -267,6 +267,10 @@
                         </select>
                     </div>
                     <div class="field">
+                        <label>Datum</label>
+                        <input type="date" name="transacted_at" style="width:10rem">
+                    </div>
+                    <div class="field">
                         <button type="submit" class="ui primary button">Buchen</button>
                     </div>
                 </div>
