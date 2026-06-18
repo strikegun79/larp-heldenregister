@@ -78,5 +78,41 @@
             @endforelse
         </tbody>
     </table>
+
+    @if ($adventure->teamerSignups->isNotEmpty() || $nscBookings->isNotEmpty())
+        <h2 style="font-size:14px;margin:20px 0 6px;">Teamer &amp; NSC-Elternteile</h2>
+        <table class="list">
+            <thead>
+                <tr>
+                    <th>Nr.</th>
+                    <th>Nachname</th>
+                    <th>Vorname</th>
+                    <th>Rolle</th>
+                    <th>Status</th>
+                </tr>
+            </thead>
+            <tbody>
+                @php($nr = 1)
+                @foreach ($adventure->teamerSignups as $signup)
+                    <tr>
+                        <td class="nr">{{ $nr++ }}</td>
+                        <td>{{ $signup->user->lastname }}</td>
+                        <td>{{ $signup->user->name }}</td>
+                        <td>{{ $signup->teamer_role ?? '—' }}</td>
+                        <td>{{ $signup->status_label }}</td>
+                    </tr>
+                @endforeach
+                @foreach ($nscBookings as $booking)
+                    <tr>
+                        <td class="nr">{{ $nr++ }}</td>
+                        <td>{{ $booking->is_guest ? $booking->guest_lastname : $booking->player?->lastname }}</td>
+                        <td>{{ $booking->is_guest ? $booking->guest_name : $booking->player?->name }}</td>
+                        <td>Eltern-NSC</td>
+                        <td>{{ \App\Models\Booking::STATUS_LABELS[$booking->status ?? 'offen'] ?? 'offen' }}</td>
+                    </tr>
+                @endforeach
+            </tbody>
+        </table>
+    @endif
 </body>
 </html>

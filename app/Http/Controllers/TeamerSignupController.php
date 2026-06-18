@@ -113,6 +113,76 @@ class TeamerSignupController extends Controller
             : back()->with('status', $msg);
     }
 
+    /** Bearbeitungsformular einer Teamer-Anmeldung (Modal-Partial, ADV-29). */
+    public function edit(Adventure $adventure, TeamerSignup $signup): View
+    {
+        abort_unless(request()->user()->can('events.edit'), 403);
+        abort_if($signup->adventure_id !== $adventure->id, 404);
+
+        return view('adventures._teamer_signup_edit', compact('adventure', 'signup'));
+    }
+
+    /** Teamer-Anmeldung aktualisieren (ADV-29). */
+    public function update(Request $request, Adventure $adventure, TeamerSignup $signup): RedirectResponse|JsonResponse
+    {
+        abort_unless($request->user()->can('events.edit'), 403);
+        abort_if($signup->adventure_id !== $adventure->id, 404);
+
+        $data = $request->validate([
+            'kontakt_telefon' => ['nullable', 'string', 'max:50'],
+            'allergien' => ['nullable', 'string', 'max:500'],
+            'medikamente' => ['nullable', 'string', 'max:500'],
+            'leih_tunika' => ['boolean'],
+            'leih_waffe' => ['boolean'],
+            'anmerkung' => ['nullable', 'string', 'max:1000'],
+            'teamer_role' => ['nullable', 'string', 'in:'.implode(',', TeamerSignup::ROLES)],
+        ]);
+
+        $signup->update($data);
+
+        $msg = 'Teamer-Anmeldung aktualisiert.';
+
+        return $request->expectsJson()
+            ? response()->json(['message' => $msg, 'refresh_modal' => true])
+            : back()->with('status', $msg);
+    }
+
+    /** Teamer-Anmeldung bestätigen / Bestätigung zurücknehmen (Toggle, ADV-29). */
+    public function approve(Request $request, Adventure $adventure, TeamerSignup $signup): RedirectResponse|JsonResponse
+    {
+        abort_unless($request->user()->can('events.edit'), 403);
+        abort_if($signup->adventure_id !== $adventure->id, 404);
+
+        $signup->update([
+            'approved_at' => $signup->approved_at ? null : now(),
+            'rejected_at' => null,
+        ]);
+
+        $msg = $signup->approved_at ? 'Teamer bestätigt.' : 'Bestätigung zurückgenommen.';
+
+        return $request->expectsJson()
+            ? response()->json(['message' => $msg, 'refresh_modal' => true])
+            : back()->with('status', $msg);
+    }
+
+    /** Teamer-Anmeldung ablehnen / Ablehnung zurücknehmen (Toggle, ADV-29). */
+    public function reject(Request $request, Adventure $adventure, TeamerSignup $signup): RedirectResponse|JsonResponse
+    {
+        abort_unless($request->user()->can('events.edit'), 403);
+        abort_if($signup->adventure_id !== $adventure->id, 404);
+
+        $signup->update([
+            'rejected_at' => $signup->rejected_at ? null : now(),
+            'approved_at' => null,
+        ]);
+
+        $msg = $signup->rejected_at ? 'Teamer abgelehnt.' : 'Ablehnung zurückgenommen.';
+
+        return $request->expectsJson()
+            ? response()->json(['message' => $msg, 'refresh_modal' => true])
+            : back()->with('status', $msg);
+    }
+
     /** Teamer-Rolle zuweisen (nur Projektleitung/Admin). */
     public function updateRole(Request $request, Adventure $adventure, TeamerSignup $signup): RedirectResponse|JsonResponse
     {

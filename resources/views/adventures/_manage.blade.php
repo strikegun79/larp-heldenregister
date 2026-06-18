@@ -2,7 +2,8 @@
 
 <div class="ui top attached tabular menu">
     <a class="item active" data-tab="data">Event-Daten</a>
-    <a class="item" data-tab="bookings">Anmeldungen</a>
+    <a class="item" data-tab="bookings">Anmeldungen ({{ $mainBookings->count() }})</a>
+    <a class="item" data-tab="teamer-nsc">Teamer/NSC ({{ $adventure->teamerSignups->count() + $nscBookings->count() }})</a>
     <a class="item" data-tab="checkin">Check-in</a>
     <a class="item" data-tab="teamer">Teamer ({{ $adventure->teamerSignups->count() }})</a>
 </div>
@@ -27,10 +28,18 @@
     @endif
 </div>
 
-{{-- Tab 2: Anmeldungen mit Verwaltungsaktionen --}}
+{{-- Tab 2: Anmeldungen (nur reguläre Teilnehmer, ohne NSC-Elternteil) --}}
 <div class="ui bottom attached tab segment" data-tab="bookings">
     <a href="{{ route('adventures.participation-csv', $adventure) }}" class="ui small button mb-3" target="_blank" rel="noopener">Belegungsreport (CSV)</a>
-    @include('adventures._bookings', ['bookings' => $adventure->bookings, 'manage' => true])
+    @include('adventures._bookings', ['bookings' => $mainBookings, 'manage' => true])
+</div>
+
+{{-- Tab 3: Teamer/NSC-Übersicht (ADV-29) --}}
+<div class="ui bottom attached tab segment" data-tab="teamer-nsc">
+    @include('adventures._teamer_nsc_tab', [
+        'teamerSignups' => $adventure->teamerSignups,
+        'nscBookings'   => $nscBookings,
+    ])
 </div>
 
 {{-- Tab 3: Check-in --}}

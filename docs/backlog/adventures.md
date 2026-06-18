@@ -402,12 +402,21 @@ Anschrift der erziehungsberechtigten Person
 > „Teamer einladen"-Button. Opt-out-Checkbox im Profil (nur für Teamer/Lehrmeister).
 > Tests: `TeamerInvitationTest` (8).
 
-### ADV-29 Teamer/NSC Übersicht
+### ADV-29 Teamer/NSC Übersicht · ✅
 **Beschreibung:** In der Verwaltung eines Event soll eine Teamer/NSC Tab sein
 **Akzeptanzkriterien:**
-- [] Nach dem Tab Anmeldungen, soll das Tab "Teamer/NSC" sein
-- [] Dort sind alle Anmeldungen von Teamern und Eltern-NSCs gelistet.
-- [] Die Liste soll folgende Spalten haben: Nutzer, Alter, Rolle (Eltern-NSC oder Teamer-Rolle) Status. 
-- [] Buttons pro Listeneintrag sollen sein: Bestätigen, Ablehnen, Bearbeiten, Stornieren
-- [] Eltern-NSC werden nicht unter den Anmeldungen gelistet und diese haben keine Teilnahmenbeiträge zu zahlen.
-- [] Die Teilnehmerliste als PDF, soll einen weiteren Abschnitt haben für Teamer und Eltern-NSCs
+- [x] Nach dem Tab Anmeldungen, soll das Tab "Teamer/NSC" sein
+- [x] Dort sind alle Anmeldungen von Teamern und Eltern-NSCs gelistet.
+- [x] Die Liste soll folgende Spalten haben: Nutzer, Alter, Rolle (Eltern-NSC oder Teamer-Rolle) Status.
+- [x] Buttons pro Listeneintrag sollen sein: Bestätigen, Ablehnen, Bearbeiten, Stornieren
+- [x] Eltern-NSC werden nicht unter den Anmeldungen gelistet und diese haben keine Teilnahmenbeiträge zu zahlen.
+- [x] Die Teilnehmerliste als PDF, soll einen weiteren Abschnitt haben für Teamer und Eltern-NSCs
+
+> Umgesetzt: Migration `approved_at`/`rejected_at` auf `teamer_signups` + Status-Accessor.
+> `EventRole::NSC_ROLE_ID = 2`. `TeamerSignupController`: `approve`, `reject`, `edit`,
+> `update`. Tab „Teamer/NSC (N)" in `_manage.blade.php`; NSC-Buchungen aus dem
+> Anmeldungen-Tab herausgefiltert. `_teamer_nsc_tab.blade.php`: einheitliche Tabelle
+> mit Teamer-Anmeldungen + NSC-Buchungen, alle vier Aktionsbuttons.
+> `_teamer_signup_edit.blade.php`: Bearbeitungs-Modal. `participants_pdf.blade.php`:
+> Abschnitt „Teamer &amp; NSC-Elternteile" am Ende. Tests: `TeamerNscTabTest` (12),
+> `EventGuestBookingTest` angepasst, 548 gesamt grün.

@@ -147,7 +147,13 @@ class AdventureController extends Controller
     {
         $adventure->load(['bookings.player.users', 'bookings.bookedBy', 'bookings.role', 'visits', 'status', 'teamerSignups.user']);
 
-        return view('adventures._manage', $this->formData($adventure));
+        $nscBookings = $adventure->bookings->where('event_role_id', EventRole::NSC_ROLE_ID)->values();
+        $mainBookings = $adventure->bookings->where('event_role_id', '!=', EventRole::NSC_ROLE_ID)->values();
+
+        return view('adventures._manage', array_merge($this->formData($adventure), [
+            'nscBookings' => $nscBookings,
+            'mainBookings' => $mainBookings,
+        ]));
     }
 
     /**
@@ -156,17 +162,23 @@ class AdventureController extends Controller
      */
     public function participantsPdf(Adventure $adventure): Response
     {
-        $adventure->load(['location', 'category', 'bookings.player.users', 'bookings.bookedBy']);
+        $adventure->load(['location', 'category', 'bookings.player.users', 'bookings.bookedBy', 'teamerSignups.user']);
 
+        // Nur reguläre Teilnehmer (ohne NSC-Elternteil) in der Hauptliste.
         $bookings = $adventure->bookings
+            ->where('event_role_id', '!=', EventRole::NSC_ROLE_ID)
             ->sortBy([['player.lastname', 'asc'], ['player.name', 'asc']])
+            ->values();
+
+        $nscBookings = $adventure->bookings
+            ->where('event_role_id', EventRole::NSC_ROLE_ID)
             ->values();
 
         $male = $bookings->filter(fn ($b) => $b->player?->gender === 'männlich')->count();
         $female = $bookings->filter(fn ($b) => $b->player?->gender === 'weiblich')->count();
         $diverse = $bookings->filter(fn ($b) => $b->player?->gender === 'divers')->count();
 
-        $pdf = Pdf::loadView('adventures.participants_pdf', compact('adventure', 'bookings', 'male', 'female', 'diverse'));
+        $pdf = Pdf::loadView('adventures.participants_pdf', compact('adventure', 'bookings', 'nscBookings', 'male', 'female', 'diverse'));
 
         // Inline (ADV-19): öffnet im Browser-Tab/Popup statt Download.
         return $pdf->stream('teilnehmerliste-'.$adventure->id.'.pdf');

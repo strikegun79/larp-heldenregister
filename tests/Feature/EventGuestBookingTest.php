@@ -136,8 +136,9 @@ class EventGuestBookingTest extends TestCase
         // ADV-20: „Divers" in der Kopfzeile der Teilnehmer-PDF.
         $adventure = Adventure::factory()->create();
         $html = view('adventures.participants_pdf', [
-            'adventure' => $adventure->load(['location', 'category']),
+            'adventure' => $adventure->load(['location', 'category', 'teamerSignups']),
             'bookings' => collect(),
+            'nscBookings' => collect(),
             'male' => 0, 'female' => 0, 'diverse' => 0,
         ])->render();
 

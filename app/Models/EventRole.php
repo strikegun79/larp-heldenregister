@@ -13,6 +13,9 @@ class EventRole extends Model
     /** Teamer-Rollen, die nicht in der Teilnehmer-Anmeldung auswählbar sind (ADV-27). */
     public const TEAMER_ROLE_IDS = [3, 4, 5];
 
+    /** NSC-Elternteil-Rolle — wird separat im Teamer/NSC-Tab gelistet (ADV-29). */
+    public const NSC_ROLE_ID = 2;
+
     protected $fillable = [
         'id',
         'description',
