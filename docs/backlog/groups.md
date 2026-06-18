@@ -6,12 +6,12 @@ neues Datenmodell.
 
 ## Offen (🔲)
 
-### GRP-01 · Gruppen-Schema + Model · ⏱ 3h · 🔲
+### GRP-01 · Gruppen-Schema + Model · ⏱ 3h · ✅
 **Beschreibung:** Entität „Gruppe" (Trupp/Gilde) mit Name, Beschreibung, ggf. Bild.
 **Akzeptanzkriterien:**
-- [ ] Migration `groups` + Model; `group_hero` (oder `group_player`) Pivot.
-- [ ] Entscheidung dokumentiert: Mitgliedschaft auf Helden- oder Spielerebene.
-- [ ] Factory + Tests.
+- [x] Migration `groups` + Model; `group_hero` Pivot (Mitgliedschaft auf Heldenebene).
+- [x] Entscheidung: Heldenebene (`group_hero`) — Gruppen sind LARP-Gilden/Trupps für Charaktere.
+- [x] Factory + 7 Tests (Erstellung, Relationen, Pivot, Cascade-Delete).
 
 ### GRP-02 · Gruppen-CRUD (Verwaltung) · ⏱ 3h · 🔲
 **Beschreibung:** Anlegen/Bearbeiten/Löschen von Gruppen.

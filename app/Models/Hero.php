@@ -54,6 +54,15 @@ class Hero extends Model
     }
 
     /**
+     * Gruppen, denen dieser Held angehört (GRP-01).
+     */
+    public function groups(): BelongsToMany
+    {
+        return $this->belongsToMany(Group::class)
+            ->withPivot('role', 'joined_at');
+    }
+
+    /**
      * Gelernte Fertigkeiten (Legacy: hero2skill).
      */
     public function skills(): BelongsToMany
