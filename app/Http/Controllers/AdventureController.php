@@ -102,7 +102,7 @@ class AdventureController extends Controller
 
     public function show(Adventure $adventure): View
     {
-        $adventure->load(['location', 'status', 'category', 'client', 'bookings.player', 'bookings.role', 'visits', 'gamemaster', 'eventleader']);
+        $adventure->load(['location', 'status', 'category', 'client', 'bookings.player', 'bookings.role', 'visits', 'gamemaster', 'eventleader', 'teamerSignups.user']);
 
         // Buchbare Spieler: Bürokrat/Admin alle, sonst nur eigene/betreute (BOOK-10).
         $players = Gate::allows('book-any-player')
@@ -119,11 +119,16 @@ class AdventureController extends Controller
                 fn ($b) => $ownPlayerIds->contains($b->player_id) || $b->booked_by_user_id === $user->id
             )->values();
 
+        $teamerSignups = $adventure->teamerSignups;
+        $myTeamerSignup = $teamerSignups->firstWhere('user_id', request()->user()->id);
+
         $data = [
             'adventure' => $adventure,
             'players' => $players,
             'roles' => EventRole::orderBy('id')->get(),
             'visibleBookings' => $visibleBookings,
+            'teamerSignups' => $teamerSignups,
+            'myTeamerSignup' => $myTeamerSignup,
         ];
 
         if (request()->ajax()) {

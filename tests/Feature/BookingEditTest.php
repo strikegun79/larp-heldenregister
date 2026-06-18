@@ -47,7 +47,7 @@ class BookingEditTest extends TestCase
     public function test_modify_permission_can_update_booking_details(): void
     {
         $booking = $this->booking();
-        $newRole = EventRole::orderBy('id', 'desc')->first();
+        $newRole = EventRole::whereNotIn('id', \App\Models\EventRole::TEAMER_ROLE_IDS)->orderBy('id', 'desc')->first();
 
         $this->actingAs($this->userWithRole(60)) // Event buchen hat adventure.modify
             ->putJson(route('adventures.bookings.update', [$booking->adventure_id, $booking]), [

@@ -75,6 +75,11 @@ class Adventure extends Model
         return $this->hasMany(Booking::class);
     }
 
+    public function teamerSignups(): HasMany
+    {
+        return $this->hasMany(TeamerSignup::class);
+    }
+
     public function visits(): HasMany
     {
         return $this->hasMany(EventVisit::class);

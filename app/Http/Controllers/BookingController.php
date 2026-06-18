@@ -49,7 +49,7 @@ class BookingController extends Controller
         return view('bookings._create', [
             'adventure' => $adventure,
             'players' => $players,
-            'roles' => EventRole::orderBy('id')->get(),
+            'roles' => EventRole::whereNotIn('id', EventRole::TEAMER_ROLE_IDS)->orderBy('id')->get(),
             'userPhone' => $request->user()->phone,
         ]);
     }
@@ -61,7 +61,7 @@ class BookingController extends Controller
     {
         $data = $request->validate([
             'player_id' => ['required', 'exists:players,id'],
-            'event_role_id' => ['required', 'exists:event_roles,id'],
+            'event_role_id' => ['required', 'exists:event_roles,id', 'not_in:'.implode(',', EventRole::TEAMER_ROLE_IDS)],
             'agb' => ['accepted'],
             'fotoerlaubnis' => ['boolean'],
             'vegetarier' => ['boolean'],
@@ -142,7 +142,7 @@ class BookingController extends Controller
     {
         return view('bookings._create_guest', [
             'adventure' => $adventure,
-            'roles' => EventRole::orderBy('id')->get(),
+            'roles' => EventRole::whereNotIn('id', EventRole::TEAMER_ROLE_IDS)->orderBy('id')->get(),
         ]);
     }
 
@@ -157,7 +157,7 @@ class BookingController extends Controller
             'guest_lastname' => ['required', 'string', 'max:100'],
             'guest_age' => ['nullable', 'integer', 'min:0', 'max:120'],
             'guest_place' => ['nullable', 'string', 'max:100'],
-            'event_role_id' => ['required', 'exists:event_roles,id'],
+            'event_role_id' => ['required', 'exists:event_roles,id', 'not_in:'.implode(',', EventRole::TEAMER_ROLE_IDS)],
             'agb' => ['accepted'],
             'fotoerlaubnis' => ['boolean'],
             'vegetarier' => ['boolean'],
@@ -208,7 +208,7 @@ class BookingController extends Controller
         return view('bookings._edit', [
             'adventure' => $adventure,
             'booking' => $booking,
-            'roles' => EventRole::orderBy('id')->get(),
+            'roles' => EventRole::whereNotIn('id', EventRole::TEAMER_ROLE_IDS)->orderBy('id')->get(),
             'userPhone' => $userPhone,
         ]);
     }
@@ -221,7 +221,7 @@ class BookingController extends Controller
         abort_unless($booking->adventure_id === $adventure->id, 404);
 
         $data = $request->validate([
-            'event_role_id' => ['required', 'exists:event_roles,id'],
+            'event_role_id' => ['required', 'exists:event_roles,id', 'not_in:'.implode(',', EventRole::TEAMER_ROLE_IDS)],
             'fotoerlaubnis' => ['boolean'],
             'vegetarier' => ['boolean'],
             'leih_tunika' => ['boolean'],

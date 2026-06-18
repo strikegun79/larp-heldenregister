@@ -365,3 +365,32 @@ Anschrift der erziehungsberechtigten Person
 - [x] Hinweis, falls Kind abweichende Anschrift hat
 - [x] Export enthält diese Angaben ebenfalls.
 - [x] Datenschutz: Nur Admins und Projektleiter mit Berechtigung sehen diese Daten.
+
+### ADV-27 Teamer Anmeldung · ✅
+**Beschreibung:** Nutzer mit der Rolle Teamer, Lehrmeister können sich als Teamer zu einem Event anmelden
+**Akzeptanzkriterien:**
+- [x] Es soll ein Tab unter dem Event-Detail geben, wo die Teamer angezeigt werden. Nur sichtbar für Teamer, Projektleiter, Bürokrat, Spielleiter
+- [x] im Event-Detail, kann ein Nutzer mit der Rolle Teamer oder Lehrmeister den Button "Teamer-Anmeldung" im Footer des Modals sehen.
+- [x] Abzufragende Felder sind: Allergien, Medikamente, Kontaktrufnummer, Checkbox für AGB, Leih-Tunika, Leih-Waffe, Anmerkungsfeld
+- [x] Projektleiter können angemeldete Teamer eine Teamer-Rolle geben: Spielleitung, Projektleiter, Teamer A, Teamer B, Teamer C oder Bürokrat
+- [x] Anmeldungen als Teamer müssen keinen Beitrag zahlen und gelten nicht als Anmeldungen als Teilnehmer.
+- [x] In der Event-Details Tabs felder soll eine Zahl der aktuellen angemeldeten Teamer stehen z.B. "Teamer (8)"
+- [x] Entferne aus der normalen Anmeldung für Teilnehmer die Rollen-Auswahl Teamer A, Teamer B und Teamer C. Die wird für Teamer separat festgelegt.
+
+> Umgesetzt: `teamer_signups`-Tabelle + `TeamerSignup`-Model. `TeamerSignupController`
+> mit `create/store/destroy/updateRole`. Tab „Teamer (N)" im Event-Detail-Modal
+> (`_detail.blade.php`) + Teamer-Tab-Partial (`_teamer_tab.blade.php`) +
+> Anmeldeformular-Partial (`_teamer_signup_form.blade.php`). Footer-Button
+> „Teamer-Anmeldung" sichtbar für Teamer/Lehrmeister ohne aktive Anmeldung.
+> Rollenzuweisung (events.edit: Bürokrat, Projektleiter, Admin). Stornierung
+> durch Eigentümer oder portal.manage. Teamer-Rollen (ids 3/4/5) aus dem
+> normalen Buchungs-Dropdown gefiltert + via `not_in`-Validierung gesperrt.
+> `EventRole::TEAMER_ROLE_IDS = [3, 4, 5]`. Tests: `TeamerSignupTest` (12).
+
+### ADV-28 Teamer Einladung
+**Beschreibung:** Der Projektleiter kann in der Event-Verwaltung in einem Event die Teamer einladen zu einer Veranstaltung.
+**Akzeptanzkriterien:**
+- [] Email Benachrichtigung und im Portal für aktive Teamer und Lehrmeister über eine neue Veranstaltung
+- [] Email wird erst verschickt, wenn im Teamer Tab eines Events, der Projektleiter den Button für "Teamer einladen"
+- [] Teamer können in ihrem Profil einen Haken deaktiveren um Informationen als Teamer auszuschalten und so keine Benachrichtigungen mehr zu bekommen.
+

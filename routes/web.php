@@ -245,6 +245,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::delete('players/{player}/matrix', [Admin\MatrixAccountController::class, 'destroy'])->name('players.matrix.destroy');
     });
 
+    // Teamer-Anmeldungen (ADV-27): Teamer/Lehrmeister melden sich zu Events an.
+    Route::get('adventures/{adventure}/teamer-signup', [\App\Http\Controllers\TeamerSignupController::class, 'create'])
+        ->name('adventures.teamer.create');
+    Route::post('adventures/{adventure}/teamer-signup', [\App\Http\Controllers\TeamerSignupController::class, 'store'])
+        ->name('adventures.teamer.store');
+    Route::delete('adventures/{adventure}/teamer-signup/{signup}', [\App\Http\Controllers\TeamerSignupController::class, 'destroy'])
+        ->name('adventures.teamer.destroy');
+    Route::patch('adventures/{adventure}/teamer-signup/{signup}/role', [\App\Http\Controllers\TeamerSignupController::class, 'updateRole'])
+        ->name('adventures.teamer.update-role');
+
     // Gruppen-CRUD (GRP-02): eigene Berechtigung groups.manage (Admin, Bürokrat, Spielleiter).
     Route::prefix('admin')->name('admin.')->middleware('can:groups.manage')->group(function () {
         Route::get('groups', [Admin\GroupController::class, 'index'])->name('groups.index');

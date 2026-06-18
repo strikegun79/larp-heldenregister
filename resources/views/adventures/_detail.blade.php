@@ -3,6 +3,9 @@
 <div class="ui top attached tabular menu">
     <a class="item active" data-tab="event">Event</a>
     <a class="item" data-tab="bookings">Anmeldungen</a>
+    @can('manage-attendance')
+        <a class="item" data-tab="teamer">Teamer ({{ $teamerSignups->count() }})</a>
+    @endcan
 </div>
 
 {{-- Tab 1: Event-Informationen --}}
@@ -29,6 +32,13 @@
     @include('adventures._bookings', ['bookings' => $visibleBookings, 'manage' => false])
 </div>
 
+{{-- Tab 3: Teamer-Anmeldungen (ADV-27, nur manage-attendance) --}}
+@can('manage-attendance')
+    <div class="ui bottom attached tab segment" data-tab="teamer">
+        @include('adventures._teamer_tab', ['teamerSignups' => $teamerSignups, 'myTeamerSignup' => $myTeamerSignup])
+    </div>
+@endcan
+
 <div data-modal-actions hidden>
     @can('adventure.book')
         @if ($adventure->registrationOpen())
@@ -40,6 +50,11 @@
                class="ui button" title="Für Gäste werden keine EP gesammelt">GAST-Anmeldung</a>
         @endif
     @endcan
+    @if (auth()->user()->hasAnyRole('teamer', 'lehrmeister') && $myTeamerSignup === null)
+        <a href="{{ route('adventures.teamer.create', $adventure) }}"
+           data-modal-stack="{{ route('adventures.teamer.create', $adventure) }}"
+           class="ui teal button">Teamer-Anmeldung</a>
+    @endif
     @can('events.edit')
         <a href="{{ route('adventures.manage', $adventure) }}"
            data-modal-url="{{ route('adventures.manage', $adventure) }}"
