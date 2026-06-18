@@ -66,8 +66,12 @@ class PermissionMatrixTest extends TestCase
                 'profile.view', 'player.view', 'heldenregister.view',
                 'adventure.book', 'adventure.modify', 'adventure.cancel', 'events.view',
             ]],
-            'Teamer' => [50, [
+            'Lehrmeister' => [45, [
                 'profile.view', 'player.view', 'heldenregister.view',
+                'adventure.book', 'adventure.modify', 'adventure.cancel', 'events.view',
+            ]],
+            'Teamer' => [50, [
+                'profile.view', 'player.view',
                 'adventure.book', 'adventure.modify', 'adventure.cancel', 'events.view',
             ]],
             'Event buchen' => [60, [

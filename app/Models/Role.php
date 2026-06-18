@@ -17,6 +17,7 @@ class Role extends Model
         'registrar',
         'project_lead',
         'game_master',
+        'lehrmeister',
         'teamer',
         'event_booking',
         'participant',

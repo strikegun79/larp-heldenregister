@@ -43,9 +43,16 @@ erzwungen (Selbstbedienung). Entscheiden + ggf. konsistent gaten.
 - [ ] `@canany`-Nutzung vereinheitlicht oder eigener Helper `@haspermission`.
 - [ ] `adventure.access`-Logik zentral, nicht dupliziert.
 
-### ROLE-08 · Rollenänderungen im Audit-Log erfassen · ⏱ 3h · 🔲
+### ROLE-08 · Rollenänderungen im Audit-Log erfassen · ⏱ 3h · ✅
 **Beschreibung:** Wer hat wem wann welche Rolle gegeben.
 **Akzeptanzkriterien:**
-- [ ] Rollen-Sync in `Admin\UserController@update` schreibt Audit-Eintrag.
-- [ ] Sichtbar im Audit-Log (siehe ADM-Audit).
+- [x] Rollen-Sync in `Admin\UserController@update` schreibt Audit-Eintrag.
+- [x] Sichtbar im Audit-Log (siehe ADM-Audit).
 **Abhängig von:** ADM-08.
+
+### ROLE-09 · Rollen für Lehrmeister einfügen · ⏱ 3h · ✅
+**Beschreibung:** Die Rolle Lehrmeister soll hinzugefügt werden
+**Akzeptanzkriterien:**
+- [x] Die Lehrmeister-Rolle ist ein erweiterter Teamer (id=45). Mit Einfluss und mehr Rechte als normale Teamer.
+- [x] Lehrmeister erhält: profile.view, player.view, heldenregister.view, adventure.book, events.view, adventure.cancel, adventure.modify; hat manage-attendance.
+- [x] Die Rolle "Teamer" hat kein heldenregister.view mehr.

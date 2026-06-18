@@ -48,7 +48,7 @@ class HeroTest extends TestCase
     public function test_a_viewer_role_sees_the_register_but_cannot_create(): void
     {
         Hero::factory()->create(['character_name' => 'Tilix']);
-        $teamer = $this->userWithRole(50); // Teamer: sehen, nicht bearbeiten
+        $teamer = $this->userWithRole(45); // Lehrmeister: sehen, nicht bearbeiten (Teamer hat kein heldenregister.view mehr)
 
         $this->actingAs($teamer)->get(route('heroes.index'))->assertOk()->assertSee('Tilix');
         $this->actingAs($teamer)->get(route('heroes.create'))->assertForbidden();

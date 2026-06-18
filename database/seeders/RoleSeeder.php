@@ -19,6 +19,7 @@ class RoleSeeder extends Seeder
             ['id' => 20, 'slug' => 'registrar',     'label' => 'Bürokrat'],
             ['id' => 30, 'slug' => 'project_lead',  'label' => 'Projektleitung'],
             ['id' => 40, 'slug' => 'game_master',   'label' => 'Spielleiter'],
+            ['id' => 45, 'slug' => 'lehrmeister',   'label' => 'Lehrmeister'],
             ['id' => 50, 'slug' => 'teamer',        'label' => 'Teamer'],
             ['id' => 60, 'slug' => 'event_booking', 'label' => 'Event buchen'],
             ['id' => 70, 'slug' => 'participant',   'label' => 'Teilnehmer'],

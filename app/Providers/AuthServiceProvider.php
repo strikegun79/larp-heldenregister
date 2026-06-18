@@ -37,8 +37,8 @@ class AuthServiceProvider extends ServiceProvider
         // (Rolle „Event buchen" hat kein events.view, aber adventure.book).
         Gate::define('adventure.access', fn (User $user) => $user->hasPermission('events.view') || $user->hasPermission('adventure.book'));
 
-        // Teilnahme/Check-in erfassen: Spielleiter, Teamer (+ Admin via before).
-        Gate::define('manage-attendance', fn (User $user) => $user->hasAnyRole('game_master', 'teamer'));
+        // Teilnahme/Check-in erfassen: Spielleiter, Lehrmeister, Teamer (+ Admin via before).
+        Gate::define('manage-attendance', fn (User $user) => $user->hasAnyRole('game_master', 'lehrmeister', 'teamer'));
 
         // Anmeldungen bestätigen/freigeben (BOOK-05): Bürokrat (+ Admin via before).
         Gate::define('approve-bookings', fn (User $user) => $user->hasRole('registrar'));

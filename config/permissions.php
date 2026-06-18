@@ -53,10 +53,17 @@ return [
             'events.view',
         ],
 
-        // Teamer
-        'teamer' => [
+        // Lehrmeister (erweiterter Teamer mit Helden-Einsicht, ROLE-09)
+        'lehrmeister' => [
             'profile.view', 'player.view',
             'heldenregister.view',
+            'adventure.book', 'adventure.modify', 'adventure.cancel',
+            'events.view',
+        ],
+
+        // Teamer (kein heldenregister.view, ROLE-09)
+        'teamer' => [
+            'profile.view', 'player.view',
             'adventure.book', 'adventure.modify', 'adventure.cancel',
             'events.view',
         ],
