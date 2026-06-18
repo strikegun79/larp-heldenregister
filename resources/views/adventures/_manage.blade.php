@@ -4,6 +4,7 @@
     <a class="item active" data-tab="data">Event-Daten</a>
     <a class="item" data-tab="bookings">Anmeldungen</a>
     <a class="item" data-tab="checkin">Check-in</a>
+    <a class="item" data-tab="teamer">Teamer ({{ $adventure->teamerSignups->count() }})</a>
 </div>
 
 {{-- Tab 1: Allgemeine Event-Daten (Editor) --}}
@@ -35,6 +36,25 @@
 {{-- Tab 3: Check-in --}}
 <div class="ui bottom attached tab segment" data-tab="checkin">
     @include('adventures._checkin')
+</div>
+
+{{-- Tab 4: Teamer-Anmeldungen + Einladung (ADV-28) --}}
+<div class="ui bottom attached tab segment" data-tab="teamer">
+    @include('adventures._teamer_tab', [
+        'teamerSignups' => $adventure->teamerSignups,
+        'myTeamerSignup' => null,
+    ])
+
+    <div class="mt-4 pt-4 border-t border-stone-200">
+        <form method="POST" action="{{ route('adventures.teamer.invite', $adventure) }}"
+              onsubmit="return confirm('Einladung an alle aktiven Teamer und Lehrmeister schicken?')">
+            @csrf
+            <button type="submit" class="ui teal button">
+                <i class="mail icon"></i> Teamer einladen
+            </button>
+            <span class="text-sm text-stone-500 ml-2">Benachrichtigt alle aktiven Teamer &amp; Lehrmeister mit eingeschalteten Benachrichtigungen.</span>
+        </form>
+    </div>
 </div>
 
 <div data-modal-actions hidden>

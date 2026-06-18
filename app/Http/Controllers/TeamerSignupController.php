@@ -3,7 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Models\Adventure;
+use App\Models\Role;
 use App\Models\TeamerSignup;
+use App\Models\User;
+use App\Notifications\TeamerInvitation;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -79,6 +82,31 @@ class TeamerSignupController extends Controller
         $signup->delete();
 
         $msg = 'Teamer-Anmeldung wurde storniert.';
+
+        return $request->expectsJson()
+            ? response()->json(['message' => $msg, 'refresh_modal' => true])
+            : back()->with('status', $msg);
+    }
+
+    /**
+     * Teamer-Einladung versenden (ADV-28).
+     * Schickt Mail + In-App-Notification an alle aktiven Teamer/Lehrmeister
+     * mit eingeschalteten Teamer-Benachrichtigungen.
+     */
+    public function invite(Request $request, Adventure $adventure): RedirectResponse|JsonResponse
+    {
+        abort_unless($request->user()->can('events.edit'), 403);
+
+        $teamerRoleIds = Role::whereIn('slug', ['teamer', 'lehrmeister'])->pluck('id');
+
+        $recipients = User::whereHas('roles', fn ($q) => $q->whereIn('roles.id', $teamerRoleIds))
+            ->where('activated', true)
+            ->where('teamer_notifications', true)
+            ->get();
+
+        $recipients->each->notify(new TeamerInvitation($adventure));
+
+        $msg = "Einladung an {$recipients->count()} Teamer verschickt.";
 
         return $request->expectsJson()
             ? response()->json(['message' => $msg, 'refresh_modal' => true])

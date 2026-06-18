@@ -32,6 +32,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'needs_password_reset',
         'lastlogin_at',
         'legacy_id',
+        'teamer_notifications',
     ];
 
     /**
@@ -54,6 +55,7 @@ class User extends Authenticatable implements MustVerifyEmail
         'lastlogin_at' => 'datetime',
         'activated' => 'boolean',
         'needs_password_reset' => 'boolean',
+        'teamer_notifications' => 'boolean',
         'password' => 'hashed',
     ];
 

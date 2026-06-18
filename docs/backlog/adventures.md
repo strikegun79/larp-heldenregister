@@ -387,10 +387,27 @@ Anschrift der erziehungsberechtigten Person
 > normalen Buchungs-Dropdown gefiltert + via `not_in`-Validierung gesperrt.
 > `EventRole::TEAMER_ROLE_IDS = [3, 4, 5]`. Tests: `TeamerSignupTest` (12).
 
-### ADV-28 Teamer Einladung
+### ADV-28 Teamer Einladung · ✅
 **Beschreibung:** Der Projektleiter kann in der Event-Verwaltung in einem Event die Teamer einladen zu einer Veranstaltung.
 **Akzeptanzkriterien:**
-- [] Email Benachrichtigung und im Portal für aktive Teamer und Lehrmeister über eine neue Veranstaltung
-- [] Email wird erst verschickt, wenn im Teamer Tab eines Events, der Projektleiter den Button für "Teamer einladen"
-- [] Teamer können in ihrem Profil einen Haken deaktiveren um Informationen als Teamer auszuschalten und so keine Benachrichtigungen mehr zu bekommen.
+- [x] Email Benachrichtigung und im Portal für aktive Teamer und Lehrmeister über eine neue Veranstaltung
+- [x] Email wird erst verschickt, wenn im Teamer Tab eines Events, der Projektleiter den Button für "Teamer einladen"
+- [x] Teamer können in ihrem Profil einen Haken deaktiveren um Informationen als Teamer auszuschalten und so keine Benachrichtigungen mehr zu bekommen.
 
+> Umgesetzt: `teamer_notifications` boolean-Spalte auf `users` (Default true).
+> `TeamerInvitation`-Notification (mail + database). `TeamerSignupController@invite`
+> (POST `adventures/{adventure}/teamer-invite`, `events.edit`): sendet Notification
+> an alle aktiven Teamer/Lehrmeister mit `teamer_notifications = true`.
+> Teamer-Tab im Verwaltungs-Modal (`_manage.blade.php`) mit Signup-Liste +
+> „Teamer einladen"-Button. Opt-out-Checkbox im Profil (nur für Teamer/Lehrmeister).
+> Tests: `TeamerInvitationTest` (8).
+
+### ADV-29 Teamer/NSC Übersicht
+**Beschreibung:** In der Verwaltung eines Event soll eine Teamer/NSC Tab sein
+**Akzeptanzkriterien:**
+- [] Nach dem Tab Anmeldungen, soll das Tab "Teamer/NSC" sein
+- [] Dort sind alle Anmeldungen von Teamern und Eltern-NSCs gelistet.
+- [] Die Liste soll folgende Spalten haben: Nutzer, Alter, Rolle (Eltern-NSC oder Teamer-Rolle) Status. 
+- [] Buttons pro Listeneintrag sollen sein: Bestätigen, Ablehnen, Bearbeiten, Stornieren
+- [] Eltern-NSC werden nicht unter den Anmeldungen gelistet und diese haben keine Teilnahmenbeiträge zu zahlen.
+- [] Die Teilnehmerliste als PDF, soll einen weiteren Abschnitt haben für Teamer und Eltern-NSCs

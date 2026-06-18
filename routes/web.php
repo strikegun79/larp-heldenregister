@@ -254,6 +254,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('adventures.teamer.destroy');
     Route::patch('adventures/{adventure}/teamer-signup/{signup}/role', [\App\Http\Controllers\TeamerSignupController::class, 'updateRole'])
         ->name('adventures.teamer.update-role');
+    Route::post('adventures/{adventure}/teamer-invite', [\App\Http\Controllers\TeamerSignupController::class, 'invite'])
+        ->name('adventures.teamer.invite');
 
     // Gruppen-CRUD (GRP-02): eigene Berechtigung groups.manage (Admin, Bürokrat, Spielleiter).
     Route::prefix('admin')->name('admin.')->middleware('can:groups.manage')->group(function () {
