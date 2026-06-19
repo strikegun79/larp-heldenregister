@@ -37,7 +37,7 @@
                 <div class="p-4 sm:p-8 bg-white shadow sm:rounded-lg">
                     <div class="max-w-xl">
                         <h2 class="text-lg font-medium text-gray-900">Teamer-Benachrichtigungen</h2>
-                        <p class="mt-1 text-sm text-gray-600">Erhalte eine Benachrichtigung, wenn du als Teamer zu einem Event eingeladen wirst.</p>
+                        <p class="mt-1 text-sm text-gray-600">Erhalte eine Benachrichtigung, wenn du als Teamer zu einem Abenteuer eingeladen wirst.</p>
                         <form method="POST" action="{{ route('profile.update') }}" class="mt-4">
                             @csrf @method('PATCH')
                             {{-- Pflichtfelder des Profils mitschicken --}}
