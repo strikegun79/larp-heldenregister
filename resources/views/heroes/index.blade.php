@@ -14,7 +14,7 @@
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            @php($selectClass = 'mt-1 block w-full border-gray-300 rounded-md shadow-sm text-sm focus:border-indigo-500 focus:ring-indigo-500')
+            @php($selectClass = 'mt-1 block w-full border-gray-300 rounded-md shadow-sm text-sm focus:border-amber-600 focus:ring-amber-600')
             <form method="GET" action="{{ route('heroes.index') }}"
                   class="mb-4 bg-white/60 border-2 border-[#5a3a22]/30 rounded-lg p-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-5 items-end">
                 <div class="lg:col-span-2">
@@ -54,41 +54,95 @@
                 </div>
             </form>
 
-            <div class="bg-white dark:bg-gray-800 overflow-hidden shadow-sm sm:rounded-lg">
-                <table class="min-w-full divide-y divide-gray-200 dark:divide-gray-700">
-                    <thead class="bg-gray-50 dark:bg-gray-900">
-                        <tr>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Spieler</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Charakter</th>
-                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">EP gesamt</th>
-                            <th class="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase">EP verfügbar</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Klassen</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase">Aktiv</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-200 dark:divide-gray-700 text-gray-800 dark:text-gray-200">
-                        @forelse ($heroes as $hero)
-                            <tr data-modal-url="{{ route('heroes.show', $hero) }}" class="cursor-pointer hover:bg-black/5 {{ $hero->died ? 'opacity-60' : '' }}">
-                                <td class="px-6 py-4">{{ $hero->player?->full_name ?? '—' }}</td>
-                                <td class="px-6 py-4 font-medium">{{ $hero->character_name ?? '—' }}</td>
-                                <td class="px-6 py-4 text-right">{{ number_format($hero->ep_total, 0, ',', '.') }}</td>
-                                <td class="px-6 py-4 text-right">{{ number_format($hero->ep_balance, 0, ',', '.') }}</td>
-                                <td class="px-6 py-4">{{ $hero->classes->pluck('name')->implode(', ') ?: '—' }}</td>
-                                <td class="px-6 py-4">
-                                    @if ($hero->died)
-                                        <span class="text-red-700">verschollen</span>
-                                    @else
-                                        {{ $hero->active ? 'ja' : 'nein' }}
-                                    @endif
-                                </td>
-                            </tr>
-                        @empty
+            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+
+                {{-- Mobile: Kartenliste (nur < sm) --}}
+                <div class="sm:hidden divide-y divide-stone-200">
+                    @forelse ($heroes as $hero)
+                        <div data-modal-url="{{ route('heroes.show', $hero) }}"
+                             role="button" tabindex="0"
+                             aria-label="Held {{ $hero->character_name ?? 'unbenannt' }} öffnen"
+                             class="p-4 cursor-pointer hover:bg-black/5 active:bg-black/10 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-600 focus-visible:outline-offset-[-2px] {{ $hero->died ? 'opacity-60' : '' }}">
+                            <div class="font-medium text-stone-800">{{ $hero->character_name ?? '—' }}</div>
+                            <div class="text-sm text-stone-500 mt-0.5">{{ $hero->player?->full_name ?? '—' }}</div>
+                            <div class="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2 text-xs text-stone-500">
+                                @if ($hero->classes->isNotEmpty())
+                                    <span>{{ $hero->classes->pluck('name')->implode(', ') }}</span>
+                                @endif
+                                <span>{{ number_format($hero->ep_balance, 0, ',', '.') }} EP</span>
+                                @if ($hero->died)
+                                    <span class="text-red-700 font-medium">verschollen</span>
+                                @else
+                                    <span>{{ $hero->active ? 'aktiv' : 'inaktiv' }}</span>
+                                @endif
+                            </div>
+                        </div>
+                    @empty
+                        <div class="p-8 text-center">
+                            <p class="font-medium text-stone-700 mb-1">Noch keine Helden erfasst.</p>
+                            <p class="text-sm text-stone-500 mb-4">
+                                Bevor ein Held angelegt werden kann, muss ein
+                                <a href="{{ route('players.index') }}" class="text-waldritter hover:underline">Spieler</a>
+                                vorhanden sein.
+                            </p>
+                            @can('heldenregister.edit')
+                                <a href="{{ route('heroes.create') }}" class="ui small primary button">Neuen Helden anlegen</a>
+                            @endcan
+                        </div>
+                    @endforelse
+                </div>
+
+                {{-- Desktop: Tabelle (ab sm) --}}
+                <div class="hidden sm:block overflow-x-auto">
+                    <table class="min-w-full divide-y divide-stone-200">
+                        <thead class="bg-stone-50">
                             <tr>
-                                <td colspan="6" class="px-6 py-4 text-center text-gray-500">Noch keine Helden erfasst.</td>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase">Spieler</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase">Charakter</th>
+                                <th class="px-6 py-3 text-right text-xs font-medium text-stone-500 uppercase">EP gesamt</th>
+                                <th class="px-6 py-3 text-right text-xs font-medium text-stone-500 uppercase">EP verfügbar</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase">Klassen</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase">Aktiv</th>
                             </tr>
-                        @endforelse
-                    </tbody>
-                </table>
+                        </thead>
+                        <tbody class="divide-y divide-stone-200 text-stone-800">
+                            @forelse ($heroes as $hero)
+                                <tr data-modal-url="{{ route('heroes.show', $hero) }}"
+                                    role="button" tabindex="0"
+                                    aria-label="Held {{ $hero->character_name ?? 'unbenannt' }} öffnen"
+                                    class="cursor-pointer hover:bg-black/5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-600 focus-visible:outline-offset-[-2px] {{ $hero->died ? 'opacity-60' : '' }}">
+                                    <td class="px-6 py-4">{{ $hero->player?->full_name ?? '—' }}</td>
+                                    <td class="px-6 py-4 font-medium">{{ $hero->character_name ?? '—' }}</td>
+                                    <td class="px-6 py-4 text-right">{{ number_format($hero->ep_total, 0, ',', '.') }}</td>
+                                    <td class="px-6 py-4 text-right">{{ number_format($hero->ep_balance, 0, ',', '.') }}</td>
+                                    <td class="px-6 py-4">{{ $hero->classes->pluck('name')->implode(', ') ?: '—' }}</td>
+                                    <td class="px-6 py-4">
+                                        @if ($hero->died)
+                                            <span class="text-red-700">verschollen</span>
+                                        @else
+                                            {{ $hero->active ? 'ja' : 'nein' }}
+                                        @endif
+                                    </td>
+                                </tr>
+                            @empty
+                                <tr>
+                                    <td colspan="6" class="px-6 py-10 text-center">
+                                        <p class="font-medium text-stone-700 mb-1">Noch keine Helden erfasst.</p>
+                                        <p class="text-sm text-stone-500 mb-4">
+                                            Bevor ein Held angelegt werden kann, muss ein
+                                            <a href="{{ route('players.index') }}" class="text-waldritter hover:underline">Spieler</a>
+                                            vorhanden sein.
+                                        </p>
+                                        @can('heldenregister.edit')
+                                            <a href="{{ route('heroes.create') }}" class="ui small primary button">Neuen Helden anlegen</a>
+                                        @endcan
+                                    </td>
+                                </tr>
+                            @endforelse
+                        </tbody>
+                    </table>
+                </div>
+
             </div>
 
             <div class="mt-4">
