@@ -14,11 +14,8 @@
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Uncial+Antiqua&family=MedievalSharp&family=EB+Garamond:wght@400;500&display=swap" rel="stylesheet">
         <link rel="stylesheet" href="{{ asset('css/heldenregister.css') }}">
-        <!-- Fomantic UI (wie im Legacy) -->
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/fomantic-ui@2.9.3/dist/semantic.min.css">
-        <!-- Cropper.js für Avatar-Editor (PLAY-11) -->
-        <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.css">
-
+        <!-- Vendor: Fomantic UI + Cropper.js (lokal via Vite/npm, UI-10) -->
+        @vite(['resources/css/vendor.css', 'resources/js/vendor.js'])
         <!-- Scripts (Tailwind/Breeze danach, damit das Theme gewinnt) -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
 
@@ -166,11 +163,7 @@
             </div>
         </div>
 
-        <!-- jQuery + Fomantic JS -->
-        <script src="https://cdn.jsdelivr.net/npm/jquery@3.7.1/dist/jquery.min.js"></script>
-        <script src="https://cdn.jsdelivr.net/npm/fomantic-ui@2.9.3/dist/semantic.min.js"></script>
-        <!-- Cropper.js für Avatar-Editor (PLAY-11) -->
-        <script src="https://cdn.jsdelivr.net/npm/cropperjs@1.6.2/dist/cropper.min.js"></script>
+        {{-- jQuery + Fomantic + Cropper sind im vendor-Bundle (UI-10). --}}
         <script>
             let appModalUrl = null;
 

@@ -57,12 +57,17 @@ darstellen (einheitliches Feedback).
 - [x] Beim Laden vorhandene Flash-Messages als Toast ausgeben.
 - [x] Keine doppelte Anzeige (Box + Toast).
 
-### UI-10 · Fomantic-Assets lokal bündeln (statt CDN) · ⏱ 3h · 🔲
+### UI-10 · Fomantic-Assets lokal bündeln (statt CDN) · ⏱ 3h · ✅
 **Beschreibung:** Fomantic/jQuery aktuell per CDN; für Offline/Prod lokal via Vite.
 **Akzeptanzkriterien:**
-- [ ] Fomantic + jQuery über npm/Vite gebaut und eingebunden.
-- [ ] Keine externen CDN-Abhängigkeiten zur Laufzeit.
-- [ ] Build dokumentiert.
+- [x] Fomantic + jQuery über npm/Vite gebaut und eingebunden.
+- [x] Keine externen CDN-Abhängigkeiten zur Laufzeit.
+- [x] Build dokumentiert.
+
+> Umgesetzt: `jquery@3.7.1`, `fomantic-ui@2.9.3`, `cropperjs@1.6.2` per npm;
+> `resources/js/vendor.js` + `resources/css/vendor.css` als eigene Vite-Entrypoints.
+> `@rollup/plugin-inject` injiziert jQuery als Global in alle JS-Dateien (Fomantic-IIFE-Kompatibilität).
+> CDN-Tags in `app.blade.php` durch `@vite()` ersetzt.
 
 ### UI-11 · Accessibility-Grundlagen · ⏱ 3h · 🔲
 **Beschreibung:** Fokus-Management in Modals, Labels, Kontraste, ARIA.
