@@ -38,7 +38,7 @@
             @endif
 
             <!-- Page Content -->
-            <main class="flex-1">
+            <main class="flex-1" id="page-main">
                 {{ $slot }}
             </main>
 
@@ -426,6 +426,19 @@
                 $('#confirm-modal').modal({ allowMultiple: true, autofocus: false }).modal('show');
             }, true);
 
+            // Seitenhinhalt (nur <main>) per AJAX neu laden – kein voller Browser-Reload.
+            function refreshPageContent() {
+                fetch(window.location.href, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+                    .then(r => r.text())
+                    .then(html => {
+                        const doc = new DOMParser().parseFromString(html, 'text/html');
+                        const newMain = doc.getElementById('page-main');
+                        const curMain = document.getElementById('page-main');
+                        if (newMain && curMain) curMain.innerHTML = newMain.innerHTML;
+                    })
+                    .catch(() => window.location.reload());
+            }
+
             // Formulare innerhalb des Modals per AJAX absenden; Rückmeldung als Toast.
             document.addEventListener('submit', function (e) {
                 const form = e.target;
@@ -448,7 +461,10 @@
                         if (resp.ok) {
                             showToast(data.message || 'Gespeichert.', 'success');
                             if (data.reload) {
-                                setTimeout(() => window.location.reload(), 700);
+                                // Modals schließen, dann nur <main> per AJAX aktualisieren (kein Seiten-Reload).
+                                $('#app-modal-2').modal('hide');
+                                $('#app-modal').modal('hide');
+                                refreshPageContent();
                             } else if (inStack) {
                                 // Einmalige Formulare (z. B. Anmeldung) schließen den Stack
                                 // und aktualisieren das Haupt-Modal; sonst Stack selbst neu laden.
