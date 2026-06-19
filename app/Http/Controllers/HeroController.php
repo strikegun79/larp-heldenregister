@@ -208,7 +208,7 @@ class HeroController extends Controller
         $hero->load([
             'player.bookings.adventure',
             'player.users',
-            'classes.skills',
+            'classes.skills.prerequisites',
             'skills.perlColor',
             'epTransactions.type',
             'epTransactions.adventure',

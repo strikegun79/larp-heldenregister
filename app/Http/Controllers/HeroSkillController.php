@@ -39,6 +39,14 @@ class HeroSkillController extends Controller
             return $this->fail($request, 'Diese Fertigkeit wurde bereits erlernt.');
         }
 
+        $skill->load('prerequisites');
+        $learnedIds = $hero->skills()->pluck('skills.id');
+        $missing = $skill->prerequisites->filter(fn ($p) => ! $learnedIds->contains($p->id));
+        if ($missing->isNotEmpty()) {
+            $names = $missing->pluck('name')->join(', ');
+            return $this->fail($request, "Voraussetzungen nicht erfüllt: {$names}.");
+        }
+
         if ($hero->ep_balance < $skill->ep_costs) {
             return $this->fail($request, 'Nicht genug EP für diese Fertigkeit.');
         }

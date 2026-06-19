@@ -524,20 +524,30 @@
                 $('#skill-modal-title').text(node.getAttribute('data-skill-name') || 'Fertigkeit');
                 $('#skill-modal-desc').text(node.getAttribute('data-skill-desc') || '');
 
+                const locked  = node.getAttribute('data-skill-locked') === '1';
+                const prereqs = node.getAttribute('data-skill-prereqs') || '';
+
                 const $accept = $('#skill-modal-accept');
                 const $revoke = $('#skill-modal-revoke');
-                $('#skill-modal-warn').hide();
+                const $warn   = $('#skill-modal-warn');
+                $warn.hide();
 
                 if (learned) {
                     // Bereits erlernt -> aberkennen (EP-Rückerstattung).
                     $('#skill-modal-meta').html('Bereits erlernt &nbsp;·&nbsp; Rückerstattung: <strong>' + cost + ' EP</strong>');
                     $accept.hide();
                     $revoke.toggle(skillCanEdit);
+                } else if (locked) {
+                    // SKILL-06: Voraussetzungen nicht erfüllt.
+                    $('#skill-modal-meta').html('Kosten: <strong>' + cost + ' EP</strong>');
+                    $warn.text('Voraussetzungen fehlen: ' + prereqs + '.').show();
+                    $accept.hide();
+                    $revoke.hide();
                 } else {
                     const enough = balance >= cost;
                     const epColor = enough ? 'text-green-700' : 'text-red-700';
                     $('#skill-modal-meta').html('Kosten: <strong>' + cost + ' EP</strong> &nbsp;·&nbsp; Verfügbar: <span class="' + epColor + ' font-medium">' + balance + ' EP</span>');
-                    $('#skill-modal-warn').toggle(!enough);
+                    $warn.text('Nicht genug EP. EP werden durch Abenteuer-Teilnahme gutgeschrieben.').toggle(!enough);
                     $revoke.hide();
                     $accept.toggle(skillCanEdit).toggleClass('disabled', !enough);
                 }

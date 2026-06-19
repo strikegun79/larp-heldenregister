@@ -100,13 +100,13 @@ Voraussetzungen (Skill → benötigt Skill(s) / Mindest-Level).
 > Voraussetzungen; BFS-Zyklen-Prüfung in `hasCycle()` lehnt direkte und transitive
 > Kreisbezüge mit 422 ab. Tests: `SkillPrerequisiteTest` (9).
 
-### SKILL-06 · Voraussetzungen beim Lernen prüfen · ⏱ 3h · 🔲
+### SKILL-06 · Voraussetzungen beim Lernen prüfen · ⏱ 3h · ✅
 **Beschreibung:** Eine Fertigkeit ist nur lernbar, wenn ihre Voraussetzungen
 beim Helden erfüllt sind.
 **Akzeptanzkriterien:**
-- [ ] Lern-Aktion (EP-03) lehnt Fertigkeiten ohne erfüllte Voraussetzungen ab.
-- [ ] UI zeigt gesperrte Fertigkeiten mit Begründung.
-- [ ] Tests (gesperrt/freigeschaltet).
+- [x] Lern-Aktion (EP-03) lehnt Fertigkeiten ohne erfüllte Voraussetzungen ab.
+- [x] UI zeigt gesperrte Fertigkeiten mit Begründung.
+- [x] Tests (gesperrt/freigeschaltet).
 **Abhängig von:** SKILL-05, EP-03.
 
 ### SKILL-07 · Fertigkeiten-Baum-Visualisierung je Klasse · ⏱ 4h · 🔲

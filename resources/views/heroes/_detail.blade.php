@@ -232,15 +232,19 @@
                     @php($unset = ($skill->pivot->x_percentage == 0 && $skill->pivot->y_percentage == 0))
                     @php($px = $unset ? 6 + ($loop->index % 10) * 9 : (int) $skill->pivot->x_percentage)
                     @php($py = $unset ? 8 + intdiv($loop->index, 10) * 11 : (int) $skill->pivot->y_percentage)
+                    @php($missingPrereqs = $skill->prerequisites->filter(fn ($p) => ! $learnedIds->contains($p->id)))
+                    @php($locked = ! $learned && $missingPrereqs->isNotEmpty())
                     <button type="button"
-                            class="skill-marker skill-trigger {{ $learned ? 'learned' : 'unlearned' }}"
+                            class="skill-marker skill-trigger {{ $learned ? 'learned' : ($locked ? 'locked' : 'unlearned') }}"
                             style="left: {{ $px }}%; top: {{ $py }}%;"
-                            title="{{ $skill->name }} ({{ $skill->ep_costs }} EP)"
+                            title="{{ $skill->name }} ({{ $skill->ep_costs }} EP){{ $locked ? ' – gesperrt' : '' }}"
                             data-skill-id="{{ $skill->id }}"
                             data-skill-name="{{ $skill->name }}"
                             data-skill-desc="{{ $skill->description }}"
                             data-skill-cost="{{ $skill->ep_costs }}"
-                            data-skill-learned="{{ $learned ? 1 : 0 }}"></button>
+                            data-skill-learned="{{ $learned ? 1 : 0 }}"
+                            data-skill-locked="{{ $locked ? 1 : 0 }}"
+                            data-skill-prereqs="{{ $locked ? $missingPrereqs->pluck('name')->join(', ') : '' }}"></button>
                 @endforeach
             </div>
 
@@ -250,15 +254,19 @@
                 <div class="ui middle aligned divided list skill-list">
                     @foreach ($class->skills as $skill)
                         @php($learned = $learnedIds->contains($skill->id))
+                        @php($missingPrereqs = $skill->prerequisites->filter(fn ($p) => ! $learnedIds->contains($p->id)))
+                        @php($locked = ! $learned && $missingPrereqs->isNotEmpty())
                         <div class="item">
                             <div class="content">
-                                <a class="skill-trigger {{ $learned ? 'text-green-700' : 'text-waldritter' }} hover:underline" style="cursor:pointer"
+                                <a class="skill-trigger {{ $learned ? 'text-green-700' : ($locked ? 'text-stone-400' : 'text-waldritter') }} hover:underline" style="cursor:pointer"
                                    data-skill-id="{{ $skill->id }}"
                                    data-skill-name="{{ $skill->name }}"
                                    data-skill-desc="{{ $skill->description }}"
                                    data-skill-cost="{{ $skill->ep_costs }}"
-                                   data-skill-learned="{{ $learned ? 1 : 0 }}">
-                                    {{ $learned ? '✓ ' : '' }}{{ $skill->name }} ({{ $skill->ep_costs }} EP)
+                                   data-skill-learned="{{ $learned ? 1 : 0 }}"
+                                   data-skill-locked="{{ $locked ? 1 : 0 }}"
+                                   data-skill-prereqs="{{ $locked ? $missingPrereqs->pluck('name')->join(', ') : '' }}">
+                                    {{ $learned ? '✓ ' : ($locked ? '🔒 ' : '') }}{{ $skill->name }} ({{ $skill->ep_costs }} EP)
                                 </a>
                             </div>
                         </div>

@@ -51,6 +51,20 @@
     text-align: center;
 }
 
+/* SKILL-06: Gesperrte Fertigkeiten (Voraussetzungen nicht erfüllt). */
+.skill-marker.locked {
+    background: rgba(180, 180, 180, 0.6);
+    opacity: 0.7;
+}
+
+.skill-marker.locked::after {
+    content: "🔒";
+    font-size: 11px;
+    line-height: 24px;
+    display: block;
+    text-align: center;
+}
+
 /* ===========================================================================
    Modal-Höhenbegrenzung (Tablet-Tauglichkeit)
    ---------------------------------------------------------------------------
