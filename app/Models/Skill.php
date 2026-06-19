@@ -60,4 +60,20 @@ class Skill extends Model
     {
         return $this->belongsToMany(Hero::class)->withPivot('trained_at');
     }
+
+    /**
+     * Fertigkeiten, die ein Held bereits kennen muss, bevor er diese lernen kann.
+     */
+    public function prerequisites(): BelongsToMany
+    {
+        return $this->belongsToMany(Skill::class, 'skill_prerequisites', 'skill_id', 'required_skill_id');
+    }
+
+    /**
+     * Fertigkeiten, für die diese Fertigkeit Voraussetzung ist.
+     */
+    public function prerequisiteFor(): BelongsToMany
+    {
+        return $this->belongsToMany(Skill::class, 'skill_prerequisites', 'required_skill_id', 'skill_id');
+    }
 }

@@ -85,13 +85,20 @@ Farbe summieren (LARP-Repräsentation).
 
 ## Fertigkeiten-Baum (Vision: „Fertigkeiten-Baum pro Klasse")
 
-### SKILL-05 · Voraussetzungen-Datenmodell (Skill-Tree) · ⏱ 4h · 🔲
+### SKILL-05 · Voraussetzungen-Datenmodell (Skill-Tree) · ⏱ 4h · ✅
 **Beschreibung:** Fertigkeiten bauen aufeinander auf. Modellierung von
 Voraussetzungen (Skill → benötigt Skill(s) / Mindest-Level).
 **Akzeptanzkriterien:**
-- [ ] `skill_prerequisites` (skill_id, required_skill_id) oder Level-Schwelle.
-- [ ] Model-Relationen + Validierung (keine Zyklen).
-- [ ] Tests.
+- [x] `skill_prerequisites` (skill_id, required_skill_id) oder Level-Schwelle.
+- [x] Model-Relationen + Validierung (keine Zyklen).
+- [x] Tests.
+
+> Umgesetzt: Migration `skill_prerequisites` (composite PK + FK cascadeOnDelete).
+> `Skill::prerequisites()` (BelongsToMany auf sich selbst) + `prerequisiteFor()`
+> (Inverse). Admin-Formular `_form.blade.php`: Checkbox-Liste aller anderen
+> Fertigkeiten, gruppiert nach Klasse. `SkillController`: `store`/`update` synct
+> Voraussetzungen; BFS-Zyklen-Prüfung in `hasCycle()` lehnt direkte und transitive
+> Kreisbezüge mit 422 ab. Tests: `SkillPrerequisiteTest` (9).
 
 ### SKILL-06 · Voraussetzungen beim Lernen prüfen · ⏱ 3h · 🔲
 **Beschreibung:** Eine Fertigkeit ist nur lernbar, wenn ihre Voraussetzungen

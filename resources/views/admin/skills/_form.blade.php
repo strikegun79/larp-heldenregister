@@ -78,6 +78,26 @@
             @endforeach
         </div>
     </div>
+
+    <div>
+        <span class="block font-medium text-stone-700 mb-2">Voraussetzungen (muss der Held bereits können)</span>
+        @forelse ($allSkills->groupBy(fn ($s) => $s->heroClass?->name ?? 'Ohne Klasse') as $className => $classSkills)
+            <div class="mb-3">
+                <div class="text-xs font-semibold text-stone-500 uppercase tracking-wide mb-1">{{ $className }}</div>
+                <div class="grid grid-cols-2 sm:grid-cols-3 gap-1">
+                    @foreach ($classSkills as $s)
+                        <label class="flex items-center gap-2 text-stone-700 text-sm">
+                            <input type="checkbox" name="prerequisites[]" value="{{ $s->id }}"
+                                   @checked(in_array($s->id, old('prerequisites', $assignedPrerequisites)))>
+                            {{ $s->name }} (Lv.{{ $s->level }})
+                        </label>
+                    @endforeach
+                </div>
+            </div>
+        @empty
+            <p class="text-sm text-stone-500">Noch keine anderen Fertigkeiten vorhanden.</p>
+        @endforelse
+    </div>
 </form>
 
 <div data-modal-actions hidden>

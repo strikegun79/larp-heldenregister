@@ -52,6 +52,7 @@ class SkillController extends Controller
 
         $skill = Skill::create($data);
         $skill->classes()->sync($request->input('classes', []));
+        $skill->prerequisites()->sync($request->input('prerequisites', []));
 
         return $this->respond($request, 'Fertigkeit wurde angelegt.');
     }
@@ -67,8 +68,19 @@ class SkillController extends Controller
 
     public function update(Request $request, Skill $skill): RedirectResponse|JsonResponse
     {
+        $prerequisiteIds = array_filter(array_map('intval', $request->input('prerequisites', [])));
+
+        if ($this->hasCycle($skill->id, $prerequisiteIds)) {
+            $msg = 'Voraussetzungen würden einen Kreisbezug erzeugen.';
+
+            return $request->expectsJson()
+                ? response()->json(['message' => $msg], 422)
+                : back()->withInput()->with('error', $msg);
+        }
+
         $skill->update($this->validated($request));
         $skill->classes()->sync($request->input('classes', []));
+        $skill->prerequisites()->sync($prerequisiteIds);
 
         return $this->respond($request, 'Fertigkeit wurde aktualisiert.');
     }
@@ -91,12 +103,45 @@ class SkillController extends Controller
 
     private function formData(Skill $skill): array
     {
+        $allSkills = Skill::with('heroClass')
+            ->orderBy('hero_class_id')
+            ->orderBy('level')
+            ->orderBy('name')
+            ->when($skill->exists, fn ($q) => $q->where('id', '!=', $skill->id))
+            ->get();
+
         return [
             'skill' => $skill,
             'heroClasses' => HeroClass::where('disabled', false)->orderBy('name')->get(),
             'perlColors' => PerlColor::orderBy('name')->get(),
             'assigned' => $skill->exists ? $skill->classes->pluck('id')->all() : [],
+            'allSkills' => $allSkills,
+            'assignedPrerequisites' => $skill->exists ? $skill->prerequisites->pluck('id')->all() : [],
         ];
+    }
+
+    /**
+     * BFS-Zyklen-Prüfung: ergibt true, wenn eine der $prerequisiteIds über ihre
+     * transitive Voraussetzungskette wieder zu $skillId führt.
+     */
+    private function hasCycle(int $skillId, array $prerequisiteIds): bool
+    {
+        $visited = [];
+        $queue = $prerequisiteIds;
+
+        while ($current = array_shift($queue)) {
+            if ($current === $skillId) {
+                return true;
+            }
+            if (isset($visited[$current])) {
+                continue;
+            }
+            $visited[$current] = true;
+            $next = Skill::find($current)?->prerequisites()->pluck('skills.id')->all() ?? [];
+            array_push($queue, ...$next);
+        }
+
+        return false;
     }
 
     private function validated(Request $request): array

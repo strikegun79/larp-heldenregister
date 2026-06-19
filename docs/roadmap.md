@@ -137,3 +137,4 @@ Die spielerseitigen Vision-Funktionen.
 | [data-migration](backlog/data-migration.md) | ETL/Legacy | ETL |
 | [infrastructure](backlog/infrastructure.md) | Betrieb/CI/Deploy | INFRA |
 | [quality-testing](backlog/quality-testing.md) | Tests/Qualität | QA |
+| [anforderungen] (backlog/anforderungen.md) | Anforderungen vom Vorstand | REQ |

@@ -1,8 +1,8 @@
-# Backlog · Anforderungen aus Sicht des Vorstands und ORGA (ORGA)
+# Backlog · Anforderungen aus Sicht des Vorstands und REG (REG)
 
 ## Offen (🔲)
 
-### ORGA-01 ✅
+### REG-01 ✅
 **Beschreibung:** Erste Anpassung zur Eltern-Kind Anpassung
 **Akzeptanzkriterien:**
 - [x] Validierungslogik
