@@ -24,7 +24,7 @@
                     @foreach ([
                         ['Spieler', $metrics['players']],
                         ['Helden', $metrics['heroes']],
-                        ['Kommende Events', $metrics['upcoming_events']],
+                        ['Kommende Abenteuer', $metrics['upcoming_events']],
                         ['Offene Anmeldungen', $metrics['open_bookings']],
                     ] as [$label, $value])
                         <div class="bg-white/70 border-2 border-[#5a3a22]/40 rounded-lg p-4 text-center">
@@ -40,7 +40,7 @@
                 <a href="{{ route('profile.edit') }}"
                    class="group block rounded-lg overflow-hidden border-2 border-[#5a3a22]/40 bg-white/60 shadow hover:shadow-xl hover:-translate-y-1 transition">
                     <div class="h-44 overflow-hidden">
-                        <img src="/images/dein_profil.jpg" alt="" class="w-full h-full object-cover group-hover:scale-105 transition">
+                        <img src="/images/dein_profil.jpg" alt="" aria-hidden="true" loading="lazy" width="400" height="176" class="w-full h-full object-cover group-hover:scale-105 transition">
                     </div>
                     <div class="p-4 text-center">
                         <div class="font-uncial text-lg text-waldritter">Dein Profil</div>
@@ -53,7 +53,7 @@
                     <a href="{{ route('heroes.index') }}"
                        class="group block rounded-lg overflow-hidden border-2 border-[#5a3a22]/40 bg-white/60 shadow hover:shadow-xl hover:-translate-y-1 transition">
                         <div class="h-44 overflow-hidden">
-                            <img src="/images/heroes_db.jpg" alt="" class="w-full h-full object-cover group-hover:scale-105 transition">
+                            <img src="/images/heroes_db.jpg" alt="" aria-hidden="true" loading="lazy" width="400" height="176" class="w-full h-full object-cover group-hover:scale-105 transition">
                         </div>
                         <div class="p-4 text-center">
                             <div class="font-uncial text-lg text-waldritter">Heldenregister</div>
@@ -67,7 +67,7 @@
                     <a href="{{ route('adventures.index') }}"
                        class="group block rounded-lg overflow-hidden border-2 border-[#5a3a22]/40 bg-white/60 shadow hover:shadow-xl hover:-translate-y-1 transition">
                         <div class="h-44 overflow-hidden">
-                            <img src="/images/abenteuer_v2.jpg" alt="" class="w-full h-full object-cover group-hover:scale-105 transition">
+                            <img src="/images/abenteuer_v2.jpg" alt="" aria-hidden="true" loading="lazy" width="400" height="176" class="w-full h-full object-cover group-hover:scale-105 transition">
                         </div>
                         <div class="p-4 text-center">
                             <div class="font-uncial text-lg text-waldritter">Abenteuer</div>
@@ -80,7 +80,7 @@
                 <a href="{{ route('players.index') }}"
                    class="group block rounded-lg overflow-hidden border-2 border-[#5a3a22]/40 bg-white/60 shadow hover:shadow-xl hover:-translate-y-1 transition">
                     <div class="h-44 overflow-hidden">
-                        <img src="/images/heldenarchiv.jpg" alt="" class="w-full h-full object-cover group-hover:scale-105 transition">
+                        <img src="/images/heldenarchiv.jpg" alt="" aria-hidden="true" loading="lazy" width="400" height="176" class="w-full h-full object-cover group-hover:scale-105 transition">
                     </div>
                     <div class="p-4 text-center">
                         <div class="font-uncial text-lg text-waldritter">Deine Spieler</div>
@@ -93,7 +93,7 @@
                     <a href="{{ route('admin.index') }}"
                        class="group block rounded-lg overflow-hidden border-2 border-[#5a3a22]/40 bg-white/60 shadow hover:shadow-xl hover:-translate-y-1 transition">
                         <div class="h-44 overflow-hidden">
-                            <img src="/images/administration.jpg" alt="" class="w-full h-full object-cover group-hover:scale-105 transition">
+                            <img src="/images/administration.jpg" alt="" aria-hidden="true" loading="lazy" width="400" height="176" class="w-full h-full object-cover group-hover:scale-105 transition">
                         </div>
                         <div class="p-4 text-center">
                             <div class="font-uncial text-lg text-waldritter">Verwaltung</div>
