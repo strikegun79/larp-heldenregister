@@ -316,3 +316,115 @@ Klick-außerhalb). Touch-Nutzer verlieren leicht die Orientierung.
       `closable: false` → `true` für `#app-modal-2` (Außenklick schließt nun auch).
 **Betroffene Seiten/Routen:** `layouts/app.blade.php`, `players/_detail.blade.php`,
 `heroes/_detail.blade.php`, `adventures/_manage.blade.php`
+
+## Mobile-Modal-Review 2026-06 (🔲)
+
+> Gezielte Prüfung des Modal-Systems auf Mobil (Auslöser: „Abenteuer-Modal auf
+> Mobile nicht vollständig sichtbar"). Ergänzt — dupliziert NICHT — die bereits
+> erledigten UI-08 (Mobile-Feinschliff) und UI-25 (gestapelte Modals/Tabs). Die
+> folgenden Tickets adressieren konkrete, dort noch nicht behandelte Teilaspekte.
+> Priorität: P1 = kritisch, P2 = wichtig, P3 = nice-to-have. **Lösungshinweise
+> sind nur Vorschläge — kein Code in diesem Review geändert.**
+
+### UI-26 · [P1] Modal-Footer mit vielen Buttons umbruchfähig machen · ⏱ 2h · ✅
+**Beschreibung:** Die projekteigene Regel `#app-modal-actions { display: flex;
+align-items: center; gap: .5rem }` (`public/css/heldenregister.css`) besitzt **kein
+`flex-wrap`**. Im Abenteuer-Detail-Modal (`adventures/_detail.blade.php`) stehen je
+nach Rolle bis zu vier Aktions-Buttons plus den automatisch ergänzten
+„Schließen"-Button im Footer (Anmelden · Gast anmelden · Teamer-Anmeldung ·
+Verwalten · Schließen). Auf Screens < ~400 px werden diese Buttons in eine einzige,
+nicht umbrechende Zeile gequetscht und laufen seitlich aus dem sichtbaren Bereich —
+das ist die direkte Ursache des gemeldeten „nicht vollständig sichtbar". Fomantics
+eigener mobiler Button-Umbruch (`.actions > .button { margin-bottom: 1rem }`) greift
+nicht, weil die `display:flex`-Regel ihn aushebelt. `.deny { margin-left: auto }`
+verschärft das Quetschen zusätzlich.
+**Nutzen:** Alle Touch-Nutzer (Eltern/Kinder am Handy) erreichen jede Aktion des
+zentralen Anmelde-Flows zuverlässig; kein horizontales Überlaufen mehr.
+**Lösungshinweis (nicht umsetzen, nur Vorschlag):** `flex-wrap: wrap` ergänzen;
+auf < 768 px ggf. `width: 100%` + ausreichende Tap-Höhe (≥ 44 px) je Button und
+„Schließen" nach unten umbrechen lassen. `margin-left:auto` der `.deny` auf Mobil
+zurücknehmen, damit nicht künstlich Platz erzwungen wird.
+**Akzeptanzkriterien:**
+- [x] Footer-Buttons brechen auf schmalen Screens (320–400 px) um, statt zu überlaufen.
+- [x] Jeder Button bleibt vollständig sichtbar und antippbar (Tap-Ziel ≥ 44 px Höhe).
+- [x] „Schließen" bleibt eindeutig auffindbar (z. B. als letztes Element / volle Breite).
+- [x] Verhalten in `#app-modal` UND `#app-modal-2` gleich (siehe UI-27).
+**Betroffene Seiten/Routen:** `public/css/heldenregister.css` (`#app-modal-actions`),
+`adventures/_detail.blade.php`, `adventures/_manage.blade.php`, `heroes/_detail.blade.php`
+
+### UI-27 · [P2] Footer-Layout für gestapeltes Modal (#app-modal-2) angleichen · ⏱ 1h · ✅
+**Beschreibung:** Die Flex-/Abstands-Regel existiert nur für `#app-modal-actions`.
+Der Footer des gestapelten Modals (`#app-modal-2-actions`) hat **keine eigene
+Regel** und erbt weder das Flex-Layout noch `.deny { margin-left: auto }`. Dadurch
+sind Footer von Haupt- und gestapeltem Modal optisch und im Umbruchverhalten
+unterschiedlich. Gestapelte Modals tragen u. a. den Anmelde-/Gast-Anmelde- und
+Teamer-Anmelde-Flow sowie „Buchung bearbeiten" — also genau die Eltern-Flows.
+**Nutzen:** Konsistente, vorhersehbare Bedienung über beide Modal-Ebenen; der
+Umbruch-Fix aus UI-26 wirkt auch im gestapelten Modal.
+**Lösungshinweis:** `#app-modal-2-actions` in dieselbe (umbruchfähige) Regel
+aufnehmen, z. B. Selektor `#app-modal-actions, #app-modal-2-actions { … }`.
+**Akzeptanzkriterien:**
+- [x] `#app-modal-2-actions` nutzt dasselbe Flex-/Wrap-/Abstands-Layout wie `#app-modal-actions`.
+- [x] „Schließen"-Position und Tap-Größen sind in beiden Modal-Ebenen identisch.
+**Betroffene Seiten/Routen:** `public/css/heldenregister.css`, `layouts/app.blade.php`
+
+### UI-28 · [P2] Vertikale Sichtbarkeit langer Modals auf Mobil sichern · ⏱ 3h · 🔲
+**Beschreibung:** Fomantic positioniert Modals mit `position: absolute` + `top`
+(mobil `top: .5rem; margin: 0 auto`), nicht `fixed`/vertikal zentriert. Bei langem
+Inhalt — z. B. Verwaltungs-Modal mit `min-height: min(820px, 60vh)` plus mehreren
+Tabs (`adventures/_manage.blade.php`) oder Helden-Detail (`modal-hero`) — kann der
+Modal-Kopf bei gescrolltem Hintergrund über den oberen Viewport-Rand wandern; der
+Titel/obere Bereich wirkt dann „abgeschnitten". Der scrollende Inhaltsbereich
+(`.scrolling.content`) ist zwar auf `max-height: calc(80vh - 10rem)` gedeckelt,
+aber die erzwungene `min-height` der Detail-Modals kann dem entgegenwirken.
+**Nutzen:** Modal-Titel und obere Inhalte bleiben auf Smartphones immer sichtbar;
+kein „Verlust" des oberen Modal-Bereichs beim Öffnen.
+**Lösungshinweis (zu prüfen):** Auf < 768 px die Detail-Modal-`min-height`
+(`modal-hero`/`modal-event` `.scrolling.content`) reduzieren oder entfernen, damit
+Fomantics 80vh-Deckel greift; alternativ Voll-Höhen-Modal (`top:.5rem; bottom:.5rem`)
+mit innerem Scroll. Real auf iOS Safari + Android Chrome verifizieren (Adressleisten-
+Kollaps, `100vh`-Problematik → ggf. `dvh`).
+**Akzeptanzkriterien:**
+- [ ] Beim Öffnen jedes Modals ist der Titel/Header sofort vollständig sichtbar (320×568 bis 414×896).
+- [ ] Langer Inhalt ist vollständig im Modal-Body scrollbar erreichbar; nichts wird abgeschnitten.
+- [ ] Verhalten auf iOS Safari und Android Chrome geprüft.
+**Betroffene Seiten/Routen:** `public/css/heldenregister.css` (`modal-hero`/`modal-event`),
+`adventures/_manage.blade.php`, `heroes/_detail.blade.php`, `layouts/app.blade.php`
+
+### UI-29 · [P2] Breite Tabellen in Modalen mobil bedienbar (Anmeldungen, Check-in, EP) · ⏱ 3h · 🔲
+**Beschreibung:** Modal-Inhalte enthalten breite Tabellen: `adventures/_bookings.blade.php`
+(7 Spalten + Aktionsleiste mit bis zu 5 Icon-Buttons), `adventures/_checkin.blade.php`
+(4 Spalten + Check-in/Abmelden/auschecken), `heroes/_detail.blade.php` EP-Verlauf
+(`inline fields` Formular). Sie liegen in `overflow-x-auto`-Wrappern (gut), aber im
+ohnehin schmalen Modal-Body auf dem Handy entsteht doppeltes/verschachteltes
+Horizontal-Scrollen, und Icon-Only-Aktionen (nur `data-tooltip`, kein sichtbares
+Label) sind auf Touch kaum erschließbar (Tooltips erscheinen erst bei Hover).
+**Nutzen:** Spielleitungen/Admins können Anmeldungen und Check-in auch am Handy/Tablet
+am Veranstaltungsort bedienen; Aktionen sind ohne Hover verständlich.
+**Lösungshinweis:** Auf < sm Karten-/Stack-Darstellung je Zeile (wie UI-19 in den
+Index-Listen), Aktions-Icons mit sichtbarem Kurzlabel oder größeren Tap-Zielen.
+**Akzeptanzkriterien:**
+- [ ] Anmeldungs- und Check-in-Tabelle auf < sm ohne erzwungenes Quer-Scrollen nutzbar.
+- [ ] Aktions-Buttons auf Touch ohne Hover-Tooltip verständlich (Label oder größere Ziele).
+- [ ] EP-Verlauf-Eingabe (`inline fields`) bricht auf Mobil sauber um.
+**Betroffene Seiten/Routen:** `adventures/_bookings.blade.php`, `adventures/_checkin.blade.php`,
+`heroes/_detail.blade.php`, `adventures/_teamer_nsc_tab.blade.php`
+
+### UI-30 · [P3] Footer-Buttons als einheitliche `<button>`-Elemente · ⏱ 1h · 🔲
+**Beschreibung:** Footer-Aktionen sind teils `<a class="ui button" data-modal-stack>`
+(Anmelden/Gast/Teamer/Verwalten in `adventures/_detail.blade.php`,
+`heroes/_detail.blade.php`), teils `<button type="submit">`. Links und Buttons
+verhalten sich bei Tastatur/Touch leicht unterschiedlich (z. B. Space-Taste,
+Default-Fokusring) und das Mischmasch erschwert ein einheitliches Umbruch-/
+Tap-Größen-Styling (UI-26).
+**Nutzen:** Einheitliche Bedienbarkeit und konsistentes Styling aller Footer-Aktionen.
+**Lösungshinweis:** Wo keine echte Navigation nötig ist, `<button type="button">`
+mit dem `data-modal-stack`/`data-modal-url`-Attribut verwenden (Handler reagiert
+bereits auf beliebige Elemente). Reine Downloads/Neue-Tab-Links (`target="_blank"`,
+PDF/CSV) bleiben `<a>`.
+**Akzeptanzkriterien:**
+- [ ] Footer-Aktionen, die Modals öffnen, sind `<button>` mit gleichem Styling.
+- [ ] Tastaturauslösung (Enter/Space) und Fokusring für alle Footer-Aktionen gleich.
+- [ ] Download-/Neuer-Tab-Aktionen bleiben semantisch `<a>`.
+**Betroffene Seiten/Routen:** `adventures/_detail.blade.php`, `heroes/_detail.blade.php`,
+`adventures/_manage.blade.php`

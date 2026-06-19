@@ -154,12 +154,33 @@
     }
 }
 
-/* Modal-Footer (ADV-16): Primäraktionen links, „Schließen" stets ganz rechts. */
-#app-modal-actions {
+/* UI-26/UI-27: Modal-Footer beide Ebenen — Primäraktionen links, „Schließen" rechts. */
+#app-modal-actions,
+#app-modal-2-actions {
     display: flex;
     align-items: center;
+    flex-wrap: wrap;
     gap: 0.5rem;
 }
-#app-modal-actions .deny {
+#app-modal-actions .deny,
+#app-modal-2-actions .deny {
     margin-left: auto;
+}
+
+/* UI-26: Auf Mobilgeräten umbrechen Buttons vollbreit, kein margin-left-auto-Quetschen. */
+@media (max-width: 767px) {
+    #app-modal-actions,
+    #app-modal-2-actions {
+        flex-direction: column;
+        align-items: stretch;
+    }
+    #app-modal-actions .deny,
+    #app-modal-2-actions .deny {
+        margin-left: 0;
+    }
+    #app-modal-actions .button,
+    #app-modal-2-actions .button {
+        min-height: 44px;
+        justify-content: center;
+    }
 }
