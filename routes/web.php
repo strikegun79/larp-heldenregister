@@ -265,7 +265,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::patch('adventures/{adventure}/teamer-signup/{signup}/reject', [\App\Http\Controllers\TeamerSignupController::class, 'reject'])
         ->name('adventures.teamer.reject');
 
-    // Gruppen-CRUD (GRP-02): eigene Berechtigung groups.manage (Admin, Bürokrat, Spielleiter).
+    // Gruppen-CRUD (GRP-02) + Mitglieder (GRP-03): Berechtigung groups.manage.
     Route::prefix('admin')->name('admin.')->middleware('can:groups.manage')->group(function () {
         Route::get('groups', [Admin\GroupController::class, 'index'])->name('groups.index');
         Route::get('groups/create', [Admin\GroupController::class, 'create'])->name('groups.create');
@@ -273,6 +273,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('groups/{group}/edit', [Admin\GroupController::class, 'edit'])->name('groups.edit');
         Route::put('groups/{group}', [Admin\GroupController::class, 'update'])->name('groups.update');
         Route::delete('groups/{group}', [Admin\GroupController::class, 'destroy'])->name('groups.destroy');
+        // GRP-03: Mitglieder verwalten.
+        Route::get('groups/{group}/members', [Admin\GroupMemberController::class, 'index'])->name('groups.members');
+        Route::post('groups/{group}/members', [Admin\GroupMemberController::class, 'store'])->name('groups.members.store');
+        Route::delete('groups/{group}/members/{hero}', [Admin\GroupMemberController::class, 'destroy'])->name('groups.members.destroy');
     });
 });
 

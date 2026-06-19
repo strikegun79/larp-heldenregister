@@ -31,6 +31,9 @@
                                 <td class="px-6 py-4">{{ $group->heroes_count }}</td>
                                 <td class="px-6 py-4 text-right">
                                     <div class="flex items-center justify-end gap-3">
+                                        <a href="{{ route('admin.groups.members', $group) }}"
+                                           data-modal-url="{{ route('admin.groups.members', $group) }}"
+                                           class="text-waldritter hover:underline">Mitglieder</a>
                                         <a href="{{ route('admin.groups.edit', $group) }}"
                                            data-modal-url="{{ route('admin.groups.edit', $group) }}"
                                            class="text-waldritter hover:underline">Bearbeiten</a>

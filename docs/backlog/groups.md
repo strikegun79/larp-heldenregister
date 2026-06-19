@@ -21,13 +21,13 @@ neues Datenmodell.
 - [x] 12 Tests (CRUD, Zugriffsschutz, AJAX-Formular, Cascade).
 **Abhängig von:** GRP-01.
 
-### GRP-03 · Mitglieder verwalten · ⏱ 3h · 🔲
+### GRP-03 · Mitglieder verwalten · ⏱ 3h · ✅
 **Beschreibung:** Helden/Spieler einer Gruppe zuordnen/entfernen, Rolle in der
 Gruppe (z. B. Anführer) optional.
 **Akzeptanzkriterien:**
-- [ ] Mitglieder hinzufügen/entfernen über Modal.
-- [ ] Optional Gruppenrolle (Anführer/Mitglied).
-- [ ] Tests.
+- [x] Mitglieder hinzufügen/entfernen über Modal.
+- [x] Optional Gruppenrolle (Anführer/Mitglied).
+- [x] Tests.
 **Abhängig von:** GRP-01.
 
 ### GRP-04 · Gruppenansicht (Mitglieder, Helden) · ⏱ 3h · 🔲
