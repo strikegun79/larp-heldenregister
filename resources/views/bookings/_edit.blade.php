@@ -15,11 +15,21 @@
         </select>
     </div>
 
-    <div class="grid grid-cols-2 gap-2 my-2">
-        @foreach (['fotoerlaubnis' => 'Fotoerlaubnis', 'vegetarier' => 'Vegetarier', 'leih_tunika' => 'Leih-Tunika', 'leih_waffe' => 'Leih-Waffe', 'nsc' => 'NSC'] as $field => $label)
-            <label class="flex items-center gap-2"><input type="checkbox" name="{{ $field }}" value="1" @checked($booking->$field)> {{ $label }}</label>
-        @endforeach
-    </div>
+    <fieldset class="border border-stone-200 rounded p-3 mb-3">
+        <legend class="text-sm font-medium text-stone-600 px-1">Optionale Angaben</legend>
+        <div class="grid grid-cols-2 gap-2">
+            <label class="flex items-center gap-2"><input type="checkbox" name="fotoerlaubnis" value="1" @checked($booking->fotoerlaubnis)> Fotoerlaubnis</label>
+            <label class="flex items-center gap-2"><input type="checkbox" name="vegetarier" value="1" @checked($booking->vegetarier)> Vegetarier</label>
+            <label class="flex items-center gap-2"><input type="checkbox" name="leih_tunika" value="1" @checked($booking->leih_tunika)> Leih-Tunika</label>
+            <label class="flex items-center gap-2"><input type="checkbox" name="leih_waffe" value="1" @checked($booking->leih_waffe)> Leih-Waffe</label>
+            <label class="flex items-center gap-2">
+                <input type="checkbox" name="nsc" value="1" @checked($booking->nsc)> NSC
+                <span class="text-stone-400 text-xs cursor-help"
+                      data-tooltip="Non-Spieler-Charakter: Dein Kind übernimmt eine Statistenrolle statt als eigener Held zu spielen."
+                      data-position="top center">(?)</span>
+            </label>
+        </div>
+    </fieldset>
 
     <div class="field">
         <label>Allergien</label>

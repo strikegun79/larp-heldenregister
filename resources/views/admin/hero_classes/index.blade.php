@@ -10,6 +10,7 @@
             </div>
 
             <div class="bg-white/70 border-2 border-[#5a3a22]/40 shadow sm:rounded-lg overflow-hidden">
+                <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-stone-200">
                     <thead class="bg-black/5">
                         <tr>
@@ -36,7 +37,7 @@
                                     @endif
                                 </td>
                                 <td class="px-6 py-4 text-right">
-                                    <a href="{{ route('admin.hero-classes.edit', $class) }}" data-modal-url="{{ route('admin.hero-classes.edit', $class) }}" class="text-indigo-700 hover:underline">Bearbeiten</a>
+                                    <a href="{{ route('admin.hero-classes.edit', $class) }}" data-modal-url="{{ route('admin.hero-classes.edit', $class) }}" class="text-waldritter hover:underline">Bearbeiten</a>
                                 </td>
                             </tr>
                         @empty
@@ -44,6 +45,7 @@
                         @endforelse
                     </tbody>
                 </table>
+                </div>
             </div>
 
             <br>

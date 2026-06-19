@@ -1,7 +1,7 @@
 <span data-modal-title hidden>{{ $adventure->name }}</span>
 
 <div class="ui top attached tabular menu">
-    <a class="item active" data-tab="event">Event</a>
+    <a class="item active" data-tab="event">Abenteuer</a>
     <a class="item" data-tab="bookings">Anmeldungen</a>
     @can('manage-attendance')
         <a class="item" data-tab="teamer">Teamer ({{ $teamerSignups->count() }})</a>
@@ -23,7 +23,7 @@
             <div><dt class="text-sm text-stone-500">Funktions-E-Mail</dt><dd><a href="mailto:{{ $adventure->function_email }}" class="text-waldritter hover:underline">{{ $adventure->function_email }}</a></dd></div>
         @endif
         <div><dt class="text-sm text-stone-500">Spielleiter</dt><dd>{{ $adventure->gamemaster ? trim("{$adventure->gamemaster->name} {$adventure->gamemaster->lastname}") : '—' }}</dd></div>
-        <div><dt class="text-sm text-stone-500">Eventleiter</dt><dd>{{ $adventure->eventleader ? trim("{$adventure->eventleader->name} {$adventure->eventleader->lastname}") : '—' }}</dd></div>
+        <div><dt class="text-sm text-stone-500">Veranstaltungsleiter</dt><dd>{{ $adventure->eventleader ? trim("{$adventure->eventleader->name} {$adventure->eventleader->lastname}") : '—' }}</dd></div>
     </dl>
 </div>
 
@@ -47,7 +47,7 @@
                class="ui primary button">Anmelden</a>
             <a href="{{ route('adventures.bookings.create-guest', $adventure) }}"
                data-modal-stack="{{ route('adventures.bookings.create-guest', $adventure) }}"
-               class="ui button" title="Für Gäste werden keine EP gesammelt">GAST-Anmeldung</a>
+               class="ui button" title="Für Gäste werden keine EP gesammelt">Gast anmelden</a>
         @endif
     @endcan
     @if (auth()->user()->hasAnyRole('teamer', 'lehrmeister') && $myTeamerSignup === null)

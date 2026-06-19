@@ -6,6 +6,7 @@
     <div class="py-12">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="bg-white/70 border-2 border-[#5a3a22]/40 shadow sm:rounded-lg overflow-hidden">
+                <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-stone-200">
                     <thead class="bg-black/5">
                         <tr>
@@ -36,6 +37,7 @@
                         @endforeach
                     </tbody>
                 </table>
+                </div>
             </div>
 
             <div class="mt-6">

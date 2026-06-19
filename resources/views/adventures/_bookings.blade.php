@@ -85,7 +85,7 @@
                         @endcan
                         @can('adventure.cancel')
                             <form method="POST" action="{{ route('adventures.bookings.destroy', [$adventure, $booking]) }}"
-                                  data-refresh-modal onsubmit="return confirm('Anmeldung stornieren?');">
+                                  data-refresh-modal data-confirm="Anmeldung stornieren?">
                                 @csrf @method('DELETE')
                                 <button type="submit" class="ui mini icon button red" data-tooltip="Stornieren" data-position="top center">
                                     <i class="times icon"></i>

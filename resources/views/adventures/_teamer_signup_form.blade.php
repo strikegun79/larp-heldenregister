@@ -1,6 +1,6 @@
 <span data-modal-title hidden>Teamer-Anmeldung · {{ $adventure->name }}</span>
 
-<form data-stack-close method="POST" action="{{ route('adventures.teamer.store', $adventure) }}" class="ui form">
+<form id="teamer-signup-form" data-stack-close method="POST" action="{{ route('adventures.teamer.store', $adventure) }}" class="ui form">
     @csrf
 
     <div class="field">
@@ -39,5 +39,8 @@
         </label>
     </div>
 
-    <button type="submit" class="ui primary button">Als Teamer anmelden</button>
 </form>
+
+<div data-modal-actions hidden>
+    <button type="submit" form="teamer-signup-form" class="ui primary button">Als Teamer anmelden</button>
+</div>

@@ -15,7 +15,7 @@
                     <p>{{ session('warning') }}</p>
                     @if (session('force_delete_id'))
                         <form method="POST" action="{{ route('admin.players.destroy', session('force_delete_id')) }}"
-                              class="mt-2" onsubmit="return confirm('Spieler trotzdem loeschen?');">
+                              class="mt-2" data-confirm="Spieler wirklich trotzdem löschen?">
                             @csrf @method('DELETE')
                             <input type="hidden" name="force" value="1">
                             <button type="submit" class="ui mini red button">Trotzdem löschen</button>
@@ -38,6 +38,7 @@
             </form>
 
             <div class="bg-white/70 border-2 border-[#5a3a22]/40 shadow sm:rounded-lg overflow-hidden">
+                <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-stone-200">
                     <thead class="bg-black/5">
                         <tr>
@@ -101,17 +102,17 @@
                                         @else
                                             <a href="{{ route('admin.players.edit', $player) }}"
                                                data-modal-url="{{ route('admin.players.edit', $player) }}"
-                                               class="text-indigo-700 hover:underline"
+                                               class="text-waldritter hover:underline"
                                                title="{{ $player->address_same_as_guardian ? 'Elternanschrift' : 'Abweichende Anschrift' }}">
                                                 Anschrift{{ $player->address_same_as_guardian ? '' : ' *' }}
                                             </a>
                                             <a href="{{ route('admin.players.caretakers', $player) }}"
                                                data-modal-url="{{ route('admin.players.caretakers', $player) }}"
-                                               class="text-indigo-700 hover:underline">Betreuer</a>
+                                               class="text-waldritter hover:underline">Betreuer</a>
                                             <a href="{{ route('admin.players.matrix.edit', $player) }}"
-                                               class="text-indigo-700 hover:underline">Matrix</a>
+                                               class="text-waldritter hover:underline">Matrix</a>
                                             <form method="POST" action="{{ route('admin.players.destroy', $player->id) }}"
-                                                  onsubmit="return confirm('Spieler loeschen?');">
+                                                  data-confirm="Spieler löschen?">
                                                 @csrf @method('DELETE')
                                                 <button type="submit" class="ui mini red icon button"
                                                         data-tooltip="Löschen" data-position="top center">
@@ -125,6 +126,7 @@
                         @endforeach
                     </tbody>
                 </table>
+                </div>
             </div>
 
             <div class="mt-4">{{ $players->links() }}</div>

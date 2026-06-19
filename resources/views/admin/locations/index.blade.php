@@ -10,6 +10,7 @@
             </div>
 
             <div class="bg-white/70 border-2 border-[#5a3a22]/40 shadow sm:rounded-lg overflow-hidden">
+                <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-stone-200">
                     <thead class="bg-black/5">
                         <tr>
@@ -29,9 +30,9 @@
                                 <td class="px-6 py-4">{{ $location->adventures_count }}</td>
                                 <td class="px-6 py-4 text-right">
                                     <div class="flex items-center justify-end gap-3">
-                                        <a href="{{ route('admin.locations.edit', $location) }}" data-modal-url="{{ route('admin.locations.edit', $location) }}" class="text-indigo-700 hover:underline">Bearbeiten</a>
+                                        <a href="{{ route('admin.locations.edit', $location) }}" data-modal-url="{{ route('admin.locations.edit', $location) }}" class="text-waldritter hover:underline">Bearbeiten</a>
                                         <form method="POST" action="{{ route('admin.locations.destroy', $location) }}"
-                                              onsubmit="return confirm('Ort „{{ $location->titel }}“ löschen?{{ $location->adventures_count ? ' '.$location->adventures_count.' Event(s) verlieren den Ort.' : '' }}');">
+                                              data-confirm="Ort „{{ $location->titel }}” löschen?{{ $location->adventures_count ? ' '.$location->adventures_count.' Abenteuer verlieren den Ort.' : '' }}">
                                             @csrf @method('DELETE')
                                             <button type="submit" class="text-red-600 hover:underline">Löschen</button>
                                         </form>
@@ -43,6 +44,7 @@
                         @endforelse
                     </tbody>
                 </table>
+                </div>
             </div>
 
             <br>

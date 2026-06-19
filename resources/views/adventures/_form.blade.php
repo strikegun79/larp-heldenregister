@@ -1,6 +1,6 @@
 @csrf
 @php
-    $selectClass = 'mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm';
+    $selectClass = 'mt-1 block w-full border-gray-300 focus:border-amber-600 focus:ring-amber-600 rounded-md shadow-sm';
 @endphp
 <div class="space-y-6">
     <div>
@@ -94,7 +94,7 @@
             </select>
         </div>
         <div>
-            <x-input-label for="eventleader_id" value="Eventleiter" />
+            <x-input-label for="eventleader_id" value="Veranstaltungsleiter" />
             <select id="eventleader_id" name="eventleader_id" class="{{ $selectClass }}">
                 <option value="">— keine(r) —</option>
                 @foreach ($eligibleUsers as $u)
@@ -127,7 +127,7 @@
     @unless($inModal ?? false)
     <div class="flex items-center gap-4">
         <x-primary-button>Speichern</x-primary-button>
-        <a href="{{ route('adventures.index') }}" class="text-sm text-gray-600 dark:text-gray-400 hover:underline">Abbrechen</a>
+        <a href="{{ route('adventures.index') }}" class="text-sm text-gray-600 hover:underline">Abbrechen</a>
     </div>
     @endunless
 </div>

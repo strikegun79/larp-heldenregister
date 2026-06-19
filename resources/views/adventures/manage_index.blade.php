@@ -14,6 +14,7 @@
 
 
             <div class="bg-white/70 border-2 border-[#5a3a22]/40 shadow sm:rounded-lg overflow-hidden">
+                <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-stone-200">
                     <thead class="bg-black/5">
                         <tr>
@@ -33,10 +34,10 @@
                                 <td class="px-6 py-4">{{ $adventure->confirmed_bookings_count }} / {{ $adventure->max_player }}</td>
                                 <td class="px-6 py-4 text-right">
                                     <div class="flex items-center justify-end gap-3">
-                                        <a href="{{ route('adventures.manage', $adventure) }}" data-modal-url="{{ route('adventures.manage', $adventure) }}" class="text-indigo-700 hover:underline">Verwalten</a>
+                                        <a href="{{ route('adventures.manage', $adventure) }}" data-modal-url="{{ route('adventures.manage', $adventure) }}" class="text-waldritter hover:underline">Verwalten</a>
                                         @if ($adventure->event_status_id !== \App\Models\EventStatus::CANCELLED && $adventure->canTransitionTo(\App\Models\EventStatus::CANCELLED))
                                             <form method="POST" action="{{ route('adventures.cancel', $adventure) }}"
-                                                  onsubmit="return confirm('Event „{{ $adventure->name }}“ wirklich absagen?');">
+                                                  data-confirm="Abenteuer „{{ $adventure->name }}” wirklich absagen?">
                                                 @csrf @method('PATCH')
                                                 <button type="submit" class="text-red-600 hover:underline">Absagen</button>
                                             </form>
@@ -49,6 +50,7 @@
                         @endforelse
                     </tbody>
                 </table>
+                </div>
             </div>
             <br>
             <a href="{{ route('admin.index') }}">

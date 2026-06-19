@@ -19,7 +19,7 @@
                 <tr>
                     <td>{{ $signup->user->name }} {{ $signup->user->lastname }}</td>
                     <td>
-                        @can('adventure.modify')
+                        @can('events.edit')
                             <form method="POST"
                                   action="{{ route('adventures.teamer.update-role', [$adventure, $signup]) }}"
                                   class="flex items-center gap-2">
@@ -41,7 +41,7 @@
                             @if ($signup->user_id === auth()->id() || auth()->user()->hasAnyRole('project_lead', 'registrar'))
                                 <form method="POST"
                                       action="{{ route('adventures.teamer.destroy', [$adventure, $signup]) }}"
-                                      onsubmit="return confirm('Teamer-Anmeldung stornieren?')">
+                                      data-confirm="Teamer-Anmeldung stornieren?">
                                     @csrf @method('DELETE')
                                     <button type="submit" class="ui mini red button">Stornieren</button>
                                 </form>

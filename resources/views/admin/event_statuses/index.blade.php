@@ -14,6 +14,7 @@
             @endif
 
             <div class="bg-white/70 border-2 border-[#5a3a22]/40 shadow sm:rounded-lg overflow-hidden">
+                <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-stone-200">
                     <thead class="bg-black/5">
                         <tr>
@@ -39,11 +40,11 @@
                                     <div class="flex items-center justify-end gap-3">
                                         <a href="{{ route('admin.event-statuses.edit', $status) }}"
                                            data-modal-url="{{ route('admin.event-statuses.edit', $status) }}"
-                                           class="text-indigo-700 hover:underline">Bearbeiten</a>
+                                           class="text-waldritter hover:underline">Bearbeiten</a>
                                         @if ($status->adventures_count === 0)
                                             <form method="POST"
                                                   action="{{ route('admin.event-statuses.destroy', $status) }}"
-                                                  onsubmit="return confirm('Status „{{ $status->description }}" löschen?');">
+                                                  data-confirm="Status „{{ $status->description }}" löschen?">
                                                 @csrf @method('DELETE')
                                                 <button type="submit" class="text-red-600 hover:underline">Löschen</button>
                                             </form>
@@ -58,6 +59,7 @@
                         @endforelse
                     </tbody>
                 </table>
+                </div>
             </div>
             <br>
             <a href="{{ route('admin.index') }}">

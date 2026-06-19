@@ -24,7 +24,24 @@
                     <tr>
                         <td>{{ $signup->user->name }} {{ $signup->user->lastname }}</td>
                         <td>—</td>
-                        <td>{{ $signup->teamer_role ?? '—' }}</td>
+                        <td>
+                            @can('events.edit')
+                                <form method="POST"
+                                      action="{{ route('adventures.teamer.update-role', [$adventure, $signup]) }}"
+                                      class="flex items-center gap-2">
+                                    @csrf @method('PATCH')
+                                    <select name="teamer_role" class="ui compact dropdown">
+                                        <option value="">— keine —</option>
+                                        @foreach (\App\Models\TeamerSignup::ROLES as $role)
+                                            <option value="{{ $role }}" @selected($signup->teamer_role === $role)>{{ $role }}</option>
+                                        @endforeach
+                                    </select>
+                                    <button type="submit" class="ui mini primary button">OK</button>
+                                </form>
+                            @else
+                                {{ $signup->teamer_role ?? '—' }}
+                            @endcan
+                        </td>
                         <td>
                             @if ($signup->approved_at)
                                 <span class="ui mini green label">bestätigt</span>
@@ -74,7 +91,7 @@
                                     <form method="POST"
                                           action="{{ route('adventures.teamer.destroy', [$adventure, $signup]) }}"
                                           data-refresh-modal
-                                          onsubmit="return confirm('Teamer-Anmeldung stornieren?')">
+                                          data-confirm="Teamer-Anmeldung stornieren?">
                                         @csrf @method('DELETE')
                                         <button type="submit"
                                                 class="ui mini icon button red"
@@ -145,7 +162,7 @@
                                     <form method="POST"
                                           action="{{ route('adventures.bookings.destroy', [$adventure, $booking]) }}"
                                           data-refresh-modal
-                                          onsubmit="return confirm('Anmeldung stornieren?')">
+                                          data-confirm="Anmeldung stornieren?">
                                         @csrf @method('DELETE')
                                         <button type="submit"
                                                 class="ui mini icon button red"

@@ -3,7 +3,7 @@
     <div>
         <x-input-label for="player_id" value="Spieler" />
         <select id="player_id" name="player_id"
-                class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">
+                class="mt-1 block w-full border-gray-300 focus:border-amber-600 focus:ring-amber-600 rounded-md shadow-sm">
             <option value="">— bitte wählen —</option>
             @foreach ($players as $player)
                 <option value="{{ $player->id }}"
@@ -33,7 +33,7 @@
     <div>
         <x-input-label for="description" value="Steckbrief / Hintergrund" />
         <textarea id="description" name="description" rows="4"
-                  class="mt-1 block w-full border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-300 focus:border-indigo-500 focus:ring-indigo-500 rounded-md shadow-sm">{{ old('description', $hero->description) }}</textarea>
+                  class="mt-1 block w-full border-gray-300 focus:border-amber-600 focus:ring-amber-600 rounded-md shadow-sm">{{ old('description', $hero->description) }}</textarea>
         <x-input-error :messages="$errors->get('description')" class="mt-2" />
     </div>
 
@@ -51,12 +51,14 @@
             <x-input-label for="born" value="Erste Erblickung" />
             <x-text-input id="born" name="born" type="date" class="mt-1 block w-full"
                           :value="old('born', optional($hero->born)->format('Y-m-d'))" />
+            <p class="mt-1 text-xs text-gray-500">Das Datum, an dem der Held zum ersten Mal in der Spielwelt aufgetreten ist (Geburtstag des Charakters).</p>
             <x-input-error :messages="$errors->get('born')" class="mt-2" />
         </div>
         <div>
             <x-input-label for="died" value="Verschollen" />
             <x-text-input id="died" name="died" type="date" class="mt-1 block w-full"
                           :value="old('died', optional($hero->died)->format('Y-m-d'))" />
+            <p class="mt-1 text-xs text-gray-500">Das Datum, ab dem der Held nicht mehr aktiv spielt (z. B. in Rente gegangen oder aus der Spielwelt verschwunden). Leer lassen, wenn der Held noch aktiv ist.</p>
             <x-input-error :messages="$errors->get('died')" class="mt-2" />
         </div>
     </div>
@@ -68,9 +70,9 @@
             <x-input-label value="Startklassen" />
             <div class="mt-1 grid grid-cols-2 gap-2">
                 @foreach ($classes as $class)
-                    <label class="flex items-center gap-2 text-gray-700 dark:text-gray-300">
+                    <label class="flex items-center gap-2 text-gray-700">
                         <input type="checkbox" name="classes[]" value="{{ $class->id }}"
-                               class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500"
+                               class="rounded border-gray-300 text-amber-600 shadow-sm focus:ring-amber-600"
                                @checked(in_array($class->id, old('classes', $hero->classes->pluck('id')->all())))>
                         {{ $class->name }}
                     </label>
@@ -81,9 +83,9 @@
     @endunless
 
     <div>
-        <label class="flex items-center gap-2 text-gray-700 dark:text-gray-300">
+        <label class="flex items-center gap-2 text-gray-700">
             <input type="checkbox" name="active" value="1"
-                   class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500"
+                   class="rounded border-gray-300 text-amber-600 shadow-sm focus:ring-amber-600"
                    @checked(old('active', $hero->active))>
             Aktiver Held
         </label>
@@ -92,6 +94,6 @@
     <div class="flex items-center gap-4">
         <x-primary-button>Speichern</x-primary-button>
         <a href="{{ route('heroes.index') }}"
-           class="text-sm text-gray-600 dark:text-gray-400 hover:underline">Abbrechen</a>
+           class="text-sm text-gray-600 hover:underline">Abbrechen</a>
     </div>
 </div>

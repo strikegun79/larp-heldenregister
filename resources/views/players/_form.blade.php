@@ -1,5 +1,5 @@
 @csrf
-@php($selectClass = 'mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-indigo-500 focus:ring-indigo-500')
+@php($selectClass = 'mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-amber-600 focus:ring-amber-600')
 <div class="space-y-6">
     <div class="grid grid-cols-2 gap-4">
         <div>
@@ -46,7 +46,7 @@
     <div>
         <label class="flex items-center gap-2 text-stone-700 font-medium">
             <input type="checkbox" id="address_same_as_guardian_toggle"
-                   class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500"
+                   class="rounded border-gray-300 text-amber-600 shadow-sm focus:ring-amber-600"
                    @checked(old('address_same_as_guardian', $player->address_same_as_guardian ?? true))
                    onchange="
                        document.getElementById('child-address-fields').classList.toggle('hidden', this.checked);
@@ -91,7 +91,7 @@
 
     <label class="flex items-center gap-2 text-stone-700">
         <input type="checkbox" name="self" value="1"
-               class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500"
+               class="rounded border-gray-300 text-amber-600 shadow-sm focus:ring-amber-600"
                @checked(old('self', $self ?? false))>
         Das bin ich selbst (eigener Spieler)
     </label>

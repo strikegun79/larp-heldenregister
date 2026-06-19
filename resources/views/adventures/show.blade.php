@@ -9,7 +9,15 @@
                 @include('adventures._detail')
             </div>
 
-            <a href="{{ route('adventures.index') }}" class="inline-block mt-4 text-sm text-stone-600 hover:underline">&larr; Zurück zur Übersicht</a>
+            <div class="mt-4">
+                <a href="{{ route('adventures.index') }}" class="ui button">&larr; Zurück zur Übersicht</a>
+            </div>
         </div>
     </div>
+
+    @push('scripts')
+    <script>
+        $(function () { $('.menu .item[data-tab]').tab(); });
+    </script>
+    @endpush
 </x-app-layout>

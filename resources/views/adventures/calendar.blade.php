@@ -16,16 +16,16 @@
             @forelse ($events as $yearMonth => $monthEvents)
                 @php([$year, $month] = explode('-', $yearMonth))
                 <h3 class="font-uncial text-xl text-waldritter mt-6 mb-2">{{ $monthNames[(int) $month] }} {{ $year }}</h3>
-                <div class="bg-white/70 dark:bg-gray-800 border-2 border-[#5a3a22]/30 shadow-sm sm:rounded-lg divide-y divide-stone-200 dark:divide-gray-700">
+                <div class="bg-white/70 border-2 border-[#5a3a22]/30 shadow-sm sm:rounded-lg divide-y divide-stone-200">
                     @foreach ($monthEvents as $event)
-                        <div class="flex items-center gap-4 px-4 py-3 cursor-pointer hover:bg-stone-50 dark:hover:bg-gray-700 transition-colors rounded"
+                        <div class="flex items-center gap-4 px-4 py-3 cursor-pointer hover:bg-stone-50 transition-colors rounded"
                              data-modal-url="{{ route('adventures.show', $event) }}">
                             <div class="w-16 text-center shrink-0">
                                 <div class="text-2xl font-semibold text-waldritter leading-none">{{ $event->start_at->format('d') }}</div>
                                 <div class="text-xs uppercase text-stone-500">{{ $event->start_at->isoFormat('dd') }}</div>
                             </div>
                             <div class="flex-1 min-w-0">
-                                <div class="font-medium text-stone-800 dark:text-gray-200">{{ $event->name }}</div>
+                                <div class="font-medium text-stone-800">{{ $event->name }}</div>
                                 <div class="text-sm text-stone-500">
                                     {{ $event->start_at->format('H:i') }} Uhr · {{ $event->location?->titel ?? 'Ort offen' }}
                                 </div>
