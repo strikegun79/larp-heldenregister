@@ -6,6 +6,7 @@
 @if ($teamerSignups->isEmpty())
     <p class="text-stone-500 text-sm">Noch keine Teamer angemeldet.</p>
 @else
+    <div class="overflow-x-auto">
     <table class="ui very basic compact table">
         <thead>
             <tr>
@@ -52,4 +53,5 @@
             @endforeach
         </tbody>
     </table>
+    </div>
 @endif

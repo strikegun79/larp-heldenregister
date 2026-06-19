@@ -1,4 +1,5 @@
 @php($manage = $manage ?? false)
+<div class="overflow-x-auto">
 <table class="ui very basic compact table">
     <thead><tr>
         <th>Spieler</th><th>Alter</th><th>Rolle</th><th>Liste</th><th>Status</th><th>Beitrag</th><th></th>
@@ -100,6 +101,7 @@
         @endforelse
     </tbody>
 </table>
+</div>
 
 @if ($manage)
     @can('manage-payments')

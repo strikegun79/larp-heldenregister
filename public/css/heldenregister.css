@@ -117,6 +117,20 @@
     }
 }
 
+/* UI-08: Modals auf Mobilgeräten vollbreit und mit kompakten Rändern. */
+#app-modal,
+#app-modal-2 {
+    max-width: 95vw;
+}
+
+@media (max-width: 767px) {
+    #app-modal,
+    #app-modal-2 {
+        width: 95vw !important;
+        margin: 0.5rem auto !important;
+    }
+}
+
 /* Modal-Footer (ADV-16): Primäraktionen links, „Schließen" stets ganz rechts. */
 #app-modal-actions {
     display: flex;

@@ -38,6 +38,7 @@
 
 {{-- Tab: Helden (mit Helden-Foto) --}}
 <div class="ui bottom attached tab segment" data-tab="p-helden">
+    <div class="overflow-x-auto">
     <table class="ui very basic compact table">
         <thead><tr><th>Foto</th><th>Name</th><th>Klasse(n)</th><th class="right aligned">EP</th><th>Aktiv</th></tr></thead>
         <tbody>
@@ -70,6 +71,7 @@
             @endforelse
         </tbody>
     </table>
+    </div>
 </div>
 
 {{-- Tab: Abenteuer (besuchte Veranstaltungen) --}}
@@ -78,6 +80,7 @@
     @if ($visited->isEmpty())
         <p class="text-stone-500">Noch keine besuchten Veranstaltungen.</p>
     @else
+        <div class="overflow-x-auto">
         <table class="ui very basic compact table">
             <thead><tr><th>Datum</th><th>Veranstaltung</th></tr></thead>
             <tbody>
@@ -90,6 +93,7 @@
                 @endforeach
             </tbody>
         </table>
+        </div>
     @endif
 </div>
 

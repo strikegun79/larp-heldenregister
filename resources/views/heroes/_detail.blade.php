@@ -94,6 +94,7 @@
         @php($perlSummary = $hero->perl_summary)
         @if ($perlSummary->isNotEmpty())
             <h3 class="font-uncial text-lg text-waldritter mt-6 mb-2">Bändchen / Perlen</h3>
+            <div class="overflow-x-auto">
             <table class="ui very basic compact table" style="max-width:20rem">
                 <thead><tr><th>Farbe</th><th class="right aligned">Anzahl</th></tr></thead>
                 <tbody>
@@ -109,6 +110,7 @@
                     @endforeach
                 </tbody>
             </table>
+            </div>
         @endif
 
         <h3 class="font-uncial text-lg text-waldritter mt-6 mb-2">Klassen</h3>
@@ -175,6 +177,7 @@
         @if ($hero->adventure_history->isEmpty())
             <p class="text-stone-500">Noch keine Abenteuer bestritten.</p>
         @else
+            <div class="overflow-x-auto">
             <table class="ui very basic compact table">
                 <thead><tr><th>Datum</th><th>Abenteuer</th><th class="right aligned">EP</th></tr></thead>
                 <tbody>
@@ -193,6 +196,7 @@
                     </tr>
                 </tfoot>
             </table>
+            </div>
         @endif
 
         @php($bookings = $hero->player?->bookings?->sortByDesc(fn ($b) => optional($b->adventure)->start_at) ?? collect())
@@ -200,6 +204,7 @@
         @if ($bookings->isEmpty())
             <p class="text-stone-500">Keine Anmeldungen.</p>
         @else
+            <div class="overflow-x-auto">
             <table class="ui very basic compact table">
                 <thead><tr><th>Abenteuer</th><th>Beginn</th><th>Liste</th></tr></thead>
                 <tbody>
@@ -212,6 +217,7 @@
                     @endforeach
                 </tbody>
             </table>
+            </div>
             <p class="text-xs text-stone-400 mt-2">Anmeldungen sind spielerbezogen (alle Helden des Spielers).</p>
         @endif
     </div>
@@ -299,6 +305,7 @@
             </form>
         @endcan
 
+        <div class="overflow-x-auto">
         <table class="ui very basic compact table">
             <thead><tr><th>Datum</th><th>Art</th><th class="right aligned">EP</th></tr></thead>
             <tbody>
@@ -315,6 +322,7 @@
                 @endforelse
             </tbody>
         </table>
+        </div>
     </div>
 </div>
 

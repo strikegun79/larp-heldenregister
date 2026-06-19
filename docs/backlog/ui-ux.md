@@ -37,18 +37,18 @@ Paginierungs-Erhalt (Query-String).
 - [x] In mind. einer Liste produktiv (Helden oder Spieler). (umgesetzt in PLAY-09)
 - [x] Tests.
 
-### UI-07 · Modal-Submit ohne Reload (Teil-Refresh) · ⏱ 4h · 🔲
+### UI-07 · Modal-Submit ohne Reload (Teil-Refresh) · ⏱ 4h · ✅
 **Beschreibung:** Aktuell `reload` nach Erfolg. Stattdessen Liste/Modal gezielt
 per AJAX aktualisieren.
 **Akzeptanzkriterien:**
-- [ ] Nach Erfolg wird der betroffene Listeneintrag/Modal-Inhalt neu geladen.
-- [ ] Kein voller Seiten-Reload mehr; Toast bleibt.
+- [x] Nach Erfolg wird der betroffene Listeneintrag/Modal-Inhalt neu geladen.
+- [x] Kein voller Seiten-Reload mehr; Toast bleibt.
 
-### UI-08 · Responsives Verhalten & Mobile-Feinschliff · ⏱ 3h · 🔲
+### UI-08 · Responsives Verhalten & Mobile-Feinschliff · ⏱ 3h · ✅
 **Beschreibung:** Tabellen/Modals/Karten auf Mobil prüfen und anpassen.
 **Akzeptanzkriterien:**
-- [ ] Tabellen scrollbar/stacked auf kleinen Screens.
-- [ ] Modals nutzbar auf Mobil (Scroll/Fullscreen).
+- [x] Tabellen scrollbar/stacked auf kleinen Screens.
+- [x] Modals nutzbar auf Mobil (Scroll/Fullscreen).
 
 ### UI-09 · Flash-Messages global als Toast · ⏱ 2h · ✅
 **Beschreibung:** Session-`status`/`error` (Vollseiten) ebenfalls als Toast
