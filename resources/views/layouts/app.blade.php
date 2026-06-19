@@ -61,8 +61,9 @@
         <!-- Gemeinsames Fomantic-Modal: Header + scrollender Inhalt + Footer.
              Inhalt wird per AJAX aus [data-modal-url] geladen; das Partial liefert
              [data-modal-title] (Header) und optional [data-modal-actions] (Footer). -->
-        <div class="ui modal" id="app-modal">
-            <i class="close icon"></i>
+        <div class="ui modal" id="app-modal"
+             role="dialog" aria-modal="true" aria-labelledby="app-modal-header">
+            <button type="button" class="close icon" aria-label="Schließen"></button>
             <div class="header" id="app-modal-header"></div>
             <div class="scrolling content" id="app-modal-content"></div>
             <div class="actions" id="app-modal-actions"></div>
@@ -71,16 +72,18 @@
         <!-- Gestapeltes Modal (ADV-22): öffnet über #app-modal (z. B. Anmeldung,
              Gast-Anmeldung, Anmeldung bearbeiten). Schließ-Icon oben rechts (UI-25)
              ist immer erreichbar, unabhängig von der Scroll-Position des Inhalts. -->
-        <div class="ui modal" id="app-modal-2">
-            <i class="close icon"></i>
+        <div class="ui modal" id="app-modal-2"
+             role="dialog" aria-modal="true" aria-labelledby="app-modal-2-header">
+            <button type="button" class="close icon" aria-label="Schließen"></button>
             <div class="header" id="app-modal-2-header"></div>
             <div class="scrolling content" id="app-modal-2-content"></div>
             <div class="actions" id="app-modal-2-actions"></div>
         </div>
 
         <!-- Foto-Crop-Modal: Helden-Foto zuschneiden (HERO-22) -->
-        <div class="ui modal" id="photo-crop-modal">
-            <div class="header">Foto zuschneiden</div>
+        <div class="ui modal" id="photo-crop-modal"
+             role="dialog" aria-modal="true" aria-labelledby="photo-crop-modal-header">
+            <div class="header" id="photo-crop-modal-header">Foto zuschneiden</div>
             <div class="scrolling content">
                 <div style="max-height:400px; overflow:hidden; background:#111; border-radius:.4rem;">
                     <img id="photo-crop-img" src="" alt="Zuschnitt" style="display:block; max-width:100%;">
@@ -88,7 +91,7 @@
                 <p class="text-sm text-stone-700 mt-2">Rahmen verschieben und anpassen, dann „Übernehmen" klicken.</p>
             </div>
             <div class="actions">
-                <div class="ui deny button">Abbrechen</div>
+                <button type="button" class="ui deny button">Abbrechen</button>
                 <button type="button" id="photo-crop-save-btn" class="ui primary button">
                     <i class="check icon"></i> Übernehmen
                 </button>
@@ -96,7 +99,8 @@
         </div>
 
         <!-- Bestätigungs-Modal: Fertigkeit erlernen/aberkennen (HERO-14/16) -->
-        <div class="ui small modal" id="skill-modal">
+        <div class="ui small modal" id="skill-modal"
+             role="dialog" aria-modal="true" aria-labelledby="skill-modal-title">
             <div class="header" id="skill-modal-title"></div>
             <div class="content">
                 <p id="skill-modal-desc" class="text-stone-700"></p>
@@ -104,36 +108,38 @@
                 <p id="skill-modal-warn" class="text-red-700 font-medium" style="display:none">Nicht genug EP. EP werden durch Abenteuer-Teilnahme gutgeschrieben.</p>
             </div>
             <div class="actions">
-                <div class="ui deny button">Schließen</div>
+                <button type="button" class="ui deny button">Schließen</button>
                 <button type="button" class="ui positive button" id="skill-modal-accept">Fertigkeit erlernen</button>
                 <button type="button" class="ui negative button" id="skill-modal-revoke">Zurücknehmen</button>
             </div>
         </div>
 
         <!-- Unterschrift + Check-in als Multimodal (ADV-19) -->
-        <div class="ui modal" id="signature-modal">
-            <div class="header">Unterschrift &amp; Check-in</div>
+        <div class="ui modal" id="signature-modal"
+             role="dialog" aria-modal="true" aria-labelledby="signature-modal-header">
+            <div class="header" id="signature-modal-header">Unterschrift &amp; Check-in</div>
             <div class="content">
                 <p id="signature-modal-name" class="font-semibold"></p>
                 <p class="text-sm text-stone-700">Mit Tablet &amp; Stift im Feld unterschreiben.</p>
-                <canvas id="signature-pad" width="600" height="240"
+                <canvas id="signature-pad" width="600" height="240" aria-label="Unterschriftenfeld"
                         style="border:2px solid #5a3a22; border-radius:.4rem; touch-action:none; background:#fff; max-width:100%; width:600px; height:240px;"></canvas>
             </div>
             <div class="actions">
-                <div class="ui deny button">Abbrechen</div>
+                <button type="button" class="ui deny button">Abbrechen</button>
                 <button type="button" class="ui button" onclick="clearSignaturePad()">Löschen</button>
                 <button type="button" class="ui primary button" id="signature-modal-save">Check-in bestätigen</button>
             </div>
         </div>
 
         <!-- Abmeldung mit Grund als Multimodal (ADV-19) -->
-        <div class="ui small modal" id="deregister-modal">
-            <div class="header">Teilnehmer abmelden</div>
+        <div class="ui small modal" id="deregister-modal"
+             role="dialog" aria-modal="true" aria-labelledby="deregister-modal-header">
+            <div class="header" id="deregister-modal-header">Teilnehmer abmelden</div>
             <div class="content">
                 <p id="deregister-modal-name" class="font-semibold"></p>
                 <div class="ui form">
                     <div class="field">
-                        <label>Grund der Abmeldung</label>
+                        <label for="deregister-reason">Grund der Abmeldung</label>
                         <select id="deregister-reason">
                             <option value="">— wählen —</option>
                             @foreach (\App\Models\Booking::ABSENCE_REASONS as $key => $label)
@@ -144,19 +150,20 @@
                 </div>
             </div>
             <div class="actions">
-                <div class="ui deny button">Abbrechen</div>
+                <button type="button" class="ui deny button">Abbrechen</button>
                 <button type="button" class="ui primary button" id="deregister-modal-save">Abmelden</button>
             </div>
         </div>
 
         <!-- Bestätigungs-Modal (UI-17) -->
-        <div class="ui small modal" id="confirm-modal">
+        <div class="ui small modal" id="confirm-modal"
+             role="alertdialog" aria-modal="true" aria-labelledby="confirm-modal-header">
             <div class="header" id="confirm-modal-header">Bitte bestätigen</div>
             <div class="content">
                 <p id="confirm-modal-message" class="text-stone-700"></p>
             </div>
             <div class="actions">
-                <div class="ui deny button"><i class="times icon"></i> Abbrechen</div>
+                <button type="button" class="ui deny button"><i class="times icon"></i> Abbrechen</button>
                 <button type="button" class="ui negative button" id="confirm-modal-ok">
                     <i class="check icon"></i> Bestätigen
                 </button>
@@ -188,7 +195,7 @@
                         $actions.html($partActions.length ? $partActions.html() : '');
                         $partActions.remove();
                         // Standard-Schließen-Button immer anbieten.
-                        $actions.append('<div class="ui deny button">Schließen</div>');
+                        $actions.append('<button type="button" class="ui deny button">Schließen</button>');
                         // Fomantic-Tabs im Modal aktivieren (z. B. Detail-Tabs / Fertigkeitsbaum).
                         $content.find('.menu .item[data-tab]').tab();
                         // Zuvor aktiven Tab wiederherstellen, falls vorhanden.
@@ -205,6 +212,13 @@
                         // UI-05: Fomantic-Datepicker im geladenen Inhalt initialisieren.
                         initFomanticCalendars($content);
                         $('#app-modal').modal('refresh');
+                        // UI-11: Fokus nach AJAX-Load ins Modal verschieben.
+                        requestAnimationFrame(function () {
+                            const first = $content[0].querySelector(
+                                'button:not([disabled]), input:not([disabled]):not([type="hidden"]), select:not([disabled]), textarea:not([disabled]), a[href], [tabindex]:not([tabindex="-1"])'
+                            );
+                            if (first) first.focus();
+                        });
                     })
                     .catch(() => $content.html('<div class="ui error message">Konnte nicht geladen werden.</div>'));
             }
@@ -262,7 +276,7 @@
                         const $partActions = $content.find('[data-modal-actions]').first();
                         $actions.html($partActions.length ? $partActions.html() : '');
                         $partActions.remove();
-                        $actions.append('<div class="ui deny button">Schließen</div>');
+                        $actions.append('<button type="button" class="ui deny button">Schließen</button>');
                         // Tabs (z. B. Helden-Detail) im gestapelten Modal aktivieren.
                         $content.find('.menu .item[data-tab]').tab();
                         if (prevTab && $content.find('.menu .item[data-tab="' + prevTab + '"]').length) {
@@ -273,6 +287,13 @@
                         // UI-05: Fomantic-Datepicker im gestapelten Modal initialisieren.
                         initFomanticCalendars($content);
                         $('#app-modal-2').modal('refresh');
+                        // UI-11: Fokus nach AJAX-Load ins gestapelte Modal verschieben.
+                        requestAnimationFrame(function () {
+                            const first = $content[0].querySelector(
+                                'button:not([disabled]), input:not([disabled]):not([type="hidden"]), select:not([disabled]), textarea:not([disabled]), a[href], [tabindex]:not([tabindex="-1"])'
+                            );
+                            if (first) first.focus();
+                        });
                     })
                     .catch(() => $content.html('<div class="ui error message">Konnte nicht geladen werden.</div>'));
             }

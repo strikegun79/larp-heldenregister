@@ -69,11 +69,11 @@ darstellen (einheitliches Feedback).
 > `@rollup/plugin-inject` injiziert jQuery als Global in alle JS-Dateien (Fomantic-IIFE-Kompatibilität).
 > CDN-Tags in `app.blade.php` durch `@vite()` ersetzt.
 
-### UI-11 · Accessibility-Grundlagen · ⏱ 3h · 🔲
+### UI-11 · Accessibility-Grundlagen · ⏱ 3h · ✅
 **Beschreibung:** Fokus-Management in Modals, Labels, Kontraste, ARIA.
 **Akzeptanzkriterien:**
-- [ ] Modale fangen Fokus, schließen mit ESC.
-- [ ] Formularfelder mit Labels; ausreichende Kontraste.
+- [x] Modale fangen Fokus, schließen mit ESC.
+- [x] Formularfelder mit Labels; ausreichende Kontraste.
 
 ### UI-12 · Accessibility-UI Fomantic · ⏱ 3h · ✅
 **Beschreibung:** Verwende ui Modale für das öffnen der Details

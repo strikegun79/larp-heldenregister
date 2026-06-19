@@ -117,6 +117,15 @@
     }
 }
 
+/* UI-11: Close-Button als <button> statt <i> – Fomantic-Styling beibehalten. */
+.ui.modal > button.close.icon {
+    background: none;
+    border: none;
+    cursor: pointer;
+    padding: 0;
+    line-height: 1;
+}
+
 /* UI-08: Modals auf Mobilgeräten vollbreit und mit kompakten Rändern. */
 #app-modal,
 #app-modal-2 {
