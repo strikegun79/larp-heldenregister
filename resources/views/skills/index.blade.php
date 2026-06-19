@@ -7,20 +7,22 @@
         <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8">
 
             {{-- Klassen-Filter --}}
-            <form method="GET" action="{{ route('skills.catalog') }}" class="mb-6 flex flex-wrap gap-3 items-end">
+            <form method="GET" action="{{ route('skills.catalog') }}"
+                  class="mb-6 bg-white/60 border-2 border-[#5a3a22]/30 rounded-lg p-4 flex flex-wrap gap-3 items-end">
                 <div>
-                    <label class="block text-xs text-stone-500 mb-1">Klasse</label>
-                    <select name="class_id" onchange="this.form.submit()"
-                            class="border border-stone-300 rounded px-3 py-1.5 text-sm bg-white">
+                    <label class="text-sm text-stone-600">Klasse</label>
+                    <select name="class_id"
+                            class="mt-1 block border-gray-300 rounded-md shadow-sm text-sm focus:border-amber-600 focus:ring-amber-600">
                         <option value="">– alle Klassen –</option>
                         @foreach ($allClasses as $cls)
                             <option value="{{ $cls->id }}" @selected($classId == $cls->id)>{{ $cls->name }}</option>
                         @endforeach
                     </select>
                 </div>
-                @if ($classId)
-                    <a href="{{ route('skills.catalog') }}" class="ui button text-sm">Alle anzeigen</a>
-                @endif
+                <div class="flex items-center gap-3">
+                    <button type="submit" class="ui small primary button">Filtern</button>
+                    <a href="{{ route('skills.catalog') }}" class="text-sm text-stone-600 hover:underline">Zurücksetzen</a>
+                </div>
             </form>
 
             @forelse ($heroClasses as $class)

@@ -11,14 +11,17 @@
             </div>
 
             {{-- Suche (PLAY-09) --}}
-            <form method="GET" action="{{ route('players.index') }}" class="ui form mb-6">
-                <div class="ui action input w-full sm:w-80">
-                    <input type="search" name="q" value="{{ $q }}" placeholder="Name suchen…" class="!rounded-l-full">
-                    <button type="submit" class="ui icon button" aria-label="Suchen"><i class="search icon"></i></button>
+            <form method="GET" action="{{ route('players.index') }}"
+                  class="mb-6 bg-white/60 border-2 border-[#5a3a22]/30 rounded-lg p-4 flex flex-wrap gap-3 items-end">
+                <div class="flex-1 min-w-48">
+                    <label class="text-sm text-stone-600">Suche</label>
+                    <input type="text" name="q" value="{{ $q }}" placeholder="Name suchen…"
+                           class="mt-1 block w-full border-gray-300 rounded-md shadow-sm text-sm focus:border-amber-600 focus:ring-amber-600">
                 </div>
-                @if ($q !== '')
-                    <a href="{{ route('players.index') }}" class="ml-3 text-sm text-stone-500 hover:underline">Filter zurücksetzen</a>
-                @endif
+                <div class="flex items-center gap-3">
+                    <button type="submit" class="ui small primary button">Filtern</button>
+                    <a href="{{ route('players.index') }}" class="text-sm text-stone-600 hover:underline">Zurücksetzen</a>
+                </div>
             </form>
 
             {{-- Spielerkarten: Avatar links (150×150), Daten rechts (PLAY-11) --}}
@@ -29,6 +32,7 @@
                    class="group flex rounded-lg overflow-hidden border-2 border-dashed border-[#5a3a22]/50 bg-white/50 shadow hover:shadow-xl hover:-translate-y-1 transition min-h-[150px]">
                     <div class="shrink-0 overflow-hidden" style="width:150px; min-height:150px;">
                         <img src="/images/wewantyou_poster4.jpg" alt="Neuer Spieler"
+                             loading="lazy" width="150" height="150"
                              class="w-full h-full object-cover group-hover:scale-105 transition" style="min-height:150px;">
                     </div>
                     <div class="p-4 flex-1 flex flex-col justify-center">
@@ -45,6 +49,7 @@
                         {{-- Avatar 1:1, linksbündig --}}
                         <div class="shrink-0 overflow-hidden" style="width:150px; min-height:150px;">
                             <img src="{{ $player->avatar_url }}" alt="{{ $player->full_name }}"
+                                 loading="lazy" width="150" height="150"
                                  class="w-full h-full object-cover group-hover:scale-105 transition" style="min-height:150px;">
                         </div>
                         {{-- Name + Spielerdaten --}}
@@ -65,6 +70,13 @@
                     </a>
                 @endforeach
             </div>
+
+            @if ($players->isEmpty())
+                <div class="mt-6 bg-amber-50 border border-amber-200 rounded-lg p-4 text-sm text-stone-700">
+                    <strong class="font-medium">Erste Schritte:</strong>
+                    Lege zunächst einen Spieler an. Danach kannst du für diesen Spieler einen Helden erstellen und ihn zu Abenteuern anmelden.
+                </div>
+            @endif
         </div>
     </div>
 </x-app-layout>

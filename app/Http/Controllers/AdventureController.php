@@ -39,14 +39,18 @@ class AdventureController extends Controller
     /**
      * Liste aller Abenteuer.
      */
-    public function index(): View
+    public function index(Request $request): View
     {
+        $q = trim($request->string('q'));
+
         $adventures = Adventure::with(['location', 'status', 'category'])
             ->withCount('confirmedBookings')
+            ->when($q, fn ($query) => $query->where('name', 'like', "%{$q}%"))
             ->orderByDesc('start_at')
-            ->paginate(20);
+            ->paginate(20)
+            ->withQueryString();
 
-        return view('adventures.index', compact('adventures'));
+        return view('adventures.index', compact('adventures', 'q'));
     }
 
     /**
@@ -100,42 +104,40 @@ class AdventureController extends Controller
             ->with('status', 'Abenteuer wurde angelegt.');
     }
 
-    public function show(Adventure $adventure): View
+    public function show(Request $request, Adventure $adventure): View|RedirectResponse
     {
+        // Direktaufruf im Browser → zur Index-Seite umleiten, dort Modal per ?open= öffnen.
+        if (! $request->ajax()) {
+            return redirect()->route('adventures.index', ['open' => $adventure->id]);
+        }
+
         $adventure->load(['location', 'status', 'category', 'client', 'bookings.player', 'bookings.role', 'visits', 'gamemaster', 'eventleader', 'teamerSignups.user']);
 
         // Buchbare Spieler: Bürokrat/Admin alle, sonst nur eigene/betreute (BOOK-10).
         $players = Gate::allows('book-any-player')
             ? Player::orderBy('name')->get()
-            : request()->user()->players()->orderBy('name')->get();
+            : $request->user()->players()->orderBy('name')->get();
 
         // Sichtbare Anmeldungen (ADV-15): Bürokrat/Projektleitung/Spielleiter/Admin
         // sehen alle, sonst nur eigene Spieler + selbst angemeldete Gäste (ADV-21).
-        $user = request()->user();
-        $ownPlayerIds = $user->players->pluck('id');
+        $ownPlayerIds = $request->user()->players->pluck('id');
         $visibleBookings = Gate::allows('view-all-bookings')
             ? $adventure->bookings
             : $adventure->bookings->filter(
-                fn ($b) => $ownPlayerIds->contains($b->player_id) || $b->booked_by_user_id === $user->id
+                fn ($b) => $ownPlayerIds->contains($b->player_id) || $b->booked_by_user_id === $request->user()->id
             )->values();
 
         $teamerSignups = $adventure->teamerSignups;
-        $myTeamerSignup = $teamerSignups->firstWhere('user_id', request()->user()->id);
+        $myTeamerSignup = $teamerSignups->firstWhere('user_id', $request->user()->id);
 
-        $data = [
+        return view('adventures._detail', [
             'adventure' => $adventure,
             'players' => $players,
             'roles' => EventRole::orderBy('id')->get(),
             'visibleBookings' => $visibleBookings,
             'teamerSignups' => $teamerSignups,
             'myTeamerSignup' => $myTeamerSignup,
-        ];
-
-        if (request()->ajax()) {
-            return view('adventures._detail', $data);
-        }
-
-        return view('adventures.show', $data);
+        ]);
     }
 
     /**
