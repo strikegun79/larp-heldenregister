@@ -65,16 +65,17 @@
              Inhalt wird per AJAX aus [data-modal-url] geladen; das Partial liefert
              [data-modal-title] (Header) und optional [data-modal-actions] (Footer). -->
         <div class="ui modal" id="app-modal">
-            {{-- Kein Schließ-Icon (PLAY-11): Schließen über den „Schließen"-Button im Footer. --}}
+            <i class="close icon"></i>
             <div class="header" id="app-modal-header"></div>
             <div class="scrolling content" id="app-modal-content"></div>
             <div class="actions" id="app-modal-actions"></div>
         </div>
 
         <!-- Gestapeltes Modal (ADV-22): öffnet über #app-modal (z. B. Anmeldung,
-             Gast-Anmeldung, Anmeldung bearbeiten). Kein Schließ-Icon; nur über
-             Speichern oder „Schließen" zu schließen. -->
+             Gast-Anmeldung, Anmeldung bearbeiten). Schließ-Icon oben rechts (UI-25)
+             ist immer erreichbar, unabhängig von der Scroll-Position des Inhalts. -->
         <div class="ui modal" id="app-modal-2">
+            <i class="close icon"></i>
             <div class="header" id="app-modal-2-header"></div>
             <div class="scrolling content" id="app-modal-2-content"></div>
             <div class="actions" id="app-modal-2-actions"></div>
@@ -103,12 +104,12 @@
             <div class="content">
                 <p id="skill-modal-desc" class="text-stone-700"></p>
                 <p id="skill-modal-meta"></p>
-                <p id="skill-modal-warn" class="text-red-600" style="display:none">Nicht genug EP für diese Fertigkeit.</p>
+                <p id="skill-modal-warn" class="text-red-700 font-medium" style="display:none">Nicht genug EP. EP werden durch Abenteuer-Teilnahme gutgeschrieben.</p>
             </div>
             <div class="actions">
                 <div class="ui deny button">Schließen</div>
-                <button type="button" class="ui positive button" id="skill-modal-accept">Fertigkeit errungen</button>
-                <button type="button" class="ui negative button" id="skill-modal-revoke">Fertigkeit aberkennen</button>
+                <button type="button" class="ui positive button" id="skill-modal-accept">Fertigkeit erlernen</button>
+                <button type="button" class="ui negative button" id="skill-modal-revoke">Zurücknehmen</button>
             </div>
         </div>
 
@@ -148,6 +149,20 @@
             <div class="actions">
                 <div class="ui deny button">Abbrechen</div>
                 <button type="button" class="ui primary button" id="deregister-modal-save">Abmelden</button>
+            </div>
+        </div>
+
+        <!-- Bestätigungs-Modal (UI-17) -->
+        <div class="ui small modal" id="confirm-modal">
+            <div class="header" id="confirm-modal-header">Bitte bestätigen</div>
+            <div class="content">
+                <p id="confirm-modal-message" class="text-stone-700"></p>
+            </div>
+            <div class="actions">
+                <div class="ui deny button"><i class="times icon"></i> Abbrechen</div>
+                <button type="button" class="ui negative button" id="confirm-modal-ok">
+                    <i class="check icon"></i> Bestätigen
+                </button>
             </div>
         </div>
 
@@ -198,6 +213,17 @@
                     })
                     .catch(() => $content.html('<div class="ui error message">Konnte nicht geladen werden.</div>'));
             }
+
+            // UI-20: Tastatursteuerung für interaktive Zeilen/Karten (tabindex="0").
+            // Enter oder Space auf fokussierten [data-modal-url]/[data-modal-stack]-Elementen
+            // löst denselben Pfad wie ein Mausklick aus.
+            document.addEventListener('keydown', function (e) {
+                if (e.key !== 'Enter' && e.key !== ' ') return;
+                const trigger = e.target.closest('[data-modal-url], [data-modal-stack]');
+                if (!trigger || trigger.tagName === 'A' || trigger.tagName === 'BUTTON') return;
+                e.preventDefault();
+                trigger.click();
+            });
 
             // Klick auf ein Element mit data-modal-url -> Inhalt per AJAX ins Modal laden.
             document.addEventListener('click', function (e) {
@@ -259,7 +285,7 @@
                 if (!trigger) return;
                 e.preventDefault();
                 loadStackContent(trigger.getAttribute('data-modal-stack'));
-                $('#app-modal-2').modal({ allowMultiple: true, closable: false, autofocus: false }).modal('show');
+                $('#app-modal-2').modal({ allowMultiple: true, autofocus: false }).modal('show');
             });
 
             // ADV-17/19: einfaches Unterschriften-Pad (Tablet/Stift/Maus via Pointer Events).
@@ -363,12 +389,45 @@
                 });
             }
 
+            // UI-17: Capture-Phase Submit-Handler für data-confirm-Attribute.
+            // Läuft vor dem AJAX-Bubble-Handler; zeigt Fomantic-Modal statt nativem confirm().
+            document.addEventListener('submit', function (e) {
+                const form = e.target;
+                if (!form.dataset.confirm || form.dataset.confirmReady) return;
+
+                // data-confirm-unless-id / -val: Bestätigung überspringen wenn Bedingung erfüllt.
+                const skipId  = form.dataset.confirmUnlessId;
+                const skipVal = form.dataset.confirmUnlessVal;
+                if (skipId && skipVal) {
+                    const el = document.getElementById(skipId);
+                    if (el && el.value === skipVal) return;
+                }
+
+                e.preventDefault();
+                e.stopImmediatePropagation();
+                const submitter = e.submitter || null;
+                document.getElementById('confirm-modal-message').textContent = form.dataset.confirm;
+                const okBtn = document.getElementById('confirm-modal-ok');
+                function onOk() {
+                    okBtn.removeEventListener('click', onOk);
+                    $('#confirm-modal').modal('hide');
+                    form.dataset.confirmReady = '1';
+                    form.requestSubmit(submitter);
+                    delete form.dataset.confirmReady;
+                }
+                okBtn.addEventListener('click', onOk);
+                $('#confirm-modal').off('hide.modal.confirm').on('hide.modal.confirm', function () {
+                    okBtn.removeEventListener('click', onOk);
+                });
+                $('#confirm-modal').modal({ allowMultiple: true, autofocus: false }).modal('show');
+            }, true);
+
             // Formulare innerhalb des Modals per AJAX absenden; Rückmeldung als Toast.
             document.addEventListener('submit', function (e) {
                 const form = e.target;
                 const inStack = !! form.closest('#app-modal-2');
                 if (! inStack && ! form.closest('#app-modal')) return;
-                // Inline-onsubmit (z. B. confirm() == false) respektieren.
+                // Capture-Handler (data-confirm, UI-17) hat ggf. bereits verhindert.
                 if (e.defaultPrevented) return;
                 e.preventDefault();
 
@@ -437,12 +496,13 @@
 
                 if (learned) {
                     // Bereits erlernt -> aberkennen (EP-Rückerstattung).
-                    $('#skill-modal-meta').text('Bereits erlernt · Rückerstattung bei Aberkennung: ' + cost + ' EP');
+                    $('#skill-modal-meta').html('Bereits erlernt &nbsp;·&nbsp; Rückerstattung: <strong>' + cost + ' EP</strong>');
                     $accept.hide();
                     $revoke.toggle(skillCanEdit);
                 } else {
                     const enough = balance >= cost;
-                    $('#skill-modal-meta').text('Kosten: ' + cost + ' EP · Verfügbar: ' + balance + ' EP');
+                    const epColor = enough ? 'text-green-700' : 'text-red-700';
+                    $('#skill-modal-meta').html('Kosten: <strong>' + cost + ' EP</strong> &nbsp;·&nbsp; Verfügbar: <span class="' + epColor + ' font-medium">' + balance + ' EP</span>');
                     $('#skill-modal-warn').toggle(!enough);
                     $revoke.hide();
                     $accept.toggle(skillCanEdit).toggleClass('disabled', !enough);

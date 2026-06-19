@@ -2,11 +2,11 @@
 
 @php($canEdit = auth()->user()?->can('update', $player))
 
-<div class="ui top attached tabular menu">
-    <a class="item active" data-tab="p-allg">Allgemeines</a>
-    <a class="item" data-tab="p-helden">Helden</a>
-    <a class="item" data-tab="p-abenteuer">Abenteuer</a>
-    @if ($canEdit)<a class="item" data-tab="p-avatar">Avatar</a>@endif
+<div class="ui top attached tabular menu" style="overflow-x: auto; flex-wrap: nowrap;">
+    <a class="item active" data-tab="p-allg" style="white-space: nowrap;">Allgemeines</a>
+    <a class="item" data-tab="p-helden" style="white-space: nowrap;">Helden</a>
+    <a class="item" data-tab="p-abenteuer" style="white-space: nowrap;">Abenteuer</a>
+    @if ($canEdit)<a class="item" data-tab="p-avatar" style="white-space: nowrap;">Avatar</a>@endif
 </div>
 
 {{-- Tab: Allgemeines --}}
@@ -42,16 +42,18 @@
         <thead><tr><th>Foto</th><th>Name</th><th>Klasse(n)</th><th class="right aligned">EP</th><th>Aktiv</th></tr></thead>
         <tbody>
             @forelse ($player->heroes as $hero)
-                <tr>
+                <tr data-modal-stack="{{ route('heroes.show', $hero) }}"
+                    role="button" tabindex="0"
+                    aria-label="Held {{ $hero->character_name ?? 'unbenannt' }} öffnen"
+                    class="cursor-pointer hover:bg-stone-50 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-600 focus-visible:outline-offset-[-2px]">
                     <td>
                         <img src="{{ $hero->image_url }}" alt="{{ $hero->character_name }}"
                              class="w-12 h-12 object-cover rounded border">
                     </td>
-                    {{-- Helden-Ansicht als gestapeltes Modal (PLAY-11). --}}
-                    <td><a href="{{ route('heroes.show', $hero) }}" data-modal-stack="{{ route('heroes.show', $hero) }}" class="text-indigo-700 hover:underline">{{ $hero->character_name ?? '—' }}</a></td>
+                    <td>{{ $hero->character_name ?? '—' }}</td>
                     <td>{{ $hero->classes->pluck('name')->implode(', ') ?: '—' }}</td>
                     <td class="right aligned">{{ number_format($hero->ep_balance, 0, ',', '.') }}</td>
-                    <td>
+                    <td onclick="event.stopPropagation()">
                         @if ($player->active_hero_id === $hero->id)
                             <span class="ui green label">aktiv</span>
                         @elseif ($canEdit)
@@ -83,7 +85,7 @@
                     @continue (! $visit->adventure)
                     <tr>
                         <td>{{ optional($visit->adventure->start_at)->format('d.m.Y') ?? '—' }}</td>
-                        <td><a href="{{ route('adventures.show', $visit->adventure) }}" data-modal-url="{{ route('adventures.show', $visit->adventure) }}" class="text-indigo-700 hover:underline">{{ $visit->adventure->name }}</a></td>
+                        <td><a href="{{ route('adventures.show', $visit->adventure) }}" data-modal-url="{{ route('adventures.show', $visit->adventure) }}" class="text-waldritter hover:underline">{{ $visit->adventure->name }}</a></td>
                     </tr>
                 @endforeach
             </tbody>
@@ -104,7 +106,7 @@
             @if ($player->image)
                 <form method="POST" action="{{ route('players.avatar.destroy', $player) }}"
                       data-refresh-modal
-                      onsubmit="return confirm('Avatar wirklich löschen?');">
+                      data-confirm="Avatar wirklich löschen?">
                     @csrf @method('DELETE')
                     <button type="submit" class="ui red button">
                         <i class="trash icon"></i> Avatar löschen

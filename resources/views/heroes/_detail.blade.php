@@ -9,13 +9,13 @@
      data-balance="{{ $hero->ep_balance }}"
      data-can-edit="{{ auth()->user()?->can('heldenregister.edit') ? 1 : 0 }}">
 
-    <div class="ui top attached tabular menu">
-        <a class="item active" data-tab="overview">Übersicht</a>
-        <a class="item" data-tab="adventures">Abenteuer</a>
+    <div class="ui top attached tabular menu" style="overflow-x: auto; flex-wrap: nowrap;">
+        <a class="item active" data-tab="overview" style="white-space: nowrap;">Übersicht</a>
+        <a class="item" data-tab="adventures" style="white-space: nowrap;">Abenteuer</a>
         @foreach ($hero->classes as $class)
-            <a class="item" data-tab="cls-{{ $class->id }}">{{ $class->name }}</a>
+            <a class="item" data-tab="cls-{{ $class->id }}" style="white-space: nowrap;">{{ $class->name }}</a>
         @endforeach
-        <a class="item" data-tab="ep">EP-Verlauf</a>
+        <a class="item" data-tab="ep" style="white-space: nowrap;">EP-Verlauf</a>
     </div>
 
     {{-- Tab: Übersicht --}}
@@ -51,7 +51,7 @@
                     @if ($hero->image)
                         <form method="POST" action="{{ route('heroes.photo.destroy', $hero) }}"
                               data-refresh-modal
-                              onsubmit="return confirm('Helden-Foto wirklich löschen?');">
+                              data-confirm="Helden-Foto wirklich löschen?">
                             @csrf @method('DELETE')
                             <button type="submit" class="ui mini red icon button"
                                     data-tooltip="Foto löschen" data-position="top center">
@@ -118,7 +118,7 @@
                     {{ $class->name }}
                     @can('heldenregister.edit')
                         <form method="POST" action="{{ route('heroes.classes.destroy', [$hero, $class]) }}" data-refresh-modal class="inline"
-                              onsubmit="return confirm('Klasse „{{ $class->name }}“ entfernen? {{ $class->ep_cost }} EP werden erstattet.');">
+                              data-confirm="Klasse „{{ $class->name }}” entfernen? {{ $class->ep_cost }} EP werden erstattet.">
                             @csrf @method('DELETE')
                             <button type="submit" class="ml-1 text-red-600" title="Entfernen">&times;</button>
                         </form>
@@ -133,7 +133,9 @@
             @if ($availableClasses->isNotEmpty())
                 {{-- HERO-20: Hinzufügen kostet EP (Abfrage vor Abzug); Korrektur fügt 0 EP hinzu. --}}
                 <form method="POST" action="{{ route('heroes.classes.store', $hero) }}" data-refresh-modal class="ui form mt-3"
-                      onsubmit="return document.getElementById('class-free-{{ $hero->id }}').value === '1' || confirm('Sollen die EP-Kosten wirklich abgezogen werden?');">
+                      data-confirm="Sollen die EP-Kosten wirklich abgezogen werden?"
+                      data-confirm-unless-id="class-free-{{ $hero->id }}"
+                      data-confirm-unless-val="1">
                     @csrf
                     <input type="hidden" name="free" id="class-free-{{ $hero->id }}" value="0">
                     <div class="flex items-end gap-2 flex-wrap">
@@ -244,7 +246,7 @@
                         @php($learned = $learnedIds->contains($skill->id))
                         <div class="item">
                             <div class="content">
-                                <a class="skill-trigger {{ $learned ? 'text-green-700' : 'text-indigo-700' }} hover:underline" style="cursor:pointer"
+                                <a class="skill-trigger {{ $learned ? 'text-green-700' : 'text-waldritter' }} hover:underline" style="cursor:pointer"
                                    data-skill-id="{{ $skill->id }}"
                                    data-skill-name="{{ $skill->name }}"
                                    data-skill-desc="{{ $skill->description }}"
