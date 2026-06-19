@@ -105,6 +105,22 @@
     min-height: min(820px, 60vh);
 }
 
+/* UI-28: Auf Mobilgeräten min-height aufheben, damit Fomantics max-height greift
+   und der Modal-Header nie über den Viewport-Rand wandert.
+   dvh berücksichtigt kollabierte Adressleisten (iOS Safari, Chrome Android). */
+@media (max-width: 767px) {
+    #app-modal.modal-hero > .scrolling.content,
+    #app-modal.modal-event > .scrolling.content {
+        min-height: 0;
+        max-height: calc(80dvh - 10rem);
+    }
+    #app-modal.modal-hero,
+    #app-modal.modal-event {
+        top: 0.5rem !important;
+        margin-bottom: 0.5rem !important;
+    }
+}
+
 /* Positions-Editor (HERO-17): nummerierte, ziehbare Marker */
 .editor-marker {
     font-size: 12px;

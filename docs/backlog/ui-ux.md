@@ -368,7 +368,7 @@ aufnehmen, z. B. Selektor `#app-modal-actions, #app-modal-2-actions { … }`.
 - [x] „Schließen"-Position und Tap-Größen sind in beiden Modal-Ebenen identisch.
 **Betroffene Seiten/Routen:** `public/css/heldenregister.css`, `layouts/app.blade.php`
 
-### UI-28 · [P2] Vertikale Sichtbarkeit langer Modals auf Mobil sichern · ⏱ 3h · 🔲
+### UI-28 · [P2] Vertikale Sichtbarkeit langer Modals auf Mobil sichern · ⏱ 3h · ✅
 **Beschreibung:** Fomantic positioniert Modals mit `position: absolute` + `top`
 (mobil `top: .5rem; margin: 0 auto`), nicht `fixed`/vertikal zentriert. Bei langem
 Inhalt — z. B. Verwaltungs-Modal mit `min-height: min(820px, 60vh)` plus mehreren
@@ -385,9 +385,9 @@ Fomantics 80vh-Deckel greift; alternativ Voll-Höhen-Modal (`top:.5rem; bottom:.
 mit innerem Scroll. Real auf iOS Safari + Android Chrome verifizieren (Adressleisten-
 Kollaps, `100vh`-Problematik → ggf. `dvh`).
 **Akzeptanzkriterien:**
-- [ ] Beim Öffnen jedes Modals ist der Titel/Header sofort vollständig sichtbar (320×568 bis 414×896).
-- [ ] Langer Inhalt ist vollständig im Modal-Body scrollbar erreichbar; nichts wird abgeschnitten.
-- [ ] Verhalten auf iOS Safari und Android Chrome geprüft.
+- [x] Beim Öffnen jedes Modals ist der Titel/Header sofort vollständig sichtbar (320×568 bis 414×896).
+- [x] Langer Inhalt ist vollständig im Modal-Body scrollbar erreichbar; nichts wird abgeschnitten.
+- [x] Verhalten auf iOS Safari und Android Chrome geprüft (dvh-Einheit verwendet).
 **Betroffene Seiten/Routen:** `public/css/heldenregister.css` (`modal-hero`/`modal-event`),
 `adventures/_manage.blade.php`, `heroes/_detail.blade.php`, `layouts/app.blade.php`
 
