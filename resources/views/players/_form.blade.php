@@ -19,8 +19,8 @@
     <div class="grid grid-cols-2 gap-4">
         <div>
             <x-input-label for="dayofbirth" value="Geburtsdatum" />
-            <x-text-input id="dayofbirth" name="dayofbirth" type="date" class="mt-1 block w-full"
-                          :value="old('dayofbirth', optional($player->dayofbirth)->format('Y-m-d'))" />
+            <x-date-picker name="dayofbirth"
+                           :value="old('dayofbirth', optional($player->dayofbirth)->format('Y-m-d'))" />
             <x-input-error :messages="$errors->get('dayofbirth')" class="mt-2" />
         </div>
         <div>

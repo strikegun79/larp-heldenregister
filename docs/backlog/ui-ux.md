@@ -18,13 +18,16 @@ Modal-Formulare; Erfolg/Validierung/Fachfehler als Toast.
 
 ## Offen (🔲)
 
-### UI-05 · Konsistente Fomantic-Formularkomponenten · ⏱ 4h · 🔲
+### UI-05 · Konsistente Fomantic-Formularkomponenten · ⏱ 4h · ✅
 **Beschreibung:** Mischung aus Tailwind- und Fomantic-Formularen vereinheitlichen;
 Fomantic-Dropdowns/Calendar (wie Legacy) für Auswahl/Datum.
 **Akzeptanzkriterien:**
-- [ ] Wiederverwendbare Blade-Komponenten für Feld/Select/Checkbox (Fomantic).
-- [ ] Datepicker (Fomantic Calendar) für Datumsfelder.
-- [ ] Helden-/Spieler-/Event-Formulare umgestellt.
+- [x] Wiederverwendbare Blade-Komponente `<x-date-picker>` (Props: name, value,
+      type date|datetime, required).
+- [x] Datepicker (Fomantic Calendar) mit DE-Format (TT.MM.JJJJ), ISO-Hidden-Input
+      ans Backend, `initFomanticCalendars()` in beiden Modal-Ladern + DOMContentLoaded.
+- [x] Helden-/_form (born, died), Spieler-/_form (dayofbirth),
+      Abenteuer-/_form (start_at, end_at) umgestellt.
 
 ### UI-06 · Such-/Filter-/Sortier-Baustein für Listen · ⏱ 4h · ✅
 **Beschreibung:** Gemeinsames Muster für Suche/Filter/Sortierung mit

@@ -33,14 +33,16 @@
     <div class="grid grid-cols-2 gap-4">
         <div>
             <x-input-label for="start_at" value="Beginn" />
-            <x-text-input id="start_at" name="start_at" type="datetime-local" class="mt-1 block w-full"
-                          :value="old('start_at', optional($adventure->start_at)->format('Y-m-d\TH:i'))" required />
+            <x-date-picker name="start_at" type="datetime"
+                           :value="old('start_at', optional($adventure->start_at)->format('Y-m-d\TH:i'))"
+                           :required="true" />
             <x-input-error :messages="$errors->get('start_at')" class="mt-2" />
         </div>
         <div>
             <x-input-label for="end_at" value="Ende" />
-            <x-text-input id="end_at" name="end_at" type="datetime-local" class="mt-1 block w-full"
-                          :value="old('end_at', optional($adventure->end_at)->format('Y-m-d\TH:i'))" required />
+            <x-date-picker name="end_at" type="datetime"
+                           :value="old('end_at', optional($adventure->end_at)->format('Y-m-d\TH:i'))"
+                           :required="true" />
             <x-input-error :messages="$errors->get('end_at')" class="mt-2" />
         </div>
     </div>

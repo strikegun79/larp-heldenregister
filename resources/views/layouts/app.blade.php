@@ -209,6 +209,8 @@
                         $('#app-modal').toggleClass('modal-event', $content.find('[data-tab="checkin"]').length > 0);
                         // ADV-17: Unterschriften-Pad aktivieren, falls vorhanden.
                         if ($content.find('#signature-pad').length) initSignaturePad('signature-pad');
+                        // UI-05: Fomantic-Datepicker im geladenen Inhalt initialisieren.
+                        initFomanticCalendars($content);
                         $('#app-modal').modal('refresh');
                     })
                     .catch(() => $content.html('<div class="ui error message">Konnte nicht geladen werden.</div>'));
@@ -275,6 +277,8 @@
                             $content.find('[data-tab="' + prevTab + '"]').addClass('active');
                         }
                         $('#app-modal-2').toggleClass('modal-hero', $content.find('#skilltree').length > 0);
+                        // UI-05: Fomantic-Datepicker im gestapelten Modal initialisieren.
+                        initFomanticCalendars($content);
                         $('#app-modal-2').modal('refresh');
                     })
                     .catch(() => $content.html('<div class="ui error message">Konnte nicht geladen werden.</div>'));
@@ -629,6 +633,62 @@
                     .catch(function () { showToast('Netzwerkfehler.', 'error'); })
                     .finally(function () { btn.classList.remove('loading', 'disabled'); });
                 }, 'image/jpeg', 0.85);
+            });
+        </script>
+
+        <script>
+            // UI-05: Fomantic Calendar für x-date-picker-Komponenten.
+            function initFomanticCalendars($container) {
+                $container.find('.ui.calendar[data-cal-type]').each(function () {
+                    var $cal = $(this);
+                    if ($cal.data('cal-ready')) return;
+                    $cal.data('cal-ready', true);
+
+                    var type       = $cal.data('cal-type');   // 'date' | 'datetime'
+                    var initialIso = $cal.data('initial') || '';
+                    var $hidden    = $cal.find('input[type=hidden]');
+                    var pad        = function (n) { return String(n).padStart(2, '0'); };
+
+                    var fmtDate = function (d) {
+                        return pad(d.getDate()) + '.' + pad(d.getMonth() + 1) + '.' + d.getFullYear();
+                    };
+                    var fmtDatetime = function (d) {
+                        return fmtDate(d) + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes());
+                    };
+
+                    var opts = {
+                        type:       type === 'datetime' ? 'datetime' : 'date',
+                        monthFirst: false,
+                        today:      true,
+                        closable:   true,
+                        formatter:  type === 'datetime'
+                            ? { datetime: function (d) { return d ? fmtDatetime(d) : ''; } }
+                            : { date:     function (d) { return d ? fmtDate(d)     : ''; } },
+                        onChange: function (date) {
+                            if (!date) { $hidden.val(''); return; }
+                            var iso = type === 'datetime'
+                                ? date.getFullYear() + '-' + pad(date.getMonth()+1) + '-' + pad(date.getDate())
+                                  + 'T' + pad(date.getHours()) + ':' + pad(date.getMinutes())
+                                : date.getFullYear() + '-' + pad(date.getMonth()+1) + '-' + pad(date.getDate());
+                            $hidden.val(iso);
+                        },
+                    };
+
+                    $cal.calendar(opts);
+
+                    if (initialIso) {
+                        var parts = initialIso.split(/[-T:]/);
+                        var d = type === 'datetime'
+                            ? new Date(+parts[0], +parts[1]-1, +parts[2], +(parts[3]||0), +(parts[4]||0))
+                            : new Date(+parts[0], +parts[1]-1, +parts[2]);
+                        if (!isNaN(d)) $cal.calendar('set date', d, true, false);
+                    }
+                });
+            }
+
+            // Standalone-Seiten (Held/Spieler anlegen, Formular direkt im DOM).
+            document.addEventListener('DOMContentLoaded', function () {
+                initFomanticCalendars($(document));
             });
         </script>
 
