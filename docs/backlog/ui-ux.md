@@ -705,7 +705,7 @@ Speichern-Footer als Sticky-Bar. Tabs auf Mobil als Accordion (UI-40).
 **Abhängigkeiten:** Baut auf UI-38 (gleiches Wrapper-Muster); kombiniert mit
 UI-40 (Accordion) und UI-41 (Tabellen→Karten für `_bookings`/`_checkin`, vgl. UI-29).
 
-### UI-40 · [P2] Detail-Tabs auf Mobil als Accordion statt horizontaler Tab-Leiste · ⏱ 5h · 🔲
+### UI-40 · [P2] Detail-Tabs auf Mobil als Accordion statt horizontaler Tab-Leiste · ⏱ 5h · ✅
 **Beschreibung:** Alle Detailansichten nutzen Fomantic `tabular menu`: Helden bis
 zu 7 Tabs (Übersicht, Abenteuer, je Klasse einer, EP-Verlauf — vgl. UI-33),
 Verwaltung 4, Abenteuer-Detail 3, Spieler 4. Auf Mobil scrollt die Leiste
