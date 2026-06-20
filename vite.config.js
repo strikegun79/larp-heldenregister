@@ -10,6 +10,7 @@ export default defineConfig({
                 'resources/js/vendor.js',
                 'resources/css/app.css',
                 'resources/js/app.js',
+                'resources/js/heldenregister.js',
             ],
             refresh: true,
         }),

@@ -124,14 +124,16 @@
 
     @push('scripts')
     <script>
-        (function () {
+        {{-- ARCH-001: In DOMContentLoaded wrappen, damit heldenregister.js (Modul, deferred)
+             vor diesem Inline-Skript ausgeführt wurde und loadModalContent verfügbar ist. --}}
+        document.addEventListener('DOMContentLoaded', function () {
             const open = new URLSearchParams(window.location.search).get('open');
             if (!open) return;
             history.replaceState({}, '', '{{ route('adventures.index') }}');
-            appModalUrl = '{{ url('adventures') }}/' + open;
+            window.appModalUrl = '{{ url('adventures') }}/' + open;
             $('#app-modal').modal({ autofocus: false, observeChanges: true }).modal('show');
-            loadModalContent(appModalUrl);
-        })();
+            loadModalContent(window.appModalUrl);
+        });
     </script>
     @endpush
 </x-app-layout>
