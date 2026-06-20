@@ -37,13 +37,11 @@
 
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
 
-                {{-- Mobile: Kartenliste (nur < sm) --}}
+                {{-- Mobile: Kartenliste (nur < sm) — UI-38: direkte Navigation statt Modal --}}
                 <div class="sm:hidden divide-y divide-stone-200">
                     @forelse ($adventures as $adventure)
-                        <div data-modal-url="{{ route('adventures.show', $adventure) }}"
-                             role="button" tabindex="0"
-                             aria-label="Abenteuer {{ $adventure->name }} öffnen"
-                             class="p-4 cursor-pointer hover:bg-stone-50 active:bg-stone-100 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-600 focus-visible:outline-offset-[-2px]">
+                        <a href="{{ route('adventures.show', $adventure) }}"
+                           class="block p-4 hover:bg-stone-50 active:bg-stone-100 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-600 focus-visible:outline-offset-[-2px]">
                             <div class="font-medium text-stone-800">{{ $adventure->name }}</div>
                             <div class="text-sm text-stone-500 mt-0.5">
                                 {{ optional($adventure->start_at)->format('d.m.Y H:i') }}
@@ -60,7 +58,7 @@
                                     {{ $adventure->confirmed_bookings_count }}/{{ $adventure->max_player }} Plätze
                                 </span>
                             </div>
-                        </div>
+                        </a>
                     @empty
                         <div class="p-8 text-center">
                             <p class="font-medium text-stone-700 mb-1">Keine Abenteuer geplant.</p>

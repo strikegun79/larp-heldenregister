@@ -428,3 +428,389 @@ PDF/CSV) bleiben `<a>`.
 - [ ] Download-/Neuer-Tab-Aktionen bleiben semantisch `<a>`.
 **Betroffene Seiten/Routen:** `adventures/_detail.blade.php`, `heroes/_detail.blade.php`,
 `adventures/_manage.blade.php`
+
+## Child-Experience-Review 2026-06 (🔲)
+
+> Lese-Review aller Haupt-Flows aus Sicht von Kindern (8–12 am Elternhandy),
+> Jugendlichen (13–17, eigenes Handy) und Eltern/Betreuern. Fokus: problematische
+> Modale, Tabs, lange/komplexe Formulare, mehrstufige Abläufe. Reihenfolge:
+> zuerst Eltern-Flows (Anmeldung), dann Jugend-Flows (Heldenpflege), dann
+> Admin/Profil. Bereits erledigte Tickets (UI-15/16/19/22/23/24/25/26/27/28)
+> und die offenen UI-29/30 werden NICHT dupliziert. **Lösungshinweise sind nur
+> Vorschläge — in diesem Review wurde kein Anwendungscode geändert.**
+
+### UI-31 · [P1] Kosten/Beitrag vor dem Anmelden klar sichtbar machen · ⏱ 2h · 🔲
+**Beschreibung:** Der Teilnahmebeitrag (`$adventure->fee`) erscheint nur als Zeile
+„Beitrag" im ersten Tab des Detail-Modals (`adventures/_detail.blade.php`). Wer im
+Footer direkt auf „Anmelden" tippt und das gestapelte Anmeldeformular
+(`bookings/_create.blade.php`) öffnet, sieht dort **keinen Preis** mehr. Für
+Eltern ist „Was kostet das?" eine der ersten Fragen; sie schließen die Anmeldung
+ab, ohne die Kosten noch einmal vor Augen zu haben. Auch die Belegung
+(„X / Y, Z frei") und ein evtl. Wartelisten-Status sind im Formular nur teilweise
+präsent.
+**Nutzen:** Eltern verstehen Kosten und Platzsituation innerhalb von 30 Sekunden
+und schließen die Anmeldung mit Sicherheit statt Unsicherheit ab; weniger
+Rückfragen ans Orga-Team.
+**Lösungshinweis (nur Vorschlag):** Im Anmeldeformular oben eine kompakte
+Info-Zeile/`ui message` mit Abenteuername, Datum, Ort und **Beitrag** anzeigen
+(Daten liegen über `$adventure` bereits vor). Bei `fee == 0` „kostenlos"
+ausweisen. Wartelisten-Warnung (bereits vorhanden) beibehalten.
+**Akzeptanzkriterien:**
+- [ ] Beitrag ist im Anmelde- und Gast-Anmelde-Formular sichtbar (auch „kostenlos").
+- [ ] Datum + Ort des Abenteuers stehen im Formularkopf.
+- [ ] Bei vollem Abenteuer bleibt der Wartelisten-Hinweis sichtbar.
+**Betroffene Seiten/Routen:** `bookings/_create.blade.php`,
+`bookings/_create_guest.blade.php`, `adventures/_detail.blade.php`
+
+### UI-32 · [P1] Datenschutz-/Zweckhinweis bei Erfassung von Minderjährigen-Daten · ⏱ 3h · 🔲
+**Beschreibung:** An mehreren Stellen werden personenbezogene Daten von Kindern
+erhoben, **ohne Zweck- oder Datenschutzhinweis**: `players/_form.blade.php`
+(Geburtsdatum, Geschlecht, Anschrift des Kindes, E-Mail) und
+`bookings/_create_guest.blade.php` (Alter und Ort eines minderjährigen Gastes).
+Im Spieler-Anlegeformular fehlt jeder Hinweis, wofür Geburtsdatum/Adresse
+gebraucht werden und wer sie sieht. Das Buchungsformular für eigene Kinder
+(`_create`) macht das über UI-15 bereits vorbildlich (jedes Feld erklärt „nur fürs
+Orga-Team, Notfall"), die übrigen Stellen ziehen nicht nach. Für ein Angebot mit
+überwiegend minderjährigen Nutzern ist transparente Datenerhebung
+vertrauensbildend und datenschutzrechtlich relevant.
+**Nutzen:** Eltern vertrauen der Plattform, weil bei jeder Dateneingabe klar ist,
+warum und für wen sie erhoben wird; Transparenz im Sinne der Zielgruppe.
+**Lösungshinweis (nur Vorschlag):** Kurze `<small>`-Zweckhinweise je Feldgruppe
+ergänzen (analog UI-15), z. B. unter Geburtsdatum „Wird für altersgerechte
+Gruppen und die Notfallvorsorge benötigt." Einen Satz + Link zur
+Datenschutzerklärung am Formularanfang. Bei Gast-Alter/-Ort kurzer Zweckhinweis.
+**Akzeptanzkriterien:**
+- [ ] Geburtsdatum, Anschrift und E-Mail in `players/_form` haben einen
+      verständlichen Zweckhinweis (1 Satz) und Hinweis auf die Sichtbarkeit.
+- [ ] Gast-Alter und -Ort in `_create_guest` haben einen kurzen Zweckhinweis.
+- [ ] Verweis auf die Datenschutzerklärung am Anfang beider Formulare.
+**Betroffene Seiten/Routen:** `players/_form.blade.php`,
+`bookings/_create_guest.blade.php`
+
+### UI-33 · [P2] Helden-Detail: Tab-Flut für Kinder reduzieren/gruppieren · ⏱ 4h · 🔲
+**Beschreibung:** Das Helden-Detail-Modal (`heroes/_detail.blade.php`) zeigt
+dynamisch sehr viele Tabs: „Übersicht", „Abenteuer", **je Klasse einen eigenen
+Tab** (Fertigkeitsbaum) plus „EP-Verlauf". Bei einem Helden mit 3 Klassen sind das
+bereits 6 Tabs, bei 4 Klassen 7. Auf dem Handy ist die Tab-Leiste zwar horizontal
+scrollbar (UI-25), aber für Kinder (8–12) ist die Menge an gleichwertig
+aussehenden Reitern unübersichtlich; das spielerisch wichtigste Element (der
+Fertigkeitsbaum) konkurriert optisch mit Verwaltungs-Tabs („EP-Verlauf"). Es gibt
+keine visuelle Hierarchie zwischen „Spielen/Entdecken" und „Verwaltung/Historie".
+**Nutzen:** Kinder finden den Fertigkeitsbaum (das Belohnungsherz der App) sofort;
+weniger Orientierungsverlust, mehr Spielfreude.
+**Lösungshinweis (nur Vorschlag):** Fertigkeitsbäume der Klassen unter einem
+gemeinsamen Tab „Fertigkeiten" mit Unterauswahl (Klassen-Pills) bündeln, statt je
+Klasse einen Top-Level-Tab. Verwaltungs-/Historien-Tabs („EP-Verlauf") optisch
+oder per Reihenfolge nachordnen. Aktiven Tab beim Mobil-Öffnen sichtbar
+hervorheben.
+**Akzeptanzkriterien:**
+- [ ] Anzahl der Top-Level-Tabs steigt nicht mehr linear mit der Klassenzahl.
+- [ ] Fertigkeitsbäume bleiben pro Klasse erreichbar (Unterauswahl).
+- [ ] Spiel-relevante Tabs stehen vor Verwaltungs-/Historien-Tabs.
+- [ ] Verhalten auf 320–414 px geprüft (Tab-Leiste ohne Überforderung).
+**Betroffene Seiten/Routen:** `heroes/_detail.blade.php`
+
+### UI-34 · [P2] Erfahrungspunkte (EP) und Fachbegriffe im Helden-Detail erklären · ⏱ 3h · 🔲
+**Beschreibung:** Die Übersicht im Helden-Detail (`heroes/_detail.blade.php`)
+nennt „EP-Saldo", „EP gesamt / ausgegeben", „Fertigkeiten / Klassen" ohne jede
+Erklärung. Für ein Kind ist nicht ersichtlich, was EP sind, wie man sie bekommt
+und wofür man sie ausgibt – obwohl genau das die zentrale Spielmechanik und
+Motivationsschleife ist. UI-23 erklärt EP nur im Lern-Modal („EP werden durch
+Abenteuer-Teilnahme gutgeschrieben"), nicht aber in der Helden-Übersicht selbst.
+Auch im Navigationspunkt „EP buchen" und der Abenteuer-Detailzeile „Belegung"
+bleiben Begriffe unerklärt.
+**Nutzen:** Kinder verstehen den Kern-Spielkreislauf (Abenteuer → EP →
+Fertigkeiten) und werden zum Weitermachen motiviert; weniger Erklärbedarf durch
+Betreuer/Eltern.
+**Lösungshinweis (nur Vorschlag):** Kurzer, freundlicher Hilfetext/Tooltip bei
+„EP-Saldo" („Erfahrungspunkte – sammelst du durch Abenteuer, gibst du für
+Fertigkeiten aus."). Begriffe gemäß `docs/begriffe.md` vereinheitlichen; ggf.
+„verfügbar / insgesamt / ausgegeben" statt „Saldo".
+**Akzeptanzkriterien:**
+- [ ] „EP-Saldo" o. Ä. hat einen verständlichen Ein-Satz-Hilfetext/Tooltip.
+- [ ] Begriffe konsistent mit `docs/begriffe.md`.
+- [ ] Hilfetext ist auch auf dem Handy ohne Hover erreichbar (Touch).
+**Betroffene Seiten/Routen:** `heroes/_detail.blade.php`, `docs/begriffe.md`
+
+### UI-35 · [P2] Hilfetexte/Tooltips aus dem Anmelde- ins Bearbeiten-Formular übernehmen · ⏱ 1h · 🔲
+**Beschreibung:** `bookings/_create.blade.php` erklärt durch UI-15 jedes sensible
+Feld (Allergien, Medikamente, Erreichbarkeit, Notfallnummer) und enthält die
+Pflichtfeld-Legende sowie die Teilnahmebedingungen. Das Bearbeiten-Formular
+`bookings/_edit.blade.php` zeigt dieselben Felder **ohne diese Hilfetexte** (nur
+der NSC-Tooltip ist vorhanden) und ohne Pflichtfeld-Legende. Wer eine bestehende
+Anmeldung später korrigiert, verliert den Kontext, der beim ersten Mal noch da
+war – uneinheitlich und für Eltern verwirrend.
+**Nutzen:** Konsistente, vorhersehbare Bedienung; Eltern müssen die Bedeutung der
+Felder beim Bearbeiten nicht neu erschließen.
+**Lösungshinweis (nur Vorschlag):** Die `<small>`-Hilfetexte und die
+Pflichtfeld-Legende aus `_create` in `_edit` übernehmen (ggf. gemeinsames Partial
+für die Feldgruppe, um Doppelpflege zu vermeiden).
+**Akzeptanzkriterien:**
+- [ ] Allergien/Medikamente/Erreichbarkeit/Notfallnummer haben in `_edit` dieselben
+      Hilfetexte wie in `_create`.
+- [ ] Pflichtfeld-Legende auch in `_edit` vorhanden.
+- [ ] Keine inhaltliche Doppelpflege (gemeinsames Partial geprüft).
+**Betroffene Seiten/Routen:** `bookings/_edit.blade.php`, `bookings/_create.blade.php`
+
+### UI-36 · [P3] Profilseite ins Theme bringen + Datenübersicht/Datenschutz-Link · ⏱ 3h · 🔲
+**Beschreibung:** Die Profilseite (`profile/edit.blade.php`) bricht aus dem
+Mittelalter-/Pergament-Theme aus: generischer grauer Header
+(`text-gray-800`/`font-semibold` statt `font-uncial text-waldritter`) und weiße
+Breeze-Standardkarten. Für Eltern, die hier ihre Stammdaten und das Passwort
+pflegen, wirkt die Seite wie ein fremder, „technischer" Bereich – das schwächt das
+Vertrauen, das die übrigen (themengetreuen) Seiten aufbauen. Zudem fehlt ein
+zentraler, transparenter Überblick „Welche Daten sind über mich/mein Kind
+gespeichert?" und ein gut auffindbarer Link zur Datenschutzerklärung – gerade bei
+minderjährigen Nutzern ein wichtiger Vertrauensanker.
+**Nutzen:** Einheitliches, vertrauenswürdiges Erscheinungsbild; Eltern finden
+Datenschutz- und Dateninformationen an erwartbarer Stelle.
+**Lösungshinweis (nur Vorschlag):** Header auf `font-uncial text-waldritter`
+umstellen, Karten an das Theme angleichen (`bg-white/60 border-2`…). Abschnitt
+„Deine gespeicherten Daten" mit Verweis auf die Datenschutzerklärung und
+Kontaktmöglichkeit ergänzen.
+**Akzeptanzkriterien:**
+- [ ] Profil-Header und Karten folgen dem Pergament-/Waldritter-Theme.
+- [ ] Sichtbarer Link zur Datenschutzerklärung auf der Profilseite.
+- [ ] Kurzer Hinweis, welche Datenkategorien gespeichert sind / an wen man sich wendet.
+**Betroffene Seiten/Routen:** `profile/edit.blade.php`,
+`profile/partials/*` (Header-Stil)
+
+### UI-37 · [P3] Orientierung im zweistufigen Anmelde-Modal-Stack verbessern · ⏱ 2h · 🔲
+**Beschreibung:** Der Eltern-Anmeldeflow läuft über zwei gestapelte Modals:
+Abenteuer-Detail (`#app-modal`) → „Anmelden" öffnet das Anmeldeformular im
+gestapelten Modal (`#app-modal-2`). Auf dem Handy ist nicht erkennbar, dass man
+sich auf einer zweiten Ebene befindet und dass „Schließen" zurück zum Detail führt
+(nicht abbricht). Es gibt keine Schritt-/Orientierungsanzeige („Schritt: Anmeldung
+für <Abenteuer>"). Kinder/Eltern verlieren bei langem Formular und Scroll leicht
+den Kontext, in welchem Abenteuer sie gerade anmelden.
+**Nutzen:** Klare Orientierung im mehrstufigen Flow; geringeres Risiko,
+versehentlich abzubrechen oder das falsche Abenteuer zu buchen.
+**Lösungshinweis (nur Vorschlag):** Im gestapelten Anmelde-Modal einen klaren,
+kontextgebenden Titel/Breadcrumb anzeigen („Anmeldung · <Abenteuer>") – Titel ist
+bereits gesetzt, aber visuell als Ebene-2 kennzeichnen. „Schließen" ggf. in
+„Zurück" umbenennen, wo es nur die obere Ebene schließt.
+**Akzeptanzkriterien:**
+- [ ] Gestapeltes Anmelde-Modal zeigt sichtbar Abenteuername als Kontext.
+- [ ] Schließen/Zurück-Aktion ist als „zurück zum Abenteuer" erkennbar.
+- [ ] Auf 320–414 px geprüft.
+**Betroffene Seiten/Routen:** `layouts/app.blade.php`,
+`bookings/_create.blade.php`, `bookings/_create_guest.blade.php`
+
+## Mobile-First-Konzept 2026-06 (🔲)
+
+> Zielgruppe: Kinder 8–17 + Eltern, primär am **Smartphone**. Das System ist
+> heute „Desktop-mit-Mobil-Pflaster": fast alle Details laufen als AJAX-Modal
+> (`#app-modal`), Detailansichten nutzen horizontale Fomantic-Tabs, Tabellen in
+> Modals sind nur quer-scrollbar, und die gesamte Sekundär-Navigation versteckt
+> sich auf Mobil im Hamburger. Dieses Konzept dreht die Logik auf Mobile-First.
+> **Kein Anwendungscode in diesem Review geändert — Lösungshinweise sind Vorschläge.**
+>
+> **Modal → Seite:** Die „großen", verlinkbaren Entitäten werden auf Mobil zu
+> echten Seiten mit eigener URL — Helden-Detail, Abenteuer-Detail und das
+> Verwaltungs-Modal. Sie haben bereits reale Routen (`heroes.show`,
+> `adventures.show`, `adventures.manage`), liefern bei AJAX nur das Partial → der
+> Umbau zur Vollseite ist günstig (Browser-Back, Teilen/Verlinken, weniger
+> DOM-/Scroll-Konflikte, kein Stack-Chaos). **Modal bleiben** die kurzen,
+> kontextgebundenen Aktionen: Bestätigung, Skill-Lernen, Foto-Crop, Unterschrift/
+> Check-in, Abmelde-Grund — und die kurzen Formulare (Anmeldung, EP buchen,
+> Bearbeiten) als Bottom-Sheet. **Spieler-Detail** bleibt vorerst Modal (kürzer,
+> meist Sprungbrett zum Helden), kann später nachziehen.
+>
+> **Tabs → Accordion:** Auf < `sm` werden die Detail-Tabs (Helden, Abenteuer,
+> Verwaltung, Spieler) zu vertikalen Accordions (eine Sektion offen). Das löst
+> das horizontale Tab-Scrollen (UI-25) und die Tab-Flut bei vielen Helden-Klassen
+> (UI-33). Ab `sm` bleiben Tabs.
+>
+> **Bottom-Navigation (5 Punkte, nur < `sm`):** Übersicht · Helden · Abenteuer ·
+> Spieler · Mehr. „Mehr" öffnet ein Sheet mit den rollenabhängigen Resten
+> (Fertigkeiten, EP buchen, Verwaltung) + Profil, Benachrichtigungen, Abmelden.
+> Punkte respektieren `@can`; fehlt eine Berechtigung, rückt der nächste erlaubte
+> Punkt nach. Top-Navbar bleibt ab `sm`.
+>
+> **Mobiles Dashboard:** Statt reiner Bild-Kachel-Navigation (die die Bottom-Nav
+> ohnehin dupliziert) oben Quick-Actions + „Nächstes Abenteuer" + Hero-/EP-Status.
+>
+> **Umsetzungsreihenfolge:**
+> - **Phase 1 (Breaking, Architektur):** UI-38 (Detail-Seiten Helden/Abenteuer),
+>   UI-39 (Verwaltung als Seite), UI-42 (Bottom-Nav). Verändert Routing/Layout.
+> - **Phase 2 (Enhancement, additiv):** UI-40 (Tabs→Accordion), UI-41
+>   (Modal-Tabellen→Karten, erweitert UI-29), UI-43 (mobiles Dashboard),
+>   UI-44 (Anmelde-/Kurzformulare als Bottom-Sheet). Bauen auf Phase 1 auf.
+
+### UI-38 · [P1] Helden- & Abenteuer-Detail als echte Seite (mit Modal-Fallback) · ⏱ 8h · ✅
+**Beschreibung:** Helden- und Abenteuer-Detail öffnen heute ausschließlich im
+AJAX-Modal (`#app-modal`, Partials `heroes/_detail.blade.php`,
+`adventures/_detail.blade.php`). Auf dem Smartphone bedeutet das: kein nutzbarer
+Browser-Zurück (Schließen nur per Footer-Button), keine teil-/verlinkbare URL,
+verschachteltes Scrollen (Seite + Modal-Body), und beim Anmelden ein zweistufiger
+Modal-Stack (UI-37). Da `heroes.show`/`adventures.show` bereits **echte Routen**
+sind, die bei `X-Requested-With` nur das Partial liefern, kann derselbe Inhalt mit
+geringem Aufwand auch als Vollseite ausgeliefert werden.
+**Nutzen:** Kinder/Eltern bekommen echtes Zurück, teilbare Links (z. B. Abenteuer
+per Link weitergeben), flüssiges Scrollen ohne Modal-im-Modal und einen klaren
+„eine Sache pro Bildschirm"-Fokus — die Kernerwartung am Handy.
+**Lösungshinweis (nur Vorschlag):** Bei Nicht-AJAX-Request das vorhandene Partial
+in `x-app-layout` wrappen: `data-modal-title` → Seiten-Header (`font-uncial
+text-waldritter`), `data-modal-actions` → Sticky-Footer-Leiste am unteren Rand
+(Tap-Ziel ≥ 44 px). Modal-Variante als Verhalten ab `sm` (Desktop) optional
+beibehalten oder ganz auf Seiten umstellen. Anmelden/Verwalten verlinken dann auf
+echte Seiten/Sheet statt Modal-Stack.
+**Akzeptanzkriterien:**
+- [x] `heroes.show` und `adventures.show` rendern vollwertige Seite mit Theme-Header und `<x-mobile.sticky-footer>`.
+- [x] Browser-Zurück führt von der Detailseite zur Liste zurück (echte Route, kein Redirect).
+- [x] Detail-URL ist teil-/verlinkbar.
+- [x] Aktionen (Anmelden/Gast/Teamer → Modal, Verwalten → direkte Seitennavigation, Bearbeiten → Modal).
+- [x] Mobile Cards in adventures/index + heroes/index navigieren direkt (kein Modal mehr auf < sm).
+- [x] Desktop-Tabellenzeilen öffnen weiterhin per Modal (unverändert).
+**Betroffene Seiten/Routen:** `heroes/_detail.blade.php`, `adventures/_detail.blade.php`,
+`HeroController@show`, `AdventureController@show`, `routes/web.php`, `layouts/app.blade.php`
+**Abhängigkeiten:** Entschärft UI-28 (vertikale Modal-Sichtbarkeit) und UI-37
+(Stack-Orientierung) für diese Ansichten; Grundlage für UI-40/UI-41.
+
+### UI-39 · [P1] Abenteuer-Verwaltung als eigene Seite statt Modal · ⏱ 5h · 🔲
+**Beschreibung:** Das Verwaltungs-Modal (`adventures/_manage.blade.php`, Route
+`adventures.manage`) ist der inhaltlich schwerste Dialog: 4 Tabs (Event-Daten-
+Editor, Anmeldungen, Teamer/NSC, Check-in) mit breiten Tabellen und Formularen,
+erzwungen auf `min-height: min(820px,60vh)` (`modal-event`). Es wird heute aus dem
+Abenteuer-Detail-Modal **als weiteres Modal** geöffnet — auf dem Handy/Tablet am
+Veranstaltungsort (Check-in!) kaum beherrschbar. `adventures.manage` ist bereits
+eine echte Route.
+**Nutzen:** Spielleitungen/Teamer können Anmeldungen und Check-in am Handy/Tablet
+vor Ort bedienen; voller Bildschirm, echtes Zurück, kein Modal-Höhen-Konflikt.
+**Lösungshinweis (nur Vorschlag):** `adventures.manage` als Vollseite rendern
+(Partial in `x-app-layout`), „Verwalten" im Detail wird ein Link auf diese Seite.
+Speichern-Footer als Sticky-Bar. Tabs auf Mobil als Accordion (UI-40).
+**Akzeptanzkriterien:**
+- [ ] `adventures.manage` ist eine eigene Seite mit Theme-Header und Sticky-Speichern.
+- [ ] „Verwalten" navigiert dorthin (kein Modal mehr).
+- [ ] Check-in/Anmeldungen auf 320–414 px ohne Modal-Höhen-Abschneiden bedienbar.
+- [ ] Browser-Zurück führt zurück zum Abenteuer-Detail.
+**Betroffene Seiten/Routen:** `adventures/_manage.blade.php`,
+`AdventureController@manage`, `routes/web.php`
+**Abhängigkeiten:** Baut auf UI-38 (gleiches Wrapper-Muster); kombiniert mit
+UI-40 (Accordion) und UI-41 (Tabellen→Karten für `_bookings`/`_checkin`, vgl. UI-29).
+
+### UI-40 · [P2] Detail-Tabs auf Mobil als Accordion statt horizontaler Tab-Leiste · ⏱ 5h · 🔲
+**Beschreibung:** Alle Detailansichten nutzen Fomantic `tabular menu`: Helden bis
+zu 7 Tabs (Übersicht, Abenteuer, je Klasse einer, EP-Verlauf — vgl. UI-33),
+Verwaltung 4, Abenteuer-Detail 3, Spieler 4. Auf Mobil scrollt die Leiste
+horizontal (UI-25 Workaround), aber nebeneinander liegende, gleich aussehende
+Reiter sind für Kinder unübersichtlich, und nicht-aktive Tabs sind unsichtbar
+(kein Überblick, was es überhaupt gibt). Ein vertikales Accordion zeigt alle
+Sektionen untereinander; eine ist offen.
+**Nutzen:** Kinder sehen sofort, welche Bereiche es gibt; kein horizontales
+Suchen; der spielwichtige Fertigkeitsbaum ist klar auffindbar (ergänzt UI-33).
+**Lösungshinweis (nur Vorschlag):** Auf < `sm` die Tab-Struktur als Accordion
+rendern (z. B. Fomantic `ui accordion` oder native `<details>`), ab `sm` weiter
+Tabs. Reihenfolge spielrelevant zuerst (Fertigkeiten vor Verwaltung/Historie,
+vgl. UI-33). Offen-Zustand bei Teil-Refresh erhalten.
+**Akzeptanzkriterien:**
+- [ ] Auf < `sm` werden Detail-Tabs als Accordion (eine Sektion offen) dargestellt.
+- [ ] Alle Sektionen sind ohne horizontales Scrollen erreichbar.
+- [ ] Tastatur-/Screenreader-bedienbar (aufklappbar mit Enter/Space, Status erkennbar).
+- [ ] Ab `sm` bleibt das bisherige Tab-Verhalten erhalten.
+- [ ] Geprüft mit einem Helden mit ≥ 3 Klassen (≥ 6 Sektionen) auf 320–414 px.
+**Betroffene Seiten/Routen:** `heroes/_detail.blade.php`, `adventures/_detail.blade.php`,
+`adventures/_manage.blade.php`, `players/_detail.blade.php`, `layouts/app.blade.php` (Tab-Init)
+**Abhängigkeiten:** Ergänzt UI-25 (Tab-Scrollen) und UI-33 (Tab-Flut); wirkt in
+UI-38/UI-39-Seiten wie im verbleibenden Modal.
+
+### UI-41 · [P2] Tabellen in Detailansichten & Admin auf Mobil als Karten · ⏱ 5h · 🔲
+**Beschreibung:** UI-19 hat die Index-Listen (Helden, Abenteuer) auf Karten
+umgestellt, UI-29 adressiert die Anmeldungs-/Check-in-Tabellen. Ungelöst bleiben
+weitere mehrspaltige Tabellen **in Detailansichten** — Spieler-Detail (Helden,
+besuchte Abenteuer), Helden-Detail (bestrittene Abenteuer, Anmeldungen,
+EP-Verlauf, Perlen) — sowie die **Admin-Lookups**, die nur `overflow-x-auto`
+haben (UI-19) und damit auf dem Handy weiterhin quer gescrollt werden müssen.
+**Nutzen:** Eltern/Kinder lesen Helden-Historie und EP-Verlauf am Handy ohne
+Quer-Scrollen; Admins bedienen Lookups mobil.
+**Lösungshinweis (nur Vorschlag):** Wiederverwendbares „Tabelle → Karten unter
+< `sm`"-Muster (Label/Wert-Paare) wie in UI-19, idealerweise als Blade-Komponente,
+um Doppelpflege zu vermeiden. Zuerst Detail-Tabellen, dann Admin-Lookups.
+**Akzeptanzkriterien:**
+- [ ] Tabellen in `players/_detail` und `heroes/_detail` werden auf < `sm` als
+      Karten (Label + Wert) dargestellt, ohne erzwungenes Quer-Scrollen.
+- [ ] Mindestens die meistgenutzten Admin-Lookups (Nutzer, Spieler, Veranstaltungen)
+      erhalten einen Kartenfallback auf < `sm`.
+- [ ] Interaktive Zeilen behalten Tap-Ziel + Tastaturbedienung (vgl. UI-20).
+- [ ] Geprüft auf 320–414 px.
+**Betroffene Seiten/Routen:** `players/_detail.blade.php`, `heroes/_detail.blade.php`,
+`adventures/_bookings.blade.php`, `admin/*/index.blade.php`
+**Abhängigkeiten:** Erweitert UI-19 und UI-29 auf Detail-/Admin-Tabellen; nutzt
+das gleiche Karten-Muster.
+
+### UI-42 · [P1] Bottom-Navigation für Mobil (5 Hauptpunkte + „Mehr") · ⏱ 6h · 🔲
+**Beschreibung:** Die Navigation (`layouts/navigation.blade.php`) ist eine
+Top-Navbar mit Alpine-Hamburger; auf Mobil verschwinden **alle** Navigationsziele
+(inkl. Benachrichtigungen, Profil, Abmelden) hinter dem Hamburger-Icon. Für die
+junge, mobile Zielgruppe ist eine permanent sichtbare Bottom-Navigation mit großen
+Tap-Zielen die erwartete und schnellste Bedienung (Daumenreichweite).
+**Nutzen:** Die wichtigsten Bereiche sind mit einem Daumen-Tap erreichbar; weniger
+Klicks, klare Orientierung, app-typisches Gefühl für Kinder/Jugendliche.
+**Lösungshinweis (nur Vorschlag):** Fixierte Bottom-Bar nur < `sm`
+(`fixed bottom-0`), 5 Punkte: **Übersicht · Helden · Abenteuer · Spieler · Mehr**.
+Jeder Punkt Icon + Kurzlabel, aktiver Zustand farbig (Waldritter/Amber),
+Tap-Ziel ≥ 44 px. `@can` respektieren (fehlt z. B. Heldenregister, rückt der
+nächste erlaubte Punkt nach oder „Mehr" trägt ihn). „Mehr" öffnet ein Sheet mit
+Fertigkeiten, EP buchen, Verwaltung (rollenabhängig) + Profil, Benachrichtigungen
+(mit Badge), Abmelden. `<main>` unten Padding geben, damit die Bar nichts verdeckt.
+Top-Navbar bleibt ab `sm`; Hamburger entfällt < `sm`.
+**Akzeptanzkriterien:**
+- [ ] Auf < `sm` ist eine fixierte Bottom-Nav mit bis zu 5 Punkten sichtbar.
+- [ ] „Mehr" öffnet Profil, Abmelden, Benachrichtigungen + rollenabhängige Reste.
+- [ ] Aktiver Bereich ist hervorgehoben; Tap-Ziele ≥ 44 px.
+- [ ] Punkte/Sheet-Einträge respektieren die `@can`-Berechtigungen.
+- [ ] Inhalt wird nicht von der Bar verdeckt (ausreichendes `padding-bottom`).
+- [ ] Benachrichtigungs-Badge bleibt mobil sichtbar erreichbar.
+**Betroffene Seiten/Routen:** `layouts/navigation.blade.php`, `layouts/app.blade.php`
+**Abhängigkeiten:** Unabhängig umsetzbar; harmoniert mit UI-43 (Dashboard muss die
+Kachel-Navigation dann nicht mehr doppeln).
+
+### UI-43 · [P2] Mobiles Dashboard: Quick-Actions, nächstes Abenteuer, Hero-Status · ⏱ 5h · 🔲
+**Beschreibung:** Das Dashboard (`dashboard.blade.php`) ist auf Mobil eine reine
+Kachel-Navigation (5–6 große Bild-Kacheln `h-44`), die exakt die Nav-Ziele
+dupliziert und viel vertikalen Platz frisst, ohne inhaltlichen Mehrwert. Für die
+Zielgruppe wäre die Startseite wertvoller mit konkretem Kontext: Was steht als
+Nächstes an? Wie viele EP hat mein aktiver Held? Was kann ich jetzt tun?
+**Nutzen:** Kinder/Eltern sehen beim Öffnen sofort Relevantes (nächstes Abenteuer,
+EP-Stand) und die häufigsten Aktionen — statt nur ein zweites Menü. Mehr
+Motivation, weniger Klicks.
+**Lösungshinweis (nur Vorschlag):** Auf < `sm` oben kompakte Quick-Action-Buttons
+(z. B. „Zu Abenteuern", „Mein Held", „Anmelden"), darunter Karte „Nächstes
+Abenteuer" (Name, Datum, Ort, Anmelden) und „Mein aktiver Held" (Name, EP-Saldo,
+Link). Bild-Kacheln auf Mobil reduzieren oder weglassen (Bottom-Nav UI-42 deckt
+Navigation ab). Admin-Kennzahlen (`$metrics`) bleiben.
+**Akzeptanzkriterien:**
+- [ ] Auf < `sm` zeigt das Dashboard Quick-Actions statt nur Bild-Kacheln.
+- [ ] „Nächstes Abenteuer" (falls vorhanden) mit Datum/Ort + Aktion sichtbar.
+- [ ] Hero-/EP-Status des aktiven Helden sichtbar (falls vorhanden).
+- [ ] Sinnvoller Leerzustand, wenn nichts ansteht (vgl. UI-22).
+- [ ] Geprüft auf 320–414 px.
+**Betroffene Seiten/Routen:** `dashboard.blade.php`, `DashboardController`
+**Abhängigkeiten:** Sinnvoll nach UI-42 (Navigation aus dem Dashboard ausgelagert);
+nutzt Leerzustands-Muster aus UI-22.
+
+### UI-44 · [P2] Kurzformulare (Anmeldung, EP, Bearbeiten) als Bottom-Sheet statt Stack-Modal · ⏱ 4h · 🔲
+**Beschreibung:** Nach dem Umbau der Detailansichten zu Seiten (UI-38/39) sollen
+die kurzen, kontextgebundenen Formulare nicht wieder als (gestapelte) zentrierte
+Desktop-Modals erscheinen — auf Mobil ist dafür ein vom unteren Rand
+einfahrendes Bottom-Sheet die natürlichere, daumenfreundlichere Form (Schließen
+durch Wegwischen/Button unten). Betrifft Anmeldung/Gast-Anmeldung
+(`bookings/_create*`), EP buchen und die Bearbeiten-Formulare.
+**Nutzen:** Eltern füllen das Anmeldeformular in einer ruhigen, vollbreiten
+Vom-Rand-Ansicht aus; klarer Schließen-/Abschicken-Bereich unten in
+Daumenreichweite; Orientierungsverlust aus UI-37 entfällt.
+**Lösungshinweis (nur Vorschlag):** Auf < `sm` Modal als Bottom-Sheet stylen
+(volle Breite, vom unteren Rand, Drag-/Schließleiste oben, Footer fix unten).
+Ab `sm` weiter zentriertes Modal. Kontext-Kopf „Anmeldung · <Abenteuer>" (UI-37)
+beibehalten.
+**Akzeptanzkriterien:**
+- [ ] Anmelde-/Gast-/EP-/Bearbeiten-Formulare erscheinen auf < `sm` als Bottom-Sheet.
+- [ ] Schließen-/Abschicken-Bereich ist unten fix und in Daumenreichweite.
+- [ ] Kontext (Abenteuername) ist im Sheet-Kopf sichtbar.
+- [ ] Ab `sm` unverändertes Modalverhalten.
+- [ ] Geprüft auf 320–414 px.
+**Betroffene Seiten/Routen:** `layouts/app.blade.php`, `public/css/heldenregister.css`,
+`bookings/_create.blade.php`, `bookings/_create_guest.blade.php`, `bookings/_edit.blade.php`
+**Abhängigkeiten:** Setzt UI-38/39 voraus (Stack entsteht dann nicht mehr aus
+Detail-Modals); ersetzt teilweise UI-37; nutzt Footer-Wrap aus UI-26/27.

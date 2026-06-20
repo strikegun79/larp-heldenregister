@@ -56,13 +56,11 @@
 
             <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
 
-                {{-- Mobile: Kartenliste (nur < sm) --}}
+                {{-- Mobile: Kartenliste (nur < sm) — UI-38: direkte Navigation statt Modal --}}
                 <div class="sm:hidden divide-y divide-stone-200">
                     @forelse ($heroes as $hero)
-                        <div data-modal-url="{{ route('heroes.show', $hero) }}"
-                             role="button" tabindex="0"
-                             aria-label="Held {{ $hero->character_name ?? 'unbenannt' }} öffnen"
-                             class="p-4 cursor-pointer hover:bg-black/5 active:bg-black/10 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-600 focus-visible:outline-offset-[-2px] {{ $hero->died ? 'opacity-60' : '' }}">
+                        <a href="{{ route('heroes.show', $hero) }}"
+                           class="block p-4 hover:bg-black/5 active:bg-black/10 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-600 focus-visible:outline-offset-[-2px] {{ $hero->died ? 'opacity-60' : '' }}">
                             <div class="font-medium text-stone-800">{{ $hero->character_name ?? '—' }}</div>
                             <div class="text-sm text-stone-500 mt-0.5">{{ $hero->player?->full_name ?? '—' }}</div>
                             <div class="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2 text-xs text-stone-500">
@@ -76,7 +74,7 @@
                                     <span>{{ $hero->active ? 'aktiv' : 'inaktiv' }}</span>
                                 @endif
                             </div>
-                        </div>
+                        </a>
                     @empty
                         <div class="p-8 text-center">
                             <p class="font-medium text-stone-700 mb-1">Noch keine Helden erfasst.</p>
