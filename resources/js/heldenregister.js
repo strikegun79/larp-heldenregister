@@ -83,14 +83,22 @@ function loadModalContent(url, preserveTab) {
 window.loadModalContent = loadModalContent;
 
 // UI-20: Tastatursteuerung für interaktive Zeilen/Karten (tabindex="0").
-// Enter oder Space auf fokussierten [data-modal-url]/[data-modal-stack]-Elementen
+// Enter oder Space auf fokussierten [data-modal-url]/[data-modal-stack]/[data-navigate]-Elementen
 // löst denselben Pfad wie ein Mausklick aus.
 document.addEventListener('keydown', function (e) {
     if (e.key !== 'Enter' && e.key !== ' ') return;
-    const trigger = e.target.closest('[data-modal-url], [data-modal-stack]');
+    const trigger = e.target.closest('[data-modal-url], [data-modal-stack], [data-navigate]');
     if (!trigger || trigger.tagName === 'A' || trigger.tagName === 'BUTTON') return;
     e.preventDefault();
     trigger.click();
+});
+
+// Direktnavigation für [data-navigate]-Elemente (z. B. klickbare Tabellenzeilen).
+document.addEventListener('click', function (e) {
+    const trigger = e.target.closest('[data-navigate]');
+    if (!trigger) return;
+    if (e.target.closest('a, button, form')) return;
+    location.href = trigger.getAttribute('data-navigate');
 });
 
 // Klick auf ein Element mit data-modal-url -> Inhalt per AJAX ins Modal laden.

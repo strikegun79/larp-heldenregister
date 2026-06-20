@@ -22,32 +22,21 @@
                                 <th class=”px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase”>Beginn</th>
                                 <th class=”px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase”>Status</th>
                                 <th class=”px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase”>Belegung</th>
-                                <th class=”px-6 py-3”></th>
                             </tr>
                         </thead>
                         <tbody class=”divide-y divide-stone-200 text-stone-800”>
                             @forelse ($adventures as $adventure)
-                                <tr>
+                                <tr data-navigate=”{{ route('adventures.manage', $adventure) }}”
+                                    role=”button” tabindex=”0”
+                                    aria-label=”Abenteuer {{ $adventure->name }} verwalten”
+                                    class=”cursor-pointer hover:bg-stone-50 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-600 focus-visible:outline-offset-[-2px]”>
                                     <td data-label=”Name” class=”px-6 py-4 font-medium”>{{ $adventure->name }}</td>
                                     <td data-label=”Beginn” class=”px-6 py-4”>{{ optional($adventure->start_at)->format('d.m.Y H:i') }}</td>
                                     <td data-label=”Status” class=”px-6 py-4”>@include('adventures._status_badge', ['status' => $adventure->status])</td>
                                     <td data-label=”Belegung” class=”px-6 py-4”>{{ $adventure->confirmed_bookings_count }} / {{ $adventure->max_player }}</td>
-                                    <td class=”px-6 py-4 text-right”>
-                                        <div class=”flex items-center justify-end gap-3”>
-                                            <a href=”{{ route('adventures.manage', $adventure) }}”
-                                               class=”text-waldritter hover:underline”>Verwalten</a>
-                                            @if ($adventure->event_status_id !== \App\Models\EventStatus::CANCELLED && $adventure->canTransitionTo(\App\Models\EventStatus::CANCELLED))
-                                                <form method=”POST” action=”{{ route('adventures.cancel', $adventure) }}”
-                                                      data-confirm=”Abenteuer „{{ $adventure->name }}” wirklich absagen?”>
-                                                    @csrf @method('PATCH')
-                                                    <button type=”submit” class=”text-red-600 hover:underline”>Absagen</button>
-                                                </form>
-                                            @endif
-                                        </div>
-                                    </td>
                                 </tr>
                             @empty
-                                <tr><td colspan=”5” class=”px-6 py-4 text-stone-500”>Noch keine Abenteuer.</td></tr>
+                                <tr><td colspan=”4” class=”px-6 py-4 text-stone-500”>Noch keine Abenteuer.</td></tr>
                             @endforelse
                         </tbody>
                     </table>
