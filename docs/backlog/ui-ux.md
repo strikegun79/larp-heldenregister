@@ -542,7 +542,7 @@ Fertigkeiten aus."). Begriffe gemäß `docs/begriffe.md` vereinheitlichen; ggf.
 - [ ] Hilfetext ist auch auf dem Handy ohne Hover erreichbar (Touch).
 **Betroffene Seiten/Routen:** `heroes/_detail.blade.php`, `docs/begriffe.md`
 
-### UI-35 · [P2] Hilfetexte/Tooltips aus dem Anmelde- ins Bearbeiten-Formular übernehmen · ⏱ 1h · 🔲
+### UI-35 · [P2] Hilfetexte/Tooltips aus dem Anmelde- ins Bearbeiten-Formular übernehmen · ⏱ 1h · ✅
 **Beschreibung:** `bookings/_create.blade.php` erklärt durch UI-15 jedes sensible
 Feld (Allergien, Medikamente, Erreichbarkeit, Notfallnummer) und enthält die
 Pflichtfeld-Legende sowie die Teilnahmebedingungen. Das Bearbeiten-Formular
@@ -556,11 +556,15 @@ Felder beim Bearbeiten nicht neu erschließen.
 Pflichtfeld-Legende aus `_create` in `_edit` übernehmen (ggf. gemeinsames Partial
 für die Feldgruppe, um Doppelpflege zu vermeiden).
 **Akzeptanzkriterien:**
-- [ ] Allergien/Medikamente/Erreichbarkeit/Notfallnummer haben in `_edit` dieselben
+- [x] Allergien/Medikamente/Erreichbarkeit/Notfallnummer haben in `_edit` dieselben
       Hilfetexte wie in `_create`.
-- [ ] Pflichtfeld-Legende auch in `_edit` vorhanden.
-- [ ] Keine inhaltliche Doppelpflege (gemeinsames Partial geprüft).
+- [x] Pflichtfeld-Legende auch in `_edit` vorhanden.
+- [x] Keine inhaltliche Doppelpflege (gemeinsames Partial geprüft).
 **Betroffene Seiten/Routen:** `bookings/_edit.blade.php`, `bookings/_create.blade.php`
+**Implementierung:** Pflichtfeld-Legende, Placeholder-Texte und `<small>`-Hilfetexte
+aus `_create` in `_edit` übernommen. Gemeinsames Partial abgelehnt: `_edit` hat
+andere Defaults (Bestandswerte statt `old()`), keine Spieler-Auswahl, keine AGB —
+zu unterschiedlich für sinnvolle Abstraktion.
 
 ### UI-36 · [P3] Profilseite ins Theme bringen + Datenübersicht/Datenschutz-Link · ⏱ 3h · 🔲
 **Beschreibung:** Die Profilseite (`profile/edit.blade.php`) bricht aus dem

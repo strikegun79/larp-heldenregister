@@ -6,6 +6,8 @@
       class="ui form">
     @csrf @method('PUT')
 
+    <p class="text-xs text-stone-400 mb-3">Mit <span class="text-red-500">*</span> markierte Felder sind Pflichtfelder.</p>
+
     <div class="field">
         <label>Rolle</label>
         <select name="event_role_id" required>
@@ -32,18 +34,21 @@
     </fieldset>
 
     <div class="field">
-        <label>Allergien</label>
-        <textarea name="allergien" rows="2">{{ $booking->allergien }}</textarea>
+        <label>Allergien / Unverträglichkeiten</label>
+        <textarea name="allergien" rows="2" placeholder="z. B. Nüsse, Laktose, Bienen …">{{ $booking->allergien }}</textarea>
+        <small class="text-stone-400">Optional – wird nur dem Organisationsteam angezeigt und dient ausschließlich der Sicherheit deines Kindes.</small>
     </div>
 
     <div class="field">
         <label>Medikamente</label>
-        <textarea name="medikamente" rows="2">{{ $booking->medikamente }}</textarea>
+        <textarea name="medikamente" rows="2" placeholder="z. B. Epipen, Inhalator, tägliche Einnahme …">{{ $booking->medikamente }}</textarea>
+        <small class="text-stone-400">Optional – regelmäßige Medikamente, die dein Kind während der Veranstaltung benötigt. Nur für das Orga-Team sichtbar.</small>
     </div>
 
     <div class="field">
-        <label>Erreichbarkeit</label>
-        <textarea name="erreichbarkeit" rows="2">{{ $booking->erreichbarkeit }}</textarea>
+        <label>Erreichbarkeit während der Veranstaltung</label>
+        <textarea name="erreichbarkeit" rows="2" placeholder="z. B. Handy-Nummer vor Ort, Hotel, Zeltplatz …">{{ $booking->erreichbarkeit }}</textarea>
+        <small class="text-stone-400">Optional – wo kannst du kurzfristig erreicht werden, falls wir dich kontaktieren müssen?</small>
     </div>
 
     <div class="field required">
@@ -51,8 +56,12 @@
         <input type="tel" name="kontakt_telefon" maxlength="100" required
                value="{{ old('kontakt_telefon', $booking->kontakt_telefon ?? $userPhone ?? '') }}"
                placeholder="z. B. +49 123 456789">
-        @if (!$booking->kontakt_telefon && $userPhone)
-            <small class="text-stone-400">Aus dem Spielerprofil übernommen – du kannst die Nummer ändern.</small>
+        @if ($booking->kontakt_telefon)
+            <small class="text-stone-400">Diese Nummer wird im Notfall kontaktiert.</small>
+        @elseif ($userPhone)
+            <small class="text-stone-400">Aus deinem Profil übernommen – du kannst die Nummer für dieses Event ändern.</small>
+        @else
+            <small class="text-stone-400">Diese Nummer wird im Notfall kontaktiert.</small>
         @endif
     </div>
 
