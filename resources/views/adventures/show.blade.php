@@ -17,7 +17,9 @@
 
     @push('scripts')
     <script>
-        $(function () { $('.menu .item[data-tab]').tab(); });
+        document.addEventListener('DOMContentLoaded', function () {
+            $('.menu .item[data-tab]').tab();
+        });
     </script>
     @endpush
 </x-app-layout>

@@ -104,13 +104,8 @@ class AdventureController extends Controller
             ->with('status', 'Abenteuer wurde angelegt.');
     }
 
-    public function show(Request $request, Adventure $adventure): View|RedirectResponse
+    public function show(Request $request, Adventure $adventure): View
     {
-        // Direktaufruf im Browser → zur Index-Seite umleiten, dort Modal per ?open= öffnen.
-        if (! $request->ajax()) {
-            return redirect()->route('adventures.index', ['open' => $adventure->id]);
-        }
-
         $adventure->load(['location', 'status', 'category', 'client', 'bookings.player', 'bookings.role', 'visits', 'gamemaster', 'eventleader', 'teamerSignups.user']);
 
         // Buchbare Spieler: Bürokrat/Admin alle, sonst nur eigene/betreute (BOOK-10).
@@ -130,14 +125,19 @@ class AdventureController extends Controller
         $teamerSignups = $adventure->teamerSignups;
         $myTeamerSignup = $teamerSignups->firstWhere('user_id', $request->user()->id);
 
-        return view('adventures._detail', [
-            'adventure' => $adventure,
-            'players' => $players,
-            'roles' => EventRole::orderBy('id')->get(),
+        $data = [
+            'adventure'      => $adventure,
+            'players'        => $players,
+            'roles'          => EventRole::orderBy('id')->get(),
             'visibleBookings' => $visibleBookings,
-            'teamerSignups' => $teamerSignups,
+            'teamerSignups'  => $teamerSignups,
             'myTeamerSignup' => $myTeamerSignup,
-        ]);
+        ];
+
+        // ARCH-002: AJAX → Partial für Modal, Direktaufruf → Vollseite (wie HeroController@show).
+        return $request->ajax()
+            ? view('adventures._detail', $data)
+            : view('adventures.show', $data);
     }
 
     /**
@@ -145,17 +145,22 @@ class AdventureController extends Controller
      * mit Aktionen und Check-in. Für die Verwaltung → Abenteuer; keine
      * Selbst-Anmeldung.
      */
-    public function manage(Adventure $adventure): View
+    public function manage(Request $request, Adventure $adventure): View
     {
         $adventure->load(['bookings.player.users', 'bookings.bookedBy', 'bookings.role', 'visits', 'status', 'teamerSignups.user']);
 
         $nscBookings = $adventure->bookings->where('event_role_id', EventRole::NSC_ROLE_ID)->values();
         $mainBookings = $adventure->bookings->where('event_role_id', '!=', EventRole::NSC_ROLE_ID)->values();
 
-        return view('adventures._manage', array_merge($this->formData($adventure), [
-            'nscBookings' => $nscBookings,
+        $data = array_merge($this->formData($adventure), [
+            'nscBookings'  => $nscBookings,
             'mainBookings' => $mainBookings,
-        ]));
+        ]);
+
+        // ARCH-002: AJAX → Partial für Modal, Direktaufruf → Vollseite.
+        return $request->ajax()
+            ? view('adventures._manage', $data)
+            : view('adventures.manage', $data);
     }
 
     /**

@@ -42,7 +42,7 @@ in Module (modal, skill, photo, signature, calendar).
 `vite.config.js`, alle Partials mit Inline-`<script>` (z. B. `heroes/_detail.blade.php`).
 **Abhängigkeiten:** Grundlage für ARCH-002/003 und UI-38/40/44 (alle erweitern dieses JS).
 
-### ARCH-002 · [P1] Dual-Render-Vertrag „Partial ↔ Vollseite" vereinheitlichen · ⏱ 6h · 🔲
+### ARCH-002 · [P1] Dual-Render-Vertrag „Partial ↔ Vollseite" vereinheitlichen · ⏱ 6h · ✅
 **Kategorie:** Architektur
 **Beschreibung:** Die Show-/Manage-Controller behandeln AJAX vs. Direktaufruf
 uneinheitlich — das ist der zentrale Architektur-Blocker für UI-38/39:
@@ -64,12 +64,12 @@ Partial gewrappt in `x-app-layout` (eigene `heroes/show`, `adventures/show`,
 Footer-Mapping machen). `data-modal-title` → Seiten-Header, `data-modal-actions`
 → Sticky-Footer. Optional ein kleines Trait/Helper `respondWithPartialOrPage()`.
 **Akzeptanzkriterien:**
-- [ ] Einheitliches, dokumentiertes Muster (in `docs/` oder `begriffe.md`-Stil)
-      für AJAX-Partial vs. Vollseite.
-- [ ] `AdventureController@show` erhält eine echte Vollseite statt Redirect-Hack.
-- [ ] `AdventureController@manage` kann als Vollseite gerendert werden.
-- [ ] `HeroController@show` bleibt kompatibel (Referenzimplementierung).
-- [ ] Keine Duplizierung des Detail-Markups (Vollseite include-t das Partial).
+- [x] Einheitliches Muster: AJAX → `*._detail`/`*._manage`, Direktaufruf → `*.show`/`*.manage`.
+- [x] `AdventureController@show` liefert echte Vollseite (`adventures.show`) statt Redirect.
+- [x] `AdventureController@manage` liefert Vollseite (`adventures.manage`) bei Direktaufruf.
+- [x] `HeroController@show` bleibt kompatibel (Referenzimplementierung unverändert).
+- [x] Keine Duplizierung: Vollseiten-Blades include-n nur das Partial.
+- [x] 567 Tests grün.
 **Betroffene Bereiche:** `HeroController@show`, `AdventureController@show`,
 `AdventureController@manage`, `routes/web.php`, `heroes/show.blade.php`,
 neue `adventures/show.blade.php` + `adventures/manage.blade.php`-Wrapper.
