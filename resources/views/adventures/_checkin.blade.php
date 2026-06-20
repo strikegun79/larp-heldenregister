@@ -14,52 +14,54 @@
         <p class="text-stone-500">Keine Anmeldungen mit Check-in (Gäste sammeln keine EP).</p>
     @else
         @php($visitedIds = $adventure->visits->pluck('player_id'))
-        <table class="ui very basic compact table">
-            <thead><tr><th>Teilnehmer</th><th>Status</th><th>Unterschrift</th><th></th></tr></thead>
-            <tbody>
-                @foreach ($checkinBookings as $booking)
-                    @php($present = $visitedIds->contains($booking->player_id))
-                    <tr>
-                        <td>{{ $booking->player?->full_name }}</td>
-                        <td>
-                            @if ($booking->status === 'abgemeldet')
-                                <span class="text-orange-600">abgemeldet{{ $booking->absence_reason_label ? ' ('.$booking->absence_reason_label.')' : '' }}</span>
-                            @elseif ($present)
-                                <span class="text-green-700">✓ anwesend</span>
-                            @else
-                                <span class="text-stone-500">{{ $booking->status_label }}</span>
-                            @endif
-                        </td>
-                        <td>
-                            @if ($booking->signature)
-                                <img src="{{ $booking->signature }}" alt="Unterschrift" style="height:34px; background:#fff; border:1px solid #ccc">
-                            @else
-                                <span class="text-stone-500">—</span>
-                            @endif
-                        </td>
-                        <td class="right aligned">
-                            <div class="flex items-center justify-end gap-2">
-                                @if ($adventure->checkinAllowed())
-                                    @if ($present)
-                                        <form method="POST" action="{{ route('adventures.bookings.checkin', [$adventure, $booking]) }}" data-refresh-modal>
-                                            @csrf @method('PATCH')
-                                            <button type="submit" class="ui mini button">auschecken</button>
-                                        </form>
-                                    @else
-                                        <button type="button" class="ui mini primary button checkin-trigger"
-                                                data-url="{{ route('adventures.bookings.signature.update', [$adventure, $booking]) }}"
-                                                data-name="{{ $booking->player?->full_name }}">Check-in</button>
-                                    @endif
+        <x-mobile.cards-or-table>
+            <table class="ui very basic compact table w-full">
+                <thead><tr><th>Teilnehmer</th><th>Status</th><th>Unterschrift</th><th></th></tr></thead>
+                <tbody>
+                    @foreach ($checkinBookings as $booking)
+                        @php($present = $visitedIds->contains($booking->player_id))
+                        <tr>
+                            <td data-label="Teilnehmer" class="font-medium">{{ $booking->player?->full_name }}</td>
+                            <td data-label="Status">
+                                @if ($booking->status === 'abgemeldet')
+                                    <span class="text-orange-600">abgemeldet{{ $booking->absence_reason_label ? ' ('.$booking->absence_reason_label.')' : '' }}</span>
+                                @elseif ($present)
+                                    <span class="text-green-700">✓ anwesend</span>
+                                @else
+                                    <span class="text-stone-500">{{ $booking->status_label }}</span>
                                 @endif
-                                <button type="button" class="ui mini button deregister-trigger"
-                                        data-url="{{ route('adventures.bookings.deregister', [$adventure, $booking]) }}"
-                                        data-name="{{ $booking->player?->full_name }}">Abmelden</button>
-                            </div>
-                        </td>
-                    </tr>
-                @endforeach
-            </tbody>
-        </table>
+                            </td>
+                            <td data-label="Unterschrift">
+                                @if ($booking->signature)
+                                    <img src="{{ $booking->signature }}" alt="Unterschrift" style="height:34px; background:#fff; border:1px solid #ccc">
+                                @else
+                                    <span class="text-stone-500">—</span>
+                                @endif
+                            </td>
+                            <td>
+                                <div class="flex items-center justify-end gap-2 flex-wrap">
+                                    @if ($adventure->checkinAllowed())
+                                        @if ($present)
+                                            <form method="POST" action="{{ route('adventures.bookings.checkin', [$adventure, $booking]) }}" data-refresh-modal>
+                                                @csrf @method('PATCH')
+                                                <button type="submit" class="ui mini button">auschecken</button>
+                                            </form>
+                                        @else
+                                            <button type="button" class="ui mini primary button checkin-trigger"
+                                                    data-url="{{ route('adventures.bookings.signature.update', [$adventure, $booking]) }}"
+                                                    data-name="{{ $booking->player?->full_name }}">Check-in</button>
+                                        @endif
+                                    @endif
+                                    <button type="button" class="ui mini button deregister-trigger"
+                                            data-url="{{ route('adventures.bookings.deregister', [$adventure, $booking]) }}"
+                                            data-name="{{ $booking->player?->full_name }}">Abmelden</button>
+                                </div>
+                            </td>
+                        </tr>
+                    @endforeach
+                </tbody>
+            </table>
+        </x-mobile.cards-or-table>
 
         @if ($adventure->checkinAllowed())
             @php($days = $adventure->start_at && $adventure->end_at ? max(1, (int) $adventure->start_at->copy()->startOfDay()->diffInDays($adventure->end_at->copy()->startOfDay()) + 1) : 1)

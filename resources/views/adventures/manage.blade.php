@@ -21,7 +21,7 @@
                 <button type="submit" form="manage-adventure-form" class="ui primary button">
                     <i class="save icon"></i> Speichern
                 </button>
-                <a href="{{ route('adventures.manage-index') }}" class="ui button">&larr; Zurück</a>
+                <a href="{{ route('adventures.show', $adventure) }}" class="ui button">&larr; Zur Detailansicht</a>
             </x-mobile.sticky-footer>
         </div>
     </div>

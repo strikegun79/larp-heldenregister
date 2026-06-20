@@ -223,7 +223,9 @@ function sendModalAction(url, method, fields, $modal, btn) {
             if (r.ok) {
                 showToast(d.message || 'Gespeichert.', 'success');
                 $modal.modal('hide');
+                // Modal-Kontext: Inhalt per AJAX neu laden. Vollseite: Standard-Reload.
                 if (window.appModalUrl) loadModalContent(window.appModalUrl, true);
+                else window.location.reload();
             } else {
                 const errs = d.errors ? Object.values(d.errors).flat().join('<br>') : '';
                 showToast(errs || d.message || 'Aktion fehlgeschlagen.', 'error');

@@ -667,7 +667,7 @@ echte Seiten/Sheet statt Modal-Stack.
 **Abhängigkeiten:** Entschärft UI-28 (vertikale Modal-Sichtbarkeit) und UI-37
 (Stack-Orientierung) für diese Ansichten; Grundlage für UI-40/UI-41.
 
-### UI-39 · [P1] Abenteuer-Verwaltung als eigene Seite statt Modal · ⏱ 5h · 🔲
+### UI-39 · [P1] Abenteuer-Verwaltung als eigene Seite statt Modal · ⏱ 5h · ✅
 **Beschreibung:** Das Verwaltungs-Modal (`adventures/_manage.blade.php`, Route
 `adventures.manage`) ist der inhaltlich schwerste Dialog: 4 Tabs (Event-Daten-
 Editor, Anmeldungen, Teamer/NSC, Check-in) mit breiten Tabellen und Formularen,
@@ -681,10 +681,11 @@ vor Ort bedienen; voller Bildschirm, echtes Zurück, kein Modal-Höhen-Konflikt.
 (Partial in `x-app-layout`), „Verwalten" im Detail wird ein Link auf diese Seite.
 Speichern-Footer als Sticky-Bar. Tabs auf Mobil als Accordion (UI-40).
 **Akzeptanzkriterien:**
-- [ ] `adventures.manage` ist eine eigene Seite mit Theme-Header und Sticky-Speichern.
-- [ ] „Verwalten" navigiert dorthin (kein Modal mehr).
-- [ ] Check-in/Anmeldungen auf 320–414 px ohne Modal-Höhen-Abschneiden bedienbar.
-- [ ] Browser-Zurück führt zurück zum Abenteuer-Detail.
+- [x] `adventures.manage` ist eigene Seite (manage.blade.php) mit Theme-Header, Sticky-Footer (Speichern/Zurück).
+- [x] „Verwalten" in _detail und manage_index navigiert direkt (kein data-modal-url mehr).
+- [x] Check-in-Tabelle via x-mobile.cards-or-table: Karten auf Mobile, kein Modal-Höhen-Limit.
+- [x] sendModalAction lädt auf Vollseite via window.location.reload() statt appModalUrl.
+- [x] „Zurück"-Link im Footer zeigt auf adventures.show (Detail-Seite).
 **Betroffene Seiten/Routen:** `adventures/_manage.blade.php`,
 `AdventureController@manage`, `routes/web.php`
 **Abhängigkeiten:** Baut auf UI-38 (gleiches Wrapper-Muster); kombiniert mit

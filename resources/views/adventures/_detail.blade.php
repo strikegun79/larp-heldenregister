@@ -59,8 +59,6 @@
            class="ui teal button">Teamer-Anmeldung</a>
     @endif
     @can('events.edit')
-        <a href="{{ route('adventures.manage', $adventure) }}"
-           data-modal-url="{{ route('adventures.manage', $adventure) }}"
-           class="ui button">Verwalten</a>
+        <a href="{{ route('adventures.manage', $adventure) }}" class="ui button">Verwalten</a>
     @endcan
 </div>

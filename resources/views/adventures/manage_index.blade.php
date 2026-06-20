@@ -35,7 +35,6 @@
                                     <td class=”px-6 py-4 text-right”>
                                         <div class=”flex items-center justify-end gap-3”>
                                             <a href=”{{ route('adventures.manage', $adventure) }}”
-                                               data-modal-url=”{{ route('adventures.manage', $adventure) }}”
                                                class=”text-waldritter hover:underline”>Verwalten</a>
                                             @if ($adventure->event_status_id !== \App\Models\EventStatus::CANCELLED && $adventure->canTransitionTo(\App\Models\EventStatus::CANCELLED))
                                                 <form method=”POST” action=”{{ route('adventures.cancel', $adventure) }}”
