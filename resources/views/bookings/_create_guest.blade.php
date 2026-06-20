@@ -1,5 +1,36 @@
 <span data-modal-title hidden>Gast anmelden · {{ $adventure->name }}</span>
 
+{{-- UI-31: Abenteuer-Kurzinfo vor dem Formular --}}
+@php($freeSlots = $adventure->freeSlots())
+<div class="bg-[#fdf6e3] border border-[#5a3a22]/20 rounded-lg px-4 py-3 mb-4 text-sm">
+    <p class="font-semibold text-stone-800 mb-2">{{ $adventure->name }}</p>
+    <div class="flex flex-wrap gap-x-5 gap-y-1 text-stone-600">
+        @if ($adventure->start_at)
+            <span><span class="text-stone-400">Datum:</span> {{ $adventure->start_at->format('d.m.Y') }}</span>
+        @endif
+        @if ($adventure->location)
+            <span><span class="text-stone-400">Ort:</span> {{ $adventure->location->titel }}</span>
+        @endif
+        <span>
+            <span class="text-stone-400">Beitrag:</span>
+            @if ($adventure->fee > 0)
+                <strong>{{ number_format($adventure->fee, 2, ',', '.') }} €</strong>
+            @else
+                <strong class="text-green-700">kostenlos</strong>
+            @endif
+        </span>
+        <span>
+            <span class="text-stone-400">Plätze:</span>
+            {{ $adventure->max_player - $freeSlots }} / {{ $adventure->max_player }}
+            @if ($freeSlots > 0)
+                <span class="text-green-700">({{ $freeSlots }} frei)</span>
+            @else
+                <span class="text-orange-600">(Warteliste)</span>
+            @endif
+        </span>
+    </div>
+</div>
+
 <div class="ui warning message" style="display:block">
     <strong>Hinweis:</strong> Für Gäste werden <em>keine Erfahrungspunkte</em> gesammelt.
 </div>

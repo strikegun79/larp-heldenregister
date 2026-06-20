@@ -439,7 +439,7 @@ PDF/CSV) bleiben `<a>`.
 > und die offenen UI-29/30 werden NICHT dupliziert. **Lösungshinweise sind nur
 > Vorschläge — in diesem Review wurde kein Anwendungscode geändert.**
 
-### UI-31 · [P1] Kosten/Beitrag vor dem Anmelden klar sichtbar machen · ⏱ 2h · 🔲
+### UI-31 · [P1] Kosten/Beitrag vor dem Anmelden klar sichtbar machen · ⏱ 2h · ✅
 **Beschreibung:** Der Teilnahmebeitrag (`$adventure->fee`) erscheint nur als Zeile
 „Beitrag" im ersten Tab des Detail-Modals (`adventures/_detail.blade.php`). Wer im
 Footer direkt auf „Anmelden" tippt und das gestapelte Anmeldeformular
@@ -456,11 +456,16 @@ Info-Zeile/`ui message` mit Abenteuername, Datum, Ort und **Beitrag** anzeigen
 (Daten liegen über `$adventure` bereits vor). Bei `fee == 0` „kostenlos"
 ausweisen. Wartelisten-Warnung (bereits vorhanden) beibehalten.
 **Akzeptanzkriterien:**
-- [ ] Beitrag ist im Anmelde- und Gast-Anmelde-Formular sichtbar (auch „kostenlos").
-- [ ] Datum + Ort des Abenteuers stehen im Formularkopf.
-- [ ] Bei vollem Abenteuer bleibt der Wartelisten-Hinweis sichtbar.
+- [x] Beitrag ist im Anmelde- und Gast-Anmelde-Formular sichtbar (auch „kostenlos").
+- [x] Datum + Ort des Abenteuers stehen im Formularkopf.
+- [x] Bei vollem Abenteuer bleibt der Wartelisten-Hinweis sichtbar.
 **Betroffene Seiten/Routen:** `bookings/_create.blade.php`,
 `bookings/_create_guest.blade.php`, `adventures/_detail.blade.php`
+**Implementierung:** Kompakter Pergament-Info-Block (`bg-[#fdf6e3]`) direkt nach dem
+`data-modal-title`, immer sichtbar (vor dem `@if registrationOpen()`-Gate). Zeigt
+Abenteuername, Datum (falls gesetzt), Ort (falls gesetzt), Beitrag (grün „kostenlos"
+wenn 0), Platz-Belegung (grün/orange je Verfügbarkeit). `freeSlots()` nur einmal
+via `@php` aufgerufen. Wartelisten-Meldung bleibt unverändert darunter.
 
 ### UI-32 · [P1] Datenschutz-/Zweckhinweis bei Erfassung von Minderjährigen-Daten · ⏱ 3h · 🔲
 **Beschreibung:** An mehreren Stellen werden personenbezogene Daten von Kindern
