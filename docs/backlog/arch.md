@@ -75,7 +75,7 @@ Footer-Mapping machen). `data-modal-title` → Seiten-Header, `data-modal-action
 neue `adventures/show.blade.php` + `adventures/manage.blade.php`-Wrapper.
 **Abhängigkeiten:** Direkte Voraussetzung für UI-38 und UI-39.
 
-### ARCH-003 · [P2] Wiederverwendbare Layout-Primitive für Mobile (Accordion, Bottom-Sheet, Sticky-Footer, Tabelle→Karte) · ⏱ 8h · 🔲
+### ARCH-003 · [P2] Wiederverwendbare Layout-Primitive für Mobile (Accordion, Bottom-Sheet, Sticky-Footer, Tabelle→Karte) · ⏱ 8h · ✅
 **Kategorie:** Architektur / Wartbarkeit / Mobile
 **Beschreibung:** UI-40 (Accordion), UI-41 (Tabelle→Karte), UI-42 (Bottom-Nav),
 UI-44 (Bottom-Sheet) lösen jeweils dasselbe Grundproblem an verschiedenen Stellen.
@@ -97,11 +97,12 @@ erfinden"; konsistentes Verhalten, eine Pflegestelle, testbar.
   Transform) statt neuer JS-Lib (UI-44).
 Reines Tailwind + Fomantic + minimal Vanilla-JS — kein neues Framework.
 **Akzeptanzkriterien:**
-- [ ] Mindestens Accordion, Tabelle→Karte und Sticky-Footer existieren als
-      wiederverwendbare Blade-Komponenten.
-- [ ] Mindestens eine reale View nutzt jede Komponente produktiv (Pilot).
-- [ ] Komponenten respektieren Tastatur/ARIA (vgl. UI-11/UI-20).
-- [ ] Kein zusätzliches JS-Framework, keine neue große Abhängigkeit.
+- [x] `<x-mobile.accordion-section>` (`<details>`/`<summary>`, native ARIA).
+- [x] `<x-mobile.cards-or-table>` (CSS `data-label`-Karten unter sm, Tabelle ab sm).
+- [x] `<x-mobile.sticky-footer>` (CSS `position:fixed` auf Mobile, inline auf Desktop).
+- [x] Pilots: `adventures/_detail.blade.php` (Accordion), `adventures/manage_index.blade.php` (Tabelle→Karten), `adventures/manage.blade.php` (Sticky-Footer).
+- [x] Keine neuen JS-Frameworks, keine neuen Abhängigkeiten. CSS in `heldenregister.css`.
+- [x] 567 Tests grün.
 **Betroffene Bereiche:** `resources/views/components/mobile/*`,
 `public/css/heldenregister.css`, `resources/js/heldenregister.js`.
 **Abhängigkeiten:** Liefert die Bausteine für UI-40/41/42/44; baut auf ARCH-001/002.

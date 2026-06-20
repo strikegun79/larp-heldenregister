@@ -16,13 +16,13 @@
                 @include('adventures._manage')
             </div>
 
-            {{-- Aktionen für Vollseite (im Modal übernimmt data-modal-actions diese Rolle) --}}
-            <div class="mt-4 flex items-center gap-3">
+            {{-- Aktionen für Vollseite: auf Mobile sticky unten, auf Desktop inline --}}
+            <x-mobile.sticky-footer class="mt-4">
                 <button type="submit" form="manage-adventure-form" class="ui primary button">
                     <i class="save icon"></i> Speichern
                 </button>
                 <a href="{{ route('adventures.manage-index') }}" class="ui button">&larr; Zurück</a>
-            </div>
+            </x-mobile.sticky-footer>
         </div>
     </div>
 
