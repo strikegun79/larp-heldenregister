@@ -63,10 +63,12 @@
             <div class="field">
                 <label>Alter</label>
                 <input type="number" name="guest_age" min="0" max="120">
+                <small class="text-stone-400">Optional – für altersgerechte Gruppenaufteilung.</small>
             </div>
             <div class="field">
                 <label>Ort</label>
                 <input type="text" name="guest_place">
+                <small class="text-stone-400">Optional – für Abholkoordination und Notfallkontakt.</small>
             </div>
         </div>
         <div class="field required">

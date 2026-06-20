@@ -467,7 +467,7 @@ Abenteuername, Datum (falls gesetzt), Ort (falls gesetzt), Beitrag (grün „kos
 wenn 0), Platz-Belegung (grün/orange je Verfügbarkeit). `freeSlots()` nur einmal
 via `@php` aufgerufen. Wartelisten-Meldung bleibt unverändert darunter.
 
-### UI-32 · [P1] Datenschutz-/Zweckhinweis bei Erfassung von Minderjährigen-Daten · ⏱ 3h · 🔲
+### UI-32 · [P1] Datenschutz-/Zweckhinweis bei Erfassung von Minderjährigen-Daten · ⏱ 3h · ✅
 **Beschreibung:** An mehreren Stellen werden personenbezogene Daten von Kindern
 erhoben, **ohne Zweck- oder Datenschutzhinweis**: `players/_form.blade.php`
 (Geburtsdatum, Geschlecht, Anschrift des Kindes, E-Mail) und
@@ -485,12 +485,17 @@ ergänzen (analog UI-15), z. B. unter Geburtsdatum „Wird für altersgerechte
 Gruppen und die Notfallvorsorge benötigt." Einen Satz + Link zur
 Datenschutzerklärung am Formularanfang. Bei Gast-Alter/-Ort kurzer Zweckhinweis.
 **Akzeptanzkriterien:**
-- [ ] Geburtsdatum, Anschrift und E-Mail in `players/_form` haben einen
+- [x] Geburtsdatum, Anschrift und E-Mail in `players/_form` haben einen
       verständlichen Zweckhinweis (1 Satz) und Hinweis auf die Sichtbarkeit.
-- [ ] Gast-Alter und -Ort in `_create_guest` haben einen kurzen Zweckhinweis.
-- [ ] Verweis auf die Datenschutzerklärung am Anfang beider Formulare.
+- [x] Gast-Alter und -Ort in `_create_guest` haben einen kurzen Zweckhinweis.
+- [x] Verweis auf die Datenschutzerklärung am Anfang beider Formulare.
 **Betroffene Seiten/Routen:** `players/_form.blade.php`,
 `bookings/_create_guest.blade.php`
+**Implementierung:** Datenschutzhinweis-Block (blau, `bg-blue-50`) am Anfang von
+`players/_form` mit Hinweis auf Orga-Team-Sichtbarkeit und kein Drittfluss.
+`<small>`-Zweckhinweise bei Geburtsdatum, E-Mail und Kinder-Anschrift.
+Gast-Formular: `<small>` unter Alter und Ort. Da kein Datenschutzerklärung-Route
+existiert, wird statt Link auf das Organisationsteam als Anlaufstelle verwiesen.
 
 ### UI-33 · [P2] Helden-Detail: Tab-Flut für Kinder reduzieren/gruppieren · ⏱ 4h · 🔲
 **Beschreibung:** Das Helden-Detail-Modal (`heroes/_detail.blade.php`) zeigt

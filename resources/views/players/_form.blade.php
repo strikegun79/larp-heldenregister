@@ -1,5 +1,11 @@
 @csrf
 @php($selectClass = 'mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-amber-600 focus:ring-amber-600')
+
+{{-- UI-32: Datenschutzhinweis --}}
+<div class="bg-blue-50 border border-blue-200 rounded-lg px-4 py-3 mb-5 text-sm text-blue-800">
+    <strong>Datenschutzhinweis:</strong> Die hier erfassten Angaben werden ausschließlich für die Organisation der Waldritter-Veranstaltungen verwendet und sind nur für das Organisationsteam sichtbar. Sie werden nicht an Dritte weitergegeben. Fragen zum Datenschutz beantwortet dir das Organisationsteam.
+</div>
+
 <div class="space-y-6">
     <div class="grid grid-cols-2 gap-4">
         <div>
@@ -22,6 +28,7 @@
             <x-date-picker name="dayofbirth"
                            :value="old('dayofbirth', optional($player->dayofbirth)->format('Y-m-d'))" />
             <x-input-error :messages="$errors->get('dayofbirth')" class="mt-2" />
+            <small class="text-stone-400">Wird für altersgerechte Gruppenaufteilung und die Notfallvorsorge benötigt.</small>
         </div>
         <div>
             <x-input-label for="gender" value="Geschlecht" />
@@ -40,6 +47,7 @@
         <x-text-input id="email" name="email" type="email" class="mt-1 block w-full"
                       :value="old('email', $player->email)" />
         <x-input-error :messages="$errors->get('email')" class="mt-2" />
+        <small class="text-stone-400">Optional – nur für das Organisationsteam sichtbar, z. B. für Rückfragen zur Anmeldung.</small>
     </div>
 
     {{-- Kinder-Anschrift (PLAY-14 / ORGA-01) --}}
@@ -61,6 +69,7 @@
     <div id="child-address-fields"
          class="{{ old('address_same_as_guardian', ($player->address_same_as_guardian ?? true) ? '1' : '0') === '1' ? 'hidden' : '' }} space-y-4">
         <p class="text-sm text-stone-500">Abweichende Anschrift des Kindes</p>
+        <small class="text-stone-400 block -mt-2">Nur für administrative Zwecke und postalische Kommunikation des Veranstalters – nicht öffentlich sichtbar.</small>
         <div class="grid grid-cols-2 gap-4">
             <div>
                 <x-input-label for="street" value="Straße" />
