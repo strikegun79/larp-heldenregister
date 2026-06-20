@@ -1,4 +1,5 @@
-<nav x-data="{ open: false }" class="bg-[#e4cea5]/80 backdrop-blur border-b-2 border-[#5a3a22]/50 shadow-sm">
+@php($unreadNotes = Auth::user()->unreadNotifications)
+<nav class="bg-[#e4cea5]/80 backdrop-blur border-b-2 border-[#5a3a22]/50 shadow-sm">
     <!-- Primary Navigation Menu -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
         <div class="flex justify-between h-16">
@@ -10,7 +11,7 @@
                     </a>
                 </div>
 
-                <!-- Navigation Links -->
+                <!-- Navigation Links (Desktop) -->
                 <div class="hidden space-x-8 sm:-my-px sm:ms-10 sm:flex">
                     <x-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
                         {{ __('Übersicht') }}
@@ -44,10 +45,8 @@
                 </div>
             </div>
 
-            <!-- Settings Dropdown -->
+            <!-- Settings Dropdown (Desktop) -->
             <div class="hidden sm:flex sm:items-center sm:ms-6">
-                {{-- In-App-Benachrichtigungen (NOTI-07) --}}
-                @php($unreadNotes = Auth::user()->unreadNotifications)
                 <div class="me-3">
                     <x-dropdown align="right" width="64">
                         <x-slot name="trigger">
@@ -84,7 +83,6 @@
                     <x-slot name="trigger">
                         <button class="inline-flex items-center px-3 py-2 border border-transparent text-sm leading-4 font-medium rounded-md text-gray-500 bg-white hover:text-gray-700 focus:outline-none transition ease-in-out duration-150">
                             <div>{{ Auth::user()->name }}</div>
-
                             <div class="ms-1">
                                 <svg class="fill-current h-4 w-4" xmlns="http://www.w3.org/2000/svg" viewBox="0 0 20 20">
                                     <path fill-rule="evenodd" d="M5.293 7.293a1 1 0 011.414 0L10 10.586l3.293-3.293a1 1 0 111.414 1.414l-4 4a1 1 0 01-1.414 0l-4-4a1 1 0 010-1.414z" clip-rule="evenodd" />
@@ -92,7 +90,6 @@
                             </div>
                         </button>
                     </x-slot>
-
                     <x-slot name="content">
                         <div class="px-4 py-2 text-xs text-gray-500 border-b border-gray-100">
                             {{ __('Rollen') }}: {{ Auth::user()->roles->pluck('label')->implode(', ') ?: __('keine') }}
@@ -100,90 +97,174 @@
                         <x-dropdown-link :href="route('profile.edit')">
                             {{ __('Profile') }}
                         </x-dropdown-link>
-
-                        <!-- Authentication -->
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
-
                             <x-dropdown-link :href="route('logout')"
-                                    onclick="event.preventDefault();
-                                                this.closest('form').submit();">
+                                    onclick="event.preventDefault(); this.closest('form').submit();">
                                 Abmelden
                             </x-dropdown-link>
                         </form>
                     </x-slot>
                 </x-dropdown>
             </div>
-
-            <!-- Hamburger -->
-            <div class="-me-2 flex items-center sm:hidden">
-                <button @click="open = ! open" class="inline-flex items-center justify-center p-2 rounded-md text-gray-400 hover:text-gray-500 hover:bg-gray-100 focus:outline-none focus:bg-gray-100 focus:text-gray-500 transition duration-150 ease-in-out">
-                    <svg class="h-6 w-6" stroke="currentColor" fill="none" viewBox="0 0 24 24">
-                        <path :class="{'hidden': open, 'inline-flex': ! open }" class="inline-flex" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16" />
-                        <path :class="{'hidden': ! open, 'inline-flex': open }" class="hidden" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12" />
-                    </svg>
-                </button>
-            </div>
-        </div>
-    </div>
-
-    <!-- Responsive Navigation Menu -->
-    <div :class="{'block': open, 'hidden': ! open}" class="hidden sm:hidden">
-        <div class="pt-2 pb-3 space-y-1">
-            <x-responsive-nav-link :href="route('dashboard')" :active="request()->routeIs('dashboard')">
-                {{ __('Dashboard') }}
-            </x-responsive-nav-link>
-            <x-responsive-nav-link :href="route('players.index')" :active="request()->routeIs('players.*')">
-                {{ __('Spieler') }}
-            </x-responsive-nav-link>
-            @can('heldenregister.view')
-                <x-responsive-nav-link :href="route('heroes.index')" :active="request()->routeIs('heroes.*')">
-                    {{ __('Heldenregister') }}
-                </x-responsive-nav-link>
-                <x-responsive-nav-link :href="route('skills.catalog')" :active="request()->routeIs('skills.catalog')">
-                    {{ __('Fertigkeiten') }}
-                </x-responsive-nav-link>
-            @endcan
-            @can('heldenregister.edit')
-                <x-responsive-nav-link :href="route('ep.create')" :active="request()->routeIs('ep.*')">
-                    {{ __('EP buchen') }}
-                </x-responsive-nav-link>
-            @endcan
-            @can('adventure.access')
-                <x-responsive-nav-link :href="route('adventures.index')" :active="request()->routeIs('adventures.*')">
-                    {{ __('Abenteuer') }}
-                </x-responsive-nav-link>
-            @endcan
-            @can('portal.manage')
-                <x-responsive-nav-link :href="route('admin.index')" :active="request()->routeIs('admin.*')">
-                    {{ __('Verwaltung') }}
-                </x-responsive-nav-link>
-            @endcan
-        </div>
-
-        <!-- Responsive Settings Options -->
-        <div class="pt-4 pb-1 border-t border-gray-200">
-            <div class="px-4">
-                <div class="font-medium text-base text-gray-800">{{ Auth::user()->name }}</div>
-                <div class="font-medium text-sm text-gray-500">{{ Auth::user()->email }}</div>
-            </div>
-
-            <div class="mt-3 space-y-1">
-                <x-responsive-nav-link :href="route('profile.edit')">
-                    Profil
-                </x-responsive-nav-link>
-
-                <!-- Authentication -->
-                <form method="POST" action="{{ route('logout') }}">
-                    @csrf
-
-                    <x-responsive-nav-link :href="route('logout')"
-                            onclick="event.preventDefault();
-                                        this.closest('form').submit();">
-                        Abmelden
-                    </x-responsive-nav-link>
-                </form>
-            </div>
         </div>
     </div>
 </nav>
+
+{{-- UI-42: Bottom-Navigation + „Mehr"-Sheet (nur < sm) --}}
+<div x-data="{ moreOpen: false }" class="sm:hidden">
+
+    {{-- Fixierte 5-Punkte-Bar --}}
+    <div class="fixed bottom-0 inset-x-0 z-50 bg-[#e4cea5]/95 backdrop-blur border-t-2 border-[#5a3a22]/50 shadow-lg">
+        <div class="flex items-center justify-around h-16 px-1">
+
+            {{-- Übersicht --}}
+            <a href="{{ route('dashboard') }}"
+               class="bottom-nav-item {{ request()->routeIs('dashboard') ? 'text-waldritter' : 'text-stone-500' }}">
+                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="m2.25 12 8.954-8.955c.44-.439 1.152-.439 1.591 0L21.75 12M4.5 9.75v10.125c0 .621.504 1.125 1.125 1.125H9.75v-4.875c0-.621.504-1.125 1.125-1.125h2.25c.621 0 1.125.504 1.125 1.125V21h4.125c.621 0 1.125-.504 1.125-1.125V9.75M8.25 21h8.25" />
+                </svg>
+                <span>Übersicht</span>
+            </a>
+
+            {{-- Helden --}}
+            @can('heldenregister.view')
+            <a href="{{ route('heroes.index') }}"
+               class="bottom-nav-item {{ request()->routeIs('heroes.*') ? 'text-waldritter' : 'text-stone-500' }}">
+                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M17.982 18.725A7.488 7.488 0 0 0 12 15.75a7.488 7.488 0 0 0-5.982 2.975m11.963 0a9 9 0 1 0-11.963 0m11.963 0A8.966 8.966 0 0 1 12 21a8.966 8.966 0 0 1-5.982-2.275M15 9.75a3 3 0 1 1-6 0 3 3 0 0 1 6 0Z" />
+                </svg>
+                <span>Helden</span>
+            </a>
+            @endcan
+
+            {{-- Abenteuer --}}
+            @can('adventure.access')
+            <a href="{{ route('adventures.index') }}"
+               class="bottom-nav-item {{ request()->routeIs('adventures.*') ? 'text-waldritter' : 'text-stone-500' }}">
+                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 6.75V15m6-6v8.25m.503 3.498 4.875-2.437c.381-.19.622-.58.622-1.006V4.82c0-.836-.88-1.38-1.628-1.006l-3.869 1.934c-.317.159-.69.159-1.006 0L9.503 3.252a1.125 1.125 0 0 0-1.006 0L3.622 5.689C3.24 5.88 3 6.27 3 6.695V19.18c0 .836.88 1.38 1.628 1.006l3.869-1.934c.317-.159.69-.159 1.006 0l4.994 2.497c.317.158.69.158 1.006 0Z" />
+                </svg>
+                <span>Abenteuer</span>
+            </a>
+            @endcan
+
+            {{-- Spieler --}}
+            <a href="{{ route('players.index') }}"
+               class="bottom-nav-item {{ request()->routeIs('players.*') ? 'text-waldritter' : 'text-stone-500' }}">
+                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M15 19.128a9.38 9.38 0 0 0 2.625.372 9.337 9.337 0 0 0 4.121-.952 4.125 4.125 0 0 0-7.533-2.493M15 19.128v-.003c0-1.113-.285-2.16-.786-3.07M15 19.128v.106A12.318 12.318 0 0 1 8.624 21c-2.331 0-4.512-.645-6.374-1.766l-.001-.109a6.375 6.375 0 0 1 11.964-3.07M12 6.375a3.375 3.375 0 1 1-6.75 0 3.375 3.375 0 0 1 6.75 0Zm8.25 2.25a2.625 2.625 0 1 1-5.25 0 2.625 2.625 0 0 1 5.25 0Z" />
+                </svg>
+                <span>Spieler</span>
+            </a>
+
+            {{-- Mehr --}}
+            <button type="button" @click="moreOpen = true"
+                    aria-label="Mehr anzeigen"
+                    class="bottom-nav-item relative {{ request()->routeIs('profile.*', 'admin.*', 'skills.*', 'ep.*', 'notifications.*') ? 'text-waldritter' : 'text-stone-500' }}">
+                <svg class="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke-width="1.8" stroke="currentColor" aria-hidden="true">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 6.75h16.5M3.75 12h16.5m-16.5 5.25h16.5" />
+                </svg>
+                <span class="relative">
+                    Mehr
+                    @if ($unreadNotes->count())
+                        <span class="absolute -top-1.5 -right-2.5 inline-flex items-center justify-center min-w-[1rem] h-4 px-0.5 text-[9px] font-bold text-white bg-red-600 rounded-full">{{ $unreadNotes->count() }}</span>
+                    @endif
+                </span>
+            </button>
+        </div>
+    </div>
+
+    {{-- „Mehr"-Sheet: Backdrop + Panel --}}
+    <div x-show="moreOpen" style="display:none" class="fixed inset-0 z-[55]">
+
+        {{-- Backdrop --}}
+        <div @click="moreOpen = false" class="absolute inset-0 bg-black/50"></div>
+
+        {{-- Sheet Panel --}}
+        <div x-show="moreOpen"
+             x-transition:enter="transition ease-out duration-200"
+             x-transition:enter-start="translate-y-full opacity-0"
+             x-transition:enter-end="translate-y-0 opacity-100"
+             x-transition:leave="transition ease-in duration-150"
+             x-transition:leave-start="translate-y-0 opacity-100"
+             x-transition:leave-end="translate-y-full opacity-0"
+             class="absolute bottom-16 left-0 right-0 bg-[#fdf6e3] border-t-2 border-[#5a3a22]/40 rounded-t-2xl shadow-2xl overflow-y-auto max-h-[80dvh]"
+             style="display:none">
+
+            {{-- Griff-Balken --}}
+            <div class="flex justify-center pt-3 pb-1">
+                <div class="w-10 h-1 rounded-full bg-stone-300"></div>
+            </div>
+
+            {{-- Nutzer-Info --}}
+            <div class="px-5 py-3 border-b border-[#5a3a22]/20">
+                <div class="font-medium text-stone-800">{{ Auth::user()->name }}</div>
+                <div class="text-sm text-stone-500">{{ Auth::user()->email }}</div>
+                <div class="text-xs text-stone-400 mt-0.5">{{ Auth::user()->roles->pluck('label')->implode(', ') ?: 'keine Rolle' }}</div>
+            </div>
+
+            <div class="py-2">
+                {{-- Benachrichtigungen --}}
+                @if ($unreadNotes->count())
+                    <div class="px-5 pt-2 pb-1 text-xs font-semibold text-stone-500 uppercase tracking-wide">Benachrichtigungen</div>
+                    @foreach ($unreadNotes->take(5) as $note)
+                        <a href="{{ route('notifications.read', $note->id) }}" @click="moreOpen = false"
+                           class="flex items-start px-5 py-2.5 text-sm text-stone-700 hover:bg-stone-100 active:bg-stone-200 gap-3">
+                            <i class="bell icon text-stone-400 mt-0.5 shrink-0"></i>
+                            <span>{{ $note->data['message'] ?? 'Benachrichtigung' }}</span>
+                        </a>
+                    @endforeach
+                    <form method="POST" action="{{ route('notifications.read-all') }}" class="px-5 pb-2">
+                        @csrf
+                        <button type="submit" class="text-sm text-amber-700 hover:underline">Alle als gelesen markieren</button>
+                    </form>
+                    <div class="border-t border-stone-200 mx-4 my-1"></div>
+                @endif
+
+                {{-- Rollenbasierte Links --}}
+                @can('heldenregister.view')
+                <a href="{{ route('skills.catalog') }}" @click="moreOpen = false"
+                   class="flex items-center px-5 py-3 text-sm text-stone-700 hover:bg-stone-100 active:bg-stone-200 gap-3">
+                    <i class="book icon text-stone-400 w-5 text-center shrink-0"></i>
+                    Fertigkeiten
+                </a>
+                @endcan
+                @can('heldenregister.edit')
+                <a href="{{ route('ep.create') }}" @click="moreOpen = false"
+                   class="flex items-center px-5 py-3 text-sm text-stone-700 hover:bg-stone-100 active:bg-stone-200 gap-3">
+                    <i class="star icon text-stone-400 w-5 text-center shrink-0"></i>
+                    EP buchen
+                </a>
+                @endcan
+                @can('portal.manage')
+                <a href="{{ route('admin.index') }}" @click="moreOpen = false"
+                   class="flex items-center px-5 py-3 text-sm text-stone-700 hover:bg-stone-100 active:bg-stone-200 gap-3">
+                    <i class="cogs icon text-stone-400 w-5 text-center shrink-0"></i>
+                    Verwaltung
+                </a>
+                @endcan
+
+                <div class="border-t border-stone-200 mx-4 my-1"></div>
+
+                <a href="{{ route('profile.edit') }}" @click="moreOpen = false"
+                   class="flex items-center px-5 py-3 text-sm text-stone-700 hover:bg-stone-100 active:bg-stone-200 gap-3">
+                    <i class="user circle icon text-stone-400 w-5 text-center shrink-0"></i>
+                    Profil
+                </a>
+
+                <form method="POST" action="{{ route('logout') }}">
+                    @csrf
+                    <button type="submit"
+                            class="flex items-center w-full px-5 py-3 text-sm text-red-600 hover:bg-red-50 active:bg-red-100 gap-3">
+                        <i class="sign out icon w-5 text-center shrink-0"></i>
+                        Abmelden
+                    </button>
+                </form>
+            </div>
+
+            {{-- Safe-area-Abstand --}}
+            <div class="pb-safe" style="padding-bottom: env(safe-area-inset-bottom, 0.5rem)"></div>
+        </div>
+    </div>
+</div>
