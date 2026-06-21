@@ -520,7 +520,7 @@ hervorheben.
 - [ ] Verhalten auf 320–414 px geprüft (Tab-Leiste ohne Überforderung).
 **Betroffene Seiten/Routen:** `heroes/_detail.blade.php`
 
-### UI-34 · [P2] Erfahrungspunkte (EP) und Fachbegriffe im Helden-Detail erklären · ⏱ 3h · 🔲
+### UI-34 · [P2] Erfahrungspunkte (EP) und Fachbegriffe im Helden-Detail erklären · ⏱ 3h · ✅
 **Beschreibung:** Die Übersicht im Helden-Detail (`heroes/_detail.blade.php`)
 nennt „EP-Saldo", „EP gesamt / ausgegeben", „Fertigkeiten / Klassen" ohne jede
 Erklärung. Für ein Kind ist nicht ersichtlich, was EP sind, wie man sie bekommt
@@ -754,7 +754,7 @@ um Doppelpflege zu vermeiden. Zuerst Detail-Tabellen, dann Admin-Lookups.
 **Abhängigkeiten:** Erweitert UI-19 und UI-29 auf Detail-/Admin-Tabellen; nutzt
 das gleiche Karten-Muster.
 
-### UI-42 · [P1] Bottom-Navigation für Mobil (5 Hauptpunkte + „Mehr") · ⏱ 6h · 🔲
+### UI-42 · [P1] Bottom-Navigation für Mobil (5 Hauptpunkte + „Mehr") · ⏱ 6h · ✅
 **Beschreibung:** Die Navigation (`layouts/navigation.blade.php`) ist eine
 Top-Navbar mit Alpine-Hamburger; auf Mobil verschwinden **alle** Navigationsziele
 (inkl. Benachrichtigungen, Profil, Abmelden) hinter dem Hamburger-Icon. Für die

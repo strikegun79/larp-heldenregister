@@ -14,14 +14,14 @@
 
         {{-- Übersicht --}}
         <x-mobile.accordion-section title="Übersicht" :open="true">
-            <div class="flex items-start gap-3 mb-4">
+            <div class="flex items-start gap-3 mb-3">
                 <img src="{{ $hero->image_url }}" alt="{{ $hero->character_name }}"
                      class="h-20 w-20 object-cover rounded border-2 border-[#5a3a22]/40 shrink-0">
                 <dl class="text-stone-800 text-sm space-y-1 flex-1">
                     <div>
-                        <dt class="text-stone-500">EP-Saldo</dt>
+                        <dt class="text-stone-500">Verfügbare EP</dt>
                         <dd class="font-semibold text-base">{{ number_format($hero->ep_balance, 0, ',', '.') }} EP</dd>
-                        <dd class="text-xs text-stone-400">{{ number_format($hero->ep_total, 0, ',', '.') }} gesamt / {{ number_format($hero->ep_spent, 0, ',', '.') }} ausgegeben</dd>
+                        <dd class="text-xs text-stone-400">{{ number_format($hero->ep_total, 0, ',', '.') }} gesammelt / {{ number_format($hero->ep_spent, 0, ',', '.') }} für Fertigkeiten ausgegeben</dd>
                     </div>
                     <div>
                         <dt class="text-stone-500">Status</dt>
@@ -29,13 +29,28 @@
                     </div>
                 </dl>
             </div>
+            <div class="bg-amber-50 border border-amber-200 rounded px-3 py-2 mb-3 text-xs text-amber-900 leading-snug">
+                <strong>Was sind EP?</strong> Erfahrungspunkte sammelst du durch Abenteuer-Teilnahme. Mit EP kannst du Fertigkeiten für deinen Helden kaufen — schau in die Fertigkeitsbaum-Bereiche unten!
+            </div>
             <dl class="grid grid-cols-2 gap-3 text-stone-800 text-sm mb-4">
                 <div><dt class="text-stone-500">Spieler</dt><dd>{{ $hero->player?->full_name ?? '—' }}</dd></div>
                 <div><dt class="text-stone-500">Klassen</dt><dd>{{ $hero->classes->pluck('name')->implode(', ') ?: '—' }}</dd></div>
                 <div><dt class="text-stone-500">Heimatort</dt><dd>{{ $hero->homeplace ?? '—' }}</dd></div>
-                <div><dt class="text-stone-500">Fertigkeiten</dt><dd>{{ $hero->skills_count }} in {{ $hero->classes_count }} Klassen</dd></div>
-                <div><dt class="text-stone-500">Erste Erblickung</dt><dd>{{ optional($hero->born)->format('d.m.Y') ?? '—' }}</dd></div>
-                <div><dt class="text-stone-500">Verschollen</dt><dd>{{ optional($hero->died)->format('d.m.Y') ?? '—' }}</dd></div>
+                <div>
+                    <dt class="text-stone-500">Fertigkeiten</dt>
+                    <dd>{{ $hero->skills_count }} in {{ $hero->classes_count }} Klassen</dd>
+                    <dd class="text-xs text-stone-400">Fähigkeiten, die dein Held beherrscht</dd>
+                </div>
+                <div>
+                    <dt class="text-stone-500">Erste Erblickung</dt>
+                    <dd>{{ optional($hero->born)->format('d.m.Y') ?? '—' }}</dd>
+                    <dd class="text-xs text-stone-400">Geburtstag des Helden</dd>
+                </div>
+                <div>
+                    <dt class="text-stone-500">Verschollen seit</dt>
+                    <dd>{{ optional($hero->died)->format('d.m.Y') ?? '—' }}</dd>
+                    <dd class="text-xs text-stone-400">Held spielt nicht mehr aktiv</dd>
+                </div>
             </dl>
 
             @if ($hero->description)
@@ -212,6 +227,7 @@
 
         {{-- EP-Verlauf --}}
         <x-mobile.accordion-section title="EP-Verlauf">
+            <p class="text-xs text-stone-400 mb-3">Hier siehst du alle EP-Buchungen – zum Beispiel nach einem Abenteuer oder wenn du eine Fertigkeit gekauft hast.</p>
             <a href="{{ route('heroes.ep.export', $hero) }}" class="ui small button mb-3" target="_blank" rel="noopener">EP-Auszug (CSV)</a>
 
             @can('heldenregister.edit')
@@ -306,15 +322,37 @@
                     </div>
                 @endif
             </div>
+            <div class="bg-amber-50 border border-amber-200 rounded px-3 py-2 mb-3 text-sm text-amber-900 leading-snug clear-both">
+                <strong>EP (Erfahrungspunkte)</strong> sammelst du durch Abenteuer-Teilnahme und gibst sie für Fertigkeiten aus. Die Fertigkeitsbäume findest du in den Tabs oben.
+            </div>
             <dl class="grid grid-cols-2 gap-4 text-stone-800">
                 <div><dt class="text-sm text-stone-500">Spieler</dt><dd>{{ $hero->player?->full_name ?? '—' }}</dd></div>
                 <div><dt class="text-sm text-stone-500">Klassen</dt><dd>{{ $hero->classes->pluck('name')->implode(', ') ?: '—' }}</dd></div>
                 <div><dt class="text-sm text-stone-500">Heimatort</dt><dd>{{ $hero->homeplace ?? '—' }}</dd></div>
-                <div><dt class="text-sm text-stone-500">EP-Saldo</dt><dd class="font-semibold">{{ number_format($hero->ep_balance, 0, ',', '.') }} EP</dd></div>
-                <div><dt class="text-sm text-stone-500">EP gesamt / ausgegeben</dt><dd>{{ number_format($hero->ep_total, 0, ',', '.') }} / {{ number_format($hero->ep_spent, 0, ',', '.') }}</dd></div>
-                <div><dt class="text-sm text-stone-500">Fertigkeiten / Klassen</dt><dd>{{ $hero->skills_count }} / {{ $hero->classes_count }}</dd></div>
-                <div><dt class="text-sm text-stone-500">Erste Erblickung</dt><dd>{{ optional($hero->born)->format('d.m.Y') ?? '—' }}</dd></div>
-                <div><dt class="text-sm text-stone-500">Verschollen</dt><dd>{{ optional($hero->died)->format('d.m.Y') ?? '—' }}</dd></div>
+                <div>
+                    <dt class="text-sm text-stone-500">Verfügbare EP</dt>
+                    <dd class="font-semibold">{{ number_format($hero->ep_balance, 0, ',', '.') }} EP</dd>
+                    <dd class="text-xs text-stone-400">frei für Fertigkeiten</dd>
+                </div>
+                <div>
+                    <dt class="text-sm text-stone-500">EP gesammelt / ausgegeben</dt>
+                    <dd>{{ number_format($hero->ep_total, 0, ',', '.') }} / {{ number_format($hero->ep_spent, 0, ',', '.') }}</dd>
+                </div>
+                <div>
+                    <dt class="text-sm text-stone-500">Fertigkeiten / Klassen</dt>
+                    <dd>{{ $hero->skills_count }} / {{ $hero->classes_count }}</dd>
+                    <dd class="text-xs text-stone-400">erlernte Fähigkeiten</dd>
+                </div>
+                <div>
+                    <dt class="text-sm text-stone-500">Erste Erblickung</dt>
+                    <dd>{{ optional($hero->born)->format('d.m.Y') ?? '—' }}</dd>
+                    <dd class="text-xs text-stone-400">Geburtstag des Helden</dd>
+                </div>
+                <div>
+                    <dt class="text-sm text-stone-500">Verschollen seit</dt>
+                    <dd>{{ optional($hero->died)->format('d.m.Y') ?? '—' }}</dd>
+                    <dd class="text-xs text-stone-400">Held spielt nicht mehr aktiv</dd>
+                </div>
                 <div>
                     <dt class="text-sm text-stone-500">Status</dt>
                     <dd>@if ($hero->died)<span class="text-red-700">verschollen</span>@else{{ $hero->active ? 'aktiv' : 'inaktiv' }}@endif</dd>
