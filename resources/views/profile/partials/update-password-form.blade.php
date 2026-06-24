@@ -1,8 +1,8 @@
 <section>
     <header>
-        <h2 class="text-lg font-medium text-gray-900">Passwort ändern</h2>
+        <h2 class="font-uncial text-lg text-waldritter">Passwort ändern</h2>
 
-        <p class="mt-1 text-sm text-gray-600">
+        <p class="mt-1 text-sm text-stone-600">
             Verwende ein langes, zufälliges Passwort, um dein Konto sicher zu halten.
         </p>
     </header>
@@ -41,7 +41,7 @@
                     x-show="show"
                     x-transition
                     x-init="setTimeout(() => show = false, 2000)"
-                    class="text-sm text-gray-600"
+                    class="text-sm text-stone-600"
                 >Gespeichert.</p>
             @endif
         </div>

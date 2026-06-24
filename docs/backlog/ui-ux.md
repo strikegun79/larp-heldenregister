@@ -566,7 +566,7 @@ aus `_create` in `_edit` übernommen. Gemeinsames Partial abgelehnt: `_edit` hat
 andere Defaults (Bestandswerte statt `old()`), keine Spieler-Auswahl, keine AGB —
 zu unterschiedlich für sinnvolle Abstraktion.
 
-### UI-36 · [P3] Profilseite ins Theme bringen + Datenübersicht/Datenschutz-Link · ⏱ 3h · 🔲
+### UI-36 · [P3] Profilseite ins Theme bringen + Datenübersicht/Datenschutz-Link · ⏱ 3h · ✅
 **Beschreibung:** Die Profilseite (`profile/edit.blade.php`) bricht aus dem
 Mittelalter-/Pergament-Theme aus: generischer grauer Header
 (`text-gray-800`/`font-semibold` statt `font-uncial text-waldritter`) und weiße
