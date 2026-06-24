@@ -781,7 +781,7 @@ Top-Navbar bleibt ab `sm`; Hamburger entfällt < `sm`.
 **Abhängigkeiten:** Unabhängig umsetzbar; harmoniert mit UI-43 (Dashboard muss die
 Kachel-Navigation dann nicht mehr doppeln).
 
-### UI-43 · [P2] Mobiles Dashboard: Quick-Actions, nächstes Abenteuer, Hero-Status · ⏱ 5h · 🔲
+### UI-43 · [P2] Mobiles Dashboard: Quick-Actions, nächstes Abenteuer, Hero-Status · ⏱ 5h · ✅
 **Beschreibung:** Das Dashboard (`dashboard.blade.php`) ist auf Mobil eine reine
 Kachel-Navigation (5–6 große Bild-Kacheln `h-44`), die exakt die Nav-Ziele
 dupliziert und viel vertikalen Platz frisst, ohne inhaltlichen Mehrwert. Für die
