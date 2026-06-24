@@ -6,7 +6,7 @@
 @if ($teamerSignups->isEmpty() && $nscBookings->isEmpty())
     <p class="text-stone-500 text-sm">Noch keine Teamer- oder NSC-Anmeldungen vorhanden.</p>
 @else
-    <div class="overflow-x-auto">
+    <x-mobile.cards-or-table>
         <table class="ui very basic compact table">
             <thead>
                 <tr>
@@ -22,9 +22,9 @@
                 {{-- Teamer-Anmeldungen (teamer_signups) --}}
                 @foreach ($teamerSignups as $signup)
                     <tr>
-                        <td>{{ $signup->user->name }} {{ $signup->user->lastname }}</td>
-                        <td>—</td>
-                        <td>
+                        <td data-label="Nutzer">{{ $signup->user->name }} {{ $signup->user->lastname }}</td>
+                        <td data-label="Alter">—</td>
+                        <td data-label="Rolle">
                             @can('events.edit')
                                 <form method="POST"
                                       action="{{ route('adventures.teamer.update-role', [$adventure, $signup]) }}"
@@ -42,7 +42,7 @@
                                 {{ $signup->teamer_role ?? '—' }}
                             @endcan
                         </td>
-                        <td>
+                        <td data-label="Status">
                             @if ($signup->approved_at)
                                 <span class="ui mini green label">bestätigt</span>
                             @elseif ($signup->rejected_at)
@@ -51,10 +51,9 @@
                                 <span class="ui mini grey label">offen</span>
                             @endif
                         </td>
-                        <td class="right aligned">
-                            <div class="flex items-center justify-end gap-1">
+                        <td>
+                            <div class="flex items-center justify-end gap-1 flex-wrap">
                                 @can('events.edit')
-                                    {{-- Bestätigen / Toggle --}}
                                     <form method="POST"
                                           action="{{ route('adventures.teamer.approve', [$adventure, $signup]) }}"
                                           data-refresh-modal>
@@ -64,9 +63,9 @@
                                                 data-tooltip="{{ $signup->approved_at ? 'Bestätigung zurücknehmen' : 'Bestätigen' }}"
                                                 data-position="top center">
                                             <i class="check icon"></i>
+                                            <span class="sm:hidden ml-1 text-xs">{{ $signup->approved_at ? 'Zurück' : 'Bestät.' }}</span>
                                         </button>
                                     </form>
-                                    {{-- Ablehnen / Toggle --}}
                                     <form method="POST"
                                           action="{{ route('adventures.teamer.reject', [$adventure, $signup]) }}"
                                           data-refresh-modal>
@@ -76,17 +75,17 @@
                                                 data-tooltip="{{ $signup->rejected_at ? 'Ablehnung zurücknehmen' : 'Ablehnen' }}"
                                                 data-position="top center">
                                             <i class="hand paper outline icon"></i>
+                                            <span class="sm:hidden ml-1 text-xs">{{ $signup->rejected_at ? 'Zurück' : 'Ablehnen' }}</span>
                                         </button>
                                     </form>
-                                    {{-- Bearbeiten --}}
                                     <a href="{{ route('adventures.teamer.edit', [$adventure, $signup]) }}"
                                        data-modal-stack="{{ route('adventures.teamer.edit', [$adventure, $signup]) }}"
                                        class="ui mini icon button"
                                        data-tooltip="Bearbeiten" data-position="top center">
                                         <i class="edit icon"></i>
+                                        <span class="sm:hidden ml-1 text-xs">Bearb.</span>
                                     </a>
                                 @endcan
-                                {{-- Stornieren --}}
                                 @can('adventure.cancel')
                                     <form method="POST"
                                           action="{{ route('adventures.teamer.destroy', [$adventure, $signup]) }}"
@@ -97,6 +96,7 @@
                                                 class="ui mini icon button red"
                                                 data-tooltip="Stornieren" data-position="top center">
                                             <i class="times icon"></i>
+                                            <span class="sm:hidden ml-1 text-xs">Storn.</span>
                                         </button>
                                     </form>
                                 @endcan
@@ -108,14 +108,14 @@
                 {{-- NSC-Elternteil-Buchungen --}}
                 @foreach ($nscBookings as $booking)
                     <tr>
-                        <td>
+                        <td data-label="Spieler">
                             {{ $booking->is_guest
                                 ? $booking->guest_name.' '.$booking->guest_lastname.' (Gast)'
                                 : ($booking->player?->name.' '.$booking->player?->lastname) }}
                         </td>
-                        <td>{{ $booking->participant_age ?? '—' }}</td>
-                        <td>Eltern-NSC</td>
-                        <td>
+                        <td data-label="Alter">{{ $booking->participant_age ?? '—' }}</td>
+                        <td data-label="Rolle">Eltern-NSC</td>
+                        <td data-label="Status">
                             @php($status = $booking->status ?? 'offen')
                             <span class="ui mini label {{ match($status) {
                                 'bestaetigt' => 'green',
@@ -124,8 +124,8 @@
                                 default      => 'grey',
                             } }}">{{ \App\Models\Booking::STATUS_LABELS[$status] ?? $status }}</span>
                         </td>
-                        <td class="right aligned">
-                            <div class="flex items-center justify-end gap-1">
+                        <td>
+                            <div class="flex items-center justify-end gap-1 flex-wrap">
                                 @can('approve-bookings')
                                     <form method="POST"
                                           action="{{ route('adventures.bookings.approval', [$adventure, $booking]) }}"
@@ -136,6 +136,7 @@
                                                 data-tooltip="{{ $booking->status === 'bestaetigt' ? 'Bestätigung zurücknehmen' : 'Bestätigen' }}"
                                                 data-position="top center">
                                             <i class="check icon"></i>
+                                            <span class="sm:hidden ml-1 text-xs">{{ $booking->status === 'bestaetigt' ? 'Zurück' : 'Bestät.' }}</span>
                                         </button>
                                     </form>
                                     <form method="POST"
@@ -147,6 +148,7 @@
                                                 data-tooltip="{{ $booking->status === 'abgelehnt' ? 'Ablehnung zurücknehmen' : 'Ablehnen' }}"
                                                 data-position="top center">
                                             <i class="hand paper outline icon"></i>
+                                            <span class="sm:hidden ml-1 text-xs">{{ $booking->status === 'abgelehnt' ? 'Zurück' : 'Ablehnen' }}</span>
                                         </button>
                                     </form>
                                 @endcan
@@ -156,6 +158,7 @@
                                        class="ui mini icon button"
                                        data-tooltip="Bearbeiten" data-position="top center">
                                         <i class="edit icon"></i>
+                                        <span class="sm:hidden ml-1 text-xs">Bearb.</span>
                                     </a>
                                 @endcan
                                 @can('adventure.cancel')
@@ -168,6 +171,7 @@
                                                 class="ui mini icon button red"
                                                 data-tooltip="Stornieren" data-position="top center">
                                             <i class="times icon"></i>
+                                            <span class="sm:hidden ml-1 text-xs">Storn.</span>
                                         </button>
                                     </form>
                                 @endcan
@@ -178,5 +182,5 @@
 
             </tbody>
         </table>
-    </div>
+    </x-mobile.cards-or-table>
 @endif

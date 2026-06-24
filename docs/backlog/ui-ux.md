@@ -391,7 +391,7 @@ Kollaps, `100vh`-Problematik → ggf. `dvh`).
 **Betroffene Seiten/Routen:** `public/css/heldenregister.css` (`modal-hero`/`modal-event`),
 `adventures/_manage.blade.php`, `heroes/_detail.blade.php`, `layouts/app.blade.php`
 
-### UI-29 · [P2] Breite Tabellen in Modalen mobil bedienbar (Anmeldungen, Check-in, EP) · ⏱ 3h · 🔲
+### UI-29 · [P2] Breite Tabellen in Modalen mobil bedienbar (Anmeldungen, Check-in, EP) · ⏱ 3h · ✅
 **Beschreibung:** Modal-Inhalte enthalten breite Tabellen: `adventures/_bookings.blade.php`
 (7 Spalten + Aktionsleiste mit bis zu 5 Icon-Buttons), `adventures/_checkin.blade.php`
 (4 Spalten + Check-in/Abmelden/auschecken), `heroes/_detail.blade.php` EP-Verlauf

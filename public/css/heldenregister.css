@@ -291,4 +291,14 @@
     .mobile-cards-table-wrapper table tbody tr td:only-child {
         display: table-cell;
     }
+    /* Aktions-Zelle (kein data-label): Trenner + Buttons voll breit */
+    .mobile-cards-table-wrapper table td:not([data-label]):not(:only-child) {
+        border-top: 1px solid #e5e7eb !important;
+        margin-top: 0.25rem;
+        padding-top: 0.5rem;
+    }
+    .mobile-cards-table-wrapper table td:not([data-label]):not(:only-child) > div {
+        width: 100%;
+        justify-content: flex-end;
+    }
 }
