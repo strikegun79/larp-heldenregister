@@ -51,6 +51,13 @@
                     <dd>{{ optional($hero->died)->format('d.m.Y') ?? '—' }}</dd>
                     <dd class="text-xs text-stone-400">Held spielt nicht mehr aktiv</dd>
                 </div>
+                @if ($hero->public_code)
+                <div class="col-span-2">
+                    <dt class="text-stone-500">Helden-Code</dt>
+                    <dd><code class="font-mono tracking-widest text-waldritter bg-stone-100 rounded px-2 py-0.5 text-sm">{{ $hero->public_code }}</code></dd>
+                    <dd class="text-xs text-stone-400">für öffentliches Profil</dd>
+                </div>
+                @endif
             </dl>
 
             @if ($hero->description)
@@ -362,6 +369,13 @@
                     <dt class="text-sm text-stone-500">Status</dt>
                     <dd>@if ($hero->died)<span class="text-red-700">verschollen</span>@else{{ $hero->active ? 'aktiv' : 'inaktiv' }}@endif</dd>
                 </div>
+                @if ($hero->public_code)
+                <div class="col-span-2">
+                    <dt class="text-sm text-stone-500">Helden-Code</dt>
+                    <dd><code class="font-mono tracking-widest text-waldritter bg-stone-100 rounded px-2 py-0.5">{{ $hero->public_code }}</code></dd>
+                    <dd class="text-xs text-stone-400">für öffentliches Profil (PUB-02)</dd>
+                </div>
+                @endif
             </dl>
 
             <a href="{{ route('heroes.sheet-pdf', $hero) }}" class="ui small button mt-3" target="_blank" rel="noopener">Charakterbogen (PDF)</a>

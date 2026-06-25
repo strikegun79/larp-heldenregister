@@ -13,6 +13,35 @@ class Hero extends Model
 {
     use HasFactory;
 
+    /**
+     * PUB-01: Eindeutigen 6-stelligen Code generieren und beim Erstellen setzen.
+     */
+    protected static function booted(): void
+    {
+        static::creating(function (Hero $hero) {
+            if (empty($hero->public_code)) {
+                $hero->public_code = static::generatePublicCode();
+            }
+        });
+    }
+
+    /** Kollisionsfreien 6-stelligen Code aus dem BASE31-Alphabet erzeugen. */
+    public static function generatePublicCode(): string
+    {
+        do {
+            $code = '';
+            $len  = strlen(self::CODE_ALPHABET);
+            for ($i = 0; $i < 6; $i++) {
+                $code .= self::CODE_ALPHABET[random_int(0, $len - 1)];
+            }
+        } while (static::where('public_code', $code)->exists());
+
+        return $code;
+    }
+
+    /** PUB-01: Alphabet ohne visuell verwechselbare Zeichen (0, O, 1, I, L). */
+    private const CODE_ALPHABET = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+
     protected $fillable = [
         'player_id',
         'character_name',
@@ -23,6 +52,7 @@ class Hero extends Model
         'image',
         'active',
         'legacy_id',
+        'public_code',
     ];
 
     protected $casts = [
