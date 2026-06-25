@@ -497,7 +497,7 @@ Datenschutzerklärung am Formularanfang. Bei Gast-Alter/-Ort kurzer Zweckhinweis
 Gast-Formular: `<small>` unter Alter und Ort. Da kein Datenschutzerklärung-Route
 existiert, wird statt Link auf das Organisationsteam als Anlaufstelle verwiesen.
 
-### UI-33 · [P2] Helden-Detail: Tab-Flut für Kinder reduzieren/gruppieren · ⏱ 4h · 🔲
+### UI-33 · [P2] Helden-Detail: Tab-Flut für Kinder reduzieren/gruppieren · ⏱ 4h · ✅
 **Beschreibung:** Das Helden-Detail-Modal (`heroes/_detail.blade.php`) zeigt
 dynamisch sehr viele Tabs: „Übersicht", „Abenteuer", **je Klasse einen eigenen
 Tab** (Fertigkeitsbaum) plus „EP-Verlauf". Bei einem Helden mit 3 Klassen sind das

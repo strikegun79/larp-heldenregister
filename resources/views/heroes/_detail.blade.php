@@ -273,10 +273,15 @@
     <div class="hidden sm:block">
         <div class="ui top attached tabular menu" style="overflow-x: auto; flex-wrap: nowrap;">
             <a class="item active" data-tab="overview" style="white-space: nowrap;">Übersicht</a>
+            @if ($hero->classes->isNotEmpty())
+                <a class="item" data-tab="skills" style="white-space: nowrap;">
+                    Fertigkeiten
+                    @if ($hero->classes_count > 1)
+                        <span class="ui mini circular label ml-1">{{ $hero->classes_count }}</span>
+                    @endif
+                </a>
+            @endif
             <a class="item" data-tab="adventures" style="white-space: nowrap;">Abenteuer</a>
-            @foreach ($hero->classes as $class)
-                <a class="item" data-tab="cls-{{ $class->id }}" style="white-space: nowrap;">{{ $class->name }}</a>
-            @endforeach
             <a class="item" data-tab="ep" style="white-space: nowrap;">EP-Verlauf</a>
         </div>
 
@@ -323,7 +328,7 @@
                 @endif
             </div>
             <div class="bg-amber-50 border border-amber-200 rounded px-3 py-2 mb-3 text-sm text-amber-900 leading-snug clear-both">
-                <strong>EP (Erfahrungspunkte)</strong> sammelst du durch Abenteuer-Teilnahme und gibst sie für Fertigkeiten aus. Die Fertigkeitsbäume findest du in den Tabs oben.
+                <strong>EP (Erfahrungspunkte)</strong> sammelst du durch Abenteuer-Teilnahme und gibst sie für Fertigkeiten aus. Die Fertigkeitsbäume findest du im Tab „Fertigkeiten" oben.
             </div>
             <dl class="grid grid-cols-2 gap-4 text-stone-800">
                 <div><dt class="text-sm text-stone-500">Spieler</dt><dd>{{ $hero->player?->full_name ?? '—' }}</dd></div>
@@ -503,65 +508,90 @@
             @endif
         </div>
 
-        {{-- Tabs: Fertigkeitsbaum je Klasse --}}
-        @foreach ($hero->classes as $class)
-            <div class="ui bottom attached tab segment" data-tab="cls-{{ $class->id }}">
-                <div class="skill-map">
-                    <img src="{{ $class->skilltreeImage() }}" alt="Fertigkeitsbaum {{ $class->name }}" class="skill-image">
-                    @foreach ($class->skills as $skill)
-                        @php($learned = $learnedIds->contains($skill->id))
-                        @php($unset = ($skill->pivot->x_percentage == 0 && $skill->pivot->y_percentage == 0))
-                        @php($px = $unset ? 6 + ($loop->index % 10) * 9 : (int) $skill->pivot->x_percentage)
-                        @php($py = $unset ? 8 + intdiv($loop->index, 10) * 11 : (int) $skill->pivot->y_percentage)
-                        @php($missingPrereqs = $skill->prerequisites->filter(fn ($p) => ! $learnedIds->contains($p->id)))
-                        @php($locked = ! $learned && $missingPrereqs->isNotEmpty())
-                        <button type="button"
-                                class="skill-marker skill-trigger {{ $learned ? 'learned' : ($locked ? 'locked' : 'unlearned') }}"
-                                style="left: {{ $px }}%; top: {{ $py }}%;"
-                                title="{{ $skill->name }} ({{ $skill->ep_costs }} EP){{ $locked ? ' – gesperrt' : '' }}"
-                                data-skill-id="{{ $skill->id }}"
-                                data-skill-name="{{ $skill->name }}"
-                                data-skill-desc="{{ $skill->description }}"
-                                data-skill-cost="{{ $skill->ep_costs }}"
-                                data-skill-learned="{{ $learned ? 1 : 0 }}"
-                                data-skill-locked="{{ $locked ? 1 : 0 }}"
-                                data-skill-prereqs="{{ $locked ? $missingPrereqs->pluck('name')->join(', ') : '' }}"></button>
-                    @endforeach
-                </div>
-
-                @if ($class->skills->isEmpty())
-                    <p class="text-stone-500">Für diese Klasse sind keine Fertigkeiten hinterlegt.</p>
-                @else
-                    <div class="ui middle aligned divided list skill-list">
-                        @foreach ($class->skills as $skill)
-                            @php($learned = $learnedIds->contains($skill->id))
-                            @php($missingPrereqs = $skill->prerequisites->filter(fn ($p) => ! $learnedIds->contains($p->id)))
-                            @php($locked = ! $learned && $missingPrereqs->isNotEmpty())
-                            <div class="item">
-                                <div class="content">
-                                    <a class="skill-trigger {{ $learned ? 'text-green-700' : ($locked ? 'text-stone-400' : 'text-waldritter') }} hover:underline" style="cursor:pointer"
-                                       data-skill-id="{{ $skill->id }}"
-                                       data-skill-name="{{ $skill->name }}"
-                                       data-skill-desc="{{ $skill->description }}"
-                                       data-skill-cost="{{ $skill->ep_costs }}"
-                                       data-skill-learned="{{ $learned ? 1 : 0 }}"
-                                       data-skill-locked="{{ $locked ? 1 : 0 }}"
-                                       data-skill-prereqs="{{ $locked ? $missingPrereqs->pluck('name')->join(', ') : '' }}">
-                                        {{ $learned ? '✓ ' : ($locked ? '🔒 ' : '') }}{{ $skill->name }} ({{ $skill->ep_costs }} EP)
-                                    </a>
-                                </div>
-                            </div>
+        {{-- Tab: Fertigkeiten (alle Klassen zusammengefasst, UI-33) --}}
+        @if ($hero->classes->isNotEmpty())
+            <div class="ui bottom attached tab segment" data-tab="skills"
+                 x-data="{ activeClass: {{ $hero->classes->first()->id }} }">
+                {{-- Klassen-Pills zur Auswahl --}}
+                @if ($hero->classes->count() > 1)
+                    <div class="flex flex-wrap gap-2 mb-4">
+                        @foreach ($hero->classes as $class)
+                            <button type="button"
+                                    @click="activeClass = {{ $class->id }}"
+                                    :class="activeClass === {{ $class->id }}
+                                        ? 'ui primary label'
+                                        : 'ui label'"
+                                    class="cursor-pointer">
+                                {{ $class->name }}
+                            </button>
                         @endforeach
                     </div>
                 @endif
 
-                @can('heldenregister.edit')
-                    <div class="mt-3">
-                        <a href="{{ route('skilltree.edit', $class) }}" class="ui tiny basic button">Positionen bearbeiten</a>
+                {{-- Fertigkeitsbaum je Klasse --}}
+                @foreach ($hero->classes as $class)
+                    <div x-show="activeClass === {{ $class->id }}">
+                        @if ($hero->classes->count() === 1)
+                            <h3 class="font-uncial text-lg text-waldritter mb-3">{{ $class->name }}</h3>
+                        @endif
+                        <div class="skill-map">
+                            <img src="{{ $class->skilltreeImage() }}" alt="Fertigkeitsbaum {{ $class->name }}" class="skill-image">
+                            @foreach ($class->skills as $skill)
+                                @php($learned = $learnedIds->contains($skill->id))
+                                @php($unset = ($skill->pivot->x_percentage == 0 && $skill->pivot->y_percentage == 0))
+                                @php($px = $unset ? 6 + ($loop->index % 10) * 9 : (int) $skill->pivot->x_percentage)
+                                @php($py = $unset ? 8 + intdiv($loop->index, 10) * 11 : (int) $skill->pivot->y_percentage)
+                                @php($missingPrereqs = $skill->prerequisites->filter(fn ($p) => ! $learnedIds->contains($p->id)))
+                                @php($locked = ! $learned && $missingPrereqs->isNotEmpty())
+                                <button type="button"
+                                        class="skill-marker skill-trigger {{ $learned ? 'learned' : ($locked ? 'locked' : 'unlearned') }}"
+                                        style="left: {{ $px }}%; top: {{ $py }}%;"
+                                        title="{{ $skill->name }} ({{ $skill->ep_costs }} EP){{ $locked ? ' – gesperrt' : '' }}"
+                                        data-skill-id="{{ $skill->id }}"
+                                        data-skill-name="{{ $skill->name }}"
+                                        data-skill-desc="{{ $skill->description }}"
+                                        data-skill-cost="{{ $skill->ep_costs }}"
+                                        data-skill-learned="{{ $learned ? 1 : 0 }}"
+                                        data-skill-locked="{{ $locked ? 1 : 0 }}"
+                                        data-skill-prereqs="{{ $locked ? $missingPrereqs->pluck('name')->join(', ') : '' }}"></button>
+                            @endforeach
+                        </div>
+
+                        @if ($class->skills->isEmpty())
+                            <p class="text-stone-500">Für diese Klasse sind keine Fertigkeiten hinterlegt.</p>
+                        @else
+                            <div class="ui middle aligned divided list skill-list">
+                                @foreach ($class->skills as $skill)
+                                    @php($learned = $learnedIds->contains($skill->id))
+                                    @php($missingPrereqs = $skill->prerequisites->filter(fn ($p) => ! $learnedIds->contains($p->id)))
+                                    @php($locked = ! $learned && $missingPrereqs->isNotEmpty())
+                                    <div class="item">
+                                        <div class="content">
+                                            <a class="skill-trigger {{ $learned ? 'text-green-700' : ($locked ? 'text-stone-400' : 'text-waldritter') }} hover:underline" style="cursor:pointer"
+                                               data-skill-id="{{ $skill->id }}"
+                                               data-skill-name="{{ $skill->name }}"
+                                               data-skill-desc="{{ $skill->description }}"
+                                               data-skill-cost="{{ $skill->ep_costs }}"
+                                               data-skill-learned="{{ $learned ? 1 : 0 }}"
+                                               data-skill-locked="{{ $locked ? 1 : 0 }}"
+                                               data-skill-prereqs="{{ $locked ? $missingPrereqs->pluck('name')->join(', ') : '' }}">
+                                                {{ $learned ? '✓ ' : ($locked ? '🔒 ' : '') }}{{ $skill->name }} ({{ $skill->ep_costs }} EP)
+                                            </a>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        @endif
+
+                        @can('heldenregister.edit')
+                            <div class="mt-3">
+                                <a href="{{ route('skilltree.edit', $class) }}" class="ui tiny basic button">Positionen bearbeiten</a>
+                            </div>
+                        @endcan
                     </div>
-                @endcan
+                @endforeach
             </div>
-        @endforeach
+        @endif
 
         {{-- Tab: EP-Verlauf --}}
         <div class="ui bottom attached tab segment" data-tab="ep">
