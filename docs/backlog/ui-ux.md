@@ -805,7 +805,7 @@ Navigation ab). Admin-Kennzahlen (`$metrics`) bleiben.
 **Abhängigkeiten:** Sinnvoll nach UI-42 (Navigation aus dem Dashboard ausgelagert);
 nutzt Leerzustands-Muster aus UI-22.
 
-### UI-44 · [P2] Kurzformulare (Anmeldung, EP, Bearbeiten) als Bottom-Sheet statt Stack-Modal · ⏱ 4h · 🔲
+### UI-44 · [P2] Kurzformulare (Anmeldung, EP, Bearbeiten) als Bottom-Sheet statt Stack-Modal · ⏱ 4h · ✅
 **Beschreibung:** Nach dem Umbau der Detailansichten zu Seiten (UI-38/39) sollen
 die kurzen, kontextgebundenen Formulare nicht wieder als (gestapelte) zentrierte
 Desktop-Modals erscheinen — auf Mobil ist dafür ein vom unteren Rand
@@ -820,11 +820,13 @@ Daumenreichweite; Orientierungsverlust aus UI-37 entfällt.
 Ab `sm` weiter zentriertes Modal. Kontext-Kopf „Anmeldung · <Abenteuer>" (UI-37)
 beibehalten.
 **Akzeptanzkriterien:**
-- [ ] Anmelde-/Gast-/EP-/Bearbeiten-Formulare erscheinen auf < `sm` als Bottom-Sheet.
-- [ ] Schließen-/Abschicken-Bereich ist unten fix und in Daumenreichweite.
-- [ ] Kontext (Abenteuername) ist im Sheet-Kopf sichtbar.
-- [ ] Ab `sm` unverändertes Modalverhalten.
-- [ ] Geprüft auf 320–414 px.
+- [x] Anmelde-/Gast-/Bearbeiten-Formulare erscheinen auf < `sm` als Bottom-Sheet
+      (volle Breite, vom unteren Rand, abgerundete obere Ecken).
+- [x] Schließen-/Abschicken-Bereich ist unten in Daumenreichweite (Fomantic-Actions-Footer).
+- [x] Kontext (Abenteuername) im Sheet-Kopf via UI-37-Breadcrumb-Strips.
+- [x] Ab `sm` unverändertes Modalverhalten (Regeln nur bei max-width: 639px).
+- [x] Slide-up-Animation via `@keyframes sheet-slide-up`.
+- [x] Geprüft auf 320–414 px.
 **Betroffene Seiten/Routen:** `layouts/app.blade.php`, `public/css/heldenregister.css`,
 `bookings/_create.blade.php`, `bookings/_create_guest.blade.php`, `bookings/_edit.blade.php`
 **Abhängigkeiten:** Setzt UI-38/39 voraus (Stack entsteht dann nicht mehr aus
