@@ -730,7 +730,7 @@ vgl. UI-33). Offen-Zustand bei Teil-Refresh erhalten.
 **Abhängigkeiten:** Ergänzt UI-25 (Tab-Scrollen) und UI-33 (Tab-Flut); wirkt in
 UI-38/UI-39-Seiten wie im verbleibenden Modal.
 
-### UI-41 · [P2] Tabellen in Detailansichten & Admin auf Mobil als Karten · ⏱ 5h · 🔲
+### UI-41 · [P2] Tabellen in Detailansichten & Admin auf Mobil als Karten · ⏱ 5h · ✅
 **Beschreibung:** UI-19 hat die Index-Listen (Helden, Abenteuer) auf Karten
 umgestellt, UI-29 adressiert die Anmeldungs-/Check-in-Tabellen. Ungelöst bleiben
 weitere mehrspaltige Tabellen **in Detailansichten** — Spieler-Detail (Helden,
@@ -743,12 +743,12 @@ Quer-Scrollen; Admins bedienen Lookups mobil.
 < `sm`"-Muster (Label/Wert-Paare) wie in UI-19, idealerweise als Blade-Komponente,
 um Doppelpflege zu vermeiden. Zuerst Detail-Tabellen, dann Admin-Lookups.
 **Akzeptanzkriterien:**
-- [ ] Tabellen in `players/_detail` und `heroes/_detail` werden auf < `sm` als
-      Karten (Label + Wert) dargestellt, ohne erzwungenes Quer-Scrollen.
-- [ ] Mindestens die meistgenutzten Admin-Lookups (Nutzer, Spieler, Veranstaltungen)
-      erhalten einen Kartenfallback auf < `sm`.
-- [ ] Interaktive Zeilen behalten Tap-Ziel + Tastaturbedienung (vgl. UI-20).
-- [ ] Geprüft auf 320–414 px.
+- [x] Tabellen in `players/_detail` und `heroes/_detail` werden auf < `sm` als
+      Karten (Label + Wert) dargestellt, ohne erzwungenes Quer-Scrollen (via UI-40 Accordion).
+- [x] Alle 14 Admin-Lookup-Tabellen erhalten Kartenfallback auf < `sm`
+      (`x-mobile.cards-or-table` + `data-label` auf allen Daten-`<td>`).
+- [x] Interaktive Zeilen behalten Tap-Ziel + Tastaturbedienung (vgl. UI-20).
+- [x] Geprüft auf 320–414 px.
 **Betroffene Seiten/Routen:** `players/_detail.blade.php`, `heroes/_detail.blade.php`,
 `adventures/_bookings.blade.php`, `admin/*/index.blade.php`
 **Abhängigkeiten:** Erweitert UI-19 und UI-29 auf Detail-/Admin-Tabellen; nutzt

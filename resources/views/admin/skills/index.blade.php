@@ -29,7 +29,7 @@
             </form>
 
             <div class="bg-white/70 border-2 border-[#5a3a22]/40 shadow sm:rounded-lg overflow-hidden">
-                <div class="overflow-x-auto">
+                <x-mobile.cards-or-table>
                 <table class="min-w-full divide-y divide-stone-200">
                     <thead class="bg-black/5">
                         <tr>
@@ -46,11 +46,11 @@
                     <tbody class="divide-y divide-stone-200 text-stone-800">
                         @forelse ($skills as $skill)
                             <tr>
-                                <td class="px-4 py-3 font-medium">{{ $skill->name }}</td>
-                                <td class="px-4 py-3 text-sm">{{ $skill->heroClass?->name ?? '—' }}</td>
-                                <td class="px-4 py-3">{{ $skill->level }}</td>
-                                <td class="px-4 py-3">{{ $skill->ep_costs }}</td>
-                                <td class="px-4 py-3">
+                                <td class="px-4 py-3 font-medium" data-label="Name">{{ $skill->name }}</td>
+                                <td class="px-4 py-3 text-sm" data-label="Masterclass">{{ $skill->heroClass?->name ?? '—' }}</td>
+                                <td class="px-4 py-3" data-label="Lvl">{{ $skill->level }}</td>
+                                <td class="px-4 py-3" data-label="EP">{{ $skill->ep_costs }}</td>
+                                <td class="px-4 py-3" data-label="Farbe">
                                     @if ($skill->perlColor)
                                         <span style="display:inline-block;width:1rem;height:1rem;border-radius:50%;border:1px solid #ccc;background:{{ $skill->perlColor->code }};"
                                               title="{{ $skill->perlColor->name }}"></span>
@@ -58,8 +58,8 @@
                                         —
                                     @endif
                                 </td>
-                                <td class="px-4 py-3 text-sm">{{ $skill->classes_count }}</td>
-                                <td class="px-4 py-3 text-sm">{{ $skill->heroes_count }}</td>
+                                <td class="px-4 py-3 text-sm" data-label="Klassen">{{ $skill->classes_count }}</td>
+                                <td class="px-4 py-3 text-sm" data-label="Helden">{{ $skill->heroes_count }}</td>
                                 <td class="px-4 py-3 text-right">
                                     <div class="flex items-center justify-end gap-3">
                                         <a href="{{ route('admin.skills.edit', $skill) }}"
@@ -80,7 +80,7 @@
                         @endforelse
                     </tbody>
                 </table>
-                </div>
+                </x-mobile.cards-or-table>
             </div>
 
             <div class="mt-4">{{ $skills->links() }}</div>

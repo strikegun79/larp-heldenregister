@@ -11,7 +11,7 @@
     <div class="py-12">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="bg-white/70 border-2 border-[#5a3a22]/40 shadow sm:rounded-lg overflow-hidden">
-                <div class="overflow-x-auto">
+                <x-mobile.cards-or-table>
                 <table class="min-w-full divide-y divide-stone-200">
                     <thead class="bg-black/5">
                         <tr>
@@ -25,15 +25,15 @@
                     <tbody class="divide-y divide-stone-200 text-stone-800">
                         @foreach ($users as $user)
                             <tr class="{{ $user->trashed() ? 'opacity-50 bg-stone-50' : '' }}">
-                                <td class="px-6 py-4">
+                                <td class="px-6 py-4" data-label="Name">
                                     {{ trim("{$user->name} {$user->lastname}") }}
                                     @if ($user->trashed())
                                         <span class="ml-2 text-xs text-red-600 font-semibold">[gelöscht]</span>
                                     @endif
                                 </td>
-                                <td class="px-6 py-4">{{ $user->email }}</td>
-                                <td class="px-6 py-4 text-sm">{{ $user->roles->pluck('label')->implode(', ') ?: '—' }}</td>
-                                <td class="px-6 py-4">{{ $user->activated ? 'ja' : 'nein' }}</td>
+                                <td class="px-6 py-4" data-label="E-Mail">{{ $user->email }}</td>
+                                <td class="px-6 py-4 text-sm" data-label="Rollen">{{ $user->roles->pluck('label')->implode(', ') ?: '—' }}</td>
+                                <td class="px-6 py-4" data-label="Aktiv">{{ $user->activated ? 'ja' : 'nein' }}</td>
                                 <td class="px-6 py-4 text-right">
                                     @if ($user->trashed())
                                         <form method="POST" action="{{ route('admin.users.restore', $user->id) }}" class="inline"
@@ -59,7 +59,7 @@
                         @endforeach
                     </tbody>
                 </table>
-                </div>
+                </x-mobile.cards-or-table>
             </div>
 
             <div class="mt-4">{{ $users->links() }}</div>

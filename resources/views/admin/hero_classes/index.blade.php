@@ -10,7 +10,7 @@
             </div>
 
             <div class="bg-white/70 border-2 border-[#5a3a22]/40 shadow sm:rounded-lg overflow-hidden">
-                <div class="overflow-x-auto">
+                <x-mobile.cards-or-table>
                 <table class="min-w-full divide-y divide-stone-200">
                     <thead class="bg-black/5">
                         <tr>
@@ -25,11 +25,11 @@
                     <tbody class="divide-y divide-stone-200 text-stone-800">
                         @forelse ($classes as $class)
                             <tr class="{{ $class->disabled ? 'opacity-60' : '' }}">
-                                <td class="px-6 py-4">{{ $class->name }}</td>
-                                <td class="px-6 py-4 text-sm text-stone-500">{{ $class->slug }}</td>
-                                <td class="px-6 py-4">{{ $class->ep_cost }} EP</td>
-                                <td class="px-6 py-4">{{ $class->heroes_count }}</td>
-                                <td class="px-6 py-4">
+                                <td class="px-6 py-4" data-label="Name">{{ $class->name }}</td>
+                                <td class="px-6 py-4 text-sm text-stone-500" data-label="Slug">{{ $class->slug }}</td>
+                                <td class="px-6 py-4" data-label="EP-Kosten">{{ $class->ep_cost }} EP</td>
+                                <td class="px-6 py-4" data-label="Helden">{{ $class->heroes_count }}</td>
+                                <td class="px-6 py-4" data-label="Status">
                                     @if ($class->disabled)
                                         <span class="text-stone-500">deaktiviert</span>
                                     @else
@@ -45,7 +45,7 @@
                         @endforelse
                     </tbody>
                 </table>
-                </div>
+                </x-mobile.cards-or-table>
             </div>
 
             <br>

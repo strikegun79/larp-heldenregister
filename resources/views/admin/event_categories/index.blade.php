@@ -10,7 +10,7 @@
             </div>
 
             <div class="bg-white/70 border-2 border-[#5a3a22]/40 shadow sm:rounded-lg overflow-hidden">
-                <div class="overflow-x-auto">
+                <x-mobile.cards-or-table>
                 <table class="min-w-full divide-y divide-stone-200">
                     <thead class="bg-black/5">
                         <tr>
@@ -23,9 +23,9 @@
                     <tbody class="divide-y divide-stone-200 text-stone-800">
                         @forelse ($categories as $category)
                             <tr>
-                                <td class="px-6 py-4">{{ $category->name }}</td>
-                                <td class="px-6 py-4">{{ $category->description ?: '—' }}</td>
-                                <td class="px-6 py-4">{{ $category->adventures_count }}</td>
+                                <td class="px-6 py-4" data-label="Name">{{ $category->name }}</td>
+                                <td class="px-6 py-4" data-label="Beschreibung">{{ $category->description ?: '—' }}</td>
+                                <td class="px-6 py-4" data-label="Events">{{ $category->adventures_count }}</td>
                                 <td class="px-6 py-4 text-right">
                                     <div class="flex items-center justify-end gap-3">
                                         <a href="{{ route('admin.event-categories.edit', $category) }}" data-modal-url="{{ route('admin.event-categories.edit', $category) }}" class="text-waldritter hover:underline">Bearbeiten</a>
@@ -42,7 +42,7 @@
                         @endforelse
                     </tbody>
                 </table>
-                </div>
+                </x-mobile.cards-or-table>
             </div>
             <br>
             <a href="{{ route('admin.index') }}">

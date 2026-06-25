@@ -38,7 +38,7 @@
             </form>
 
             <div class="bg-white/70 border-2 border-[#5a3a22]/40 shadow sm:rounded-lg overflow-hidden">
-                <div class="overflow-x-auto">
+                <x-mobile.cards-or-table>
                 <table class="min-w-full divide-y divide-stone-200">
                     <thead class="bg-black/5">
                         <tr>
@@ -74,13 +74,13 @@
                     <tbody class="divide-y divide-stone-200 text-stone-800">
                         @foreach ($players as $player)
                             <tr class="{{ $player->trashed() ? 'opacity-50' : '' }}">
-                                <td class="px-6 py-4">{{ $player->full_name }}</td>
-                                <td class="px-6 py-4">{{ $player->age !== null ? $player->age.' J.' : '—' }}</td>
-                                <td class="px-6 py-4">{{ $player->gender ?? '—' }}</td>
-                                <td class="px-6 py-4">{{ $player->heroes_count }}</td>
-                                <td class="px-6 py-4 text-sm">{{ $player->users->pluck('name')->implode(', ') ?: '—' }}</td>
-                                <td class="px-6 py-4">{{ $player->trashed() ? 'gelöscht' : ($player->active ? 'aktiv' : 'inaktiv') }}</td>
-                                <td class="px-6 py-4 text-sm">
+                                <td class="px-6 py-4" data-label="Name">{{ $player->full_name }}</td>
+                                <td class="px-6 py-4" data-label="Alter">{{ $player->age !== null ? $player->age.' J.' : '—' }}</td>
+                                <td class="px-6 py-4" data-label="Geschlecht">{{ $player->gender ?? '—' }}</td>
+                                <td class="px-6 py-4" data-label="Helden">{{ $player->heroes_count }}</td>
+                                <td class="px-6 py-4 text-sm" data-label="Betreut von">{{ $player->users->pluck('name')->implode(', ') ?: '—' }}</td>
+                                <td class="px-6 py-4" data-label="Status">{{ $player->trashed() ? 'gelöscht' : ($player->active ? 'aktiv' : 'inaktiv') }}</td>
+                                <td class="px-6 py-4 text-sm" data-label="Matrix">
                                     @if ($player->matrixAccount)
                                         <span class="{{ $player->matrixAccount->active ? 'text-green-700' : 'text-stone-500' }}">
                                             {{ $player->matrixAccount->active ? 'aktiv' : 'inaktiv' }}
@@ -126,7 +126,7 @@
                         @endforeach
                     </tbody>
                 </table>
-                </div>
+                </x-mobile.cards-or-table>
             </div>
 
             <div class="mt-4">{{ $players->links() }}</div>

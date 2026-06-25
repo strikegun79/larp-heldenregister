@@ -6,7 +6,7 @@
     <div class="py-12">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="bg-white/70 border-2 border-[#5a3a22]/40 shadow sm:rounded-lg overflow-hidden">
-                <div class="overflow-x-auto">
+                <x-mobile.cards-or-table>
                 <table class="min-w-full divide-y divide-stone-200">
                     <thead class="bg-black/5">
                         <tr>
@@ -19,9 +19,9 @@
                     <tbody class="divide-y divide-stone-200 text-stone-800">
                         @foreach ($roles as $role)
                             <tr class="align-top">
-                                <td class="px-6 py-4 font-medium">{{ $role->label }}</td>
-                                <td class="px-6 py-4 font-mono text-sm text-stone-500">{{ $role->slug }}</td>
-                                <td class="px-6 py-4 text-sm">
+                                <td class="px-6 py-4 font-medium" data-label="Rolle">{{ $role->label }}</td>
+                                <td class="px-6 py-4 font-mono text-sm text-stone-500" data-label="Slug">{{ $role->slug }}</td>
+                                <td class="px-6 py-4 text-sm" data-label="Berechtigungen">
                                     @if ($role->permissions)
                                         <div class="flex flex-wrap gap-1">
                                             @foreach ($role->permissions as $perm)
@@ -32,12 +32,12 @@
                                         <span class="text-stone-400">—</span>
                                     @endif
                                 </td>
-                                <td class="px-6 py-4 text-right tabular-nums">{{ $role->users_count }}</td>
+                                <td class="px-6 py-4 text-right tabular-nums" data-label="Nutzer">{{ $role->users_count }}</td>
                             </tr>
                         @endforeach
                     </tbody>
                 </table>
-                </div>
+                </x-mobile.cards-or-table>
             </div>
 
             <div class="mt-6">

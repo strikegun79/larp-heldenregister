@@ -12,7 +12,7 @@
             </div>
 
             <div class="bg-white/70 border-2 border-[#5a3a22]/40 shadow sm:rounded-lg overflow-hidden">
-                <div class="overflow-x-auto">
+                <x-mobile.cards-or-table>
                 <table class="min-w-full divide-y divide-stone-200">
                     <thead class="bg-black/5">
                         <tr>
@@ -26,16 +26,16 @@
                     <tbody class="divide-y divide-stone-200 text-stone-800">
                         @forelse ($types as $type)
                             <tr>
-                                <td class="px-6 py-4 font-mono text-sm">{{ $type->id }}</td>
-                                <td class="px-6 py-4">{{ $type->description }}</td>
-                                <td class="px-6 py-4">
+                                <td class="px-6 py-4 font-mono text-sm" data-label="ID">{{ $type->id }}</td>
+                                <td class="px-6 py-4" data-label="Beschreibung">{{ $type->description }}</td>
+                                <td class="px-6 py-4" data-label="Typ">
                                     @if ($type->is_credit)
                                         <span class="ui mini green label">Gutschrift</span>
                                     @else
                                         <span class="ui mini orange label">Buchung</span>
                                     @endif
                                 </td>
-                                <td class="px-6 py-4">{{ $type->transactions_count }}</td>
+                                <td class="px-6 py-4" data-label="Buchungen">{{ $type->transactions_count }}</td>
                                 <td class="px-6 py-4 text-right">
                                     <div class="flex items-center justify-end gap-3">
                                         <a href="{{ route('admin.ep-transaction-types.edit', $type) }}"
@@ -56,7 +56,7 @@
                         @endforelse
                     </tbody>
                 </table>
-                </div>
+                </x-mobile.cards-or-table>
             </div>
             <br>
             <a href="{{ route('admin.index') }}">

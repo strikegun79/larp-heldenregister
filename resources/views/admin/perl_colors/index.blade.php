@@ -12,7 +12,7 @@
             </div>
 
             <div class="bg-white/70 border-2 border-[#5a3a22]/40 shadow sm:rounded-lg overflow-hidden">
-                <div class="overflow-x-auto">
+                <x-mobile.cards-or-table>
                 <table class="min-w-full divide-y divide-stone-200">
                     <thead class="bg-black/5">
                         <tr>
@@ -26,12 +26,12 @@
                     <tbody class="divide-y divide-stone-200 text-stone-800">
                         @forelse ($colors as $color)
                             <tr>
-                                <td class="px-6 py-4">
+                                <td class="px-6 py-4" data-label="Farbe">
                                     <span style="display:inline-block;width:1.5rem;height:1.5rem;border-radius:50%;border:1px solid #ccc;background:{{ $color->code }};"></span>
                                 </td>
-                                <td class="px-6 py-4">{{ $color->name }}</td>
-                                <td class="px-6 py-4 font-mono text-sm">{{ $color->code }}</td>
-                                <td class="px-6 py-4">{{ $color->skills_count }}</td>
+                                <td class="px-6 py-4" data-label="Name">{{ $color->name }}</td>
+                                <td class="px-6 py-4 font-mono text-sm" data-label="Code">{{ $color->code }}</td>
+                                <td class="px-6 py-4" data-label="Fertigkeiten">{{ $color->skills_count }}</td>
                                 <td class="px-6 py-4 text-right">
                                     <div class="flex items-center justify-end gap-3">
                                         <a href="{{ route('admin.perl-colors.edit', $color) }}"
@@ -52,7 +52,7 @@
                         @endforelse
                     </tbody>
                 </table>
-                </div>
+                </x-mobile.cards-or-table>
             </div>
             <br>
             <a href="{{ route('admin.index') }}">

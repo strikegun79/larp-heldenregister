@@ -10,7 +10,7 @@
             </div>
 
             <div class="bg-white/70 border-2 border-[#5a3a22]/40 shadow sm:rounded-lg overflow-hidden">
-                <div class="overflow-x-auto">
+                <x-mobile.cards-or-table>
                 <table class="min-w-full divide-y divide-stone-200">
                     <thead class="bg-black/5">
                         <tr>
@@ -22,8 +22,8 @@
                     <tbody class="divide-y divide-stone-200 text-stone-800">
                         @forelse ($roles as $role)
                             <tr>
-                                <td class="px-6 py-4">{{ $role->description }}</td>
-                                <td class="px-6 py-4">{{ $role->bookings_count }}</td>
+                                <td class="px-6 py-4" data-label="Bezeichnung">{{ $role->description }}</td>
+                                <td class="px-6 py-4" data-label="Anmeldungen">{{ $role->bookings_count }}</td>
                                 <td class="px-6 py-4 text-right">
                                     <div class="flex items-center justify-end gap-3">
                                         <a href="{{ route('admin.event-roles.edit', $role) }}" data-modal-url="{{ route('admin.event-roles.edit', $role) }}" class="text-waldritter hover:underline">Bearbeiten</a>
@@ -42,7 +42,7 @@
                         @endforelse
                     </tbody>
                 </table>
-                </div>
+                </x-mobile.cards-or-table>
             </div>
 
             <br>

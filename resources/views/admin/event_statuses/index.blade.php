@@ -14,7 +14,7 @@
             @endif
 
             <div class="bg-white/70 border-2 border-[#5a3a22]/40 shadow sm:rounded-lg overflow-hidden">
-                <div class="overflow-x-auto">
+                <x-mobile.cards-or-table>
                 <table class="min-w-full divide-y divide-stone-200">
                     <thead class="bg-black/5">
                         <tr>
@@ -28,14 +28,14 @@
                     <tbody class="divide-y divide-stone-200 text-stone-800">
                         @forelse ($statuses as $status)
                             <tr>
-                                <td class="px-6 py-4 font-mono text-stone-500">{{ $status->id }}</td>
-                                <td class="px-6 py-4">
+                                <td class="px-6 py-4 font-mono text-stone-500" data-label="ID">{{ $status->id }}</td>
+                                <td class="px-6 py-4" data-label="Farbe">
                                     <span class="inline-block w-6 h-6 rounded border border-stone-300"
                                           style="background:{{ $status->color }}"
                                           title="{{ $status->color }}"></span>
                                 </td>
-                                <td class="px-6 py-4">{{ $status->description }}</td>
-                                <td class="px-6 py-4">{{ $status->adventures_count }}</td>
+                                <td class="px-6 py-4" data-label="Bezeichnung">{{ $status->description }}</td>
+                                <td class="px-6 py-4" data-label="Events">{{ $status->adventures_count }}</td>
                                 <td class="px-6 py-4 text-right">
                                     <div class="flex items-center justify-end gap-3">
                                         <a href="{{ route('admin.event-statuses.edit', $status) }}"
@@ -59,7 +59,7 @@
                         @endforelse
                     </tbody>
                 </table>
-                </div>
+                </x-mobile.cards-or-table>
             </div>
             <br>
             <a href="{{ route('admin.index') }}">

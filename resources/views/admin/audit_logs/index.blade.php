@@ -30,7 +30,7 @@
             </form>
 
             <div class="bg-white/70 border-2 border-[#5a3a22]/40 shadow sm:rounded-lg overflow-hidden">
-                <div class="overflow-x-auto">
+                <x-mobile.cards-or-table>
                 <table class="min-w-full divide-y divide-stone-200 text-sm">
                     <thead class="bg-black/5">
                         <tr>
@@ -44,16 +44,16 @@
                     <tbody class="divide-y divide-stone-200 text-stone-800">
                         @forelse ($logs as $log)
                             <tr class="hover:bg-black/5">
-                                <td class="px-4 py-3 whitespace-nowrap text-stone-500 font-mono text-xs">
+                                <td class="px-4 py-3 whitespace-nowrap text-stone-500 font-mono text-xs" data-label="Zeitpunkt">
                                     {{ $log->created_at->format('d.m.Y H:i') }}
                                 </td>
-                                <td class="px-4 py-3 whitespace-nowrap">
+                                <td class="px-4 py-3 whitespace-nowrap" data-label="Aktion">
                                     <span class="inline-block bg-stone-100 text-stone-700 rounded px-2 py-0.5 font-mono text-xs">
                                         {{ $log->action }}
                                     </span>
                                 </td>
-                                <td class="px-4 py-3 whitespace-nowrap">{{ $log->actor_name ?? '—' }}</td>
-                                <td class="px-4 py-3">
+                                <td class="px-4 py-3 whitespace-nowrap" data-label="Akteur">{{ $log->actor_name ?? '—' }}</td>
+                                <td class="px-4 py-3" data-label="Betreff">
                                     @if ($log->subject_label)
                                         <span>{{ $log->subject_label }}</span>
                                         @if ($log->subject_type)
@@ -63,7 +63,7 @@
                                         —
                                     @endif
                                 </td>
-                                <td class="px-4 py-3 text-xs text-stone-500 max-w-xs truncate" title="{{ $log->changes ? json_encode($log->changes, JSON_UNESCAPED_UNICODE) : '' }}">
+                                <td class="px-4 py-3 text-xs text-stone-500 max-w-xs truncate" data-label="Änderungen" title="{{ $log->changes ? json_encode($log->changes, JSON_UNESCAPED_UNICODE) : '' }}">
                                     {{ $log->changes ? json_encode($log->changes, JSON_UNESCAPED_UNICODE) : '—' }}
                                 </td>
                             </tr>
@@ -72,7 +72,7 @@
                         @endforelse
                     </tbody>
                 </table>
-                </div>
+                </x-mobile.cards-or-table>
             </div>
 
             <div class="mt-4">
