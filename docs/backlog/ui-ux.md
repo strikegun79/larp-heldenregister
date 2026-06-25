@@ -410,7 +410,7 @@ Index-Listen), Aktions-Icons mit sichtbarem Kurzlabel oder größeren Tap-Zielen
 **Betroffene Seiten/Routen:** `adventures/_bookings.blade.php`, `adventures/_checkin.blade.php`,
 `heroes/_detail.blade.php`, `adventures/_teamer_nsc_tab.blade.php`
 
-### UI-30 · [P3] Footer-Buttons als einheitliche `<button>`-Elemente · ⏱ 1h · 🔲
+### UI-30 · [P3] Footer-Buttons als einheitliche `<button>`-Elemente · ⏱ 1h · ✅
 **Beschreibung:** Footer-Aktionen sind teils `<a class="ui button" data-modal-stack>`
 (Anmelden/Gast/Teamer/Verwalten in `adventures/_detail.blade.php`,
 `heroes/_detail.blade.php`), teils `<button type="submit">`. Links und Buttons

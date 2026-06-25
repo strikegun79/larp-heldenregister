@@ -619,6 +619,6 @@
 
 <div data-modal-actions hidden>
     @can('heldenregister.edit')
-        <a href="{{ route('heroes.edit', $hero) }}" data-modal-url="{{ route('heroes.edit', $hero) }}" class="ui button">Bearbeiten</a>
+        <button type="button" data-modal-url="{{ route('heroes.edit', $hero) }}" class="ui button">Bearbeiten</button>
     @endcan
 </div>

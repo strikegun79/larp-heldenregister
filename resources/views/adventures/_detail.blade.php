@@ -45,18 +45,19 @@
 <div data-modal-actions hidden>
     @can('adventure.book')
         @if ($adventure->registrationOpen())
-            <a href="{{ route('adventures.bookings.create', $adventure) }}"
-               data-modal-stack="{{ route('adventures.bookings.create', $adventure) }}"
-               class="ui primary button">Anmelden</a>
-            <a href="{{ route('adventures.bookings.create-guest', $adventure) }}"
-               data-modal-stack="{{ route('adventures.bookings.create-guest', $adventure) }}"
-               class="ui button" title="Für Gäste werden keine EP gesammelt">Gast anmelden</a>
+            <button type="button"
+                    data-modal-stack="{{ route('adventures.bookings.create', $adventure) }}"
+                    class="ui primary button">Anmelden</button>
+            <button type="button"
+                    data-modal-stack="{{ route('adventures.bookings.create-guest', $adventure) }}"
+                    class="ui button"
+                    title="Für Gäste werden keine EP gesammelt">Gast anmelden</button>
         @endif
     @endcan
     @if (auth()->user()->hasAnyRole('teamer', 'lehrmeister') && $myTeamerSignup === null)
-        <a href="{{ route('adventures.teamer.create', $adventure) }}"
-           data-modal-stack="{{ route('adventures.teamer.create', $adventure) }}"
-           class="ui teal button">Teamer-Anmeldung</a>
+        <button type="button"
+                data-modal-stack="{{ route('adventures.teamer.create', $adventure) }}"
+                class="ui teal button">Teamer-Anmeldung</button>
     @endif
     @can('events.edit')
         <a href="{{ route('adventures.manage', $adventure) }}" class="ui button">Verwalten</a>
