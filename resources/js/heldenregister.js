@@ -144,7 +144,7 @@ function loadStackContent(url, preserveTab) {
             const $partActions = $content.find('[data-modal-actions]').first();
             $actions.html($partActions.length ? $partActions.html() : '');
             $partActions.remove();
-            $actions.append('<button type="button" class="ui deny button">Schließen</button>');
+            $actions.append('<button type="button" class="ui deny button">&#8592; Zurück</button>');
             // Tabs (z. B. Helden-Detail) im gestapelten Modal aktivieren.
             $content.find('.menu .item[data-tab]').tab();
             if (prevTab && $content.find('.menu .item[data-tab="' + prevTab + '"]').length) {

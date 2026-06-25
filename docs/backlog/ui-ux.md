@@ -589,7 +589,7 @@ Kontaktmöglichkeit ergänzen.
 **Betroffene Seiten/Routen:** `profile/edit.blade.php`,
 `profile/partials/*` (Header-Stil)
 
-### UI-37 · [P3] Orientierung im zweistufigen Anmelde-Modal-Stack verbessern · ⏱ 2h · 🔲
+### UI-37 · [P3] Orientierung im zweistufigen Anmelde-Modal-Stack verbessern · ⏱ 2h · ✅
 **Beschreibung:** Der Eltern-Anmeldeflow läuft über zwei gestapelte Modals:
 Abenteuer-Detail (`#app-modal`) → „Anmelden" öffnet das Anmeldeformular im
 gestapelten Modal (`#app-modal-2`). Auf dem Handy ist nicht erkennbar, dass man

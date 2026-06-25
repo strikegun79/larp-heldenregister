@@ -76,7 +76,7 @@
              ist immer erreichbar, unabhängig von der Scroll-Position des Inhalts. -->
         <div class="ui modal" id="app-modal-2"
              role="dialog" aria-modal="true" aria-labelledby="app-modal-2-header">
-            <button type="button" class="close icon" aria-label="Schließen"></button>
+            <button type="button" class="close icon" aria-label="Zurück"></button>
             <div class="header" id="app-modal-2-header"></div>
             <div class="scrolling content" id="app-modal-2-content"></div>
             <div class="actions" id="app-modal-2-actions"></div>

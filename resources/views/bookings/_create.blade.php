@@ -1,5 +1,12 @@
 <span data-modal-title hidden>Anmelden · {{ $adventure->name }}</span>
 
+{{-- UI-37: Kontext-Strip auf Mobile (Header scrollt weg, Info bleibt) --}}
+<div class="sm:hidden flex items-center gap-2 mb-3 text-xs text-stone-400">
+    <span>Abenteuer-Detail</span>
+    <span aria-hidden="true">›</span>
+    <span class="font-medium text-stone-600">Anmeldung</span>
+</div>
+
 {{-- UI-31: Abenteuer-Kurzinfo vor dem Formular --}}
 @php($freeSlots = $adventure->freeSlots())
 <div class="bg-[#fdf6e3] border border-[#5a3a22]/20 rounded-lg px-4 py-3 mb-4 text-sm">
