@@ -27,6 +27,17 @@ class GroupController extends Controller
         return view('admin.groups.index', compact('groups'));
     }
 
+    /** GRP-04: Gruppendetail mit Mitgliedern und deren Helden. */
+    public function show(Group $group): View
+    {
+        $group->load(['heroes' => function ($q) {
+            $q->with(['classes', 'player', 'epTransactions'])
+              ->orderBy('character_name');
+        }]);
+
+        return view('admin.groups.show', compact('group'));
+    }
+
     public function create(Request $request): View
     {
         $data = ['group' => new Group];

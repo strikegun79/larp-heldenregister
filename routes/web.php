@@ -270,6 +270,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('groups', [Admin\GroupController::class, 'index'])->name('groups.index');
         Route::get('groups/create', [Admin\GroupController::class, 'create'])->name('groups.create');
         Route::post('groups', [Admin\GroupController::class, 'store'])->name('groups.store');
+        Route::get('groups/{group}', [Admin\GroupController::class, 'show'])->name('groups.show');
         Route::get('groups/{group}/edit', [Admin\GroupController::class, 'edit'])->name('groups.edit');
         Route::put('groups/{group}', [Admin\GroupController::class, 'update'])->name('groups.update');
         Route::delete('groups/{group}', [Admin\GroupController::class, 'destroy'])->name('groups.destroy');

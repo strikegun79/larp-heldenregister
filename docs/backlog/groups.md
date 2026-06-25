@@ -30,11 +30,12 @@ Gruppe (z. B. Anführer) optional.
 - [x] Tests.
 **Abhängig von:** GRP-01.
 
-### GRP-04 · Gruppenansicht (Mitglieder, Helden) · ⏱ 3h · 🔲
+### GRP-04 · Gruppenansicht (Mitglieder, Helden) · ⏱ 3h · ✅
 **Beschreibung:** Detailseite einer Gruppe mit Mitgliedern und deren Helden.
 **Akzeptanzkriterien:**
-- [ ] Gruppen-Detail listet Mitglieder + Helden (verlinkt ins Helden-Modal).
-- [ ] Kennzahlen (Anzahl Mitglieder/Helden).
+- [x] Gruppen-Detail listet Mitglieder + Helden (verlinkt auf heroes.show).
+- [x] Kennzahlen (Anzahl Mitglieder), Spalten: Held, Spieler, Klasse(n), EP, Rolle, Beigetreten.
+- [x] Mobil als Karten (x-mobile.cards-or-table), Leerzustand mit CTA.
 
 ### GRP-05 · Gruppe in Heldenansicht & öffentlicher Seite · ⏱ 2h · 🔲
 **Beschreibung:** Gruppenzugehörigkeit beim Helden anzeigen (auch öffentlich,
