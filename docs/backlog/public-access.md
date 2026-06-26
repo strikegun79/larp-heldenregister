@@ -24,12 +24,12 @@ Code (z. B. Base32 ohne Verwechslungszeichen).
 - [x] „Nicht gefunden" bei unbekanntem/deaktiviertem Code.
 - [x] Tests (sichtbare vs. verborgene Felder).
 
-### PUB-03 · Heldensuche per Code · ⏱ 2h · 🔲
+### PUB-03 · Heldensuche per Code · ⏱ 2h · ✅
 **Beschreibung:** Öffentliche Suchmaske: Code eingeben → Heldenseite.
 **Akzeptanzkriterien:**
-- [ ] Öffentliche Suchseite mit Code-Eingabe (Format-Validierung).
-- [ ] Weiterleitung auf `/h/{code}`; freundliche Fehlermeldung.
-- [ ] Tests.
+- [x] Öffentliche Suchseite mit Code-Eingabe (Format-Validierung).
+- [x] Weiterleitung auf `/h/{code}`; freundliche Fehlermeldung.
+- [x] Tests.
 
 ### PUB-04 · Sichtbarkeit/Opt-out je Held steuern · ⏱ 3h · 🔲
 **Beschreibung:** Datenschutz: pro Held einstellbar, ob öffentlich sichtbar.

@@ -32,6 +32,10 @@ Route::get('/', function () {
     return redirect()->route('dashboard');
 });
 
+// PUB-03: Heldensuche per Code (vor {code}-Route, damit /h/search nicht als Code gilt).
+Route::get('/h', [PublicHeroController::class, 'index'])->name('public.hero.search');
+Route::get('/h/search', [PublicHeroController::class, 'search'])->name('public.hero.search.go');
+
 // PUB-02: Öffentliches Helden-Profil – kein Login erforderlich.
 Route::get('/h/{code}', [PublicHeroController::class, 'show'])->name('public.hero');
 
