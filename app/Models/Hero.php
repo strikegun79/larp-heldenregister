@@ -53,12 +53,14 @@ class Hero extends Model
         'active',
         'legacy_id',
         'public_code',
+        'public_visible',
     ];
 
     protected $casts = [
-        'born' => 'date',
-        'died' => 'date',
-        'active' => 'boolean',
+        'born'           => 'date',
+        'died'           => 'date',
+        'active'         => 'boolean',
+        'public_visible' => 'boolean',
     ];
 
     /** Öffentliche URL des Helden-Fotos; Standardbild wenn keins hochgeladen (HERO-22). */

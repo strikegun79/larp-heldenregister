@@ -54,8 +54,24 @@
                 @if ($hero->public_code)
                 <div class="col-span-2">
                     <dt class="text-stone-500">Helden-Code</dt>
-                    <dd><code class="font-mono tracking-widest text-waldritter bg-stone-100 rounded px-2 py-0.5 text-sm">{{ $hero->public_code }}</code></dd>
-                    <dd class="text-xs text-stone-400">für öffentliches Profil</dd>
+                    <dd class="flex flex-wrap items-center gap-2">
+                        <code class="font-mono tracking-widest text-waldritter bg-stone-100 rounded px-2 py-0.5 text-sm">{{ $hero->public_code }}</code>
+                        @if ($hero->public_visible)
+                            <span class="text-xs text-green-700 bg-green-50 border border-green-200 rounded px-1.5 py-0.5">öffentlich</span>
+                        @else
+                            <span class="text-xs text-stone-500 bg-stone-100 border border-stone-200 rounded px-1.5 py-0.5">versteckt</span>
+                        @endif
+                    </dd>
+                    @can('heldenregister.edit')
+                        <dd class="mt-1">
+                            <form method="POST" action="{{ route('heroes.visibility', $hero) }}" data-refresh-modal class="inline">
+                                @csrf @method('PATCH')
+                                <button type="submit" class="text-xs text-waldritter hover:underline">
+                                    {{ $hero->public_visible ? 'Profil verstecken' : 'Profil sichtbar machen' }}
+                                </button>
+                            </form>
+                        </dd>
+                    @endcan
                 </div>
                 @endif
             </dl>
@@ -372,8 +388,24 @@
                 @if ($hero->public_code)
                 <div class="col-span-2">
                     <dt class="text-sm text-stone-500">Helden-Code</dt>
-                    <dd><code class="font-mono tracking-widest text-waldritter bg-stone-100 rounded px-2 py-0.5">{{ $hero->public_code }}</code></dd>
-                    <dd class="text-xs text-stone-400">für öffentliches Profil (PUB-02)</dd>
+                    <dd class="flex flex-wrap items-center gap-2">
+                        <code class="font-mono tracking-widest text-waldritter bg-stone-100 rounded px-2 py-0.5">{{ $hero->public_code }}</code>
+                        @if ($hero->public_visible)
+                            <span class="text-xs text-green-700 bg-green-50 border border-green-200 rounded px-1.5 py-0.5">öffentlich</span>
+                        @else
+                            <span class="text-xs text-stone-500 bg-stone-100 border border-stone-200 rounded px-1.5 py-0.5">versteckt</span>
+                        @endif
+                    </dd>
+                    @can('heldenregister.edit')
+                        <dd class="mt-1">
+                            <form method="POST" action="{{ route('heroes.visibility', $hero) }}" data-refresh-modal class="inline">
+                                @csrf @method('PATCH')
+                                <button type="submit" class="text-xs text-waldritter hover:underline">
+                                    {{ $hero->public_visible ? 'Profil verstecken' : 'Profil sichtbar machen' }}
+                                </button>
+                            </form>
+                        </dd>
+                    @endcan
                 </div>
                 @endif
             </dl>

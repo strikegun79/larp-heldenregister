@@ -82,12 +82,19 @@
         </div>
     @endunless
 
-    <div>
+    <div class="space-y-2">
         <label class="flex items-center gap-2 text-gray-700">
             <input type="checkbox" name="active" value="1"
                    class="rounded border-gray-300 text-amber-600 shadow-sm focus:ring-amber-600"
                    @checked(old('active', $hero->active))>
             Aktiver Held
+        </label>
+        <label class="flex items-center gap-2 text-gray-700">
+            <input type="checkbox" name="public_visible" value="1"
+                   class="rounded border-gray-300 text-amber-600 shadow-sm focus:ring-amber-600"
+                   @checked(old('public_visible', $hero->public_visible ?? true))>
+            Öffentlich sichtbar
+            <span class="text-xs text-gray-400">(Profil unter /h/{code} abrufbar)</span>
         </label>
     </div>
 

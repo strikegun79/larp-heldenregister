@@ -301,6 +301,22 @@ class HeroController extends Controller
     }
 
     /**
+     * PUB-04: Öffentliche Sichtbarkeit des Helden umschalten.
+     */
+    public function toggleVisibility(Request $request, Hero $hero): RedirectResponse|JsonResponse
+    {
+        $hero->update(['public_visible' => ! $hero->public_visible]);
+
+        $message = $hero->public_visible
+            ? "{$hero->character_name} ist jetzt öffentlich sichtbar."
+            : "{$hero->character_name} ist jetzt nicht mehr öffentlich sichtbar.";
+
+        return $request->expectsJson()
+            ? response()->json(['message' => $message, 'refresh_modal' => true])
+            : back()->with('status', $message);
+    }
+
+    /**
      * Validierungsregeln für Anlegen und Bearbeiten.
      *
      * @return array<string, mixed>
@@ -315,13 +331,15 @@ class HeroController extends Controller
             'homeplace' => ['nullable', 'string', 'max:150'],
             'description' => ['nullable', 'string', 'max:5000'],
             'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
-            'active' => ['boolean'],
-            'classes' => ['array'],
-            'classes.*' => ['exists:hero_classes,id'],
+            'active'         => ['boolean'],
+            'public_visible' => ['boolean'],
+            'classes'        => ['array'],
+            'classes.*'      => ['exists:hero_classes,id'],
         ]);
 
-        // Checkbox liefert nichts, wenn nicht gesetzt.
-        $validated['active'] = $request->boolean('active');
+        // Checkboxen liefern nichts, wenn nicht gesetzt.
+        $validated['active']         = $request->boolean('active');
+        $validated['public_visible'] = $request->boolean('public_visible');
 
         // 'classes' (Pivot) und 'image' (Datei-Upload) werden separat behandelt.
         unset($validated['classes'], $validated['image']);

@@ -37,6 +37,7 @@ class PublicHeroController extends Controller
     public function show(string $code): View
     {
         $hero = Hero::where('public_code', strtoupper($code))
+            ->where('public_visible', true)
             ->with(['classes', 'skills.perlColor', 'groups'])
             ->firstOrFail();
 

@@ -31,12 +31,13 @@ Code (z. B. Base32 ohne Verwechslungszeichen).
 - [x] Weiterleitung auf `/h/{code}`; freundliche Fehlermeldung.
 - [x] Tests.
 
-### PUB-04 · Sichtbarkeit/Opt-out je Held steuern · ⏱ 3h · 🔲
+### PUB-04 · Sichtbarkeit/Opt-out je Held steuern · ⏱ 3h · ✅
 **Beschreibung:** Datenschutz: pro Held einstellbar, ob öffentlich sichtbar.
 **Akzeptanzkriterien:**
-- [ ] `heroes.public_visible` (default an/aus nach DSGVO-Entscheid).
-- [ ] Nicht sichtbare Helden liefern 404 auf der öffentlichen Seite.
-- [ ] Umschalten im Helden-Formular; Tests.
+- [x] `heroes.public_visible` (default true), Migration + Model + Factory.
+- [x] Nicht sichtbare Helden liefern 404 auf der öffentlichen Seite.
+- [x] Umschalten im Helden-Formular + schneller Toggle-Button im Detail.
+- [x] Tests (7 Tests: 404, Default, Toggle, Formular, Zugriffsschutz).
 **Abhängig von:** PUB-02.
 
 ### PUB-05 · QR-/Teilen-Funktion für den Code · ⏱ 3h · 🔲
