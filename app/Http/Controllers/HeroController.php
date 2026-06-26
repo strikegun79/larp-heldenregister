@@ -302,10 +302,13 @@ class HeroController extends Controller
     }
 
     /**
-     * PUB-04: Öffentliche Sichtbarkeit des Helden umschalten.
+     * PUB-07: Öffentliche Sichtbarkeit umschalten.
+     * Erlaubt für: heldenregister.edit ODER Betreuer des Spielers.
      */
     public function toggleVisibility(Request $request, Hero $hero): RedirectResponse|JsonResponse
     {
+        abort_unless($this->canManagePublicSettings($request, $hero), 403);
+
         $hero->update(['public_visible' => ! $hero->public_visible]);
 
         $message = $hero->public_visible
@@ -315,6 +318,36 @@ class HeroController extends Controller
         return $request->expectsJson()
             ? response()->json(['message' => $message, 'refresh_modal' => true])
             : back()->with('status', $message);
+    }
+
+    /**
+     * PUB-08: Auffindbarkeit in der öffentlichen Suche umschalten.
+     * Erlaubt für: heldenregister.edit ODER Betreuer des Spielers.
+     */
+    public function toggleSearchable(Request $request, Hero $hero): RedirectResponse|JsonResponse
+    {
+        abort_unless($this->canManagePublicSettings($request, $hero), 403);
+
+        $hero->update(['public_searchable' => ! $hero->public_searchable]);
+
+        $message = $hero->public_searchable
+            ? "{$hero->character_name} ist jetzt in der Suche auffindbar."
+            : "{$hero->character_name} ist jetzt nicht mehr in der Suche auffindbar.";
+
+        return $request->expectsJson()
+            ? response()->json(['message' => $message, 'refresh_modal' => true])
+            : back()->with('status', $message);
+    }
+
+    /** Prüft ob der Nutzer öffentliche Einstellungen eines Helden ändern darf. */
+    private function canManagePublicSettings(Request $request, Hero $hero): bool
+    {
+        if ($request->user()->can('heldenregister.edit')) {
+            return true;
+        }
+
+        return $hero->player !== null
+            && $request->user()->can('update', $hero->player);
     }
 
     /**

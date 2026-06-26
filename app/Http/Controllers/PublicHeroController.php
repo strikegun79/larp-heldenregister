@@ -8,7 +8,7 @@ use Illuminate\Http\Request;
 use Illuminate\View\View;
 
 /**
- * PUB-02: Öffentliches Helden-Profil – keine Authentifizierung erforderlich.
+ * PUB-02/03/08: Öffentliches Helden-Profil & Suche – keine Authentifizierung.
  * Zeigt ausschließlich Charakterdaten, keine personenbezogenen Spielerdaten.
  */
 class PublicHeroController extends Controller
@@ -19,19 +19,42 @@ class PublicHeroController extends Controller
         return view('public.search');
     }
 
-    /** PUB-03: Code validieren und auf das Helden-Profil weiterleiten. */
+    /**
+     * PUB-03/08: Code oder Heldennamen suchen.
+     * Gültiger 6-Zeichen-Code → direkte Weiterleitung auf /h/{code}.
+     * Sonst → Namenssuche (nur public_searchable + public_visible).
+     */
     public function search(Request $request): RedirectResponse|View
     {
-        $code = strtoupper(trim($request->input('code', '')));
+        $query = trim($request->input('code', ''));
+        $upper = strtoupper($query);
 
-        if (! preg_match('/^[ABCDEFGHJKMNPQRSTUVWXYZ23456789]{6}$/', $code)) {
+        // Sieht nach einem Code aus → direkt weiterleiten.
+        if (preg_match('/^[ABCDEFGHJKMNPQRSTUVWXYZ23456789]{6}$/', $upper)) {
+            return redirect()->route('public.hero', $upper);
+        }
+
+        // Zu kurze oder leere Eingabe ohne Treffer → Fehlermeldung.
+        if (mb_strlen($query) < 2) {
             return view('public.search', [
-                'error' => 'Bitte gib einen gültigen 6-stelligen Helden-Code ein.',
-                'input' => $request->input('code', ''),
+                'error' => 'Bitte gib mindestens 2 Zeichen oder einen 6-stelligen Helden-Code ein.',
+                'input' => $query,
             ]);
         }
 
-        return redirect()->route('public.hero', $code);
+        // PUB-08: Namenssuche – nur sichtbare & suchbare Helden.
+        $results = Hero::where('public_visible', true)
+            ->where('public_searchable', true)
+            ->where('character_name', 'like', '%'.$query.'%')
+            ->with('classes')
+            ->orderBy('character_name')
+            ->limit(20)
+            ->get();
+
+        return view('public.search', [
+            'results' => $results,
+            'input'   => $query,
+        ]);
     }
 
     public function show(string $code): View

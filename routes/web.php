@@ -72,6 +72,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Verschollen-Status umschalten (HERO-08).
     Route::patch('heroes/{hero}/missing', [HeroController::class, 'toggleMissing'])->name('heroes.missing');
     Route::patch('heroes/{hero}/visibility', [HeroController::class, 'toggleVisibility'])->name('heroes.visibility');
+    Route::patch('heroes/{hero}/searchable', [HeroController::class, 'toggleSearchable'])->name('heroes.searchable');
     // EP-Buchung für einen Helden (HERO-12).
     Route::post('heroes/{hero}/ep', [EpTransactionController::class, 'store'])->name('heroes.ep.store');
     // EP-Konto-Auszug als CSV (REP-02).

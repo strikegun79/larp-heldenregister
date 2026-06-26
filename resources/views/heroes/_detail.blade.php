@@ -3,6 +3,9 @@
 @php($learnedIds = $hero->skills->pluck('id'))
 @php($canEditPhoto = auth()->user()?->can('heldenregister.edit')
     || optional($hero->player)->users->contains('id', auth()->id()))
+{{-- PUB-07: Sichtbarkeit/Suche ändern darf: heldenregister.edit ODER Betreuer des Spielers. --}}
+@php($canManagePublic = auth()->user()?->can('heldenregister.edit')
+    || optional($hero->player)->users->contains('id', auth()->id()))
 
 <div id="skilltree"
      data-learn-url="{{ route('heroes.skills.store', $hero) }}"
@@ -68,25 +71,34 @@
                             <span class="text-xs text-stone-500 bg-stone-100 border border-stone-200 rounded px-1.5 py-0.5">versteckt</span>
                         @endif
                     </dd>
-                    @can('heldenregister.edit')
-                        <dd class="mt-1">
+                    @if ($canManagePublic)
+                        <dd class="mt-1 flex flex-wrap gap-3">
                             <form method="POST" action="{{ route('heroes.visibility', $hero) }}" data-refresh-modal class="inline">
                                 @csrf @method('PATCH')
                                 <button type="submit" class="text-xs text-waldritter hover:underline">
                                     {{ $hero->public_visible ? 'Profil verstecken' : 'Profil sichtbar machen' }}
                                 </button>
                             </form>
+                            <form method="POST" action="{{ route('heroes.searchable', $hero) }}" data-refresh-modal class="inline">
+                                @csrf @method('PATCH')
+                                <button type="submit" class="text-xs text-waldritter hover:underline">
+                                    {{ $hero->public_searchable ? 'Aus Suche entfernen' : 'In Suche aufnehmen' }}
+                                </button>
+                            </form>
                         </dd>
-                    @endcan
-                    @if ($hero->public_visible)
+                    @endif
+                    {{-- PUB-07: QR/URL für Ausweis – Admin/Bürokrat sehen es auch wenn versteckt. --}}
+                    @if ($hero->public_visible || auth()->user()?->can('heldenregister.edit'))
                         <dd class="mt-2 flex flex-wrap items-end gap-3">
-                            <canvas data-qr-url="{{ route('public.hero', $hero->public_code) }}"
-                                    title="QR-Code zum öffentlichen Profil"></canvas>
+                            @if ($hero->public_visible)
+                                <canvas data-qr-url="{{ route('public.hero', $hero->public_code) }}"
+                                        title="QR-Code zum öffentlichen Profil"></canvas>
+                            @endif
                             <div class="text-xs text-stone-500 space-y-1">
-                                <div>Öffentliches Profil:</div>
+                                <div>Öffentliches Profil{{ $hero->public_visible ? '' : ' (aktuell versteckt)' }}:</div>
                                 <a href="{{ route('public.hero', $hero->public_code) }}"
                                    target="_blank" rel="noopener"
-                                   class="text-waldritter hover:underline break-all">
+                                   class="text-waldritter hover:underline break-all {{ $hero->public_visible ? '' : 'opacity-50' }}">
                                     {{ url(route('public.hero', $hero->public_code)) }}
                                 </a>
                             </div>
@@ -422,25 +434,34 @@
                             <span class="text-xs text-stone-500 bg-stone-100 border border-stone-200 rounded px-1.5 py-0.5">versteckt</span>
                         @endif
                     </dd>
-                    @can('heldenregister.edit')
-                        <dd class="mt-1">
+                    @if ($canManagePublic)
+                        <dd class="mt-1 flex flex-wrap gap-3">
                             <form method="POST" action="{{ route('heroes.visibility', $hero) }}" data-refresh-modal class="inline">
                                 @csrf @method('PATCH')
                                 <button type="submit" class="text-xs text-waldritter hover:underline">
                                     {{ $hero->public_visible ? 'Profil verstecken' : 'Profil sichtbar machen' }}
                                 </button>
                             </form>
+                            <form method="POST" action="{{ route('heroes.searchable', $hero) }}" data-refresh-modal class="inline">
+                                @csrf @method('PATCH')
+                                <button type="submit" class="text-xs text-waldritter hover:underline">
+                                    {{ $hero->public_searchable ? 'Aus Suche entfernen' : 'In Suche aufnehmen' }}
+                                </button>
+                            </form>
                         </dd>
-                    @endcan
-                    @if ($hero->public_visible)
+                    @endif
+                    {{-- PUB-07: QR/URL für Ausweis – Admin/Bürokrat sehen es auch wenn versteckt. --}}
+                    @if ($hero->public_visible || auth()->user()?->can('heldenregister.edit'))
                         <dd class="mt-2 flex flex-wrap items-end gap-3">
-                            <canvas data-qr-url="{{ route('public.hero', $hero->public_code) }}"
-                                    title="QR-Code zum öffentlichen Profil"></canvas>
+                            @if ($hero->public_visible)
+                                <canvas data-qr-url="{{ route('public.hero', $hero->public_code) }}"
+                                        title="QR-Code zum öffentlichen Profil"></canvas>
+                            @endif
                             <div class="text-xs text-stone-500 space-y-1">
-                                <div>Öffentliches Profil:</div>
+                                <div>Öffentliches Profil{{ $hero->public_visible ? '' : ' (aktuell versteckt)' }}:</div>
                                 <a href="{{ route('public.hero', $hero->public_code) }}"
                                    target="_blank" rel="noopener"
-                                   class="text-waldritter hover:underline break-all">
+                                   class="text-waldritter hover:underline break-all {{ $hero->public_visible ? '' : 'opacity-50' }}">
                                     {{ url(route('public.hero', $hero->public_code)) }}
                                 </a>
                             </div>

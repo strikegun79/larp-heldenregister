@@ -17,8 +17,9 @@ class HeroFactory extends Factory
             'character_name' => fake()->firstName(),
             'homeplace' => fake()->city(),
             'born' => fake()->date(),
-            'active'         => true,
-            'public_visible' => true,
+            'active'            => true,
+            'public_visible'    => true,
+            'public_searchable' => true,
         ];
     }
 }

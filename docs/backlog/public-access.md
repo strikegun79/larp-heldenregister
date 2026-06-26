@@ -57,15 +57,17 @@ Code (z. B. Base32 ohne Verwechslungszeichen).
 - [x] Code-Raum 31⁶ ≈ 887 Mio. (Base31) — rechnerisch sicher gegen Brute-Force.
 - [x] 5 Tests (Header, 429-Verhalten, Limit-Wert).
 
-### PUB-07 · Heldencode sehen & Freigabe · ⏱ 3h · 🔲
+### PUB-07 · Heldencode sehen & Freigabe · ⏱ 3h · ✅
 **Beschreibung:** Bürokrat kann Heldencode sehen & Freigabe durch Betreuer
 **Akzeptanzkriterien:**
-- [] Nutzer mit Rolle Admin oder Bürokrat, können den Code sehen zur öffentlichen Seite. Damit er diesen auf den Ausweis schreiben kann für das Kind
-- [] Betreuer des Spielers, admin und Bürokrat können im Helden-Detail die öffentliche Seite deaktivieren oder aktivieren. Damit steht es jedem Frei das zu entscheiden
+- [x] Nutzer mit Rolle Admin oder Bürokrat, können den Code sehen zur öffentlichen Seite (auch wenn `public_visible=false`, mit „aktuell versteckt"-Hinweis).
+- [x] Betreuer des Spielers, admin und Bürokrat können im Helden-Detail die öffentliche Seite deaktivieren oder aktivieren (`heroes.visibility` PATCH-Route, Zugriffsschutz via `canManagePublicSettings()`).
+- [x] 10 Tests (PUB-07+08 kombiniert).
 
-### PUB-08 Heldensuche auf der öffentlichen Seite · ⏱ 3h · 🔲
-**Beschreibung:** Nur wer sein Helden für die Heldensuche freigibt, kann gefunden werden.
+### PUB-08 · Heldensuche auf der öffentlichen Seite · ⏱ 3h · ✅
+**Beschreibung:** Nur wer seinen Helden für die Heldensuche freigibt, kann gefunden werden.
 **Akzeptanzkriterien:**
-- [] Option im Helden-Detail, ob man per öffentliche Suche gefunden werden kann.
-- [] Änderbar nur durch Betreuer, Admin oder Bürokrat
-- [] Suche soll den Heldennamen oder Code beinhalten
+- [x] `heroes.public_searchable` (default true), Migration + Model + Factory.
+- [x] Option im Helden-Detail (Toggle-Button), ob man per öffentlicher Suche gefunden werden kann.
+- [x] Änderbar nur durch Betreuer, Admin oder Bürokrat (`heroes.searchable` PATCH-Route).
+- [x] Suche beinhaltet Heldennamen (LIKE) oder direkten Code (Redirect); nur `public_visible=true` & `public_searchable=true`.
