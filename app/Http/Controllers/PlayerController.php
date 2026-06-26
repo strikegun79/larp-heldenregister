@@ -14,6 +14,8 @@ class PlayerController extends Controller
 {
     public function __construct()
     {
+        // ROLE-06: Kein player.view-Middleware nötig — index() liefert nur eigene
+        // Spieler ($request->user()->players()); show() nutzt PlayerPolicy::view().
         $this->middleware('auth');
     }
 

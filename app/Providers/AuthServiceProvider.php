@@ -33,6 +33,10 @@ class AuthServiceProvider extends ServiceProvider
             Gate::define($permission, fn (User $user) => $user->hasPermission($permission));
         }
 
+        // ROLE-07: Zusammengesetzte Gates kapseln Oder-Logik aus mehreren Einzelrechten,
+        // damit Views/Controller stets @can('name') statt @canany([...]) verwenden.
+        // Neue Oder-Verknüpfungen gehören hierher – keine Inline-Prüfungen in Views.
+
         // Den Abenteuer-Bereich darf sehen, wer Events verwaltet ODER buchen kann
         // (Rolle „Event buchen" hat kein events.view, aber adventure.book).
         Gate::define('adventure.access', fn (User $user) => $user->hasPermission('events.view') || $user->hasPermission('adventure.book'));
