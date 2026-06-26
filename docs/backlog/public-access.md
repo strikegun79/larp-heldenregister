@@ -48,8 +48,10 @@ Code (z. B. Base32 ohne Verwechslungszeichen).
 - [ ] Druckfreundliche Darstellung; Test (QR wird erzeugt).
 **Abhängig von:** PUB-02.
 
-### PUB-06 · Rate-Limiting & Missbrauchsschutz öffentliche Endpunkte · ⏱ 2h · 🔲
+### PUB-06 · Rate-Limiting & Missbrauchsschutz öffentliche Endpunkte · ⏱ 2h · ✅
 **Beschreibung:** Öffentliche Suche/Profil gegen Enumeration/Scraping absichern.
 **Akzeptanzkriterien:**
-- [ ] Throttle auf Such-/Profil-Routen.
-- [ ] Code-Raum groß genug gegen Erraten; Test.
+- [x] Throttle `public-hero` (30/min je IP) auf /h, /h/search, /h/{code}.
+- [x] X-RateLimit-Header in Antworten; 429 nach Überschreitung.
+- [x] Code-Raum 31⁶ ≈ 887 Mio. (Base31) — rechnerisch sicher gegen Brute-Force.
+- [x] 5 Tests (Header, 429-Verhalten, Limit-Wert).

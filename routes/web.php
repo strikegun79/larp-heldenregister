@@ -32,12 +32,15 @@ Route::get('/', function () {
     return redirect()->route('dashboard');
 });
 
-// PUB-03: Heldensuche per Code (vor {code}-Route, damit /h/search nicht als Code gilt).
-Route::get('/h', [PublicHeroController::class, 'index'])->name('public.hero.search');
-Route::get('/h/search', [PublicHeroController::class, 'search'])->name('public.hero.search.go');
+// PUB-02/03/06: Öffentliche Helden-Routen mit Rate-Limiting (30/min je IP).
+Route::middleware('throttle:public-hero')->group(function () {
+    // PUB-03: Suchformular + Weiterleitung (vor {code}-Route registriert).
+    Route::get('/h', [PublicHeroController::class, 'index'])->name('public.hero.search');
+    Route::get('/h/search', [PublicHeroController::class, 'search'])->name('public.hero.search.go');
 
-// PUB-02: Öffentliches Helden-Profil – kein Login erforderlich.
-Route::get('/h/{code}', [PublicHeroController::class, 'show'])->name('public.hero');
+    // PUB-02: Öffentliches Helden-Profil.
+    Route::get('/h/{code}', [PublicHeroController::class, 'show'])->name('public.hero');
+});
 
 Route::get('/dashboard', [\App\Http\Controllers\DashboardController::class, 'index'])
     ->middleware(['auth', 'verified'])->name('dashboard');
