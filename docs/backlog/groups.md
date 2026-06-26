@@ -37,12 +37,13 @@ Gruppe (z. B. Anführer) optional.
 - [x] Kennzahlen (Anzahl Mitglieder), Spalten: Held, Spieler, Klasse(n), EP, Rolle, Beigetreten.
 - [x] Mobil als Karten (x-mobile.cards-or-table), Leerzustand mit CTA.
 
-### GRP-05 · Gruppe in Heldenansicht & öffentlicher Seite · ⏱ 2h · 🔲
+### GRP-05 · Gruppe in Heldenansicht & öffentlicher Seite · ⏱ 2h · ✅
 **Beschreibung:** Gruppenzugehörigkeit beim Helden anzeigen (auch öffentlich,
 ohne Realnamen).
 **Akzeptanzkriterien:**
-- [ ] Helden-Detail zeigt Gruppe(n).
-- [ ] Öffentliche Heldenseite zeigt Gruppennamen (keine Personendaten).
+- [x] Helden-Detail zeigt Gruppe(n) mit optionaler Rolle (mobil + Desktop).
+- [x] Öffentliche Heldenseite zeigt Gruppennamen (keine Personendaten).
+- [x] 5 Tests (Detail, Rolle, Leerzustand, öffentlich, kein Realname).
 **Abhängig von:** GRP-01, PUB-02.
 
 ### GRP-06 · Gruppen-basierte Event-Buchung (optional) · ⏱ 4h · 🔲

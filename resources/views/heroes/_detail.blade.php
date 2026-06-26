@@ -35,6 +35,12 @@
             <dl class="grid grid-cols-2 gap-3 text-stone-800 text-sm mb-4">
                 <div><dt class="text-stone-500">Spieler</dt><dd>{{ $hero->player?->full_name ?? '—' }}</dd></div>
                 <div><dt class="text-stone-500">Klassen</dt><dd>{{ $hero->classes->pluck('name')->implode(', ') ?: '—' }}</dd></div>
+                @if ($hero->groups->isNotEmpty())
+                <div class="col-span-2">
+                    <dt class="text-stone-500">Gruppen</dt>
+                    <dd>{{ $hero->groups->map(fn ($g) => $g->name . ($g->pivot->role ? ' ('.$g->pivot->role.')' : ''))->implode(', ') }}</dd>
+                </div>
+                @endif
                 <div><dt class="text-stone-500">Heimatort</dt><dd>{{ $hero->homeplace ?? '—' }}</dd></div>
                 <div>
                     <dt class="text-stone-500">Fertigkeiten</dt>
@@ -356,6 +362,12 @@
             <dl class="grid grid-cols-2 gap-4 text-stone-800">
                 <div><dt class="text-sm text-stone-500">Spieler</dt><dd>{{ $hero->player?->full_name ?? '—' }}</dd></div>
                 <div><dt class="text-sm text-stone-500">Klassen</dt><dd>{{ $hero->classes->pluck('name')->implode(', ') ?: '—' }}</dd></div>
+                @if ($hero->groups->isNotEmpty())
+                <div class="col-span-2">
+                    <dt class="text-sm text-stone-500">Gruppen</dt>
+                    <dd>{{ $hero->groups->map(fn ($g) => $g->name . ($g->pivot->role ? ' ('.$g->pivot->role.')' : ''))->implode(', ') }}</dd>
+                </div>
+                @endif
                 <div><dt class="text-sm text-stone-500">Heimatort</dt><dd>{{ $hero->homeplace ?? '—' }}</dd></div>
                 <div>
                     <dt class="text-sm text-stone-500">Verfügbare EP</dt>

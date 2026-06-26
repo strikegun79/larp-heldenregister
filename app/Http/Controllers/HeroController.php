@@ -212,6 +212,7 @@ class HeroController extends Controller
             'skills.perlColor',
             'epTransactions.type',
             'epTransactions.adventure',
+            'groups', // GRP-05: Gruppenzugehörigkeit im Detail anzeigen.
         ]);
 
         $data = [
