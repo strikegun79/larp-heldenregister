@@ -90,11 +90,20 @@
             </div>
         @endif
 
-        {{-- Helden-Code --}}
-        <p class="text-center text-xs text-stone-400 mt-4">
-            Helden-Code:
-            <code class="font-mono tracking-widest">{{ $hero->public_code }}</code>
-        </p>
+        {{-- Teilen --}}
+        <div class="bg-white/70 border-2 border-[#5a3a22]/40 shadow sm:rounded-lg p-5 mb-6 text-center">
+            <p class="text-sm text-stone-600 mb-2">
+                Helden-Code:
+                <code class="font-mono tracking-widest text-waldritter text-base">{{ $hero->public_code }}</code>
+            </p>
+            <p class="text-xs text-stone-400 mb-3 break-all">{{ url()->current() }}</p>
+            <button type="button"
+                    class="ui small button"
+                    onclick="navigator.clipboard.writeText('{{ url()->current() }}').then(function(){this.textContent='✓ Kopiert!';setTimeout(function(){document.querySelectorAll('[data-copy-btn]').forEach(function(b){b.textContent='Link kopieren'})},2000)}.bind(this))"
+                    data-copy-btn>
+                Link kopieren
+            </button>
+        </div>
 
     </div>
 

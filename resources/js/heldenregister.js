@@ -1,3 +1,5 @@
+import QRCode from 'qrcode';
+
 /* ================================================================
    Heldenregister – Frontend-Logik (ARCH-001)
    Aus layouts/app.blade.php ausgelagert und als Vite-Entrypoint
@@ -69,6 +71,8 @@ function loadModalContent(url, preserveTab) {
             if ($content.find('#signature-pad').length) initSignaturePad('signature-pad');
             // UI-05: Fomantic-Datepicker im geladenen Inhalt initialisieren.
             initFomanticCalendars($content);
+            // PUB-05: QR-Code nach Modal-Load rendern.
+            initQrCodes($content);
             $('#app-modal').modal('refresh');
             // UI-11: Fokus nach AJAX-Load ins Modal verschieben.
             requestAnimationFrame(function () {
@@ -154,6 +158,8 @@ function loadStackContent(url, preserveTab) {
             $('#app-modal-2').toggleClass('modal-hero', $content.find('#skilltree').length > 0);
             // UI-05: Fomantic-Datepicker im gestapelten Modal initialisieren.
             initFomanticCalendars($content);
+            // PUB-05: QR-Code nach Stack-Modal-Load rendern.
+            initQrCodes($content);
             $('#app-modal-2').modal('refresh');
             // UI-11: Fokus nach AJAX-Load ins gestapelte Modal verschieben.
             requestAnimationFrame(function () {
@@ -581,12 +587,23 @@ function initFomanticCalendars($container) {
 }
 
 // ------------------------------------------------------------------
+// PUB-05: QR-Codes für [data-qr-url]-Canvas-Elemente rendern.
+// ------------------------------------------------------------------
+function initQrCodes(root) {
+    (root instanceof $ ? root[0] : root).querySelectorAll('canvas[data-qr-url]').forEach(function (canvas) {
+        QRCode.toCanvas(canvas, canvas.dataset.qrUrl, { width: 160, margin: 2, color: { dark: '#5a3a22' } });
+    });
+}
+
+// ------------------------------------------------------------------
 // DOMContentLoaded: Kalender + Flash-Toast (UI-09)
 // Module laufen nach DOM-Parse, aber vor DOMContentLoaded.
 // ------------------------------------------------------------------
 document.addEventListener('DOMContentLoaded', function () {
     // UI-05: Standalone-Seiten (Held/Spieler anlegen, Formular direkt im DOM).
     initFomanticCalendars($(document));
+    // PUB-05: QR-Codes auf der Vollseite (z. B. heroes.show ohne Modal).
+    initQrCodes(document);
 
     // UI-09: Session-Flash als Toast (Vollseiten-Redirects).
     // Daten kommen aus data-Attributen von #app-flash (gesetzt via Blade in app.blade.php).

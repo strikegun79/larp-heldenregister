@@ -40,12 +40,13 @@ Code (z. B. Base32 ohne Verwechslungszeichen).
 - [x] Tests (7 Tests: 404, Default, Toggle, Formular, Zugriffsschutz).
 **Abhängig von:** PUB-02.
 
-### PUB-05 · QR-/Teilen-Funktion für den Code · ⏱ 3h · 🔲
-**Beschreibung:** QR-Code/Link zum Helden zum Ausdrucken/Teilen (Legacy hatte
-`chillerlan/php-qrcode` – ungenutzt; hier sinnvoll reaktivierbar).
+### PUB-05 · QR-/Teilen-Funktion für den Code · ⏱ 3h · ✅
+**Beschreibung:** QR-Code/Link zum Helden zum Ausdrucken/Teilen.
 **Akzeptanzkriterien:**
-- [ ] QR-Code zur öffentlichen Heldenseite im Detail/Charakterbogen.
-- [ ] Druckfreundliche Darstellung; Test (QR wird erzeugt).
+- [x] QR-Code-Canvas (data-qr-url) im internen Helden-Detail, gerendert per `qrcode` npm-Paket in heldenregister.js (inkl. nach Modal-Load).
+- [x] Nur bei public_visible=true sichtbar; waldritter-Farbe (#5a3a22).
+- [x] Öffentliches Profil: „Link kopieren"-Button (Clipboard-API) + Helden-Code als Text.
+- [x] 5 Tests; Backlog ✅.
 **Abhängig von:** PUB-02.
 
 ### PUB-06 · Rate-Limiting & Missbrauchsschutz öffentliche Endpunkte · ⏱ 2h · ✅
@@ -55,3 +56,16 @@ Code (z. B. Base32 ohne Verwechslungszeichen).
 - [x] X-RateLimit-Header in Antworten; 429 nach Überschreitung.
 - [x] Code-Raum 31⁶ ≈ 887 Mio. (Base31) — rechnerisch sicher gegen Brute-Force.
 - [x] 5 Tests (Header, 429-Verhalten, Limit-Wert).
+
+### PUB-07 · Heldencode sehen & Freigabe · ⏱ 3h · 🔲
+**Beschreibung:** Bürokrat kann Heldencode sehen & Freigabe durch Betreuer
+**Akzeptanzkriterien:**
+- [] Nutzer mit Rolle Admin oder Bürokrat, können den Code sehen zur öffentlichen Seite. Damit er diesen auf den Ausweis schreiben kann für das Kind
+- [] Betreuer des Spielers, admin und Bürokrat können im Helden-Detail die öffentliche Seite deaktivieren oder aktivieren. Damit steht es jedem Frei das zu entscheiden
+
+### PUB-08 Heldensuche auf der öffentlichen Seite · ⏱ 3h · 🔲
+**Beschreibung:** Nur wer sein Helden für die Heldensuche freigibt, kann gefunden werden.
+**Akzeptanzkriterien:**
+- [] Option im Helden-Detail, ob man per öffentliche Suche gefunden werden kann.
+- [] Änderbar nur durch Betreuer, Admin oder Bürokrat
+- [] Suche soll den Heldennamen oder Code beinhalten

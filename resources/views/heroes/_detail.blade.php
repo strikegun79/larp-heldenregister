@@ -78,6 +78,20 @@
                             </form>
                         </dd>
                     @endcan
+                    @if ($hero->public_visible)
+                        <dd class="mt-2 flex flex-wrap items-end gap-3">
+                            <canvas data-qr-url="{{ route('public.hero', $hero->public_code) }}"
+                                    title="QR-Code zum öffentlichen Profil"></canvas>
+                            <div class="text-xs text-stone-500 space-y-1">
+                                <div>Öffentliches Profil:</div>
+                                <a href="{{ route('public.hero', $hero->public_code) }}"
+                                   target="_blank" rel="noopener"
+                                   class="text-waldritter hover:underline break-all">
+                                    {{ url(route('public.hero', $hero->public_code)) }}
+                                </a>
+                            </div>
+                        </dd>
+                    @endif
                 </div>
                 @endif
             </dl>
@@ -418,6 +432,20 @@
                             </form>
                         </dd>
                     @endcan
+                    @if ($hero->public_visible)
+                        <dd class="mt-2 flex flex-wrap items-end gap-3">
+                            <canvas data-qr-url="{{ route('public.hero', $hero->public_code) }}"
+                                    title="QR-Code zum öffentlichen Profil"></canvas>
+                            <div class="text-xs text-stone-500 space-y-1">
+                                <div>Öffentliches Profil:</div>
+                                <a href="{{ route('public.hero', $hero->public_code) }}"
+                                   target="_blank" rel="noopener"
+                                   class="text-waldritter hover:underline break-all">
+                                    {{ url(route('public.hero', $hero->public_code)) }}
+                                </a>
+                            </div>
+                        </dd>
+                    @endif
                 </div>
                 @endif
             </dl>
