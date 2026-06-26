@@ -6,23 +6,23 @@ einen **6-stelligen Code** und kann seinen Helden darüber finden/teilen.
 
 ## Offen (🔲)
 
-### PUB-01 · 6-stelliger Helden-Code · ⏱ 3h · 🔲
+### PUB-01 · 6-stelliger Helden-Code · ⏱ 3h · ✅
 **Beschreibung:** Jeder Held erhält einen eindeutigen, gut lesbaren 6-stelligen
 Code (z. B. Base32 ohne Verwechslungszeichen).
 **Akzeptanzkriterien:**
-- [ ] Migration `heroes.public_code` (unique), Generierung bei Anlage/Migration.
-- [ ] Kollisionsfreie Erzeugung; Backfill für bestehende Helden.
-- [ ] Code im Helden-Detail (für den Spieler) sichtbar.
-- [ ] Tests (Eindeutigkeit, Format).
+- [x] Migration `heroes.public_code` (unique), Generierung bei Anlage/Migration.
+- [x] Kollisionsfreie Erzeugung; Backfill für bestehende Helden.
+- [x] Code im Helden-Detail (für den Spieler) sichtbar.
+- [x] Tests (Eindeutigkeit, Format).
 
-### PUB-02 · Öffentliches Helden-Profil (ohne Realname) · ⏱ 4h · 🔲
+### PUB-02 · Öffentliches Helden-Profil (ohne Realname) · ⏱ 4h · ✅
 **Beschreibung:** Öffentlich erreichbare, anonymisierte Heldenseite
 (`/h/{code}`) – nur Charakterdaten, **kein** Spieler-Realname.
 **Akzeptanzkriterien:**
-- [ ] Route ohne Auth; zeigt Charaktername, Klassen, Fertigkeiten/Perlen, ggf. Heimatort.
-- [ ] Keine personenbezogenen Daten (kein Spieler-Realname, keine E-Mail/Geburtsdatum).
-- [ ] „Nicht gefunden" bei unbekanntem/deaktiviertem Code.
-- [ ] Tests (sichtbare vs. verborgene Felder).
+- [x] Route ohne Auth; zeigt Charaktername, Klassen, Fertigkeiten/Perlen, ggf. Heimatort.
+- [x] Keine personenbezogenen Daten (kein Spieler-Realname, keine E-Mail/Geburtsdatum).
+- [x] „Nicht gefunden" bei unbekanntem/deaktiviertem Code.
+- [x] Tests (sichtbare vs. verborgene Felder).
 
 ### PUB-03 · Heldensuche per Code · ⏱ 2h · 🔲
 **Beschreibung:** Öffentliche Suchmaske: Code eingeben → Heldenseite.

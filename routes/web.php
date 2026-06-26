@@ -11,6 +11,7 @@ use App\Http\Controllers\HeroSkillController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PlayerController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\PublicHeroController;
 use App\Http\Controllers\SignatureController;
 use App\Http\Controllers\SkillController;
 use App\Http\Controllers\SkilltreeController;
@@ -30,6 +31,9 @@ use Illuminate\Support\Facades\Route;
 Route::get('/', function () {
     return redirect()->route('dashboard');
 });
+
+// PUB-02: Öffentliches Helden-Profil – kein Login erforderlich.
+Route::get('/h/{code}', [PublicHeroController::class, 'show'])->name('public.hero');
 
 Route::get('/dashboard', [\App\Http\Controllers\DashboardController::class, 'index'])
     ->middleware(['auth', 'verified'])->name('dashboard');
