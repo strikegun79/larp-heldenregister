@@ -209,6 +209,7 @@ class HeroController extends Controller
             'player.bookings.adventure',
             'player.users',
             'classes.skills.prerequisites',
+            'classes.skills.perlColor', // SKILL-07: Perlenfarbe je Knoten in Spaltenansicht.
             'skills.perlColor',
             'epTransactions.type',
             'epTransactions.adventure',

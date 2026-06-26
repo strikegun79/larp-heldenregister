@@ -109,13 +109,14 @@ beim Helden erfüllt sind.
 - [x] Tests (gesperrt/freigeschaltet).
 **Abhängig von:** SKILL-05, EP-03.
 
-### SKILL-07 · Fertigkeiten-Baum-Visualisierung je Klasse · ⏱ 4h · 🔲
+### SKILL-07 · Fertigkeiten-Baum-Visualisierung je Klasse · ⏱ 4h · ✅
 **Beschreibung:** Grafische/strukturierte Darstellung des Skill-Trees pro Klasse
 (Level-Ebenen, Abhängigkeiten), inkl. „gelernt"-Markierung für einen Helden.
 **Akzeptanzkriterien:**
-- [ ] Baum-/Spalten-Ansicht je Klasse (nach Level/Abhängigkeit).
-- [ ] Für einen Helden: gelernt / lernbar / gesperrt farblich unterschieden.
-- [ ] Perlenfarbe je Knoten dargestellt.
+- [x] Baum-/Spalten-Ansicht je Klasse (nach Level/Abhängigkeit) — Toggle-Buttons „Baum"/„Stufen" im Fertigkeiten-Tab (Desktop + Mobile).
+- [x] Für einen Helden: gelernt (grün) / lernbar (amber) / gesperrt (grau+🔒) farblich unterschieden.
+- [x] Perlenfarbe je Knoten als farbiger Punkt dargestellt (classes.skills.perlColor eager-load).
+- [x] Partial `heroes/partials/_skill_columns.blade.php`; 6 Tests.
 **Abhängig von:** SKILL-05, SKILL-03.
 
 ### SKILL-08 · Fertigkeiten-Katalog mit Symbolen · ⏱ 3h · ✅
