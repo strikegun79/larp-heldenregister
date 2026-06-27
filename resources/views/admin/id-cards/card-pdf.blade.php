@@ -13,7 +13,7 @@
      * spiegelt nur vertikal, nicht horizontal).
      *
      * 3 Kombos nebeneinander auf A4 quer (29,7 × 21 cm):
-     *   Breite:  3 × 7,52 cm = 22,56 cm + 2 × 2px ≈ 22,6 cm  < 29,7 cm ✓
+     *   Breite:  3 × 7,52 cm = 22,56 cm + 2 × 1mm = 22,76 cm < 29,7 cm ✓
      *   Höhe:    2 × 10 cm   = 20 cm                          < 21,0 cm ✓
      */
     @page { margin: 0; size: A4 landscape; }
@@ -22,7 +22,7 @@
         display: flex;
         flex-direction: row;
         flex-wrap: nowrap;
-        gap: 2px;
+        gap: 1mm;
         align-items: flex-start;
     }
 
@@ -78,9 +78,8 @@
         top: 8.025cm;
         width: 2.248cm;
         height: 0.808cm;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+        text-align: center;
+        line-height: 0.808cm;
         font-family: "DejaVu Sans Mono", monospace;
         font-size: 9px;
         font-weight: bold;
@@ -115,9 +114,8 @@
         top: 8.025cm;
         width: 2.248cm;
         height: 0.808cm;
-        display: flex;
-        align-items: center;
-        justify-content: center;
+        text-align: center;
+        line-height: 0.808cm;
         font-family: "DejaVu Sans Mono", monospace;
         font-size: 9px;
         font-weight: bold;
