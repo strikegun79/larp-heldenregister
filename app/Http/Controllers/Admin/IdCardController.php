@@ -1,0 +1,153 @@
+<?php
+
+namespace App\Http\Controllers\Admin;
+
+use App\Http\Controllers\Controller;
+use App\Models\Hero;
+use App\Models\IdCardCode;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Endroid\QrCode\QrCode;
+use Endroid\QrCode\Writer\PngWriter;
+use Illuminate\Http\RedirectResponse;
+use Illuminate\Http\Request;
+use Illuminate\Http\Response;
+use Illuminate\View\View;
+
+/**
+ * PUB-10: Generator für Heldenausweise (Admin/Bürokrat).
+ */
+class IdCardController extends Controller
+{
+    private const CODE_ALPHABET = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
+
+    /**
+     * Pool-Übersicht + Generator-Formular.
+     */
+    public function index(): View
+    {
+        $unassigned = IdCardCode::whereNull('hero_id')
+            ->orderBy('created_at', 'desc')
+            ->get();
+
+        $assigned = IdCardCode::whereNotNull('hero_id')
+            ->with('hero')
+            ->orderBy('assigned_at', 'desc')
+            ->limit(50)
+            ->get();
+
+        return view('admin.id-cards.index', compact('unassigned', 'assigned'));
+    }
+
+    /**
+     * N Codes generieren und als PDF herunterladen.
+     * Karte: 7,52 cm × 10 cm, 3×2 querformat auf A4.
+     */
+    public function generate(Request $request): Response|RedirectResponse
+    {
+        $request->validate(['count' => ['required', 'integer', 'min:1', 'max:200']]);
+        $count = (int) $request->integer('count');
+
+        $codes = [];
+        $attempts = 0;
+        while (count($codes) < $count && $attempts < $count * 10) {
+            $code = $this->randomCode();
+            if (
+                ! isset($codes[$code])
+                && ! Hero::where('public_code', $code)->exists()
+                && ! IdCardCode::where('code', $code)->exists()
+            ) {
+                IdCardCode::create(['code' => $code, 'created_by' => $request->user()->id]);
+                $codes[$code] = true;
+            }
+            $attempts++;
+        }
+
+        if (empty($codes)) {
+            return back()->withErrors(['count' => 'Codes konnten nicht generiert werden.']);
+        }
+
+        $cardData = array_map(fn ($code) => [
+            'code' => $code,
+            'url'  => route('public.hero', $code),
+            'qr'   => $this->qrDataUri(route('public.hero', $code)),
+        ], array_keys($codes));
+
+        $pdf = Pdf::loadView('admin.id-cards.card-pdf', ['cards' => $cardData])
+            ->setPaper('a4', 'landscape');
+
+        return $pdf->download('heldenausweise-'.date('Ymd').'.pdf');
+    }
+
+    /**
+     * Ausweis eines einzelnen Helden neu drucken (Verlust).
+     */
+    public function reprint(Hero $hero): Response
+    {
+        abort_unless($hero->public_code, 404);
+
+        $cardData = [[
+            'code'          => $hero->public_code,
+            'character_name' => $hero->character_name,
+            'url'           => route('public.hero', $hero->public_code),
+            'qr'            => $this->qrDataUri(route('public.hero', $hero->public_code)),
+        ]];
+
+        $pdf = Pdf::loadView('admin.id-cards.card-pdf', ['cards' => $cardData])
+            ->setPaper('a4', 'landscape');
+
+        return $pdf->download('ausweis-'.$hero->id.'.pdf');
+    }
+
+    /**
+     * Pool-Code einem Helden zuweisen (setzt heroes.public_code).
+     */
+    public function assign(Request $request, Hero $hero): RedirectResponse
+    {
+        $request->validate([
+            'code' => ['required', 'string', 'size:6', 'regex:/^[ABCDEFGHJKMNPQRSTUVWXYZ23456789]{6}$/'],
+        ]);
+
+        $code = strtoupper(trim($request->string('code')));
+
+        // Prüfen ob der Code bereits vergeben ist (anderem Helden oder existierender auto-code)
+        $existingHero = Hero::where('public_code', $code)->where('id', '!=', $hero->id)->first();
+        if ($existingHero) {
+            return back()->withErrors(['code' => 'Dieser Code ist bereits einem anderen Helden zugewiesen.']);
+        }
+
+        // Pool-Eintrag suchen oder anlegen
+        $poolEntry = IdCardCode::firstOrCreate(
+            ['code' => $code],
+            ['created_by' => $request->user()->id]
+        );
+
+        if ($poolEntry->hero_id && $poolEntry->hero_id !== $hero->id) {
+            return back()->withErrors(['code' => 'Dieser Pool-Code ist bereits einem anderen Helden zugewiesen.']);
+        }
+
+        $hero->update(['public_code' => $code]);
+        $poolEntry->update(['hero_id' => $hero->id, 'assigned_at' => now()]);
+
+        return redirect()->route('heroes.show', $hero)
+            ->with('status', 'Helden-Code zugewiesen: '.$code);
+    }
+
+    private function randomCode(): string
+    {
+        $len  = strlen(self::CODE_ALPHABET);
+        $code = '';
+        for ($i = 0; $i < 6; $i++) {
+            $code .= self::CODE_ALPHABET[random_int(0, $len - 1)];
+        }
+        return $code;
+    }
+
+    /** QR-Code als base64-PNG-Data-URI für DOMPDF. */
+    private function qrDataUri(string $url): string
+    {
+        $qr     = new QrCode($url);
+        $writer = new PngWriter();
+        $result = $writer->write($qr);
+        return 'data:image/png;base64,'.base64_encode($result->getString());
+    }
+}

@@ -106,6 +106,35 @@
                     @endif
                 </div>
                 @endif
+                @can('heldenregister.edit')
+                <div class="col-span-2 pt-2">
+                    <dt class="text-stone-500">Ausweis-Code (Bürokrat)</dt>
+                    <dd class="mt-1">
+                        <form method="POST" action="{{ route('heroes.assign-code', $hero) }}" data-refresh-modal class="ui form">
+                            @csrf @method('PATCH')
+                            <div class="flex items-end gap-2 flex-wrap">
+                                <div class="field !mb-0">
+                                    <input type="text" name="code" maxlength="6" minlength="6"
+                                           pattern="[A-HJ-NP-Z2-9]{6}"
+                                           placeholder="XXXXXX"
+                                           value="{{ old('code', $hero->public_code) }}"
+                                           class="font-mono tracking-widest w-28"
+                                           style="text-transform:uppercase"
+                                           required>
+                                </div>
+                                <button type="submit" class="ui primary mini button">Zuweisen</button>
+                                @if ($hero->public_code)
+                                    <a href="{{ route('admin.id-cards.reprint', $hero) }}" class="ui mini basic button" target="_blank" rel="noopener">
+                                        <i class="print icon"></i> Drucken
+                                    </a>
+                                @endif
+                            </div>
+                        </form>
+                        @error('code') <p class="text-red-600 text-xs mt-1">{{ $message }}</p> @enderror
+                        <p class="text-xs text-stone-400 mt-1">6 Zeichen aus A–Z (kein I/L/O) und 2–9</p>
+                    </dd>
+                </div>
+                @endcan
             </dl>
 
             @if ($hero->description)
@@ -497,6 +526,33 @@
                     @endif
                 </div>
                 @endif
+                @can('heldenregister.edit')
+                <div class="col-span-2 pt-2">
+                    <dt class="text-sm text-stone-500">Ausweis-Code zuweisen (Bürokrat)</dt>
+                    <dd class="mt-1">
+                        <form method="POST" action="{{ route('heroes.assign-code', $hero) }}" data-refresh-modal class="ui form flex items-end gap-2 flex-wrap">
+                            @csrf @method('PATCH')
+                            <div class="field !mb-0">
+                                <input type="text" name="code" maxlength="6" minlength="6"
+                                       pattern="[A-HJ-NP-Z2-9]{6}"
+                                       placeholder="XXXXXX"
+                                       value="{{ old('code', $hero->public_code) }}"
+                                       class="font-mono tracking-widest w-28"
+                                       style="text-transform:uppercase"
+                                       required>
+                            </div>
+                            <button type="submit" class="ui primary small button">Code zuweisen</button>
+                            @if ($hero->public_code)
+                                <a href="{{ route('admin.id-cards.reprint', $hero) }}" class="ui small basic button" target="_blank" rel="noopener">
+                                    <i class="print icon"></i> Ausweis drucken
+                                </a>
+                            @endif
+                        </form>
+                        @error('code') <p class="text-red-600 text-sm mt-1">{{ $message }}</p> @enderror
+                        <p class="text-xs text-stone-400 mt-1">6 Zeichen aus A–Z (kein I/L/O) und 2–9</p>
+                    </dd>
+                </div>
+                @endcan
             </dl>
 
             <a href="{{ route('heroes.sheet-pdf', $hero) }}" class="ui small button mt-3" target="_blank" rel="noopener">Charakterbogen (PDF)</a>

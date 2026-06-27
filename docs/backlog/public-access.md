@@ -80,16 +80,25 @@ Code (z. B. Base32 ohne Verwechslungszeichen).
 - [x] Öffentliche Suchseite: Amber-Box mit Hinweis auf Ausweis und QR-Code als Code-Quellen.
 - [x] 4 Tests.
 
-### PUB-10 Heldencode eintragen durch den Bürokraten ⏱ 3h · 
+### PUB-10 Heldencode eintragen durch den Bürokraten ✅
 **Beschreibung:** Damit der Held gleich einen Ausweis erhält, werden die Ausweise schon vorab fertiggestellt.
 **Akzeptanzkriterien:**
-- [] Generator für Heldenausweise in der Verwaltung, Rollen Admin und Bürokrat
-- [] Beim Helden den Helden-Code eintragen, wenn der Ausweis ausgehändigt wird. ansonsten kein Code.
-- [] Generator erstellt eine PDF mit Ausweise im Größenraster 7,52cm x 10cm im Raster von 3x2 querformat.
-- [] Generator fragt die Anzahl der Ausweise die erstellt werden sollen ab.
-- [] Der Helden-Kode soll per Zufallsprinzip generiert werden.
-- [] der Helden-Kode wird erst im System aktiv, wenn dieser vom Bürokrat dem Helden zugeteilt wird. Aber vermeiden der doppelbelegung.
-- [] Bei Verlust eines Ausweis, kann der Bürokrat den Ausweis neu herstellen per PDF export.
-- [] Vorderseite des Ausweis: template_helden_ausweis_vorderseite.png
-- [] Rückseite des Ausweis: template_helden_ausweis_rueckseite.png
-- [] erstelle den QR Code und setze ihn auf das entsprechne Feld auf der Vorderseite des Ausweises
+- [x] Generator für Heldenausweise in der Verwaltung, Rollen Admin und Bürokrat
+- [x] Beim Helden den Helden-Code eintragen, wenn der Ausweis ausgehändigt wird. ansonsten kein Code.
+- [x] Generator erstellt eine PDF mit Ausweise im Größenraster 7,52cm x 10cm im Raster von 3x2 querformat.
+- [x] Generator fragt die Anzahl der Ausweise die erstellt werden sollen ab.
+- [x] Der Helden-Kode soll per Zufallsprinzip generiert werden.
+- [x] der Helden-Kode wird erst im System aktiv, wenn dieser vom Bürokrat dem Helden zugeteilt wird. Aber vermeiden der doppelbelegung.
+- [x] Bei Verlust eines Ausweis, kann der Bürokrat den Ausweis neu herstellen per PDF export.
+- [x] Vorderseite des Ausweis: template_helden_ausweis_vorderseite.png (CSS-Design als Fallback; Bild optonal per file_exists)
+- [ ] Rückseite des Ausweis: template_helden_ausweis_rueckseite.png (noch nicht umgesetzt)
+- [x] erstelle den QR Code und setze ihn auf das entsprechne Feld auf der Vorderseite des Ausweises
+
+### PUB-11 Helden Informationen ⏱ 3h · 
+**Beschreibung:** Was alles in der öffentlichen Seite angezeigt werden soll
+**Akzeptanzkriterien:**
+- [] Zeige die Fertigkeitsbäume mit den errungenen Fertigkeiten und Perlen an.
+- [] Wenn noch kein Charaktername existiert, schreibe die Initialien des Spielers
+- [] Felder die kein Inhalt haben, sollen dennoch angezeigt werden, z.b. Steckbrief, dann mit der Notiz "Noch keine Eintragungen" oder Herkunft.
+- [] Zeige auch das Datum der "Erblickung" also wann der Charakter im Rollenspiel das erstemal erwähnt wurde
+- [] Zeige auch die verfügbare EP

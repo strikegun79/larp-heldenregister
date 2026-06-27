@@ -278,6 +278,18 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::patch('adventures/{adventure}/teamer-signup/{signup}/reject', [\App\Http\Controllers\TeamerSignupController::class, 'reject'])
         ->name('adventures.teamer.reject');
 
+    // PUB-10: Heldenausweis-Generator (Admin/Bürokrat = heldenregister.edit).
+    Route::prefix('admin')->name('admin.')->middleware('can:heldenregister.edit')->group(function () {
+        Route::get('id-cards', [Admin\IdCardController::class, 'index'])->name('id-cards.index');
+        Route::post('id-cards/generate', [Admin\IdCardController::class, 'generate'])->name('id-cards.generate');
+        Route::get('id-cards/{hero}/reprint', [Admin\IdCardController::class, 'reprint'])->name('id-cards.reprint');
+    });
+
+    // Code einem Helden zuweisen (heldenregister.edit).
+    Route::patch('heroes/{hero}/assign-code', [Admin\IdCardController::class, 'assign'])
+        ->middleware('can:heldenregister.edit')
+        ->name('heroes.assign-code');
+
     // Gruppen-CRUD (GRP-02) + Mitglieder (GRP-03): Berechtigung groups.manage.
     Route::prefix('admin')->name('admin.')->middleware('can:groups.manage')->group(function () {
         Route::get('groups', [Admin\GroupController::class, 'index'])->name('groups.index');

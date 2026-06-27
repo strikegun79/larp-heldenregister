@@ -28,6 +28,7 @@
                         ['Fertigkeiten', 'Fertigkeiten-Katalog pflegen', 'admin_classes.jpg', route('admin.skills.index')],
                         ['Perlenfarben', 'Perlenfarben pflegen', 'admin_classes.jpg', route('admin.perl-colors.index')],
                         ['EP-Buchungsarten', 'EP-Buchungsarten pflegen', 'admin_katagorien.jpg', route('admin.ep-transaction-types.index')],
+                        ['Heldenausweise', 'Ausweise generieren & zuweisen', 'admin_katagorien.jpg', route('admin.id-cards.index')],
                     ];
                 @endphp
                 @foreach ($cards as [$title, $subtitle, $img, $href])
