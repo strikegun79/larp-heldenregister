@@ -1,3 +1,4 @@
+import Cropper from 'cropperjs';
 import QRCode from 'qrcode';
 
 /* ================================================================
