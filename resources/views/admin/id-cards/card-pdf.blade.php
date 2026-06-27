@@ -9,12 +9,14 @@
     /*
      * PUB-10: Karte 7,52 cm × 10 cm, 3×2 Raster auf A4 quer (29,7 × 21 cm).
      * Seitenränder je 0,5 cm → nutzbarer Bereich 28,7 × 20 cm.
-     * 3 Spalten × 7,52 cm = 22,56 cm; Abstand je 0,74 cm (3 × 7,52 + 2 × 0,74 ≈ 23 cm).
+     * 3 Spalten × 7,52 cm = 22,56 cm; Abstand je 0,74 cm.
      * 2 Reihen × 10 cm = 20 cm (passt mit 0 cm Abstand in den nutzbaren Bereich).
      */
     @page { margin: 0.5cm; size: A4 landscape; }
 
     .page-wrap { display: flex; flex-wrap: wrap; gap: 0.74cm; align-content: flex-start; }
+
+    .page-break { page-break-before: always; }
 
     .card {
         width: 7.52cm;
@@ -27,9 +29,26 @@
         page-break-inside: avoid;
     }
 
-    /* Wenn Vorderseiten-Template vorhanden, als Hintergrundbild setzen */
-    .card.has-template {
-        background-image: url("{{ public_path('images/template_helden_ausweis_vorderseite.png') }}");
+    /* Vorderseiten-Template als Hintergrundbild */
+    .card.has-front-template {
+        background-image: url("{{ str_replace('\\', '/', resource_path('images/template_helden_ausweis_vorderseite.png')) }}");
+        background-size: cover;
+        background-position: center;
+    }
+
+    /* Rückseite: Template füllt die ganze Karte */
+    .card-back {
+        width: 7.52cm;
+        height: 10cm;
+        border: 1px solid #5a3a22;
+        border-radius: 0.35cm;
+        overflow: hidden;
+        page-break-inside: avoid;
+        background: #fdf8f0;
+    }
+
+    .card-back.has-back-template {
+        background-image: url("{{ str_replace('\\', '/', resource_path('images/template_helden_ausweis_rueckseite.png')) }}");
         background-size: cover;
         background-position: center;
     }
@@ -132,15 +151,28 @@
 </style>
 </head>
 <body>
+
+@php
+    $hasFront = file_exists(resource_path('images/template_helden_ausweis_vorderseite.png'));
+    $hasBack  = file_exists(resource_path('images/template_helden_ausweis_rueckseite.png'));
+
+    // Rückseiten: Spalten spiegeln für Duplexdruck (je 3er-Gruppe umkehren)
+    $backCards = collect($cards)
+        ->chunk(3)
+        ->map(fn ($chunk) => $chunk->reverse()->values())
+        ->flatten(1)
+        ->values()
+        ->all();
+@endphp
+
+{{-- Seite 1: Vorderseiten --}}
 <div class="page-wrap">
 @foreach ($cards as $card)
-<div class="card{{ file_exists(public_path('images/template_helden_ausweis_vorderseite.png')) ? ' has-template' : '' }}">
-
+<div class="card{{ $hasFront ? ' has-front-template' : '' }}">
     <div class="card-header">
         <span class="org">Waldritter-Gießen e.V.</span>
         <span class="title">Heldenausweis</span>
     </div>
-
     <div class="card-body">
         <div class="qr-block">
             <img src="{{ $card['qr'] }}" alt="QR-Code">
@@ -153,10 +185,17 @@
         <hr class="separator">
         <div class="url-hint">{{ url('/h/'.$card['code']) }}</div>
     </div>
-
     <div class="card-footer">heldenregister.waldritter-giessen.de</div>
 </div>
 @endforeach
 </div>
+
+{{-- Seite 2: Rückseiten (Spalten gespiegelt für Duplexdruck) --}}
+<div class="page-wrap page-break">
+@foreach ($backCards as $card)
+<div class="card-back{{ $hasBack ? ' has-back-template' : '' }}"></div>
+@endforeach
+</div>
+
 </body>
 </html>

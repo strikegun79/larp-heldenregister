@@ -90,8 +90,8 @@ Code (z. B. Base32 ohne Verwechslungszeichen).
 - [x] Der Helden-Kode soll per Zufallsprinzip generiert werden.
 - [x] der Helden-Kode wird erst im System aktiv, wenn dieser vom Bürokrat dem Helden zugeteilt wird. Aber vermeiden der doppelbelegung.
 - [x] Bei Verlust eines Ausweis, kann der Bürokrat den Ausweis neu herstellen per PDF export.
-- [x] Vorderseite des Ausweis: template_helden_ausweis_vorderseite.png (CSS-Design als Fallback; Bild optonal per file_exists)
-- [ ] Rückseite des Ausweis: template_helden_ausweis_rueckseite.png (noch nicht umgesetzt)
+- [x] Vorderseite des Ausweis: template_helden_ausweis_vorderseite.png (optional per file_exists, CSS-Fallback)
+- [x] Rückseite des Ausweis: template_helden_ausweis_rueckseite.png (Seite 2 im PDF, Spalten gespiegelt für Duplexdruck)
 - [x] erstelle den QR Code und setze ihn auf das entsprechne Feld auf der Vorderseite des Ausweises
 
 ### PUB-11 Helden Informationen ⏱ 3h · 
