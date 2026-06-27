@@ -61,19 +61,18 @@ class PublicHeroController extends Controller
     {
         $hero = Hero::where('public_code', strtoupper($code))
             ->where('public_visible', true)
-            ->with(['classes', 'skills.perlColor', 'groups'])
+            ->with([
+                'player',
+                'classes.skills.perlColor',
+                'skills.perlColor',
+                'groups',
+                'epTransactions.type',
+            ])
             ->firstOrFail();
 
-        $perlSummary = $hero->skills
-            ->filter(fn ($s) => $s->perlColor !== null)
-            ->groupBy('perl_color_id')
-            ->map(fn ($group) => (object) [
-                'color' => $group->first()->perlColor,
-                'count' => $group->count(),
-            ])
-            ->sortBy('color.name')
-            ->values();
+        $learnedIds  = $hero->skills->pluck('id');
+        $perlSummary = $hero->perlSummary;
 
-        return view('public.hero', compact('hero', 'perlSummary'));
+        return view('public.hero', compact('hero', 'perlSummary', 'learnedIds'));
     }
 }

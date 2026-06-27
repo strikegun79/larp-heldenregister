@@ -1,27 +1,33 @@
-<x-public-layout :title="$hero->character_name . ' – Heldenregister'">
+@php
+    $displayName = filled($hero->character_name)
+        ? $hero->character_name
+        : mb_strtoupper(mb_substr($hero->player->name, 0, 1))
+          . mb_strtoupper(mb_substr($hero->player->lastname, 0, 1));
+    $isInitials = ! filled($hero->character_name);
+@endphp
+
+<x-public-layout :title="$displayName . ' – Heldenregister'">
 
     <div class="max-w-2xl mx-auto px-4 sm:px-6">
 
         {{-- Helden-Header --}}
         <div class="bg-white/70 border-2 border-[#5a3a22]/40 shadow sm:rounded-lg overflow-hidden mb-6">
             <div class="flex items-center gap-5 p-5">
-                <img src="{{ $hero->image_url }}" alt="{{ $hero->character_name }}"
+                <img src="{{ $hero->image_url }}" alt="{{ $displayName }}"
                      class="h-24 w-24 object-cover rounded border-2 border-[#5a3a22]/40 shrink-0">
-                <div>
+                <div class="flex-1 min-w-0">
                     <h1 class="font-uncial text-2xl text-waldritter leading-tight">
-                        {{ $hero->character_name }}
+                        {{ $displayName }}
+                        @if ($isInitials)
+                            <span class="text-base text-stone-400 font-normal">(noch namenlos)</span>
+                        @endif
                     </h1>
                     @if ($hero->classes->isNotEmpty())
                         <p class="text-stone-600 mt-1">
                             {{ $hero->classes->pluck('name')->implode(', ') }}
                         </p>
                     @endif
-                    @if ($hero->homeplace)
-                        <p class="text-sm text-stone-500 mt-0.5">
-                            <i class="map marker alternate icon"></i>{{ $hero->homeplace }}
-                        </p>
-                    @endif
-                    <div class="mt-2">
+                    <div class="mt-2 flex flex-wrap gap-1.5 items-center">
                         @if ($hero->died)
                             <span class="ui tiny red label">verschollen</span>
                         @elseif ($hero->active)
@@ -32,34 +38,69 @@
                     </div>
                 </div>
             </div>
+
+            {{-- Eckdaten --}}
+            <dl class="grid grid-cols-2 gap-x-4 gap-y-2 px-5 pb-5 text-sm">
+                <div>
+                    <dt class="text-stone-500">Erblickung</dt>
+                    <dd class="text-stone-800 font-medium">
+                        {{ $hero->born ? $hero->born->locale('de')->isoFormat('D. MMMM YYYY') : 'Unbekannt' }}
+                    </dd>
+                </div>
+                <div>
+                    <dt class="text-stone-500">Heimatort</dt>
+                    <dd class="text-stone-800 font-medium">
+                        {{ filled($hero->homeplace) ? $hero->homeplace : 'Unbekannt' }}
+                    </dd>
+                </div>
+                <div>
+                    <dt class="text-stone-500">Verfügbare EP</dt>
+                    <dd class="text-stone-800 font-medium">{{ number_format($hero->ep_balance, 0, ',', '.') }}</dd>
+                </div>
+                <div>
+                    <dt class="text-stone-500">Erlernte Fertigkeiten</dt>
+                    <dd class="text-stone-800 font-medium">{{ $hero->skills_count }}</dd>
+                </div>
+            </dl>
         </div>
 
         {{-- Steckbrief --}}
-        @if ($hero->description)
-            <div class="bg-white/70 border-2 border-[#5a3a22]/40 shadow sm:rounded-lg p-5 mb-6">
-                <h2 class="font-uncial text-lg text-waldritter mb-2">Steckbrief</h2>
+        <div class="bg-white/70 border-2 border-[#5a3a22]/40 shadow sm:rounded-lg p-5 mb-6">
+            <h2 class="font-uncial text-lg text-waldritter mb-2">Steckbrief</h2>
+            @if (filled($hero->description))
                 <p class="text-stone-700 whitespace-pre-line">{{ $hero->description }}</p>
-            </div>
-        @endif
+            @else
+                <p class="text-stone-400 italic">Noch keine Eintragungen</p>
+            @endif
+        </div>
 
-        {{-- Fertigkeiten --}}
-        @if ($hero->skills->isNotEmpty())
-            <div class="bg-white/70 border-2 border-[#5a3a22]/40 shadow sm:rounded-lg p-5 mb-6">
-                <h2 class="font-uncial text-lg text-waldritter mb-3">Fertigkeiten</h2>
-                <div class="flex flex-wrap gap-2">
-                    @foreach ($hero->skills as $skill)
-                        <span class="ui label">{{ $skill->name }}
-                            <span class="detail">{{ $skill->ep_costs }} EP</span>
-                        </span>
-                    @endforeach
-                </div>
-            </div>
-        @endif
+        {{-- Fertigkeitsbäume --}}
+        <div class="bg-white/70 border-2 border-[#5a3a22]/40 shadow sm:rounded-lg p-5 mb-6">
+            <h2 class="font-uncial text-lg text-waldritter mb-4">Fertigkeiten</h2>
+            @if ($hero->classes->isEmpty())
+                <p class="text-stone-400 italic">Noch keine Eintragungen</p>
+            @else
+                @foreach ($hero->classes as $class)
+                    <div class="{{ ! $loop->first ? 'mt-5 pt-5 border-t border-stone-200' : '' }}">
+                        <h3 class="font-semibold text-waldritter mb-3 flex items-center gap-2">
+                            {{ $class->name }}
+                            @php($classLearnedCount = $class->skills->filter(fn ($s) => $learnedIds->contains($s->id))->count())
+                            @if ($classLearnedCount > 0)
+                                <span class="ui mini green circular label">{{ $classLearnedCount }}</span>
+                            @endif
+                        </h3>
+                        @include('public._skill_tree', ['class' => $class, 'learnedIds' => $learnedIds])
+                    </div>
+                @endforeach
+            @endif
+        </div>
 
-        {{-- Bändchen / Perlen --}}
-        @if ($perlSummary->isNotEmpty())
-            <div class="bg-white/70 border-2 border-[#5a3a22]/40 shadow sm:rounded-lg p-5 mb-6">
-                <h2 class="font-uncial text-lg text-waldritter mb-3">Bändchen &amp; Perlen</h2>
+        {{-- Bändchen & Perlen --}}
+        <div class="bg-white/70 border-2 border-[#5a3a22]/40 shadow sm:rounded-lg p-5 mb-6">
+            <h2 class="font-uncial text-lg text-waldritter mb-3">Bändchen &amp; Perlen</h2>
+            @if ($perlSummary->isEmpty())
+                <p class="text-stone-400 italic">Noch keine Eintragungen</p>
+            @else
                 <div class="flex flex-wrap gap-x-6 gap-y-2 text-stone-700">
                     @foreach ($perlSummary as $entry)
                         <span class="flex items-center gap-1.5">
@@ -70,13 +111,15 @@
                         </span>
                     @endforeach
                 </div>
-            </div>
-        @endif
+            @endif
+        </div>
 
         {{-- Gruppen --}}
-        @if ($hero->groups->isNotEmpty())
-            <div class="bg-white/70 border-2 border-[#5a3a22]/40 shadow sm:rounded-lg p-5 mb-6">
-                <h2 class="font-uncial text-lg text-waldritter mb-3">Gruppen</h2>
+        <div class="bg-white/70 border-2 border-[#5a3a22]/40 shadow sm:rounded-lg p-5 mb-6">
+            <h2 class="font-uncial text-lg text-waldritter mb-3">Gruppen</h2>
+            @if ($hero->groups->isEmpty())
+                <p class="text-stone-400 italic">Noch keine Eintragungen</p>
+            @else
                 <div class="flex flex-wrap gap-2">
                     @foreach ($hero->groups as $group)
                         <span class="ui label">
@@ -87,8 +130,8 @@
                         </span>
                     @endforeach
                 </div>
-            </div>
-        @endif
+            @endif
+        </div>
 
         {{-- Teilen --}}
         <div class="bg-white/70 border-2 border-[#5a3a22]/40 shadow sm:rounded-lg p-5 mb-6 text-center">
