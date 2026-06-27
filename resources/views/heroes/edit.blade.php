@@ -8,7 +8,7 @@
     <div class="py-12">
         <div class="max-w-3xl mx-auto sm:px-6 lg:px-8 space-y-6">
             <div class="bg-white shadow-sm sm:rounded-lg p-6">
-                <form method="POST" action="{{ route('heroes.update', $hero) }}" enctype="multipart/form-data">
+                <form method="POST" action="{{ route('heroes.update', $hero) }}">
                     @method('PUT')
                     @include('heroes._form')
                 </form>
