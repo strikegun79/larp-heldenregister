@@ -71,3 +71,25 @@ Code (z. B. Base32 ohne Verwechslungszeichen).
 - [x] Option im Helden-Detail (Toggle-Button), ob man per öffentlicher Suche gefunden werden kann.
 - [x] Änderbar nur durch Betreuer, Admin oder Bürokrat (`heroes.searchable` PATCH-Route).
 - [x] Suche beinhaltet Heldennamen (LIKE) oder direkten Code (Redirect); nur `public_visible=true` & `public_searchable=true`.
+
+### PUB-09 · Heldensuche verlinken · ⏱ 3h · ✅
+**Beschreibung:** Damit man zu Heldensuche kommt, verlinken auf unterschiedlichen Stellen
+**Akzeptanzkriterien:**
+- [x] Auf der Login-Seite: Info-Block „Was ist das Heldenregister?" mit Erklärung + Link zur Heldensuche.
+- [x] Auf der Login-Seite: Hinweis auf Helden-Code (Ausweis vom Bürokraten, QR-Code im Detail).
+- [x] Öffentliche Suchseite: Amber-Box mit Hinweis auf Ausweis und QR-Code als Code-Quellen.
+- [x] 4 Tests.
+
+### PUB-10 Heldencode eintragen durch den Bürokraten ⏱ 3h · 
+**Beschreibung:** Damit der Held gleich einen Ausweis erhält, werden die Ausweise schon vorab fertiggestellt.
+**Akzeptanzkriterien:**
+- [] Generator für Heldenausweise in der Verwaltung, Rollen Admin und Bürokrat
+- [] Beim Helden den Helden-Code eintragen, wenn der Ausweis ausgehändigt wird. ansonsten kein Code.
+- [] Generator erstellt eine PDF mit Ausweise im Größenraster 7,52cm x 10cm im Raster von 3x2 querformat.
+- [] Generator fragt die Anzahl der Ausweise die erstellt werden sollen ab.
+- [] Der Helden-Kode soll per Zufallsprinzip generiert werden.
+- [] der Helden-Kode wird erst im System aktiv, wenn dieser vom Bürokrat dem Helden zugeteilt wird. Aber vermeiden der doppelbelegung.
+- [] Bei Verlust eines Ausweis, kann der Bürokrat den Ausweis neu herstellen per PDF export.
+- [] Vorderseite des Ausweis: template_helden_ausweis_vorderseite.png
+- [] Rückseite des Ausweis: template_helden_ausweis_rueckseite.png
+- [] erstelle den QR Code und setze ihn auf das entsprechne Feld auf der Vorderseite des Ausweises

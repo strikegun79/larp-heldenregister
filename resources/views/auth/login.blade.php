@@ -48,4 +48,25 @@
             </a>
         </div>
     @endif
+
+    {{-- PUB-09: Heldensuche ohne Anmeldung --}}
+    <div class="mt-8 pt-6 border-t-2 border-[#5a3a22]/20">
+        <h2 class="font-uncial text-waldritter text-base mb-2 text-center">Was ist das Heldenregister?</h2>
+        <p class="text-sm text-stone-600 leading-snug mb-4 text-center">
+            Das Heldenregister der Waldritter erfasst alle LARP-Helden mit ihren
+            Fertigkeiten und Abenteuern. Jeder Held hat einen eigenen 6-stelligen
+            Code – zum Beispiel auf dem <strong>Heldenausweis</strong> oder als
+            <strong>QR-Code</strong>.
+        </p>
+        <a href="{{ route('public.hero.search') }}"
+           class="ui fluid waldritter button"
+           style="background:#5a3a22; color:#fff; display:block; text-align:center;
+                  border-radius:.375rem; padding:.625rem 1rem; font-family:inherit;
+                  text-decoration:none; font-size:.95rem;">
+            &#x2692; Helden-Code eingeben &rarr; Profil aufrufen
+        </a>
+        <p class="text-xs text-stone-400 mt-2 text-center">
+            Keine Anmeldung nötig – einfach Code oder Heldennamen eingeben.
+        </p>
+    </div>
 </x-guest-layout>

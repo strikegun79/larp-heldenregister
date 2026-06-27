@@ -5,9 +5,14 @@
         <div class="bg-white/70 border-2 border-[#5a3a22]/40 shadow sm:rounded-lg p-6 mb-6">
 
             <h1 class="font-uncial text-2xl text-waldritter mb-2 text-center">Helden suchen</h1>
-            <p class="text-stone-600 text-sm text-center mb-6">
+            <p class="text-stone-600 text-sm text-center mb-3">
                 Gib den 6-stelligen Helden-Code oder einen Heldennamen ein.
             </p>
+            {{-- PUB-09: Hinweis auf Code-Quellen --}}
+            <div class="bg-amber-50 border border-amber-200 rounded px-4 py-3 mb-5 text-xs text-amber-900 leading-snug">
+                Den Code findest du auf dem <strong>Heldenausweis</strong> (ausgehändigt vom Bürokraten)
+                oder als <strong>QR-Code</strong> im Helden-Detail nach der Anmeldung.
+            </div>
 
             @if (!empty($error))
                 <div class="bg-red-50 border border-red-300 text-red-800 rounded px-4 py-3 mb-5 text-sm">
