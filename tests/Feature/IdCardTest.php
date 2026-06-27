@@ -239,4 +239,43 @@ class IdCardTest extends TestCase
             ->assertSee('UNSET2')
             ->assertSee('ABCDEF');
     }
+
+    // --- Nicht zugewiesene Siegel löschen ---
+
+    public function test_destroy_loescht_nicht_zugewiesenes_siegel(): void
+    {
+        $admin = $this->adminUser();
+        IdCardCode::create(['code' => 'DLTME2', 'created_by' => $admin->id]);
+
+        $this->actingAs($admin)
+            ->delete(route('admin.id-cards.destroy', 'DLTME2'))
+            ->assertRedirect(route('admin.id-cards.index'));
+
+        $this->assertDatabaseMissing('id_card_codes', ['code' => 'DLTME2']);
+    }
+
+    public function test_destroy_verweigert_zugewiesenes_siegel(): void
+    {
+        $admin = $this->adminUser();
+        $hero  = $this->heroWithCode('NODLT3');
+        IdCardCode::create(['code' => 'NODLT3', 'hero_id' => $hero->id, 'created_by' => $admin->id]);
+
+        $this->actingAs($admin)
+            ->delete(route('admin.id-cards.destroy', 'NODLT3'))
+            ->assertForbidden();
+
+        $this->assertDatabaseHas('id_card_codes', ['code' => 'NODLT3']);
+    }
+
+    public function test_teilnehmer_kann_nicht_loeschen(): void
+    {
+        $admin = $this->adminUser();
+        IdCardCode::create(['code' => 'NODLT4', 'created_by' => $admin->id]);
+
+        $this->actingAs($this->teilnehmer())
+            ->delete(route('admin.id-cards.destroy', 'NODLT4'))
+            ->assertForbidden();
+
+        $this->assertDatabaseHas('id_card_codes', ['code' => 'NODLT4']);
+    }
 }

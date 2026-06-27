@@ -12,29 +12,22 @@
      * der Vorderseite. Keine Spaltenumkehrung nötig (waagerechte Klappackse
      * spiegelt nur vertikal, nicht horizontal).
      *
-     * 3 Kombos nebeneinander auf A4 quer (29,7 × 21 cm):
-     *   Breite:  3 × 7,52 cm = 22,56 cm + 2 × 1mm = 22,76 cm < 29,7 cm ✓
-     *   Höhe:    2 × 10 cm   = 20 cm                          < 21,0 cm ✓
+     * 1 Kombo pro Seite, zentriert auf A4 quer (29,7 × 21 cm).
+     * Kombo: Vorderseite (10 cm) + Rückseite 180° gedreht (10 cm) = 20 cm Höhe < 21 cm ✓
+     * Untereinander = eine Kombo je Seite, Seiten werden im PDF-Viewer untereinander angezeigt.
      */
     @page { margin: 0; size: A4 landscape; }
 
     .page-wrap {
         display: flex;
-        flex-direction: row;
-        flex-wrap: nowrap;
-        gap: 1mm;
+        justify-content: center;
         align-items: flex-start;
     }
 
     .page-break { page-break-before: always; }
 
-    /*
-     * Kombo: Vorderseite + Rückseite gestapelt.
-     * Feste Breite damit der flex-Container weiß wie viel Platz jede Kombo braucht.
-     */
     .card-combo {
         width: 7.52cm;
-        flex-shrink: 0;
     }
 
     /*
@@ -152,7 +145,7 @@
 @php
     $hasFront = file_exists(resource_path('images/template_helden_ausweis_vorderseite.png'));
     $hasBack  = $backTemplateUri !== null;
-    $chunks   = collect($cards)->chunk(3);
+    $chunks   = collect($cards)->chunk(1);
 @endphp
 
 @foreach ($chunks as $chunkIndex => $chunk)

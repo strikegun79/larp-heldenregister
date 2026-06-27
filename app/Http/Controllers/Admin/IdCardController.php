@@ -77,7 +77,7 @@ class IdCardController extends Controller
             'backTemplateUri' => $this->backTemplateDataUri(),
         ])->setPaper('a4', 'landscape');
 
-        return $pdf->download('heldenausweise-'.date('Ymd').'.pdf');
+        return $pdf->stream('heldenausweise-'.date('Ymd').'.pdf');
     }
 
     /**
@@ -99,7 +99,7 @@ class IdCardController extends Controller
             'backTemplateUri' => $this->backTemplateDataUri(),
         ])->setPaper('a4', 'landscape');
 
-        return $pdf->download('ausweis-'.$hero->id.'.pdf');
+        return $pdf->stream('ausweis-'.$hero->id.'.pdf');
     }
 
     /**
@@ -134,6 +134,22 @@ class IdCardController extends Controller
 
         return redirect()->route('heroes.show', $hero)
             ->with('status', 'Helden-Siegel zugewiesen: '.$code);
+    }
+
+    /**
+     * Nicht zugewiesenes Siegel aus dem Pool löschen.
+     * Bereits zugewiesene Siegel (hero_id gesetzt) werden abgelehnt.
+     */
+    public function destroy(string $code): RedirectResponse
+    {
+        $entry = IdCardCode::where('code', $code)->firstOrFail();
+
+        abort_if($entry->hero_id !== null, 403, 'Zugewiesene Siegel können nicht gelöscht werden.');
+
+        $entry->delete();
+
+        return redirect()->route('admin.id-cards.index')
+            ->with('status', 'Siegel '.$code.' gelöscht.');
     }
 
     private function randomCode(): string

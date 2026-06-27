@@ -13,7 +13,8 @@
                 speichert sie im Pool und erstellt eine PDF (7,52&nbsp;cm &times; 10&nbsp;cm,
                 3&times;2 auf A4 quer) zum Ausdrucken.
             </p>
-            <form method="POST" action="{{ route('admin.id-cards.generate') }}" class="ui form">
+            <form method="POST" action="{{ route('admin.id-cards.generate') }}"
+                  class="ui form" target="_blank">
                 @csrf
                 <div class="flex flex-wrap items-end gap-3">
                     <div class="field !mb-0">
@@ -23,7 +24,7 @@
                                class="w-28" required>
                     </div>
                     <button type="submit" class="ui primary button">
-                        <i class="download icon"></i> PDF generieren & herunterladen
+                        <i class="file pdf icon"></i> PDF generieren &amp; anzeigen
                     </button>
                 </div>
                 @error('count')
@@ -51,11 +52,20 @@
                             <tr>
                                 <td><code class="font-mono tracking-widest text-waldritter">{{ $entry->code }}</code></td>
                                 <td>{{ $entry->created_at->format('d.m.Y H:i') }}</td>
-                                <td>
+                                <td class="flex flex-wrap gap-1">
                                     <a href="{{ route('public.hero', $entry->code) }}" target="_blank"
                                        class="ui mini basic button" rel="noopener">
                                         Link testen
                                     </a>
+                                    <form method="POST"
+                                          action="{{ route('admin.id-cards.destroy', $entry->code) }}"
+                                          data-confirm="Siegel {{ $entry->code }} wirklich löschen?"
+                                          style="display:inline">
+                                        @csrf @method('DELETE')
+                                        <button type="submit" class="ui mini basic red button">
+                                            <i class="trash icon"></i> Löschen
+                                        </button>
+                                    </form>
                                 </td>
                             </tr>
                         @endforeach
@@ -94,7 +104,7 @@
                             <td>
                                 @if ($entry->hero)
                                     <a href="{{ route('admin.id-cards.reprint', $entry->hero) }}"
-                                       class="ui mini basic button">
+                                       class="ui mini basic button" target="_blank" rel="noopener">
                                         <i class="print icon"></i> Neu drucken
                                     </a>
                                 @endif

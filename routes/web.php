@@ -283,6 +283,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('id-cards', [Admin\IdCardController::class, 'index'])->name('id-cards.index');
         Route::post('id-cards/generate', [Admin\IdCardController::class, 'generate'])->name('id-cards.generate');
         Route::get('id-cards/{hero}/reprint', [Admin\IdCardController::class, 'reprint'])->name('id-cards.reprint');
+        Route::delete('id-cards/{code}', [Admin\IdCardController::class, 'destroy'])->name('id-cards.destroy');
     });
 
     // Code einem Helden zuweisen (heldenregister.edit).
