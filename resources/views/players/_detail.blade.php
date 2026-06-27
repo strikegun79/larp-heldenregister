@@ -207,7 +207,8 @@
                     if (!file) return;
                     this.value = '';
                     openPhotoCropper(file, inp.dataset.uploadUrl, function () {
-                        if (appModalUrl) loadModalContent(appModalUrl, true);
+                        if (appModal2Url) loadStackContent(appModal2Url, true);
+                        else if (appModalUrl) loadModalContent(appModalUrl, true);
                     });
                 });
             })();

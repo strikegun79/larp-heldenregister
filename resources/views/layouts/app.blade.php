@@ -86,9 +86,10 @@
         <div class="ui modal" id="photo-crop-modal"
              role="dialog" aria-modal="true" aria-labelledby="photo-crop-modal-header">
             <div class="header" id="photo-crop-modal-header">Foto zuschneiden</div>
-            <div class="scrolling content">
-                <div style="max-height:400px; overflow:hidden; background:#111; border-radius:.4rem;">
-                    <img id="photo-crop-img" src="" alt="Zuschnitt" style="display:block; max-width:100%;">
+            <div class="content">
+                {{-- Kein overflow:hidden – würde Cropper.js-Handles abschneiden. --}}
+                <div style="background:#111; border-radius:.4rem;">
+                    <img id="photo-crop-img" src="" alt="Zuschnitt" style="display:block; max-width:100%; max-height:400px;">
                 </div>
                 <p class="text-sm text-stone-700 mt-2">Rahmen verschieben und anpassen, dann „Übernehmen" klicken.</p>
             </div>

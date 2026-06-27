@@ -473,10 +473,35 @@ document.getElementById('skill-modal-revoke').addEventListener('click', function
 
 // ------------------------------------------------------------------
 // Foto-Crop-Editor (HERO-22 / PLAY-11)
+// Fomantic-UI registriert onVisible/onHidden bei erneutem .modal({...})
+// auf einer bereits initialisierten Instanz NICHT neu. Daher: Modal
+// einmalig mit persistenten Callbacks initialisieren; openPhotoCropper
+// setzt nur Daten und ruft .modal('show') auf.
 // ------------------------------------------------------------------
 let photoCropper      = null;
 let photoCropUrl      = null;
 let photoCropCallback = null;
+
+$('#photo-crop-modal').modal({
+    allowMultiple: true,
+    closable:      false,
+    autofocus:     false,
+    onVisible: function () {
+        const img = document.getElementById('photo-crop-img');
+        if (photoCropper) { photoCropper.destroy(); }
+        photoCropper = new Cropper(img, {
+            aspectRatio:  1,
+            viewMode:     1,
+            autoCropArea: 1,
+            background:   false,
+            responsive:   true,
+        });
+    },
+    onHidden: function () {
+        if (photoCropper) { photoCropper.destroy(); photoCropper = null; }
+        document.getElementById('photo-crop-img').src = '';
+    },
+});
 
 function openPhotoCropper(file, uploadUrl, onSuccess) {
     if (file.size > 20 * 1024 * 1024) {
@@ -488,28 +513,9 @@ function openPhotoCropper(file, uploadUrl, onSuccess) {
 
     const reader = new FileReader();
     reader.onload = function (e) {
-        const img = document.getElementById('photo-crop-img');
-        img.src = e.target.result;
-        // Modal erst öffnen wenn src gesetzt -> onVisible kann Cropper korrekt messen.
-        $('#photo-crop-modal').modal({
-            allowMultiple: true,
-            closable:      false,
-            autofocus:     false,
-            onVisible: function () {
-                if (photoCropper) { photoCropper.destroy(); }
-                photoCropper = new Cropper(img, {
-                    aspectRatio:  1,
-                    viewMode:     1,
-                    autoCropArea: 1,
-                    background:   false,
-                    responsive:   true,
-                });
-            },
-            onHidden: function () {
-                if (photoCropper) { photoCropper.destroy(); photoCropper = null; }
-                img.src = '';
-            },
-        }).modal('show');
+        // src setzen bevor show() – onVisible kann Cropper korrekt messen.
+        document.getElementById('photo-crop-img').src = e.target.result;
+        $('#photo-crop-modal').modal('show');
     };
     reader.readAsDataURL(file);
 }
