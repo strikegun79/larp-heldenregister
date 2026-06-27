@@ -6,7 +6,7 @@
 
             <h1 class="font-uncial text-2xl text-waldritter mb-2 text-center">Helden suchen</h1>
             <p class="text-stone-600 text-sm text-center mb-3">
-                Gib den 6-stelligen Helden-Code oder einen Heldennamen ein.
+                Gib das 6-stellige Helden-Siegel oder einen Heldennamen ein.
             </p>
             {{-- PUB-09: Hinweis auf Code-Quellen --}}
             <div class="bg-amber-50 border border-amber-200 rounded px-4 py-3 mb-5 text-xs text-amber-900 leading-snug">
@@ -23,7 +23,7 @@
             <form method="GET" action="{{ route('public.hero.search.go') }}" class="space-y-4">
                 <div>
                     <label for="code" class="block text-sm font-medium text-stone-700 mb-1">
-                        Helden-Code oder Name
+                        Helden-Siegel oder Name
                     </label>
                     <input
                         type="text"
@@ -37,7 +37,7 @@
                         class="block w-full rounded border-2 border-stone-300 focus:border-[#5a3a22] px-4 py-2"
                     >
                     <p class="text-xs text-stone-400 mt-1">
-                        6-stelliger Code (direkte Weiterleitung) oder mind. 2 Zeichen Heldennamen.
+                        6-stelliges Siegel (direkte Weiterleitung) oder mind. 2 Zeichen Heldennamen.
                     </p>
                 </div>
 

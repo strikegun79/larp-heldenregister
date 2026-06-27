@@ -63,10 +63,10 @@
            style="background:#5a3a22; color:#fff; display:block; text-align:center;
                   border-radius:.375rem; padding:.625rem 1rem; font-family:inherit;
                   text-decoration:none; font-size:.95rem;">
-            &#x2692; Helden-Code eingeben &rarr; Profil aufrufen
+            &#x2692; Helden-Siegel eingeben &rarr; Profil aufrufen
         </a>
         <p class="text-xs text-stone-400 mt-2 text-center">
-            Keine Anmeldung nötig – einfach Code oder Heldennamen eingeben.
+            Keine Anmeldung nötig – einfach Siegel oder Heldennamen eingeben.
         </p>
     </div>
 </x-guest-layout>

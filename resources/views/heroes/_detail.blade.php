@@ -62,7 +62,7 @@
                 </div>
                 @if ($hero->public_code)
                 <div class="col-span-2">
-                    <dt class="text-stone-500">Helden-Code</dt>
+                    <dt class="text-stone-500">Helden-Siegel</dt>
                     <dd class="flex flex-wrap items-center gap-2">
                         <code class="font-mono tracking-widest text-waldritter bg-stone-100 rounded px-2 py-0.5 text-sm">{{ $hero->public_code }}</code>
                         @if ($hero->public_visible)
@@ -108,7 +108,7 @@
                 @endif
                 @can('heldenregister.edit')
                 <div class="col-span-2 pt-2">
-                    <dt class="text-stone-500">Ausweis-Code (Bürokrat)</dt>
+                    <dt class="text-stone-500">Helden-Siegel zuweisen (Bürokrat)</dt>
                     <dd class="mt-1">
                         <form method="POST" action="{{ route('heroes.assign-code', $hero) }}" data-refresh-modal class="ui form">
                             @csrf @method('PATCH')
@@ -122,7 +122,7 @@
                                            style="text-transform:uppercase"
                                            required>
                                 </div>
-                                <button type="submit" class="ui primary mini button">Zuweisen</button>
+                                <button type="submit" class="ui primary mini button">Siegel zuweisen</button>
                                 @if ($hero->public_code)
                                     <a href="{{ route('admin.id-cards.reprint', $hero) }}" class="ui mini basic button" target="_blank" rel="noopener">
                                         <i class="print icon"></i> Drucken
@@ -482,7 +482,7 @@
                 </div>
                 @if ($hero->public_code)
                 <div class="col-span-2">
-                    <dt class="text-sm text-stone-500">Helden-Code</dt>
+                    <dt class="text-sm text-stone-500">Helden-Siegel</dt>
                     <dd class="flex flex-wrap items-center gap-2">
                         <code class="font-mono tracking-widest text-waldritter bg-stone-100 rounded px-2 py-0.5">{{ $hero->public_code }}</code>
                         @if ($hero->public_visible)
@@ -528,7 +528,7 @@
                 @endif
                 @can('heldenregister.edit')
                 <div class="col-span-2 pt-2">
-                    <dt class="text-sm text-stone-500">Ausweis-Code zuweisen (Bürokrat)</dt>
+                    <dt class="text-sm text-stone-500">Helden-Siegel zuweisen (Bürokrat)</dt>
                     <dd class="mt-1">
                         <form method="POST" action="{{ route('heroes.assign-code', $hero) }}" data-refresh-modal class="ui form flex items-end gap-2 flex-wrap">
                             @csrf @method('PATCH')
@@ -541,7 +541,7 @@
                                        style="text-transform:uppercase"
                                        required>
                             </div>
-                            <button type="submit" class="ui primary small button">Code zuweisen</button>
+                            <button type="submit" class="ui primary small button">Siegel zuweisen</button>
                             @if ($hero->public_code)
                                 <a href="{{ route('admin.id-cards.reprint', $hero) }}" class="ui small basic button" target="_blank" rel="noopener">
                                     <i class="print icon"></i> Ausweis drucken

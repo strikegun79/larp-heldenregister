@@ -32,19 +32,19 @@
             </form>
         </div>
 
-        {{-- Nicht zugewiesene Codes --}}
+        {{-- Nicht zugewiesene Siegel --}}
         <div class="bg-white/70 border-2 border-[#5a3a22]/40 rounded-lg p-6 shadow">
             <h3 class="font-uncial text-waldritter text-base mb-3">
-                Pool – nicht zugewiesene Codes
+                Pool – nicht zugewiesene Siegel
                 <span class="ui mini circular label ml-1">{{ $unassigned->count() }}</span>
             </h3>
             @if ($unassigned->isEmpty())
-                <p class="text-stone-500 text-sm">Alle Codes wurden zugewiesen oder es wurden noch keine generiert.</p>
+                <p class="text-stone-500 text-sm">Alle Siegel wurden zugewiesen oder es wurden noch keine generiert.</p>
             @else
                 <div class="overflow-x-auto">
                 <table class="ui very basic compact table">
                     <thead><tr>
-                        <th>Code</th><th>Erstellt am</th><th>Aktionen</th>
+                        <th>Siegel</th><th>Erstellt am</th><th>Aktionen</th>
                     </tr></thead>
                     <tbody>
                         @foreach ($unassigned as $entry)
@@ -65,16 +65,16 @@
             @endif
         </div>
 
-        {{-- Zugewiesene Codes (letzte 50) --}}
+        {{-- Zugewiesene Siegel (letzte 50) --}}
         @if ($assigned->isNotEmpty())
         <div class="bg-white/70 border-2 border-[#5a3a22]/40 rounded-lg p-6 shadow">
             <h3 class="font-uncial text-waldritter text-base mb-3">
-                Zugewiesene Codes <span class="text-sm font-normal text-stone-500">(letzte 50)</span>
+                Zugewiesene Siegel <span class="text-sm font-normal text-stone-500">(letzte 50)</span>
             </h3>
             <div class="overflow-x-auto">
             <table class="ui very basic compact table">
                 <thead><tr>
-                    <th>Code</th><th>Held</th><th>Zugewiesen am</th><th>Aktionen</th>
+                    <th>Siegel</th><th>Held</th><th>Zugewiesen am</th><th>Aktionen</th>
                 </tr></thead>
                 <tbody>
                     @foreach ($assigned as $entry)

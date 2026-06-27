@@ -136,7 +136,7 @@
         {{-- Teilen --}}
         <div class="bg-white/70 border-2 border-[#5a3a22]/40 shadow sm:rounded-lg p-5 mb-6 text-center">
             <p class="text-sm text-stone-600 mb-2">
-                Helden-Code:
+                Helden-Siegel:
                 <code class="font-mono tracking-widest text-waldritter text-base">{{ $hero->public_code }}</code>
             </p>
             <p class="text-xs text-stone-400 mb-3 break-all">{{ url()->current() }}</p>

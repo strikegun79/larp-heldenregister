@@ -129,7 +129,7 @@ class IdCardController extends Controller
         $poolEntry->update(['hero_id' => $hero->id, 'assigned_at' => now()]);
 
         return redirect()->route('heroes.show', $hero)
-            ->with('status', 'Helden-Code zugewiesen: '.$code);
+            ->with('status', 'Helden-Siegel zugewiesen: '.$code);
     }
 
     private function randomCode(): string
@@ -142,10 +142,10 @@ class IdCardController extends Controller
         return $code;
     }
 
-    /** QR-Code als base64-PNG-Data-URI für DOMPDF. */
+    /** QR-Code als base64-PNG-Data-URI für DOMPDF (400 px für gute Druckqualität). */
     private function qrDataUri(string $url): string
     {
-        $qr     = new QrCode($url);
+        $qr     = new QrCode($url, size: 400);
         $writer = new PngWriter();
         $result = $writer->write($qr);
         return 'data:image/png;base64,'.base64_encode($result->getString());

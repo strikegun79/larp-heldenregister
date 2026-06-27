@@ -33,11 +33,11 @@ class PublicHeroLinkTest extends TestCase
              ->assertSee(route('public.hero.search'), false);
     }
 
-    public function test_login_seite_zeigt_hinweis_auf_code_quellen(): void
+    public function test_login_seite_zeigt_hinweis_auf_siegel(): void
     {
         $this->get(route('login'))
              ->assertOk()
-             ->assertSee('Helden-Code eingeben');
+             ->assertSee('Helden-Siegel eingeben');
     }
 
     public function test_oeffentliche_suchseite_zeigt_hinweis_auf_ausweis(): void

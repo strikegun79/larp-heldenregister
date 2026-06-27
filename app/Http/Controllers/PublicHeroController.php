@@ -37,7 +37,7 @@ class PublicHeroController extends Controller
         // Zu kurze oder leere Eingabe ohne Treffer → Fehlermeldung.
         if (mb_strlen($query) < 2) {
             return view('public.search', [
-                'error' => 'Bitte gib mindestens 2 Zeichen oder einen 6-stelligen Helden-Code ein.',
+                'error' => 'Bitte gib mindestens 2 Zeichen oder ein 6-stelliges Helden-Siegel ein.',
                 'input' => $query,
             ]);
         }

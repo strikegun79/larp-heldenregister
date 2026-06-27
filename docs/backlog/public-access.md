@@ -103,13 +103,13 @@ Code (z. B. Base32 ohne Verwechslungszeichen).
 - [x] Zeige auch das Datum der "Erblickung" also wann der Charakter im Rollenspiel das erstemal erwähnt wurde
 - [x] Zeige auch die verfügbare EP
 
-### PUB-12 Helden-Ausweis ⏱ 3h · 
+### PUB-12 Helden-Ausweis ⏱ 3h · ✅
 **Beschreibung:** Anpassung des Helden-Ausweises und Generator
 **Akzeptanzkriterien:**
-- [] PDF Auflösung von mindestens 72dpi
-- [] Keine Ränder oder zusätzliches, nur die Bilder-Templates template_helden_ausweis_vorderseite.png und template_helden_ausweis_rueckseite
-- [] die Templates sind 72dpi und 980 px x 1312 px
-- [] Der Platz für den QR-Code ist im template 247px x 220px groß und an der beginnt an der Position x:612px und y: 981px
-- [] Der Platz für den Helden-Kode ist im template 293px X 106px groß und beginnt an der Position x:105px und y:1053px
-- [] benenne überall den Begriff Helden-ID, Helden-Code oder Helden-Kode um in Helden-Siegel.
-- [] beim Generieren von mehreren Ausweisen, sollen kachelförmig die Ausweise auf eine duplex Seite passen. mit 2px abstand dazwischen.
+- [x] PDF Auflösung von mindestens 72dpi (QR-Code auf 400 px, Template-Hintergrund skaliert 100%×100%)
+- [x] Keine Ränder oder zusätzliches, nur die Bilder-Templates template_helden_ausweis_vorderseite.png und template_helden_ausweis_rueckseite
+- [x] die Templates sind 72dpi und 980 px x 1312 px
+- [x] Der Platz für den QR-Code ist im template 247px x 220px groß und an der beginnt an der Position x:612px und y: 981px
+- [x] Der Platz für den Helden-Kode ist im template 293px X 106px groß und beginnt an der Position x:105px und y:1053px
+- [x] benenne überall den Begriff Helden-ID, Helden-Code oder Helden-Kode um in Helden-Siegel.
+- [x] beim Generieren von mehreren Ausweisen, sollen kachelförmig die Ausweise auf eine duplex Seite passen. mit 2px abstand dazwischen.
