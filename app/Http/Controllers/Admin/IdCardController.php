@@ -75,7 +75,9 @@ class IdCardController extends Controller
         $pdf = Pdf::loadView('admin.id-cards.card-pdf', [
             'cards'           => $cardData,
             'backTemplateUri' => $this->backTemplateDataUri(),
-        ])->setPaper('a4', 'landscape');
+        ])->setPaper('a4', 'landscape')
+          ->setOption('dpi', 150)
+          ->setOption('isFontSubsettingEnabled', true);
 
         return $pdf->stream('heldenausweise-'.date('Ymd').'.pdf');
     }
@@ -97,7 +99,9 @@ class IdCardController extends Controller
         $pdf = Pdf::loadView('admin.id-cards.card-pdf', [
             'cards'           => $cardData,
             'backTemplateUri' => $this->backTemplateDataUri(),
-        ])->setPaper('a4', 'landscape');
+        ])->setPaper('a4', 'landscape')
+          ->setOption('dpi', 150)
+          ->setOption('isFontSubsettingEnabled', true);
 
         return $pdf->stream('ausweis-'.$hero->id.'.pdf');
     }

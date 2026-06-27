@@ -9,22 +9,35 @@
     /*
      * Klappformat: Vorderseite oben + Rückseite 180° gedreht darunter.
      * Entlang der waagerechten Mittellinie klappen → Rückseite liegt korrekt auf
-     * der Vorderseite. Keine Spaltenumkehrung nötig (waagerechte Klappackse
+     * der Vorderseite. Keine Spaltenumkehrung nötig (waagerechte Klappachse
      * spiegelt nur vertikal, nicht horizontal).
      *
-     * 1 Kombo pro Seite, zentriert auf A4 quer (29,7 × 21 cm).
+     * Bis zu 3 Kombos nebeneinander auf A4 quer (29,7 × 21 cm).
      * Kombo: Vorderseite (10 cm) + Rückseite 180° gedreht (10 cm) = 20 cm Höhe < 21 cm ✓
-     * Untereinander = eine Kombo je Seite, Seiten werden im PDF-Viewer untereinander angezeigt.
+     * Breite: 3 × 7,52 cm + 2 × 1 mm = 22,76 cm < 29,7 cm ✓
+     * Tabellenbasiertes Layout, da DOMPDF kein Flexbox unterstützt.
      */
     @page { margin: 0; size: A4 landscape; }
 
-    .page-wrap {
-        display: flex;
-        justify-content: center;
-        align-items: flex-start;
+    .page-break { page-break-before: always; }
+
+    /* Tabellen-Wrapper für 3 Kombos nebeneinander */
+    .combo-table {
+        border-collapse: collapse;
+        border-spacing: 0;
+        margin: 0 auto;
     }
 
-    .page-break { page-break-before: always; }
+    .combo-cell {
+        vertical-align: top;
+        padding: 0;
+        width: 7.52cm;
+    }
+
+    .gap-cell {
+        width: 1mm;
+        padding: 0;
+    }
 
     .card-combo {
         width: 7.52cm;
@@ -34,7 +47,9 @@
      * Vorderseite: Template-Bild 7,52 cm × 10 cm.
      * Pixelgenaue Positionen aus dem 980 × 1312 px Template (sx=7.52/980, sy=10/1312):
      *   QR:     left 4,696 cm / top 7,477 cm / 1,895 × 1,677 cm
-     *   Siegel: left 0,806 cm / top 8,025 cm / 2,248 × 0,808 cm
+     *   Siegel: Mittelpunkt x:250px → 1,918 cm / y:1103px → 8,407 cm
+     *           Feld 293×106 px → 2,248×0,808 cm
+     *           left = 1,918 − 1,124 = 0,794 cm / top = 8,407 − 0,404 = 8,003 cm
      */
     .card {
         width: 7.52cm;
@@ -65,20 +80,31 @@
 
     .card-qr img { width: 100%; height: 100%; }
 
+    /* Siegel-Box: pixelgenau positioniert, Inhalt per Tabelle zentriert */
     .card-siegel {
         position: absolute;
-        left: 0.806cm;
-        top: 8.025cm;
+        left: 0.794cm;
+        top: 8.003cm;
         width: 2.248cm;
         height: 0.808cm;
+        overflow: hidden;
+    }
+
+    .card-siegel table {
+        width: 100%;
+        height: 100%;
+        border-collapse: collapse;
+    }
+
+    .card-siegel td {
         text-align: center;
-        line-height: 0.808cm;
+        vertical-align: middle;
         font-family: "DejaVu Sans Mono", monospace;
-        font-size: 9px;
+        font-size: 14pt; /* pt statt px: 14pt = ~5mm, unabhängig von DOMPDF-DPI */
         font-weight: bold;
         letter-spacing: 0.04cm;
         color: #1a0a00;
-        overflow: hidden;
+        padding: 0;
     }
 
     /* Fallback ohne Vorderseiten-Template */
@@ -103,17 +129,28 @@
 
     .card-fallback-siegel {
         position: absolute;
-        left: 0.806cm;
-        top: 8.025cm;
+        left: 0.794cm;
+        top: 8.003cm;
         width: 2.248cm;
         height: 0.808cm;
+        overflow: hidden;
+    }
+
+    .card-fallback-siegel table {
+        width: 100%;
+        height: 100%;
+        border-collapse: collapse;
+    }
+
+    .card-fallback-siegel td {
         text-align: center;
-        line-height: 0.808cm;
+        vertical-align: middle;
         font-family: "DejaVu Sans Mono", monospace;
-        font-size: 9px;
+        font-size: 14pt;
         font-weight: bold;
         letter-spacing: 0.04cm;
         color: #2a1a0a;
+        padding: 0;
     }
 
     /*
@@ -145,12 +182,23 @@
 @php
     $hasFront = file_exists(resource_path('images/template_helden_ausweis_vorderseite.png'));
     $hasBack  = $backTemplateUri !== null;
-    $chunks   = collect($cards)->chunk(1);
+    $chunks   = collect($cards)->chunk(3);
 @endphp
 
 @foreach ($chunks as $chunkIndex => $chunk)
-<div class="page-wrap{{ $chunkIndex > 0 ? ' page-break' : '' }}">
+@if ($chunkIndex > 0)<div class="page-break"></div>@endif
+@php
+    /* Explizite Zentrierung: DOMPDF ignoriert margin:auto auf Tabellen ohne feste Breite.
+     * A4 quer = 29,7 cm. Tabellenbreite = n×7,52 cm + (n-1)×1 mm Abstand. */
+    $n          = $chunk->count();
+    $tableW     = $n * 7.52 + max(0, $n - 1) * 0.1;
+    $marginLeft = round((29.7 - $tableW) / 2, 3);
+@endphp
+<table class="combo-table" style="margin-left: {{ $marginLeft }}cm;">
+<tr>
     @foreach ($chunk as $card)
+    @if (! $loop->first)<td class="gap-cell"></td>@endif
+    <td class="combo-cell">
     <div class="card-combo">
 
         {{-- Vorderseite --}}
@@ -163,12 +211,16 @@
                 <div class="card-qr">
                     <img src="{{ $card['qr'] }}" alt="QR">
                 </div>
-                <div class="card-siegel">{{ $card['code'] }}</div>
+                <div class="card-siegel">
+                    <table><tr><td>{{ $card['code'] }}</td></tr></table>
+                </div>
             @else
                 <div class="card-fallback-qr">
                     <img src="{{ $card['qr'] }}" alt="QR">
                 </div>
-                <div class="card-fallback-siegel">{{ $card['code'] }}</div>
+                <div class="card-fallback-siegel">
+                    <table><tr><td>{{ $card['code'] }}</td></tr></table>
+                </div>
             @endif
         </div>
 
@@ -176,8 +228,10 @@
         <div class="card-back {{ $hasBack ? 'has-back-template' : 'no-template' }}"></div>
 
     </div>
+    </td>
     @endforeach
-</div>
+</tr>
+</table>
 @endforeach
 
 </body>
