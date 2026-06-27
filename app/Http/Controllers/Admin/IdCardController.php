@@ -72,8 +72,10 @@ class IdCardController extends Controller
             'qr'   => $this->qrDataUri(route('public.hero', $code)),
         ], array_keys($codes));
 
-        $pdf = Pdf::loadView('admin.id-cards.card-pdf', ['cards' => $cardData])
-            ->setPaper('a4', 'landscape');
+        $pdf = Pdf::loadView('admin.id-cards.card-pdf', [
+            'cards'           => $cardData,
+            'backTemplateUri' => $this->backTemplateDataUri(),
+        ])->setPaper('a4', 'landscape');
 
         return $pdf->download('heldenausweise-'.date('Ymd').'.pdf');
     }
@@ -86,14 +88,16 @@ class IdCardController extends Controller
         abort_unless($hero->public_code, 404);
 
         $cardData = [[
-            'code'          => $hero->public_code,
+            'code'           => $hero->public_code,
             'character_name' => $hero->character_name,
-            'url'           => route('public.hero', $hero->public_code),
-            'qr'            => $this->qrDataUri(route('public.hero', $hero->public_code)),
+            'url'            => route('public.hero', $hero->public_code),
+            'qr'             => $this->qrDataUri(route('public.hero', $hero->public_code)),
         ]];
 
-        $pdf = Pdf::loadView('admin.id-cards.card-pdf', ['cards' => $cardData])
-            ->setPaper('a4', 'landscape');
+        $pdf = Pdf::loadView('admin.id-cards.card-pdf', [
+            'cards'           => $cardData,
+            'backTemplateUri' => $this->backTemplateDataUri(),
+        ])->setPaper('a4', 'landscape');
 
         return $pdf->download('ausweis-'.$hero->id.'.pdf');
     }
@@ -149,5 +153,29 @@ class IdCardController extends Controller
         $writer = new PngWriter();
         $result = $writer->write($qr);
         return 'data:image/png;base64,'.base64_encode($result->getString());
+    }
+
+    /**
+     * Rückseiten-Template um 180° drehen und als Base64-DataURI zurückgeben.
+     * Wird für das Klappformat benötigt: Rückseite kopfüber unter der Vorderseite.
+     * Gibt null zurück wenn das Template fehlt oder GD nicht verfügbar ist.
+     */
+    private function backTemplateDataUri(): ?string
+    {
+        $path = resource_path('images/template_helden_ausweis_rueckseite.png');
+        if (! file_exists($path) || ! function_exists('imagecreatefrompng')) {
+            return null;
+        }
+        $img = @imagecreatefrompng($path);
+        if ($img === false) {
+            return null;
+        }
+        $rotated = imagerotate($img, 180, 0);
+        ob_start();
+        imagepng($rotated);
+        $data = ob_get_clean();
+        imagedestroy($img);
+        imagedestroy($rotated);
+        return 'data:image/png;base64,'.base64_encode($data);
     }
 }

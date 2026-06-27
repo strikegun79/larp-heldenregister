@@ -7,32 +7,47 @@
     body { font-family: "DejaVu Sans", sans-serif; }
 
     /*
-     * PUB-12: Kein Seitenrand – Templates füllen die Fläche lückenlos.
-     * Kachelformat: 3×2 auf A4 quer, 2px Abstand zwischen den Karten.
-     * Kartenmaß 7,52 cm × 10 cm bleibt unverändert.
+     * Klappformat: Vorderseite oben + Rückseite 180° gedreht darunter.
+     * Entlang der waagerechten Mittellinie klappen → Rückseite liegt korrekt auf
+     * der Vorderseite. Keine Spaltenumkehrung nötig (waagerechte Klappackse
+     * spiegelt nur vertikal, nicht horizontal).
+     *
+     * 3 Kombos nebeneinander auf A4 quer (29,7 × 21 cm):
+     *   Breite:  3 × 7,52 cm = 22,56 cm + 2 × 2px ≈ 22,6 cm  < 29,7 cm ✓
+     *   Höhe:    2 × 10 cm   = 20 cm                          < 21,0 cm ✓
      */
     @page { margin: 0; size: A4 landscape; }
 
     .page-wrap {
         display: flex;
-        flex-wrap: wrap;
+        flex-direction: row;
+        flex-wrap: nowrap;
         gap: 2px;
-        align-content: flex-start;
+        align-items: flex-start;
     }
 
     .page-break { page-break-before: always; }
 
     /*
-     * PUB-12: Karte = nur Template-Bild als Hintergrund, kein Border/Hintergrundfarbe.
-     * Template-Maße: 980 × 1312 px → auf 7,52 cm × 10 cm skaliert.
-     * Skalierung: sx = 7.52/980 = 0.007673 cm/px, sy = 10/1312 = 0.007622 cm/px
+     * Kombo: Vorderseite + Rückseite gestapelt.
+     * Feste Breite damit der flex-Container weiß wie viel Platz jede Kombo braucht.
+     */
+    .card-combo {
+        width: 7.52cm;
+        flex-shrink: 0;
+    }
+
+    /*
+     * Vorderseite: Template-Bild 7,52 cm × 10 cm.
+     * Pixelgenaue Positionen aus dem 980 × 1312 px Template (sx=7.52/980, sy=10/1312):
+     *   QR:     left 4,696 cm / top 7,477 cm / 1,895 × 1,677 cm
+     *   Siegel: left 0,806 cm / top 8,025 cm / 2,248 × 0,808 cm
      */
     .card {
         width: 7.52cm;
         height: 10cm;
         position: relative;
         overflow: hidden;
-        page-break-inside: avoid;
     }
 
     .card.has-front-template {
@@ -41,18 +56,12 @@
         background-repeat: no-repeat;
     }
 
-    /* Fallback ohne Template: dezenter Rahmen */
     .card.no-template {
         border: 1px solid #5a3a22;
         border-radius: 0.3cm;
         background: #fdf8f0;
     }
 
-    /*
-     * QR-Code: Templateposition x:612 y:981, Größe 247×220 px
-     * → left: 612×sx=4.696cm  top: 981×sy=7.477cm
-     *   width: 247×sx=1.895cm  height: 220×sy=1.677cm
-     */
     .card-qr {
         position: absolute;
         left: 4.696cm;
@@ -61,16 +70,8 @@
         height: 1.677cm;
     }
 
-    .card-qr img {
-        width: 100%;
-        height: 100%;
-    }
+    .card-qr img { width: 100%; height: 100%; }
 
-    /*
-     * Helden-Siegel (Code-Text): Templateposition x:105 y:1053, Größe 293×106 px
-     * → left: 105×sx=0.806cm  top: 1053×sy=8.025cm
-     *   width: 293×sx=2.248cm  height: 106×sy=0.808cm
-     */
     .card-siegel {
         position: absolute;
         left: 0.806cm;
@@ -88,7 +89,16 @@
         overflow: hidden;
     }
 
-    /* Fallback-Elemente wenn kein Template vorhanden */
+    /* Fallback ohne Vorderseiten-Template */
+    .card-fallback-header {
+        background: #5a3a22;
+        color: #f5e8d0;
+        text-align: center;
+        padding: 0.2cm 0.1cm;
+        font-size: 8px;
+        letter-spacing: 0.04cm;
+    }
+
     .card-fallback-qr {
         position: absolute;
         left: 4.696cm;
@@ -98,15 +108,6 @@
     }
 
     .card-fallback-qr img { width: 100%; height: 100%; }
-
-    .card-fallback-header {
-        background: #5a3a22;
-        color: #f5e8d0;
-        text-align: center;
-        padding: 0.2cm 0.1cm;
-        font-size: 8px;
-        letter-spacing: 0.04cm;
-    }
 
     .card-fallback-siegel {
         position: absolute;
@@ -124,17 +125,19 @@
         color: #2a1a0a;
     }
 
-    /* Rückseite */
+    /*
+     * Rückseite: 180° gedrehtes Template (via GD vorverarbeitet, als DataURI).
+     * Liegt direkt unter der Vorderseite; beim Klappen entlang der Mittellinie
+     * kommt die Rückseite korrekt ausgerichtet hinter der Vorderseite zu liegen.
+     */
     .card-back {
         width: 7.52cm;
         height: 10cm;
-        position: relative;
         overflow: hidden;
-        page-break-inside: avoid;
     }
 
     .card-back.has-back-template {
-        background-image: url("{{ str_replace('\\', '/', resource_path('images/template_helden_ausweis_rueckseite.png')) }}");
+        background-image: url("{{ $backTemplateUri }}");
         background-size: 100% 100%;
         background-repeat: no-repeat;
     }
@@ -142,7 +145,7 @@
     .card-back.no-template {
         border: 1px solid #5a3a22;
         border-radius: 0.3cm;
-        background: #fdf8f0;
+        background: #f0ece4;
     }
 </style>
 </head>
@@ -150,47 +153,41 @@
 
 @php
     $hasFront = file_exists(resource_path('images/template_helden_ausweis_vorderseite.png'));
-    $hasBack  = file_exists(resource_path('images/template_helden_ausweis_rueckseite.png'));
-
-    // Rückseiten: Spalten spiegeln für Duplexdruck (je 3er-Gruppe umkehren)
-    $backCards = collect($cards)
-        ->chunk(3)
-        ->map(fn ($chunk) => $chunk->reverse()->values())
-        ->flatten(1)
-        ->values()
-        ->all();
+    $hasBack  = $backTemplateUri !== null;
+    $chunks   = collect($cards)->chunk(3);
 @endphp
 
-{{-- Seite 1: Vorderseiten --}}
-<div class="page-wrap">
-@foreach ($cards as $card)
-<div class="card {{ $hasFront ? 'has-front-template' : 'no-template' }}">
-    @if (! $hasFront)
-        <div class="card-fallback-header">Heldenausweis – {{ $card['code'] }}</div>
-    @endif
+@foreach ($chunks as $chunkIndex => $chunk)
+<div class="page-wrap{{ $chunkIndex > 0 ? ' page-break' : '' }}">
+    @foreach ($chunk as $card)
+    <div class="card-combo">
 
-    {{-- QR-Code an Templateposition --}}
-    @if ($hasFront)
-        <div class="card-qr">
-            <img src="{{ $card['qr'] }}" alt="QR">
+        {{-- Vorderseite --}}
+        <div class="card {{ $hasFront ? 'has-front-template' : 'no-template' }}">
+            @if (! $hasFront)
+                <div class="card-fallback-header">Heldenausweis – {{ $card['code'] }}</div>
+            @endif
+
+            @if ($hasFront)
+                <div class="card-qr">
+                    <img src="{{ $card['qr'] }}" alt="QR">
+                </div>
+                <div class="card-siegel">{{ $card['code'] }}</div>
+            @else
+                <div class="card-fallback-qr">
+                    <img src="{{ $card['qr'] }}" alt="QR">
+                </div>
+                <div class="card-fallback-siegel">{{ $card['code'] }}</div>
+            @endif
         </div>
-        <div class="card-siegel">{{ $card['code'] }}</div>
-    @else
-        <div class="card-fallback-qr">
-            <img src="{{ $card['qr'] }}" alt="QR">
-        </div>
-        <div class="card-fallback-siegel">{{ $card['code'] }}</div>
-    @endif
+
+        {{-- Rückseite: 180° gedreht, direkt darunter --}}
+        <div class="card-back {{ $hasBack ? 'has-back-template' : 'no-template' }}"></div>
+
+    </div>
+    @endforeach
 </div>
 @endforeach
-</div>
-
-{{-- Seite 2: Rückseiten (Spalten gespiegelt für Duplexdruck) --}}
-<div class="page-wrap page-break">
-@foreach ($backCards as $card)
-<div class="card-back {{ $hasBack ? 'has-back-template' : 'no-template' }}"></div>
-@endforeach
-</div>
 
 </body>
 </html>
