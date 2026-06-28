@@ -24,7 +24,14 @@
                     </thead>
                     <tbody class="divide-y divide-stone-200 text-stone-800">
                         @foreach ($users as $user)
-                            <tr class="{{ $user->trashed() ? 'opacity-50 bg-stone-50' : '' }}">
+                            <tr @if (! $user->trashed())
+                                    data-modal-url="{{ route('admin.users.edit', $user) }}"
+                                    role="button" tabindex="0"
+                                    aria-label="Nutzer {{ trim($user->name . ' ' . $user->lastname) }} bearbeiten"
+                                    class="cursor-pointer hover:bg-black/5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-600 focus-visible:outline-offset-[-2px]"
+                                @else
+                                    class="opacity-50 bg-stone-50"
+                                @endif>
                                 <td class="px-6 py-4" data-label="Name">
                                     {{ trim("{$user->name} {$user->lastname}") }}
                                     @if ($user->trashed())
@@ -34,25 +41,25 @@
                                 <td class="px-6 py-4" data-label="E-Mail">{{ $user->email }}</td>
                                 <td class="px-6 py-4 text-sm" data-label="Rollen">{{ $user->roles->pluck('label')->implode(', ') ?: '—' }}</td>
                                 <td class="px-6 py-4" data-label="Aktiv">{{ $user->activated ? 'ja' : 'nein' }}</td>
-                                <td class="px-6 py-4 text-right">
+                                {{-- stopPropagation verhindert, dass Klick auf Aktions-Buttons den Row-Modal-Trigger auslöst --}}
+                                <td class="px-6 py-4 text-right" onclick="event.stopPropagation()">
                                     @if ($user->trashed())
                                         <form method="POST" action="{{ route('admin.users.restore', $user->id) }}" class="inline"
                                               data-confirm="Konto von {{ trim($user->name . ' ' . $user->lastname) }} wiederherstellen?">
                                             @csrf @method('PATCH')
-                                            <button type="submit" class="text-green-700 hover:underline">Wiederherstellen</button>
+                                            <button type="submit" class="ui mini basic green button">
+                                                <i class="redo icon"></i> Wiederherstellen
+                                            </button>
                                         </form>
-                                    @else
-                                        <a href="{{ route('admin.users.edit', $user) }}"
-                                           data-modal-url="{{ route('admin.users.edit', $user) }}"
-                                           class="text-waldritter hover:underline">Bearbeiten</a>
-                                        @if (! $user->hasRole('admin') && $user->id !== Auth::id())
-                                            <form method="POST" action="{{ route('admin.users.destroy', $user->id) }}"
-                                                  class="inline ms-3"
-                                                  data-confirm="Konto von {{ trim($user->name . ' ' . $user->lastname) }} löschen?">
-                                                @csrf @method('DELETE')
-                                                <button type="submit" class="text-red-600 hover:underline">Löschen</button>
-                                            </form>
-                                        @endif
+                                    @elseif (! $user->hasRole('admin') && $user->id !== Auth::id())
+                                        <form method="POST" action="{{ route('admin.users.destroy', $user->id) }}"
+                                              class="inline"
+                                              data-confirm="Konto von {{ trim($user->name . ' ' . $user->lastname) }} löschen?">
+                                            @csrf @method('DELETE')
+                                            <button type="submit" class="ui mini basic red icon button" title="Nutzer löschen">
+                                                <i class="trash icon"></i>
+                                            </button>
+                                        </form>
                                     @endif
                                 </td>
                             </tr>

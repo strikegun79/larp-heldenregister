@@ -63,9 +63,9 @@ Matrix, EP-Buchungen).
 - [x] `Setting::get()` / `Setting::set()` als statische Helper; `SettingsSeeder` mit Defaults.
 - [x] Tests.
 
-### ADM-10 · Portal-Nutzer-Bearbeiten
+### ADM-10 · Portal-Nutzer-Bearbeiten · ✅
 **Beschreibung:** bessere GUI Einstellungen für die Nutzer-Verwaltung
 **Akzeptanzkriterien:**
-- [] Das öffnen eines Nutzer in der Nutzer-Verwaltung soll per klick auf die Zeile sich öffnen. 
-- [] Löschen soll als Symbol (Mülleimer) zu sehen sein.
-- [] Ein Nutzer soll auch Wiederverwendbar sein. Also nur Soft-Deletes
+- [x] Das öffnen eines Nutzer in der Nutzer-Verwaltung soll per klick auf die Zeile sich öffnen.
+- [x] Löschen soll als Symbol (Mülleimer) zu sehen sein.
+- [x] Ein Nutzer soll auch Wiederverwendbar sein. Also nur Soft-Deletes (bereits via `SoftDeletes` + restore-Route implementiert).
