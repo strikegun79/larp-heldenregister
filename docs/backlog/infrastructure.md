@@ -2,14 +2,21 @@
 
 Produktivbetrieb, Pipeline, Umgebung.
 
-## Offen (🔲)
+## Inventar (✅)
 
-### INFRA-01 · Prod-`.env` & Konfiguration · ⏱ 2h · 🔲
+### INFRA-01 · Prod-`.env` & Konfiguration · ⏱ 2h · ✅
 **Beschreibung:** Produktive Umgebung sauber konfigurieren.
 **Akzeptanzkriterien:**
-- [ ] `APP_ENV=production`, `APP_DEBUG=false`, echte `APP_URL`, Mail-Credentials.
-- [ ] DB-/Legacy-/Matrix-Token-Variablen gesetzt; `.env.example` aktualisiert.
-- [ ] `key:generate`, `config:cache`/`route:cache`/`view:cache` dokumentiert.
+- [x] `APP_ENV=production`, `APP_DEBUG=false`, echte `APP_URL`, Mail-Credentials.
+- [x] DB-/Legacy-/Matrix-Token-Variablen gesetzt; `.env.example` aktualisiert.
+- [x] `key:generate`, `config:cache`/`route:cache`/`view:cache` dokumentiert.
+
+> Umgesetzt: `.env.example` auf Projekt-Defaults aktualisiert (Heldenregister-spezifisch,
+> alle generischen Laravel-Defaults entfernt). Neue Sektionen: `LEGACY_DB_*`,
+> `MATRIX_DOMAIN`, `MATRIX_CORPORAL_TOKEN`. Deployment-Doku in `docs/deployment.md`
+> (Ersteinrichtung, Update/Redeploy, vhost-Konfiguration, Rollback, Go-Live-Checkliste).
+
+## Offen (🔲)
 
 ### INFRA-02 · Deployment-Skript/Anleitung · ⏱ 3h · 🔲
 **Beschreibung:** Reproduzierbares Deployment (Docroot `public/`, Rechte).

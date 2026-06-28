@@ -1,0 +1,170 @@
+# Deployment-Anleitung · Heldenregister
+
+Schritt-für-Schritt-Anleitung für das Einrichten und Aktualisieren der Produktivumgebung.
+Voraussetzung: PHP 8.3+, Composer, Node 20+, MySQL 8+, ein vhost auf `public/`.
+
+---
+
+## Ersteinrichtung (Erstmalige Installation)
+
+```bash
+# 1. Repository klonen
+git clone <repo-url> /var/www/heldenregister
+cd /var/www/heldenregister
+
+# 2. PHP-Abhängigkeiten (ohne Dev-Pakete)
+composer install --no-dev --optimize-autoloader
+
+# 3. Frontend-Assets bauen
+npm ci
+npm run build
+
+# 4. Umgebungsdatei anlegen und befüllen
+cp .env.example .env
+# → .env manuell bearbeiten (DB, Mail, Matrix, APP_URL, …)
+
+# 5. App-Schlüssel generieren (nur einmalig!)
+php artisan key:generate
+
+# 6. Datenbankmigrationen ausführen
+php artisan migrate --force
+
+# 7. Datenbank-Seeder (Stammdaten / Standard-Settings)
+php artisan db:seed --class=SettingsSeeder
+# weitere Seeder nach Bedarf: --class=EventStatusSeeder usw.
+
+# 8. Storage-Symlink anlegen
+php artisan storage:link
+
+# 9. Berechtigungen setzen
+chown -R www-data:www-data storage bootstrap/cache
+chmod -R 775 storage bootstrap/cache
+```
+
+---
+
+## Konfiguration für den Produktivbetrieb cachen
+
+Nach jeder Änderung an `.env` oder Config-Dateien:
+
+```bash
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
+```
+
+Cache leeren (z. B. nach einem Deploy):
+
+```bash
+php artisan optimize:clear
+```
+
+---
+
+## Update / Redeploy (laufende Instanz)
+
+```bash
+git pull
+
+composer install --no-dev --optimize-autoloader
+
+npm ci
+npm run build
+
+php artisan migrate --force
+
+php artisan optimize:clear
+php artisan config:cache
+php artisan route:cache
+php artisan view:cache
+
+# Queue-Worker neu starten (falls INFRA-04 umgesetzt)
+php artisan queue:restart
+```
+
+---
+
+## Webserver-Konfiguration
+
+Docroot zeigt auf `public/` (nicht auf das Projekt-Root).
+
+**Apache-Beispiel (`.htaccess` ist bereits enthalten):**
+
+```apache
+<VirtualHost *:443>
+    ServerName heldenregister.example.de
+    DocumentRoot /var/www/heldenregister/public
+
+    <Directory /var/www/heldenregister/public>
+        AllowOverride All
+        Require all granted
+    </Directory>
+</VirtualHost>
+```
+
+**Nginx-Beispiel:**
+
+```nginx
+server {
+    listen 443 ssl;
+    server_name heldenregister.example.de;
+    root /var/www/heldenregister/public;
+    index index.php;
+
+    location / {
+        try_files $uri $uri/ /index.php?$query_string;
+    }
+
+    location ~ \.php$ {
+        fastcgi_pass unix:/run/php/php8.3-fpm.sock;
+        fastcgi_param SCRIPT_FILENAME $realpath_root$fastcgi_script_name;
+        include fastcgi_params;
+    }
+}
+```
+
+---
+
+## Scheduler (Cron)
+
+Einmalig als `www-data`-Cron eintragen:
+
+```cron
+* * * * * cd /var/www/heldenregister && php artisan schedule:run >> /dev/null 2>&1
+```
+
+---
+
+## Rollback
+
+Bei einem fehlgeschlagenen Deploy:
+
+```bash
+# Vorherigen Commit auschecken
+git checkout <letzter-guter-commit>
+
+composer install --no-dev --optimize-autoloader
+npm ci && npm run build
+
+# Falls Migration rückgängig gemacht werden muss:
+php artisan migrate:rollback
+
+php artisan optimize:clear
+php artisan config:cache
+```
+
+---
+
+## Checkliste vor Go-Live
+
+- [ ] `APP_ENV=production`, `APP_DEBUG=false` in `.env`
+- [ ] `APP_KEY` gesetzt (`php artisan key:generate`)
+- [ ] `APP_URL` auf echte Domain gesetzt
+- [ ] Datenbank-Credentials korrekt
+- [ ] `MAIL_*`-Werte für echten SMTP-Server gesetzt
+- [ ] `MATRIX_CORPORAL_TOKEN` gesetzt
+- [ ] `php artisan config:cache` + `route:cache` + `view:cache` ausgeführt
+- [ ] `storage/` und `bootstrap/cache/` beschreibbar für `www-data`
+- [ ] `php artisan storage:link` ausgeführt
+- [ ] SSL-Zertifikat aktiv
+- [ ] Cron-Eintrag für Scheduler gesetzt
