@@ -62,3 +62,10 @@ Matrix, EP-Buchungen).
 - [x] Editierbare Vereins-Settings (Vereinsname, Kontakt-E-Mail, Logo-Dateiname) im Admin.
 - [x] `Setting::get()` / `Setting::set()` als statische Helper; `SettingsSeeder` mit Defaults.
 - [x] Tests.
+
+### ADM-10 · Portal-Nutzer-Bearbeiten
+**Beschreibung:** bessere GUI Einstellungen für die Nutzer-Verwaltung
+**Akzeptanzkriterien:**
+- [] Das öffnen eines Nutzer in der Nutzer-Verwaltung soll per klick auf die Zeile sich öffnen. 
+- [] Löschen soll als Symbol (Mülleimer) zu sehen sein.
+- [] Ein Nutzer soll auch Wiederverwendbar sein. Also nur Soft-Deletes
