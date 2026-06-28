@@ -206,6 +206,53 @@ Supervisor/systemd startet den Worker danach automatisch neu.
 
 ---
 
+## Backups (INFRA-06)
+
+Backups werden täglich via `spatie/laravel-backup` erstellt:
+- **01:00** — alte Backups bereinigen (`backup:clean`)
+- **02:00** — neues Backup anlegen (`backup:run`): DB-Dump (gzip) + `storage/app`-Uploads
+
+Backup-Dateien liegen unter `BACKUP_DISK_PATH` (Standard: `/var/backups/heldenregister`).
+
+**Aufbewahrung:** täglich 7 Tage, täglich 30 Tage, wöchentlich 8 Wochen,
+monatlich 6 Monate, jährlich 2 Jahre.
+
+### Manuelle Befehle
+
+```bash
+# Backup sofort ausführen
+php artisan backup:run
+
+# Nur DB sichern (ohne Dateien)
+php artisan backup:run --only-db
+
+# Altes Backups aufräumen
+php artisan backup:clean
+
+# Backup-Status prüfen
+php artisan backup:monitor
+php artisan backup:list
+```
+
+### Wiederherstellung
+
+```bash
+# 1. Gewünschtes Backup-Archiv aus BACKUP_DISK_PATH entpacken
+cd /var/backups/heldenregister/Heldenregister/
+unzip YYYY-MM-DD-HH-II-SS.zip -d /tmp/restore
+
+# 2. DB wiederherstellen (Achtung: überschreibt die bestehende DB!)
+mysql -u heldenregister -p heldenregister < /tmp/restore/*.sql.gz | gunzip | mysql -u heldenregister -p heldenregister
+# Oder direkt mit gunzip:
+gunzip -c /tmp/restore/*.sql.gz | mysql -u heldenregister -p heldenregister
+
+# 3. Uploads wiederherstellen
+rsync -av /tmp/restore/var/www/heldenregister/storage/app/ /var/www/heldenregister/storage/app/
+chown -R www-data:www-data /var/www/heldenregister/storage/app
+```
+
+---
+
 ## Logging & Fehler-Monitoring (INFRA-07)
 
 ### Log-Konfiguration

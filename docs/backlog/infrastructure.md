@@ -64,11 +64,17 @@ Produktivbetrieb, Pipeline, Umgebung.
 > `* * * * * cd /var/www/heldenregister && php artisan schedule:run >> /dev/null 2>&1`.
 > `php artisan schedule:list` zeigt den Task. Verifiziert über die NOTI-05-Tests.
 
-### INFRA-06 · Backups (DB + Uploads) · ⏱ 3h · 🔲
+### INFRA-06 · Backups (DB + Uploads) · ⏱ 3h · ✅
 **Beschreibung:** Regelmäßige Sicherung der Produktiv-DB und Uploads.
 **Akzeptanzkriterien:**
-- [ ] Backup-Strategie/-Skript (z. B. `spatie/laravel-backup`).
-- [ ] Wiederherstellung getestet/dokumentiert.
+- [x] Backup-Strategie/-Skript (z. B. `spatie/laravel-backup`).
+- [x] Wiederherstellung getestet/dokumentiert.
+
+> Umgesetzt: `spatie/laravel-backup` installiert. `config/backup.php` sichert
+> MySQL-DB (gzip, useSingleTransaction) + `storage/app`-Uploads in den
+> `backup`-Disk (`BACKUP_DISK_PATH`). Scheduler: `backup:clean` 01:00,
+> `backup:run` 02:00. Fehler-Benachrichtigung per Mail (`BACKUP_MAIL_TO`).
+> Wiederherstellungs-Anleitung in `docs/deployment.md`.
 
 ### INFRA-07 · Fehler-Monitoring/Logging · ⏱ 2h · ✅
 **Beschreibung:** Produktives Logging + optionales Error-Tracking.

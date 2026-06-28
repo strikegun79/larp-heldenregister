@@ -15,6 +15,10 @@ class Kernel extends ConsoleKernel
         // Tägliche Event-Erinnerungen (NOTI-05). Cron-Eintrag für den Scheduler:
         //   * * * * * cd /var/www/heldenregister && php artisan schedule:run >> /dev/null 2>&1
         $schedule->command('events:send-reminders')->dailyAt('08:00');
+
+        // Tägliches Backup (INFRA-06): DB-Dump + Uploads als ZIP auf dem backup-Disk.
+        $schedule->command('backup:clean')->dailyAt('01:00');
+        $schedule->command('backup:run')->dailyAt('02:00');
     }
 
     /**

@@ -15,7 +15,8 @@
         "laravel/tinker": "^2.8",
         "nunomaduro/collision": "^8.9",
         "nunomaduro/termwind": "^2.0",
-        "phpunit/phpunit": "^11.5.50"
+        "phpunit/phpunit": "^11.5.50",
+        "spatie/laravel-backup": "^10.3"
     },
     "require-dev": {
         "fakerphp/faker": "^1.9.1",
