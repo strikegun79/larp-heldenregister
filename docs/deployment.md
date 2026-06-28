@@ -206,6 +206,58 @@ Supervisor/systemd startet den Worker danach automatisch neu.
 
 ---
 
+## Logging & Fehler-Monitoring (INFRA-07)
+
+### Log-Konfiguration
+
+Produktion verwendet den `daily`-Channel (rotierende Tagesdateien in `storage/logs/`):
+
+```dotenv
+LOG_CHANNEL=daily
+LOG_LEVEL=warning
+LOG_DAILY_DAYS=30
+```
+
+Log-Dateien liegen unter `storage/logs/laravel-YYYY-MM-DD.log`.
+
+### OS-seitige Log-Rotation (logrotate)
+
+Als zusätzliches Sicherheitsnetz, falls `LOG_DAILY_DAYS` nicht ausreicht:
+
+```
+# /etc/logrotate.d/heldenregister
+/var/www/heldenregister/storage/logs/*.log {
+    daily
+    missingok
+    rotate 30
+    compress
+    delaycompress
+    notifempty
+    create 0664 www-data www-data
+    sharedscripts
+}
+```
+
+### Optionales Error-Tracking mit Sentry
+
+Falls ein zentrales Error-Tracking gewünscht wird:
+
+```bash
+composer require sentry/sentry-laravel
+php artisan sentry:publish --dsn=https://<key>@sentry.io/<project>
+```
+
+In `.env` ergänzen:
+
+```dotenv
+SENTRY_LARAVEL_DSN=https://<key>@sentry.io/<project>
+SENTRY_TRACES_SAMPLE_RATE=0.1
+```
+
+Ohne `SENTRY_LARAVEL_DSN` bleibt das Paket inaktiv — kein Pflichtbestandteil.
+
+---
+
 ## Rollback
 
 Bei einem fehlgeschlagenen Deploy:

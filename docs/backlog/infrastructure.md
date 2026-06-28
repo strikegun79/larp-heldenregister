@@ -70,11 +70,16 @@ Produktivbetrieb, Pipeline, Umgebung.
 - [ ] Backup-Strategie/-Skript (z. B. `spatie/laravel-backup`).
 - [ ] Wiederherstellung getestet/dokumentiert.
 
-### INFRA-07 · Fehler-Monitoring/Logging · ⏱ 2h · 🔲
+### INFRA-07 · Fehler-Monitoring/Logging · ⏱ 2h · ✅
 **Beschreibung:** Produktives Logging + optionales Error-Tracking.
 **Akzeptanzkriterien:**
-- [ ] Log-Channel/Level für Prod gesetzt; Rotation.
-- [ ] Optional Sentry o. Ä. angebunden.
+- [x] Log-Channel/Level für Prod gesetzt; Rotation.
+- [x] Optional Sentry o. Ä. angebunden.
+
+> Umgesetzt: `.env.example` auf `LOG_CHANNEL=daily`, `LOG_LEVEL=warning`,
+> `LOG_DAILY_DAYS=30` umgestellt. `config/logging.php` liest `LOG_DAILY_DAYS`
+> aus Umgebung (Standard 30 Tage). `docs/deployment.md` um Logging-Abschnitt
+> erweitert: logrotate-Konfiguration + optionale Sentry-Anbindung dokumentiert.
 
 ### INFRA-08 · Legacy-Abschaltung & Cutover-Plan · ⏱ 2h · 🔲
 **Beschreibung:** Geordneter Wechsel vom Legacy-Portal.
