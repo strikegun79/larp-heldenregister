@@ -18,19 +18,27 @@ Produktivbetrieb, Pipeline, Umgebung.
 
 ## Offen (🔲)
 
-### INFRA-02 · Deployment-Skript/Anleitung · ⏱ 3h · 🔲
+### INFRA-02 · Deployment-Skript/Anleitung · ⏱ 3h · ✅
 **Beschreibung:** Reproduzierbares Deployment (Docroot `public/`, Rechte).
 **Akzeptanzkriterien:**
-- [ ] Schritt-für-Schritt-Deploy (composer `--no-dev`, `npm ci && build`, `migrate --force`).
-- [ ] vhost auf `public/`; Storage-/Cache-Rechte für `www-data`.
-- [ ] Rollback-Hinweis.
+- [x] Schritt-für-Schritt-Deploy (composer `--no-dev`, `npm ci && build`, `migrate --force`).
+- [x] vhost auf `public/`; Storage-/Cache-Rechte für `www-data`.
+- [x] Rollback-Hinweis.
 
-### INFRA-03 · CI-Pipeline (Tests + Pint) · ⏱ 3h · 🔲
+> Umgesetzt als Teil von INFRA-01: `docs/deployment.md` enthält vollständige
+> Ersteinrichtung, Update/Redeploy-Ablauf, Apache/Nginx-vhost-Beispiele,
+> Rollback-Anleitung und Go-Live-Checkliste.
+
+### INFRA-03 · CI-Pipeline (Tests + Pint) · ⏱ 3h · ✅
 **Beschreibung:** GitHub Actions: Tests, Pint, Build bei Push/PR.
 **Akzeptanzkriterien:**
-- [ ] Workflow installiert Abhängigkeiten, richtet Test-DB ein, `php artisan test`.
-- [ ] `pint --test` als Lint-Gate; `npm run build`.
-- [ ] Grünes Badge im README.
+- [x] Workflow installiert Abhängigkeiten, richtet Test-DB ein, `php artisan test`.
+- [x] `pint --test` als Lint-Gate; `npm run build`.
+- [x] Grünes Badge im README.
+
+> Umgesetzt: `.github/workflows/ci.yml` mit MySQL-8-Service-Container,
+> PHP 8.3, Composer-Cache, Node 20, `pint --test` vor PHPUnit.
+> Badge in `README.md` auf dieses Repository gesetzt.
 
 ### INFRA-04 · Queue-Worker für Mails/Jobs · ⏱ 3h · 🔲
 **Beschreibung:** Mails asynchron über Queue (statt sync).
