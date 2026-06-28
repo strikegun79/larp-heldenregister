@@ -17,7 +17,7 @@
      * Breite: 3 × 7,52 cm + 2 × 1 mm = 22,76 cm < 29,7 cm ✓
      * Tabellenbasiertes Layout, da DOMPDF kein Flexbox unterstützt.
      */
-    @page { margin: 0; size: A4 landscape; }
+    @page { margin: 0; size: A4 landscape; } /* DOMPDF ignoriert @page-margin – Zentrierung via Spacer-Div */
 
     .page-break { page-break-before: always; }
 
@@ -188,12 +188,18 @@
 @foreach ($chunks as $chunkIndex => $chunk)
 @if ($chunkIndex > 0)<div class="page-break"></div>@endif
 @php
-    /* Explizite Zentrierung: DOMPDF ignoriert margin:auto auf Tabellen ohne feste Breite.
-     * A4 quer = 29,7 cm. Tabellenbreite = n×7,52 cm + (n-1)×1 mm Abstand. */
+    /*
+     * Vertikale Zentrierung: DOMPDF ignoriert @page margin, daher Spacer-Div.
+     * A4 quer = 21 cm, Kombo = 20 cm → (21−20)/2 = 0,5 cm oben.
+     *
+     * Horizontale Zentrierung: DOMPDF ignoriert margin:auto auf Tabellen.
+     * A4 quer = 29,7 cm. Tabellenbreite = n×7,52 cm + (n-1)×1 mm Abstand.
+     */
     $n          = $chunk->count();
     $tableW     = $n * 7.52 + max(0, $n - 1) * 0.1;
     $marginLeft = round((29.7 - $tableW) / 2, 3);
 @endphp
+<div style="height: 0.5cm;"></div>
 <table class="combo-table" style="margin-left: {{ $marginLeft }}cm;">
 <tr>
     @foreach ($chunk as $card)
