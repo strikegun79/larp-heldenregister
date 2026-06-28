@@ -135,6 +135,77 @@ Einmalig als `www-data`-Cron eintragen:
 
 ---
 
+## Queue-Worker (INFRA-04)
+
+Alle Notifications implementieren `ShouldQueue`; Mails werden asynchron
+versendet, sobald `QUEUE_CONNECTION=database` gesetzt ist.
+
+**Voraussetzung:** `jobs`-Tabelle migrieren (einmalig, bereits in Migration enthalten):
+
+```bash
+php artisan migrate
+```
+
+### Supervisor (empfohlen für Produktivbetrieb)
+
+```ini
+# /etc/supervisor/conf.d/heldenregister-worker.conf
+[program:heldenregister-worker]
+process_name=%(program_name)s_%(process_num)02d
+command=php /var/www/heldenregister/artisan queue:work --sleep=3 --tries=3 --max-time=3600
+autostart=true
+autorestart=true
+stopasgroup=true
+killasgroup=true
+user=www-data
+numprocs=1
+redirect_stderr=true
+stdout_logfile=/var/log/heldenregister-worker.log
+stopwaitsecs=3600
+```
+
+```bash
+supervisorctl reread
+supervisorctl update
+supervisorctl start heldenregister-worker:*
+```
+
+### systemd (Alternative)
+
+```ini
+# /etc/systemd/system/heldenregister-worker.service
+[Unit]
+Description=Heldenregister Queue Worker
+After=network.target
+
+[Service]
+User=www-data
+Group=www-data
+WorkingDirectory=/var/www/heldenregister
+ExecStart=/usr/bin/php artisan queue:work --sleep=3 --tries=3 --max-time=3600
+Restart=on-failure
+RestartSec=5s
+
+[Install]
+WantedBy=multi-user.target
+```
+
+```bash
+systemctl enable heldenregister-worker
+systemctl start heldenregister-worker
+systemctl status heldenregister-worker
+```
+
+### Worker nach Deploy neu starten
+
+```bash
+php artisan queue:restart
+```
+
+Supervisor/systemd startet den Worker danach automatisch neu.
+
+---
+
 ## Rollback
 
 Bei einem fehlgeschlagenen Deploy:

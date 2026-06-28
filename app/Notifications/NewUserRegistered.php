@@ -4,6 +4,7 @@ namespace App\Notifications;
 
 use App\Models\User;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
@@ -11,7 +12,7 @@ use Illuminate\Notifications\Notification;
  * Benachrichtigung an die Admins, wenn sich ein neuer Benutzer registriert.
  * Ersetzt die Legacy-Smarty-Vorlage email_admin_new-user.tpl.
  */
-class NewUserRegistered extends Notification
+class NewUserRegistered extends Notification implements ShouldQueue
 {
     use Queueable;
 

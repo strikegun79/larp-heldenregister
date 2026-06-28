@@ -40,12 +40,18 @@ Produktivbetrieb, Pipeline, Umgebung.
 > PHP 8.3, Composer-Cache, Node 20, `pint --test` vor PHPUnit.
 > Badge in `README.md` auf dieses Repository gesetzt.
 
-### INFRA-04 · Queue-Worker für Mails/Jobs · ⏱ 3h · 🔲
+### INFRA-04 · Queue-Worker für Mails/Jobs · ⏱ 3h · ✅
 **Beschreibung:** Mails asynchron über Queue (statt sync).
 **Akzeptanzkriterien:**
-- [ ] `QUEUE_CONNECTION=database`/redis; `jobs`-Tabelle migriert.
-- [ ] Worker als Supervisor/systemd-Service dokumentiert.
-- [ ] Mailables `ShouldQueue`.
+- [x] `QUEUE_CONNECTION=database`/redis; `jobs`-Tabelle migriert.
+- [x] Worker als Supervisor/systemd-Service dokumentiert.
+- [x] Mailables `ShouldQueue`.
+
+> Umgesetzt: `jobs`-Tabellen-Migration angelegt (`queue:table`).
+> `NewUserRegistered` um `implements ShouldQueue` ergänzt (alle anderen
+> Notifications hatten es bereits). `.env.example` auf `QUEUE_CONNECTION=database`
+> umgestellt. `docs/deployment.md` um Supervisor- und systemd-Konfiguration
+> inkl. `queue:restart`-Hinweis erweitert.
 
 ### INFRA-05 · Scheduler einrichten · ⏱ 2h · ✅
 **Beschreibung:** `schedule:run` Cron für Erinnerungen/Pflegejobs.
