@@ -107,7 +107,7 @@ Reines Tailwind + Fomantic + minimal Vanilla-JS — kein neues Framework.
 `public/css/heldenregister.css`, `resources/js/heldenregister.js`.
 **Abhängigkeiten:** Liefert die Bausteine für UI-40/41/42/44; baut auf ARCH-001/002.
 
-### ARCH-004 · [P3] Bewusste Entscheidung gegen Inertia/Livewire dokumentieren (ADR) · ⏱ 1h · 🔲
+### ARCH-004 · [P3] Bewusste Entscheidung gegen Inertia/Livewire dokumentieren (ADR) · ⏱ 1h · ✅
 **Kategorie:** Architektur / Dokumentation
 **Beschreibung:** Damit die Mobile-First-Entscheidung (Ansatz E statt Stack-Wechsel)
 nicht in 12 Monaten erneut diskutiert wird, sollte sie als kurzer Architecture
@@ -117,11 +117,16 @@ Formulare gefragt sind).
 **Nutzen:** Verhindert wiederholte Grundsatzdiskussionen; macht die Entscheidung
 und ihre Auslöser für künftige Entwickler nachvollziehbar.
 **Akzeptanzkriterien:**
-- [ ] Kurzer ADR (z. B. `docs/adr/0001-mobile-first.md`) mit Kontext, Optionen
-      A–E, Entscheidung (E + Modal→Seite) und „Revisit-wenn"-Kriterien.
-- [ ] Verweis aus diesem Backlog auf den ADR.
-**Betroffene Bereiche:** `docs/` (neuer ADR).
+- [x] Kurzer ADR mit Kontext, Optionen A–E, Entscheidung (E + Modal→Seite) und
+      „Revisit-wenn"-Kriterien.
+- [x] Verweis aus diesem Backlog auf den ADR.
+**Betroffene Bereiche:** `docs/adr/` (neuer ADR).
 **Abhängigkeiten:** Keine.
+
+> Umgesetzt: [`docs/adr/0001-frontend-architektur-mobile-first.md`](../adr/0001-frontend-architektur-mobile-first.md) —
+> Kontext, Optionen A–E mit Bewertungsmatrix, Begründung für Ansatz E,
+> bereits umgesetzte ARCH-001–003, Revisit-Kriterien (Echtzeit-Checkin,
+> reaktive Formulare, native App, Offline, Teamwachstum).
 
 ### ARCH-005 · [P3] Stack-Diskrepanz Laravel-Version klären (Doku vs. composer.json) · ⏱ 1h · ✅
 **Kategorie:** Architektur / Technische Schuld
