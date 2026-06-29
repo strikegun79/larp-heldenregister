@@ -41,11 +41,20 @@ Modal-Öffnen, AJAX-Submit, Toasts.
 > `phpstan-baseline.neon` erfasst. `.github/workflows/ci.yml` um
 > PHPStan-Gate erweitert.
 
-### QA-06 · N+1-Queries auditieren · ⏱ 3h · 🔲
+### QA-06 · N+1-Queries auditieren · ⏱ 3h · ✅
 **Beschreibung:** Listen/Modals auf Eager-Loading prüfen.
 **Akzeptanzkriterien:**
-- [ ] `preventLazyLoading` in Dev aktiv; gefundene N+1 behoben.
-- [ ] Spot-Checks dokumentiert.
+- [x] `preventLazyLoading` in Dev aktiv; gefundene N+1 behoben.
+- [x] Spot-Checks dokumentiert.
+
+> Umgesetzt: `Model::preventLazyLoading(!app()->isProduction())` in
+> `AppServiceProvider`. Gefundene N+1:
+> 1. `Auth::user()->roles` doppelt in `navigation.blade.php` → `loadMissing`
+>    am Dateianfang vorangestellt.
+> 2. `EpTransaction.type` auf jedem Hero-EP-Zugriff lazy-geladen
+>    (`ep_balance`, `ep_total`, `signedAmount`) → `->with('type')` direkt
+>    in `Hero::epTransactions()` Relationship-Definition.
+> Testsuite: 661 grün, 7 vorbestehende Fehler (unverändert).
 
 ### QA-07 · Factories & Seeder für Demo-/Testdaten · ⏱ 3h · 🔲
 **Beschreibung:** Vollständige Factories (Skill, Adventure-Beziehungen, Matrix)

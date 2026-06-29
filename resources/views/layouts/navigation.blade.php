@@ -1,4 +1,7 @@
-@php($unreadNotes = Auth::user()->unreadNotifications)
+@php
+    Auth::user()->loadMissing(['roles', 'unreadNotifications']);
+    $unreadNotes = Auth::user()->unreadNotifications;
+@endphp
 <nav class="bg-[#e4cea5]/80 backdrop-blur border-b-2 border-[#5a3a22]/50 shadow-sm">
     <!-- Primary Navigation Menu -->
     <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">

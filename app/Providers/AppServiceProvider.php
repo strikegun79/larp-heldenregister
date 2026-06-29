@@ -4,6 +4,7 @@ namespace App\Providers;
 
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Auth\Notifications\VerifyEmail;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Support\ServiceProvider;
 
@@ -22,6 +23,10 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // N+1-Schutz: wirft eine Exception im nicht-produktiven Betrieb,
+        // wenn Relationen lazy-geladen werden (QA-06).
+        Model::preventLazyLoading(! app()->isProduction());
+
         // Deutsche, gebrandete Auth-Mails (NOTI-06). Layout (Logo/Footer) kommt
         // aus den angepassten Mail-Komponenten (resources/views/vendor/mail).
         VerifyEmail::toMailUsing(function ($notifiable, string $url): MailMessage {

@@ -109,7 +109,9 @@ class Hero extends Model
      */
     public function epTransactions(): HasMany
     {
-        return $this->hasMany(EpTransaction::class);
+        // type immer mitladen: signedAmount() und ep_total/ep_balance-Accessors
+        // greifen auf type->is_credit zu.
+        return $this->hasMany(EpTransaction::class)->with('type');
     }
 
     /**
