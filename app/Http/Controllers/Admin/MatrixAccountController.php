@@ -25,12 +25,21 @@ class MatrixAccountController extends Controller
     {
         $account = $player->matrixAccount()->withTrashed()->first();
 
+        $rooms = MatrixManagedRoom::orderBy('roomname')->get();
+
+        // MTX-06: Neues Konto → default_allow-Räume vorselektieren.
+        if ($account) {
+            $joined = $account->rooms()->pluck('matrix_managed_rooms.roomid')->all();
+        } else {
+            $joined = $rooms->where('default_allow', true)->pluck('roomid')->all();
+        }
+
         return view('admin.matrix.edit', [
-            'player' => $player,
+            'player'  => $player,
             'account' => $account,
-            'rooms' => MatrixManagedRoom::orderBy('roomname')->get(),
-            'joined' => $account ? $account->rooms()->pluck('matrix_managed_rooms.roomid')->all() : [],
-            'mxid' => $account?->mxid ?? $player->deriveMatrixId(),
+            'rooms'   => $rooms,
+            'joined'  => $joined,
+            'mxid'    => $account?->mxid ?? $player->deriveMatrixId(),
         ]);
     }
 

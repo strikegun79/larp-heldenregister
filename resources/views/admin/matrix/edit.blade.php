@@ -42,6 +42,11 @@
 
                     <div>
                         <span class="block font-medium text-stone-700 mb-2">Räume</span>
+                        @unless ($account)
+                            <p class="text-xs text-stone-400 mb-2">
+                                Vorauswahl: Räume mit "Standard: allow". Anpassung vor dem Speichern möglich.
+                            </p>
+                        @endunless
                         @if ($rooms->isEmpty())
                             <p class="text-sm text-stone-500">Keine verwalteten Räume vorhanden.</p>
                         @else
@@ -51,7 +56,13 @@
                                         <input type="checkbox" name="rooms[]" value="{{ $room->roomid }}"
                                                class="rounded border-gray-300 text-amber-600 shadow-sm focus:ring-amber-600"
                                                @checked(in_array($room->roomid, old('rooms', $joined)))>
-                                        {{ $room->roomname }} <span class="text-stone-400">({{ $room->roomtype }})</span>
+                                        {{ $room->roomname }}
+                                        <span class="text-stone-400">({{ $room->roomtype }})</span>
+                                        @if ($room->default_allow)
+                                            <span class="ui green tiny label">Standard</span>
+                                        @elseif ($room->default_deny)
+                                            <span class="ui red tiny label">Gesperrt</span>
+                                        @endif
                                     </label>
                                 @endforeach
                             </div>

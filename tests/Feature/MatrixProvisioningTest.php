@@ -96,4 +96,69 @@ class MatrixProvisioningTest extends TestCase
         // mxid bleibt stabile Matrix-Identität, ändert sich nicht bei Umbenennung.
         $this->assertSame('@mia.klaiss:waldritter-giessen.de', $player->fresh()->matrixAccount->mxid);
     }
+
+    // MTX-06: Default-Raum-Zuordnung
+
+    public function test_neues_konto_formular_zeigt_default_allow_räume_vorselektiert(): void
+    {
+        $player = Player::factory()->create();
+        MatrixManagedRoom::create(['roomid' => '!allow:wr.de', 'roomname' => 'Standard',  'roomtype' => 'Raum', 'default_allow' => true]);
+        MatrixManagedRoom::create(['roomid' => '!deny:wr.de',  'roomname' => 'Gesperrt',  'roomtype' => 'Raum', 'default_deny'  => true]);
+        MatrixManagedRoom::create(['roomid' => '!none:wr.de',  'roomname' => 'Kein Flag', 'roomtype' => 'Raum']);
+
+        $response = $this->actingAs($this->admin())
+            ->get(route('admin.players.matrix.edit', $player));
+
+        $response->assertOk();
+        // default_allow-Raum ist vorselektiert
+        $response->assertSee('value="!allow:wr.de"', false);
+        $response->assertSee('checked', false);
+        // Hinweistext für neues Konto
+        $response->assertSee('Vorauswahl');
+    }
+
+    public function test_bestehendes_konto_behält_seine_räume_statt_defaults(): void
+    {
+        $player  = Player::factory()->create(['name' => 'Max', 'lastname' => 'Muster']);
+        $default = MatrixManagedRoom::create(['roomid' => '!allow:wr.de', 'roomname' => 'Standard', 'roomtype' => 'Raum', 'default_allow' => true]);
+        $custom  = MatrixManagedRoom::create(['roomid' => '!custom:wr.de', 'roomname' => 'Speziell', 'roomtype' => 'Raum']);
+
+        $account = MatrixAccount::create([
+            'mxid'       => '@max.muster:waldritter-giessen.de',
+            'player_id'  => $player->id,
+            'active'     => true,
+            'forbid_room_creation' => true,
+            'forbid_encrypted_room_creation' => true,
+        ]);
+        // Konto hat nur den Custom-Raum (nicht den Default-Raum)
+        $account->rooms()->attach($custom->roomid);
+
+        $response = $this->actingAs($this->admin())
+            ->get(route('admin.players.matrix.edit', $player));
+
+        $response->assertOk();
+        // Kein "Vorauswahl"-Hinweis bei bestehendem Konto
+        $response->assertDontSee('Vorauswahl');
+    }
+
+    public function test_neues_konto_speichert_nur_abgeschickte_räume(): void
+    {
+        $player  = Player::factory()->create(['name' => 'Lena', 'lastname' => 'Lenz']);
+        $default = MatrixManagedRoom::create(['roomid' => '!allow:wr.de', 'roomname' => 'Standard', 'roomtype' => 'Raum', 'default_allow' => true]);
+        $other   = MatrixManagedRoom::create(['roomid' => '!other:wr.de', 'roomname' => 'Anderer',  'roomtype' => 'Raum']);
+
+        // Admin aktiviert Konto und schickt NUR den non-default Raum ab
+        // (hat default_allow-Raum bewusst abgehakt)
+        $this->actingAs($this->admin())->put(route('admin.players.matrix.update', $player), [
+            'active' => '1',
+            'rooms'  => ['!other:wr.de'],
+        ])->assertRedirect();
+
+        $account = $player->fresh()->matrixAccount;
+        $this->assertNotNull($account);
+        // Nur der explizit gewählte Raum
+        $roomIds = $account->rooms()->pluck('matrix_managed_rooms.roomid')->all();
+        $this->assertContains('!other:wr.de', $roomIds);
+        $this->assertNotContains('!allow:wr.de', $roomIds);
+    }
 }

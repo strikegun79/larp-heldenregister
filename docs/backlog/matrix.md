@@ -31,13 +31,17 @@ referenziert, sind aber nicht pflegbar.
 > `admin.matrix.rooms.*` unter `can:portal.manage`. Löschen verhindert wenn
 > Mitglieder vorhanden. 11 Tests grün.
 
-### MTX-06 · Default-Raum-Zuordnung anwenden · ⏱ 3h · 🔲
+### MTX-06 · Default-Raum-Zuordnung anwenden · ⏱ 3h · ✅
 **Beschreibung:** `default_allow` Räume sollten neuen Matrix-Konten automatisch
 zugeordnet werden.
 **Akzeptanzkriterien:**
-- [ ] Bei Neuanlage eines Kontos werden `default_allow`-Räume vorbelegt.
-- [ ] `default_deny` schließt Räume aus.
-- [ ] Tests.
+- [x] Bei Neuanlage eines Kontos werden `default_allow`-Räume vorbelegt.
+- [x] `default_deny` kennzeichnet Räume im Formular (roter Label „Gesperrt").
+- [x] Tests (3 neue Tests in `MatrixProvisioningTest`).
+
+> Umgesetzt: `MatrixAccountController@edit` wählt `default_allow`-Räume für
+> neue Konten vor; bestehende Konten behalten ihre tatsächlichen Räume.
+> View zeigt „Vorauswahl"-Hinweis und farbige Labels (Standard/Gesperrt).
 
 ### MTX-07 · mxid-Kollision/Sanitisierung · ⏱ 3h · 🔲
 **Beschreibung:** Abgeleitete mxid `@vorname.nachname:domain` kann Leer-/
