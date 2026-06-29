@@ -39,6 +39,12 @@ class MatrixAccount extends Model
         'forbid_encrypted_room_creation' => 'boolean',
     ];
 
+    /** Lesbare Bezeichnung für das Audit-Log (MTX-09). */
+    public function auditLabel(): string
+    {
+        return $this->mxid;
+    }
+
     protected static function booted(): void
     {
         // Cache der corporal-Policy bei jeder Kontoänderung invalidieren (MTX-08).

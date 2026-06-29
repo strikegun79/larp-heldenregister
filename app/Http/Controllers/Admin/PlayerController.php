@@ -30,7 +30,7 @@ class PlayerController extends Controller
 
         $query = Player::withTrashed()
             ->withCount('heroes')
-            ->with(['users', 'matrixAccount']);
+            ->with(['users', 'matrixAccount' => fn ($q) => $q->withCount('rooms')]);
 
         if ($q !== '') {
             $query->where(function ($builder) use ($q) {

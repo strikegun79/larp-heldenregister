@@ -66,8 +66,11 @@ Sonderzeichen enthalten (Legacy hatte `@mia lenja...`). Matrix-IDs erlauben das 
 
 > Cache-Key `MatrixAccount::CORPORAL_CACHE_KEY = 'matrix.corporal.policy'`.
 
-### MTX-09 · Provisionierungs-Audit & Statusanzeige · ⏱ 2h · 🔲
+### MTX-09 · Provisionierungs-Audit & Statusanzeige · ⏱ 2h · ✅
 **Beschreibung:** Nachvollziehbarkeit von Konto-/Raumänderungen.
 **Akzeptanzkriterien:**
-- [ ] Änderungen am Matrix-Konto landen im Audit-Log (ADM-08).
-- [ ] Admin-Liste zeigt Raumzahl/aktiv je Konto.
+- [x] Konto anlegen/aktualisieren/entziehen schreibt `matrix.account.*`-Einträge ins Audit-Log.
+- [x] `MatrixAccount::auditLabel()` liefert die mxid als lesbare Bezeichnung.
+- [x] Admin-Spielerliste zeigt Raumzahl und aktiv/inaktiv je Konto.
+- [x] Migration ändert `audit_logs.subject_id` auf `VARCHAR(150)` (String-PKs).
+- [x] 6 Tests in `MatrixAuditTest`.

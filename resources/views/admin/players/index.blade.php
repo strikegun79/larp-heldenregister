@@ -85,6 +85,9 @@
                                         <span class="{{ $player->matrixAccount->active ? 'text-green-700' : 'text-stone-500' }}">
                                             {{ $player->matrixAccount->active ? 'aktiv' : 'inaktiv' }}
                                         </span>
+                                        <span class="text-stone-400 text-xs block">
+                                            {{ $player->matrixAccount->rooms_count }} {{ $player->matrixAccount->rooms_count === 1 ? 'Raum' : 'Räume' }}
+                                        </span>
                                     @else
                                         <span class="text-stone-400">—</span>
                                     @endif
