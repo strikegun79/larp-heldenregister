@@ -105,6 +105,34 @@ class Player extends Model
     }
 
     /**
+     * DSGVO Art. 17: Spieler anonymisieren (Recht auf Löschung).
+     * Überschreibt alle Klardaten, löscht das Profilfoto und soft-deleted.
+     * Verknüpfte Helden bleiben erhalten (Charaktername ist kein Realname).
+     */
+    public function anonymize(): void
+    {
+        if ($this->image) {
+            \Illuminate\Support\Facades\Storage::disk('public')->delete($this->image);
+        }
+
+        $this->forceFill([
+            'name'                  => 'Gelöscht',
+            'lastname'              => null,
+            'email'                 => null,
+            'dayofbirth'            => null,
+            'gender'                => null,
+            'image'                 => null,
+            'street'                => null,
+            'house_number'          => null,
+            'zip'                   => null,
+            'city'                  => null,
+            'address_same_as_guardian' => false,
+        ])->save();
+
+        $this->delete();
+    }
+
+    /**
      * Leitet die Matrix-User-ID aus dem Namen ab (Legacy:
      * "@vorname.nachname:domain"). Wird nur bei der Erstanlage genutzt –
      * eine bestehende mxid bleibt als stabile Matrix-Identität erhalten.

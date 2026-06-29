@@ -143,6 +143,33 @@ class User extends Authenticatable implements MustVerifyEmail
     }
 
     /**
+     * DSGVO Art. 17: Konto anonymisieren (Recht auf Löschung).
+     * Überschreibt alle Klardaten durch Platzhalter und soft-deleted den Datensatz.
+     * Audit-Log-Snapshots (actor_name) bleiben erhalten.
+     */
+    public function anonymize(): void
+    {
+        $this->tokens()->delete();
+        $this->notifications()->delete();
+
+        $this->forceFill([
+            'name'              => 'Gelöscht',
+            'lastname'          => null,
+            'email'             => 'deleted+'.$this->id.'@deleted.invalid',
+            'phone'             => null,
+            'street'            => null,
+            'house_number'      => null,
+            'zip'               => null,
+            'city'              => null,
+            'password'          => \Illuminate\Support\Str::random(64),
+            'remember_token'    => null,
+            'email_verified_at' => null,
+        ])->save();
+
+        $this->delete();
+    }
+
+    /**
      * Prüft eine Berechtigung anhand der Rollen-Rechte-Matrix
      * (config/permissions.php). 'admin' besitzt über '*' alle Rechte.
      */

@@ -63,12 +63,19 @@ und ein Demo-Seeder für Schulung/Tests.
 - [ ] Factories für alle Kern-Entitäten.
 - [ ] `DemoSeeder` erzeugt konsistenten Beispieldatensatz.
 
-### QA-08 · DSGVO-/Datenschutz-Review · ⏱ 3h · 🔲
+### QA-08 · DSGVO-/Datenschutz-Review · ⏱ 3h · ✅
 **Beschreibung:** Personenbezogene Daten (Minderjährige!) prüfen: Speicherung,
 Löschkonzept, Exporte.
 **Akzeptanzkriterien:**
-- [ ] Lösch-/Anonymisierungskonzept dokumentiert.
-- [ ] Datensparsamkeit in Exporten (REP) sichergestellt.
+- [x] Lösch-/Anonymisierungskonzept dokumentiert.
+- [x] Datensparsamkeit in Exporten (REP) sichergestellt.
+
+> Umgesetzt: `docs/dsgvo.md` mit vollständigem Datenschutzkonzept (Inventar,
+> Rechtsgrundlagen, Aufbewahrungsfristen, Löschkonzept, Export-Dokumentation,
+> offene Punkte). `User::anonymize()` und `Player::anonymize()` für DSGVO
+> Art. 17 implementiert: überschreiben Klardaten, löschen Fotos, soft-delete.
+> Alle Admin-Exporte (CSV, PDF) sind hinter `can:`-Middleware; Inhalte auf
+> das gesetzlich erforderliche Minimum geprüft.
 
 ### QA-09 · Developer-Onboarding-Doku · ⏱ 2h · 🔲
 **Beschreibung:** README/Setup für neue Entwickler.
