@@ -240,18 +240,42 @@ class MigrateLegacyData extends Command
     private function migrateHeroClasses(): void
     {
         $heroes = $this->map('heroes');
-        // Legacy hero2classes.class_id hält den Klassen-Slug (idname).
+
+        // Slug → Laravel-ID (Primärpfad: class_id ist idname-Slug).
         $classBySlug = DB::table('hero_classes')->pluck('id', 'slug');
 
+        // Fallback: numeric class_id → Slug über Legacy-type_classes (ETL-04).
+        $legacyIdToSlug = $this->legacy()->table('type_classes')->pluck('idname', 'id');
+
+        $skipped = 0;
+
         foreach ($this->legacy()->table('hero2classes')->get() as $row) {
-            $classId = $classBySlug[$row->class_id] ?? null;
-            if (! isset($heroes[$row->hero_id]) || $classId === null) {
+            if (! isset($heroes[$row->hero_id])) {
                 continue;
             }
+
+            // class_id kann Slug ('warrior') oder numerische Legacy-ID sein.
+            if (is_numeric($row->class_id)) {
+                $slug    = $legacyIdToSlug[$row->class_id] ?? null;
+                $classId = $slug ? ($classBySlug[$slug] ?? null) : null;
+            } else {
+                $classId = $classBySlug[$row->class_id] ?? null;
+            }
+
+            if ($classId === null) {
+                $this->warn("hero2classes: class_id='{$row->class_id}' für hero_id={$row->hero_id} nicht auflösbar – übersprungen.");
+                $skipped++;
+                continue;
+            }
+
             DB::table('hero_hero_class')->updateOrInsert(
                 ['hero_id' => $heroes[$row->hero_id], 'hero_class_id' => $classId],
                 []
             );
+        }
+
+        if ($skipped > 0) {
+            $this->warn("hero2classes: {$skipped} Einträge übersprungen (nicht auflösbare class_id). Vor Go-Live `etl:check-hero-classes` ausführen.");
         }
     }
 
