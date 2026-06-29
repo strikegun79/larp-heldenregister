@@ -56,12 +56,20 @@ Modal-Öffnen, AJAX-Submit, Toasts.
 >    in `Hero::epTransactions()` Relationship-Definition.
 > Testsuite: 661 grün, 7 vorbestehende Fehler (unverändert).
 
-### QA-07 · Factories & Seeder für Demo-/Testdaten · ⏱ 3h · 🔲
+### QA-07 · Factories & Seeder für Demo-/Testdaten · ⏱ 3h · ✅
 **Beschreibung:** Vollständige Factories (Skill, Adventure-Beziehungen, Matrix)
 und ein Demo-Seeder für Schulung/Tests.
 **Akzeptanzkriterien:**
-- [ ] Factories für alle Kern-Entitäten.
-- [ ] `DemoSeeder` erzeugt konsistenten Beispieldatensatz.
+- [x] Factories für alle Kern-Entitäten.
+- [x] `DemoSeeder` erzeugt konsistenten Beispieldatensatz.
+
+> Umgesetzt: `EpTransactionFactory` (States: credit/debit/adventure/initial) und
+> `MatrixAccountFactory` (State: inactive) neu. `UserFactory` um States
+> `admin()`, `teamer()`, `withRole(slug)` erweitert. `PlayerFactory` um
+> `minor()` und `inactive()`. `HeroFactory` um `inactive()` und `private()`.
+> `SkillFactory` mit Null-Fallback abgesichert. `DemoSeeder` erzeugt 4 Konten
+> (Admin, Bürokrat, 2 Teamer), 5 Spieler (3 Minderjährige), je 1 Held mit
+> Klassen/Skills/EP, 1 vergangenes + 1 kommendes Abenteuer.
 
 ### QA-08 · DSGVO-/Datenschutz-Review · ⏱ 3h · ✅
 **Beschreibung:** Personenbezogene Daten (Minderjährige!) prüfen: Speicherung,

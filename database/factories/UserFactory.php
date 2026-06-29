@@ -58,4 +58,44 @@ class UserFactory extends Factory
             'activated' => false,
         ]);
     }
+
+    /**
+     * Admin-Rolle zuweisen (nach create() ausgeführt).
+     */
+    public function admin(): static
+    {
+        return $this->afterCreating(function (\App\Models\User $user) {
+            $role = \App\Models\Role::where('slug', 'admin')->first();
+            if ($role) {
+                $user->roles()->syncWithoutDetaching([$role->id]);
+            }
+        });
+    }
+
+    /**
+     * Teamer-Rolle zuweisen (nach create() ausgeführt).
+     */
+    public function teamer(): static
+    {
+        return $this->afterCreating(function (\App\Models\User $user) {
+            $role = \App\Models\Role::where('slug', 'teamer')->first();
+            if ($role) {
+                $user->roles()->syncWithoutDetaching([$role->id]);
+            }
+        });
+    }
+
+    /**
+     * Beliebige Rolle per Slug zuweisen.
+     * Beispiel: User::factory()->withRole('game_master')->create()
+     */
+    public function withRole(string $slug): static
+    {
+        return $this->afterCreating(function (\App\Models\User $user) use ($slug) {
+            $role = \App\Models\Role::where('slug', $slug)->first();
+            if ($role) {
+                $user->roles()->syncWithoutDetaching([$role->id]);
+            }
+        });
+    }
 }
