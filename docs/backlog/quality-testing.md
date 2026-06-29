@@ -13,13 +13,18 @@ Code-Style durchgängig via Laravel Pint.
 
 ## Offen (🔲)
 
-### QA-03 · Browser-/E2E-Tests für Modals & AJAX · ⏱ 4h · 🔲
+### QA-03 · Browser-/E2E-Tests für Modals & AJAX · ⏱ 4h · ✅
 **Beschreibung:** Feature-Tests decken JS nicht ab. Dusk/Playwright für
 Modal-Öffnen, AJAX-Submit, Toasts.
 **Akzeptanzkriterien:**
-- [ ] E2E-Setup; Test: Liste → Modal öffnet → Formular absenden → Toast.
-- [ ] Läuft in CI (headless).
+- [x] Laravel Dusk installiert; ChromeDriver automatisch via `dusk:chrome-driver --detect`.
+- [x] 3 Tests in `tests/Browser/ModalAjaxTest`: Modal öffnen, AJAX-Submit → Toast, data-confirm → Abbrechen.
+- [x] Separater `dusk`-Job in CI (headless, nach `test`-Job, Screenshot-Artefakt bei Fehler).
+- [x] Reguläre PHPUnit-Suite schließt `tests/Browser/` nicht ein.
 **Abhängig von:** INFRA-03.
+
+> Lokal starten: `.env.dusk.local` anlegen (Vorlage: `.env.dusk.local.example`),
+> dann `php artisan serve --env=dusk.local &` + `php artisan dusk`.
 
 ### QA-04 · Test-Coverage-Messung & Zielwert · ⏱ 2h · ✅
 **Beschreibung:** Coverage erfassen und Mindestziel definieren.
