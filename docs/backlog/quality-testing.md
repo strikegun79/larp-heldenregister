@@ -27,11 +27,19 @@ Modal-Öffnen, AJAX-Submit, Toasts.
 - [ ] Coverage-Report (Xdebug/PCOV) lokal + CI.
 - [ ] Zielwert dokumentiert (z. B. ≥ 70 % der App-Klassen).
 
-### QA-05 · Statische Analyse (PHPStan/Larastan) · ⏱ 3h · 🔲
+### QA-05 · Statische Analyse (PHPStan/Larastan) · ⏱ 3h · ✅
 **Beschreibung:** Statische Typprüfung einführen.
 **Akzeptanzkriterien:**
-- [ ] Larastan auf Level n eingerichtet, grün.
-- [ ] In CI als Gate.
+- [x] Larastan auf Level 5 eingerichtet, grün (0 Fehler).
+- [x] In CI als Gate.
+
+> Umgesetzt: `larastan/larastan` v3 installiert, `phpstan.neon` auf Level 5.
+> 3 echte Bugs behoben: `abort_unless` mit `string|null` (IdCardController),
+> PHPDoc `array<int, string>` → `list<string>` für `$fillable`/`$hidden`
+> (User-Model). 71 Larastan-Inferenzprobleme (Eloquent-Collections, nullable
+> Datum-Casts, `HasOne::withTrashed()`, dynamische View-Namen) in
+> `phpstan-baseline.neon` erfasst. `.github/workflows/ci.yml` um
+> PHPStan-Gate erweitert.
 
 ### QA-06 · N+1-Queries auditieren · ⏱ 3h · 🔲
 **Beschreibung:** Listen/Modals auf Eager-Loading prüfen.

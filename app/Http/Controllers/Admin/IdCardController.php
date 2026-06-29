@@ -87,7 +87,7 @@ class IdCardController extends Controller
      */
     public function reprint(Hero $hero): Response
     {
-        abort_unless($hero->public_code, 404);
+        abort_unless((bool) $hero->public_code, 404);
 
         $cardData = [[
             'code'           => $hero->public_code,

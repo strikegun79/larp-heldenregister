@@ -76,5 +76,8 @@ jobs:
       - name: Pint (Code-Style)
         run: ./vendor/bin/pint --test
 
+      - name: PHPStan (Statische Analyse)
+        run: ./vendor/bin/phpstan analyse --memory-limit=512M --no-progress
+
       - name: PHPUnit-Tests
         run: php artisan test --stop-on-failure
