@@ -7,10 +7,14 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Cache;
 
 class MatrixAccount extends Model
 {
     use HasFactory, SoftDeletes;
+
+    /** Cache-Schlüssel der corporal-Policy (MTX-08). */
+    const CORPORAL_CACHE_KEY = 'matrix.corporal.policy';
 
     protected $primaryKey = 'mxid';
 
@@ -34,6 +38,15 @@ class MatrixAccount extends Model
         'forbid_room_creation' => 'boolean',
         'forbid_encrypted_room_creation' => 'boolean',
     ];
+
+    protected static function booted(): void
+    {
+        // Cache der corporal-Policy bei jeder Kontoänderung invalidieren (MTX-08).
+        $flush = fn () => Cache::forget(self::CORPORAL_CACHE_KEY);
+        static::saved($flush);
+        static::deleted($flush);
+        static::restored($flush);
+    }
 
     /**
      * Der Spieler hinter dem Matrix-Konto.

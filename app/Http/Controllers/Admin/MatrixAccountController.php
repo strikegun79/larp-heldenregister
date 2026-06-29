@@ -8,6 +8,7 @@ use App\Models\MatrixManagedRoom;
 use App\Models\Player;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
@@ -82,7 +83,9 @@ class MatrixAccountController extends Controller
             $account->save();
 
             // Raum-Mitgliedschaften abgleichen.
+            // sync() löst keine Model-Events aus → Cache manuell invalidieren (MTX-08).
             $account->rooms()->sync($request->input('rooms', []));
+            Cache::forget(MatrixAccount::CORPORAL_CACHE_KEY);
         });
 
         return back()->with('status', "Matrix-Konto für {$player->full_name} gespeichert.");

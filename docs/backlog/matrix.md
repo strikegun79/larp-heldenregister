@@ -55,11 +55,16 @@ Sonderzeichen enthalten (Legacy hatte `@mia lenja...`). Matrix-IDs erlauben das 
 > `uniqueMatrixId()` (Kollisions-sicher, wird bei Kontoanlage genutzt).
 > Controller nutzt jetzt `uniqueMatrixId()` statt `deriveMatrixId()`.
 
-### MTX-08 · Policy-Caching/Performance · ⏱ 2h · 🔲
+### MTX-08 · Policy-Caching/Performance · ⏱ 2h · ✅
 **Beschreibung:** corporal pollt regelmäßig; Policy-Antwort cachen/invalidieren.
 **Akzeptanzkriterien:**
-- [ ] Kurzes Caching der Policy mit Invalidierung bei Konto-/Raumänderung.
-- [ ] Test, dass Änderungen zeitnah sichtbar werden.
+- [x] `Cache::remember(60s)` in `CorporalPolicyController` (TTL via `MATRIX_CORPORAL_CACHE_TTL`).
+- [x] Invalidierung bei Konto-Änderung (`MatrixAccount::booted` saved/deleted/restored).
+- [x] Invalidierung bei Raum-Änderung (`MatrixManagedRoom::booted` saved/deleted).
+- [x] Explizites Flush nach `rooms()->sync()` (Pivot-Events lösen keine Model-Events aus).
+- [x] 6 Tests in `MatrixPolicyCachingTest` (Cache-Hit nachweis via QueryLog, alle Invalidierungs-Pfade).
+
+> Cache-Key `MatrixAccount::CORPORAL_CACHE_KEY = 'matrix.corporal.policy'`.
 
 ### MTX-09 · Provisionierungs-Audit & Statusanzeige · ⏱ 2h · 🔲
 **Beschreibung:** Nachvollziehbarkeit von Konto-/Raumänderungen.

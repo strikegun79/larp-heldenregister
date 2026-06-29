@@ -18,6 +18,9 @@ return [
     */
     'corporal_token' => env('MATRIX_CORPORAL_TOKEN'),
 
+    // Sekunden, für die die corporal-Policy gecacht wird (0 = kein Caching).
+    'corporal_cache_ttl' => (int) env('MATRIX_CORPORAL_CACHE_TTL', 60),
+
     // Statische Policy-Flags (1:1 aus dem Legacy corporal.php).
     'flags' => [
         'allowCustomUserDisplayNames' => false,
