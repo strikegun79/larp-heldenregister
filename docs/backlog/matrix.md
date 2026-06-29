@@ -18,13 +18,18 @@ Konto anlegen/aktivieren, Räume zuweisen, Zugang entziehen.
 
 ## Offen (🔲)
 
-### MTX-05 · Matrix-Räume verwalten (CRUD) · ⏱ 3h · 🔲
+### MTX-05 · Matrix-Räume verwalten (CRUD) · ⏱ 3h · ✅
 **Beschreibung:** `matrix_managed_rooms` werden nur in der Provisionierung
 referenziert, sind aber nicht pflegbar.
 **Akzeptanzkriterien:**
-- [ ] Admin-CRUD für Räume (roomid, Name, Typ Raum/Space, default_allow/deny).
-- [ ] Verwendung in der Provisionierungs-Raumauswahl.
-- [ ] Tests.
+- [x] Admin-CRUD für Räume (roomid, Name, Typ Raum/Space, default_allow/deny).
+- [x] Verwendung in der Provisionierungs-Raumauswahl.
+- [x] Tests.
+
+> Umgesetzt: `MatrixRoomController` (index/create/store/edit/update/destroy),
+> Views `admin/matrix/rooms/index.blade.php` + `_form.blade.php`. Route:
+> `admin.matrix.rooms.*` unter `can:portal.manage`. Löschen verhindert wenn
+> Mitglieder vorhanden. 11 Tests grün.
 
 ### MTX-06 · Default-Raum-Zuordnung anwenden · ⏱ 3h · 🔲
 **Beschreibung:** `default_allow` Räume sollten neuen Matrix-Konten automatisch

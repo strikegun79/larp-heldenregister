@@ -256,6 +256,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('players/{player}/matrix', [Admin\MatrixAccountController::class, 'edit'])->name('players.matrix.edit');
         Route::put('players/{player}/matrix', [Admin\MatrixAccountController::class, 'update'])->name('players.matrix.update');
         Route::delete('players/{player}/matrix', [Admin\MatrixAccountController::class, 'destroy'])->name('players.matrix.destroy');
+
+        // Matrix-Räume verwalten (MTX-05).
+        Route::resource('matrix/rooms', Admin\MatrixRoomController::class)
+            ->parameters(['rooms' => 'room'])
+            ->names('matrix.rooms');
     });
 
     // Teamer-Anmeldungen (ADV-27): Teamer/Lehrmeister melden sich zu Events an.
