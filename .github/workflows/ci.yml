@@ -34,7 +34,7 @@ jobs:
         with:
           php-version: "8.3"
           extensions: mbstring, pdo, pdo_mysql, xml, bcmath, gd, intl, zip
-          coverage: none
+          coverage: pcov
 
       - name: Composer-Cache
         uses: actions/cache@v4
@@ -79,5 +79,5 @@ jobs:
       - name: PHPStan (Statische Analyse)
         run: ./vendor/bin/phpstan analyse --memory-limit=512M --no-progress
 
-      - name: PHPUnit-Tests
-        run: php artisan test --stop-on-failure
+      - name: PHPUnit-Tests mit Coverage
+        run: php artisan test --coverage --min=70

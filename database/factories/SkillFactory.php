@@ -21,7 +21,7 @@ class SkillFactory extends Factory
             'description'   => $this->faker->sentence(),
             'ep_costs'      => $this->faker->numberBetween(0, 10),
             'level'         => $this->faker->numberBetween(1, 6),
-            'hero_class_id' => HeroClass::inRandomOrder()->value('id') ?? 1,
+            'hero_class_id' => HeroClass::inRandomOrder()->value('id'),
             'perl_color_id' => PerlColor::inRandomOrder()->value('id'),
             'perl_count'    => $this->faker->numberBetween(1, 5),
         ];

@@ -21,11 +21,17 @@ Modal-Öffnen, AJAX-Submit, Toasts.
 - [ ] Läuft in CI (headless).
 **Abhängig von:** INFRA-03.
 
-### QA-04 · Test-Coverage-Messung & Zielwert · ⏱ 2h · 🔲
+### QA-04 · Test-Coverage-Messung & Zielwert · ⏱ 2h · ✅
 **Beschreibung:** Coverage erfassen und Mindestziel definieren.
 **Akzeptanzkriterien:**
-- [ ] Coverage-Report (Xdebug/PCOV) lokal + CI.
-- [ ] Zielwert dokumentiert (z. B. ≥ 70 % der App-Klassen).
+- [x] Coverage-Report (Xdebug/PCOV) lokal + CI.
+- [x] Zielwert dokumentiert (z. B. ≥ 70 % der App-Klassen).
+
+> Umgesetzt: PCOV (php8.3-pcov) als Coverage-Driver. Baseline (668 Tests):
+> Lines 75,88 % (2171/2861) · Methods 69,37 % (308/444) · Classes 47,12 %.
+> CI-Gate: `--coverage --min=70` (Zeilen-Coverage). Lokal:
+> `php artisan test --coverage` oder `./vendor/bin/phpunit --coverage-text`.
+> Zielwert: ≥ 70 % Zeilen-Coverage als CI-Pflichtschranke.
 
 ### QA-05 · Statische Analyse (PHPStan/Larastan) · ⏱ 3h · ✅
 **Beschreibung:** Statische Typprüfung einführen.
