@@ -43,13 +43,17 @@ zugeordnet werden.
 > neue Konten vor; bestehende Konten behalten ihre tatsächlichen Räume.
 > View zeigt „Vorauswahl"-Hinweis und farbige Labels (Standard/Gesperrt).
 
-### MTX-07 · mxid-Kollision/Sanitisierung · ⏱ 3h · 🔲
+### MTX-07 · mxid-Kollision/Sanitisierung · ⏱ 3h · ✅
 **Beschreibung:** Abgeleitete mxid `@vorname.nachname:domain` kann Leer-/
 Sonderzeichen enthalten (Legacy hatte `@mia lenja...`). Matrix-IDs erlauben das nicht.
 **Akzeptanzkriterien:**
-- [ ] Sanitisierung (Kleinbuchstaben, Leerzeichen→`_`/entfernt, ASCII).
-- [ ] Kollisionsbehandlung bei doppelten Namen (Suffix).
-- [ ] Tests mit problematischen Namen.
+- [x] Sanitisierung (Kleinbuchstaben, Leerzeichen→`_`, Umlaute aufgelöst, Sonderzeichen entfernt).
+- [x] Kollisionsbehandlung bei doppelten Namen (`.2`, `.3`, …-Suffix).
+- [x] 15 Tests in `MatrixMxidSanitizationTest` (Umlaute, Akzente, Leerzeichen, Bindestrich, Kollisionen, Integration).
+
+> Umgesetzt: `Player::sanitizeMxidLocalpart()` (private), `deriveMatrixId()` (Vorschau),
+> `uniqueMatrixId()` (Kollisions-sicher, wird bei Kontoanlage genutzt).
+> Controller nutzt jetzt `uniqueMatrixId()` statt `deriveMatrixId()`.
 
 ### MTX-08 · Policy-Caching/Performance · ⏱ 2h · 🔲
 **Beschreibung:** corporal pollt regelmäßig; Policy-Antwort cachen/invalidieren.

@@ -67,7 +67,8 @@ class MatrixAccountController extends Controller
         DB::transaction(function () use ($player, $account, $active, $request) {
             if (! $account) {
                 // Neuanlage: mxid einmalig aus dem Namen ableiten.
-                $account = new MatrixAccount(['mxid' => $player->deriveMatrixId()]);
+                // uniqueMatrixId() sanitisiert + prüft Kollisionen (MTX-07).
+                $account = new MatrixAccount(['mxid' => $player->uniqueMatrixId()]);
                 $account->player_id = $player->id;
             }
 
