@@ -619,4 +619,11 @@ document.addEventListener('DOMContentLoaded', function () {
         if (flash.dataset.status) showToast(flash.dataset.status, 'success');
         if (flash.dataset.error)  showToast(flash.dataset.error,  'error');
     }
+
+    // ARCH-006: Service-Worker registrieren (PWA).
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/sw.js', { scope: '/' }).catch(function () {
+            // SW-Registrierung ist optional – kein Hard-Error bei Fehlschlag.
+        });
+    }
 });

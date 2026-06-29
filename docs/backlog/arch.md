@@ -143,7 +143,7 @@ weiteren Architekturentscheidungen.
 **Betroffene Bereiche:** `composer.json`, `CLAUDE.md`.
 **Abhängigkeiten:** Keine.
 
-### ARCH-006 · [P3] PWA-Fundament: Manifest, Service-Worker, Installierbarkeit · ⏱ 6h · 🔲
+### ARCH-006 · [P3] PWA-Fundament: Manifest, Service-Worker, Installierbarkeit · ⏱ 6h · ✅
 **Kategorie:** Architektur / Mobile / PWA
 **Beschreibung:** Nach Abschluss der Mobile-First-Umstellung (UI-38–UI-44) ist das
 Portal eine echte „eine-Sache-pro-Seite"-Web-App mit verlinkbaren URLs. Damit ist
@@ -157,22 +157,27 @@ Offline-Datenszenarien (Charakterbogen, Teilnehmerliste vor Ort) sind ein eigene
 späteres Ticket.
 **Nutzen:** Installierbares, app-typisches Erlebnis für Kinder/Jugendliche/Eltern;
 schnelleres Wiederöffnen; Grundlage für spätere Push-Benachrichtigungen.
-**Lösungshinweis (nur Vorschlag):** `manifest.webmanifest` (Name, Theme-/
-Background-Farbe Waldritter/Pergament, `display: standalone`, Icon-Satz
-192–512 px), via Vite/Blade einbinden. Schlanker Service-Worker (z. B. Workbox
-oder handgeschrieben) für App-Shell-/Asset-Caching (`vendor.css`, `vendor.js`,
-Logo, Fonts) mit Network-First für HTML. Kein neues Framework. Erst nach UI-38/39
-sinnvoll, weil dann stabile, verlinkbare Seiten-URLs existieren.
 **Akzeptanzkriterien:**
-- [ ] Gültiges Web-App-Manifest mit Icon-Satz; Lighthouse „Installable" grün.
-- [ ] Service-Worker cached App-Shell/Assets; HTML bleibt Network-First (keine
+- [x] Gültiges Web-App-Manifest mit Icon-Satz; Lighthouse „Installable" grün.
+- [x] Service-Worker cached App-Shell/Assets; HTML bleibt Network-First (keine
       veralteten Inhalte/Token-Probleme).
-- [ ] Auf Android Chrome und iOS Safari als „Zum Startbildschirm hinzufügen" prüfbar.
-- [ ] Kein zusätzliches JS-Framework; Build dokumentiert.
+- [x] Auf Android Chrome und iOS Safari als „Zum Startbildschirm hinzufügen" prüfbar.
+- [x] Kein zusätzliches JS-Framework; Build dokumentiert.
 **Betroffene Bereiche:** `public/` (Manifest, Icons), `resources/js/`, `vite.config.js`,
 `layouts/app.blade.php` (Manifest-/Theme-Color-Tags).
 **Abhängigkeiten:** Sinnvoll nach UI-38/UI-39 (stabile Seiten-URLs); Voraussetzung
 für eventuelle spätere Push-Benachrichtigungen und Offline-Datenszenarien.
+
+> Umgesetzt: `public/manifest.webmanifest` (name/short_name, theme_color `#5a3a22`,
+> background_color `#e4cea5`, display `standalone`, Icons 192/512/512-maskable).
+> Icons (`public/icons/`) mit PHP-GD generiert (Lato-Bold-TTF, Waldritter-Braun
+> mit gold „HR"). `public/sw.js`: Network-First für HTML, Cache-First für Assets
+> (`/build/`, `/icons/`, `/css/`); skipWaiting/clientsClaim; alte Cache-Versionen
+> beim Activate bereinigt. `layouts/app.blade.php`: `<link rel="manifest">`,
+> `<meta name="theme-color">`, Apple-Touch-Icon, apple-mobile-web-app-*-Tags.
+> `heldenregister.js`: SW-Registrierung in DOMContentLoaded.
+> 14 Tests in `tests/Feature/PwaManifestTest.php` (Pflichtfelder, Farben,
+> Icon-Satz, Maskable-Icon, Layout-Tags, Datei-Existenz).
 
 ### ARCH-007 · [P3] API-/Serialisierungs-Grundlage für spätere App-/Offline-Optionen · ⏱ 4h · 🔲
 **Kategorie:** Architektur / Skalierbarkeit
