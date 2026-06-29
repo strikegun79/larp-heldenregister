@@ -15,28 +15,25 @@ Zeilenzahlen-Vergleich; Non-bcrypt-Passwort-Hinweis.
 
 ## Offen (🔲)
 
-### ETL-04 · `hero2classes.class_id`-Inkonsistenz bereinigen · ⏱ 3h · 🔲
+### ETL-04 · `hero2classes.class_id`-Inkonsistenz bereinigen · ⏱ 3h · ✅
 **Beschreibung:** Legacy speichert mal `id`, mal `idname` (slug). Migration löst
 aktuell via slug auf; Quelldaten bzw. Mapping endgültig verifizieren.
 **Akzeptanzkriterien:**
-- [ ] Prüfskript meldet nicht auflösbare Klassenzuordnungen.
-- [ ] Alle Helden-Klassen korrekt migriert (Stichprobe + Zähler).
+- [x] Prüfskript meldet nicht auflösbare Klassenzuordnungen.
+- [x] Alle Helden-Klassen korrekt migriert (Stichprobe + Zähler).
 
-### ETL-05 · Trockenlauf-/Dry-Run-Modus · ⏱ 3h · 🔲
-**Beschreibung:** ETL ohne Schreibzugriff zur Vorab-Prüfung.
-**Akzeptanzkriterien:**
-- [ ] `--dry-run` zeigt geplante Inserts/Updates + Konflikte ohne Schreiben.
-- [ ] Report wie im Echtlauf.
+> Umgesetzt: `etl:check-hero-classes` Audit-Command. `migrateHeroClasses()`
+> löst numerische class_id über `type_classes.idname` auf; nicht auflösbare
+> Einträge werden gewarnt und übersprungen.
 
-### ETL-06 · Datenqualitäts-Report (verwaiste FKs, Dubletten) · ⏱ 3h · 🔲
-**Beschreibung:** Vor Go-Live Auffälligkeiten in den Legacy-Daten finden.
-**Akzeptanzkriterien:**
-- [ ] Report über verwaiste Referenzen, leere Pflichtfelder, doppelte E-Mails.
-- [ ] Ausgabe als Liste/CSV.
+## Gestrichen (~~)
 
-### ETL-07 · Re-Run-Sicherheit nach Go-Live dokumentieren · ⏱ 2h · 🔲
-**Beschreibung:** Klarstellen, wann/ob `migrate:legacy` nach Produktivbetrieb
-erneut laufen darf (Überschreiben vs. Erhalt manueller Änderungen).
-**Akzeptanzkriterien:**
-- [ ] Verhalten je Tabelle dokumentiert (update vs. insert-only).
-- [ ] Schutz produktiv geänderter Daten beschrieben/umgesetzt.
+### ~~ETL-05 · Trockenlauf-/Dry-Run-Modus~~ · entfällt
+Legacy-DB enthält keine Produktivdaten — das neue Portal ist bereits live.
+Ein Dry-Run-Modus bietet keinen Mehrwert mehr.
+
+### ~~ETL-06 · Datenqualitäts-Report (verwaiste FKs, Dubletten)~~ · entfällt
+Vor-Go-Live-Analyse der Legacy-Daten obsolet, da Migration abgeschlossen.
+
+### ~~ETL-07 · Re-Run-Sicherheit nach Go-Live dokumentieren~~ · entfällt
+Re-Run-Szenarien nicht mehr relevant, da keine Nachlieferung aus Legacy geplant.
