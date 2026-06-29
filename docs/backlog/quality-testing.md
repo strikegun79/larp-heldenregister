@@ -77,8 +77,14 @@ Löschkonzept, Exporte.
 > Alle Admin-Exporte (CSV, PDF) sind hinter `can:`-Middleware; Inhalte auf
 > das gesetzlich erforderliche Minimum geprüft.
 
-### QA-09 · Developer-Onboarding-Doku · ⏱ 2h · 🔲
+### QA-09 · Developer-Onboarding-Doku · ⏱ 2h · ✅
 **Beschreibung:** README/Setup für neue Entwickler.
 **Akzeptanzkriterien:**
-- [ ] Lokales Setup (DB, `migrate --seed`, Test-DB, `migrate:legacy`).
-- [ ] Architektur-/Berechtigungs-Überblick verlinkt (roadmap/permissions).
+- [x] Lokales Setup (DB, `migrate --seed`, Test-DB, `migrate:legacy`).
+- [x] Architektur-/Berechtigungs-Überblick verlinkt (roadmap/permissions).
+
+> Umgesetzt: README.md vollständig überarbeitet — Laravel-Boilerplate ersetzt
+> durch projektspezifische Doku: Voraussetzungen, Setup-Schritte, Admin-Account
+> via Tinker, Testdatenbank, Legacy-Migration, Architektur-Überblick mit
+> Verzeichnisstruktur, Rollenmodell-Tabelle, wichtige Artisan-Befehle,
+> Code-Qualitäts-Befehle.
