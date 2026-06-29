@@ -19,13 +19,18 @@
             {{-- Aktionen für Vollseite: auf Mobile sticky unten, auf Desktop inline --}}
             <x-mobile.sticky-footer class="mt-4">
                 {{-- Mobile: Accordion-Form (manage-adventure-form-mobile) --}}
-                <button type="submit" form="manage-adventure-form-mobile" class="ui primary button sm:hidden">
-                    <i class="save icon"></i> Speichern
-                </button>
+                {{-- Wrapper trägt die Sichtbarkeitsklasse, damit .ui.button sie nicht überschreibt --}}
+                <div class="sm:hidden">
+                    <button type="submit" form="manage-adventure-form-mobile" class="ui primary button">
+                        <i class="save icon"></i> Speichern
+                    </button>
+                </div>
                 {{-- Desktop: Tab-Form (manage-adventure-form) --}}
-                <button type="submit" form="manage-adventure-form" class="ui primary button hidden sm:inline-flex">
-                    <i class="save icon"></i> Speichern
-                </button>
+                <div class="hidden sm:block">
+                    <button type="submit" form="manage-adventure-form" class="ui primary button">
+                        <i class="save icon"></i> Speichern
+                    </button>
+                </div>
                 <a href="{{ route('adventures.show', $adventure) }}" class="ui button">&larr; Zur Detailansicht</a>
             </x-mobile.sticky-footer>
         </div>
