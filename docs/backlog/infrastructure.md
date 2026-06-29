@@ -87,9 +87,14 @@ Produktivbetrieb, Pipeline, Umgebung.
 > aus Umgebung (Standard 30 Tage). `docs/deployment.md` um Logging-Abschnitt
 > erweitert: logrotate-Konfiguration + optionale Sentry-Anbindung dokumentiert.
 
-### INFRA-08 · Legacy-Abschaltung & Cutover-Plan · ⏱ 2h · 🔲
+### INFRA-08 · Legacy-Abschaltung & Cutover-Plan · ⏱ 2h · ✅
 **Beschreibung:** Geordneter Wechsel vom Legacy-Portal.
 **Akzeptanzkriterien:**
-- [ ] Cutover-Checkliste (ETL-Endlauf, DNS/Docroot, corporal-URL umstellen).
-- [ ] Legacy read-only/offline; Backup behalten.
-- [ ] Kommunikation an Mitglieder.
+- [x] Cutover-Checkliste (ETL-Endlauf, DNS/Docroot, corporal-URL umstellen).
+- [x] Legacy read-only/offline; Backup behalten.
+- [x] Kommunikation an Mitglieder.
+
+> Umgesetzt: `docs/cutover.md` mit vollständiger Cutover-Checkliste:
+> Voraussetzungen, ETL-Endlauf, DNS-Umstellung, matrix-corporal-URL,
+> Legacy read-only/offline, Rollback-Plan, 48h-Post-Cutover-Monitoring
+> und Kommunikationsvorlage für Mitglieder.
