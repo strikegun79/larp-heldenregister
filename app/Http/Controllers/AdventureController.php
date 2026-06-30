@@ -80,7 +80,7 @@ class AdventureController extends Controller
     public function manageIndex(): View
     {
         $adventures = Adventure::with('status')
-            ->withCount('confirmedBookings')
+            ->withCount(['confirmedBookings', 'bookings', 'teamerSignups', 'epTransactions'])
             ->orderByDesc('start_at')
             ->paginate(25);
 
