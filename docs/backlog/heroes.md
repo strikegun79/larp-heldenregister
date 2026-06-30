@@ -278,11 +278,28 @@ für das Detail-Layout vergeben).
 ### HERO-23 · Helden-Verwaltungstab · ⏱ 1h · ✅ 
 **Beschreibung:** Für den Bürokraten ein Verwaltungstab anlegen
 **Akzeptanzkriterien:**
-- [] im Modal Helden-Detail soll ein weiterer Tab entstehen, den nur der Bürokrat oder Admin sehen kann, mit dem Namen "Verwalten"
-- [] in den Verwalten-Tab kommen die folgenden Funktionen rein
+- [x] im Modal Helden-Detail soll ein weiterer Tab entstehen, den nur der Bürokrat oder Admin sehen kann, mit dem Namen "Verwalten"
+- [x] in den Verwalten-Tab kommen die folgenden Funktionen rein
 	- die Felder um das Helden-Siegel ändern
 	- den Ausweis Drucken
 	- die Felder um eine Klasse hinzuzufügen
 	- der Button "verschollen" / "wiedergefunden"
-- [] alle Funktionen sollten mit einer horizontalen Linie getrennt werden für die visuelle Trennung
-- [] entferne den Button für alle um den Charakter-Bogen zu erstellen. Dafür gibt es nun die Public-Seite
+- [x] alle Funktionen sollten mit einer horizontalen Linie getrennt werden für die visuelle Trennung
+- [x] entferne den Button für alle um den Charakter-Bogen zu erstellen. Dafür gibt es nun die Public-Seite
+
+### HERO-24 · Helden-Galerie · ⏱ 1h ·  
+**Beschreibung:** Der Held hat eine eigene Bildergalerie
+**Akzeptanzkriterien:**
+- [] Betreuer und Bürokrat können die Helden-Galerie ändern.
+- [] Pro Held dürfen 4 zusätzliche Bilder als JPG maximal 5MB hochgeladen werden.
+- [] Editor zum Croppen soll auch nutzbar sein und dann in einer passenden JPG Qualität abgespeichert werden.
+- [] Die Galerie soll auf der Public Ansicht angezeigt werden.
+- [] Die Galerie hat nichts mit dem Avatar zu tun.
+- [] Die Galerie soll in einem neuen Tab dargestellt werden, zum hochladen und editieren der vorhanden Bilder.
+
+### HERO-25 · Helden-suchen per Siegel · ⏱ 1h · 
+**Beschreibung:** Die Heldenregister-Suche soll auch per Siegel möglich sein
+**Akzeptanzkriterien:**
+- [] neben Spielernamen, Charaktername und Fertigkeiten soll auch nach dem Siegel gesucht werden können
+
+

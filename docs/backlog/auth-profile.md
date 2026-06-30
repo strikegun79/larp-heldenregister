@@ -89,3 +89,10 @@ Mobiltelefon
 „Wir benötigen diese Daten zur Durchführung der Veranstaltung, zur Kontaktaufnahme und für rechtlich erforderliche Einwilligungen.”
 - [x] Der Hinweis ist verständlich und nicht zu lang.
 - [x] Keine zusätzlichen Einwilligungs-Checkboxen, sofern nicht notwendig.
+
+### AUTH-13 Email-Benachrichtigungen toggeln im Profil
+**Beschreibung:** Email-Benachrichtigungen können im Profil eingestellt werden
+**Akzeptanzkriterien:**
+- [] Jeden Benachrichtigungstyp soll nach den Rollen, die der Nutzer hat angezeigt werden.
+- [] Die Benachrichtigungen sollen gruppiert angezeigt werden. Visuelle Trennung nach Rollen
+- [] Beeinflusst nicht die Benachrichtigungen im Portal für den Nutzer.

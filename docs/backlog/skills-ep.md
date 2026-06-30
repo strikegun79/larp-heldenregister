@@ -119,9 +119,15 @@ beim Helden erfüllt sind.
 - [x] Partial `heroes/partials/_skill_columns.blade.php`; 6 Tests.
 **Abhängig von:** SKILL-05, SKILL-03.
 
-### SKILL-08 · Fertigkeiten-Katalog mit Symbolen · ⏱ 3h · ✅
+### SKILL-08 · Fertigkeiten-Katalog mit Symbolen · ⏱ 3h · 
 **Beschreibung:** Übersichtsseite aller Fertigkeiten mit den passenden Symbolen ergänzen.
 **Akzeptanzkriterien:**
 - [] möglichkeit zum hochladen des Symbols für die Fertigkeit
 - [] nur png oder jpg
 - [] reduziere das Symbol beim hochladen auf 100x100 pixel
+
+### SKILL-09 · Fertigkeiten-Katalog mit Heldenanzahl
+**Beschreibung:** jede Fertigkeit hat eine Spalte mit der Anzahl der aktiven Helden die die Fertigkeit erworben haben
+**Akzeptanzkriterien:**
+- [] nur aktive Helden, also keine verschollenden
+- [] button daneben zum öffnen eines Modals zum anzeigen einer Liste der Helden/Spieler die die Fertigkeit erworben haben
