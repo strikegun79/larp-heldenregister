@@ -2,9 +2,9 @@
     <x-slot name="header">
         <div class="flex items-center justify-between">
             <h2 class="font-uncial text-2xl text-waldritter leading-tight">Kommende Events</h2>
-            <a href="{{ route('adventures.index') }}">
-                    <x-primary-button>Listenansicht</x-primary-button>
-                </a>
+            <a href="{{ route('adventures.index') }}" class="ui button">
+                <i class="list icon"></i> Listenansicht
+            </a>
 
         </div>
     </x-slot>

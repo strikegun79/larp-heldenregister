@@ -3,16 +3,14 @@
         <div class="flex items-center justify-between">
             <h2 class="font-uncial text-2xl text-waldritter leading-tight">Abenteuer</h2>
             <div class="flex items-center gap-4">
-                <a href="{{ route('adventures.calendar') }}">
-                    <x-primary-button>Kalender</x-primary-button>
+                <a href="{{ route('adventures.calendar') }}" class="ui button">
+                    <i class="calendar icon"></i> Kalender
                 </a>
-
 
                 @can('events.edit')
-                <a href="{{ route('adventures.manage-index') }}">
-                    <x-primary-button>Verwaltung</x-primary-button>
+                <a href="{{ route('adventures.manage-index') }}" class="ui primary button">
+                    <i class="cogs icon"></i> Verwaltung
                 </a>
-
                 @endcan
             </div>
         </div>

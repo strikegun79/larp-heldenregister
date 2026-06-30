@@ -72,18 +72,22 @@
                         @endif
                     </dd>
                     @if ($canManagePublic)
-                        <dd class="mt-1 flex flex-wrap gap-3">
-                            <form method="POST" action="{{ route('heroes.visibility', $hero) }}" data-refresh-modal class="inline">
+                        <dd class="mt-3 flex flex-col gap-2">
+                            <form method="POST" action="{{ route('heroes.visibility', $hero) }}" data-refresh-modal class="ui form">
                                 @csrf @method('PATCH')
-                                <button type="submit" class="text-xs text-waldritter hover:underline">
-                                    {{ $hero->public_visible ? 'Profil verstecken' : 'Profil sichtbar machen' }}
-                                </button>
+                                <div class="ui toggle checkbox">
+                                    <input type="checkbox" {{ $hero->public_visible ? 'checked' : '' }}
+                                           onchange="this.form.requestSubmit()">
+                                    <label>Profil öffentlich sichtbar</label>
+                                </div>
                             </form>
-                            <form method="POST" action="{{ route('heroes.searchable', $hero) }}" data-refresh-modal class="inline">
+                            <form method="POST" action="{{ route('heroes.searchable', $hero) }}" data-refresh-modal class="ui form">
                                 @csrf @method('PATCH')
-                                <button type="submit" class="text-xs text-waldritter hover:underline">
-                                    {{ $hero->public_searchable ? 'Aus Suche entfernen' : 'In Suche aufnehmen' }}
-                                </button>
+                                <div class="ui toggle checkbox">
+                                    <input type="checkbox" {{ $hero->public_searchable ? 'checked' : '' }}
+                                           onchange="this.form.requestSubmit()">
+                                    <label>In öffentlicher Heldensuche anzeigen</label>
+                                </div>
                             </form>
                         </dd>
                     @endif
@@ -156,77 +160,91 @@
         {{-- Verwalten (nur Bürokrat / Admin) --}}
         @can('heldenregister.edit')
         <x-mobile.accordion-section title="Verwalten">
+            <div class="ui segments">
 
-            {{-- Helden-Siegel --}}
-            <h5 class="font-uncial text-sm text-waldritter mb-2">Helden-Siegel</h5>
-            <form method="POST" action="{{ route('heroes.assign-code', $hero) }}" data-refresh-modal class="ui form">
-                @csrf @method('PATCH')
-                <div class="flex items-end gap-2 flex-wrap">
-                    <div class="field !mb-0">
-                        <input type="text" name="code" maxlength="6" minlength="6"
-                               pattern="[A-HJ-NP-Z2-9]{6}"
-                               placeholder="XXXXXX"
-                               value="{{ old('code', $hero->public_code) }}"
-                               class="font-mono tracking-widest w-28 siegel-input"
-                               style="text-transform:uppercase"
-                               required>
-                    </div>
-                    <button type="submit" class="ui primary mini button">Siegel zuweisen</button>
-                </div>
-            </form>
-            @error('code') <p class="text-red-600 text-xs mt-1">{{ $message }}</p> @enderror
-            <p class="text-xs text-stone-400 mt-1">6 Zeichen aus A–Z (kein I/L/O) und 2–9</p>
-            @if ($hero->public_code)
-                <div class="mt-3">
-                    <a href="{{ route('admin.id-cards.reprint', $hero) }}" class="ui mini basic button" target="_blank" rel="noopener">
-                        <i class="print icon"></i> Ausweis drucken
-                    </a>
-                </div>
-            @endif
-
-            <hr class="my-4 border-stone-200">
-
-            {{-- Klasse hinzufügen --}}
-            <h5 class="font-uncial text-sm text-waldritter mb-2">Klasse hinzufügen</h5>
-            @if ($availableClasses->isNotEmpty())
-                <form method="POST" action="{{ route('heroes.classes.store', $hero) }}" data-refresh-modal class="ui form"
-                      data-confirm="Sollen die EP-Kosten wirklich abgezogen werden?"
-                      data-confirm-unless-id="class-free-mobile-{{ $hero->id }}"
-                      data-confirm-unless-val="1">
-                    @csrf
-                    <input type="hidden" name="free" id="class-free-mobile-{{ $hero->id }}" value="0">
-                    <div class="flex items-end gap-2 flex-wrap">
-                        <div class="field !mb-0">
-                            <select name="hero_class_id" required>
-                                @foreach ($availableClasses as $class)
-                                    <option value="{{ $class->id }}">{{ $class->name }} (−{{ $class->ep_cost }} EP)</option>
-                                @endforeach
-                            </select>
+                {{-- Helden-Siegel --}}
+                <div class="ui segment">
+                    <h5 class="font-uncial text-sm text-waldritter mb-2">
+                        <i class="id badge outline icon"></i> Helden-Siegel
+                    </h5>
+                    <form method="POST" action="{{ route('heroes.assign-code', $hero) }}" data-refresh-modal class="ui form">
+                        @csrf @method('PATCH')
+                        <div class="flex items-end gap-2 flex-wrap">
+                            <div class="field !mb-0">
+                                <input type="text" name="code" maxlength="6" minlength="6"
+                                       pattern="[A-HJ-NP-Z2-9]{6}"
+                                       placeholder="XXXXXX"
+                                       value="{{ old('code', $hero->public_code) }}"
+                                       class="font-mono tracking-widest w-28 siegel-input"
+                                       style="text-transform:uppercase"
+                                       required>
+                            </div>
+                            <button type="submit" class="ui primary mini button">Siegel zuweisen</button>
                         </div>
-                        <button type="submit" class="ui primary button"
-                                onclick="document.getElementById('class-free-mobile-{{ $hero->id }}').value='0'">Hinzufügen</button>
-                        <button type="submit" class="ui basic button"
-                                onclick="document.getElementById('class-free-mobile-{{ $hero->id }}').value='1'"
-                                title="Ohne EP-Abzug">Korrektur (0 EP)</button>
-                    </div>
-                </form>
-            @else
-                <p class="text-stone-500 text-sm">Alle verfügbaren Klassen sind bereits zugewiesen.</p>
-            @endif
+                    </form>
+                    @error('code') <p class="text-red-600 text-xs mt-1">{{ $message }}</p> @enderror
+                    <p class="text-xs text-stone-400 mt-1">6 Zeichen aus A–Z (kein I/L/O) und 2–9</p>
+                    @if ($hero->public_code)
+                        <div class="mt-3">
+                            <a href="{{ route('admin.id-cards.reprint', $hero) }}" class="ui mini basic button" target="_blank" rel="noopener">
+                                <i class="print icon"></i> Ausweis drucken
+                            </a>
+                        </div>
+                    @endif
+                </div>
 
-            <hr class="my-4 border-stone-200">
+                {{-- Klasse hinzufügen --}}
+                <div class="ui segment">
+                    <h5 class="font-uncial text-sm text-waldritter mb-2">
+                        <i class="graduation cap icon"></i> Klasse hinzufügen
+                    </h5>
+                    @if ($availableClasses->isNotEmpty())
+                        <form method="POST" action="{{ route('heroes.classes.store', $hero) }}" data-refresh-modal class="ui form"
+                              data-confirm="Sollen die EP-Kosten wirklich abgezogen werden?"
+                              data-confirm-unless-id="class-free-mobile-{{ $hero->id }}"
+                              data-confirm-unless-val="1">
+                            @csrf
+                            <input type="hidden" name="free" id="class-free-mobile-{{ $hero->id }}" value="0">
+                            <div class="flex items-end gap-2 flex-wrap">
+                                <div class="field !mb-0">
+                                    <select name="hero_class_id" required>
+                                        @foreach ($availableClasses as $class)
+                                            <option value="{{ $class->id }}">{{ $class->name }} (−{{ $class->ep_cost }} EP)</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <button type="submit" class="ui primary button"
+                                        onclick="document.getElementById('class-free-mobile-{{ $hero->id }}').value='0'">Hinzufügen</button>
+                                <button type="submit" class="ui basic button"
+                                        onclick="document.getElementById('class-free-mobile-{{ $hero->id }}').value='1'"
+                                        title="Ohne EP-Abzug">Korrektur (0 EP)</button>
+                            </div>
+                        </form>
+                    @else
+                        <p class="text-stone-500 text-sm">Alle verfügbaren Klassen sind bereits zugewiesen.</p>
+                    @endif
+                </div>
 
-            {{-- Verschollen / Wiedergefunden --}}
-            <h5 class="font-uncial text-sm text-waldritter mb-2">Held verschollen?</h5>
-            <form method="POST" action="{{ route('heroes.missing', $hero) }}" data-refresh-modal>
-                @csrf @method('PATCH')
-                @if ($hero->died)
-                    <button type="submit" class="ui small button">Als wiedergefunden markieren</button>
-                @else
-                    <button type="submit" class="ui small red button">Als verschollen markieren</button>
-                @endif
-            </form>
+                {{-- Verschollen / Wiedergefunden --}}
+                <div class="ui {{ $hero->died ? '' : 'red' }} segment">
+                    <h5 class="font-uncial text-sm {{ $hero->died ? 'text-waldritter' : 'text-red-700' }} mb-2">
+                        <i class="user {{ $hero->died ? 'check' : 'times' }} icon"></i> Held verschollen?
+                    </h5>
+                    <form method="POST" action="{{ route('heroes.missing', $hero) }}" data-refresh-modal>
+                        @csrf @method('PATCH')
+                        @if ($hero->died)
+                            <button type="submit" class="ui small green button">
+                                <i class="undo icon"></i> Als wiedergefunden markieren
+                            </button>
+                        @else
+                            <button type="submit" class="ui small red button">
+                                <i class="user times icon"></i> Als verschollen markieren
+                            </button>
+                        @endif
+                    </form>
+                </div>
 
+            </div>
         </x-mobile.accordion-section>
         @endcan
 
@@ -410,7 +428,8 @@
 
         {{-- Tab: Übersicht --}}
         <div class="ui bottom attached tab segment active" data-tab="overview">
-            <div class="float-right ml-4 mb-4 text-center" style="min-width:8rem;">
+            <div class="flex gap-4 items-start">
+            <div class="shrink-0 text-center" style="min-width:8rem;">
                 <img src="{{ $hero->image_url }}" alt="{{ $hero->character_name }}"
                      class="h-32 w-32 object-cover rounded border-2 border-[#5a3a22]/40">
 
@@ -449,8 +468,9 @@
                         @endif
                     </div>
                 @endif
-            </div>
-            <div class="bg-amber-50 border border-amber-200 rounded px-3 py-2 mb-3 text-sm text-amber-900 leading-snug clear-both">
+            </div>{{-- /shrink-0 Foto --}}
+            <div class="flex-1 min-w-0">
+            <div class="bg-amber-50 border border-amber-200 rounded px-3 py-2 mb-3 text-sm text-amber-900 leading-snug">
                 <strong>EP (Erfahrungspunkte)</strong> sammelst du durch Abenteuer-Teilnahme und gibst sie für Fertigkeiten aus. Die Fertigkeitsbäume findest du im Tab „Fertigkeiten" oben.
             </div>
             <dl class="grid grid-cols-2 gap-4 text-stone-800">
@@ -503,18 +523,22 @@
                         @endif
                     </dd>
                     @if ($canManagePublic)
-                        <dd class="mt-1 flex flex-wrap gap-3">
-                            <form method="POST" action="{{ route('heroes.visibility', $hero) }}" data-refresh-modal class="inline">
+                        <dd class="mt-3 flex flex-col gap-2">
+                            <form method="POST" action="{{ route('heroes.visibility', $hero) }}" data-refresh-modal class="ui form">
                                 @csrf @method('PATCH')
-                                <button type="submit" class="text-xs text-waldritter hover:underline">
-                                    {{ $hero->public_visible ? 'Profil verstecken' : 'Profil sichtbar machen' }}
-                                </button>
+                                <div class="ui toggle checkbox">
+                                    <input type="checkbox" {{ $hero->public_visible ? 'checked' : '' }}
+                                           onchange="this.form.requestSubmit()">
+                                    <label>Profil öffentlich sichtbar</label>
+                                </div>
                             </form>
-                            <form method="POST" action="{{ route('heroes.searchable', $hero) }}" data-refresh-modal class="inline">
+                            <form method="POST" action="{{ route('heroes.searchable', $hero) }}" data-refresh-modal class="ui form">
                                 @csrf @method('PATCH')
-                                <button type="submit" class="text-xs text-waldritter hover:underline">
-                                    {{ $hero->public_searchable ? 'Aus Suche entfernen' : 'In Suche aufnehmen' }}
-                                </button>
+                                <div class="ui toggle checkbox">
+                                    <input type="checkbox" {{ $hero->public_searchable ? 'checked' : '' }}
+                                           onchange="this.form.requestSubmit()">
+                                    <label>In öffentlicher Heldensuche anzeigen</label>
+                                </div>
                             </form>
                         </dd>
                     @endif
@@ -538,6 +562,8 @@
                 </div>
                 @endif
             </dl>
+            </div>{{-- /flex-1 --}}
+            </div>{{-- /flex --}}
 
             @if ($hero->description)
                 <h3 class="font-uncial text-lg text-waldritter mt-6 mb-2">Steckbrief</h3>
@@ -809,77 +835,94 @@
         {{-- Tab: Verwalten (nur Bürokrat / Admin) --}}
         @can('heldenregister.edit')
         <div class="ui bottom attached tab segment" data-tab="manage">
+            <div class="ui segments">
 
-            {{-- Helden-Siegel --}}
-            <h4 class="font-uncial text-base text-waldritter mb-3">Helden-Siegel</h4>
-            <form method="POST" action="{{ route('heroes.assign-code', $hero) }}" data-refresh-modal class="ui form">
-                @csrf @method('PATCH')
-                <div class="flex items-end gap-2 flex-wrap">
-                    <div class="field !mb-0">
-                        <input type="text" name="code" maxlength="6" minlength="6"
-                               pattern="[A-HJ-NP-Z2-9]{6}"
-                               placeholder="XXXXXX"
-                               value="{{ old('code', $hero->public_code) }}"
-                               class="font-mono tracking-widest w-28 siegel-input"
-                               style="text-transform:uppercase"
-                               required>
-                    </div>
-                    <button type="submit" class="ui primary small button">Siegel zuweisen</button>
-                </div>
-            </form>
-            @error('code') <p class="text-red-600 text-sm mt-1">{{ $message }}</p> @enderror
-            <p class="text-xs text-stone-400 mt-1">6 Zeichen aus A–Z (kein I/L/O) und 2–9</p>
-            @if ($hero->public_code)
-                <div class="mt-3">
-                    <a href="{{ route('admin.id-cards.reprint', $hero) }}" class="ui small basic button" target="_blank" rel="noopener">
-                        <i class="print icon"></i> Ausweis drucken
-                    </a>
-                </div>
-            @endif
-
-            <hr class="my-5 border-stone-200">
-
-            {{-- Klasse hinzufügen --}}
-            <h4 class="font-uncial text-base text-waldritter mb-3">Klasse hinzufügen</h4>
-            @if ($availableClasses->isNotEmpty())
-                <form method="POST" action="{{ route('heroes.classes.store', $hero) }}" data-refresh-modal class="ui form"
-                      data-confirm="Sollen die EP-Kosten wirklich abgezogen werden?"
-                      data-confirm-unless-id="class-free-{{ $hero->id }}"
-                      data-confirm-unless-val="1">
-                    @csrf
-                    <input type="hidden" name="free" id="class-free-{{ $hero->id }}" value="0">
-                    <div class="flex items-end gap-2 flex-wrap">
-                        <div class="field !mb-0">
-                            <select name="hero_class_id" required>
-                                @foreach ($availableClasses as $class)
-                                    <option value="{{ $class->id }}">{{ $class->name }} (−{{ $class->ep_cost }} EP)</option>
-                                @endforeach
-                            </select>
+                {{-- Helden-Siegel --}}
+                <div class="ui segment">
+                    <h4 class="ui header" style="font-family: inherit;">
+                        <i class="id badge outline icon"></i>
+                        <div class="content" style="font-family: 'MedievalSharp', serif; font-size: 1rem;">Helden-Siegel</div>
+                    </h4>
+                    <form method="POST" action="{{ route('heroes.assign-code', $hero) }}" data-refresh-modal class="ui form">
+                        @csrf @method('PATCH')
+                        <div class="flex items-end gap-2 flex-wrap">
+                            <div class="field !mb-0">
+                                <input type="text" name="code" maxlength="6" minlength="6"
+                                       pattern="[A-HJ-NP-Z2-9]{6}"
+                                       placeholder="XXXXXX"
+                                       value="{{ old('code', $hero->public_code) }}"
+                                       class="font-mono tracking-widest w-28 siegel-input"
+                                       style="text-transform:uppercase"
+                                       required>
+                            </div>
+                            <button type="submit" class="ui primary small button">Siegel zuweisen</button>
                         </div>
-                        <button type="submit" class="ui primary button"
-                                onclick="document.getElementById('class-free-{{ $hero->id }}').value='0'">Hinzufügen</button>
-                        <button type="submit" class="ui basic button"
-                                onclick="document.getElementById('class-free-{{ $hero->id }}').value='1'"
-                                title="Versehentlich entfernt? Ohne EP-Abzug wieder hinzufügen">Korrektur (0 EP)</button>
-                    </div>
-                </form>
-            @else
-                <p class="text-stone-500 text-sm">Alle verfügbaren Klassen sind bereits zugewiesen.</p>
-            @endif
+                    </form>
+                    @error('code') <p class="text-red-600 text-sm mt-1">{{ $message }}</p> @enderror
+                    <p class="text-xs text-stone-400 mt-1">6 Zeichen aus A–Z (kein I/L/O) und 2–9</p>
+                    @if ($hero->public_code)
+                        <div class="mt-3">
+                            <a href="{{ route('admin.id-cards.reprint', $hero) }}" class="ui small basic button" target="_blank" rel="noopener">
+                                <i class="print icon"></i> Ausweis drucken
+                            </a>
+                        </div>
+                    @endif
+                </div>
 
-            <hr class="my-5 border-stone-200">
+                {{-- Klasse hinzufügen --}}
+                <div class="ui segment">
+                    <h4 class="ui header">
+                        <i class="graduation cap icon"></i>
+                        <div class="content" style="font-family: 'MedievalSharp', serif; font-size: 1rem;">Klasse hinzufügen</div>
+                    </h4>
+                    @if ($availableClasses->isNotEmpty())
+                        <form method="POST" action="{{ route('heroes.classes.store', $hero) }}" data-refresh-modal class="ui form"
+                              data-confirm="Sollen die EP-Kosten wirklich abgezogen werden?"
+                              data-confirm-unless-id="class-free-{{ $hero->id }}"
+                              data-confirm-unless-val="1">
+                            @csrf
+                            <input type="hidden" name="free" id="class-free-{{ $hero->id }}" value="0">
+                            <div class="flex items-end gap-2 flex-wrap">
+                                <div class="field !mb-0">
+                                    <select name="hero_class_id" required>
+                                        @foreach ($availableClasses as $class)
+                                            <option value="{{ $class->id }}">{{ $class->name }} (−{{ $class->ep_cost }} EP)</option>
+                                        @endforeach
+                                    </select>
+                                </div>
+                                <button type="submit" class="ui primary button"
+                                        onclick="document.getElementById('class-free-{{ $hero->id }}').value='0'">Hinzufügen</button>
+                                <button type="submit" class="ui basic button"
+                                        onclick="document.getElementById('class-free-{{ $hero->id }}').value='1'"
+                                        title="Versehentlich entfernt? Ohne EP-Abzug wieder hinzufügen">Korrektur (0 EP)</button>
+                            </div>
+                        </form>
+                    @else
+                        <p class="text-stone-500 text-sm">Alle verfügbaren Klassen sind bereits zugewiesen.</p>
+                    @endif
+                </div>
 
-            {{-- Verschollen / Wiedergefunden --}}
-            <h4 class="font-uncial text-base text-waldritter mb-3">Held verschollen?</h4>
-            <form method="POST" action="{{ route('heroes.missing', $hero) }}" data-refresh-modal>
-                @csrf @method('PATCH')
-                @if ($hero->died)
-                    <button type="submit" class="ui small button">Als wiedergefunden markieren</button>
-                @else
-                    <button type="submit" class="ui small red button">Als verschollen markieren</button>
-                @endif
-            </form>
+                {{-- Verschollen / Wiedergefunden --}}
+                <div class="ui {{ $hero->died ? '' : 'red' }} segment">
+                    <h4 class="ui header">
+                        <i class="user {{ $hero->died ? 'check' : 'times' }} icon"></i>
+                        <div class="content" style="font-family: 'MedievalSharp', serif; font-size: 1rem;">Held verschollen?</div>
+                    </h4>
+                    <form method="POST" action="{{ route('heroes.missing', $hero) }}" data-refresh-modal>
+                        @csrf @method('PATCH')
+                        @if ($hero->died)
+                            <button type="submit" class="ui small green button">
+                                <i class="undo icon"></i> Als wiedergefunden markieren
+                            </button>
+                        @else
+                            <button type="submit" class="ui small red button">
+                                <i class="user times icon"></i> Als verschollen markieren
+                            </button>
+                        @endif
+                    </form>
+                </div>
 
+            </div>
         </div>
         @endcan
 

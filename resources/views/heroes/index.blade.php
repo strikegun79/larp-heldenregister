@@ -5,8 +5,8 @@
                 Heldenregister
             </h2>
             @can('heldenregister.edit')
-                <a href="{{ route('heroes.create') }}">
-                    <x-primary-button>Neuer Held</x-primary-button>
+                <a href="{{ route('heroes.create') }}" class="ui primary button">
+                    <i class="plus icon"></i> Neuer Held
                 </a>
             @endcan
         </div>

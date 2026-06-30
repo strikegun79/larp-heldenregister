@@ -74,6 +74,8 @@ function loadModalContent(url, preserveTab) {
             initFomanticCalendars($content);
             // PUB-05: QR-Code nach Modal-Load rendern.
             initQrCodes($content);
+            // UX-901: Toggle-Checkboxen (z. B. Sichtbarkeit/Suchbarkeit im Helden-Detail).
+            $content.find('.ui.checkbox').checkbox();
             $('#app-modal').modal('refresh');
             // UI-11: Fokus nach AJAX-Load ins Modal verschieben.
             requestAnimationFrame(function () {
@@ -161,6 +163,8 @@ function loadStackContent(url, preserveTab) {
             initFomanticCalendars($content);
             // PUB-05: QR-Code nach Stack-Modal-Load rendern.
             initQrCodes($content);
+            // UX-901: Toggle-Checkboxen im gestapelten Modal initialisieren.
+            $content.find('.ui.checkbox').checkbox();
             $('#app-modal-2').modal('refresh');
             // UI-11: Fokus nach AJAX-Load ins gestapelte Modal verschieben.
             requestAnimationFrame(function () {

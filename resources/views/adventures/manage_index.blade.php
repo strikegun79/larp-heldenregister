@@ -2,7 +2,9 @@
     <x-slot name="header">
         <div class="flex items-center justify-between">
             <h2 class="font-uncial text-2xl text-waldritter leading-tight">Abenteuer verwalten</h2>
-            <a href="{{ route('adventures.create') }}"><x-primary-button>Neues Abenteuer</x-primary-button></a>
+            <a href="{{ route('adventures.create') }}" class="ui primary button">
+                <i class="plus icon"></i> Neues Abenteuer
+            </a>
         </div>
     </x-slot>
 
@@ -150,8 +152,8 @@
             </div>
 
             <br>
-            <a href="{{ route('admin.index') }}">
-                <x-primary-button>Zurück zur Verwaltung</x-primary-button>
+            <a href="{{ route('admin.index') }}" class="ui button">
+                <i class="arrow left icon"></i> Zurück zur Verwaltung
             </a>
             <div class="mt-4">{{ $adventures->links() }}</div>
         </div>

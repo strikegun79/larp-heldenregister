@@ -8,11 +8,17 @@
             @include('adventures._form', ['inModal' => true])
         </form>
         @if ($adventure->event_status_id !== \App\Models\EventStatus::CANCELLED)
-            <div class="mt-4 pt-4 border-t border-stone-300">
+            <div class="ui red segment mt-4">
+                <h5 class="ui header" style="color: #9b2c2c;">
+                    <i class="ban icon"></i>
+                    <div class="content">Gefahrenzone</div>
+                </h5>
                 <form method="POST" action="{{ route('adventures.cancel', $adventure) }}" data-refresh-modal
                       data-confirm="Abenteuer wirklich absagen? Es sind danach keine Anmeldungen mehr möglich.">
                     @csrf @method('PATCH')
-                    <button type="submit" class="ui red basic button">Abenteuer absagen</button>
+                    <button type="submit" class="ui red basic button">
+                        <i class="ban icon"></i> Abenteuer absagen
+                    </button>
                 </form>
             </div>
         @else
@@ -62,11 +68,17 @@
             @include('adventures._form', ['inModal' => true])
         </form>
         @if ($adventure->event_status_id !== \App\Models\EventStatus::CANCELLED)
-            <div class="mt-4 pt-4 border-t border-stone-300">
+            <div class="ui red segment mt-4">
+                <h5 class="ui header" style="color: #9b2c2c;">
+                    <i class="ban icon"></i>
+                    <div class="content">Gefahrenzone</div>
+                </h5>
                 <form method="POST" action="{{ route('adventures.cancel', $adventure) }}" data-refresh-modal
                       data-confirm="Abenteuer wirklich absagen? Es sind danach keine Anmeldungen mehr möglich.">
                     @csrf @method('PATCH')
-                    <button type="submit" class="ui red basic button">Abenteuer absagen</button>
+                    <button type="submit" class="ui red basic button">
+                        <i class="ban icon"></i> Abenteuer absagen
+                    </button>
                 </form>
             </div>
         @else
