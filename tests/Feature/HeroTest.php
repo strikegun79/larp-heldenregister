@@ -282,6 +282,19 @@ class HeroTest extends TestCase
             ->assertDontSee('Krieger ohne Skill');
     }
 
+    public function test_index_search_finds_heroes_by_siegel(): void
+    {
+        // HERO-25: Suche per Siegel (public_code)
+        $hero = Hero::factory()->create(['character_name' => 'Siegelritter', 'public_code' => 'AB2345']);
+        Hero::factory()->create(['character_name' => 'Anderer Held', 'public_code' => 'XY6789']);
+
+        $this->actingAs($this->userWithRole(20))
+            ->get(route('heroes.index', ['q' => 'AB2345']))
+            ->assertOk()
+            ->assertSee('Siegelritter')
+            ->assertDontSee('Anderer Held');
+    }
+
     public function test_index_filter_by_class(): void
     {
         $warrior = Hero::factory()->create(['character_name' => 'Kriegerheld']);

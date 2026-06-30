@@ -40,6 +40,7 @@ class HeroController extends Controller
             ->when($playerId, fn ($query) => $query->where('player_id', $playerId))
             ->when($q !== '', fn ($query) => $query->where(function ($w) use ($q) {
                 $w->where('character_name', 'like', "%{$q}%")
+                    ->orWhere('public_code', 'like', "%{$q}%") // HERO-25: Suche per Siegel
                     ->orWhereHas('player', fn ($p) => $p
                         ->where('name', 'like', "%{$q}%")
                         ->orWhere('lastname', 'like', "%{$q}%"))
