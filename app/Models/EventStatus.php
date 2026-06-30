@@ -22,6 +22,9 @@ class EventStatus extends Model
     /** Status „Anmeldung geschlossen" – ab hier ist Check-in möglich (ADV-14). */
     public const REGISTRATION_CLOSED = 40;
 
+    /** Status „Abgeschlossen" – terminal, keine weiteren Übergänge außer Absage. */
+    public const COMPLETED = 60;
+
     /** Status „abgesagt" (ADV-14-Nummerierung). */
     public const CANCELLED = 70;
 

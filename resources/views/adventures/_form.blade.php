@@ -84,6 +84,22 @@
         </div>
     </div>
 
+    {{-- Sichtbarkeit: manuelles Ausblenden für Teilnehmer/Teamer --}}
+    <div class="flex items-start gap-3 p-3 bg-amber-50 border border-amber-200 rounded-md">
+        <input type="hidden" name="is_hidden" value="0">
+        <input type="checkbox" id="is_hidden" name="is_hidden" value="1"
+               class="mt-0.5 rounded border-gray-300 text-amber-700 focus:ring-amber-600"
+               @checked(old('is_hidden', $adventure->is_hidden ?? false))>
+        <div>
+            <label for="is_hidden" class="font-medium text-amber-900 cursor-pointer">
+                Für Teilnehmer ausblenden
+            </label>
+            <p class="text-sm text-amber-700 mt-0.5">
+                Das Abenteuer ist dann nur für Verwalter sichtbar – unabhängig vom Status.
+            </p>
+        </div>
+    </div>
+
     {{-- Spielleiter & Eventleiter (ADV-11): berechtigte Nutzer. --}}
     <div class="grid grid-cols-2 gap-4">
         <div>

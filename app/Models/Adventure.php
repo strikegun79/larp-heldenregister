@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -26,6 +27,7 @@ class Adventure extends Model
         'event_category_id',
         'max_player',
         'waitlist',
+        'is_hidden',
         'fee',
         'legacy_id',
     ];
@@ -38,6 +40,7 @@ class Adventure extends Model
         'loot_ep_day' => 'integer',
         'max_player' => 'integer',
         'waitlist' => 'integer',
+        'is_hidden' => 'boolean',
     ];
 
     public function location(): BelongsTo
@@ -143,5 +146,57 @@ class Adventure extends Model
     public function isFull(): bool
     {
         return $this->freeSlots() === 0;
+    }
+
+    /**
+     * Scope: nur für diesen Nutzer sichtbare Abenteuer.
+     * Verwalter (events.edit) sehen immer alles.
+     * Alle anderen sehen nur nicht-ausgeblendete Events – und bei Status
+     * „Abgeschlossen" oder „abgesagt" nur dann, wenn sie angemeldet sind.
+     *
+     * @param  Builder<Adventure>  $query
+     */
+    public function scopeVisibleFor(Builder $query, User $user): Builder
+    {
+        if ($user->hasPermission('events.edit')) {
+            return $query;
+        }
+
+        $playerIds = $user->players()->pluck('players.id');
+
+        return $query
+            ->where('is_hidden', false)
+            ->where(function (Builder $q) use ($user, $playerIds) {
+                // Status weder abgeschlossen noch abgesagt: immer zeigen.
+                $q->whereNotIn('event_status_id', [EventStatus::COMPLETED, EventStatus::CANCELLED])
+                    // Abgeschlossen/abgesagt: nur zeigen, wenn angemeldet.
+                    ->orWhere(function (Builder $reg) use ($user, $playerIds) {
+                        $reg->whereHas('teamerSignups', fn (Builder $ts) => $ts->where('user_id', $user->id));
+                        if ($playerIds->isNotEmpty()) {
+                            $reg->orWhereHas('bookings', fn (Builder $b) => $b->whereIn('player_id', $playerIds->all()));
+                        }
+                    });
+            });
+    }
+
+    /**
+     * Ist dieses Abenteuer für den angegebenen Nutzer sichtbar (für show()-Zugriff).
+     */
+    public function isVisibleFor(User $user): bool
+    {
+        if ($user->hasPermission('events.edit')) {
+            return true;
+        }
+        if ($this->is_hidden) {
+            return false;
+        }
+        if (! in_array($this->event_status_id, [EventStatus::COMPLETED, EventStatus::CANCELLED], true)) {
+            return true;
+        }
+        // Abgeschlossen/abgesagt: nur wenn angemeldet.
+        $playerIds = $user->players()->pluck('players.id');
+
+        return $this->teamerSignups()->where('user_id', $user->id)->exists()
+            || ($playerIds->isNotEmpty() && $this->bookings()->whereIn('player_id', $playerIds->all())->exists());
     }
 }

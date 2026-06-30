@@ -19,6 +19,7 @@ use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class AdventureController extends Controller
 {
@@ -45,6 +46,7 @@ class AdventureController extends Controller
 
         $adventures = Adventure::with(['location', 'status', 'category'])
             ->withCount('confirmedBookings')
+            ->visibleFor($request->user())
             ->when($q, fn ($query) => $query->where('name', 'like', "%{$q}%"))
             ->orderByDesc('start_at')
             ->paginate(20)
@@ -57,10 +59,11 @@ class AdventureController extends Controller
      * Kalender-/Listenansicht kommender Events, chronologisch nach Monat
      * gruppiert (ADV-12).
      */
-    public function calendar(): View
+    public function calendar(Request $request): View
     {
         $events = Adventure::with(['location', 'status'])
             ->withCount('confirmedBookings')
+            ->visibleFor($request->user())
             ->whereNotNull('start_at')
             ->where('start_at', '>=', now()->startOfDay())
             ->orderBy('start_at')
@@ -106,6 +109,12 @@ class AdventureController extends Controller
 
     public function show(Request $request, Adventure $adventure): View
     {
+        // Ausgeblendete / abgeschlossene / abgesagte Events: nur für Verwalter
+        // oder angemeldete Nutzer zugänglich (ADV-HIDE).
+        if (! $adventure->isVisibleFor($request->user())) {
+            abort(404);
+        }
+
         $adventure->load(['location', 'status', 'category', 'client', 'bookings.player', 'bookings.role', 'visits', 'gamemaster', 'eventleader', 'teamerSignups.user']);
 
         // Buchbare Spieler: Bürokrat/Admin alle, sonst nur eigene/betreute (BOOK-10).
@@ -126,11 +135,11 @@ class AdventureController extends Controller
         $myTeamerSignup = $teamerSignups->firstWhere('user_id', $request->user()->id);
 
         $data = [
-            'adventure'      => $adventure,
-            'players'        => $players,
-            'roles'          => EventRole::orderBy('id')->get(),
+            'adventure' => $adventure,
+            'players' => $players,
+            'roles' => EventRole::orderBy('id')->get(),
             'visibleBookings' => $visibleBookings,
-            'teamerSignups'  => $teamerSignups,
+            'teamerSignups' => $teamerSignups,
             'myTeamerSignup' => $myTeamerSignup,
         ];
 
@@ -153,7 +162,7 @@ class AdventureController extends Controller
         $mainBookings = $adventure->bookings->where('event_role_id', '!=', EventRole::NSC_ROLE_ID)->values();
 
         $data = array_merge($this->formData($adventure), [
-            'nscBookings'  => $nscBookings,
+            'nscBookings' => $nscBookings,
             'mainBookings' => $mainBookings,
         ]);
 
@@ -234,7 +243,7 @@ class AdventureController extends Controller
      * Teilnahme-/Belegungsreport eines Events als CSV (REP-03): je Anmeldung
      * Spieler/Rolle/Liste/Status/Beitrag/Anwesend, plus Summenzeile.
      */
-    public function participationCsv(Adventure $adventure): \Symfony\Component\HttpFoundation\StreamedResponse
+    public function participationCsv(Adventure $adventure): StreamedResponse
     {
         $adventure->load(['bookings.player', 'bookings.role', 'visits']);
         $visitedIds = $adventure->visits->pluck('player_id');
@@ -337,7 +346,7 @@ class AdventureController extends Controller
      */
     private function validateAdventure(Request $request): array
     {
-        return $request->validate([
+        $data = $request->validate([
             'name' => ['required', 'string', 'max:200'],
             'function_email' => ['nullable', 'email', 'max:255'],
             'gamemaster_id' => ['nullable', 'exists:users,id'],
@@ -352,6 +361,12 @@ class AdventureController extends Controller
             'max_player' => ['required', 'integer', 'min:1'],
             'waitlist' => ['integer', 'min:0'],
             'fee' => ['required', 'numeric', 'min:0'],
+            'is_hidden' => ['boolean'],
         ]);
+
+        // Checkbox sendet keinen Wert wenn nicht angehakt → false setzen.
+        $data['is_hidden'] = $request->boolean('is_hidden');
+
+        return $data;
     }
 }
