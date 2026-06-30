@@ -103,10 +103,11 @@ class HeroTest extends TestCase
             ->get(route('heroes.show', $hero), ['X-Requested-With' => 'XMLHttpRequest'])
             ->assertOk()
             ->assertSee('data-tab="overview"', false)
+            ->assertSee('data-tab="skills"', false)
             ->assertSee('data-tab="adventures"', false)
-            ->assertSee('data-tab="cls-1"', false)
             ->assertSee('data-tab="ep"', false)
-            ->assertSeeInOrder(['Übersicht', 'Abenteuer', 'Krieger', 'EP-Verlauf']);
+            ->assertSee('data-tab="manage"', false)
+            ->assertSeeInOrder(['Übersicht', 'Abenteuer', 'Krieger', 'EP-Verlauf', 'Verwalten']);
     }
 
     public function test_adventure_history_aggregates_type50_ep_with_adventures(): void

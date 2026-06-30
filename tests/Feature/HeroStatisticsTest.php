@@ -60,7 +60,7 @@ class HeroStatisticsTest extends TestCase
         $this->actingAs($user)
             ->get(route('heroes.show', $hero), ['X-Requested-With' => 'XMLHttpRequest'])
             ->assertOk()
-            ->assertSee('EP gesamt / ausgegeben')
+            ->assertSee('EP gesammelt / ausgegeben')
             ->assertSee('Fertigkeiten / Klassen');
     }
 }
