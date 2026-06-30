@@ -133,6 +133,19 @@
             @endif
         </div>
 
+        {{-- Galerie (HERO-24) --}}
+        @if ($hero->galleryImages->isNotEmpty())
+        <div class="bg-white/70 border-2 border-[#5a3a22]/40 shadow sm:rounded-lg p-5 mb-6">
+            <h2 class="font-uncial text-lg text-waldritter mb-3">Galerie</h2>
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                @foreach ($hero->galleryImages as $img)
+                    <img src="{{ $img->url }}" alt="Galerie-Bild"
+                         class="w-full h-auto rounded border border-stone-200">
+                @endforeach
+            </div>
+        </div>
+        @endif
+
         {{-- Teilen --}}
         <div class="bg-white/70 border-2 border-[#5a3a22]/40 shadow sm:rounded-lg p-5 mb-6 text-center">
             <p class="text-sm text-stone-600 mb-2">

@@ -7,6 +7,7 @@ use App\Http\Controllers\BookingController;
 use App\Http\Controllers\EpTransactionController;
 use App\Http\Controllers\HeroClassController;
 use App\Http\Controllers\HeroController;
+use App\Http\Controllers\HeroGalleryController;
 use App\Http\Controllers\HeroSkillController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PlayerController;
@@ -82,6 +83,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Helden-Foto Upload + Löschen (HERO-22).
     Route::post('heroes/{hero}/photo', [HeroController::class, 'uploadPhoto'])->name('heroes.photo');
     Route::delete('heroes/{hero}/photo', [HeroController::class, 'deletePhoto'])->name('heroes.photo.destroy');
+    // Galerie (HERO-24).
+    Route::post('heroes/{hero}/gallery', [HeroGalleryController::class, 'store'])->name('heroes.gallery.store');
+    Route::delete('heroes/{hero}/gallery/{image}', [HeroGalleryController::class, 'destroy'])->name('heroes.gallery.destroy');
     // Fertigkeit erlernen (HERO-14) / aberkennen (HERO-16).
     Route::post('heroes/{hero}/skills', [HeroSkillController::class, 'store'])->name('heroes.skills.store');
     Route::delete('heroes/{hero}/skills/{skill}', [HeroSkillController::class, 'destroy'])->name('heroes.skills.destroy');

@@ -205,4 +205,10 @@ class Hero extends Model
     {
         return $this->classes->pluck('slug')->implode(', ');
     }
+
+    /** HERO-24: Galerie-Bilder (max. 4, sortiert). */
+    public function galleryImages(): HasMany
+    {
+        return $this->hasMany(HeroGalleryImage::class)->orderBy('sort_order');
+    }
 }

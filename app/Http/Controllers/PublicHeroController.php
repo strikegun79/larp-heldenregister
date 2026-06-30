@@ -67,6 +67,7 @@ class PublicHeroController extends Controller
                 'skills.perlColor',
                 'groups',
                 'epTransactions.type',
+                'galleryImages', // HERO-24: Galerie-Bilder.
             ])
             ->firstOrFail();
 

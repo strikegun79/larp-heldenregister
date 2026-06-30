@@ -486,6 +486,7 @@ document.getElementById('skill-modal-revoke').addEventListener('click', function
 let photoCropper      = null;
 let photoCropUrl      = null;
 let photoCropCallback = null;
+let photoCropAspect   = 1;
 
 $('#photo-crop-modal').modal({
     allowMultiple: true,
@@ -495,7 +496,7 @@ $('#photo-crop-modal').modal({
         const img = document.getElementById('photo-crop-img');
         if (photoCropper) { photoCropper.destroy(); }
         photoCropper = new Cropper(img, {
-            aspectRatio:  1,
+            aspectRatio:  photoCropAspect,
             viewMode:     1,
             autoCropArea: 1,
             background:   false,
@@ -508,17 +509,18 @@ $('#photo-crop-modal').modal({
     },
 });
 
-function openPhotoCropper(file, uploadUrl, onSuccess) {
+// opts: { aspectRatio: 1 } für Avatar-Quadrat, { aspectRatio: NaN } für freies Format (Galerie).
+function openPhotoCropper(file, uploadUrl, onSuccess, opts) {
     if (file.size > 20 * 1024 * 1024) {
         showToast('Bild zu groß (max. 20 MB).', 'error');
         return;
     }
     photoCropUrl      = uploadUrl;
     photoCropCallback = onSuccess || null;
+    photoCropAspect   = (opts && opts.aspectRatio !== undefined) ? opts.aspectRatio : 1;
 
     const reader = new FileReader();
     reader.onload = function (e) {
-        // src setzen bevor show() – onVisible kann Cropper korrekt messen.
         document.getElementById('photo-crop-img').src = e.target.result;
         $('#photo-crop-modal').modal('show');
     };
@@ -530,7 +532,9 @@ document.getElementById('photo-crop-save-btn').addEventListener('click', functio
     if (!photoCropper || !photoCropUrl) return;
     const btn = this;
     btn.classList.add('loading', 'disabled');
-    photoCropper.getCroppedCanvas({ width: 400, height: 400 }).toBlob(function (blob) {
+    // Für freies Seitenverhältnis (Galerie) max 1200×900; für Avatar 400×400.
+    const canvasOpts = isNaN(photoCropAspect) ? { maxWidth: 1200, maxHeight: 900 } : { width: 400, height: 400 };
+    photoCropper.getCroppedCanvas(canvasOpts).toBlob(function (blob) {
         const fd = new FormData();
         fd.append('_token', document.querySelector('meta[name=csrf-token]').content);
         fd.append('image', blob, 'photo.jpg');

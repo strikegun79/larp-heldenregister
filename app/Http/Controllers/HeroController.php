@@ -214,6 +214,7 @@ class HeroController extends Controller
             'epTransactions.type',
             'epTransactions.adventure',
             'groups', // GRP-05: Gruppenzugehörigkeit im Detail anzeigen.
+            'galleryImages', // HERO-24: Galerie-Bilder.
         ]);
 
         $data = [

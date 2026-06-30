@@ -405,6 +405,41 @@
                 <p class="text-stone-500 text-sm">Keine EP-Buchungen.</p>
             @endforelse
         </x-mobile.accordion-section>
+
+        {{-- Galerie (HERO-24) --}}
+        @if ($hero->galleryImages->isNotEmpty() || $canEditPhoto)
+        <x-mobile.accordion-section title="Galerie">
+            <div class="grid grid-cols-2 gap-2">
+                @foreach ($hero->galleryImages as $img)
+                    <div class="relative">
+                        <img src="{{ $img->url }}" alt="Galerie-Bild"
+                             class="w-full h-auto rounded border border-stone-200">
+                        @if ($canEditPhoto)
+                            <form method="POST" action="{{ route('heroes.gallery.destroy', [$hero, $img]) }}" data-refresh-modal>
+                                @csrf @method('DELETE')
+                                <button type="submit"
+                                        class="absolute top-1 right-1 ui mini red icon button"
+                                        title="Bild löschen">
+                                    <i class="trash icon"></i>
+                                </button>
+                            </form>
+                        @endif
+                    </div>
+                @endforeach
+                @if ($canEditPhoto)
+                    @for ($i = $hero->galleryImages->count(); $i < 4; $i++)
+                        <label class="flex flex-col items-center justify-center h-28 border-2 border-dashed border-stone-300 rounded cursor-pointer hover:border-waldritter hover:bg-stone-50 transition text-stone-400 text-sm select-none">
+                            <i class="camera icon text-xl mb-1"></i>
+                            Foto hinzufügen
+                            <input type="file" accept="image/*" class="hidden"
+                                   onchange="openPhotoCropper(this.files[0], '{{ route('heroes.gallery.store', $hero) }}', null, { aspectRatio: NaN })">
+                        </label>
+                    @endfor
+                @endif
+            </div>
+        </x-mobile.accordion-section>
+        @endif
+
     </div>
 
     {{-- Desktop: Fomantic-Tabs (sm+) --}}
@@ -421,6 +456,14 @@
             @endif
             <a class="item" data-tab="adventures" style="white-space: nowrap;">Abenteuer</a>
             <a class="item" data-tab="ep" style="white-space: nowrap;">EP-Verlauf</a>
+            @if ($hero->galleryImages->isNotEmpty() || $canEditPhoto)
+            <a class="item" data-tab="gallery" style="white-space: nowrap;">
+                <i class="images outline icon"></i> Galerie
+                @if ($hero->galleryImages->isNotEmpty())
+                    <span class="ui mini circular label ml-1">{{ $hero->galleryImages->count() }}</span>
+                @endif
+            </a>
+            @endif
             @can('heldenregister.edit')
             <a class="item" data-tab="manage" style="white-space: nowrap;">Verwalten</a>
             @endcan
@@ -832,6 +875,44 @@
             </table>
             </div>
         </div>
+
+        {{-- Tab: Galerie (HERO-24) --}}
+        @if ($hero->galleryImages->isNotEmpty() || $canEditPhoto)
+        <div class="ui bottom attached tab segment" data-tab="gallery">
+            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
+                @foreach ($hero->galleryImages as $img)
+                    <div class="relative">
+                        <img src="{{ $img->url }}" alt="Galerie-Bild"
+                             class="w-full h-auto rounded border border-stone-200">
+                        @if ($canEditPhoto)
+                            <form method="POST" action="{{ route('heroes.gallery.destroy', [$hero, $img]) }}" data-refresh-modal>
+                                @csrf @method('DELETE')
+                                <button type="submit"
+                                        class="absolute top-1 right-1 ui mini red icon button"
+                                        title="Bild löschen"
+                                        onclick="return confirm('Galerie-Bild wirklich löschen?')">
+                                    <i class="trash icon"></i>
+                                </button>
+                            </form>
+                        @endif
+                    </div>
+                @endforeach
+                @if ($canEditPhoto)
+                    @for ($i = $hero->galleryImages->count(); $i < 4; $i++)
+                        <label class="flex flex-col items-center justify-center h-36 border-2 border-dashed border-stone-300 rounded cursor-pointer hover:border-waldritter hover:bg-stone-50 transition text-stone-400 text-sm select-none">
+                            <i class="camera icon text-xl mb-1"></i>
+                            Foto hinzufügen
+                            <input type="file" accept="image/*" class="hidden"
+                                   onchange="openPhotoCropper(this.files[0], '{{ route('heroes.gallery.store', $hero) }}', null, { aspectRatio: NaN })">
+                        </label>
+                    @endfor
+                @elseif ($hero->galleryImages->isEmpty())
+                    <p class="text-stone-400 italic col-span-4">Noch keine Galerie-Bilder.</p>
+                @endif
+            </div>
+        </div>
+        @endif
+
         {{-- Tab: Verwalten (nur Bürokrat / Admin) --}}
         @can('heldenregister.edit')
         <div class="ui bottom attached tab segment" data-tab="manage">
