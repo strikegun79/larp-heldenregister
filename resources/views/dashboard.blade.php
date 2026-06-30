@@ -85,7 +85,7 @@
                         </dl>
                         @if ($alreadyBooked)
                             <span class="text-green-700 text-sm font-medium">&#10003; Du bist bereits angemeldet</span>
-                        @elseif ($nextAdventure->isRegistrationOpen())
+                        @elseif ($nextAdventure->registrationOpen())
                             <a href="{{ route('adventures.show', $nextAdventure) }}"
                                class="ui primary button">Jetzt anmelden</a>
                         @else
@@ -157,7 +157,7 @@
                 <a href="{{ route('players.index') }}"
                    class="group block rounded-lg overflow-hidden border-2 border-[#5a3a22]/40 bg-white/60 shadow hover:shadow-xl hover:-translate-y-1 transition">
                     <div class="h-44 overflow-hidden">
-                        <img src="/images/heldenarchiv.jpg" alt="" aria-hidden="true" loading="lazy" width="400" height="176" class="w-full h-full object-cover group-hover:scale-105 transition">
+                        <img src="/images/spieler_verwaltung2.jpg" alt="" aria-hidden="true" loading="lazy" width="400" height="176" class="w-full h-full object-cover group-hover:scale-105 transition">
                     </div>
                     <div class="p-4 text-center">
                         <div class="font-uncial text-lg text-waldritter">Deine Spieler</div>
