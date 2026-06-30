@@ -8,6 +8,7 @@ use App\Models\IdCardCode;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Endroid\QrCode\QrCode;
 use Endroid\QrCode\Writer\PngWriter;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -109,7 +110,7 @@ class IdCardController extends Controller
     /**
      * Pool-Code einem Helden zuweisen (setzt heroes.public_code).
      */
-    public function assign(Request $request, Hero $hero): RedirectResponse
+    public function assign(Request $request, Hero $hero): RedirectResponse|JsonResponse
     {
         $request->validate([
             'code' => ['required', 'string', 'size:6', 'regex:/^[ABCDEFGHJKMNPQRSTUVWXYZ23456789]{6}$/'],
@@ -117,10 +118,14 @@ class IdCardController extends Controller
 
         $code = strtoupper(trim($request->string('code')));
 
-        // Prüfen ob der Code bereits vergeben ist (anderem Helden oder existierender auto-code)
+        // Prüfen ob der Code bereits vergeben ist (anderem Helden)
         $existingHero = Hero::where('public_code', $code)->where('id', '!=', $hero->id)->first();
         if ($existingHero) {
-            return back()->withErrors(['code' => 'Dieser Code ist bereits einem anderen Helden zugewiesen.']);
+            $error = 'Dieser Code ist bereits einem anderen Helden zugewiesen.';
+
+            return $request->expectsJson()
+                ? response()->json(['errors' => ['code' => [$error]]], 422)
+                : back()->withErrors(['code' => $error]);
         }
 
         // Pool-Eintrag suchen oder anlegen
@@ -130,14 +135,21 @@ class IdCardController extends Controller
         );
 
         if ($poolEntry->hero_id && $poolEntry->hero_id !== $hero->id) {
-            return back()->withErrors(['code' => 'Dieser Pool-Code ist bereits einem anderen Helden zugewiesen.']);
+            $error = 'Dieser Pool-Code ist bereits einem anderen Helden zugewiesen.';
+
+            return $request->expectsJson()
+                ? response()->json(['errors' => ['code' => [$error]]], 422)
+                : back()->withErrors(['code' => $error]);
         }
 
         $hero->update(['public_code' => $code]);
         $poolEntry->update(['hero_id' => $hero->id, 'assigned_at' => now()]);
 
-        return redirect()->route('heroes.show', $hero)
-            ->with('status', 'Helden-Siegel zugewiesen: '.$code);
+        $message = 'Helden-Siegel zugewiesen: '.$code;
+
+        return $request->expectsJson()
+            ? response()->json(['message' => $message, 'refresh_modal' => true])
+            : redirect()->route('heroes.show', $hero)->with('status', $message);
     }
 
     /**

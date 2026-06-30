@@ -193,6 +193,31 @@ class IdCardTest extends TestCase
             ->assertSessionHasErrors('code');
     }
 
+    public function test_assign_ajax_gibt_json_mit_refresh_modal_zurueck(): void
+    {
+        $hero = $this->heroWithoutCode();
+
+        $this->actingAs($this->adminUser())
+            ->patchJson(route('heroes.assign-code', $hero), ['code' => 'ABCDEF'])
+            ->assertOk()
+            ->assertJsonFragment(['refresh_modal' => true]);
+
+        $this->assertDatabaseHas('heroes', ['id' => $hero->id, 'public_code' => 'ABCDEF']);
+    }
+
+    public function test_assign_ajax_gibt_422_bei_bereits_vergebenem_code(): void
+    {
+        $hero1 = $this->heroWithCode('WXYZ23');
+        $hero2 = $this->heroWithoutCode();
+
+        $this->actingAs($this->adminUser())
+            ->patchJson(route('heroes.assign-code', $hero2), ['code' => 'WXYZ23'])
+            ->assertStatus(422)
+            ->assertJsonStructure(['errors' => ['code']]);
+
+        $this->assertNotSame('WXYZ23', $hero2->fresh()->public_code);
+    }
+
     public function test_teilnehmer_kann_keinen_code_zuweisen(): void
     {
         $hero = $this->heroWithoutCode();
