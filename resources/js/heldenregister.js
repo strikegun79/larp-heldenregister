@@ -603,6 +603,17 @@ function initQrCodes(root) {
 }
 
 // ------------------------------------------------------------------
+// Siegel-Input: Kleinbuchstaben automatisch in Großbuchstaben umwandeln
+// ------------------------------------------------------------------
+document.addEventListener('input', function (e) {
+    if (! e.target.classList.contains('siegel-input')) return;
+    const input = e.target;
+    const pos = input.selectionStart;
+    input.value = input.value.toUpperCase();
+    input.setSelectionRange(pos, pos);
+});
+
+// ------------------------------------------------------------------
 // DOMContentLoaded: Kalender + Flash-Toast (UI-09)
 // Module laufen nach DOM-Parse, aber vor DOMContentLoaded.
 // ------------------------------------------------------------------

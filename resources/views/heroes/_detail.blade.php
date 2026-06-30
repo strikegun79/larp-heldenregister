@@ -167,7 +167,7 @@
                                pattern="[A-HJ-NP-Z2-9]{6}"
                                placeholder="XXXXXX"
                                value="{{ old('code', $hero->public_code) }}"
-                               class="font-mono tracking-widest w-28"
+                               class="font-mono tracking-widest w-28 siegel-input"
                                style="text-transform:uppercase"
                                required>
                     </div>
@@ -820,7 +820,7 @@
                                pattern="[A-HJ-NP-Z2-9]{6}"
                                placeholder="XXXXXX"
                                value="{{ old('code', $hero->public_code) }}"
-                               class="font-mono tracking-widest w-28"
+                               class="font-mono tracking-widest w-28 siegel-input"
                                style="text-transform:uppercase"
                                required>
                     </div>
