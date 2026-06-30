@@ -30,6 +30,16 @@
                                 $deletable = $adventure->bookings_count === 0
                                     && $adventure->teamer_signups_count === 0
                                     && $adventure->ep_transactions_count === 0;
+                                if (! $deletable) {
+                                    $reasons = [];
+                                    if ($adventure->bookings_count > 0)
+                                        $reasons[] = $adventure->bookings_count.($adventure->bookings_count === 1 ? ' Spieler-Anmeldung' : ' Spieler-Anmeldungen');
+                                    if ($adventure->teamer_signups_count > 0)
+                                        $reasons[] = $adventure->teamer_signups_count.($adventure->teamer_signups_count === 1 ? ' Teamer-Anmeldung' : ' Teamer-Anmeldungen');
+                                    if ($adventure->ep_transactions_count > 0)
+                                        $reasons[] = $adventure->ep_transactions_count.($adventure->ep_transactions_count === 1 ? ' EP-Transaktion' : ' EP-Transaktionen');
+                                    $blockReason = 'Nicht löschbar: '.implode(', ', $reasons);
+                                }
                             @endphp
                             <tr data-navigate="{{ route('adventures.manage', $adventure) }}"
                                 role="button" tabindex="0"
@@ -55,11 +65,16 @@
                                             <i class="trash icon"></i>
                                         </button>
                                     @else
-                                        <button type="button"
-                                                class="ui mini red basic icon button disabled"
-                                                title="Nicht löschbar: Anmeldungen oder EP-Transaktionen vorhanden">
-                                            <i class="trash icon"></i>
-                                        </button>
+                                        <span data-tooltip="{{ $blockReason }}"
+                                              data-position="top right"
+                                              data-variation="mini"
+                                              class="inline-block cursor-not-allowed">
+                                            <button type="button"
+                                                    class="ui mini red basic icon button disabled"
+                                                    style="pointer-events: none;">
+                                                <i class="trash icon"></i>
+                                            </button>
+                                        </span>
                                     @endif
                                 </td>
                             </tr>
@@ -77,6 +92,16 @@
                         $deletable = $adventure->bookings_count === 0
                             && $adventure->teamer_signups_count === 0
                             && $adventure->ep_transactions_count === 0;
+                        if (! $deletable) {
+                            $reasons = [];
+                            if ($adventure->bookings_count > 0)
+                                $reasons[] = $adventure->bookings_count.($adventure->bookings_count === 1 ? ' Spieler-Anmeldung' : ' Spieler-Anmeldungen');
+                            if ($adventure->teamer_signups_count > 0)
+                                $reasons[] = $adventure->teamer_signups_count.($adventure->teamer_signups_count === 1 ? ' Teamer-Anmeldung' : ' Teamer-Anmeldungen');
+                            if ($adventure->ep_transactions_count > 0)
+                                $reasons[] = $adventure->ep_transactions_count.($adventure->ep_transactions_count === 1 ? ' EP-Transaktion' : ' EP-Transaktionen');
+                            $blockReason = 'Nicht löschbar: '.implode(', ', $reasons);
+                        }
                     @endphp
                     <div class="flex items-center border-b border-stone-200 last:border-b-0">
                         <a href="{{ route('adventures.manage', $adventure) }}"
@@ -106,11 +131,16 @@
                                     <i class="trash icon"></i>
                                 </button>
                             @else
-                                <button type="button"
-                                        class="ui mini red basic icon button disabled"
-                                        title="Nicht löschbar">
-                                    <i class="trash icon"></i>
-                                </button>
+                                <span data-tooltip="{{ $blockReason }}"
+                                      data-position="top right"
+                                      data-variation="mini"
+                                      class="inline-block cursor-not-allowed">
+                                    <button type="button"
+                                            class="ui mini red basic icon button disabled"
+                                            style="pointer-events: none;">
+                                        <i class="trash icon"></i>
+                                    </button>
+                                </span>
                             @endif
                         </div>
                     </div>

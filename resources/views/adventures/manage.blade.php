@@ -45,10 +45,15 @@
                         <i class="trash icon"></i> Löschen
                     </button>
                 @else
-                    <button type="button" class="ui red basic button disabled ml-auto"
-                            title="{{ $deletionBlocker }}">
-                        <i class="trash icon"></i> Löschen
-                    </button>
+                    <span data-tooltip="{{ $deletionBlocker }}"
+                          data-position="top center"
+                          data-variation="mini"
+                          class="inline-block cursor-not-allowed ml-auto">
+                        <button type="button" class="ui red basic button disabled"
+                                style="pointer-events: none;">
+                            <i class="trash icon"></i> Löschen
+                        </button>
+                    </span>
                 @endif
             </x-mobile.sticky-footer>
         </div>
