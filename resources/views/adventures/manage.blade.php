@@ -32,6 +32,24 @@
                     </button>
                 </div>
                 <a href="{{ route('adventures.show', $adventure) }}" class="ui button">&larr; Zur Detailansicht</a>
+
+                {{-- Löschen: nur wenn keine Abhängigkeiten vorhanden --}}
+                @if($deletionBlocker === null)
+                    <form method="POST" action="{{ route('adventures.destroy', $adventure) }}"
+                          id="delete-adventure-form" class="inline">
+                        @csrf
+                        @method('DELETE')
+                    </form>
+                    <button type="button" class="ui red basic button ml-auto"
+                            onclick="confirmDeleteAdventure()">
+                        <i class="trash icon"></i> Löschen
+                    </button>
+                @else
+                    <button type="button" class="ui red basic button disabled ml-auto"
+                            title="{{ $deletionBlocker }}">
+                        <i class="trash icon"></i> Löschen
+                    </button>
+                @endif
             </x-mobile.sticky-footer>
         </div>
     </div>
@@ -41,6 +59,12 @@
         document.addEventListener('DOMContentLoaded', function () {
             $('.menu .item[data-tab]').tab();
         });
+
+        function confirmDeleteAdventure() {
+            if (confirm('Abenteuer „{{ addslashes($adventure->name) }}" wirklich löschen?\nDiese Aktion kann nicht rückgängig gemacht werden.')) {
+                document.getElementById('delete-adventure-form').submit();
+            }
+        }
     </script>
     @endpush
 </x-app-layout>

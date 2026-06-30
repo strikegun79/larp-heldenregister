@@ -164,6 +164,7 @@ class AdventureController extends Controller
         $data = array_merge($this->formData($adventure), [
             'nscBookings' => $nscBookings,
             'mainBookings' => $mainBookings,
+            'deletionBlocker' => $adventure->deletionBlocker(),
         ]);
 
         // ARCH-002: AJAX → Partial für Modal, Direktaufruf → Vollseite.
@@ -311,11 +312,17 @@ class AdventureController extends Controller
 
     public function destroy(Adventure $adventure): RedirectResponse
     {
+        $blocker = $adventure->deletionBlocker();
+        if ($blocker !== null) {
+            return back()->with('error', $blocker);
+        }
+
+        $name = $adventure->name;
         $adventure->delete();
 
         return redirect()
-            ->route('adventures.index')
-            ->with('status', 'Abenteuer wurde gelöscht.');
+            ->route('adventures.manage-index')
+            ->with('status', '„'.$name.'" wurde gelöscht.');
     }
 
     /**

@@ -88,6 +88,11 @@ class Adventure extends Model
         return $this->hasMany(EventVisit::class);
     }
 
+    public function epTransactions(): HasMany
+    {
+        return $this->hasMany(EpTransaction::class);
+    }
+
     /**
      * Anmeldungen auf einem regulären Platz (nicht auf der Warteliste).
      */
@@ -177,6 +182,26 @@ class Adventure extends Model
                         }
                     });
             });
+    }
+
+    /**
+     * Gibt den Grund zurück, warum das Abenteuer nicht gelöscht werden kann,
+     * oder null wenn es löschbar ist.
+     * Sperrgründe (in Priorität): Buchungen → Teamer-Anmeldungen → EP-Transaktionen.
+     */
+    public function deletionBlocker(): ?string
+    {
+        if ($this->bookings()->exists()) {
+            return 'Es gibt bereits Spieler-Anmeldungen für dieses Abenteuer.';
+        }
+        if ($this->teamerSignups()->exists()) {
+            return 'Es gibt bereits Teamer-Anmeldungen für dieses Abenteuer.';
+        }
+        if ($this->epTransactions()->exists()) {
+            return 'Es wurden bereits EP-Transaktionen für dieses Abenteuer erfasst.';
+        }
+
+        return null;
     }
 
     /**
