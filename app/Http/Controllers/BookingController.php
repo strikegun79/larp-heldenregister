@@ -7,8 +7,12 @@ use App\Models\Booking;
 use App\Models\EventRole;
 use App\Models\Player;
 use App\Models\User;
+use App\Notifications\BookingApproved;
 use App\Notifications\BookingCancelled;
+use App\Notifications\BookingCancelledParticipant;
 use App\Notifications\BookingReceived;
+use App\Notifications\BookingRejected;
+use App\Notifications\PaymentConfirmed;
 use App\Notifications\WaitlistPromoted;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
@@ -270,7 +274,10 @@ class BookingController extends Controller
 
         $message = $confirm ? 'Anmeldung bestätigt.' : 'Bestätigung zurückgenommen.';
 
-        // NOTI-02: optionaler Versand einer Bestätigungs-Mail an den Spieler.
+        // NOTI-10: Bestätigungs-Mail an den Spieler (nur beim Bestätigen, nicht beim Zurücknehmen).
+        if ($confirm && $booking->player?->email) {
+            Notification::route('mail', $booking->player->email)->notify(new BookingApproved($booking));
+        }
 
         return $request->expectsJson()
             ? response()->json(['message' => $message, 'refresh_modal' => true])
@@ -293,6 +300,11 @@ class BookingController extends Controller
 
         $message = $reject ? 'Anmeldung abgelehnt.' : 'Ablehnung zurückgenommen.';
 
+        // NOTI-10: Ablehnungs-Mail an den Spieler (nur beim Ablehnen, nicht beim Zurücknehmen).
+        if ($reject && $booking->player?->email) {
+            Notification::route('mail', $booking->player->email)->notify(new BookingRejected($booking));
+        }
+
         return $request->expectsJson()
             ? response()->json(['message' => $message, 'refresh_modal' => true])
             : back()->with('status', $message);
@@ -305,9 +317,15 @@ class BookingController extends Controller
     {
         abort_unless($booking->adventure_id === $adventure->id, 404);
 
+        $wasPaid = $booking->paid;
         $booking->update(['paid' => ! $booking->paid]);
 
         $message = $booking->paid ? 'Als bezahlt markiert.' : 'Als offen markiert.';
+
+        // NOTI-10: Zahlungsbestätigung an den Spieler (nur beim Setzen auf bezahlt).
+        if (! $wasPaid && $booking->paid && $booking->player?->email) {
+            Notification::route('mail', $booking->player->email)->notify(new PaymentConfirmed($booking));
+        }
 
         return $request->expectsJson()
             ? response()->json(['message' => $message, 'refresh_modal' => true])
@@ -332,6 +350,11 @@ class BookingController extends Controller
         // Wird ein regulärer Platz frei, rückt die älteste Wartelisten-Buchung nach (BOOK-07).
         $wasRegular = ! $booking->waitlisted;
         $booking->delete();
+
+        // NOTI-10: Stornierungsbestätigung an den Teilnehmer selbst.
+        if ($booking->player?->email) {
+            Notification::route('mail', $booking->player->email)->notify(new BookingCancelledParticipant($adventure));
+        }
 
         // ADV-21: Projektleitung über die Stornierung informieren.
         $leaders = User::whereHas('roles', fn ($q) => $q->where('roles.id', 30))->get();
