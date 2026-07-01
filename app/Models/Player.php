@@ -89,6 +89,19 @@ class Player extends Model
     }
 
     /**
+     * Prüft ob der verknüpfte Nutzer eine bestimmte E-Mail-Benachrichtigung aktiviert hat.
+     * Gibt true zurück wenn kein Nutzerkonto verknüpft ist (Versand als Fallback).
+     */
+    public function notificationEnabled(string $column): bool
+    {
+        $user = $this->relationLoaded('users')
+            ? $this->users->first()
+            : $this->users()->first();
+
+        return $user?->$column ?? true;
+    }
+
+    /**
      * Voller Name des Spielers.
      */
     public function getFullNameAttribute(): string

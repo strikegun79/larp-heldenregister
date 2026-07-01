@@ -34,6 +34,15 @@ class User extends Authenticatable implements MustVerifyEmail
         'legacy_id',
         'teamer_notifications',
         'notify_new_user',
+        'notify_booking_received',
+        'notify_booking_approved',
+        'notify_booking_rejected',
+        'notify_booking_cancelled',
+        'notify_payment_confirmed',
+        'notify_waitlist_promoted',
+        'notify_event_cancelled',
+        'notify_event_reminder',
+        'notify_cancellation_report',
     ];
 
     /**
@@ -56,8 +65,17 @@ class User extends Authenticatable implements MustVerifyEmail
         'lastlogin_at' => 'datetime',
         'activated' => 'boolean',
         'needs_password_reset' => 'boolean',
-        'teamer_notifications' => 'boolean',
-        'notify_new_user'      => 'boolean',
+        'teamer_notifications'      => 'boolean',
+        'notify_new_user'           => 'boolean',
+        'notify_booking_received'   => 'boolean',
+        'notify_booking_approved'   => 'boolean',
+        'notify_booking_rejected'   => 'boolean',
+        'notify_booking_cancelled'  => 'boolean',
+        'notify_payment_confirmed'  => 'boolean',
+        'notify_waitlist_promoted'  => 'boolean',
+        'notify_event_cancelled'    => 'boolean',
+        'notify_event_reminder'     => 'boolean',
+        'notify_cancellation_report' => 'boolean',
         'password' => 'hashed',
     ];
 

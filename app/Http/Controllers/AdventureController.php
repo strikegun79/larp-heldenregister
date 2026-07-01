@@ -217,13 +217,18 @@ class AdventureController extends Controller
 
         $adventure->update(['event_status_id' => EventStatus::CANCELLED]);
 
-        // NOTI-04: Absage-Mails an alle gebuchten Spieler mit E-Mail.
-        $recipients = $adventure->bookings()->with('player')->get()
-            ->map(fn ($b) => $b->player?->email)
-            ->filter()
-            ->unique();
-        foreach ($recipients as $email) {
-            Notification::route('mail', $email)->notify(new EventCancelled($adventure));
+        // NOTI-04: Absage-Mails an gebuchte Spieler (sofern Benachrichtigung aktiv).
+        $bookings = $adventure->bookings()->with('player.users')->get();
+        $notified = [];
+        foreach ($bookings as $b) {
+            $player = $b->player;
+            if (! $player?->email || isset($notified[$player->email])) {
+                continue;
+            }
+            if ($player->notificationEnabled('notify_event_cancelled')) {
+                Notification::route('mail', $player->email)->notify(new EventCancelled($adventure));
+                $notified[$player->email] = true;
+            }
         }
 
         $message = 'Event wurde abgesagt.';

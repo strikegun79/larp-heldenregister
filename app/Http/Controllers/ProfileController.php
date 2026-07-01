@@ -33,8 +33,22 @@ class ProfileController extends Controller
         }
 
         // Checkboxen senden keinen Wert wenn deaktiviert → explizit setzen.
-        $request->user()->teamer_notifications = $request->boolean('teamer_notifications');
-        $request->user()->notify_new_user      = $request->boolean('notify_new_user');
+        $user = $request->user();
+        foreach ([
+            'teamer_notifications',
+            'notify_new_user',
+            'notify_booking_received',
+            'notify_booking_approved',
+            'notify_booking_rejected',
+            'notify_booking_cancelled',
+            'notify_payment_confirmed',
+            'notify_waitlist_promoted',
+            'notify_event_cancelled',
+            'notify_event_reminder',
+            'notify_cancellation_report',
+        ] as $col) {
+            $user->$col = $request->boolean($col);
+        }
 
         $request->user()->save();
 

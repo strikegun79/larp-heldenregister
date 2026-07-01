@@ -23,7 +23,11 @@ class BookingCancelled extends Notification implements ShouldQueue
     /** @return array<int, string> */
     public function via(object $notifiable): array
     {
-        return ['mail', 'database'];
+        $channels = ['database'];
+        if ($notifiable->notify_cancellation_report ?? true) {
+            $channels[] = 'mail';
+        }
+        return $channels;
     }
 
     /** @return array<string, string> */

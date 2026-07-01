@@ -125,8 +125,8 @@ class BookingController extends Controller
             'waitlisted' => $adventure->isFull(),
         ]);
 
-        // NOTI-02: Bestätigung an den Spieler (sofern E-Mail hinterlegt).
-        if ($player?->email) {
+        // NOTI-02: Bestätigung an den Spieler (sofern E-Mail hinterlegt und Benachrichtigung aktiv).
+        if ($player?->email && $player->notificationEnabled('notify_booking_received')) {
             Notification::route('mail', $player->email)->notify(new BookingReceived($booking));
         }
 
@@ -275,7 +275,7 @@ class BookingController extends Controller
         $message = $confirm ? 'Anmeldung bestätigt.' : 'Bestätigung zurückgenommen.';
 
         // NOTI-10: Bestätigungs-Mail an den Spieler (nur beim Bestätigen, nicht beim Zurücknehmen).
-        if ($confirm && $booking->player?->email) {
+        if ($confirm && $booking->player?->email && $booking->player->notificationEnabled('notify_booking_approved')) {
             Notification::route('mail', $booking->player->email)->notify(new BookingApproved($booking));
         }
 
@@ -301,7 +301,7 @@ class BookingController extends Controller
         $message = $reject ? 'Anmeldung abgelehnt.' : 'Ablehnung zurückgenommen.';
 
         // NOTI-10: Ablehnungs-Mail an den Spieler (nur beim Ablehnen, nicht beim Zurücknehmen).
-        if ($reject && $booking->player?->email) {
+        if ($reject && $booking->player?->email && $booking->player->notificationEnabled('notify_booking_rejected')) {
             Notification::route('mail', $booking->player->email)->notify(new BookingRejected($booking));
         }
 
@@ -323,7 +323,7 @@ class BookingController extends Controller
         $message = $booking->paid ? 'Als bezahlt markiert.' : 'Als offen markiert.';
 
         // NOTI-10: Zahlungsbestätigung an den Spieler (nur beim Setzen auf bezahlt).
-        if (! $wasPaid && $booking->paid && $booking->player?->email) {
+        if (! $wasPaid && $booking->paid && $booking->player?->email && $booking->player->notificationEnabled('notify_payment_confirmed')) {
             Notification::route('mail', $booking->player->email)->notify(new PaymentConfirmed($booking));
         }
 
@@ -352,7 +352,7 @@ class BookingController extends Controller
         $booking->delete();
 
         // NOTI-10: Stornierungsbestätigung an den Teilnehmer selbst.
-        if ($booking->player?->email) {
+        if ($booking->player?->email && $booking->player->notificationEnabled('notify_booking_cancelled')) {
             Notification::route('mail', $booking->player->email)->notify(new BookingCancelledParticipant($adventure));
         }
 
@@ -379,7 +379,7 @@ class BookingController extends Controller
             if ($promoted) {
                 $promoted->update(['waitlisted' => false]);
                 // NOTI-03: Benachrichtigung an den nachgerückten Spieler.
-                if ($promoted->player?->email) {
+                if ($promoted->player?->email && $promoted->player->notificationEnabled('notify_waitlist_promoted')) {
                     Notification::route('mail', $promoted->player->email)->notify(new WaitlistPromoted($promoted));
                 }
             }
