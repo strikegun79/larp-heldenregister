@@ -33,6 +33,7 @@
                 <table class="min-w-full divide-y divide-stone-200">
                     <thead class="bg-black/5">
                         <tr>
+                            <th class="px-4 py-3"></th>
                             <th class="px-4 py-3 text-left text-xs font-medium text-stone-500 uppercase">Name</th>
                             <th class="px-4 py-3 text-left text-xs font-medium text-stone-500 uppercase">Masterclass</th>
                             <th class="px-4 py-3 text-left text-xs font-medium text-stone-500 uppercase">Lvl</th>
@@ -46,6 +47,11 @@
                     <tbody class="divide-y divide-stone-200 text-stone-800">
                         @forelse ($skills as $skill)
                             <tr>
+                                <td class="px-4 py-2 w-10">
+                                    @if ($skill->icon_url)
+                                        <img src="{{ $skill->icon_url }}" alt="" class="w-8 h-8 object-cover rounded">
+                                    @endif
+                                </td>
                                 <td class="px-4 py-3 font-medium" data-label="Name">{{ $skill->name }}</td>
                                 <td class="px-4 py-3 text-sm" data-label="Masterclass">{{ $skill->heroClass?->name ?? '—' }}</td>
                                 <td class="px-4 py-3" data-label="Lvl">{{ $skill->level }}</td>
@@ -76,7 +82,7 @@
                                 </td>
                             </tr>
                         @empty
-                            <tr><td colspan="8" class="px-4 py-4 text-stone-500">Keine Fertigkeiten gefunden.</td></tr>
+                            <tr><td colspan="9" class="px-4 py-4 text-stone-500">Keine Fertigkeiten gefunden.</td></tr>
                         @endforelse
                     </tbody>
                 </table>

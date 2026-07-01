@@ -100,6 +100,39 @@
     </div>
 </form>
 
+{{-- SKILL-08: Symbol hochladen (separater Upload, kein Cropper) --}}
+@if ($skill->exists)
+<div class="ui segment">
+    <label class="block font-medium text-stone-700 mb-2">Symbol (100×100 px)</label>
+    <div class="flex items-center gap-4 flex-wrap">
+        @if ($skill->icon_url)
+            <img src="{{ $skill->icon_url }}" alt="Symbol"
+                 class="w-12 h-12 object-cover rounded border border-stone-200">
+            <form method="POST" action="{{ route('admin.skills.icon.destroy', $skill) }}" data-refresh-modal>
+                @csrf @method('DELETE')
+                <button type="submit" class="ui mini red basic button">
+                    <i class="trash icon"></i> Symbol löschen
+                </button>
+            </form>
+        @else
+            <div class="w-12 h-12 rounded border-2 border-dashed border-stone-300 flex items-center justify-center text-stone-400">
+                <i class="image outline icon"></i>
+            </div>
+        @endif
+        <form method="POST" action="{{ route('admin.skills.icon.store', $skill) }}"
+              enctype="multipart/form-data" data-refresh-modal>
+            @csrf
+            <label class="ui mini basic button cursor-pointer">
+                <i class="upload icon"></i> {{ $skill->icon_url ? 'Ersetzen' : 'Hochladen' }}
+                <input type="file" name="icon" accept="image/png,image/jpeg" class="hidden"
+                       onchange="this.form.requestSubmit()">
+            </label>
+        </form>
+    </div>
+    <p class="text-xs text-stone-400 mt-1">PNG oder JPG, wird auf 100×100 px skaliert.</p>
+</div>
+@endif
+
 <div data-modal-actions hidden>
     <button type="submit" form="skill-form" class="ui primary button">Speichern</button>
 </div>

@@ -239,6 +239,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('skills/{skill}/edit', [Admin\SkillController::class, 'edit'])->name('skills.edit');
         Route::put('skills/{skill}', [Admin\SkillController::class, 'update'])->name('skills.update');
         Route::delete('skills/{skill}', [Admin\SkillController::class, 'destroy'])->name('skills.destroy');
+        // Fertigkeits-Symbol (SKILL-08).
+        Route::post('skills/{skill}/icon', [Admin\SkillIconController::class, 'store'])->name('skills.icon.store');
+        Route::delete('skills/{skill}/icon', [Admin\SkillIconController::class, 'destroy'])->name('skills.icon.destroy');
 
         // Perlenfarben pflegen (EP-05).
         Route::get('perl-colors', [Admin\PerlColorController::class, 'index'])->name('perl-colors.index');

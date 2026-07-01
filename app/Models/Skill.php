@@ -28,6 +28,12 @@ class Skill extends Model
         'perl_count' => 'integer',
     ];
 
+    /** SKILL-08: URL des Fertigkeits-Symbols; null wenn keins hochgeladen. */
+    public function getIconUrlAttribute(): ?string
+    {
+        return $this->icon ? '/storage/'.$this->icon : null;
+    }
+
     /**
      * Masterclass der Fertigkeit (Legacy: skills.masterclass).
      */
