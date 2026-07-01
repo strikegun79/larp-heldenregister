@@ -21,9 +21,11 @@
                                     {{ $guardian->name }} {{ $guardian->lastname }}
                                     @if ($guardian->email) · {{ $guardian->email }} @endif
                                     @if ($guardian->phone) · {{ $guardian->phone }} @endif
-                                    @if ($guardian->street)
+										{{-- Braucht zu viel Platz
+										@if ($guardian->street)
                                         · {{ $guardian->street }} {{ $guardian->house_number }}, {{ $guardian->zip }} {{ $guardian->city }}
-                                    @endif
+										@endif
+										--}}
                                     @if (! $booking->usesGuardianAddress() && $booking->player?->street)
                                         <span class="text-amber-700">(Kind abw.: {{ $booking->player->street }} {{ $booking->player->house_number }}, {{ $booking->player->zip }} {{ $booking->player->city }})</span>
                                     @endif
