@@ -66,6 +66,30 @@ class SkillHeroesTest extends TestCase
         $response->assertOk()->assertDontSee('Inaktiver Held');
     }
 
+    public function test_katalog_modal_zeigt_aktive_helden(): void
+    {
+        $skill  = Skill::factory()->create(['name' => 'Kräuterkunde']);
+        $active = Hero::factory()->create(['character_name' => 'Heiler Hans', 'active' => true, 'died' => null]);
+        $active->skills()->attach($skill->id, ['trained_at' => now()]);
+
+        $response = $this->actingAs($this->admin())
+            ->getJson(route('skills.catalog.heroes', $skill));
+
+        $response->assertOk()->assertSee('Heiler Hans');
+    }
+
+    public function test_katalog_modal_verschollene_ausgeblendet(): void
+    {
+        $skill      = Skill::factory()->create(['name' => 'Alchemie']);
+        $verschollen = Hero::factory()->create(['character_name' => 'Verlorener', 'active' => false, 'died' => now()]);
+        $verschollen->skills()->attach($skill->id, ['trained_at' => now()]);
+
+        $response = $this->actingAs($this->admin())
+            ->getJson(route('skills.catalog.heroes', $skill));
+
+        $response->assertOk()->assertDontSee('Verlorener');
+    }
+
     public function test_index_zaehlt_nur_aktive_helden(): void
     {
         $skill      = Skill::factory()->create(['name' => 'Heilkunde']);

@@ -56,8 +56,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
-    // Fertigkeiten-Katalog (SKILL-04).
+    // Fertigkeiten-Katalog (SKILL-04) + aktive Helden-Modal (SKILL-09).
     Route::get('skills', [SkillController::class, 'index'])->name('skills.catalog');
+    Route::get('skills/{skill}/heroes', [SkillController::class, 'heroes'])->name('skills.catalog.heroes');
 
     // Eigenständige EP-Buchung (EP-02).
     Route::get('ep-booking', [EpTransactionController::class, 'create'])->name('ep.create');

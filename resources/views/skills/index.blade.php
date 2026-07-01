@@ -40,6 +40,7 @@
                                     <th class="px-4 py-2 text-left text-xs font-medium text-stone-500 uppercase w-16">Level</th>
                                     <th class="px-4 py-2 text-left text-xs font-medium text-stone-500 uppercase w-20">EP</th>
                                     <th class="px-4 py-2 text-left text-xs font-medium text-stone-500 uppercase w-24">Perle</th>
+                                    <th class="px-4 py-2 text-left text-xs font-medium text-stone-500 uppercase w-24">Helden</th>
                                 </tr>
                             </thead>
                             <tbody class="divide-y divide-stone-100 text-stone-800">
@@ -67,6 +68,18 @@
                                                 </span>
                                             @else
                                                 <span class="text-stone-400">—</span>
+                                            @endif
+                                        </td>
+                                        <td class="px-4 py-3">
+                                            @if ($skill->active_heroes_count > 0)
+                                                <a href="{{ route('skills.catalog.heroes', $skill) }}"
+                                                   data-modal-url="{{ route('skills.catalog.heroes', $skill) }}"
+                                                   class="ui mini basic button">
+                                                    {{ $skill->active_heroes_count }}
+                                                    <i class="users icon ml-1"></i>
+                                                </a>
+                                            @else
+                                                <span class="text-stone-400">0</span>
                                             @endif
                                         </td>
                                     </tr>
