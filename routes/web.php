@@ -242,6 +242,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         // Fertigkeits-Symbol (SKILL-08).
         Route::post('skills/{skill}/icon', [Admin\SkillIconController::class, 'store'])->name('skills.icon.store');
         Route::delete('skills/{skill}/icon', [Admin\SkillIconController::class, 'destroy'])->name('skills.icon.destroy');
+        // Aktive Helden je Fertigkeit – Modal (SKILL-09).
+        Route::get('skills/{skill}/heroes', [Admin\SkillController::class, 'heroes'])->name('skills.heroes');
 
         // Perlenfarben pflegen (EP-05).
         Route::get('perl-colors', [Admin\PerlColorController::class, 'index'])->name('perl-colors.index');

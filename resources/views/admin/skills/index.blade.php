@@ -65,7 +65,18 @@
                                     @endif
                                 </td>
                                 <td class="px-4 py-3 text-sm" data-label="Klassen">{{ $skill->classes_count }}</td>
-                                <td class="px-4 py-3 text-sm" data-label="Helden">{{ $skill->heroes_count }}</td>
+                                <td class="px-4 py-3 text-sm" data-label="Helden">
+                                    @if ($skill->active_heroes_count > 0)
+                                        <a href="{{ route('admin.skills.heroes', $skill) }}"
+                                           data-modal-url="{{ route('admin.skills.heroes', $skill) }}"
+                                           class="ui mini basic button">
+                                            {{ $skill->active_heroes_count }}
+                                            <i class="users icon ml-1"></i>
+                                        </a>
+                                    @else
+                                        <span class="text-stone-400">0</span>
+                                    @endif
+                                </td>
                                 <td class="px-4 py-3 text-right">
                                     <div class="flex items-center justify-end gap-3">
                                         <a href="{{ route('admin.skills.edit', $skill) }}"

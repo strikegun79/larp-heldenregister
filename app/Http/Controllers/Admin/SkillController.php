@@ -23,7 +23,11 @@ class SkillController extends Controller
         $classId = $request->integer('class_id') ?: null;
 
         $skills = Skill::with(['heroClass', 'perlColor'])
-            ->withCount(['classes', 'heroes'])
+            ->withCount([
+                'classes',
+                // SKILL-09: nur aktive Helden (kein died, active=true).
+                'heroes as active_heroes_count' => fn ($q) => $q->whereNull('died')->where('active', true),
+            ])
             ->when($q, fn ($query) => $query->where('name', 'like', "%{$q}%"))
             ->when($classId, fn ($query) => $query->where('hero_class_id', $classId))
             ->orderBy('hero_class_id')
@@ -99,6 +103,21 @@ class SkillController extends Controller
         $skill->delete();
 
         return $this->respond($request, 'Fertigkeit wurde gelöscht.');
+    }
+
+    /**
+     * SKILL-09: Modal-Inhalt – aktive Helden, die diese Fertigkeit erworben haben.
+     */
+    public function heroes(Skill $skill): \Illuminate\View\View
+    {
+        $heroes = $skill->heroes()
+            ->with('player')
+            ->whereNull('died')
+            ->where('active', true)
+            ->orderBy('character_name')
+            ->get();
+
+        return view('admin.skills._heroes', compact('skill', 'heroes'));
     }
 
     private function formData(Skill $skill): array
