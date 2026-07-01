@@ -25,6 +25,7 @@ class ProfileUpdateRequest extends FormRequest
             'city' => ['nullable', 'string', 'max:100'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', Rule::unique(User::class)->ignore($this->user()->id)],
             'teamer_notifications' => ['nullable', 'boolean'],
+            'notify_new_user'      => ['nullable', 'boolean'],
         ];
     }
 }

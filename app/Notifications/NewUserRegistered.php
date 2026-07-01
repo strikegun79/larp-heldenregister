@@ -19,11 +19,19 @@ class NewUserRegistered extends Notification implements ShouldQueue
     public function __construct(private readonly User $newUser) {}
 
     /**
+     * AUTH-13: Portal-Benachrichtigung (database) immer; E-Mail nur wenn notify_new_user = true.
+     *
      * @return array<int, string>
      */
     public function via(object $notifiable): array
     {
-        return ['mail', 'database'];
+        $channels = ['database'];
+
+        if ($notifiable->notify_new_user ?? true) {
+            $channels[] = 'mail';
+        }
+
+        return $channels;
     }
 
     /**

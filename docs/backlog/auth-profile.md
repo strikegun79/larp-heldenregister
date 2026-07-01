@@ -90,9 +90,16 @@ Mobiltelefon
 - [x] Der Hinweis ist verständlich und nicht zu lang.
 - [x] Keine zusätzlichen Einwilligungs-Checkboxen, sofern nicht notwendig.
 
-### AUTH-13 Email-Benachrichtigungen toggeln im Profil
+### AUTH-13 Email-Benachrichtigungen toggeln im Profil · ✅
 **Beschreibung:** Email-Benachrichtigungen können im Profil eingestellt werden
 **Akzeptanzkriterien:**
-- [] Jeden Benachrichtigungstyp soll nach den Rollen, die der Nutzer hat angezeigt werden.
-- [] Die Benachrichtigungen sollen gruppiert angezeigt werden. Visuelle Trennung nach Rollen
-- [] Beeinflusst nicht die Benachrichtigungen im Portal für den Nutzer.
+- [x] Jeden Benachrichtigungstyp soll nach den Rollen, die der Nutzer hat angezeigt werden.
+- [x] Die Benachrichtigungen sollen gruppiert angezeigt werden. Visuelle Trennung nach Rollen.
+- [x] Beeinflusst nicht die Benachrichtigungen im Portal für den Nutzer.
+
+> Umgesetzt: Neues Profil-Segment „E-Mail-Benachrichtigungen" gruppiert Toggles nach Rolle:
+> Teamer/Lehrmeister → `teamer_notifications`, Admin → `notify_new_user` (neue Spalte
+> via Migration `2026_07_01_082330_add_notify_new_user_to_users_table`).
+> `NewUserRegistered::via()` sendet Mail nur wenn `notify_new_user` true.
+> Portal-Benachrichtigungen (database-Channel) sind immer aktiv und unberührt.
+> Tests: `NotificationPreferencesTest` (5).

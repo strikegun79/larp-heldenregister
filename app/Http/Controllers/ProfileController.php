@@ -32,8 +32,9 @@ class ProfileController extends Controller
             $request->user()->email_verified_at = null;
         }
 
-        // Checkbox sendet keinen Wert wenn deaktiviert → explizit setzen.
+        // Checkboxen senden keinen Wert wenn deaktiviert → explizit setzen.
         $request->user()->teamer_notifications = $request->boolean('teamer_notifications');
+        $request->user()->notify_new_user      = $request->boolean('notify_new_user');
 
         $request->user()->save();
 
