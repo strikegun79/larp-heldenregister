@@ -46,10 +46,16 @@ ohne Realnamen).
 - [x] 5 Tests (Detail, Rolle, Leerzustand, öffentlich, kein Realname).
 **Abhängig von:** GRP-01, PUB-02.
 
-### GRP-06 · Gruppen-basierte Event-Buchung (optional) · ⏱ 4h · 🔲
+### GRP-06 · Gruppen-basierte Event-Buchung (optional) · ⏱ 4h · ✅
 **Beschreibung:** Mehrere Mitglieder einer Gruppe gesammelt zu einem Event anmelden.
 **Akzeptanzkriterien:**
-- [ ] Sammelanmeldung einer Gruppe (Auswahl der teilnehmenden Mitglieder).
-- [ ] Respektiert Kapazität/Warteliste je Einzelbuchung.
-- [ ] Tests.
+- [x] Sammelanmeldung einer Gruppe (Auswahl der teilnehmenden Mitglieder).
+- [x] Respektiert Kapazität/Warteliste je Einzelbuchung.
+- [x] Tests.
 **Abhängig von:** GRP-03, BOOK-02.
+
+> Umgesetzt: `GroupBookingController@create` + `@store`
+> (`GET/POST adventures/{adventure}/group-bookings`, `can:adventure.book`).
+> Formular-Partial `bookings/_create_group.blade.php` mit Checkbox-Auswahl
+> je Gruppen-Mitglied. Kapazität nach jeder Einzelbuchung neu geprüft.
+> Nicht-Admins sehen nur eigene Gruppen/Spieler (BOOK-10). 18 Tests.

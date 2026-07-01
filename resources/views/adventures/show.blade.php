@@ -32,6 +32,9 @@
                         <a href="{{ route('adventures.bookings.create', $adventure) }}"
                            data-modal-stack="{{ route('adventures.bookings.create', $adventure) }}"
                            class="ui primary button">Anmelden</a>
+                        <a href="{{ route('adventures.group-bookings.create', $adventure) }}"
+                           data-modal-stack="{{ route('adventures.group-bookings.create', $adventure) }}"
+                           class="ui button">Gruppe anmelden</a>
                         <a href="{{ route('adventures.bookings.create-guest', $adventure) }}"
                            data-modal-stack="{{ route('adventures.bookings.create-guest', $adventure) }}"
                            class="ui button">Gast anmelden</a>

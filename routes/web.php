@@ -4,6 +4,7 @@ use App\Http\Controllers\Admin;
 use App\Http\Controllers\AdventureController;
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\BookingController;
+use App\Http\Controllers\GroupBookingController;
 use App\Http\Controllers\EpTransactionController;
 use App\Http\Controllers\HeroClassController;
 use App\Http\Controllers\HeroController;
@@ -118,6 +119,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Anmeldeformular als Modal-Unteransicht (ADV-15).
     Route::get('adventures/{adventure}/bookings/create', [BookingController::class, 'create'])
         ->name('adventures.bookings.create');
+    // Gruppen-Anmeldung (GRP-06).
+    Route::get('adventures/{adventure}/group-bookings/create', [GroupBookingController::class, 'create'])
+        ->name('adventures.group-bookings.create');
+    Route::post('adventures/{adventure}/group-bookings', [GroupBookingController::class, 'store'])
+        ->name('adventures.group-bookings.store');
     // Gast-Anmeldung (ADV-21).
     Route::get('adventures/{adventure}/bookings/create-guest', [BookingController::class, 'createGuest'])
         ->name('adventures.bookings.create-guest');
