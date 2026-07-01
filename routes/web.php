@@ -46,6 +46,9 @@ Route::middleware('throttle:public-hero')->group(function () {
 Route::get('/dashboard', [\App\Http\Controllers\DashboardController::class, 'index'])
     ->middleware(['auth', 'verified'])->name('dashboard');
 
+// Funktionsübersicht & Hilfe für Vorstand/Auftraggeber (INFO-01).
+Route::get('/info', fn () => view('info'))->middleware(['auth', 'verified'])->name('info');
+
 // Alle Portal-Routen erfordern Login UND verifizierte E-Mail-Adresse (AUTH-07/AUTH-02).
 Route::middleware(['auth', 'verified'])->group(function () {
     // In-App-Benachrichtigungen (NOTI-07).

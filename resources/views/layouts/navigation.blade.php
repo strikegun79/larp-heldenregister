@@ -100,6 +100,9 @@
                         <x-dropdown-link :href="route('profile.edit')">
                             {{ __('Profile') }}
                         </x-dropdown-link>
+                        <x-dropdown-link :href="route('info')">
+                            {{ __('Hilfe & Übersicht') }}
+                        </x-dropdown-link>
                         <form method="POST" action="{{ route('logout') }}">
                             @csrf
                             <x-dropdown-link :href="route('logout')"
@@ -254,6 +257,12 @@
                    class="flex items-center px-5 py-3 text-sm text-stone-700 hover:bg-stone-100 active:bg-stone-200 gap-3">
                     <i class="user circle icon text-stone-400 w-5 text-center shrink-0"></i>
                     Profil
+                </a>
+
+                <a href="{{ route('info') }}" @click="moreOpen = false"
+                   class="flex items-center px-5 py-3 text-sm text-stone-700 hover:bg-stone-100 active:bg-stone-200 gap-3">
+                    <i class="info circle icon text-stone-400 w-5 text-center shrink-0"></i>
+                    Hilfe &amp; Übersicht
                 </a>
 
                 <form method="POST" action="{{ route('logout') }}">
