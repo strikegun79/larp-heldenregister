@@ -1,3 +1,6 @@
+/* Alpine.js: Elemente mit x-cloak bis zur Initialisierung verstecken. */
+[x-cloak] { display: none !important; }
+
 /* Fertigkeitsbaum (HERO-16): Skill-Marker auf dem Baum-Bild */
 .skill-map {
     position: relative;

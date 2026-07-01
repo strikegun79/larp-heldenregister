@@ -12,7 +12,7 @@
         <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Uncial+Antiqua&family=EB+Garamond:wght@400;500&display=swap" rel="stylesheet">
 
         <link rel="stylesheet" href="{{ asset('css/heldenregister.css') }}">
-        @vite(['resources/css/vendor.css', 'resources/css/app.css'])
+        @vite(['resources/css/vendor.css', 'resources/css/app.css', 'resources/js/app.js'])
 
         <style>body { font-family: 'EB Garamond', serif; }</style>
     </head>
@@ -47,5 +47,6 @@
                 </div>
             </div>
         </footer>
+        @stack('scripts')
     </body>
 </html>

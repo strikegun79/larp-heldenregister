@@ -74,22 +74,49 @@
             @endif
         </div>
 
-        {{-- Fertigkeitsbäume --}}
+        {{-- Fertigkeitsbäume mit Tab-Toggle (Baum / Stufen) --}}
         <div class="bg-white/70 border-2 border-[#5a3a22]/40 shadow sm:rounded-lg p-5 mb-6">
             <h2 class="font-uncial text-lg text-waldritter mb-4">Fertigkeiten</h2>
             @if ($hero->classes->isEmpty())
                 <p class="text-stone-400 italic">Noch keine Eintragungen</p>
             @else
                 @foreach ($hero->classes as $class)
-                    <div class="{{ ! $loop->first ? 'mt-5 pt-5 border-t border-stone-200' : '' }}">
-                        <h3 class="font-semibold text-waldritter mb-3 flex items-center gap-2">
-                            {{ $class->name }}
-                            @php($classLearnedCount = $class->skills->filter(fn ($s) => $learnedIds->contains($s->id))->count())
-                            @if ($classLearnedCount > 0)
-                                <span class="ui mini green circular label">{{ $classLearnedCount }}</span>
-                            @endif
-                        </h3>
-                        @include('public._skill_tree', ['class' => $class, 'learnedIds' => $learnedIds])
+                    <div x-data="{ view: 'baum' }"
+                         class="{{ ! $loop->first ? 'mt-6 pt-6 border-t border-stone-200' : '' }}">
+
+                        <div class="flex items-center justify-between flex-wrap gap-2 mb-3">
+                            <h3 class="font-semibold text-waldritter flex items-center gap-2">
+                                {{ $class->name }}
+                                @php($classLearnedCount = $class->skills->filter(fn ($s) => $learnedIds->contains($s->id))->count())
+                                @if ($classLearnedCount > 0)
+                                    <span class="ui mini green circular label">{{ $classLearnedCount }}</span>
+                                @endif
+                            </h3>
+
+                            {{-- Tab-Schalter --}}
+                            <div class="flex gap-1.5">
+                                <button type="button"
+                                        @click="view = 'baum'"
+                                        :class="view === 'baum' ? 'ui mini primary button' : 'ui mini basic button'">
+                                    <i class="sitemap icon"></i> Skilltree
+                                </button>
+                                <button type="button"
+                                        @click="view = 'stufen'"
+                                        :class="view === 'stufen' ? 'ui mini primary button' : 'ui mini basic button'">
+                                    <i class="columns icon"></i> Skill-Stufen
+                                </button>
+                            </div>
+                        </div>
+
+                        {{-- Skilltree: Bildansicht --}}
+                        <div x-show="view === 'baum'" x-cloak>
+                            @include('public._skill_tree_image', ['class' => $class, 'learnedIds' => $learnedIds])
+                        </div>
+
+                        {{-- Skill-Stufen: Spaltenansicht --}}
+                        <div x-show="view === 'stufen'" x-cloak>
+                            @include('public._skill_tree', ['class' => $class, 'learnedIds' => $learnedIds])
+                        </div>
                     </div>
                 @endforeach
             @endif

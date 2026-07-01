@@ -64,6 +64,7 @@ class PublicHeroController extends Controller
             ->with([
                 'player',
                 'classes.skills.perlColor',
+                'classes.skills.prerequisites',
                 'skills.perlColor',
                 'groups',
                 'epTransactions.type',
