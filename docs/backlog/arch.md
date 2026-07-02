@@ -179,7 +179,7 @@ für eventuelle spätere Push-Benachrichtigungen und Offline-Datenszenarien.
 > 14 Tests in `tests/Feature/PwaManifestTest.php` (Pflichtfelder, Farben,
 > Icon-Satz, Maskable-Icon, Layout-Tags, Datei-Existenz).
 
-### ARCH-007 · [P3] API-/Serialisierungs-Grundlage für spätere App-/Offline-Optionen · ⏱ 4h · 🔲
+### ARCH-007 · [P3] API-/Serialisierungs-Grundlage für spätere App-/Offline-Optionen · ⏱ 4h · ✅
 **Kategorie:** Architektur / Skalierbarkeit
 **Beschreibung:** Die Anwendung rendert ausschließlich serverseitig (Blade-Partials
 + AJAX-HTML). Das ist für den Mobile-First-Web-Ansatz (Ansatz E, vgl. ARCH-004)
@@ -188,17 +188,19 @@ native App, ein echtes Offline-Datenszenario (Charakterbogen/Teilnehmerliste) od
 eine Drittintegration entstehen, fehlt jedoch eine saubere JSON-Repräsentation der
 Kern-Entitäten (Held, Abenteuer, Buchung). Eine kleine, bewusst begrenzte
 API-Resource-Schicht hält diese Tür offen, ohne den aktuellen Render-Ansatz zu
-verändern. **Dieses Ticket ist explizit optional/vorbereitend** — nur umsetzen,
-wenn ein konkreter App-/Offline-Bedarf entsteht (siehe „Revisit-wenn" in ARCH-004).
+verändern.
 **Nutzen:** Klare, getestete Datenkontrakte als Grundlage für native App, Offline
 oder Integrationen — ohne Vorabinvestition in ein Frontend-Framework.
-**Lösungshinweis (nur Vorschlag):** `App\Http\Resources\*` (Hero/Adventure/Booking)
-mit bewusster Feldauswahl (öffentliche vs. interne Felder, vgl. PUB-02).
-Auth via Sanctum-Token nur bei Bedarf. Versionierter Prefix (`/api/v1`).
 **Akzeptanzkriterien:**
-- [ ] API-Resources für Held/Abenteuer/Buchung mit dokumentierter Feldauswahl.
-- [ ] Read-only-Endpunkte hinter Auth; öffentliche Felder = PUB-02-Kontrakt.
-- [ ] Tests (sichtbare vs. verborgene Felder, Auth).
-**Betroffene Bereiche:** `app/Http/Resources/*`, `routes/api.php`, `app/Models/*`.
+- [x] API-Resources für Held/Abenteuer/Buchung mit dokumentierter Feldauswahl.
+- [x] Read-only-Endpunkte hinter Auth; öffentliche Felder = PUB-02-Kontrakt.
+- [x] Tests (sichtbare vs. verborgene Felder, Auth).
+**Betroffene Bereiche:** `app/Http/Resources/Api/*`, `app/Http/Controllers/Api/V1/*`,
+`routes/api.php`.
 **Abhängigkeiten:** Konzeptuell mit PUB-02 (Feldsichtbarkeit) abzustimmen; sonst
-unabhängig. Nur bei konkretem App-/Offline-Bedarf umsetzen.
+unabhängig.
+
+> Umgesetzt: `HeroResource` (öffentlich, kein Auth, kein Realname), `AdventureResource`
+> (auth:sanctum, Sichtbarkeits-Scope wie Web), `BookingResource` (auth:sanctum, nur
+> eigene Buchungen). Versionierter Prefix `/api/v1`. 23 Tests in
+> `tests/Feature/Api/` (Auth-Schutz, Feldauswahl, Sichtbarkeitsregeln, Paginierung).
