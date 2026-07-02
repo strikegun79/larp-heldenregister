@@ -115,6 +115,110 @@
                 </form>
             </div>
 
+            {{-- Passwort ändern --}}
+            <div class="p-4 sm:p-6 bg-white/60 border-2 border-[#5a3a22]/40 rounded-lg">
+                <h3 class="font-uncial text-lg text-waldritter mb-1">Passwort ändern</h3>
+                <p class="text-sm text-stone-600 mb-4">
+                    Setzt ein neues Passwort für diesen Nutzer. Das aktuelle Passwort wird nicht benötigt.
+                </p>
+
+                <form method="POST" action="{{ route('admin.users.password.update', $user) }}" class="space-y-4">
+                    @csrf
+                    @method('PATCH')
+
+                    <div>
+                        <x-input-label for="password" value="Neues Passwort" />
+                        <x-text-input id="password" name="password" type="password" class="mt-1 block w-full"
+                                      autocomplete="new-password" />
+                        <x-input-error class="mt-2" :messages="$errors->get('password')" />
+                    </div>
+
+                    <div>
+                        <x-input-label for="password_confirmation" value="Passwort bestätigen" />
+                        <x-text-input id="password_confirmation" name="password_confirmation" type="password"
+                                      class="mt-1 block w-full" autocomplete="new-password" />
+                    </div>
+
+                    <div>
+                        <x-primary-button>Passwort setzen</x-primary-button>
+                    </div>
+                </form>
+            </div>
+
+            {{-- E-Mail-Benachrichtigungen --}}
+            <div class="p-4 sm:p-6 bg-white/60 border-2 border-[#5a3a22]/40 rounded-lg">
+                <h3 class="font-uncial text-lg text-waldritter mb-1">E-Mail-Benachrichtigungen</h3>
+                <p class="text-sm text-stone-600 mb-6">
+                    Benachrichtigungs-Einstellungen dieses Nutzers. Auf Anfrage können diese hier geändert werden.
+                </p>
+
+                <form method="POST" action="{{ route('admin.users.notifications.update', $user) }}" class="ui form">
+                    @csrf
+                    @method('PATCH')
+
+                    <div class="space-y-6">
+
+                        <fieldset class="border-0 p-0 m-0">
+                            <legend class="text-sm font-semibold text-waldritter uppercase tracking-wide mb-1">
+                                Anmeldungen
+                            </legend>
+                            <div class="divide-y divide-stone-200 border-t border-b border-stone-200">
+                                @foreach ([
+                                    ['notify_booking_received',  'Anmeldung eingegangen'],
+                                    ['notify_booking_approved',  'Anmeldung bestätigt'],
+                                    ['notify_booking_rejected',  'Anmeldung abgelehnt'],
+                                    ['notify_booking_cancelled', 'Stornierung bestätigt'],
+                                    ['notify_payment_confirmed', 'Zahlung eingegangen'],
+                                    ['notify_waitlist_promoted', 'Von der Warteliste nachgerückt'],
+                                    ['notify_event_cancelled',   'Abenteuer abgesagt'],
+                                    ['notify_event_reminder',    'Erinnerung vor dem Abenteuer'],
+                                ] as [$col, $title])
+                                    <div class="py-3">
+                                        <div class="ui toggle checkbox">
+                                            <input type="checkbox" name="{{ $col }}" id="adm_{{ $col }}" value="1"
+                                                   @checked($user->$col ?? true)>
+                                            <label for="adm_{{ $col }}" class="text-stone-800">{{ $title }}</label>
+                                        </div>
+                                    </div>
+                                @endforeach
+                            </div>
+                        </fieldset>
+
+                        <fieldset class="border-0 p-0 m-0">
+                            <legend class="text-sm font-semibold text-waldritter uppercase tracking-wide mb-1">
+                                Weitere Rollen
+                            </legend>
+                            <div class="divide-y divide-stone-200 border-t border-b border-stone-200">
+                                <div class="py-3">
+                                    <div class="ui toggle checkbox">
+                                        <input type="checkbox" name="teamer_notifications" id="adm_teamer_notifications" value="1"
+                                               @checked($user->teamer_notifications ?? true)>
+                                        <label for="adm_teamer_notifications" class="text-stone-800">Teamer-Einladungen</label>
+                                    </div>
+                                </div>
+                                <div class="py-3">
+                                    <div class="ui toggle checkbox">
+                                        <input type="checkbox" name="notify_new_user" id="adm_notify_new_user" value="1"
+                                               @checked($user->notify_new_user ?? true)>
+                                        <label for="adm_notify_new_user" class="text-stone-800">Neue Nutzer-Registrierung (Admin)</label>
+                                    </div>
+                                </div>
+                                <div class="py-3">
+                                    <div class="ui toggle checkbox">
+                                        <input type="checkbox" name="notify_cancellation_report" id="adm_notify_cancellation_report" value="1"
+                                               @checked($user->notify_cancellation_report ?? true)>
+                                        <label for="adm_notify_cancellation_report" class="text-stone-800">Stornierungen von Teilnehmern (Projektleitung)</label>
+                                    </div>
+                                </div>
+                            </div>
+                        </fieldset>
+
+                    </div>
+
+                    <button type="submit" class="ui primary button mt-6">Einstellungen speichern</button>
+                </form>
+            </div>
+
             {{-- Konto löschen (AUTH-14: Lösch-Button gehört nicht in die Übersicht) --}}
             @if (! $user->hasRole('admin') && $user->id !== Auth::id() && ! $user->trashed())
             <div class="p-4 sm:p-6 bg-white/60 border-2 border-red-200 rounded-lg">
@@ -136,4 +240,14 @@
 
         </div>
     </div>
+    @push('scripts')
+        <script>
+            document.addEventListener('DOMContentLoaded', function () {
+                if (window.jQuery) {
+                    window.jQuery('.ui.toggle.checkbox').checkbox();
+                }
+            });
+        </script>
+    @endpush
+
 </x-app-layout>

@@ -180,6 +180,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::put('users/{user}', [Admin\UserController::class, 'update'])->name('users.update');
             Route::get('users/{user}/profile', [Admin\UserController::class, 'showProfile'])->name('users.profile');
             Route::patch('users/{user}/profile', [Admin\UserController::class, 'updateProfile'])->name('users.profile.update');
+            Route::patch('users/{user}/password', [Admin\UserController::class, 'updatePassword'])->name('users.password.update');
+            Route::patch('users/{user}/notifications', [Admin\UserController::class, 'updateNotifications'])->name('users.notifications.update');
             Route::delete('users/{id}', [Admin\UserController::class, 'destroy'])->name('users.destroy');
             Route::patch('users/{id}/restore', [Admin\UserController::class, 'restore'])->name('users.restore');
         });
