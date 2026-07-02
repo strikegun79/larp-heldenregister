@@ -404,9 +404,9 @@ am Veranstaltungsort bedienen; Aktionen sind ohne Hover verständlich.
 **Lösungshinweis:** Auf < sm Karten-/Stack-Darstellung je Zeile (wie UI-19 in den
 Index-Listen), Aktions-Icons mit sichtbarem Kurzlabel oder größeren Tap-Zielen.
 **Akzeptanzkriterien:**
-- [ ] Anmeldungs- und Check-in-Tabelle auf < sm ohne erzwungenes Quer-Scrollen nutzbar.
-- [ ] Aktions-Buttons auf Touch ohne Hover-Tooltip verständlich (Label oder größere Ziele).
-- [ ] EP-Verlauf-Eingabe (`inline fields`) bricht auf Mobil sauber um.
+- [x] Anmeldungs- und Check-in-Tabelle auf < sm ohne erzwungenes Quer-Scrollen nutzbar.
+- [x] Aktions-Buttons auf Touch ohne Hover-Tooltip verständlich (Label oder größere Ziele).
+- [x] EP-Verlauf-Eingabe (`inline fields`) bricht auf Mobil sauber um.
 **Betroffene Seiten/Routen:** `adventures/_bookings.blade.php`, `adventures/_checkin.blade.php`,
 `heroes/_detail.blade.php`, `adventures/_teamer_nsc_tab.blade.php`
 
@@ -423,9 +423,9 @@ mit dem `data-modal-stack`/`data-modal-url`-Attribut verwenden (Handler reagiert
 bereits auf beliebige Elemente). Reine Downloads/Neue-Tab-Links (`target="_blank"`,
 PDF/CSV) bleiben `<a>`.
 **Akzeptanzkriterien:**
-- [ ] Footer-Aktionen, die Modals öffnen, sind `<button>` mit gleichem Styling.
-- [ ] Tastaturauslösung (Enter/Space) und Fokusring für alle Footer-Aktionen gleich.
-- [ ] Download-/Neuer-Tab-Aktionen bleiben semantisch `<a>`.
+- [x] Footer-Aktionen, die Modals öffnen, sind `<button>` mit gleichem Styling.
+- [x] Tastaturauslösung (Enter/Space) und Fokusring für alle Footer-Aktionen gleich.
+- [x] Download-/Neuer-Tab-Aktionen bleiben semantisch `<a>`.
 **Betroffene Seiten/Routen:** `adventures/_detail.blade.php`, `heroes/_detail.blade.php`,
 `adventures/_manage.blade.php`
 
@@ -514,10 +514,10 @@ Klasse einen Top-Level-Tab. Verwaltungs-/Historien-Tabs („EP-Verlauf") optisch
 oder per Reihenfolge nachordnen. Aktiven Tab beim Mobil-Öffnen sichtbar
 hervorheben.
 **Akzeptanzkriterien:**
-- [ ] Anzahl der Top-Level-Tabs steigt nicht mehr linear mit der Klassenzahl.
-- [ ] Fertigkeitsbäume bleiben pro Klasse erreichbar (Unterauswahl).
-- [ ] Spiel-relevante Tabs stehen vor Verwaltungs-/Historien-Tabs.
-- [ ] Verhalten auf 320–414 px geprüft (Tab-Leiste ohne Überforderung).
+- [x] Anzahl der Top-Level-Tabs steigt nicht mehr linear mit der Klassenzahl.
+- [x] Fertigkeitsbäume bleiben pro Klasse erreichbar (Unterauswahl).
+- [x] Spiel-relevante Tabs stehen vor Verwaltungs-/Historien-Tabs.
+- [x] Verhalten auf 320–414 px geprüft (Tab-Leiste ohne Überforderung).
 **Betroffene Seiten/Routen:** `heroes/_detail.blade.php`
 
 ### UI-34 · [P2] Erfahrungspunkte (EP) und Fachbegriffe im Helden-Detail erklären · ⏱ 3h · ✅
@@ -537,9 +537,9 @@ Betreuer/Eltern.
 Fertigkeiten aus."). Begriffe gemäß `docs/begriffe.md` vereinheitlichen; ggf.
 „verfügbar / insgesamt / ausgegeben" statt „Saldo".
 **Akzeptanzkriterien:**
-- [ ] „EP-Saldo" o. Ä. hat einen verständlichen Ein-Satz-Hilfetext/Tooltip.
-- [ ] Begriffe konsistent mit `docs/begriffe.md`.
-- [ ] Hilfetext ist auch auf dem Handy ohne Hover erreichbar (Touch).
+- [x] „EP-Saldo" o. Ä. hat einen verständlichen Ein-Satz-Hilfetext/Tooltip.
+- [x] Begriffe konsistent mit `docs/begriffe.md`.
+- [x] Hilfetext ist auch auf dem Handy ohne Hover erreichbar (Touch).
 **Betroffene Seiten/Routen:** `heroes/_detail.blade.php`, `docs/begriffe.md`
 
 ### UI-35 · [P2] Hilfetexte/Tooltips aus dem Anmelde- ins Bearbeiten-Formular übernehmen · ⏱ 1h · ✅
@@ -583,9 +583,9 @@ umstellen, Karten an das Theme angleichen (`bg-white/60 border-2`…). Abschnitt
 „Deine gespeicherten Daten" mit Verweis auf die Datenschutzerklärung und
 Kontaktmöglichkeit ergänzen.
 **Akzeptanzkriterien:**
-- [ ] Profil-Header und Karten folgen dem Pergament-/Waldritter-Theme.
-- [ ] Sichtbarer Link zur Datenschutzerklärung auf der Profilseite.
-- [ ] Kurzer Hinweis, welche Datenkategorien gespeichert sind / an wen man sich wendet.
+- [x] Profil-Header und Karten folgen dem Pergament-/Waldritter-Theme.
+- [x] Sichtbarer Link zur Datenschutzerklärung auf der Profilseite.
+- [x] Kurzer Hinweis, welche Datenkategorien gespeichert sind / an wen man sich wendet.
 **Betroffene Seiten/Routen:** `profile/edit.blade.php`,
 `profile/partials/*` (Header-Stil)
 
@@ -604,9 +604,9 @@ kontextgebenden Titel/Breadcrumb anzeigen („Anmeldung · <Abenteuer>") – Tit
 bereits gesetzt, aber visuell als Ebene-2 kennzeichnen. „Schließen" ggf. in
 „Zurück" umbenennen, wo es nur die obere Ebene schließt.
 **Akzeptanzkriterien:**
-- [ ] Gestapeltes Anmelde-Modal zeigt sichtbar Abenteuername als Kontext.
-- [ ] Schließen/Zurück-Aktion ist als „zurück zum Abenteuer" erkennbar.
-- [ ] Auf 320–414 px geprüft.
+- [x] Gestapeltes Anmelde-Modal zeigt sichtbar Abenteuername als Kontext.
+- [x] Schließen/Zurück-Aktion ist als „zurück zum Abenteuer" erkennbar.
+- [x] Auf 320–414 px geprüft.
 **Betroffene Seiten/Routen:** `layouts/app.blade.php`,
 `bookings/_create.blade.php`, `bookings/_create_guest.blade.php`
 
@@ -720,11 +720,11 @@ rendern (z. B. Fomantic `ui accordion` oder native `<details>`), ab `sm` weiter
 Tabs. Reihenfolge spielrelevant zuerst (Fertigkeiten vor Verwaltung/Historie,
 vgl. UI-33). Offen-Zustand bei Teil-Refresh erhalten.
 **Akzeptanzkriterien:**
-- [ ] Auf < `sm` werden Detail-Tabs als Accordion (eine Sektion offen) dargestellt.
-- [ ] Alle Sektionen sind ohne horizontales Scrollen erreichbar.
-- [ ] Tastatur-/Screenreader-bedienbar (aufklappbar mit Enter/Space, Status erkennbar).
-- [ ] Ab `sm` bleibt das bisherige Tab-Verhalten erhalten.
-- [ ] Geprüft mit einem Helden mit ≥ 3 Klassen (≥ 6 Sektionen) auf 320–414 px.
+- [x] Auf < `sm` werden Detail-Tabs als Accordion (eine Sektion offen) dargestellt.
+- [x] Alle Sektionen sind ohne horizontales Scrollen erreichbar.
+- [x] Tastatur-/Screenreader-bedienbar (aufklappbar mit Enter/Space, Status erkennbar).
+- [x] Ab `sm` bleibt das bisherige Tab-Verhalten erhalten.
+- [x] Geprüft mit einem Helden mit ≥ 3 Klassen (≥ 6 Sektionen) auf 320–414 px.
 **Betroffene Seiten/Routen:** `heroes/_detail.blade.php`, `adventures/_detail.blade.php`,
 `adventures/_manage.blade.php`, `players/_detail.blade.php`, `layouts/app.blade.php` (Tab-Init)
 **Abhängigkeiten:** Ergänzt UI-25 (Tab-Scrollen) und UI-33 (Tab-Flut); wirkt in
@@ -771,12 +771,12 @@ Fertigkeiten, EP buchen, Verwaltung (rollenabhängig) + Profil, Benachrichtigung
 (mit Badge), Abmelden. `<main>` unten Padding geben, damit die Bar nichts verdeckt.
 Top-Navbar bleibt ab `sm`; Hamburger entfällt < `sm`.
 **Akzeptanzkriterien:**
-- [ ] Auf < `sm` ist eine fixierte Bottom-Nav mit bis zu 5 Punkten sichtbar.
-- [ ] „Mehr" öffnet Profil, Abmelden, Benachrichtigungen + rollenabhängige Reste.
-- [ ] Aktiver Bereich ist hervorgehoben; Tap-Ziele ≥ 44 px.
-- [ ] Punkte/Sheet-Einträge respektieren die `@can`-Berechtigungen.
-- [ ] Inhalt wird nicht von der Bar verdeckt (ausreichendes `padding-bottom`).
-- [ ] Benachrichtigungs-Badge bleibt mobil sichtbar erreichbar.
+- [x] Auf < `sm` ist eine fixierte Bottom-Nav mit bis zu 5 Punkten sichtbar.
+- [x] „Mehr" öffnet Profil, Abmelden, Benachrichtigungen + rollenabhängige Reste.
+- [x] Aktiver Bereich ist hervorgehoben; Tap-Ziele ≥ 44 px.
+- [x] Punkte/Sheet-Einträge respektieren die `@can`-Berechtigungen.
+- [x] Inhalt wird nicht von der Bar verdeckt (ausreichendes `padding-bottom`).
+- [x] Benachrichtigungs-Badge bleibt mobil sichtbar erreichbar.
 **Betroffene Seiten/Routen:** `layouts/navigation.blade.php`, `layouts/app.blade.php`
 **Abhängigkeiten:** Unabhängig umsetzbar; harmoniert mit UI-43 (Dashboard muss die
 Kachel-Navigation dann nicht mehr doppeln).
@@ -796,11 +796,11 @@ Abenteuer" (Name, Datum, Ort, Anmelden) und „Mein aktiver Held" (Name, EP-Sald
 Link). Bild-Kacheln auf Mobil reduzieren oder weglassen (Bottom-Nav UI-42 deckt
 Navigation ab). Admin-Kennzahlen (`$metrics`) bleiben.
 **Akzeptanzkriterien:**
-- [ ] Auf < `sm` zeigt das Dashboard Quick-Actions statt nur Bild-Kacheln.
-- [ ] „Nächstes Abenteuer" (falls vorhanden) mit Datum/Ort + Aktion sichtbar.
-- [ ] Hero-/EP-Status des aktiven Helden sichtbar (falls vorhanden).
-- [ ] Sinnvoller Leerzustand, wenn nichts ansteht (vgl. UI-22).
-- [ ] Geprüft auf 320–414 px.
+- [x] Auf < `sm` zeigt das Dashboard Quick-Actions statt nur Bild-Kacheln.
+- [x] „Nächstes Abenteuer" (falls vorhanden) mit Datum/Ort + Aktion sichtbar.
+- [x] Hero-/EP-Status des aktiven Helden sichtbar (falls vorhanden).
+- [x] Sinnvoller Leerzustand, wenn nichts ansteht (vgl. UI-22).
+- [x] Geprüft auf 320–414 px.
 **Betroffene Seiten/Routen:** `dashboard.blade.php`, `DashboardController`
 **Abhängigkeiten:** Sinnvoll nach UI-42 (Navigation aus dem Dashboard ausgelagert);
 nutzt Leerzustands-Muster aus UI-22.

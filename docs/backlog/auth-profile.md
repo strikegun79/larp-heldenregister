@@ -103,3 +103,11 @@ Mobiltelefon
 > `NewUserRegistered::via()` sendet Mail nur wenn `notify_new_user` true.
 > Portal-Benachrichtigungen (database-Channel) sind immer aktiv und unberührt.
 > Tests: `NotificationPreferencesTest` (5).
+
+### AUTH-14 Nutzer-Profil für Admin zugänglich machen · ✅
+**Beschreibung:** Admin kann Nutzer-Profil öffnen und änderungen vornehmen.
+**Akzeptanzkriterien:**
+- [x] Admin darf unter der Verwaltung auch das Nutzer-Profil öffnen und bearbeiten
+- [x] Das Profil öffnet man über einen Button in der Übersicht der Nutzer.
+- [x] Der Lösch-Button ist im Nutzer-Details-Modal (nicht in der Übersicht).
+- [x] Der Button in der Übersicht wurde zum Profil-Öffnen-Button umfunktioniert.

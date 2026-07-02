@@ -287,19 +287,19 @@ für das Detail-Layout vergeben).
 - [x] alle Funktionen sollten mit einer horizontalen Linie getrennt werden für die visuelle Trennung
 - [x] entferne den Button für alle um den Charakter-Bogen zu erstellen. Dafür gibt es nun die Public-Seite
 
-### HERO-24 · Helden-Galerie · ⏱ 1h ·  
+### HERO-24 · Helden-Galerie · ⏱ 1h · ✅
 **Beschreibung:** Der Held hat eine eigene Bildergalerie
 **Akzeptanzkriterien:**
-- [] Betreuer und Bürokrat können die Helden-Galerie ändern.
-- [] Pro Held dürfen 4 zusätzliche Bilder als JPG maximal 5MB hochgeladen werden.
-- [] Editor zum Croppen soll auch nutzbar sein und dann in einer passenden JPG Qualität abgespeichert werden.
-- [] Die Galerie soll auf der Public Ansicht angezeigt werden.
-- [] Die Galerie hat nichts mit dem Avatar zu tun.
-- [] Die Galerie soll in einem neuen Tab dargestellt werden, zum hochladen und editieren der vorhanden Bilder.
+- [x] Betreuer und Bürokrat können die Helden-Galerie ändern.
+- [x] Pro Held dürfen 4 zusätzliche Bilder als JPG maximal 5MB hochgeladen werden.
+- [x] Editor zum Croppen soll auch nutzbar sein und dann in einer passenden JPG Qualität abgespeichert werden.
+- [x] Die Galerie soll auf der Public Ansicht angezeigt werden.
+- [x] Die Galerie hat nichts mit dem Avatar zu tun.
+- [x] Die Galerie soll in einem neuen Tab dargestellt werden, zum hochladen und editieren der vorhanden Bilder.
 
-### HERO-25 · Helden-suchen per Siegel · ⏱ 1h · 
+### HERO-25 · Helden-suchen per Siegel · ⏱ 1h · ✅
 **Beschreibung:** Die Heldenregister-Suche soll auch per Siegel möglich sein
 **Akzeptanzkriterien:**
-- [] neben Spielernamen, Charaktername und Fertigkeiten soll auch nach dem Siegel gesucht werden können
+- [x] neben Spielernamen, Charaktername und Fertigkeiten soll auch nach dem Siegel gesucht werden können
 
 

@@ -67,14 +67,14 @@ und ggf. EP-Korrektur.
 ### EP-05 · Perlenfarben-Lookup-CRUD · ⏱ 2h · ✅
 **Beschreibung:** `perl_colors` pflegbar machen (für Fertigkeits-Visualisierung).
 **Akzeptanzkriterien:**
-- [ ] Admin-CRUD für Perlenfarben (Code/Hex + Name).
-- [ ] Verwendung in Skill-Formular und Katalog.
+- [x] Admin-CRUD für Perlenfarben (Code/Hex + Name).
+- [x] Verwendung in Skill-Formular und Katalog.
 
 ### EP-06 · EP-Buchungsarten-Lookup-CRUD · ⏱ 2h · ✅
 **Beschreibung:** `ep_transaction_types` pflegbar (Beschreibung, is_credit).
 **Akzeptanzkriterien:**
-- [ ] Admin-CRUD; Schutz der system-genutzten IDs (10–70) vor Löschung.
-- [ ] Tests.
+- [x] Admin-CRUD; Schutz der system-genutzten IDs (10–70) vor Löschung.
+- [x] Tests.
 
 ### EP-07 · Perlen-Übersicht je Held (Bändchen-Liste) · ⏱ 3h · ✅
 **Beschreibung:** Aus gelernten Fertigkeiten die benötigten Perlen/Bändchen je
@@ -119,15 +119,15 @@ beim Helden erfüllt sind.
 - [x] Partial `heroes/partials/_skill_columns.blade.php`; 6 Tests.
 **Abhängig von:** SKILL-05, SKILL-03.
 
-### SKILL-08 · Fertigkeiten-Katalog mit Symbolen · ⏱ 3h · 
+### SKILL-08 · Fertigkeiten-Katalog mit Symbolen · ⏱ 3h · ✅
 **Beschreibung:** Übersichtsseite aller Fertigkeiten mit den passenden Symbolen ergänzen.
 **Akzeptanzkriterien:**
-- [] möglichkeit zum hochladen des Symbols für die Fertigkeit
-- [] nur png oder jpg
-- [] reduziere das Symbol beim hochladen auf 100x100 pixel
+- [x] möglichkeit zum hochladen des Symbols für die Fertigkeit
+- [x] nur png oder jpg
+- [x] reduziere das Symbol beim hochladen auf 100x100 pixel
 
-### SKILL-09 · Fertigkeiten-Katalog mit Heldenanzahl
+### SKILL-09 · Fertigkeiten-Katalog mit Heldenanzahl ✅
 **Beschreibung:** jede Fertigkeit hat eine Spalte mit der Anzahl der aktiven Helden die die Fertigkeit erworben haben
 **Akzeptanzkriterien:**
-- [] nur aktive Helden, also keine verschollenden
-- [] button daneben zum öffnen eines Modals zum anzeigen einer Liste der Helden/Spieler die die Fertigkeit erworben haben
+- [x] nur aktive Helden, also keine verschollenden
+- [x] button daneben zum öffnen eines Modals zum anzeigen einer Liste der Helden/Spieler die die Fertigkeit erworben haben
