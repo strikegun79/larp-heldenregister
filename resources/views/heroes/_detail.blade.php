@@ -12,7 +12,7 @@
      data-balance="{{ $hero->ep_balance }}"
      data-can-edit="{{ auth()->user()?->can('heldenregister.edit') ? 1 : 0 }}">
 
-    {{-- UI-40: Mobile Accordion (< sm) --}}
+    {{-- UI-33/UI-40: Mobile Accordion (< sm) --}}
     <div class="sm:hidden space-y-2">
 
         {{-- Übersicht --}}
@@ -150,7 +150,220 @@
 
         </x-mobile.accordion-section>
 
-        {{-- Verwalten (nur Bürokrat / Admin) --}}
+        {{-- UI-33: Fertigkeiten – alle Klassen in einem Accordion mit Klassen-Pills --}}
+        @if ($hero->classes->isNotEmpty())
+        <x-mobile.accordion-section title="Fertigkeiten">
+            <div x-data="{ activeClass: {{ $hero->classes->first()->id }}, view: 'tree' }">
+
+                {{-- Klassen-Pills (nur bei mehreren Klassen) --}}
+                @if ($hero->classes->count() > 1)
+                    <div class="flex flex-wrap gap-2 mb-3">
+                        @foreach ($hero->classes as $class)
+                            <button type="button"
+                                    @click="activeClass = {{ $class->id }}"
+                                    :class="activeClass === {{ $class->id }} ? 'ui primary label' : 'ui label'"
+                                    class="cursor-pointer">
+                                {{ $class->name }}
+                            </button>
+                        @endforeach
+                    </div>
+                @endif
+
+                {{-- View-Toggle Baum / Stufen --}}
+                <div class="flex gap-2 mb-3">
+                    <button type="button"
+                            @click="view = 'tree'"
+                            :class="view === 'tree' ? 'ui primary mini button' : 'ui mini basic button'">
+                        <i class="sitemap icon"></i> Baum
+                    </button>
+                    <button type="button"
+                            @click="view = 'columns'"
+                            :class="view === 'columns' ? 'ui primary mini button' : 'ui mini basic button'">
+                        <i class="columns icon"></i> Stufen
+                    </button>
+                </div>
+
+                {{-- Fertigkeitsbaum je Klasse (per Alpine x-show) --}}
+                @foreach ($hero->classes as $class)
+                    <div x-show="activeClass === {{ $class->id }}">
+                        @if ($hero->classes->count() === 1)
+                            <h4 class="font-uncial text-waldritter mb-2">{{ $class->name }}</h4>
+                        @endif
+
+                        {{-- Baum-Ansicht --}}
+                        <div x-show="view === 'tree'">
+                            <div class="skill-map">
+                                <img src="{{ $class->skilltreeImage() }}" alt="Fertigkeitsbaum {{ $class->name }}" class="skill-image">
+                                @foreach ($class->skills as $skill)
+                                    @php($learned = $learnedIds->contains($skill->id))
+                                    @php($unset = ($skill->pivot->x_percentage == 0 && $skill->pivot->y_percentage == 0))
+                                    @php($px = $unset ? 6 + ($loop->index % 10) * 9 : (int) $skill->pivot->x_percentage)
+                                    @php($py = $unset ? 8 + intdiv($loop->index, 10) * 11 : (int) $skill->pivot->y_percentage)
+                                    @php($missingPrereqs = $skill->prerequisites->filter(fn ($p) => ! $learnedIds->contains($p->id)))
+                                    @php($locked = ! $learned && $missingPrereqs->isNotEmpty())
+                                    <button type="button"
+                                            class="skill-marker skill-trigger {{ $learned ? 'learned' : ($locked ? 'locked' : 'unlearned') }}"
+                                            style="left: {{ $px }}%; top: {{ $py }}%;"
+                                            title="{{ $skill->name }} ({{ $skill->ep_costs }} EP){{ $locked ? ' – gesperrt' : '' }}"
+                                            data-skill-id="{{ $skill->id }}"
+                                            data-skill-name="{{ $skill->name }}"
+                                            data-skill-desc="{{ $skill->description }}"
+                                            data-skill-cost="{{ $skill->ep_costs }}"
+                                            data-skill-learned="{{ $learned ? 1 : 0 }}"
+                                            data-skill-locked="{{ $locked ? 1 : 0 }}"
+                                            data-skill-prereqs="{{ $locked ? $missingPrereqs->pluck('name')->join(', ') : '' }}"></button>
+                                @endforeach
+                            </div>
+                            @if ($class->skills->isEmpty())
+                                <p class="text-stone-500 text-sm">Für diese Klasse sind keine Fertigkeiten hinterlegt.</p>
+                            @else
+                                <div class="ui middle aligned divided list skill-list">
+                                    @foreach ($class->skills as $skill)
+                                        @php($learned = $learnedIds->contains($skill->id))
+                                        @php($missingPrereqs = $skill->prerequisites->filter(fn ($p) => ! $learnedIds->contains($p->id)))
+                                        @php($locked = ! $learned && $missingPrereqs->isNotEmpty())
+                                        <div class="item">
+                                            <div class="content">
+                                                <a class="skill-trigger {{ $learned ? 'text-green-700' : ($locked ? 'text-stone-400' : 'text-waldritter') }} hover:underline" style="cursor:pointer"
+                                                   data-skill-id="{{ $skill->id }}"
+                                                   data-skill-name="{{ $skill->name }}"
+                                                   data-skill-desc="{{ $skill->description }}"
+                                                   data-skill-cost="{{ $skill->ep_costs }}"
+                                                   data-skill-learned="{{ $learned ? 1 : 0 }}"
+                                                   data-skill-locked="{{ $locked ? 1 : 0 }}"
+                                                   data-skill-prereqs="{{ $locked ? $missingPrereqs->pluck('name')->join(', ') : '' }}">
+                                                    {{ $learned ? '✓ ' : ($locked ? '🔒 ' : '') }}{{ $skill->name }} ({{ $skill->ep_costs }} EP)
+                                                </a>
+                                            </div>
+                                        </div>
+                                    @endforeach
+                                </div>
+                            @endif
+                        </div>
+
+                        {{-- Spalten-Ansicht nach Stufe --}}
+                        <div x-show="view === 'columns'">
+                            @include('heroes.partials._skill_columns', ['class' => $class, 'learnedIds' => $learnedIds])
+                        </div>
+
+                        @can('heldenregister.edit')
+                            <div class="mt-3">
+                                <a href="{{ route('skilltree.edit', $class) }}" class="ui tiny basic button">Positionen bearbeiten</a>
+                            </div>
+                        @endcan
+                    </div>
+                @endforeach
+            </div>
+        </x-mobile.accordion-section>
+        @endif
+
+        {{-- Abenteuer --}}
+        <x-mobile.accordion-section :title="'Abenteuer (' . $hero->adventure_history->count() . ')'">
+            <h4 class="font-uncial text-sm text-waldritter mb-2">Bestrittene Abenteuer</h4>
+            @if ($hero->adventure_history->isEmpty())
+                <p class="text-stone-500 text-sm">Noch keine Abenteuer bestritten.</p>
+            @else
+                @foreach ($hero->adventure_history as $tx)
+                    <div class="flex items-center justify-between py-1.5 border-b border-stone-100 last:border-0 text-sm">
+                        <span class="text-stone-700">{{ $tx->adventure?->name ?? '—' }}</span>
+                        <span class="text-green-600 font-medium shrink-0 ml-2">+{{ number_format($tx->ep_count, 0, ',', '.') }} EP</span>
+                    </div>
+                @endforeach
+            @endif
+
+            @php($bookingsMobile = $hero->player?->bookings?->sortByDesc(fn ($b) => optional($b->adventure)->start_at) ?? collect())
+            <h4 class="font-uncial text-sm text-waldritter mt-4 mb-2">Anmeldungen des Spielers</h4>
+            @if ($bookingsMobile->isEmpty())
+                <p class="text-stone-500 text-sm">Keine Anmeldungen.</p>
+            @else
+                @foreach ($bookingsMobile as $booking)
+                    <div class="flex items-center justify-between py-1.5 border-b border-stone-100 last:border-0 text-sm">
+                        <span class="text-stone-700">{{ $booking->adventure?->name ?? '—' }}</span>
+                        <span class="text-stone-400 text-xs shrink-0 ml-2">{{ optional($booking->adventure?->start_at)->format('d.m.Y') ?? '—' }}</span>
+                    </div>
+                @endforeach
+                <p class="text-xs text-stone-400 mt-2">Anmeldungen sind spielerbezogen.</p>
+            @endif
+        </x-mobile.accordion-section>
+
+        {{-- EP-Verlauf --}}
+        <x-mobile.accordion-section title="EP-Verlauf">
+            <p class="text-xs text-stone-400 mb-3">Hier siehst du alle EP-Buchungen – zum Beispiel nach einem Abenteuer oder wenn du eine Fertigkeit gekauft hast.</p>
+            <a href="{{ route('heroes.ep.export', $hero) }}" class="ui small button mb-3" target="_blank" rel="noopener">EP-Auszug (CSV)</a>
+
+            @can('heldenregister.edit')
+                <form method="POST" action="{{ route('heroes.ep.store', $hero) }}" class="ui form mb-4" data-refresh-modal>
+                    @csrf
+                    <div class="field">
+                        <label>EP</label>
+                        <input type="number" name="ep_count" step="1" min="1" placeholder="Anzahl" required style="width:7rem">
+                    </div>
+                    <div class="field">
+                        <label>Grund</label>
+                        <select name="ep_transaction_type_id" required>
+                            @foreach ($epTypes as $type)
+                                <option value="{{ $type->id }}">{{ $type->description }} ({{ $type->is_credit ? '+' : '−' }})</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="field">
+                        <label>Datum</label>
+                        <input type="date" name="transacted_at">
+                    </div>
+                    <button type="submit" class="ui primary button">Buchen</button>
+                </form>
+            @endcan
+
+            @forelse ($hero->epTransactions->sortByDesc('transacted_at') as $tx)
+                <div class="flex items-center justify-between py-1.5 border-b border-stone-100 last:border-0 text-sm">
+                    <div>
+                        <span class="text-stone-700">{{ $tx->type?->description }}</span>
+                        <span class="text-stone-400 text-xs ml-1">{{ optional($tx->transacted_at)->format('d.m.Y') }}</span>
+                    </div>
+                    <span class="{{ $tx->type?->is_credit ? 'text-green-600' : 'text-red-600' }} font-medium shrink-0 ml-2">
+                        {{ $tx->type?->is_credit ? '+' : '−' }}{{ number_format($tx->ep_count, 0, ',', '.') }}
+                    </span>
+                </div>
+            @empty
+                <p class="text-stone-500 text-sm">Keine EP-Buchungen.</p>
+            @endforelse
+        </x-mobile.accordion-section>
+
+        {{-- Galerie (HERO-24) --}}
+        @if ($hero->galleryImages->isNotEmpty() || $canEditPhoto)
+        <x-mobile.accordion-section title="Galerie">
+            <div class="grid grid-cols-2 gap-2">
+                @foreach ($hero->galleryImages as $img)
+                    <div class="relative">
+                        <img src="{{ $img->url }}" alt="Galerie-Bild"
+                             class="w-full h-auto rounded border border-stone-200">
+                        @if ($canEditPhoto)
+                            <form method="POST" action="{{ route('heroes.gallery.destroy', [$hero, $img]) }}" data-refresh-modal>
+                                @csrf @method('DELETE')
+                                <button type="submit"
+                                        class="absolute top-1 right-1 ui mini red icon button"
+                                        title="Bild löschen">
+                                    <i class="trash icon"></i>
+                                </button>
+                            </form>
+                        @endif
+                    </div>
+                @endforeach
+                @if ($canEditPhoto)
+                    @for ($i = $hero->galleryImages->count(); $i < 4; $i++)
+                        <label class="flex flex-col items-center justify-center h-28 border-2 border-dashed border-stone-300 rounded cursor-pointer hover:border-waldritter hover:bg-stone-50 transition text-stone-400 text-sm select-none">
+                            <i class="camera icon text-xl mb-1"></i>
+                            Foto hinzufügen
+                            <input type="file" accept="image/*" class="hidden"
+                                   onchange="openPhotoCropper(this.files[0], '{{ route('heroes.gallery.store', $hero) }}', null, { aspectRatio: NaN })">
+                        </label>
+                    @endfor
+                @endif
+            </div>
+        </x-mobile.accordion-section>
+        @endif
+
+        {{-- UI-33: Verwalten ans Ende (nach spielrelevanten Sektionen) --}}
         @can('heldenregister.edit')
         <x-mobile.accordion-section title="Verwalten">
             <div class="ui segments">
@@ -240,198 +453,6 @@
             </div>
         </x-mobile.accordion-section>
         @endcan
-
-        {{-- Abenteuer --}}
-        <x-mobile.accordion-section :title="'Abenteuer (' . $hero->adventure_history->count() . ')'">
-            <h4 class="font-uncial text-sm text-waldritter mb-2">Bestrittene Abenteuer</h4>
-            @if ($hero->adventure_history->isEmpty())
-                <p class="text-stone-500 text-sm">Noch keine Abenteuer bestritten.</p>
-            @else
-                @foreach ($hero->adventure_history as $tx)
-                    <div class="flex items-center justify-between py-1.5 border-b border-stone-100 last:border-0 text-sm">
-                        <span class="text-stone-700">{{ $tx->adventure?->name ?? '—' }}</span>
-                        <span class="text-green-600 font-medium shrink-0 ml-2">+{{ number_format($tx->ep_count, 0, ',', '.') }} EP</span>
-                    </div>
-                @endforeach
-            @endif
-
-            @php($bookingsMobile = $hero->player?->bookings?->sortByDesc(fn ($b) => optional($b->adventure)->start_at) ?? collect())
-            <h4 class="font-uncial text-sm text-waldritter mt-4 mb-2">Anmeldungen des Spielers</h4>
-            @if ($bookingsMobile->isEmpty())
-                <p class="text-stone-500 text-sm">Keine Anmeldungen.</p>
-            @else
-                @foreach ($bookingsMobile as $booking)
-                    <div class="flex items-center justify-between py-1.5 border-b border-stone-100 last:border-0 text-sm">
-                        <span class="text-stone-700">{{ $booking->adventure?->name ?? '—' }}</span>
-                        <span class="text-stone-400 text-xs shrink-0 ml-2">{{ optional($booking->adventure?->start_at)->format('d.m.Y') ?? '—' }}</span>
-                    </div>
-                @endforeach
-                <p class="text-xs text-stone-400 mt-2">Anmeldungen sind spielerbezogen.</p>
-            @endif
-        </x-mobile.accordion-section>
-
-        {{-- Fertigkeitsbaum je Klasse --}}
-        @foreach ($hero->classes as $class)
-            <x-mobile.accordion-section title="Fertigkeiten: {{ $class->name }}">
-                {{-- SKILL-07: Mobile View-Toggle --}}
-                <div x-data="{ view: 'tree' }" class="space-y-3">
-                    <div class="flex gap-2">
-                        <button type="button"
-                                @click="view = 'tree'"
-                                :class="view === 'tree' ? 'ui primary mini button' : 'ui mini basic button'">
-                            <i class="sitemap icon"></i> Baum
-                        </button>
-                        <button type="button"
-                                @click="view = 'columns'"
-                                :class="view === 'columns' ? 'ui primary mini button' : 'ui mini basic button'">
-                            <i class="columns icon"></i> Stufen
-                        </button>
-                    </div>
-
-                    {{-- Baum-Ansicht --}}
-                    <div x-show="view === 'tree'">
-                        <div class="skill-map">
-                            <img src="{{ $class->skilltreeImage() }}" alt="Fertigkeitsbaum {{ $class->name }}" class="skill-image">
-                            @foreach ($class->skills as $skill)
-                                @php($learned = $learnedIds->contains($skill->id))
-                                @php($unset = ($skill->pivot->x_percentage == 0 && $skill->pivot->y_percentage == 0))
-                                @php($px = $unset ? 6 + ($loop->index % 10) * 9 : (int) $skill->pivot->x_percentage)
-                                @php($py = $unset ? 8 + intdiv($loop->index, 10) * 11 : (int) $skill->pivot->y_percentage)
-                                @php($missingPrereqs = $skill->prerequisites->filter(fn ($p) => ! $learnedIds->contains($p->id)))
-                                @php($locked = ! $learned && $missingPrereqs->isNotEmpty())
-                                <button type="button"
-                                        class="skill-marker skill-trigger {{ $learned ? 'learned' : ($locked ? 'locked' : 'unlearned') }}"
-                                        style="left: {{ $px }}%; top: {{ $py }}%;"
-                                        title="{{ $skill->name }} ({{ $skill->ep_costs }} EP){{ $locked ? ' – gesperrt' : '' }}"
-                                        data-skill-id="{{ $skill->id }}"
-                                        data-skill-name="{{ $skill->name }}"
-                                        data-skill-desc="{{ $skill->description }}"
-                                        data-skill-cost="{{ $skill->ep_costs }}"
-                                        data-skill-learned="{{ $learned ? 1 : 0 }}"
-                                        data-skill-locked="{{ $locked ? 1 : 0 }}"
-                                        data-skill-prereqs="{{ $locked ? $missingPrereqs->pluck('name')->join(', ') : '' }}"></button>
-                            @endforeach
-                        </div>
-                        @if ($class->skills->isEmpty())
-                            <p class="text-stone-500 text-sm">Für diese Klasse sind keine Fertigkeiten hinterlegt.</p>
-                        @else
-                            <div class="ui middle aligned divided list skill-list">
-                                @foreach ($class->skills as $skill)
-                                    @php($learned = $learnedIds->contains($skill->id))
-                                    @php($missingPrereqs = $skill->prerequisites->filter(fn ($p) => ! $learnedIds->contains($p->id)))
-                                    @php($locked = ! $learned && $missingPrereqs->isNotEmpty())
-                                    <div class="item">
-                                        <div class="content">
-                                            <a class="skill-trigger {{ $learned ? 'text-green-700' : ($locked ? 'text-stone-400' : 'text-waldritter') }} hover:underline" style="cursor:pointer"
-                                               data-skill-id="{{ $skill->id }}"
-                                               data-skill-name="{{ $skill->name }}"
-                                               data-skill-desc="{{ $skill->description }}"
-                                               data-skill-cost="{{ $skill->ep_costs }}"
-                                               data-skill-learned="{{ $learned ? 1 : 0 }}"
-                                               data-skill-locked="{{ $locked ? 1 : 0 }}"
-                                               data-skill-prereqs="{{ $locked ? $missingPrereqs->pluck('name')->join(', ') : '' }}">
-                                                {{ $learned ? '✓ ' : ($locked ? '🔒 ' : '') }}{{ $skill->name }} ({{ $skill->ep_costs }} EP)
-                                            </a>
-                                        </div>
-                                    </div>
-                                @endforeach
-                            </div>
-                        @endif
-                    </div>
-
-                    {{-- SKILL-07: Spalten-Ansicht nach Stufe --}}
-                    <div x-show="view === 'columns'">
-                        @include('heroes.partials._skill_columns', [
-                            'class'      => $class,
-                            'learnedIds' => $learnedIds,
-                        ])
-                    </div>
-                </div>
-
-                @can('heldenregister.edit')
-                    <div class="mt-3">
-                        <a href="{{ route('skilltree.edit', $class) }}" class="ui tiny basic button">Positionen bearbeiten</a>
-                    </div>
-                @endcan
-            </x-mobile.accordion-section>
-        @endforeach
-
-        {{-- EP-Verlauf --}}
-        <x-mobile.accordion-section title="EP-Verlauf">
-            <p class="text-xs text-stone-400 mb-3">Hier siehst du alle EP-Buchungen – zum Beispiel nach einem Abenteuer oder wenn du eine Fertigkeit gekauft hast.</p>
-            <a href="{{ route('heroes.ep.export', $hero) }}" class="ui small button mb-3" target="_blank" rel="noopener">EP-Auszug (CSV)</a>
-
-            @can('heldenregister.edit')
-                <form method="POST" action="{{ route('heroes.ep.store', $hero) }}" class="ui form mb-4" data-refresh-modal>
-                    @csrf
-                    <div class="field">
-                        <label>EP</label>
-                        <input type="number" name="ep_count" step="1" min="1" placeholder="Anzahl" required style="width:7rem">
-                    </div>
-                    <div class="field">
-                        <label>Grund</label>
-                        <select name="ep_transaction_type_id" required>
-                            @foreach ($epTypes as $type)
-                                <option value="{{ $type->id }}">{{ $type->description }} ({{ $type->is_credit ? '+' : '−' }})</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="field">
-                        <label>Datum</label>
-                        <input type="date" name="transacted_at">
-                    </div>
-                    <button type="submit" class="ui primary button">Buchen</button>
-                </form>
-            @endcan
-
-            @forelse ($hero->epTransactions->sortByDesc('transacted_at') as $tx)
-                <div class="flex items-center justify-between py-1.5 border-b border-stone-100 last:border-0 text-sm">
-                    <div>
-                        <span class="text-stone-700">{{ $tx->type?->description }}</span>
-                        <span class="text-stone-400 text-xs ml-1">{{ optional($tx->transacted_at)->format('d.m.Y') }}</span>
-                    </div>
-                    <span class="{{ $tx->type?->is_credit ? 'text-green-600' : 'text-red-600' }} font-medium shrink-0 ml-2">
-                        {{ $tx->type?->is_credit ? '+' : '−' }}{{ number_format($tx->ep_count, 0, ',', '.') }}
-                    </span>
-                </div>
-            @empty
-                <p class="text-stone-500 text-sm">Keine EP-Buchungen.</p>
-            @endforelse
-        </x-mobile.accordion-section>
-
-        {{-- Galerie (HERO-24) --}}
-        @if ($hero->galleryImages->isNotEmpty() || $canEditPhoto)
-        <x-mobile.accordion-section title="Galerie">
-            <div class="grid grid-cols-2 gap-2">
-                @foreach ($hero->galleryImages as $img)
-                    <div class="relative">
-                        <img src="{{ $img->url }}" alt="Galerie-Bild"
-                             class="w-full h-auto rounded border border-stone-200">
-                        @if ($canEditPhoto)
-                            <form method="POST" action="{{ route('heroes.gallery.destroy', [$hero, $img]) }}" data-refresh-modal>
-                                @csrf @method('DELETE')
-                                <button type="submit"
-                                        class="absolute top-1 right-1 ui mini red icon button"
-                                        title="Bild löschen">
-                                    <i class="trash icon"></i>
-                                </button>
-                            </form>
-                        @endif
-                    </div>
-                @endforeach
-                @if ($canEditPhoto)
-                    @for ($i = $hero->galleryImages->count(); $i < 4; $i++)
-                        <label class="flex flex-col items-center justify-center h-28 border-2 border-dashed border-stone-300 rounded cursor-pointer hover:border-waldritter hover:bg-stone-50 transition text-stone-400 text-sm select-none">
-                            <i class="camera icon text-xl mb-1"></i>
-                            Foto hinzufügen
-                            <input type="file" accept="image/*" class="hidden"
-                                   onchange="openPhotoCropper(this.files[0], '{{ route('heroes.gallery.store', $hero) }}', null, { aspectRatio: NaN })">
-                        </label>
-                    @endfor
-                @endif
-            </div>
-        </x-mobile.accordion-section>
-        @endif
 
     </div>
 
