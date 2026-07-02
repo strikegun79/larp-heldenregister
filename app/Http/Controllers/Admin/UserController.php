@@ -85,6 +85,44 @@ class UserController extends Controller
     }
 
     /**
+     * Admin: vollständiges Nutzerprofil anzeigen (AUTH-14).
+     */
+    public function showProfile(User $user): View
+    {
+        return view('admin.users.profile', compact('user'));
+    }
+
+    /**
+     * Admin: Stammdaten eines Nutzers speichern (AUTH-14).
+     */
+    public function updateProfile(Request $request, User $user): RedirectResponse
+    {
+        $data = $request->validate([
+            'name'         => ['required', 'string', 'max:255'],
+            'lastname'     => ['nullable', 'string', 'max:255'],
+            'email'        => ['required', 'string', 'lowercase', 'email', 'max:255', \Illuminate\Validation\Rule::unique('users', 'email')->ignore($user->id)],
+            'phone'        => ['nullable', 'string', 'max:50'],
+            'street'       => ['nullable', 'string', 'max:100'],
+            'house_number' => ['nullable', 'string', 'max:10'],
+            'zip'          => ['nullable', 'string', 'max:10'],
+            'city'         => ['nullable', 'string', 'max:100'],
+        ]);
+
+        $user->fill($data);
+
+        if ($user->isDirty('email')) {
+            $user->email_verified_at = null;
+        }
+
+        $user->save();
+
+        AuditLogger::log('user.profile_updated', $user, ['by_admin' => $request->user()->id]);
+
+        return redirect()->route('admin.users.profile', $user)
+            ->with('status', 'Profil von "'.$user->name.'" wurde aktualisiert.');
+    }
+
+    /**
      * Nutzer bearbeiten: Rollen + Aktivierung.
      */
     public function edit(User $user, Request $request): View

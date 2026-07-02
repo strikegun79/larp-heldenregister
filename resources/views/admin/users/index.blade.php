@@ -51,15 +51,13 @@
                                                 <i class="redo icon"></i> Wiederherstellen
                                             </button>
                                         </form>
-                                    @elseif (! $user->hasRole('admin') && $user->id !== Auth::id())
-                                        <form method="POST" action="{{ route('admin.users.destroy', $user->id) }}"
-                                              class="inline"
-                                              data-confirm="Konto von {{ trim($user->name . ' ' . $user->lastname) }} löschen?">
-                                            @csrf @method('DELETE')
-                                            <button type="submit" class="ui mini basic red icon button" title="Nutzer löschen">
-                                                <i class="trash icon"></i>
-                                            </button>
-                                        </form>
+                                    @else
+                                        {{-- AUTH-14: Lösch-Button ist ins Bearbeitungs-Modal gewandert;
+                                             stattdessen Profil-Seite öffnen --}}
+                                        <a href="{{ route('admin.users.profile', $user) }}"
+                                           class="ui mini basic icon button" title="Profil öffnen">
+                                            <i class="user icon"></i>
+                                        </a>
                                     @endif
                                 </td>
                             </tr>

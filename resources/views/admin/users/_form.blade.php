@@ -26,5 +26,15 @@
 </form>
 
 <div data-modal-actions hidden>
+    {{-- AUTH-14: Lösch-Button nur im Modal, nicht in der Übersicht --}}
+    @if (! $user->hasRole('admin') && $user->id !== Auth::id())
+        <form method="POST" action="{{ route('admin.users.destroy', $user->id) }}" class="inline"
+              data-confirm="Konto von {{ trim($user->name . ' ' . $user->lastname) }} löschen?">
+            @csrf @method('DELETE')
+            <button type="submit" class="ui basic red button">
+                <i class="trash icon"></i> Löschen
+            </button>
+        </form>
+    @endif
     <button type="submit" form="user-edit-form" class="ui primary button">Speichern</button>
 </div>

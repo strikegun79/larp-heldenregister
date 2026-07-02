@@ -178,6 +178,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::post('users', [Admin\UserController::class, 'store'])->name('users.store');
             Route::get('users/{user}/edit', [Admin\UserController::class, 'edit'])->name('users.edit');
             Route::put('users/{user}', [Admin\UserController::class, 'update'])->name('users.update');
+            Route::get('users/{user}/profile', [Admin\UserController::class, 'showProfile'])->name('users.profile');
+            Route::patch('users/{user}/profile', [Admin\UserController::class, 'updateProfile'])->name('users.profile.update');
             Route::delete('users/{id}', [Admin\UserController::class, 'destroy'])->name('users.destroy');
             Route::patch('users/{id}/restore', [Admin\UserController::class, 'restore'])->name('users.restore');
         });
