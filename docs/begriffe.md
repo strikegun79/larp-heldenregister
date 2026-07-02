@@ -28,6 +28,8 @@ Ziel: einheitliche, für Kinder (8–16 Jahre) und Eltern verständliche Sprache
 | **Verschollen** | Heldendatum, ab dem der Charakter nicht mehr aktiv spielt | Hilfetext im Formular ergänzen |
 | **Aktiver Held** | Der Held, der EP für das nächste Abenteuer erhält | |
 | **EP** | Erfahrungspunkte – werden nach Abenteuerteilnahme vergeben | |
+| **Verfügbare EP** | EP-Saldo – noch frei für Fertigkeiten | Nicht „EP-Saldo"; Sub-Text: „Erfahrungspunkte – frei für neue Fertigkeiten" |
+| **EP insgesamt / ausgegeben** | Gesamte EP durch Abenteuer / davon für Fertigkeiten verbraucht | Nicht „EP gesammelt / ausgegeben"; Sub-Text: „durch Abenteuer gesammelt / für Fertigkeiten ausgegeben" |
 
 ---
 

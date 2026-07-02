@@ -24,7 +24,7 @@
                     <div>
                         <dt class="text-stone-500">Verfügbare EP</dt>
                         <dd class="font-semibold text-base">{{ number_format($hero->ep_balance, 0, ',', '.') }} EP</dd>
-                        <dd class="text-xs text-stone-400">{{ number_format($hero->ep_total, 0, ',', '.') }} gesammelt / {{ number_format($hero->ep_spent, 0, ',', '.') }} für Fertigkeiten ausgegeben</dd>
+                        <dd class="text-xs text-stone-400">Erfahrungspunkte – {{ number_format($hero->ep_total, 0, ',', '.') }} gesammelt / {{ number_format($hero->ep_spent, 0, ',', '.') }} ausgegeben</dd>
                     </div>
                     <div>
                         <dt class="text-stone-500">Status</dt>
@@ -543,16 +543,17 @@
                 <div>
                     <dt class="text-sm text-stone-500">Verfügbare EP</dt>
                     <dd class="font-semibold">{{ number_format($hero->ep_balance, 0, ',', '.') }} EP</dd>
-                    <dd class="text-xs text-stone-400">frei für Fertigkeiten</dd>
+                    <dd class="text-xs text-stone-400">Erfahrungspunkte – frei für neue Fertigkeiten</dd>
                 </div>
                 <div>
-                    <dt class="text-sm text-stone-500">EP gesammelt / ausgegeben</dt>
+                    <dt class="text-sm text-stone-500">EP insgesamt / ausgegeben</dt>
                     <dd>{{ number_format($hero->ep_total, 0, ',', '.') }} / {{ number_format($hero->ep_spent, 0, ',', '.') }}</dd>
+                    <dd class="text-xs text-stone-400">durch Abenteuer gesammelt / für Fertigkeiten ausgegeben</dd>
                 </div>
                 <div>
                     <dt class="text-sm text-stone-500">Fertigkeiten / Klassen</dt>
                     <dd>{{ $hero->skills_count }} / {{ $hero->classes_count }}</dd>
-                    <dd class="text-xs text-stone-400">erlernte Fähigkeiten</dd>
+                    <dd class="text-xs text-stone-400">erlernte Fähigkeiten / Heldenklassen</dd>
                 </div>
                 <div>
                     <dt class="text-sm text-stone-500">Erste Erblickung</dt>
