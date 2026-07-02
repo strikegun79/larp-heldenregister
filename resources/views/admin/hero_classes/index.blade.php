@@ -17,6 +17,7 @@
                             <th class="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase">Name</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase">Slug</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase">EP-Kosten</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase">Klassenband</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase">Helden</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase">Status</th>
                             <th class="px-6 py-3"></th>
@@ -28,6 +29,24 @@
                                 <td class="px-6 py-4" data-label="Name">{{ $class->name }}</td>
                                 <td class="px-6 py-4 text-sm text-stone-500" data-label="Slug">{{ $class->slug }}</td>
                                 <td class="px-6 py-4" data-label="EP-Kosten">{{ $class->ep_cost }} EP</td>
+                                <td class="px-6 py-4" data-label="Klassenband">
+                                    @php($ribbonUrl = $class->ribbonImageUrl())
+                                    <div class="flex items-center gap-2">
+                                        @if ($ribbonUrl)
+                                            <img src="{{ $ribbonUrl }}" alt="Band"
+                                                 class="h-10 w-auto object-cover rounded border border-stone-200"
+                                                 style="max-width:1.5rem">
+                                        @elseif ($class->ribbon_color)
+                                            <span class="inline-block w-4 h-10 rounded"
+                                                  style="background:{{ $class->ribbon_color }}"></span>
+                                        @else
+                                            <span class="text-stone-400 text-xs">–</span>
+                                        @endif
+                                        @if ($class->ribbon_color)
+                                            <span class="text-xs text-stone-500 font-mono">{{ $class->ribbon_color }}</span>
+                                        @endif
+                                    </div>
+                                </td>
                                 <td class="px-6 py-4" data-label="Helden">{{ $class->heroes_count }}</td>
                                 <td class="px-6 py-4" data-label="Status">
                                     @if ($class->disabled)

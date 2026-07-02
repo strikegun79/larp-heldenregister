@@ -122,22 +122,14 @@
             @endif
         </div>
 
-        {{-- Bändchen & Perlen --}}
+        {{-- Bändchen & Perlen (je Klasse mit Bandstreifen) --}}
+        @php($perlByClass = $hero->perlSummaryByClass)
         <div class="bg-white/70 border-2 border-[#5a3a22]/40 shadow sm:rounded-lg p-5 mb-6">
             <h2 class="font-uncial text-lg text-waldritter mb-3">Bändchen &amp; Perlen</h2>
-            @if ($perlSummary->isEmpty())
+            @if ($perlByClass->isEmpty())
                 <p class="text-stone-400 italic">Noch keine Eintragungen</p>
             @else
-                <div class="flex flex-wrap gap-x-6 gap-y-2 text-stone-700">
-                    @foreach ($perlSummary as $entry)
-                        <span class="flex items-center gap-1.5">
-                            <span class="inline-block w-3.5 h-3.5 rounded-full border border-stone-300"
-                                  style="background:{{ $entry->color->code }}"></span>
-                            {{ $entry->color->name }}:
-                            <strong>{{ $entry->count }}</strong>
-                        </span>
-                    @endforeach
-                </div>
+                @include('partials._ribbon_perls', ['perlByClass' => $perlByClass, 'compact' => false])
             @endif
         </div>
 

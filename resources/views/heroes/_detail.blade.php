@@ -124,17 +124,10 @@
                 <p class="text-stone-500 text-sm">Keine Fertigkeiten erlernt.</p>
             @endforelse
 
-            @php($perlSummary = $hero->perl_summary)
-            @if ($perlSummary->isNotEmpty())
+            @php($perlByClass = $hero->perl_summary_by_class)
+            @if ($perlByClass->isNotEmpty())
                 <h4 class="font-uncial text-waldritter mt-4 mb-1">Bändchen / Perlen</h4>
-                <div class="flex flex-wrap gap-x-4 gap-y-1 text-sm text-stone-700">
-                    @foreach ($perlSummary as $entry)
-                        <span>
-                            <span class="inline-block w-3 h-3 rounded-full mr-1 align-middle" style="background:{{ $entry->color->code }}"></span>
-                            {{ $entry->color->name }}: <strong>{{ $entry->count }}</strong>
-                        </span>
-                    @endforeach
-                </div>
+                @include('partials._ribbon_perls', ['perlByClass' => $perlByClass, 'compact' => true])
             @endif
 
             <div class="flex flex-wrap gap-2 mt-4 items-center">
@@ -620,26 +613,10 @@
                 <p class="text-stone-500">Keine Fertigkeiten erlernt.</p>
             @endforelse
 
-            @php($perlSummary = $hero->perl_summary)
-            @if ($perlSummary->isNotEmpty())
+            @php($perlByClass = $hero->perl_summary_by_class)
+            @if ($perlByClass->isNotEmpty())
                 <h3 class="font-uncial text-lg text-waldritter mt-6 mb-2">Bändchen / Perlen</h3>
-                <div class="overflow-x-auto">
-                <table class="ui very basic compact table" style="max-width:20rem">
-                    <thead><tr><th>Farbe</th><th class="right aligned">Anzahl</th></tr></thead>
-                    <tbody>
-                        @foreach ($perlSummary as $entry)
-                            <tr>
-                                <td>
-                                    <span class="inline-block w-3 h-3 rounded-full mr-1 align-middle"
-                                          style="background:{{ $entry->color->code }}"></span>
-                                    {{ $entry->color->name }}
-                                </td>
-                                <td class="right aligned font-semibold">{{ $entry->count }}</td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-                </div>
+                @include('partials._ribbon_perls', ['perlByClass' => $perlByClass, 'compact' => false])
             @endif
 
             <h3 class="font-uncial text-lg text-waldritter mt-6 mb-2">Klassen</h3>

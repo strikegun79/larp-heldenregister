@@ -241,6 +241,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('hero-classes', [Admin\HeroClassController::class, 'store'])->name('hero-classes.store');
         Route::get('hero-classes/{heroClass}/edit', [Admin\HeroClassController::class, 'edit'])->name('hero-classes.edit');
         Route::put('hero-classes/{heroClass}', [Admin\HeroClassController::class, 'update'])->name('hero-classes.update');
+        // Klassenband-Bild hochladen / löschen (162×600 px).
+        Route::post('hero-classes/{heroClass}/ribbon', [Admin\HeroClassController::class, 'storeRibbon'])->name('hero-classes.ribbon.store');
+        Route::delete('hero-classes/{heroClass}/ribbon', [Admin\HeroClassController::class, 'destroyRibbon'])->name('hero-classes.ribbon.destroy');
 
         // Fertigkeiten-Verwaltung (SKILL-02 + SKILL-03).
         Route::get('skills', [Admin\SkillController::class, 'index'])->name('skills.index');

@@ -199,6 +199,34 @@ class Hero extends Model
     }
 
     /**
+     * Perlen-/Bändchen-Zusammenfassung je Klasse und Farbe.
+     * Gibt eine Collection von stdClass {class: HeroClass, perls: Collection<{color, count}>} zurück.
+     * Gruppierung nach hero_class_id der Fertigkeit – keine Vermischung zwischen Klassen.
+     * Klassen ohne erlernte Perlenfertigkeiten werden ausgelassen.
+     */
+    public function getPerlSummaryByClassAttribute(): Collection
+    {
+        $this->loadMissing('skills.perlColor', 'skills.heroClass');
+
+        return $this->skills
+            ->filter(fn ($s) => $s->perlColor !== null && $s->heroClass !== null)
+            ->groupBy('hero_class_id')
+            ->map(fn ($group) => (object) [
+                'class' => $group->first()->heroClass,
+                'perls' => $group
+                    ->groupBy('perl_color_id')
+                    ->map(fn ($pg) => (object) [
+                        'color' => $pg->first()->perlColor,
+                        'count' => $pg->count(),
+                    ])
+                    ->sortBy('color.name')
+                    ->values(),
+            ])
+            ->sortBy('class.name')
+            ->values();
+    }
+
+    /**
      * Komma-separierte Klassen-Slugs (ersetzt GROUP_CONCAT aus view_heroT1).
      */
     public function getClassListAttribute(): string
