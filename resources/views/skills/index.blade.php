@@ -47,10 +47,18 @@
                                 @foreach ($class->skills as $skill)
                                     <tr class="hover:bg-black/5">
                                         <td class="px-4 py-3">
-                                            <div class="font-medium">{{ $skill->name }}</div>
-                                            @if ($skill->description)
-                                                <div class="text-stone-500 text-xs mt-0.5">{{ $skill->description }}</div>
-                                            @endif
+                                            <div class="flex items-center gap-2">
+                                                @if ($skill->icon_url)
+                                                    <img src="{{ $skill->icon_url }}" alt="{{ $skill->name }}"
+                                                         class="w-8 h-8 object-contain rounded shrink-0">
+                                                @endif
+                                                <div>
+                                                    <div class="font-medium">{{ $skill->name }}</div>
+                                                    @if ($skill->description)
+                                                        <div class="text-stone-500 text-xs mt-0.5">{{ $skill->description }}</div>
+                                                    @endif
+                                                </div>
+                                            </div>
                                         </td>
                                         <td class="px-4 py-3 text-stone-600">
                                             {{ $skill->level ?: '—' }}

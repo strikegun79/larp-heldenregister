@@ -47,9 +47,11 @@
                     <tbody class="divide-y divide-stone-200 text-stone-800">
                         @forelse ($skills as $skill)
                             <tr>
-                                <td class="px-4 py-2 w-10">
+                                <td class="px-2 py-2">
                                     @if ($skill->icon_url)
-                                        <img src="{{ $skill->icon_url }}" alt="" class="w-8 h-8 object-cover rounded">
+                                        <img src="{{ $skill->icon_url }}" alt="{{ $skill->name }}" class="w-8 h-8 object-contain rounded">
+                                    @else
+                                        <span class="inline-block w-8 h-8"></span>
                                     @endif
                                 </td>
                                 <td class="px-4 py-3 font-medium" data-label="Name">{{ $skill->name }}</td>
