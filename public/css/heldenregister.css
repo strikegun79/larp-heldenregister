@@ -85,20 +85,28 @@
    Fomantic-Scrollgrenze hinaus. Diese ist jetzt auf min(N, 60vh) gedeckelt.
    =========================================================================== */
 
-/* HERO-19: Helden-Detail-Modal mit einheitlicher Mindestgröße,
-   damit es beim Tab-Wechsel nicht springt.
-   min-height ist auf 60vh gedeckelt, damit das Modal auf Tablets
-   (~800px Viewport-Höhe) nicht aus dem sichtbaren Bereich läuft. */
+/* Alle Modale mit Tabs: fixe Höhe, damit kein Springen beim Tab-Wechsel.
+   min-height == max-height → Fenster bleibt immer gleich groß; Inhalt scrollt intern. */
+#app-modal.modal-has-tabs > .scrolling.content,
+#app-modal-2.modal-has-tabs > .scrolling.content {
+    min-height: min(500px, 60vh);
+    max-height: min(500px, 60vh);
+}
+
+/* HERO-19: Helden-Detail braucht mehr Platz (Skill-Baum).
+   Überschreibt modal-has-tabs durch höhere Spezifität (gleiche ID + Klasse). */
 #app-modal.modal-hero {
     width: 950px;
     max-width: 95vw;
 }
 
-#app-modal.modal-hero > .scrolling.content {
+#app-modal.modal-hero > .scrolling.content,
+#app-modal-2.modal-hero > .scrolling.content {
     min-height: min(840px, 60vh);
+    max-height: min(840px, 60vh);
 }
 
-/* Verwaltungs-Modal (ADV-19): fest 950 px breit, springt nicht beim Tab-Wechsel. */
+/* Verwaltungs-Modal (ADV-19): fest 950 px breit. */
 #app-modal.modal-event {
     width: 950px;
     max-width: 95vw;
@@ -106,21 +114,47 @@
 
 #app-modal.modal-event > .scrolling.content {
     min-height: min(820px, 60vh);
+    max-height: min(820px, 60vh);
 }
 
-/* UI-28: Auf Mobilgeräten min-height aufheben, damit Fomantics max-height greift
+/* UI-28: Auf Mobilgeräten fixed heights aufheben, damit Fomantics max-height greift
    und der Modal-Header nie über den Viewport-Rand wandert.
    dvh berücksichtigt kollabierte Adressleisten (iOS Safari, Chrome Android). */
 @media (max-width: 767px) {
+    #app-modal.modal-has-tabs > .scrolling.content,
+    #app-modal-2.modal-has-tabs > .scrolling.content,
     #app-modal.modal-hero > .scrolling.content,
+    #app-modal-2.modal-hero > .scrolling.content,
     #app-modal.modal-event > .scrolling.content {
         min-height: 0;
         max-height: calc(80dvh - 10rem);
     }
     #app-modal.modal-hero,
+    #app-modal-2.modal-hero,
     #app-modal.modal-event {
         top: 0.5rem !important;
         margin-bottom: 0.5rem !important;
+    }
+}
+
+/* Full-Page Adventure-Tabs: fixe Segmenthöhe, damit die weiße Karte nicht springt.
+   Gilt nur für Vollseiten (show/manage) — in Modalen übernimmt .scrolling.content die Höhe. */
+.adv-detail-page .ui.bottom.attached.tab.segment {
+    min-height: min(460px, 58vh);
+    max-height: min(460px, 58vh);
+    overflow-y: auto;
+}
+.adv-manage-page .ui.bottom.attached.tab.segment {
+    min-height: min(750px, 62vh);
+    max-height: min(750px, 62vh);
+    overflow-y: auto;
+}
+@media (max-width: 767px) {
+    .adv-detail-page .ui.bottom.attached.tab.segment,
+    .adv-manage-page .ui.bottom.attached.tab.segment {
+        min-height: 0;
+        max-height: none;
+        overflow-y: visible;
     }
 }
 

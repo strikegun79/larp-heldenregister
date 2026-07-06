@@ -68,6 +68,8 @@ function loadModalContent(url, preserveTab) {
             $('#app-modal').toggleClass('modal-hero', $content.find('#skilltree').length > 0);
             // ADV-19: Verwaltungs-Modal (3 Tabs) auf feste Größe.
             $('#app-modal').toggleClass('modal-event', $content.find('[data-tab="checkin"]').length > 0);
+            // Alle Modale mit Tabs: fixe Höhe, damit kein Springen beim Tab-Wechsel.
+            $('#app-modal').toggleClass('modal-has-tabs', $content.find('.menu .item[data-tab]').length > 0);
             // ADV-17: Unterschriften-Pad aktivieren, falls vorhanden.
             if ($content.find('#signature-pad').length) initSignaturePad('signature-pad');
             // UI-05: Fomantic-Datepicker im geladenen Inhalt initialisieren.
@@ -159,6 +161,8 @@ function loadStackContent(url, preserveTab) {
                 $content.find('[data-tab="' + prevTab + '"]').addClass('active');
             }
             $('#app-modal-2').toggleClass('modal-hero', $content.find('#skilltree').length > 0);
+            // Alle Modale mit Tabs: fixe Höhe (gestapeltes Modal).
+            $('#app-modal-2').toggleClass('modal-has-tabs', $content.find('.menu .item[data-tab]').length > 0);
             // UI-05: Fomantic-Datepicker im gestapelten Modal initialisieren.
             initFomanticCalendars($content);
             // PUB-05: QR-Code nach Stack-Modal-Load rendern.

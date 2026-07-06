@@ -13,7 +13,7 @@ Anmeldungen zu Events (`bookings`) und tatsächliche Teilnahme (`event_visits`).
 ### BOOK-03 · Stornieren/Abmelden + AJAX-Toast · ⏱ 2h · ✅
 `destroy`; AJAX-Submit mit Erfolg/Fehler-Toast.
 
-## Offen (🔲)
+
 
 ### BOOK-04 · Buchung bearbeiten (`adventure.modify`) · ⏱ 4h · ✅
 **Beschreibung:** Die Berechtigung `adventure.modify` existiert, aber es gibt
@@ -126,3 +126,12 @@ sind die eigenen (bzw. für Bürokrat alle).
 > rein kosmetisches Filtern wäre umgehbar. Bestehende `AdventureTest`-Buchungs-
 > tests ordnen den Spieler jetzt dem Bucher zu. Tests: `BookingPlayerScopeTest`
 > (Liste eigene/alle, Buchen fremd verboten/Bürokrat erlaubt).
+
+## Offen (🔲)
+
+### BOOK-11 Neuladen der Veranstaltung-Verwaltung verhindern 🔲
+**Beschreibung:** wenn beim Teilnehmer in einer Verwaltung eins der Buttons geklickt wird, lädt sich die ganze Seite neu und man beginnt wieder in der Event-Daten Ansicht.
+Das macht die Listenbearbeitung schwierig.
+**Akzeptanzkriterien:**
+- [] Beim klicken auf die Buttons neben den Teilnehmer und Teamer kein neu laden der seite.
+- [] die Symbole für den Status der eben geändert wurde muss per JS geändert werden.
