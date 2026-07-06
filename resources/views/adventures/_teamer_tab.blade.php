@@ -23,7 +23,8 @@
                         @can('events.edit')
                             <form method="POST"
                                   action="{{ route('adventures.teamer.update-role', [$adventure, $signup]) }}"
-                                  class="flex items-center gap-2">
+                                  class="flex items-center gap-2"
+                                  data-refresh-modal>
                                 @csrf @method('PATCH')
                                 <select name="teamer_role" class="ui compact dropdown">
                                     <option value="">— keine —</option>
@@ -42,7 +43,8 @@
                             @if ($signup->user_id === auth()->id() || auth()->user()->hasAnyRole('project_lead', 'registrar'))
                                 <form method="POST"
                                       action="{{ route('adventures.teamer.destroy', [$adventure, $signup]) }}"
-                                      data-confirm="Teamer-Anmeldung stornieren?">
+                                      data-confirm="Teamer-Anmeldung stornieren?"
+                                      data-refresh-modal>
                                     @csrf @method('DELETE')
                                     <button type="submit" class="ui mini red button">Stornieren</button>
                                 </form>

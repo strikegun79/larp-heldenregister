@@ -6,7 +6,9 @@ use App\Models\Adventure;
 use App\Models\Role;
 use App\Models\TeamerSignup;
 use App\Models\User;
+use App\Notifications\TeamerApproved;
 use App\Notifications\TeamerInvitation;
+use App\Notifications\TeamerRejected;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -153,12 +155,17 @@ class TeamerSignupController extends Controller
         abort_unless($request->user()->can('events.edit'), 403);
         abort_if($signup->adventure_id !== $adventure->id, 404);
 
+        $wasApproved = (bool) $signup->approved_at;
         $signup->update([
-            'approved_at' => $signup->approved_at ? null : now(),
+            'approved_at' => $wasApproved ? null : now(),
             'rejected_at' => null,
         ]);
 
-        $msg = $signup->approved_at ? 'Teamer bestätigt.' : 'Bestätigung zurückgenommen.';
+        if (! $wasApproved) {
+            $signup->user->notify(new TeamerApproved($adventure));
+        }
+
+        $msg = ! $wasApproved ? 'Teamer bestätigt.' : 'Bestätigung zurückgenommen.';
 
         return $request->expectsJson()
             ? response()->json(['message' => $msg, 'refresh_modal' => true])
@@ -171,12 +178,17 @@ class TeamerSignupController extends Controller
         abort_unless($request->user()->can('events.edit'), 403);
         abort_if($signup->adventure_id !== $adventure->id, 404);
 
+        $wasRejected = (bool) $signup->rejected_at;
         $signup->update([
-            'rejected_at' => $signup->rejected_at ? null : now(),
+            'rejected_at' => $wasRejected ? null : now(),
             'approved_at' => null,
         ]);
 
-        $msg = $signup->rejected_at ? 'Teamer abgelehnt.' : 'Ablehnung zurückgenommen.';
+        if (! $wasRejected) {
+            $signup->user->notify(new TeamerRejected($adventure));
+        }
+
+        $msg = ! $wasRejected ? 'Teamer abgelehnt.' : 'Ablehnung zurückgenommen.';
 
         return $request->expectsJson()
             ? response()->json(['message' => $msg, 'refresh_modal' => true])

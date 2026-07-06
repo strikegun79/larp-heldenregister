@@ -3,17 +3,13 @@
 namespace App\Notifications;
 
 use App\Models\Adventure;
-use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
-/**
- * NOTI-10: Stornierungsbestätigung an den Teilnehmer selbst.
- * Ausgelöst in BookingController@destroy; ergänzt BookingCancelled (→ Projektleiter).
- */
-class BookingCancelledParticipant extends Notification implements ShouldQueue
+/** Teamer-Anmeldung abgelehnt – Portal + Mail (wenn teamer_notifications aktiv). */
+class TeamerRejected extends Notification implements ShouldQueue
 {
     use Queueable;
 
@@ -22,8 +18,10 @@ class BookingCancelledParticipant extends Notification implements ShouldQueue
     /** @return array<int, string> */
     public function via(object $notifiable): array
     {
-        $channels = $notifiable instanceof User ? ['database'] : [];
-        $channels[] = 'mail';
+        $channels = ['database'];
+        if ($notifiable->teamer_notifications ?? true) {
+            $channels[] = 'mail';
+        }
         return $channels;
     }
 
@@ -32,9 +30,11 @@ class BookingCancelledParticipant extends Notification implements ShouldQueue
         $date = optional($this->adventure->start_at)->format('d.m.Y');
 
         return (new MailMessage)
-            ->subject('Abmeldung bestätigt: '.$this->adventure->name)
-            ->line('Deine Anmeldung für „'.$this->adventure->name.'" ('.$date.') wurde storniert.')
-            ->line('Falls dies ein Versehen war, melde dich bitte bei den Veranstaltern.')
+            ->subject('Teamer-Anmeldung abgelehnt: '.$this->adventure->name)
+            ->greeting('Hallo '.$notifiable->name.',')
+            ->line('Deine Teamer-Anmeldung für „'.$this->adventure->name.'" wurde leider abgelehnt.')
+            ->line('Datum: '.$date)
+            ->line('Bei Fragen wende dich bitte an die Veranstalter.')
             ->action('Zum Heldenportal', route('dashboard'));
     }
 
@@ -44,8 +44,9 @@ class BookingCancelledParticipant extends Notification implements ShouldQueue
         return [
             'adventure_id'   => $this->adventure->id,
             'adventure_name' => $this->adventure->name,
-            'message'        => 'Deine Anmeldung für „'.$this->adventure->name.'" wurde storniert.',
-            'url'            => route('dashboard'),
+            'start_at'       => optional($this->adventure->start_at)->toDateString(),
+            'message'        => 'Deine Teamer-Anmeldung für „'.$this->adventure->name.'" wurde abgelehnt.',
+            'url'            => route('adventures.show', $this->adventure),
         ];
     }
 }

@@ -274,9 +274,14 @@ class BookingController extends Controller
 
         $message = $confirm ? 'Anmeldung bestätigt.' : 'Bestätigung zurückgenommen.';
 
-        // NOTI-10: Bestätigungs-Mail an den Spieler (nur beim Bestätigen, nicht beim Zurücknehmen).
-        if ($confirm && $booking->player?->email && $booking->player->notificationEnabled('notify_booking_approved')) {
-            Notification::route('mail', $booking->player->email)->notify(new BookingApproved($booking));
+        // NOTI-10: Bestätigungs-Mail + Portal an den Spieler (nur beim Bestätigen, nicht beim Zurücknehmen).
+        if ($confirm && $booking->player?->notificationEnabled('notify_booking_approved')) {
+            $user = $booking->player->users()->first();
+            if ($user) {
+                $user->notify(new BookingApproved($booking));
+            } elseif ($booking->player->email) {
+                Notification::route('mail', $booking->player->email)->notify(new BookingApproved($booking));
+            }
         }
 
         return $request->expectsJson()
@@ -300,9 +305,14 @@ class BookingController extends Controller
 
         $message = $reject ? 'Anmeldung abgelehnt.' : 'Ablehnung zurückgenommen.';
 
-        // NOTI-10: Ablehnungs-Mail an den Spieler (nur beim Ablehnen, nicht beim Zurücknehmen).
-        if ($reject && $booking->player?->email && $booking->player->notificationEnabled('notify_booking_rejected')) {
-            Notification::route('mail', $booking->player->email)->notify(new BookingRejected($booking));
+        // NOTI-10: Ablehnungs-Mail + Portal an den Spieler (nur beim Ablehnen, nicht beim Zurücknehmen).
+        if ($reject && $booking->player?->notificationEnabled('notify_booking_rejected')) {
+            $user = $booking->player->users()->first();
+            if ($user) {
+                $user->notify(new BookingRejected($booking));
+            } elseif ($booking->player->email) {
+                Notification::route('mail', $booking->player->email)->notify(new BookingRejected($booking));
+            }
         }
 
         return $request->expectsJson()
@@ -322,9 +332,14 @@ class BookingController extends Controller
 
         $message = $booking->paid ? 'Als bezahlt markiert.' : 'Als offen markiert.';
 
-        // NOTI-10: Zahlungsbestätigung an den Spieler (nur beim Setzen auf bezahlt).
-        if (! $wasPaid && $booking->paid && $booking->player?->email && $booking->player->notificationEnabled('notify_payment_confirmed')) {
-            Notification::route('mail', $booking->player->email)->notify(new PaymentConfirmed($booking));
+        // NOTI-10: Zahlungsbestätigung + Portal an den Spieler (nur beim Setzen auf bezahlt).
+        if (! $wasPaid && $booking->paid && $booking->player?->notificationEnabled('notify_payment_confirmed')) {
+            $user = $booking->player->users()->first();
+            if ($user) {
+                $user->notify(new PaymentConfirmed($booking));
+            } elseif ($booking->player->email) {
+                Notification::route('mail', $booking->player->email)->notify(new PaymentConfirmed($booking));
+            }
         }
 
         return $request->expectsJson()
@@ -347,13 +362,22 @@ class BookingController extends Controller
         // Auch bezahlte Anmeldungen dürfen storniert werden (ADV-21) – kein Block.
         $participant = $booking->participant_name;
 
+        // Für Stornierungsbenachrichtigung vorab laden, bevor das Modell gelöscht wird.
+        $cancelUser  = $booking->player?->users()->first();
+        $cancelEmail = $booking->player?->email;
+        $notifyCancel = $booking->player?->notificationEnabled('notify_booking_cancelled') ?? false;
+
         // Wird ein regulärer Platz frei, rückt die älteste Wartelisten-Buchung nach (BOOK-07).
         $wasRegular = ! $booking->waitlisted;
         $booking->delete();
 
-        // NOTI-10: Stornierungsbestätigung an den Teilnehmer selbst.
-        if ($booking->player?->email && $booking->player->notificationEnabled('notify_booking_cancelled')) {
-            Notification::route('mail', $booking->player->email)->notify(new BookingCancelledParticipant($adventure));
+        // NOTI-10: Stornierungsbestätigung + Portal an den Teilnehmer selbst.
+        if ($notifyCancel) {
+            if ($cancelUser) {
+                $cancelUser->notify(new BookingCancelledParticipant($adventure));
+            } elseif ($cancelEmail) {
+                Notification::route('mail', $cancelEmail)->notify(new BookingCancelledParticipant($adventure));
+            }
         }
 
         // ADV-21: Projektleitung über die Stornierung informieren.

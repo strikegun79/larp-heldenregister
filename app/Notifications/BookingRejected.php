@@ -3,6 +3,7 @@
 namespace App\Notifications;
 
 use App\Models\Booking;
+use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -21,7 +22,9 @@ class BookingRejected extends Notification implements ShouldQueue
     /** @return array<int, string> */
     public function via(object $notifiable): array
     {
-        return ['mail'];
+        $channels = $notifiable instanceof User ? ['database'] : [];
+        $channels[] = 'mail';
+        return $channels;
     }
 
     public function toMail(object $notifiable): MailMessage
@@ -34,5 +37,17 @@ class BookingRejected extends Notification implements ShouldQueue
             ->line('Deine Anmeldung für „'.$booking->adventure?->name.'" wurde leider abgelehnt.')
             ->line('Bei Fragen wende dich bitte an die Veranstalter.')
             ->action('Zum Heldenportal', route('dashboard'));
+    }
+
+    /** @return array<string, mixed> */
+    public function toArray(object $notifiable): array
+    {
+        $booking = $this->booking->loadMissing(['adventure']);
+        return [
+            'adventure_id'   => $booking->adventure?->id,
+            'adventure_name' => $booking->adventure?->name,
+            'message'        => 'Deine Anmeldung für „'.$booking->adventure?->name.'" wurde abgelehnt.',
+            'url'            => route('dashboard'),
+        ];
     }
 }

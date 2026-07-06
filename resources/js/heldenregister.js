@@ -398,6 +398,83 @@ document.addEventListener('submit', function (e) {
 });
 
 // ------------------------------------------------------------------
+// BOOK-11: Vollseiten-Formulare (außerhalb Modalen) mit data-refresh-modal
+// per AJAX abschicken und danach den aktiven Tab aktualisieren.
+// ------------------------------------------------------------------
+function refreshManageTab() {
+    const activeItem = document.querySelector('.ui.top.attached.tabular.menu .item.active[data-tab]');
+    const activeTabName = activeItem ? activeItem.getAttribute('data-tab') : null;
+
+    fetch(window.location.href, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+        .then(r => r.text())
+        .then(html => {
+            const doc = new DOMParser().parseFromString(html, 'text/html');
+
+            // Tab-Menü aktualisieren (z. B. geänderte Zähler in den Labels)
+            const newMenu = doc.querySelector('.ui.top.attached.tabular.menu');
+            const curMenu = document.querySelector('.ui.top.attached.tabular.menu');
+            if (newMenu && curMenu) curMenu.innerHTML = newMenu.innerHTML;
+
+            // Nur den aktiven Tab-Inhalt ersetzen
+            if (activeTabName) {
+                const sel = '.ui.bottom.attached.tab.segment[data-tab="' + activeTabName + '"]';
+                const newSeg = doc.querySelector(sel);
+                const curSeg = document.querySelector(sel);
+                if (newSeg && curSeg) curSeg.innerHTML = newSeg.innerHTML;
+            }
+
+            // Fomantic Tabs neu initialisieren und aktiven Tab wiederherstellen
+            if (curMenu) $(curMenu).find('.item[data-tab]').tab();
+            if (activeTabName) {
+                const $all = $('.ui.top.attached.tabular.menu .item[data-tab], .ui.bottom.attached.tab.segment[data-tab]');
+                $all.removeClass('active');
+                $(`.ui.top.attached.tabular.menu [data-tab="${activeTabName}"],` +
+                  `.ui.bottom.attached.tab.segment[data-tab="${activeTabName}"]`).addClass('active');
+            }
+
+            // Dropdowns und Checkboxen im aktualisierten Segment neu initialisieren
+            const activeSeg = document.querySelector('.ui.bottom.attached.tab.segment.active');
+            if (activeSeg) {
+                $(activeSeg).find('.ui.dropdown').dropdown();
+                $(activeSeg).find('.ui.checkbox').checkbox();
+            }
+        })
+        .catch(() => window.location.reload());
+}
+
+document.addEventListener('submit', function (e) {
+    const form = e.target;
+    // Nur außerhalb von Modalen — dort greift der eigene AJAX-Handler (s. o.)
+    if (form.closest('#app-modal') || form.closest('#app-modal-2')) return;
+    if (!form.hasAttribute('data-refresh-modal')) return;
+    if (e.defaultPrevented) return;
+    e.preventDefault();
+
+    const submitBtn = e.submitter || form.querySelector('[type=submit]');
+    submitBtn?.classList.add('loading', 'disabled');
+
+    fetch(form.action, {
+        method: 'POST',
+        headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' },
+        body: new FormData(form),
+    })
+        .then(async (resp) => {
+            const data = await resp.json().catch(() => ({}));
+            if (resp.ok) {
+                showToast(data.message || 'Gespeichert.', 'success');
+                refreshManageTab();
+            } else if (resp.status === 422) {
+                const errors = data.errors ? Object.values(data.errors).flat() : [];
+                showToast(errors.join('<br>') || data.message || 'Bitte prüfen.', 'error');
+            } else {
+                showToast(data.message || 'Fehler.', 'error');
+            }
+        })
+        .catch(() => showToast('Netzwerkfehler.', 'error'))
+        .finally(() => submitBtn?.classList.remove('loading', 'disabled'));
+});
+
+// ------------------------------------------------------------------
 // Skilltree: Klick auf eine Fertigkeit -> Skill-Modal (HERO-14/16)
 // ------------------------------------------------------------------
 let skillBaseUrl = null, skillCurrentId = null, skillCanEdit = false;

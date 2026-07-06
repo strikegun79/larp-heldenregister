@@ -28,7 +28,8 @@
                             @can('events.edit')
                                 <form method="POST"
                                       action="{{ route('adventures.teamer.update-role', [$adventure, $signup]) }}"
-                                      class="flex items-center gap-2">
+                                      class="flex items-center gap-2"
+                                      data-refresh-modal>
                                     @csrf @method('PATCH')
                                     <select name="teamer_role" class="ui compact dropdown">
                                         <option value="">— keine —</option>
