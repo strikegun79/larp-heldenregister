@@ -4,7 +4,7 @@
             <h2 class="font-uncial text-2xl text-waldritter leading-tight">
                 Funktionsübersicht &amp; Hilfe
             </h2>
-            <span class="text-sm text-stone-500">Waldritter Heldenregister</span>
+            <span class="text-sm text-stone-500">{{ config('portal.organization_short') }} {{ config('portal.name') }}</span>
         </div>
     </x-slot>
 
@@ -13,9 +13,9 @@
 
             {{-- Einleitung --}}
             <div class="bg-[#fdf6e3] border-2 border-[#5a3a22]/30 rounded-xl p-6 sm:p-8">
-                <h3 class="font-uncial text-xl text-waldritter mb-3">Was ist das Waldritter Heldenregister?</h3>
+                <h3 class="font-uncial text-xl text-waldritter mb-3">Was ist das {{ config('portal.organization_short') }} {{ config('portal.name') }}?</h3>
                 <p class="text-stone-700 leading-relaxed mb-4">
-                    Das Heldenregister ist das zentrale Verwaltungsportal für Kinder- und Jugend-LARP der Waldritter.
+                    Das {{ config('portal.name') }} ist das zentrale Verwaltungsportal für {{ config('portal.larp_type') }} der {{ config('portal.organization_short') }}.
                     Es bündelt die gesamte Organisation rund um Charaktere, Veranstaltungen und Teilnehmende
                     in einer modernen, sicheren Webanwendung – und löst damit das bisherige
                     PHP-Altsystem vollständig ab.
@@ -495,7 +495,7 @@
 
             {{-- Fußzeile --}}
             <div class="text-center text-xs text-stone-400 pb-4">
-                Waldritter Heldenregister &mdash; Interne Funktionsübersicht &mdash; {{ now()->format('Y') }}
+                {{ config('portal.organization_short') }} {{ config('portal.name') }} &mdash; Interne Funktionsübersicht &mdash; {{ now()->format('Y') }}
             </div>
 
         </div>

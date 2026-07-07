@@ -51,9 +51,9 @@
 
     {{-- PUB-09: Heldensuche ohne Anmeldung --}}
     <div class="mt-8 pt-6 border-t-2 border-[#5a3a22]/20">
-        <h2 class="font-uncial text-waldritter text-base mb-2 text-center">Was ist das Heldenregister?</h2>
+        <h2 class="font-uncial text-waldritter text-base mb-2 text-center">Was ist das {{ config('portal.name') }}?</h2>
         <p class="text-sm text-stone-600 leading-snug mb-4 text-center">
-            Das Heldenregister der Waldritter erfasst alle LARP-Helden mit ihren
+            Das {{ config('portal.name') }} der {{ config('portal.organization_short') }} erfasst alle LARP-Helden mit ihren
             Fertigkeiten und Abenteuern. Jeder Held hat einen eigenen 6-stelligen
             Code – zum Beispiel auf dem <strong>Heldenausweis</strong> oder als
             <strong>QR-Code</strong>.

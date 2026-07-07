@@ -7,7 +7,7 @@
 
         <title>{{ config('app.name', 'Heldenregister') }}</title>
 
-        <link rel="icon" href="/favicon.ico">
+        <link rel="icon" href="{{ config('portal.favicon') }}">
 
         <!-- Fonts -->
         <link rel="preconnect" href="https://fonts.googleapis.com">

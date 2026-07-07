@@ -7,14 +7,14 @@
 
         <title>{{ config('app.name', 'Heldenregister') }}</title>
 
-        <link rel="icon" href="/favicon.ico">
+        <link rel="icon" href="{{ config('portal.favicon') }}">
         <!-- PWA (ARCH-006) -->
         <link rel="manifest" href="/manifest.webmanifest">
-        <meta name="theme-color" content="#5a3a22">
-        <link rel="apple-touch-icon" href="/icons/apple-touch-icon.png">
+        <meta name="theme-color" content="{{ config('portal.theme_color') }}">
+        <link rel="apple-touch-icon" href="{{ config('portal.apple_touch_icon') }}">
         <meta name="apple-mobile-web-app-capable" content="yes">
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-        <meta name="apple-mobile-web-app-title" content="Heldenregister">
+        <meta name="apple-mobile-web-app-title" content="{{ config('portal.short_name') }}">
 
         <!-- Fonts: Body + mittelalterliche Überschriften (wie im Legacy) -->
         <link rel="preconnect" href="https://fonts.googleapis.com">
@@ -52,16 +52,22 @@
             <footer class="mt-8 border-t-2 border-[#5a3a22]/40 bg-black/10 text-waldritter">
                 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 grid gap-6 sm:grid-cols-3 text-sm">
                     <div>
-                        <strong>Waldritter-Gießen e.V. – Heldenregister</strong><br>
-                        Entwicklung &amp; Support<br>
-                        <a class="hover:underline" href="mailto:richy.mueller@waldritter-giessen.de">richy.mueller@waldritter-giessen.de</a>
+                        <strong>{{ config('portal.organization') }} – {{ config('portal.name') }}</strong><br>
+                        @if(config('portal.contact_name'))
+                        Entwicklung &amp; Support: {{ config('portal.contact_name') }}<br>
+                        @endif
+                        @if(config('portal.contact_email'))
+                        <a class="hover:underline" href="mailto:{{ config('portal.contact_email') }}">{{ config('portal.contact_email') }}</a>
+                        @endif
                     </div>
                     <div>
+                        @if(config('portal.email'))
                         <strong>Vereinskontakt</strong><br>
-                        <a class="hover:underline" href="mailto:info@waldritter-giessen.de">info@waldritter-giessen.de</a>
+                        <a class="hover:underline" href="mailto:{{ config('portal.email') }}">{{ config('portal.email') }}</a>
+                        @endif
                     </div>
                     <div class="sm:text-right">
-                        &copy; {{ date('Y') }} Waldritter-Gießen e.V.
+                        &copy; {{ date('Y') }} {{ config('portal.organization') }}
                     </div>
                 </div>
             </footer>

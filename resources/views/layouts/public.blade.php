@@ -5,7 +5,7 @@
         <meta name="viewport" content="width=device-width, initial-scale=1">
         <title>{{ $title ?? config('app.name', 'Heldenregister') }}</title>
 
-        <link rel="icon" href="/favicon.ico">
+        <link rel="icon" href="{{ config('portal.favicon') }}">
 
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
@@ -38,12 +38,14 @@
         <footer class="border-t-2 border-[#5a3a22]/40 bg-black/10 text-waldritter">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 grid gap-6 sm:grid-cols-3 text-sm">
                 <div>
-                    <strong>Waldritter-Gießen e.V. – Heldenregister</strong><br>
-                    <a class="hover:underline" href="mailto:info@waldritter-giessen.de">info@waldritter-giessen.de</a>
+                    <strong>{{ config('portal.organization') }} – {{ config('portal.name') }}</strong><br>
+                    @if(config('portal.email'))
+                    <a class="hover:underline" href="mailto:{{ config('portal.email') }}">{{ config('portal.email') }}</a>
+                    @endif
                 </div>
                 <div></div>
                 <div class="sm:text-right">
-                    &copy; {{ date('Y') }} Waldritter-Gießen e.V.
+                    &copy; {{ date('Y') }} {{ config('portal.organization') }}
                 </div>
             </div>
         </footer>

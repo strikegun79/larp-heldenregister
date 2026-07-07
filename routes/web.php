@@ -34,6 +34,26 @@ Route::get('/', function () {
     return redirect()->route('dashboard');
 });
 
+// Dynamisches PWA-Manifest mit Portal-Konfiguration (config/portal.php).
+Route::get('/manifest.webmanifest', function () {
+    $data = [
+        'name'             => config('portal.name'),
+        'short_name'       => config('portal.short_name'),
+        'description'      => config('portal.description'),
+        'start_url'        => '/',
+        'display'          => 'standalone',
+        'orientation'      => 'portrait-primary',
+        'theme_color'      => config('portal.theme_color'),
+        'background_color' => config('portal.background_color'),
+        'lang'             => 'de',
+        'icons'            => config('portal.icons'),
+        'screenshots'      => [],
+        'categories'       => ['entertainment', 'games'],
+    ];
+    return response()->json($data)
+        ->header('Content-Type', 'application/manifest+json');
+})->name('manifest');
+
 // PUB-02/03/06: Öffentliche Helden-Routen mit Rate-Limiting (30/min je IP).
 Route::middleware('throttle:public-hero')->group(function () {
     // PUB-03: Suchformular + Weiterleitung (vor {code}-Route registriert).
