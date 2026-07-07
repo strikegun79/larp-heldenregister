@@ -24,7 +24,7 @@
                     </x-nav-link>
                     @can('heldenregister.view')
                         <x-nav-link :href="route('heroes.index')" :active="request()->routeIs('heroes.*')">
-                            {{ __('Heldenregister') }}
+                            {{ __('Helden') }}
                         </x-nav-link>
                         <x-nav-link :href="route('skills.catalog')" :active="request()->routeIs('skills.catalog')">
                             {{ __('Fertigkeiten') }}

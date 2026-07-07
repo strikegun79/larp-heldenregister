@@ -2,7 +2,7 @@
     <x-slot name="header">
         <div class="flex items-center justify-between">
             <h2 class="font-uncial text-2xl text-waldritter leading-tight">
-                Heldenregister
+                Heldenverwaltung
             </h2>
             @can('heldenregister.edit')
                 <a href="{{ route('heroes.create') }}" class="ui primary button">

@@ -33,7 +33,7 @@
                 </div>
             @endif
 
-            {{-- UI-43: Mobile-Dashboard (< sm) --}}
+           {{-- UI-43: Mobile-Dashboard (< sm) --}}
             <div class="sm:hidden space-y-4 mb-4">
 
                 {{-- Aktiver Held --}}
@@ -133,7 +133,7 @@
                             <img src="/images/heroes_db.jpg" alt="" aria-hidden="true" loading="lazy" width="400" height="176" class="w-full h-full object-cover group-hover:scale-105 transition">
                         </div>
                         <div class="p-4 text-center">
-                            <div class="font-uncial text-lg text-waldritter">Heldenregister</div>
+                            <div class="font-uncial text-lg text-waldritter">Heldenverwaltung</div>
                             <div class="text-sm text-stone-600">Auflistung aller Helden</div>
                         </div>
                     </a>
@@ -170,7 +170,7 @@
                     <a href="{{ route('admin.index') }}"
                        class="group block rounded-lg overflow-hidden border-2 border-[#5a3a22]/40 bg-white/60 shadow hover:shadow-xl hover:-translate-y-1 transition">
                         <div class="h-44 overflow-hidden">
-                            <img src="/images/administration.jpg" alt="" aria-hidden="true" loading="lazy" width="400" height="176" class="w-full h-full object-cover group-hover:scale-105 transition">
+                            <img src="/images/verwaltung.jpg" alt="" aria-hidden="true" loading="lazy" width="400" height="176" class="w-full h-full object-cover group-hover:scale-105 transition">
                         </div>
                         <div class="p-4 text-center">
                             <div class="font-uncial text-lg text-waldritter">Verwaltung</div>
