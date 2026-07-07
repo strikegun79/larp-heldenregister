@@ -16,7 +16,7 @@
                 </p>
 
                 <div class="skill-map" id="editor-map" data-update-url="{{ route('skilltree.update', $class) }}">
-                    <img src="{{ $class->skilltreeImage() }}" alt="Fertigkeitsbaum {{ $class->name }}" class="skill-image" draggable="false">
+                    <img src="{{ $class->skilltreeImage() }}" alt="Fertigkeitsbaum {{ $class->name }}" class="skill-image" draggable="false" loading="lazy">
                     @foreach ($class->skills as $skill)
                         @php($px = (int) ($skill->pivot->x_percentage ?? 0))
                         @php($py = (int) ($skill->pivot->y_percentage ?? 0))

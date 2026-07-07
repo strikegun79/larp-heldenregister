@@ -7,7 +7,7 @@
     <x-mobile.accordion-section title="Allgemeines" :open="true">
         <div class="flex items-start gap-3 mb-4">
             <img src="{{ $player->avatar_url }}" alt="{{ $player->full_name }}"
-                 class="w-20 h-20 object-cover rounded border-2 border-[#5a3a22]/40 shrink-0">
+                 class="w-20 h-20 object-cover rounded border-2 border-[#5a3a22]/40 shrink-0" loading="lazy">
             <dl class="text-stone-800 text-sm space-y-1 flex-1">
                 <div><dt class="text-stone-500">Status</dt><dd>{{ $player->active ? 'aktiv' : 'inaktiv' }}</dd></div>
                 <div><dt class="text-stone-500">Erstellt</dt><dd>{{ optional($player->created_at)->format('d.m.Y') ?? '—' }}</dd></div>
@@ -36,7 +36,7 @@
             <a href="{{ route('heroes.show', $hero) }}" data-modal-stack="{{ route('heroes.show', $hero) }}"
                class="flex items-center gap-3 py-2 border-b border-stone-100 last:border-0 hover:bg-amber-50 active:bg-amber-100 transition-colors rounded px-1">
                 <img src="{{ $hero->image_url }}" alt="{{ $hero->character_name }}"
-                     class="w-10 h-10 object-cover rounded border">
+                     class="w-10 h-10 object-cover rounded border" loading="lazy">
                 <div class="flex-1 min-w-0">
                     <div class="font-medium text-stone-800 text-sm truncate">{{ $hero->character_name ?? '—' }}</div>
                     <div class="text-xs text-stone-500">{{ $hero->classes->pluck('name')->implode(', ') ?: '—' }}
@@ -73,7 +73,7 @@
     @if ($canEdit)
     <x-mobile.accordion-section title="Avatar">
         <img src="{{ $player->avatar_url }}" alt="Avatar"
-             class="w-32 h-32 object-cover rounded border-2 border-[#5a3a22]/40 mb-3">
+             class="w-32 h-32 object-cover rounded border-2 border-[#5a3a22]/40 mb-3" loading="lazy">
         <p class="text-sm text-stone-500">Auf einem größeren Gerät vollständig bearbeitbar.</p>
     </x-mobile.accordion-section>
     @endif
@@ -92,7 +92,7 @@
     <div class="ui bottom attached tab segment active" data-tab="p-allg">
         <div class="flex gap-4 items-start">
             <img src="{{ $player->avatar_url }}" alt="{{ $player->full_name }}"
-                 class="w-40 h-40 object-cover rounded border-2 border-[#5a3a22]/40 shrink-0" style="aspect-ratio:1/1;">
+                 class="w-40 h-40 object-cover rounded border-2 border-[#5a3a22]/40 shrink-0" style="aspect-ratio:1/1;" loading="lazy">
             <dl class="grid grid-cols-1 gap-2 text-stone-800">
                 <div><dt class="text-sm text-stone-500">Geburtsdatum</dt>
                     <dd>{{ optional($player->dayofbirth)->format('d.m.Y') ?? '—' }}@if ($player->dayofbirth) ({{ $player->age }} Jahre)@endif</dd></div>
@@ -128,7 +128,7 @@
                         class="cursor-pointer hover:bg-stone-50 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-600 focus-visible:outline-offset-[-2px]">
                         <td>
                             <img src="{{ $hero->image_url }}" alt="{{ $hero->character_name }}"
-                                 class="w-12 h-12 object-cover rounded border">
+                                 class="w-12 h-12 object-cover rounded border" loading="lazy">
                         </td>
                         <td>{{ $hero->character_name ?? '—' }}</td>
                         <td>{{ $hero->classes->pluck('name')->implode(', ') ?: '—' }}</td>
@@ -180,7 +180,7 @@
     @if ($canEdit)
         <div class="ui bottom attached tab segment" data-tab="p-avatar">
             <img src="{{ $player->avatar_url }}" alt="Avatar"
-                 class="w-40 h-40 object-cover rounded border-2 border-[#5a3a22]/40 mb-3" style="aspect-ratio:1/1;">
+                 class="w-40 h-40 object-cover rounded border-2 border-[#5a3a22]/40 mb-3" style="aspect-ratio:1/1;" loading="lazy">
             <div class="flex gap-2 flex-wrap mt-1">
                 <label class="ui button" for="avatar-file-input" style="cursor:pointer;">
                     <i class="upload icon"></i> Bild auswählen (JPG/PNG, max. 20 MB)

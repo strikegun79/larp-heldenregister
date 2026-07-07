@@ -831,3 +831,107 @@ beibehalten.
 `bookings/_create.blade.php`, `bookings/_create_guest.blade.php`, `bookings/_edit.blade.php`
 **Abhängigkeiten:** Setzt UI-38/39 voraus (Stack entsteht dann nicht mehr aus
 Detail-Modals); ersetzt teilweise UI-37; nutzt Footer-Wrap aus UI-26/27.
+
+## Performance / Datensparsamkeit 2026-07 (🔲)
+
+> Zielgruppe (Kinder/Jugendliche + Eltern) ist häufig auf Veranstaltungen mit
+> schlechtem Mobilfunknetz unterwegs (Wald, Landgebiete, überlastete Zellen).
+> Der Service Worker (`public/sw.js`) cached bereits statische Assets Cache-First,
+> was Folgebesuchen hilft. Es fehlen jedoch alle expliziten Vorkehrungen für
+> langsame/teure Verbindungen: kein `Save-Data`-Header-Check, keine
+> `prefers-reduced-data`-Behandlung, keine serverseitige Lite-Route, kein
+> Offline-Content-Fallback, kein Bild-Lazy-Loading über die Kachel-Bilder hinaus.
+> **Lösungshinweise sind Vorschläge — in diesem Ticket wurde kein Code geändert.**
+
+### UI-45 · [P2] Light-Ansicht / Save-Data-Modus für langsame Verbindungen · ⏱ 6h · 🔲
+**Typ:** Feature / Performance
+
+**Priorität:** Medium (Hoch für Nutzung am Veranstaltungsort, aber kein Blocker
+für Grundfunktion — daher gesamt Medium)
+
+**Business Value:** Mittel
+
+**Aufwand:** L (~6h)
+
+**Beschreibung:** Die App trifft heute keinerlei Unterscheidung zwischen schnellen
+und langsamen/teuren Verbindungen. Sie liefert immer dieselben Kachel-Bilder,
+Avatare, Fonts und JS/CSS-Bundles aus. Der Service Worker (`public/sw.js`) nutzt
+zwar Cache-First für statische Assets (hilft bei Folgebesuchen), aber:
+- Es gibt **keinen `Save-Data`-Header-Check** (der Browser sendet `Save-Data: on`,
+  wenn der Nutzer im System einen Datensparmodus aktiviert hat).
+- Es gibt **keine `prefers-reduced-data`-Media-Query** im CSS.
+- Es gibt **keine serverseitige Lite-/Light-Route bzw. Middleware-Option**, die
+  einen datensparsamen Modus erzwingt oder anbietet.
+- Es gibt **keinen Offline-Content-Fallback** (nur Assets sind gecached, keine
+  Seiten/Offline-Hinweisseite).
+- **Bild-Lazy-Loading** existiert nur punktuell (Dashboard-/Admin-Kacheln,
+  Avatare via UI-21), nicht projektweit.
+
+Für die Zielgruppe (Kinder/Jugendliche + Eltern, oft am Veranstaltungsort mit
+schlechtem Netz) bedeutet das: langsamer erster Eindruck, unnötiger Datenverbrauch
+und im Zweifel abgebrochene Anmeldungen bei schlechtem Empfang.
+
+**Nutzen:** Eltern und Jugendliche können die App auch bei schwachem/teurem Netz
+(Veranstaltungsgelände, Datenlimit) flüssig und datensparsam nutzen — insbesondere
+die kritischen Flows (Abenteuer ansehen, anmelden, Check-in). Weniger Ladeabbrüche,
+geringerer Datenverbrauch, besserer erster Eindruck.
+
+**Akzeptanzkriterien:**
+- [ ] Der Server erkennt den `Save-Data: on`-Request-Header (per Middleware) und
+      stellt einen Blade-/View-Flag bereit (z. B. `View::share('saveData', …)`),
+      auf das Views reagieren können (schwerere Bilder weglassen/klein ausliefern).
+- [ ] Nutzer können den Datensparmodus zusätzlich **manuell** aktivieren
+      (unabhängig vom Browser-Header), z. B. via Toggle im Profil/Menü, per Cookie/
+      Session persistiert — die Middleware berücksichtigt Header ODER manuelle Wahl.
+- [ ] Im Save-Data-Modus werden dekorative Kachel-/Hintergrundbilder weggelassen
+      oder durch leichte Platzhalter ersetzt; funktionale Bilder (Avatare) werden
+      klein/lazy ausgeliefert.
+- [ ] CSS berücksichtigt `@media (prefers-reduced-data: reduce)`: dekorative
+      Hintergrund-/Kachelbilder werden dort nicht geladen.
+- [ ] Alle inhaltlich nicht sofort sichtbaren `<img>` tragen projektweit
+      `loading="lazy"` (Erweiterung von UI-21 auf verbleibende Views).
+- [ ] Der Service Worker liefert bei fehlender Verbindung eine schlanke
+      Offline-Hinweisseite (statt Browser-Fehler) für Navigations-Requests.
+- [ ] Der Save-Data-Zustand ist für den Nutzer sichtbar (Hinweis/aktiver Toggle),
+      damit klar ist, warum ggf. Bilder fehlen.
+
+**Umsetzungshinweise (nur Vorschlag — kein Code in diesem Ticket geändert):**
+- **Save-Data-Header-Check (Server):** Eigene Middleware `DetectSaveData`
+  registrieren (in `web`-Gruppe), die `$request->header('Save-Data') === 'on'`
+  ODER eine gesetzte Session/Cookie-Präferenz auswertet und das Ergebnis via
+  `View::share('saveData', $bool)` bzw. einem `@php`-Helper allen Blades bereitstellt.
+  In Views: `@unless($saveData) <img src=… loading="lazy"> @endunless` für rein
+  dekorative Kacheln; für funktionale Bilder kleinere Variante ausliefern.
+- **Save-Data-Header im Service Worker (`public/sw.js`):** Im `fetch`-Handler
+  `event.request.headers.get('Save-Data')` prüfen; bei aktivem Save-Data für
+  Bild-Requests bevorzugt aus dem Cache antworten und Netzwerk-Nachladen
+  (Stale-While-Revalidate für Bilder) unterdrücken; ggf. Bild-Requests, die nicht
+  im Cache sind, mit einem transparenten 1×1-Platzhalter beantworten.
+- **`prefers-reduced-data`-CSS:** In `public/css/heldenregister.css` bzw.
+  `resources/css`: `@media (prefers-reduced-data: reduce) { .kachel-bg,
+  .pergament-hero { background-image: none; } }` — dekorative Hintergründe
+  nicht laden. Ergänzt die serverseitige Erkennung um die reine CSS-Ebene.
+- **Manueller Toggle:** Kleiner „Datensparmodus"-Umschalter (Profil oder „Mehr"-
+  Sheet der Bottom-Nav aus UI-42), der eine Cookie-/Session-Präferenz setzt; die
+  o. g. Middleware wertet Header ODER Präferenz aus.
+- **Lazy-Loading projektweit:** Verbleibende `<img>` ohne `loading="lazy"`
+  ergänzen (Fortsetzung von UI-21). Für above-the-fold-Bilder bewusst
+  `loading="eager"` beibehalten, um LCP nicht zu verschlechtern.
+- **Offline-Fallback:** Im Service Worker eine gecachte `offline.html`
+  vorhalten und bei fehlgeschlagenen Navigations-Requests (`request.mode ===
+  'navigate'`) ausliefern.
+
+**Abhängigkeiten:**
+- Baut auf UI-21 auf (Lazy-Loading/feste Maße wurde dort für Kachel-/Listenbilder
+  begonnen — dieses Ticket zieht es projektweit durch und ergänzt Save-Data).
+- Harmoniert mit UI-42 (manueller Toggle könnte im „Mehr"-Sheet der Bottom-Nav
+  liegen) und UI-36 (Toggle alternativ auf der Profilseite).
+- Kein Blocker durch andere Tickets; unabhängig umsetzbar.
+
+**Tags:** PERFORMANCE, UX, ACCESSIBILITY
+
+**Betroffene Seiten/Routen:** `public/sw.js`, `public/css/heldenregister.css`,
+neue Middleware (`app/Http/Middleware/DetectSaveData.php`),
+`app/Http/Kernel.php` bzw. `bootstrap/app.php` (Middleware-Registrierung),
+`layouts/app.blade.php`, `dashboard.blade.php`, `admin/index.blade.php`,
+`players/index.blade.php`, ggf. `profile/edit.blade.php` (Toggle).

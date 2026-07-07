@@ -14,7 +14,7 @@
         <div class="bg-white/70 border-2 border-[#5a3a22]/40 shadow sm:rounded-lg overflow-hidden mb-6">
             <div class="flex items-center gap-5 p-5">
                 <img src="{{ $hero->image_url }}" alt="{{ $displayName }}"
-                     class="h-24 w-24 object-cover rounded border-2 border-[#5a3a22]/40 shrink-0">
+                     class="h-24 w-24 object-cover rounded border-2 border-[#5a3a22]/40 shrink-0" loading="lazy">
                 <div class="flex-1 min-w-0">
                     <h1 class="font-uncial text-2xl text-waldritter leading-tight">
                         {{ $displayName }}
@@ -159,7 +159,7 @@
             <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 @foreach ($hero->galleryImages as $img)
                     <img src="{{ $img->url }}" alt="Galerie-Bild"
-                         class="w-full h-auto rounded border border-stone-200">
+                         class="w-full h-auto rounded border border-stone-200" loading="lazy">
                 @endforeach
             </div>
         </div>

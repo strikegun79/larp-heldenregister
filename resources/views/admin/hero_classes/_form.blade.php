@@ -54,7 +54,7 @@
                 <div class="flex flex-col items-center gap-1">
                     <img src="{{ $ribbonUrl }}" alt="Klassenband {{ $class->name }}"
                          class="h-24 w-auto object-cover rounded border border-stone-200"
-                         style="max-width:2.5rem">
+                         style="max-width:2.5rem" loading="lazy">
                     <span class="text-xs text-stone-400">Vorschau</span>
                 </div>
             @else

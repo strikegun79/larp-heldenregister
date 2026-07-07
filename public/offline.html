@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kein Netz – Heldenregister</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+        body {
+            font-family: system-ui, sans-serif;
+            background: #f5ede0;
+            color: #3b250f;
+            min-height: 100dvh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 1.5rem;
+            text-align: center;
+        }
+        .card {
+            background: #fff;
+            border: 2px solid #5a3a22;
+            border-radius: 0.75rem;
+            padding: 2rem 1.5rem;
+            max-width: 380px;
+            width: 100%;
+            box-shadow: 0 4px 16px rgba(0,0,0,.1);
+        }
+        .icon { font-size: 3rem; margin-bottom: 1rem; }
+        h1 { font-size: 1.4rem; margin-bottom: 0.5rem; }
+        p  { font-size: 0.95rem; color: #6b4c2a; margin-bottom: 1.25rem; line-height: 1.5; }
+        button {
+            background: #5a3a22;
+            color: #fff;
+            border: none;
+            border-radius: 0.5rem;
+            padding: 0.65rem 1.5rem;
+            font-size: 1rem;
+            cursor: pointer;
+        }
+        button:active { opacity: 0.85; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <div class="icon">📡</div>
+        <h1>Keine Verbindung</h1>
+        <p>Das Heldenregister ist gerade nicht erreichbar.<br>
+           Bitte prüfe deine Internetverbindung und versuche es erneut.</p>
+        <button onclick="window.location.reload()">Erneut versuchen</button>
+    </div>
+</body>
+</html>

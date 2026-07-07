@@ -50,7 +50,7 @@
                                             <div class="flex items-center gap-2">
                                                 @if ($skill->icon_url)
                                                     <img src="{{ $skill->icon_url }}" alt="{{ $skill->name }}"
-                                                         class="w-8 h-8 object-contain rounded shrink-0">
+                                                         class="w-8 h-8 object-contain rounded shrink-0" loading="lazy">
                                                 @endif
                                                 <div>
                                                     <div class="font-medium">{{ $skill->name }}</div>

@@ -60,6 +60,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
 
+    // UI-45: Datensparmodus manuell umschalten.
+    Route::post('/save-data/toggle', function (\Illuminate\Http\Request $request) {
+        $current = $request->session()->get('save_data', false);
+        $request->session()->put('save_data', ! $current);
+        return back();
+    })->name('save-data.toggle');
+
     // Fertigkeiten-Katalog (SKILL-04) + aktive Helden-Modal (SKILL-09).
     Route::get('skills', [SkillController::class, 'index'])->name('skills.catalog');
     Route::get('skills/{skill}/heroes', [SkillController::class, 'heroes'])->name('skills.catalog.heroes');

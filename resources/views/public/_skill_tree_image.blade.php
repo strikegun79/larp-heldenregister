@@ -9,7 +9,7 @@
     <div class="skill-map">
         <img src="{{ $class->skilltreeImage() }}"
              alt="Fertigkeitsbaum {{ $class->name }}"
-             class="skill-image">
+             class="skill-image" loading="lazy">
 
         @foreach ($class->skills as $skill)
             @php($learned  = $learnedIds->contains($skill->id))

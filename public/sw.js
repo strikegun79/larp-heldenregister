@@ -5,10 +5,10 @@
  *   HTML-Navigations-Requests → Network-First (immer frische Seite, kein Token-Problem)
  *   Statische Assets (CSS/JS/Bilder/Fonts/Icons) → Cache-First (Vite-Bundle mit Hash-Namen)
  *
- * Kein Offline-Fallback für Daten – das ist ein späteres Ticket (ARCH-007+).
+ * UI-45: Offline-Fallback (/offline.html) für Navigations-Requests bei fehlendem Netz.
  */
 
-const CACHE_VERSION = 'v1';
+const CACHE_VERSION = 'v2';
 const SHELL_CACHE   = 'heldenregister-shell-' + CACHE_VERSION;
 
 // Assets die beim SW-Install sofort gecacht werden (App-Shell).
@@ -17,6 +17,7 @@ const PRECACHE_URLS = [
     '/icons/icon-192.png',
     '/icons/icon-512.png',
     '/favicon.ico',
+    '/offline.html',
 ];
 
 // ----------------------------------------------------------------
@@ -65,13 +66,15 @@ self.addEventListener('fetch', function (event) {
     if (url.origin !== self.location.origin) return;
 
     // HTML-Navigation → Network-First: immer frische Serverantwort, kein Cache.
+    // UI-45: Bei Offline-Fehler die gecachte /offline.html ausliefern.
     if (req.mode === 'navigate' || req.headers.get('Accept').includes('text/html')) {
         event.respondWith(
             fetch(req).catch(function () {
-                // Netzwerkfehler: leere Offline-Antwort (kein gecachter HTML-Inhalt,
-                // um veraltete CSRF-Token oder Session-Zustände zu vermeiden).
-                return new Response('<h1>Offline</h1><p>Bitte Verbindung prüfen.</p>', {
-                    headers: { 'Content-Type': 'text/html; charset=utf-8' },
+                return caches.match('/offline.html').then(function (cached) {
+                    return cached || new Response(
+                        '<h1>Offline</h1><p>Bitte Verbindung prüfen.</p>',
+                        { headers: { 'Content-Type': 'text/html; charset=utf-8' } }
+                    );
                 });
             })
         );

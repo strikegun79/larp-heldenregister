@@ -19,7 +19,7 @@
         <x-mobile.accordion-section title="Übersicht" :open="true">
             <div class="flex items-start gap-3 mb-3">
                 <img src="{{ $hero->image_url }}" alt="{{ $hero->character_name }}"
-                     class="h-20 w-20 object-cover rounded border-2 border-[#5a3a22]/40 shrink-0">
+                     class="h-20 w-20 object-cover rounded border-2 border-[#5a3a22]/40 shrink-0" loading="lazy">
                 <dl class="text-stone-800 text-sm space-y-1 flex-1">
                     <div>
                         <dt class="text-stone-500">Verfügbare EP</dt>
@@ -193,7 +193,7 @@
                         {{-- Baum-Ansicht --}}
                         <div x-show="view === 'tree'">
                             <div class="skill-map">
-                                <img src="{{ $class->skilltreeImage() }}" alt="Fertigkeitsbaum {{ $class->name }}" class="skill-image">
+                                <img src="{{ $class->skilltreeImage() }}" alt="Fertigkeitsbaum {{ $class->name }}" class="skill-image" loading="lazy">
                                 @foreach ($class->skills as $skill)
                                     @php($learned = $learnedIds->contains($skill->id))
                                     @php($unset = ($skill->pivot->x_percentage == 0 && $skill->pivot->y_percentage == 0))
@@ -336,7 +336,7 @@
                 @foreach ($hero->galleryImages as $img)
                     <div class="relative">
                         <img src="{{ $img->url }}" alt="Galerie-Bild"
-                             class="w-full h-auto rounded border border-stone-200">
+                             class="w-full h-auto rounded border border-stone-200" loading="lazy">
                         @if ($canEditPhoto)
                             <form method="POST" action="{{ route('heroes.gallery.destroy', [$hero, $img]) }}" data-refresh-modal>
                                 @csrf @method('DELETE')
@@ -488,7 +488,7 @@
             <div class="flex gap-4 items-start">
             <div class="shrink-0 text-center" style="min-width:8rem;">
                 <img src="{{ $hero->image_url }}" alt="{{ $hero->character_name }}"
-                     class="h-32 w-32 object-cover rounded border-2 border-[#5a3a22]/40">
+                     class="h-32 w-32 object-cover rounded border-2 border-[#5a3a22]/40" loading="lazy">
 
                 @if ($canEditPhoto)
                     <div class="flex gap-1 mt-2 justify-center">
@@ -757,7 +757,7 @@
                         {{-- Baum-Ansicht (Bild) --}}
                         <div x-show="view === 'tree'">
                             <div class="skill-map">
-                                <img src="{{ $class->skilltreeImage() }}" alt="Fertigkeitsbaum {{ $class->name }}" class="skill-image">
+                                <img src="{{ $class->skilltreeImage() }}" alt="Fertigkeitsbaum {{ $class->name }}" class="skill-image" loading="lazy">
                                 @foreach ($class->skills as $skill)
                                     @php($learned = $learnedIds->contains($skill->id))
                                     @php($unset = ($skill->pivot->x_percentage == 0 && $skill->pivot->y_percentage == 0))
@@ -882,7 +882,7 @@
                 @foreach ($hero->galleryImages as $img)
                     <div class="relative">
                         <img src="{{ $img->url }}" alt="Galerie-Bild"
-                             class="w-full h-auto rounded border border-stone-200">
+                             class="w-full h-auto rounded border border-stone-200" loading="lazy">
                         @if ($canEditPhoto)
                             <form method="POST" action="{{ route('heroes.gallery.destroy', [$hero, $img]) }}" data-refresh-modal>
                                 @csrf @method('DELETE')

@@ -30,7 +30,7 @@
                 {{-- Karte „Neuer Spieler" --}}
                 <a href="{{ route('players.create') }}" data-modal-url="{{ route('players.create') }}"
                    class="group flex rounded-lg overflow-hidden border-2 border-dashed border-[#5a3a22]/50 bg-white/50 shadow hover:shadow-xl hover:-translate-y-1 transition min-h-[150px]">
-                    <div class="shrink-0 overflow-hidden" style="width:150px; min-height:150px;">
+                    <div class="shrink-0 overflow-hidden save-data-hide" style="width:150px; min-height:150px;">
                         <img src="/images/wewantyou_poster4.jpg" alt="Neuer Spieler"
                              loading="lazy" width="150" height="150"
                              class="w-full h-full object-cover group-hover:scale-105 transition" style="min-height:150px;">

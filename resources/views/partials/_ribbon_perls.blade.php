@@ -16,7 +16,8 @@
                      alt="Klassenband {{ $entry->class->name }}"
                      title="{{ $entry->class->name }}"
                      class="object-cover rounded border border-stone-200 shrink-0"
-                     style="height:{{ $compact ? '3.5rem' : '5rem' }}; width:auto; max-width:1.75rem">
+                     style="height:{{ $compact ? '3.5rem' : '5rem' }}; width:auto; max-width:1.75rem"
+                     loading="lazy">
             @elseif ($entry->class->ribbon_color)
                 <div class="rounded shrink-0"
                      style="background:{{ $entry->class->ribbon_color }};

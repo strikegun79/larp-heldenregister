@@ -41,7 +41,7 @@
                     <a href="{{ route('heroes.show', $activeHero) }}"
                        class="flex items-center gap-4 bg-white/70 border-2 border-[#5a3a22]/40 rounded-lg p-4 shadow-sm active:bg-amber-50 transition-colors">
                         <img src="{{ $activeHero->image_url }}" alt="{{ $activeHero->character_name }}"
-                             class="w-16 h-16 object-cover rounded border-2 border-[#5a3a22]/40 shrink-0">
+                             class="w-16 h-16 object-cover rounded border-2 border-[#5a3a22]/40 shrink-0" loading="lazy">
                         <div class="flex-1 min-w-0">
                             <div class="text-xs text-stone-400 uppercase tracking-wide mb-0.5">Mein aktiver Held</div>
                             <div class="font-uncial text-waldritter text-lg leading-tight truncate">{{ $activeHero->character_name }}</div>

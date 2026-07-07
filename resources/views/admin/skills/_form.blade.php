@@ -107,7 +107,7 @@
     <div class="flex items-center gap-4 flex-wrap">
         @if ($skill->icon_url)
             <img src="{{ $skill->icon_url }}" alt="Symbol"
-                 class="w-12 h-12 object-cover rounded border border-stone-200">
+                 class="w-12 h-12 object-cover rounded border border-stone-200" loading="lazy">
             <form method="POST" action="{{ route('admin.skills.icon.destroy', $skill) }}" data-refresh-modal>
                 @csrf @method('DELETE')
                 <button type="submit" class="ui mini red basic button">

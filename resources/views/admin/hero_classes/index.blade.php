@@ -35,7 +35,7 @@
                                         @if ($ribbonUrl)
                                             <img src="{{ $ribbonUrl }}" alt="Band"
                                                  class="h-10 w-auto object-cover rounded border border-stone-200"
-                                                 style="max-width:1.5rem">
+                                                 style="max-width:1.5rem" loading="lazy">
                                         @elseif ($class->ribbon_color)
                                             <span class="inline-block w-4 h-10 rounded"
                                                   style="background:{{ $class->ribbon_color }}"></span>

@@ -400,3 +400,28 @@
 select.ui.dropdown {
     min-height: 39px;
 }
+
+/* ==========================================================================
+   UI-45: Datensparmodus
+   Aktiv wenn der Nutzer den manuellen Toggle gesetzt hat (data-save-data="1"
+   am <body>) oder der Browser prefers-reduced-data signalisiert.
+   Dekorative Hintergrundbilder werden ausgeblendet; funktionale Inhalte bleiben.
+   ========================================================================== */
+
+/* Dekorative Hintergrundbilder via CSS unterdrücken */
+@media (prefers-reduced-data: reduce) {
+    .bg-cover, .bg-center, [class*="bg-[url"] {
+        background-image: none !important;
+    }
+}
+
+body[data-save-data="1"] .bg-cover,
+body[data-save-data="1"] .bg-center,
+body[data-save-data="1"] [style*="background-image"] {
+    background-image: none !important;
+}
+
+/* Dekoratives Poster (players/index) im Datenspar-Modus ausblenden */
+body[data-save-data="1"] .save-data-hide {
+    display: none !important;
+}

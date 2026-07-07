@@ -33,7 +33,7 @@
                             </td>
                             <td data-label="Unterschrift">
                                 @if ($booking->signature)
-                                    <img src="{{ $booking->signature }}" alt="Unterschrift" style="height:34px; background:#fff; border:1px solid #ccc">
+                                    <img src="{{ $booking->signature }}" alt="Unterschrift" style="height:34px; background:#fff; border:1px solid #ccc" loading="lazy">
                                 @else
                                     <span class="text-stone-500">—</span>
                                 @endif

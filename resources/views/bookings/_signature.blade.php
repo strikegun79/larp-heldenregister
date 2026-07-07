@@ -30,6 +30,6 @@
 @if ($booking->signature)
     <div class="mt-3">
         <p class="text-sm text-stone-500">Aktuell hinterlegt:</p>
-        <img src="{{ $booking->signature }}" alt="Unterschrift" style="max-height:90px; border:1px solid #ccc; background:#fff">
+        <img src="{{ $booking->signature }}" alt="Unterschrift" style="max-height:90px; border:1px solid #ccc; background:#fff" loading="lazy">
     </div>
 @endif

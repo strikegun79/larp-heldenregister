@@ -49,7 +49,7 @@
                             <tr>
                                 <td class="px-2 py-2">
                                     @if ($skill->icon_url)
-                                        <img src="{{ $skill->icon_url }}" alt="{{ $skill->name }}" class="w-8 h-8 object-contain rounded">
+                                        <img src="{{ $skill->icon_url }}" alt="{{ $skill->name }}" class="w-8 h-8 object-contain rounded" loading="lazy">
                                     @else
                                         <span class="inline-block w-8 h-8"></span>
                                     @endif
