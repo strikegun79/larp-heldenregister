@@ -395,3 +395,8 @@
         justify-content: flex-end;
     }
 }
+
+/* Fomantic-Dropdown auf select-Basis: Mindesthöhe damit Schrift nicht abgeschnitten wird. */
+select.ui.dropdown {
+    min-height: 39px;
+}
