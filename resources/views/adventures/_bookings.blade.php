@@ -50,7 +50,7 @@
                 </td>
                 <td data-label="Beitrag">
                     @if ($booking->paid)
-                        <span class="text-green-700">bezahlt</span>
+                        <span class="text-green-700">✓ bezahlt</span>
                     @else
                         <span class="text-stone-500">offen</span>
                     @endif
@@ -59,7 +59,8 @@
                     <td>
                         <div class="flex items-center justify-end gap-1 flex-wrap">
                             @can('approve-bookings')
-                                <form method="POST" action="{{ route('adventures.bookings.approval', [$adventure, $booking]) }}" data-refresh-modal>
+                                <form method="POST" action="{{ route('adventures.bookings.approval', [$adventure, $booking]) }}" data-refresh-modal
+                                      data-confirm="{{ $booking->status === 'bestaetigt' ? 'Bestätigung zurücknehmen?' : 'Anmeldung bestätigen?' }}">
                                     @csrf @method('PATCH')
                                     <button type="submit" class="ui mini icon button {{ $booking->status === 'bestaetigt' ? '' : 'green' }}"
                                             data-tooltip="{{ $booking->status === 'bestaetigt' ? 'Bestätigung zurücknehmen' : 'Bestätigen' }}" data-position="top center">
@@ -67,7 +68,8 @@
                                         <span class="sm:hidden ml-1 text-xs">{{ $booking->status === 'bestaetigt' ? 'Zurück' : 'Bestät.' }}</span>
                                     </button>
                                 </form>
-                                <form method="POST" action="{{ route('adventures.bookings.rejection', [$adventure, $booking]) }}" data-refresh-modal>
+                                <form method="POST" action="{{ route('adventures.bookings.rejection', [$adventure, $booking]) }}" data-refresh-modal
+                                      data-confirm="{{ $booking->status === 'abgelehnt' ? 'Ablehnung zurücknehmen?' : 'Anmeldung ablehnen?' }}">
                                     @csrf @method('PATCH')
                                     <button type="submit" class="ui mini icon button {{ $booking->status === 'abgelehnt' ? '' : 'orange' }}"
                                             data-tooltip="{{ $booking->status === 'abgelehnt' ? 'Ablehnung zurücknehmen' : 'Ablehnen' }}" data-position="top center">
@@ -77,7 +79,8 @@
                                 </form>
                             @endcan
                             @can('manage-payments')
-                                <form method="POST" action="{{ route('adventures.bookings.payment', [$adventure, $booking]) }}" data-refresh-modal>
+                                <form method="POST" action="{{ route('adventures.bookings.payment', [$adventure, $booking]) }}" data-refresh-modal
+                                      data-confirm="{{ $booking->paid ? 'Beitrag als offen markieren?' : 'Beitrag als bezahlt markieren?' }}">
                                     @csrf @method('PATCH')
                                     <button type="submit" class="ui mini icon button {{ $booking->paid ? '' : 'yellow' }}"
                                             data-tooltip="{{ $booking->paid ? 'Als offen markieren' : 'Als bezahlt markieren' }}" data-position="top center">

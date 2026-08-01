@@ -199,6 +199,14 @@
     max-width: 95vw;
 }
 
+/* Verhindert, dass Button-Transform-Compositing-Schichten über gestapelte Modale ragen. */
+#app-modal > .content,
+#app-modal > .scrolling.content,
+#app-modal-2 > .content,
+#app-modal-2 > .scrolling.content {
+    isolation: isolate;
+}
+
 @media (max-width: 767px) {
     #app-modal,
     #app-modal-2 {
@@ -341,7 +349,7 @@
         box-shadow: 0 -2px 12px rgba(0, 0, 0, 0.08);
     }
     body:has(.sticky-page-footer) #page-main {
-        padding-bottom: 8.5rem; /* Bottom-Nav 4rem + Sticky-Footer ~4rem + Puffer */
+        padding-bottom: 6rem; /* Bottom-Nav 4rem + einzeiliger Sticky-Footer ~1.5rem + Puffer */
     }
 }
 

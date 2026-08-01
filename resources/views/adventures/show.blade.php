@@ -2,6 +2,10 @@
     <x-slot name="header">
         <div class="flex items-center justify-between gap-4 flex-wrap">
             <div>
+                <a href="{{ route('adventures.index') }}"
+                   class="text-sm text-stone-500 hover:text-waldritter mb-1 inline-flex items-center gap-1">
+                    <i class="arrow left icon" style="font-size:.8em"></i> Zurück
+                </a>
                 <h2 class="font-uncial text-2xl text-waldritter leading-tight">{{ $adventure->name }}</h2>
                 <p class="text-sm text-stone-500 mt-0.5">
                     {{ optional($adventure->start_at)->format('d.m.Y') }}
@@ -23,32 +27,101 @@
                 @include('adventures._detail')
             </div>
 
-            {{-- UI-38: Aktions-Footer (auf Mobile sticky, auf Desktop inline).
-                 Spiegelt data-modal-actions aus _detail, aber angepasst für Vollseite:
-                 „Verwalten" navigiert direkt (kein Modal), Buchungs-Links öffnen Modal. --}}
+            {{-- UI-38: Aktions-Footer (auf Mobile sticky, auf Desktop inline). --}}
             <x-mobile.sticky-footer class="mt-4">
-                @can('adventure.book')
-                    @if ($adventure->registrationOpen())
+                @php
+                    $canBook    = auth()->user()->can('adventure.book');
+                    $regOpen    = $adventure->registrationOpen();
+                    $isTeamer   = auth()->user()->hasAnyRole('teamer', 'lehrmeister') && $myTeamerSignup === null;
+                    $canManage  = auth()->user()->can('events.edit');
+                    // Priorität: Anmelden > Teamer-Anmeldung > Verwalten
+                    $primAnmelden = $canBook && $regOpen;
+                    $primTeamer   = !$primAnmelden && $isTeamer;
+                    $primVerwalten = !$primAnmelden && !$isTeamer && $canManage;
+                    // Overflow-Dropdown zeigen wenn neben der Primäraktion noch Weiteres vorhanden ist
+                    $hasDropdown  = $primAnmelden || ($primTeamer && $canManage);
+                @endphp
+
+                {{-- Mobile (< sm): Primär-Button + Overflow-Dropdown --}}
+                <div class="sm:hidden flex w-full gap-2">
+                    @if ($primAnmelden)
                         <a href="{{ route('adventures.bookings.create', $adventure) }}"
                            data-modal-stack="{{ route('adventures.bookings.create', $adventure) }}"
-                           class="ui primary button">Anmelden</a>
-                        <a href="{{ route('adventures.group-bookings.create', $adventure) }}"
-                           data-modal-stack="{{ route('adventures.group-bookings.create', $adventure) }}"
-                           class="ui button">Gruppe anmelden</a>
-                        <a href="{{ route('adventures.bookings.create-guest', $adventure) }}"
-                           data-modal-stack="{{ route('adventures.bookings.create-guest', $adventure) }}"
-                           class="ui button">Gast anmelden</a>
+                           class="ui primary button" style="flex:1">Anmelden</a>
+                    @elseif ($primTeamer)
+                        <a href="{{ route('adventures.teamer.create', $adventure) }}"
+                           data-modal-stack="{{ route('adventures.teamer.create', $adventure) }}"
+                           class="ui teal button" style="flex:1">Teamer-Anmeldung</a>
+                    @elseif ($primVerwalten)
+                        <a href="{{ route('adventures.manage', $adventure) }}"
+                           class="ui button" style="flex:1">Verwalten</a>
                     @endif
-                @endcan
-                @if (auth()->user()->hasAnyRole('teamer', 'lehrmeister') && $myTeamerSignup === null)
-                    <a href="{{ route('adventures.teamer.create', $adventure) }}"
-                       data-modal-stack="{{ route('adventures.teamer.create', $adventure) }}"
-                       class="ui teal button">Teamer-Anmeldung</a>
-                @endif
-                @can('events.edit')
-                    <a href="{{ route('adventures.manage', $adventure) }}" class="ui button">Verwalten</a>
-                @endcan
-                <a href="{{ route('adventures.index') }}" class="ui button">&larr; Zurück</a>
+
+                    @if ($hasDropdown)
+                        <div class="ui floating dropdown icon button">
+                            <i class="ellipsis vertical icon"></i>
+                            <div class="menu">
+                                @if ($primAnmelden)
+                                    <a class="item"
+                                       href="{{ route('adventures.group-bookings.create', $adventure) }}"
+                                       data-modal-stack="{{ route('adventures.group-bookings.create', $adventure) }}">
+                                        <i class="users icon"></i> Gruppe anmelden
+                                    </a>
+                                    <a class="item"
+                                       href="{{ route('adventures.bookings.create-guest', $adventure) }}"
+                                       data-modal-stack="{{ route('adventures.bookings.create-guest', $adventure) }}">
+                                        <i class="user outline icon"></i> Gast anmelden
+                                    </a>
+                                    @if ($isTeamer || $canManage)
+                                        <div class="divider"></div>
+                                    @endif
+                                    @if ($isTeamer)
+                                        <a class="item"
+                                           href="{{ route('adventures.teamer.create', $adventure) }}"
+                                           data-modal-stack="{{ route('adventures.teamer.create', $adventure) }}">
+                                            <i class="shield alternate icon"></i> Teamer-Anmeldung
+                                        </a>
+                                    @endif
+                                    @if ($canManage)
+                                        <a class="item" href="{{ route('adventures.manage', $adventure) }}">
+                                            <i class="cog icon"></i> Verwalten
+                                        </a>
+                                    @endif
+                                @elseif ($primTeamer && $canManage)
+                                    <a class="item" href="{{ route('adventures.manage', $adventure) }}">
+                                        <i class="cog icon"></i> Verwalten
+                                    </a>
+                                @endif
+                            </div>
+                        </div>
+                    @endif
+                </div>
+
+                {{-- Desktop (sm+): Alle Buttons inline --}}
+                <div class="hidden sm:flex items-center gap-3 flex-wrap">
+                    @can('adventure.book')
+                        @if ($adventure->registrationOpen())
+                            <a href="{{ route('adventures.bookings.create', $adventure) }}"
+                               data-modal-stack="{{ route('adventures.bookings.create', $adventure) }}"
+                               class="ui primary button">Anmelden</a>
+                            <a href="{{ route('adventures.group-bookings.create', $adventure) }}"
+                               data-modal-stack="{{ route('adventures.group-bookings.create', $adventure) }}"
+                               class="ui button">Gruppe anmelden</a>
+                            <a href="{{ route('adventures.bookings.create-guest', $adventure) }}"
+                               data-modal-stack="{{ route('adventures.bookings.create-guest', $adventure) }}"
+                               class="ui button">Gast anmelden</a>
+                        @endif
+                    @endcan
+                    @if (auth()->user()->hasAnyRole('teamer', 'lehrmeister') && $myTeamerSignup === null)
+                        <a href="{{ route('adventures.teamer.create', $adventure) }}"
+                           data-modal-stack="{{ route('adventures.teamer.create', $adventure) }}"
+                           class="ui teal button">Teamer-Anmeldung</a>
+                    @endif
+                    @can('events.edit')
+                        <a href="{{ route('adventures.manage', $adventure) }}" class="ui button">Verwalten</a>
+                    @endcan
+                    <a href="{{ route('adventures.index') }}" class="ui button">&larr; Zurück</a>
+                </div>
             </x-mobile.sticky-footer>
         </div>
     </div>
@@ -57,6 +130,7 @@
     <script>
         document.addEventListener('DOMContentLoaded', function () {
             $('.menu .item[data-tab]').tab();
+            $('.ui.floating.dropdown').dropdown();
         });
     </script>
     @endpush

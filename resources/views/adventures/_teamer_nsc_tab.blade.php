@@ -57,7 +57,8 @@
                                 @can('events.edit')
                                     <form method="POST"
                                           action="{{ route('adventures.teamer.approve', [$adventure, $signup]) }}"
-                                          data-refresh-modal>
+                                          data-refresh-modal
+                                          data-confirm="{{ $signup->approved_at ? 'Bestätigung zurücknehmen?' : 'Teamer-Anmeldung bestätigen?' }}">
                                         @csrf @method('PATCH')
                                         <button type="submit"
                                                 class="ui mini icon button {{ $signup->approved_at ? '' : 'green' }}"
@@ -69,7 +70,8 @@
                                     </form>
                                     <form method="POST"
                                           action="{{ route('adventures.teamer.reject', [$adventure, $signup]) }}"
-                                          data-refresh-modal>
+                                          data-refresh-modal
+                                          data-confirm="{{ $signup->rejected_at ? 'Ablehnung zurücknehmen?' : 'Teamer-Anmeldung ablehnen?' }}">
                                         @csrf @method('PATCH')
                                         <button type="submit"
                                                 class="ui mini icon button {{ $signup->rejected_at ? '' : 'orange' }}"
@@ -130,7 +132,8 @@
                                 @can('approve-bookings')
                                     <form method="POST"
                                           action="{{ route('adventures.bookings.approval', [$adventure, $booking]) }}"
-                                          data-refresh-modal>
+                                          data-refresh-modal
+                                          data-confirm="{{ $booking->status === 'bestaetigt' ? 'Bestätigung zurücknehmen?' : 'Anmeldung bestätigen?' }}">
                                         @csrf @method('PATCH')
                                         <button type="submit"
                                                 class="ui mini icon button {{ $booking->status === 'bestaetigt' ? '' : 'green' }}"
@@ -142,7 +145,8 @@
                                     </form>
                                     <form method="POST"
                                           action="{{ route('adventures.bookings.rejection', [$adventure, $booking]) }}"
-                                          data-refresh-modal>
+                                          data-refresh-modal
+                                          data-confirm="{{ $booking->status === 'abgelehnt' ? 'Ablehnung zurücknehmen?' : 'Anmeldung ablehnen?' }}">
                                         @csrf @method('PATCH')
                                         <button type="submit"
                                                 class="ui mini icon button {{ $booking->status === 'abgelehnt' ? '' : 'orange' }}"

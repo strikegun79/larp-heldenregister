@@ -174,14 +174,14 @@
         <!-- Bestätigungs-Modal (UI-17) -->
         <div class="ui small modal" id="confirm-modal"
              role="alertdialog" aria-modal="true" aria-labelledby="confirm-modal-header">
-            <div class="header" id="confirm-modal-header">Bitte bestätigen</div>
+            <div class="header" id="confirm-modal-header">Möchtest du?</div>
             <div class="content">
                 <p id="confirm-modal-message" class="text-stone-700"></p>
             </div>
             <div class="actions">
                 <button type="button" class="ui deny button"><i class="times icon"></i> Abbrechen</button>
                 <button type="button" class="ui negative button" id="confirm-modal-ok">
-                    <i class="check icon"></i> Bestätigen
+                    <i class="check icon"></i> Ja
                 </button>
             </div>
         </div>
