@@ -363,6 +363,7 @@
 /* --- Tabelle → Karten auf Mobile ---------------------------------------- */
 @media (max-width: 639px) {
     .mobile-cards-table-wrapper table thead { display: none !important; }
+
     .mobile-cards-table-wrapper table tbody tr {
         display: block;
         border: 1px solid #e5e7eb;
@@ -402,6 +403,12 @@
         width: 100%;
         justify-content: flex-end;
     }
+}
+
+/* Tabellen-Kopfzeile: standardmäßig versteckt (Mobile), ab sm sichtbar. */
+.mob-thead { display: none; }
+@media (min-width: 640px) {
+    .mob-thead { display: table-header-group !important; }
 }
 
 /* Fomantic-Dropdown auf select-Basis: Mindesthöhe damit Schrift nicht abgeschnitten wird. */

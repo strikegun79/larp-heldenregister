@@ -8,7 +8,7 @@
 @else
     <x-mobile.cards-or-table>
     <table class="ui very basic compact table">
-        <thead>
+        <thead class="mob-thead">
             <tr>
                 <th>Name</th>
                 <th>Teamer-Rolle</th>
