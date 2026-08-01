@@ -130,24 +130,6 @@
                 @include('partials._ribbon_perls', ['perlByClass' => $perlByClass, 'compact' => true])
             @endif
 
-            <div class="flex flex-wrap gap-2 mt-4 items-center">
-                <h4 class="font-uncial text-waldritter w-full mb-1">Klassen</h4>
-                @forelse ($hero->classes as $class)
-                    <span class="ui label">
-                        {{ $class->name }}
-                        @can('heldenregister.edit')
-                            <form method="POST" action="{{ route('heroes.classes.destroy', [$hero, $class]) }}" data-refresh-modal class="inline"
-                                  data-confirm="Klasse „{{ $class->name }}" entfernen? {{ $class->ep_cost }} EP werden erstattet.">
-                                @csrf @method('DELETE')
-                                <button type="submit" class="ml-1 text-red-600" title="Entfernen">&times;</button>
-                            </form>
-                        @endcan
-                    </span>
-                @empty
-                    <span class="text-stone-500 text-sm">Keine Klassen.</span>
-                @endforelse
-            </div>
-
         </x-mobile.accordion-section>
 
         {{-- UI-33: Fertigkeiten – alle Klassen in einem Accordion mit Klassen-Pills --}}
@@ -399,38 +381,6 @@
                     @endif
                 </div>
 
-                {{-- Klasse hinzufügen --}}
-                <div class="ui segment">
-                    <h5 class="font-uncial text-sm text-waldritter mb-2">
-                        <i class="graduation cap icon"></i> Klasse hinzufügen
-                    </h5>
-                    @if ($availableClasses->isNotEmpty())
-                        <form method="POST" action="{{ route('heroes.classes.store', $hero) }}" data-refresh-modal class="ui form"
-                              data-confirm="Sollen die EP-Kosten wirklich abgezogen werden?"
-                              data-confirm-unless-id="class-free-mobile-{{ $hero->id }}"
-                              data-confirm-unless-val="1">
-                            @csrf
-                            <input type="hidden" name="free" id="class-free-mobile-{{ $hero->id }}" value="0">
-                            <div class="flex items-end gap-2 flex-wrap">
-                                <div class="field !mb-0">
-                                    <select name="hero_class_id" required>
-                                        @foreach ($availableClasses as $class)
-                                            <option value="{{ $class->id }}">{{ $class->name }} (−{{ $class->ep_cost }} EP)</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                                <button type="submit" class="ui primary button"
-                                        onclick="document.getElementById('class-free-mobile-{{ $hero->id }}').value='0'">Hinzufügen</button>
-                                <button type="submit" class="ui basic button"
-                                        onclick="document.getElementById('class-free-mobile-{{ $hero->id }}').value='1'"
-                                        title="Ohne EP-Abzug">Korrektur (0 EP)</button>
-                            </div>
-                        </form>
-                    @else
-                        <p class="text-stone-500 text-sm">Alle verfügbaren Klassen sind bereits zugewiesen.</p>
-                    @endif
-                </div>
-
                 {{-- Verschollen / Wiedergefunden --}}
                 <div class="ui {{ $hero->died ? '' : 'red' }} segment">
                     <h5 class="font-uncial text-sm {{ $hero->died ? 'text-waldritter' : 'text-red-700' }} mb-2">
@@ -640,24 +590,6 @@
                 <h3 class="font-uncial text-lg text-waldritter mt-6 mb-2">Bändchen / Perlen</h3>
                 @include('partials._ribbon_perls', ['perlByClass' => $perlByClass, 'compact' => false])
             @endif
-
-            <h3 class="font-uncial text-lg text-waldritter mt-6 mb-2">Klassen</h3>
-            <div class="flex flex-wrap items-center gap-2">
-                @forelse ($hero->classes as $class)
-                    <span class="ui label">
-                        {{ $class->name }}
-                        @can('heldenregister.edit')
-                            <form method="POST" action="{{ route('heroes.classes.destroy', [$hero, $class]) }}" data-refresh-modal class="inline"
-                                  data-confirm="Klasse „{{ $class->name }}" entfernen? {{ $class->ep_cost }} EP werden erstattet.">
-                                @csrf @method('DELETE')
-                                <button type="submit" class="ml-1 text-red-600" title="Entfernen">&times;</button>
-                            </form>
-                        @endcan
-                    </span>
-                @empty
-                    <span class="text-stone-500">Keine Klassen.</span>
-                @endforelse
-            </div>
 
         </div>
 
@@ -946,39 +878,6 @@
                                 <i class="print icon"></i> Ausweis drucken
                             </a>
                         </div>
-                    @endif
-                </div>
-
-                {{-- Klasse hinzufügen --}}
-                <div class="ui segment">
-                    <h4 class="ui header">
-                        <i class="graduation cap icon"></i>
-                        <div class="content" style="font-family: 'MedievalSharp', serif; font-size: 1rem;">Klasse hinzufügen</div>
-                    </h4>
-                    @if ($availableClasses->isNotEmpty())
-                        <form method="POST" action="{{ route('heroes.classes.store', $hero) }}" data-refresh-modal class="ui form"
-                              data-confirm="Sollen die EP-Kosten wirklich abgezogen werden?"
-                              data-confirm-unless-id="class-free-{{ $hero->id }}"
-                              data-confirm-unless-val="1">
-                            @csrf
-                            <input type="hidden" name="free" id="class-free-{{ $hero->id }}" value="0">
-                            <div class="flex items-end gap-2 flex-wrap">
-                                <div class="field !mb-0">
-                                    <select name="hero_class_id" required>
-                                        @foreach ($availableClasses as $class)
-                                            <option value="{{ $class->id }}">{{ $class->name }} (−{{ $class->ep_cost }} EP)</option>
-                                        @endforeach
-                                    </select>
-                                </div>
-                                <button type="submit" class="ui primary button"
-                                        onclick="document.getElementById('class-free-{{ $hero->id }}').value='0'">Hinzufügen</button>
-                                <button type="submit" class="ui basic button"
-                                        onclick="document.getElementById('class-free-{{ $hero->id }}').value='1'"
-                                        title="Versehentlich entfernt? Ohne EP-Abzug wieder hinzufügen">Korrektur (0 EP)</button>
-                            </div>
-                        </form>
-                    @else
-                        <p class="text-stone-500 text-sm">Alle verfügbaren Klassen sind bereits zugewiesen.</p>
                     @endif
                 </div>
 

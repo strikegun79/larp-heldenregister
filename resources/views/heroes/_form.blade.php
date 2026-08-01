@@ -89,9 +89,11 @@
         </label>
     </div>
 
+    @unless($hideFormActions ?? false)
     <div class="flex items-center gap-4">
         <x-primary-button>Speichern</x-primary-button>
         <a href="{{ route('heroes.index') }}"
            class="text-sm text-gray-600 hover:underline">Abbrechen</a>
     </div>
+    @endunless
 </div>
