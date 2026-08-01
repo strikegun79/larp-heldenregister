@@ -20,11 +20,12 @@
         <link rel="preconnect" href="https://fonts.googleapis.com">
         <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
         <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Uncial+Antiqua&family=MedievalSharp&family=EB+Garamond:wght@400;500&display=swap" rel="stylesheet">
-        <link rel="stylesheet" href="{{ asset('css/heldenregister.css') }}">
         <!-- Vendor: Fomantic UI + Cropper.js (lokal via Vite/npm, UI-10) -->
         @vite(['resources/css/vendor.css', 'resources/js/vendor.js'])
         <!-- Scripts (Tailwind/Breeze danach, damit das Theme gewinnt) -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
+        <!-- Projekt-Overrides nach Vendor: gewinnt ohne !important gegen Fomantic/Tailwind -->
+        <link rel="stylesheet" href="{{ asset('css/heldenregister.css') }}?v={{ filemtime(public_path('css/heldenregister.css')) }}">
         <!-- Heldenregister-Frontend-Logik (ARCH-001: aus Inline-Scripts ausgelagert) -->
         @vite(['resources/js/heldenregister.js'])
 

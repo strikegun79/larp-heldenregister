@@ -6,7 +6,7 @@
 @if ($teamerSignups->isEmpty())
     <p class="text-stone-500 text-sm">Noch keine Teamer angemeldet.</p>
 @else
-    <div class="overflow-x-auto">
+    <x-mobile.cards-or-table>
     <table class="ui very basic compact table">
         <thead>
             <tr>
@@ -18,8 +18,8 @@
         <tbody>
             @foreach ($teamerSignups as $signup)
                 <tr>
-                    <td>{{ $signup->user->name }} {{ $signup->user->lastname }}</td>
-                    <td>
+                    <td data-label="Name">{{ $signup->user->name }} {{ $signup->user->lastname }}</td>
+                    <td data-label="Rolle">
                         @can('events.edit')
                             <form method="POST"
                                   action="{{ route('adventures.teamer.update-role', [$adventure, $signup]) }}"
@@ -39,21 +39,23 @@
                         @endcan
                     </td>
                     @can('manage-attendance')
-                        <td class="right aligned">
-                            @if ($signup->user_id === auth()->id() || auth()->user()->hasAnyRole('project_lead', 'registrar'))
-                                <form method="POST"
-                                      action="{{ route('adventures.teamer.destroy', [$adventure, $signup]) }}"
-                                      data-confirm="Teamer-Anmeldung stornieren?"
-                                      data-refresh-modal>
-                                    @csrf @method('DELETE')
-                                    <button type="submit" class="ui mini red button">Stornieren</button>
-                                </form>
-                            @endif
+                        <td>
+                            <div class="flex justify-end">
+                                @if ($signup->user_id === auth()->id() || auth()->user()->hasAnyRole('project_lead', 'registrar'))
+                                    <form method="POST"
+                                          action="{{ route('adventures.teamer.destroy', [$adventure, $signup]) }}"
+                                          data-confirm="Teamer-Anmeldung stornieren?"
+                                          data-refresh-modal>
+                                        @csrf @method('DELETE')
+                                        <button type="submit" class="ui mini red button">Stornieren</button>
+                                    </form>
+                                @endif
+                            </div>
                         </td>
                     @endcan
                 </tr>
             @endforeach
         </tbody>
     </table>
-    </div>
+    </x-mobile.cards-or-table>
 @endif

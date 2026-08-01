@@ -362,7 +362,7 @@
 
 /* --- Tabelle → Karten auf Mobile ---------------------------------------- */
 @media (max-width: 639px) {
-    .mobile-cards-table-wrapper table thead { display: none; }
+    .mobile-cards-table-wrapper table thead { display: none !important; }
     .mobile-cards-table-wrapper table tbody tr {
         display: block;
         border: 1px solid #e5e7eb;
