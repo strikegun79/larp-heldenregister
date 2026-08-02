@@ -7,7 +7,7 @@
     <p class="text-stone-500 text-sm">Noch keine Teamer angemeldet.</p>
 @else
     <x-mobile.cards-or-table>
-    <table class="ui very basic compact table">
+    <table class="ui very basic compact unstackable table">
         <thead class="mob-thead" hidden>
             <tr>
                 <th>Name</th>
