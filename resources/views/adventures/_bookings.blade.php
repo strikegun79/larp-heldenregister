@@ -3,7 +3,7 @@
 @php($canAnyBookingAction = auth()->user()?->canAny(['approve-bookings', 'manage-payments', 'adventure.modify', 'adventure.cancel']))
 <x-mobile.cards-or-table>
 <table class="ui very basic compact table">
-    <thead class="mob-thead"><tr>
+    <thead class="mob-thead" hidden><tr>
         <th>Spieler</th><th>Alter</th><th>Rolle</th><th>Liste</th><th>Status</th><th>Beitrag</th>
         @if ($canAnyBookingAction)<th></th>@endif
     </tr></thead>
