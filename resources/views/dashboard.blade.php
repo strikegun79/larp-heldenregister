@@ -56,7 +56,8 @@
 
                 {{-- Nächstes Abenteuer --}}
                 @if ($nextAdventure)
-                    <div class="bg-white/70 border-2 border-[#5a3a22]/40 rounded-lg p-4 shadow-sm">
+                    <a href="{{ route('adventures.show', $nextAdventure) }}"
+                       class="block bg-white/70 border-2 border-[#5a3a22]/40 rounded-lg p-4 shadow-sm active:bg-amber-50 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-600 focus-visible:outline-offset-[-2px]">
                         <div class="text-xs text-stone-400 uppercase tracking-wide mb-1">Nächstes Abenteuer</div>
                         <div class="font-uncial text-waldritter text-lg leading-tight mb-2">{{ $nextAdventure->name }}</div>
                         <dl class="text-sm text-stone-600 space-y-0.5 mb-3">
@@ -83,16 +84,19 @@
                                 </dd>
                             </div>
                         </dl>
-                        @if ($alreadyBooked)
-                            <span class="text-green-700 text-sm font-medium">&#10003; Du bist bereits angemeldet</span>
-                        @elseif ($nextAdventure->registrationOpen())
-                            <a href="{{ route('adventures.show', $nextAdventure) }}"
-                               class="ui primary button">Jetzt anmelden</a>
-                        @else
-                            <a href="{{ route('adventures.show', $nextAdventure) }}"
-                               class="ui button">Details ansehen</a>
-                        @endif
-                    </div>
+                        <div class="flex items-center justify-between">
+                            @if ($alreadyBooked)
+                                <span class="text-green-700 text-sm font-medium">&#10003; Angemeldet</span>
+                            @elseif ($nextAdventure->registrationOpen())
+                                <span class="ui small primary button pointer-events-none">Jetzt anmelden</span>
+                            @else
+                                <span class="text-stone-400 text-sm">Details ansehen</span>
+                            @endif
+                            <svg class="h-5 w-5 text-stone-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+                            </svg>
+                        </div>
+                    </a>
                 @endif
 
                 {{-- Leerzustand: kein Held, kein Abenteuer --}}
@@ -110,6 +114,49 @@
                 @endif
 
             </div>
+
+            {{-- Desktop: Nächstes Abenteuer (sm+) --}}
+            @if ($nextAdventure)
+                @can('adventure.access')
+                <a href="{{ route('adventures.show', $nextAdventure) }}"
+                   class="hidden sm:flex items-center gap-6 bg-white/70 border-2 border-[#5a3a22]/40 rounded-lg p-5 shadow mb-6 hover:shadow-xl hover:-translate-y-0.5 transition-all group focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-600 focus-visible:outline-offset-[-2px]">
+                    <div class="flex-1 min-w-0">
+                        <div class="text-xs text-stone-400 uppercase tracking-wide mb-1">Nächstes Abenteuer</div>
+                        <div class="font-uncial text-waldritter text-xl leading-tight mb-2 group-hover:text-amber-700 transition-colors">{{ $nextAdventure->name }}</div>
+                        <dl class="flex flex-wrap gap-x-6 gap-y-1 text-sm text-stone-600">
+                            @if ($nextAdventure->start_at)
+                                <div class="flex items-center gap-1.5">
+                                    <dt><i class="calendar alternate outline icon text-stone-400" aria-hidden="true"></i></dt>
+                                    <dd>{{ $nextAdventure->start_at->format('d.m.Y') }}</dd>
+                                </div>
+                            @endif
+                            @if ($nextAdventure->location)
+                                <div class="flex items-center gap-1.5">
+                                    <dt><i class="map marker alternate icon text-stone-400" aria-hidden="true"></i></dt>
+                                    <dd>{{ $nextAdventure->location->titel }}</dd>
+                                </div>
+                            @endif
+                            <div class="flex items-center gap-1.5">
+                                <dt><i class="euro sign icon text-stone-400" aria-hidden="true"></i></dt>
+                                <dd>{{ $nextAdventure->fee > 0 ? number_format($nextAdventure->fee, 2, ',', '.') . ' €' : 'kostenlos' }}</dd>
+                            </div>
+                        </dl>
+                    </div>
+                    <div class="flex items-center gap-3 shrink-0">
+                        @if ($alreadyBooked)
+                            <span class="text-green-700 text-sm font-medium">&#10003; Angemeldet</span>
+                        @elseif ($nextAdventure->registrationOpen())
+                            <span class="ui small primary button pointer-events-none">Jetzt anmelden</span>
+                        @else
+                            <span class="ui small button pointer-events-none">Details ansehen</span>
+                        @endif
+                        <svg class="h-5 w-5 text-stone-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+                        </svg>
+                    </div>
+                </a>
+                @endcan
+            @endif
 
             {{-- Desktop: Kachel-Navigation (sm+) --}}
             <div class="hidden sm:grid gap-6 sm:grid-cols-2 lg:grid-cols-3">

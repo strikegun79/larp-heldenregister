@@ -15,6 +15,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\View\View;
@@ -39,20 +40,62 @@ class AdventureController extends Controller
 
     /**
      * Liste aller Abenteuer.
+     * sort=grouped (Standard): nach Status gruppiert, keine Paginierung.
+     * sort=asc: nach Datum aufsteigend (nächstes zuerst), paginiert.
+     * sort=desc: nach Datum absteigend (letztes zuerst), paginiert.
      */
     public function index(Request $request): View
     {
         $q = trim($request->string('q'));
 
-        $adventures = Adventure::with(['location', 'status', 'category'])
+        // GET-Parameter hat Vorrang; sonst gespeicherte Präferenz aus Cookie lesen.
+        // Bei aktiver Auswahl Cookie für 30 Tage aktualisieren.
+        if ($request->has('sort')) {
+            $sort = $request->get('sort');
+            Cookie::queue('adventures_sort', $sort, 60 * 24 * 30);
+        } else {
+            $sort = $request->cookie('adventures_sort', 'grouped');
+        }
+
+        if (! in_array($sort, ['grouped', 'asc', 'desc'], true)) {
+            $sort = 'grouped';
+        }
+
+        $base = Adventure::with(['location', 'status', 'category'])
             ->withCount('confirmedBookings')
             ->visibleFor($request->user())
-            ->when($q, fn ($query) => $query->where('name', 'like', "%{$q}%"))
-            ->orderByDesc('start_at')
+            ->when($q, fn ($query) => $query->where('name', 'like', "%{$q}%"));
+
+        if ($sort === 'grouped') {
+            // Definierte Reihenfolge der Status-Gruppen.
+            $groupOrder = [30, 20, 10, 40, 50, 60, 70, 0];
+
+            $all = $base->orderBy('start_at')->get();
+
+            $grouped = collect($groupOrder)
+                ->filter(fn ($id) => $all->where('event_status_id', $id)->isNotEmpty())
+                ->mapWithKeys(fn ($id) => [$id => $all->where('event_status_id', $id)->values()]);
+
+            return view('adventures.index', [
+                'adventures' => null,
+                'grouped'    => $grouped,
+                'q'          => $q,
+                'sort'       => $sort,
+            ]);
+        }
+
+        $adventures = $base
+            ->when($sort === 'asc',  fn ($query) => $query->orderBy('start_at'))
+            ->when($sort === 'desc', fn ($query) => $query->orderByDesc('start_at'))
             ->paginate(20)
             ->withQueryString();
 
-        return view('adventures.index', compact('adventures', 'q'));
+        return view('adventures.index', [
+            'adventures' => $adventures,
+            'grouped'    => null,
+            'q'          => $q,
+            'sort'       => $sort,
+        ]);
     }
 
     /**
