@@ -442,11 +442,13 @@ select.ui.dropdown {
 
 /* Dekorative Hintergrundbilder via CSS unterdrücken */
 @media (prefers-reduced-data: reduce) {
+    body,
     .bg-cover, .bg-center, [class*="bg-[url"] {
         background-image: none !important;
     }
 }
 
+body[data-save-data="1"],
 body[data-save-data="1"] .bg-cover,
 body[data-save-data="1"] .bg-center,
 body[data-save-data="1"] [style*="background-image"] {

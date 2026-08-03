@@ -12,47 +12,13 @@
             <tr>
                 <th>Name</th>
                 <th>Teamer-Rolle</th>
-                @can('manage-attendance') <th></th> @endcan
             </tr>
         </thead>
         <tbody>
             @foreach ($teamerSignups as $signup)
                 <tr>
                     <td data-label="Name">{{ $signup->user->name }} {{ $signup->user->lastname }}</td>
-                    <td data-label="Rolle">
-                        @can('events.edit')
-                            <form method="POST"
-                                  action="{{ route('adventures.teamer.update-role', [$adventure, $signup]) }}"
-                                  class="flex items-center gap-2"
-                                  data-refresh-modal>
-                                @csrf @method('PATCH')
-                                <select name="teamer_role" class="ui compact dropdown">
-                                    <option value="">— keine —</option>
-                                    @foreach (\App\Models\TeamerSignup::ROLES as $role)
-                                        <option value="{{ $role }}" @selected($signup->teamer_role === $role)>{{ $role }}</option>
-                                    @endforeach
-                                </select>
-                                <button type="submit" class="ui mini primary button">OK</button>
-                            </form>
-                        @else
-                            {{ $signup->teamer_role ?? '—' }}
-                        @endcan
-                    </td>
-                    @can('manage-attendance')
-                        <td>
-                            <div class="flex justify-end">
-                                @if ($signup->user_id === auth()->id() || auth()->user()->hasAnyRole('project_lead', 'registrar'))
-                                    <form method="POST"
-                                          action="{{ route('adventures.teamer.destroy', [$adventure, $signup]) }}"
-                                          data-confirm="Teamer-Anmeldung stornieren?"
-                                          data-refresh-modal>
-                                        @csrf @method('DELETE')
-                                        <button type="submit" class="ui mini red button">Stornieren</button>
-                                    </form>
-                                @endif
-                            </div>
-                        </td>
-                    @endcan
+                    <td data-label="Rolle">{{ $signup->teamer_role ?? '—' }}</td>
                 </tr>
             @endforeach
         </tbody>

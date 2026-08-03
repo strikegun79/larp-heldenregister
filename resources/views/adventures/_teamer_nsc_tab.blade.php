@@ -6,7 +6,7 @@
 @if ($teamerSignups->isEmpty() && $nscBookings->isEmpty())
     <p class="text-stone-500 text-sm">Noch keine Teamer- oder NSC-Anmeldungen vorhanden.</p>
 @else
-    <x-mobile.cards-or-table>
+    <x-mobile.cards-or-table class="min-h-48">
         <table class="ui very basic compact table">
             <thead>
                 <tr>
@@ -28,16 +28,15 @@
                             @can('events.edit')
                                 <form method="POST"
                                       action="{{ route('adventures.teamer.update-role', [$adventure, $signup]) }}"
-                                      class="flex items-center gap-2"
                                       data-refresh-modal>
                                     @csrf @method('PATCH')
-                                    <select name="teamer_role" class="ui compact dropdown">
+                                    <select name="teamer_role" class="ui compact dropdown"
+                                            onchange="this.closest('form').requestSubmit()">
                                         <option value="">— keine —</option>
                                         @foreach (\App\Models\TeamerSignup::ROLES as $role)
                                             <option value="{{ $role }}" @selected($signup->teamer_role === $role)>{{ $role }}</option>
                                         @endforeach
                                     </select>
-                                    <button type="submit" class="ui mini primary button">OK</button>
                                 </form>
                             @else
                                 {{ $signup->teamer_role ?? '—' }}
