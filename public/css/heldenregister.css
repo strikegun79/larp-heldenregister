@@ -184,13 +184,9 @@
     }
 }
 
-/* UI-11: Close-Button als <button> statt <i> – Fomantic-Styling beibehalten. */
-.ui.modal > button.close.icon {
-    background: none;
-    border: none;
+/* UI-11: Close-Icon als <i> mit role=button – Fomantic-Styling ergänzt. */
+.ui.modal > i.close.icon {
     cursor: pointer;
-    padding: 0;
-    line-height: 1;
 }
 
 /* UI-08: Modals auf Mobilgeräten vollbreit und mit kompakten Rändern. */
@@ -213,9 +209,25 @@
         width: 95vw !important;
         margin: 0.5rem auto !important;
     }
+
+    /* UX-106: X sicher innerhalb des Modals platzieren (analog #app-modal-2 im Sheet). */
+    #app-modal > .close.icon {
+        position: absolute !important;
+        top: 0.625rem !important;
+        right: 0.75rem !important;
+        color: #5a3a22 !important;
+        padding: 0.75rem !important;
+        z-index: 10 !important;
+    }
+
+    /* Titeltext nicht hinter das X laufen lassen. */
+    #app-modal > .header {
+        padding-right: 3rem !important;
+    }
+
 }
 
-/* UI-26/UI-27: Modal-Footer beide Ebenen — Primäraktionen links, „Schließen" rechts. */
+/* UI-26/UI-27: Modal-Footer. */
 #app-modal-actions,
 #app-modal-2-actions {
     display: flex;
@@ -223,19 +235,24 @@
     flex-wrap: wrap;
     gap: 0.5rem;
 }
-#app-modal-actions .deny,
+
+/* Hauptmodal: Aktionen rechtsbündig. */
+#app-modal-actions {
+    justify-content: flex-end;
+}
+
+/* Gestapeltes Modal: „← Zurück" rechts. */
 #app-modal-2-actions .deny {
     margin-left: auto;
 }
 
-/* UI-26: Auf Mobilgeräten umbrechen Buttons vollbreit, kein margin-left-auto-Quetschen. */
+/* UI-26: Auf Mobilgeräten umbrechen Buttons vollbreit. */
 @media (max-width: 767px) {
     #app-modal-actions,
     #app-modal-2-actions {
         flex-direction: column;
         align-items: stretch;
     }
-    #app-modal-actions .deny,
     #app-modal-2-actions .deny {
         margin-left: 0;
     }

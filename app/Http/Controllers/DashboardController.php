@@ -39,12 +39,15 @@ class DashboardController extends Controller
             ->with('location')
             ->first();
 
-        $activeHero = $request->user()
+        $activePlayer = $request->user()
             ->players()
+            ->withPivot('self')
             ->whereNotNull('active_hero_id')
             ->with('activeHero.classes')
-            ->first()
-            ?->activeHero;
+            ->first();
+
+        $activeHero = $activePlayer?->activeHero;
+        $activeHeroIsOwn = (bool) ($activePlayer?->pivot?->self);
 
         $alreadyBooked = false;
         if ($nextAdventure) {
@@ -54,6 +57,6 @@ class DashboardController extends Controller
                 ->exists();
         }
 
-        return view('dashboard', compact('metrics', 'nextAdventure', 'activeHero', 'alreadyBooked'));
+        return view('dashboard', compact('metrics', 'nextAdventure', 'activeHero', 'activePlayer', 'activeHeroIsOwn', 'alreadyBooked'));
     }
 }

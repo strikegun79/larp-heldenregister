@@ -219,6 +219,6 @@
 
 <div data-modal-actions hidden>
     @if ($canEdit)
-        <a href="{{ route('players.edit', $player) }}" data-modal-url="{{ route('players.edit', $player) }}" class="ui button">Bearbeiten</a>
+        <a href="{{ route('players.edit', $player) }}" data-modal-url="{{ route('players.edit', $player) }}" class="ui primary button">Bearbeiten</a>
     @endif
 </div>

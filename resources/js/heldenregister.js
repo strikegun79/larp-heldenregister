@@ -55,8 +55,6 @@ function loadModalContent(url, preserveTab) {
             const $partActions = $content.find('[data-modal-actions]').first();
             $actions.html($partActions.length ? $partActions.html() : '');
             $partActions.remove();
-            // Standard-Schließen-Button immer anbieten.
-            $actions.append('<button type="button" class="ui deny button">Schließen</button>');
             // Fomantic-Tabs im Modal aktivieren (z. B. Detail-Tabs / Fertigkeitsbaum).
             $content.find('.menu .item[data-tab]').tab();
             // Zuvor aktiven Tab wiederherstellen, falls vorhanden.

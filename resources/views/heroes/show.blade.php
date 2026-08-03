@@ -19,7 +19,11 @@
                        data-modal-url="{{ route('heroes.edit', $hero) }}"
                        class="ui button">Bearbeiten</a>
                 @endcan
-                <a href="{{ route('heroes.index') }}" class="ui button">&larr; Zurück zum Register</a>
+                @can('heldenregister.view')
+                    <a href="{{ route('heroes.index') }}" class="ui button">&larr; Zurück zum Register</a>
+                @else
+                    <a href="{{ route('players.index') }}" class="ui button">&larr; Zurück zu meinen Spielern</a>
+                @endcan
             </x-mobile.sticky-footer>
         </div>
     </div>

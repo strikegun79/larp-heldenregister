@@ -35,34 +35,45 @@
             <div class="bg-amber-50 border border-amber-200 rounded px-3 py-2 mb-3 text-xs text-amber-900 leading-snug">
                 <strong>Was sind EP?</strong> Erfahrungspunkte sammelst du durch Abenteuer-Teilnahme. Mit EP kannst du Fertigkeiten für deinen Helden kaufen — schau in die Fertigkeitsbaum-Bereiche unten!
             </div>
-            <dl class="grid grid-cols-2 gap-3 text-stone-800 text-sm mb-4">
-                <div><dt class="text-stone-500">Spieler</dt><dd>{{ $hero->player?->full_name ?? '—' }}</dd></div>
-                <div><dt class="text-stone-500">Klassen</dt><dd>{{ $hero->classes->pluck('name')->implode(', ') ?: '—' }}</dd></div>
+            <dl class="space-y-3 mb-4">
+                <div>
+                    <dt class="text-xs font-medium text-stone-500">Spieler</dt>
+                    <dd class="text-sm font-semibold text-stone-800">{{ $hero->player?->full_name ?? '—' }}</dd>
+                </div>
+                <div>
+                    <dt class="text-xs font-medium text-stone-500">Klassen</dt>
+                    <dd class="text-sm font-semibold text-stone-800">{{ $hero->classes->pluck('name')->implode(', ') ?: '—' }}</dd>
+                </div>
                 @if ($hero->groups->isNotEmpty())
-                <div class="col-span-2">
-                    <dt class="text-stone-500">Gruppen</dt>
-                    <dd>{{ $hero->groups->map(fn ($g) => $g->name . ($g->pivot->role ? ' ('.$g->pivot->role.')' : ''))->implode(', ') }}</dd>
+                <div>
+                    <dt class="text-xs font-medium text-stone-500">Gruppen</dt>
+                    <dd class="text-sm font-semibold text-stone-800">{{ $hero->groups->map(fn ($g) => $g->name . ($g->pivot->role ? ' ('.$g->pivot->role.')' : ''))->implode(', ') }}</dd>
                 </div>
                 @endif
-                <div><dt class="text-stone-500">Heimatort</dt><dd>{{ $hero->homeplace ?? '—' }}</dd></div>
                 <div>
-                    <dt class="text-stone-500">Fertigkeiten</dt>
-                    <dd>{{ $hero->skills_count }} in {{ $hero->classes_count }} Klassen</dd>
-                    <dd class="text-xs text-stone-400">Fähigkeiten, die dein Held beherrscht</dd>
+                    <dt class="text-xs font-medium text-stone-500">Heimatort</dt>
+                    <dd class="text-sm font-semibold text-stone-800">{{ $hero->homeplace ?? '—' }}</dd>
                 </div>
                 <div>
-                    <dt class="text-stone-500">Erste Erblickung</dt>
-                    <dd>{{ optional($hero->born)->format('d.m.Y') ?? '—' }}</dd>
-                    <dd class="text-xs text-stone-400">Geburtstag des Helden</dd>
+                    <dt class="text-xs font-medium text-stone-500">Fertigkeiten</dt>
+                    <dd class="text-sm font-semibold text-stone-800">{{ $hero->skills_count }} in {{ $hero->classes_count }} Klassen</dd>
+                    <dd class="text-xs text-stone-500">Fähigkeiten, die dein Held beherrscht</dd>
                 </div>
                 <div>
-                    <dt class="text-stone-500">Verschollen seit</dt>
-                    <dd>{{ optional($hero->died)->format('d.m.Y') ?? '—' }}</dd>
-                    <dd class="text-xs text-stone-400">Held spielt nicht mehr aktiv</dd>
+                    <dt class="text-xs font-medium text-stone-500">Erste Erblickung</dt>
+                    <dd class="text-sm font-semibold text-stone-800">{{ optional($hero->born)->format('d.m.Y') ?? '—' }}</dd>
+                    <dd class="text-xs text-stone-500">Geburtstag des Helden</dd>
                 </div>
+                @if ($hero->died)
+                <div>
+                    <dt class="text-xs font-medium text-stone-500">Verschollen seit</dt>
+                    <dd class="text-sm font-semibold text-red-700">{{ $hero->died->format('d.m.Y') }}</dd>
+                    <dd class="text-xs text-stone-500">Held spielt nicht mehr aktiv</dd>
+                </div>
+                @endif
                 @if ($hero->public_code)
-                <div class="col-span-2">
-                    <dt class="text-stone-500">Helden-Siegel</dt>
+                <div class="border-t border-[#5a3a22]/30 pt-3 mt-1">
+                    <dt class="text-xs font-medium text-stone-500">Helden-Siegel</dt>
                     <dd class="flex flex-wrap items-center gap-2">
                         <code class="font-mono tracking-widest text-waldritter bg-stone-100 rounded px-2 py-0.5 text-sm">{{ $hero->public_code }}</code>
                         @if ($hero->public_visible)
@@ -480,48 +491,59 @@
             <div class="bg-amber-50 border border-amber-200 rounded px-3 py-2 mb-3 text-sm text-amber-900 leading-snug">
                 <strong>EP (Erfahrungspunkte)</strong> sammelst du durch Abenteuer-Teilnahme und gibst sie für Fertigkeiten aus. Die Fertigkeitsbäume findest du im Tab „Fertigkeiten" oben.
             </div>
-            <dl class="grid grid-cols-2 gap-4 text-stone-800">
-                <div><dt class="text-sm text-stone-500">Spieler</dt><dd>{{ $hero->player?->full_name ?? '—' }}</dd></div>
-                <div><dt class="text-sm text-stone-500">Klassen</dt><dd>{{ $hero->classes->pluck('name')->implode(', ') ?: '—' }}</dd></div>
+            <dl class="grid grid-cols-2 gap-x-6 gap-y-4 text-stone-800">
+                <div>
+                    <dt class="text-xs font-medium text-stone-500">Spieler</dt>
+                    <dd class="text-sm font-semibold text-stone-800">{{ $hero->player?->full_name ?? '—' }}</dd>
+                </div>
+                <div>
+                    <dt class="text-xs font-medium text-stone-500">Klassen</dt>
+                    <dd class="text-sm font-semibold text-stone-800">{{ $hero->classes->pluck('name')->implode(', ') ?: '—' }}</dd>
+                </div>
                 @if ($hero->groups->isNotEmpty())
                 <div class="col-span-2">
-                    <dt class="text-sm text-stone-500">Gruppen</dt>
-                    <dd>{{ $hero->groups->map(fn ($g) => $g->name . ($g->pivot->role ? ' ('.$g->pivot->role.')' : ''))->implode(', ') }}</dd>
+                    <dt class="text-xs font-medium text-stone-500">Gruppen</dt>
+                    <dd class="text-sm font-semibold text-stone-800">{{ $hero->groups->map(fn ($g) => $g->name . ($g->pivot->role ? ' ('.$g->pivot->role.')' : ''))->implode(', ') }}</dd>
                 </div>
                 @endif
-                <div><dt class="text-sm text-stone-500">Heimatort</dt><dd>{{ $hero->homeplace ?? '—' }}</dd></div>
                 <div>
-                    <dt class="text-sm text-stone-500">Verfügbare EP</dt>
-                    <dd class="font-semibold">{{ number_format($hero->ep_balance, 0, ',', '.') }} EP</dd>
-                    <dd class="text-xs text-stone-400">Erfahrungspunkte – frei für neue Fertigkeiten</dd>
+                    <dt class="text-xs font-medium text-stone-500">Heimatort</dt>
+                    <dd class="text-sm font-semibold text-stone-800">{{ $hero->homeplace ?? '—' }}</dd>
                 </div>
                 <div>
-                    <dt class="text-sm text-stone-500">EP insgesamt / ausgegeben</dt>
-                    <dd>{{ number_format($hero->ep_total, 0, ',', '.') }} / {{ number_format($hero->ep_spent, 0, ',', '.') }}</dd>
-                    <dd class="text-xs text-stone-400">durch Abenteuer gesammelt / für Fertigkeiten ausgegeben</dd>
+                    <dt class="text-xs font-medium text-stone-500">Verfügbare EP</dt>
+                    <dd class="text-sm font-semibold text-stone-800">{{ number_format($hero->ep_balance, 0, ',', '.') }} EP</dd>
+                    <dd class="text-xs text-stone-500">Erfahrungspunkte – frei für neue Fertigkeiten</dd>
                 </div>
                 <div>
-                    <dt class="text-sm text-stone-500">Fertigkeiten / Klassen</dt>
-                    <dd>{{ $hero->skills_count }} / {{ $hero->classes_count }}</dd>
-                    <dd class="text-xs text-stone-400">erlernte Fähigkeiten / Heldenklassen</dd>
+                    <dt class="text-xs font-medium text-stone-500">EP insgesamt / ausgegeben</dt>
+                    <dd class="text-sm font-semibold text-stone-800">{{ number_format($hero->ep_total, 0, ',', '.') }} / {{ number_format($hero->ep_spent, 0, ',', '.') }}</dd>
+                    <dd class="text-xs text-stone-500">durch Abenteuer gesammelt / für Fertigkeiten ausgegeben</dd>
                 </div>
                 <div>
-                    <dt class="text-sm text-stone-500">Erste Erblickung</dt>
-                    <dd>{{ optional($hero->born)->format('d.m.Y') ?? '—' }}</dd>
-                    <dd class="text-xs text-stone-400">Geburtstag des Helden</dd>
+                    <dt class="text-xs font-medium text-stone-500">Fertigkeiten / Klassen</dt>
+                    <dd class="text-sm font-semibold text-stone-800">{{ $hero->skills_count }} / {{ $hero->classes_count }}</dd>
+                    <dd class="text-xs text-stone-500">erlernte Fähigkeiten / Heldenklassen</dd>
                 </div>
                 <div>
-                    <dt class="text-sm text-stone-500">Verschollen seit</dt>
-                    <dd>{{ optional($hero->died)->format('d.m.Y') ?? '—' }}</dd>
-                    <dd class="text-xs text-stone-400">Held spielt nicht mehr aktiv</dd>
+                    <dt class="text-xs font-medium text-stone-500">Erste Erblickung</dt>
+                    <dd class="text-sm font-semibold text-stone-800">{{ optional($hero->born)->format('d.m.Y') ?? '—' }}</dd>
+                    <dd class="text-xs text-stone-500">Geburtstag des Helden</dd>
                 </div>
+                @if ($hero->died)
                 <div>
-                    <dt class="text-sm text-stone-500">Status</dt>
-                    <dd>@if ($hero->died)<span class="text-red-700">verschollen</span>@else{{ $hero->active ? 'aktiv' : 'inaktiv' }}@endif</dd>
+                    <dt class="text-xs font-medium text-stone-500">Verschollen seit</dt>
+                    <dd class="text-sm font-semibold text-red-700">{{ $hero->died->format('d.m.Y') }}</dd>
+                    <dd class="text-xs text-stone-500">Held spielt nicht mehr aktiv</dd>
+                </div>
+                @endif
+                <div>
+                    <dt class="text-xs font-medium text-stone-500">Status</dt>
+                    <dd class="text-sm font-semibold text-stone-800">@if ($hero->died)<span class="text-red-700">verschollen</span>@else{{ $hero->active ? 'aktiv' : 'inaktiv' }}@endif</dd>
                 </div>
                 @if ($hero->public_code)
-                <div class="col-span-2">
-                    <dt class="text-sm text-stone-500">Helden-Siegel</dt>
+                <div class="col-span-2 border-t border-[#5a3a22]/30 pt-3 mt-1">
+                    <dt class="text-xs font-medium text-stone-500">Helden-Siegel</dt>
                     <dd class="flex flex-wrap items-center gap-2">
                         <code class="font-mono tracking-widest text-waldritter bg-stone-100 rounded px-2 py-0.5">{{ $hero->public_code }}</code>
                         @if ($hero->public_visible)
@@ -911,6 +933,6 @@
 
 <div data-modal-actions hidden>
     @can('heldenregister.edit')
-        <button type="button" data-modal-url="{{ route('heroes.edit', $hero) }}" class="ui button">Bearbeiten</button>
+        <button type="button" data-modal-url="{{ route('heroes.edit', $hero) }}" class="ui primary button">Bearbeiten</button>
     @endcan
 </div>

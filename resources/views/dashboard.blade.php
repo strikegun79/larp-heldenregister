@@ -43,7 +43,9 @@
                         <img src="{{ $activeHero->image_url }}" alt="{{ $activeHero->character_name }}"
                              class="w-16 h-16 object-cover rounded border-2 border-[#5a3a22]/40 shrink-0" loading="lazy">
                         <div class="flex-1 min-w-0">
-                            <div class="text-xs text-stone-400 uppercase tracking-wide mb-0.5">Mein aktiver Held</div>
+                            <div class="text-xs text-stone-500 uppercase tracking-wide mb-0.5">
+                                {{ $activeHeroIsOwn ? 'Mein aktiver Held' : 'Held von ' . $activePlayer->name }}
+                            </div>
                             <div class="font-uncial text-waldritter text-lg leading-tight truncate">{{ $activeHero->character_name }}</div>
                             <div class="text-xs text-stone-500 truncate">{{ $activeHero->classes->pluck('name')->implode(', ') ?: '—' }}</div>
                             <div class="text-sm font-semibold text-waldritter mt-1">{{ number_format($activeHero->ep_balance, 0, ',', '.') }} EP verfügbar</div>
@@ -226,6 +228,28 @@
                     </a>
                 @endcan
             </div>
+
+            {{-- Desktop: Aktiver Held (sm+) --}}
+            @if ($activeHero)
+                <div class="hidden sm:block mt-6 pt-6 border-t border-[#5a3a22]/30">
+                    <a href="{{ route('heroes.show', $activeHero) }}"
+                       class="flex items-center gap-4 bg-white/70 border-2 border-[#5a3a22]/40 rounded-lg p-4 shadow hover:shadow-xl hover:-translate-y-0.5 transition-all group focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-600 focus-visible:outline-offset-[-2px]">
+                        <img src="{{ $activeHero->image_url }}" alt="{{ $activeHero->character_name }}"
+                             class="w-16 h-16 object-cover rounded border-2 border-[#5a3a22]/40 shrink-0" loading="lazy">
+                        <div class="flex-1 min-w-0">
+                            <div class="text-xs text-stone-500 uppercase tracking-wide mb-0.5">
+                                {{ $activeHeroIsOwn ? 'Mein aktiver Held' : 'Held von ' . $activePlayer->name }}
+                            </div>
+                            <div class="font-uncial text-waldritter text-lg leading-tight truncate">{{ $activeHero->character_name }}</div>
+                            <div class="text-xs text-stone-500 truncate">{{ $activeHero->classes->pluck('name')->implode(', ') ?: '—' }}</div>
+                            <div class="text-sm font-semibold text-waldritter mt-1">{{ number_format($activeHero->ep_balance, 0, ',', '.') }} EP verfügbar</div>
+                        </div>
+                        <svg class="h-5 w-5 text-stone-400 shrink-0 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+                        </svg>
+                    </a>
+                </div>
+            @endif
 
         </div>
     </div>
