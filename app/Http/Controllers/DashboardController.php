@@ -57,6 +57,8 @@ class DashboardController extends Controller
                 ->exists();
         }
 
-        return view('dashboard', compact('metrics', 'nextAdventure', 'activeHero', 'activePlayer', 'activeHeroIsOwn', 'alreadyBooked'));
+        $hasPlayers = $request->user()->players()->exists();
+
+        return view('dashboard', compact('metrics', 'nextAdventure', 'activeHero', 'activePlayer', 'activeHeroIsOwn', 'alreadyBooked', 'hasPlayers'));
     }
 }

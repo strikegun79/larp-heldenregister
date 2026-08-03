@@ -16,6 +16,81 @@
                 <p>Willkommen im Heldenregister. Hier findest du alles rund um deine Spieler, Helden und Abenteuer.</p>
             </div>
 
+            {{-- Onboarding-Hinweis: nur wenn noch kein Spieler angelegt wurde --}}
+            @if (! $hasPlayers)
+                <section
+                    role="region"
+                    aria-labelledby="onboarding-heading"
+                    x-data="{ elternOffen: false }"
+                    class="bg-amber-50/90 border-2 border-[#5a3a22]/40 rounded-lg p-4 sm:p-6 mb-6 sm:mb-8 text-stone-800">
+
+                    <h2 id="onboarding-heading" class="font-uncial text-xl text-waldritter mb-3">
+                        Deine ersten Schritte
+                    </h2>
+
+                    <p class="text-stone-700 text-sm sm:text-base mb-4">
+                        Herzlich willkommen bei den Waldritter! So geht's los:
+                    </p>
+
+                    <ol class="space-y-4 mb-5">
+                        <li class="flex gap-3 items-start">
+                            <span aria-hidden="true"
+                                  class="shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-[#5a3a22] text-amber-50 font-semibold text-sm">1</span>
+                            <div>
+                                <p class="font-semibold text-waldritter">Spieler anlegen</p>
+                                <p class="text-sm text-stone-700 mt-0.5">Lege zunächst deinen Spieler mit deinen Daten an – das geht direkt hier im Portal.</p>
+                            </div>
+                        </li>
+                        <li class="flex gap-3 items-start">
+                            <span aria-hidden="true"
+                                  class="shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-[#5a3a22] text-amber-50 font-semibold text-sm">2</span>
+                            <div>
+                                <p class="font-semibold text-waldritter">Zu einem Abenteuer anmelden</p>
+                                <p class="text-sm text-stone-700 mt-0.5">Such dir ein Abenteuer aus und melde deinen Spieler an.</p>
+                            </div>
+                        </li>
+                        <li class="flex gap-3 items-start">
+                            <span aria-hidden="true"
+                                  class="shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-[#5a3a22] text-amber-50 font-semibold text-sm">3</span>
+                            <div>
+                                <p class="font-semibold text-waldritter">
+                                    Held wird vor Ort erstellt
+                                    <span class="text-xs font-normal text-stone-500 ml-1">(kein Klick nötig)</span>
+                                </p>
+                                <p class="text-sm text-stone-700 mt-0.5">
+                                    Deinen Helden erstellst du direkt auf der Veranstaltung zusammen mit dem
+                                    <strong class="font-medium">Bürokraten</strong> – das ist ein Spielcharakter (NSC),
+                                    der dich beim Heldenregister anmeldet. Erst danach erscheint dein Held hier im Portal.
+                                </p>
+                            </div>
+                        </li>
+                    </ol>
+
+                    <div class="flex flex-wrap gap-3 items-center">
+                        <a href="{{ route('players.create') }}"
+                           class="ui small primary button focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-600 focus-visible:outline-offset-2">
+                            Ersten Spieler anlegen
+                        </a>
+                        <button type="button"
+                                x-on:click="elternOffen = !elternOffen"
+                                :aria-expanded="elternOffen.toString()"
+                                aria-controls="onboarding-eltern"
+                                class="text-sm text-stone-600 hover:text-stone-900 underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-600 focus-visible:outline-offset-2">
+                            Infos für Eltern &amp; Erziehungsberechtigte
+                        </button>
+                    </div>
+
+                    <div id="onboarding-eltern"
+                         x-show="elternOffen"
+                         x-cloak
+                         class="mt-4 pt-4 border-t border-[#5a3a22]/20 text-sm text-stone-700 space-y-2">
+                        <p><strong class="font-semibold">Für Eltern und Erziehungsberechtigte:</strong></p>
+                        <p>Bitte legt zunächst euer Kind als Spieler an und meldet es zu einer Veranstaltung an. Auf der Veranstaltung erstellt die Spielleitung gemeinsam mit eurem Kind den Charakter (Helden). Der Bürokrat ist dabei ein Spielcharakter (NSC), der als Ansprechperson für das Heldenregister zuständig ist. Erst nach der ersten Veranstaltung erscheint der Held hier im Portal.</p>
+                        <p>Für Kinder unter 18 Jahren ist die Anmeldung nur mit Einwilligung der Erziehungsberechtigten möglich.</p>
+                    </div>
+                </section>
+            @endif
+
             {{-- Admin-Kennzahlen (REP-06) --}}
             @if (! empty($metrics))
                 <div class="grid gap-4 grid-cols-2 lg:grid-cols-4 mb-6 sm:mb-8">

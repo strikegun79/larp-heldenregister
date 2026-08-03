@@ -74,7 +74,7 @@
             @if ($players->isEmpty())
                 <div class="mt-6 bg-amber-50 border border-amber-200 rounded-lg p-4 text-sm text-stone-700">
                     <strong class="font-medium">Erste Schritte:</strong>
-                    Lege zunächst einen Spieler an. Danach kannst du für diesen Spieler einen Helden erstellen und ihn zu Abenteuern anmelden.
+                    Lege zunächst einen Spieler an und melde ihn zu einem Abenteuer an. Deinen Helden erstellst du dann direkt vor Ort beim Bürokraten – dem zuständigen Spielcharakter für das Heldenregister.
                 </div>
             @endif
         </div>
