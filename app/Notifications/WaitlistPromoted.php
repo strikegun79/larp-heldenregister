@@ -32,6 +32,6 @@ class WaitlistPromoted extends Notification implements ShouldQueue
             ->subject('Nachgerückt: '.$booking->adventure?->name)
             ->greeting('Gute Nachricht, '.($booking->player?->full_name ?: '').'!')
             ->line('Für „'.$booking->adventure?->name.'" ist ein Platz frei geworden – du bist von der Warteliste nachgerückt und nimmst regulär teil.')
-            ->action('Zum Heldenportal', route('dashboard'));
+            ->action('Zum Heldenregister', route('dashboard'));
     }
 }

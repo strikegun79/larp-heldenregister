@@ -36,7 +36,7 @@ class BookingRejected extends Notification implements ShouldQueue
             ->greeting('Hallo '.($booking->player?->full_name ?: '').'!')
             ->line('Deine Anmeldung für „'.$booking->adventure?->name.'" wurde leider abgelehnt.')
             ->line('Bei Fragen wende dich bitte an die Veranstalter.')
-            ->action('Zum Heldenportal', route('dashboard'));
+            ->action('Zum Heldenregister', route('dashboard'));
     }
 
     /** @return array<string, mixed> */

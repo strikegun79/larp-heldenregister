@@ -3,6 +3,7 @@
 namespace App\Notifications;
 
 use App\Models\Booking;
+use App\Models\Setting;
 use App\Models\User;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
@@ -31,13 +32,38 @@ class BookingApproved extends Notification implements ShouldQueue
     {
         $booking = $this->booking->loadMissing(['adventure', 'player', 'role']);
 
-        return (new MailMessage)
+        $fee    = $booking->adventure?->fee ?? 0;
+        $date   = optional($booking->adventure?->start_at)->format('d.m.Y') ?? '—';
+        $player = $booking->player?->full_name ?? '';
+
+        $mail = (new MailMessage)
             ->subject('Anmeldung bestätigt: '.$booking->adventure?->name)
-            ->greeting('Hallo '.($booking->player?->full_name ?: '').'!')
+            ->greeting('Hallo '.$player.'!')
             ->line('Deine Anmeldung für „'.$booking->adventure?->name.'" wurde offiziell bestätigt.')
             ->line('Rolle: '.($booking->role?->description ?? '—'))
-            ->line('Datum: '.(optional($booking->adventure?->start_at)->format('d.m.Y') ?? '—'))
-            ->action('Zum Heldenportal', route('dashboard'));
+            ->line('Datum: '.$date);
+
+        if ($fee > 0) {
+            $iban  = Setting::get('bank_iban');
+            $owner = Setting::get('bank_account_owner');
+            $bic   = Setting::get('bank_bic');
+            $bank  = Setting::get('bank_name');
+
+            $mail->line('');
+            $mail->line('Bitte überweise Deinen Kostendeckungsbeitrag von **'.number_format($fee, 2, ',', '.').' €** für die Anmeldung auf das folgende Konto:');
+
+            if ($owner) $mail->line('Empfänger: '.$owner);
+            if ($iban)  $mail->line('IBAN: '.$iban);
+            if ($bic)   $mail->line('BIC: '.$bic);
+            if ($bank)  $mail->line($bank);
+
+            $mail->line('Verwendungszweck: "Giessen + '.$date.' + '.$player.'"');
+        }
+
+        $mail->line('');
+        $mail->line('Am Dienstag vor der Veranstaltung bekommst Du eine E-Mail mit allen Informationen und Spielortbeschreibung.');
+
+        return $mail->action('Zum Heldenregister', route('dashboard'));
     }
 
     /** @return array<string, mixed> */

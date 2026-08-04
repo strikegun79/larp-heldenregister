@@ -35,7 +35,7 @@ class BookingCancelledParticipant extends Notification implements ShouldQueue
             ->subject('Abmeldung bestätigt: '.$this->adventure->name)
             ->line('Deine Anmeldung für „'.$this->adventure->name.'" ('.$date.') wurde storniert.')
             ->line('Falls dies ein Versehen war, melde dich bitte bei den Veranstaltern.')
-            ->action('Zum Heldenportal', route('dashboard'));
+            ->action('Zum Heldenregister', route('dashboard'));
     }
 
     /** @return array<string, mixed> */

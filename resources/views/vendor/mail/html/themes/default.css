@@ -1,3 +1,17 @@
+/*
+ * Waldritter Gießen – E-Mail-Theme
+ * Waldgrün-Braun-Farbpalette passend zum Mittelalter-LARP-Portal
+ *
+ * Farbpalette:
+ *   Waldgrün-Dunkel:  #2d5a27  – Header-Hintergrund, Panel-Akzente
+ *   Waldgrün-Mittel:  #4a7c3f  – Button-Primärfarbe, Links
+ *   Waldgrün-Hell:    #e8f0e5  – Wrapper/Hintergrund
+ *   Pergament-Weiss:  #faf7f2  – E-Mail-Body (warm-weiss statt kalt-weiss)
+ *   Braun-Dunkel:     #5a3a22  – Fliesstext, Überschriften
+ *   Pergament-Rand:   #c8b89a  – Rahmen, Trennlinien
+ *   Gold-Hell:        #e4cea5  – Header-Unterrand, Akzente
+ */
+
 /* Base */
 
 body,
@@ -11,7 +25,7 @@ body *:not(html):not(style):not(br):not(tr):not(code) {
 body {
     -webkit-text-size-adjust: none;
     background-color: #ffffff;
-    color: #718096;
+    color: #5a3a22;
     height: 100%;
     line-height: 1.4;
     margin: 0;
@@ -27,8 +41,9 @@ blockquote {
     text-align: left;
 }
 
+/* Verlinkungen in Waldgrün statt Standard-Blau */
 a {
-    color: #3869d4;
+    color: #4a7c3f;
 }
 
 a img {
@@ -38,7 +53,7 @@ a img {
 /* Typography */
 
 h1 {
-    color: #3d4852;
+    color: #2d5a27;
     font-size: 18px;
     font-weight: bold;
     margin-top: 0;
@@ -46,6 +61,7 @@ h1 {
 }
 
 h2 {
+    color: #2d5a27;
     font-size: 16px;
     font-weight: bold;
     margin-top: 0;
@@ -53,6 +69,7 @@ h2 {
 }
 
 h3 {
+    color: #4a7c3f;
     font-size: 14px;
     font-weight: bold;
     margin-top: 0;
@@ -76,11 +93,12 @@ img {
 
 /* Layout */
 
+/* Äusserer Wrapper: helles Waldgrün statt Grau-Blau */
 .wrapper {
     -premailer-cellpadding: 0;
     -premailer-cellspacing: 0;
     -premailer-width: 100%;
-    background-color: #edf2f7;
+    background-color: #e8f0e5;
     margin: 0;
     padding: 0;
     width: 100%;
@@ -97,13 +115,15 @@ img {
 
 /* Header */
 
+/* Header-Zelle: dunkles Waldgrün als Hintergrund */
 .header {
-    padding: 25px 0;
+    background-color: #2d5a27;
+    padding: 0;
     text-align: center;
 }
 
 .header a {
-    color: #3d4852;
+    color: #e4cea5;
     font-size: 19px;
     font-weight: bold;
     text-decoration: none;
@@ -119,27 +139,29 @@ img {
 
 /* Body */
 
+/* Body-Streifen in hellem Waldgrün */
 .body {
     -premailer-cellpadding: 0;
     -premailer-cellspacing: 0;
     -premailer-width: 100%;
-    background-color: #edf2f7;
-    border-bottom: 1px solid #edf2f7;
-    border-top: 1px solid #edf2f7;
+    background-color: #e8f0e5;
+    border-bottom: 1px solid #c8b89a;
+    border-top: 1px solid #c8b89a;
     margin: 0;
     padding: 0;
     width: 100%;
 }
 
+/* Innerer E-Mail-Body: warmes Pergament-Weiss */
 .inner-body {
     -premailer-cellpadding: 0;
     -premailer-cellspacing: 0;
     -premailer-width: 570px;
-    background-color: #ffffff;
-    border-color: #e8e5ef;
+    background-color: #faf7f2;
+    border-color: #c8b89a;
     border-radius: 2px;
     border-width: 1px;
-    box-shadow: 0 2px 0 rgba(0, 0, 150, 0.025), 2px 4px 0 rgba(0, 0, 150, 0.015);
+    box-shadow: 0 2px 0 rgba(45, 90, 39, 0.08), 2px 4px 0 rgba(45, 90, 39, 0.05);
     margin: 0 auto;
     padding: 0;
     width: 570px;
@@ -148,7 +170,7 @@ img {
 /* Subcopy */
 
 .subcopy {
-    border-top: 1px solid #e8e5ef;
+    border-top: 1px solid #c8b89a;
     margin-top: 25px;
     padding-top: 25px;
 }
@@ -169,14 +191,15 @@ img {
     width: 570px;
 }
 
+/* Footer-Text in gedämpftem Braun */
 .footer p {
-    color: #b0adc5;
+    color: #7a5c3a;
     font-size: 12px;
     text-align: center;
 }
 
 .footer a {
-    color: #b0adc5;
+    color: #4a7c3f;
     text-decoration: underline;
 }
 
@@ -191,13 +214,14 @@ img {
 }
 
 .table th {
-    border-bottom: 1px solid #edeff2;
+    border-bottom: 1px solid #c8b89a;
+    color: #2d5a27;
     margin: 0;
     padding-bottom: 8px;
 }
 
 .table td {
-    color: #74787e;
+    color: #5a3a22;
     font-size: 15px;
     line-height: 18px;
     margin: 0;
@@ -230,48 +254,53 @@ img {
     text-decoration: none;
 }
 
+/* Primär-Button: Waldgrün statt Dunkelgrau */
 .button-blue,
 .button-primary {
-    background-color: #2d3748;
-    border-bottom: 8px solid #2d3748;
-    border-left: 18px solid #2d3748;
-    border-right: 18px solid #2d3748;
-    border-top: 8px solid #2d3748;
+    background-color: #4a7c3f;
+    border-bottom: 8px solid #3a6230;
+    border-left: 18px solid #4a7c3f;
+    border-right: 18px solid #4a7c3f;
+    border-top: 8px solid #4a7c3f;
 }
 
+/* Erfolgs-Button: helles Waldgrün */
 .button-green,
 .button-success {
-    background-color: #48bb78;
-    border-bottom: 8px solid #48bb78;
-    border-left: 18px solid #48bb78;
-    border-right: 18px solid #48bb78;
-    border-top: 8px solid #48bb78;
+    background-color: #5a9e4e;
+    border-bottom: 8px solid #5a9e4e;
+    border-left: 18px solid #5a9e4e;
+    border-right: 18px solid #5a9e4e;
+    border-top: 8px solid #5a9e4e;
 }
 
+/* Fehler-Button: gedämpftes Rot (bleibt lesbar) */
 .button-red,
 .button-error {
-    background-color: #e53e3e;
-    border-bottom: 8px solid #e53e3e;
-    border-left: 18px solid #e53e3e;
-    border-right: 18px solid #e53e3e;
-    border-top: 8px solid #e53e3e;
+    background-color: #c0392b;
+    border-bottom: 8px solid #c0392b;
+    border-left: 18px solid #c0392b;
+    border-right: 18px solid #c0392b;
+    border-top: 8px solid #c0392b;
 }
 
 /* Panels */
 
+/* Panel-Akzentlinie in Waldgrün */
 .panel {
-    border-left: #2d3748 solid 4px;
+    border-left: #4a7c3f solid 4px;
     margin: 21px 0;
 }
 
+/* Panel-Hintergrund in hellem Pergament-Grün */
 .panel-content {
-    background-color: #edf2f7;
-    color: #718096;
+    background-color: #eef4ec;
+    color: #5a3a22;
     padding: 16px;
 }
 
 .panel-content p {
-    color: #718096;
+    color: #5a3a22;
 }
 
 .panel-item {

@@ -36,7 +36,7 @@ class PaymentConfirmed extends Notification implements ShouldQueue
             ->greeting('Hallo '.($booking->player?->full_name ?: '').'!')
             ->line('Deine Zahlung für „'.$booking->adventure?->name.'" ist bei uns eingegangen.')
             ->line('Datum: '.(optional($booking->adventure?->start_at)->format('d.m.Y') ?? '—'))
-            ->action('Zum Heldenportal', route('dashboard'));
+            ->action('Zum Heldenregister', route('dashboard'));
     }
 
     /** @return array<string, mixed> */

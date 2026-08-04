@@ -35,7 +35,7 @@ class TeamerRejected extends Notification implements ShouldQueue
             ->line('Deine Teamer-Anmeldung für „'.$this->adventure->name.'" wurde leider abgelehnt.')
             ->line('Datum: '.$date)
             ->line('Bei Fragen wende dich bitte an die Veranstalter.')
-            ->action('Zum Heldenportal', route('dashboard'));
+            ->action('Zum Heldenregister', route('dashboard'));
     }
 
     /** @return array<string, mixed> */

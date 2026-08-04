@@ -15,14 +15,20 @@
                     @csrf
                     @method('PUT')
 
+                    @php($bankKeys = ['bank_account_owner', 'bank_iban', 'bank_name'])
                     @foreach ($fields as $key => $field)
+                        @if ($key === 'bank_account_owner')
+                            <div class="pt-3 border-t border-stone-200">
+                                <p class="text-sm font-semibold text-stone-600 mb-3">Bankverbindung (für E-Mail-Bestätigungen)</p>
+                            </div>
+                        @endif
                         <div class="field">
                             <label for="setting_{{ $key }}">{{ $field['label'] }}</label>
                             <input type="{{ $key === 'contact_email' ? 'email' : 'text' }}"
                                    id="setting_{{ $key }}"
                                    name="{{ $key }}"
                                    value="{{ old($key, $values[$key] ?? '') }}"
-                                   maxlength="{{ $key === 'contact_email' ? 255 : 100 }}">
+                                   maxlength="{{ $key === 'contact_email' ? 255 : ($key === 'bank_iban' ? 40 : 100) }}">
                             <x-input-error :messages="$errors->get($key)" class="mt-1" />
                         </div>
                     @endforeach
