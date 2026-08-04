@@ -35,7 +35,6 @@
                 <th>Nr.</th>
                 <th>Nachname</th>
                 <th>Vorname</th>
-                <th>Alter</th>
                 <th>Ort</th>
                 <th>Kontaktrufnummer</th>
                 <th>Unterschrift</th>
@@ -47,34 +46,16 @@
                     <td class="nr">{{ $i + 1 }}</td>
                     <td>{{ $booking->is_guest ? $booking->guest_lastname : $booking->player?->lastname }}@if ($booking->is_guest) <strong>(Gast)</strong>@endif</td>
                     <td>{{ $booking->is_guest ? $booking->guest_name : $booking->player?->name }}</td>
-                    <td>{{ $booking->participant_age ?? '' }}</td>
                     <td>{{ $booking->effective_city ?? '—' }}</td>
-                    <td>{{ $booking->erreichbarkeit }}</td>
+                    <td>{{ $booking->kontakt_telefon ?? $booking->guardian()?->phone ?? '—' }}</td>
                     <td class="sig">
                         @if ($booking->signature)
                             <img src="{{ $booking->signature }}" alt="">
                         @endif
                     </td>
                 </tr>
-                @if (! $booking->is_guest)
-                    @php($pdfGuardian = $booking->guardian())
-                    @if ($pdfGuardian)
-                        <tr style="background:#f7f7f7;">
-                            <td style="border-top:none;"></td>
-                            <td colspan="6" style="font-size:9px;color:#555;border-top:none;padding:2px 6px 5px;">
-                                EBP: {{ $pdfGuardian->name }} {{ $pdfGuardian->lastname }}
-                                @if ($pdfGuardian->email) · {{ $pdfGuardian->email }} @endif
-                                @if ($pdfGuardian->phone) · {{ $pdfGuardian->phone }} @endif
-                                @if ($pdfGuardian->street) · {{ $pdfGuardian->street }} {{ $pdfGuardian->house_number }}, {{ $pdfGuardian->zip }} {{ $pdfGuardian->city }} @endif
-                                @if (! $booking->usesGuardianAddress() && $booking->player?->street)
-                                    <span style="color:#b45309;"> · Kind abw.: {{ $booking->player->street }} {{ $booking->player->house_number }}, {{ $booking->player->zip }} {{ $booking->player->city }}</span>
-                                @endif
-                            </td>
-                        </tr>
-                    @endif
-                @endif
             @empty
-                <tr><td colspan="7">Keine Anmeldungen.</td></tr>
+                <tr><td colspan="6">Keine Anmeldungen.</td></tr>
             @endforelse
         </tbody>
     </table>
