@@ -14,6 +14,7 @@ class AdventureFactory extends Factory
     {
         return [
             'name' => fake()->words(3, true),
+            'kuerzel' => 'JuFölarp',
             'location_id' => null,
             'start_at' => fake()->dateTimeBetween('+1 week', '+2 months'),
             'end_at' => fake()->dateTimeBetween('+2 months', '+3 months'),

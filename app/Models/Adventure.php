@@ -113,6 +113,40 @@ class Adventure extends Model
     }
 
     /**
+     * Beitrags-Zusammenfassung für die Verwaltungsansicht.
+     * Berücksichtigt pro Buchung den ermäßigten oder regulären Preis.
+     *
+     * @return array{paid_count:int,total_count:int,paid_amount:float,open_amount:float,total_amount:float,erm_count:int}
+     */
+    public function paymentSummary(): array
+    {
+        $payable    = $this->bookings->where('waitlisted', false);
+        $paidAmount = 0.0;
+        $openAmount = 0.0;
+
+        foreach ($payable as $booking) {
+            $fee = ($booking->ermaessigung && $this->fee_reduced !== null)
+                ? (float) $this->fee_reduced
+                : (float) $this->fee;
+
+            if ($booking->paid) {
+                $paidAmount += $fee;
+            } else {
+                $openAmount += $fee;
+            }
+        }
+
+        return [
+            'paid_count'   => $payable->where('paid', true)->count(),
+            'total_count'  => $payable->count(),
+            'paid_amount'  => $paidAmount,
+            'open_amount'  => $openAmount,
+            'total_amount' => $paidAmount + $openAmount,
+            'erm_count'    => $payable->where('ermaessigung', true)->count(),
+        ];
+    }
+
+    /**
      * Ist der Check-in erlaubt? Erst ab „Anmeldung geschlossen" (Status ≥ 40, ADV-14).
      */
     public function checkinAllowed(): bool

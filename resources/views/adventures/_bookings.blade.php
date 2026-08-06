@@ -49,6 +49,14 @@
                     @endif
                 </td>
                 <td data-label="Beitrag">
+                    @if ($adventure->fee > 0)
+                        @if ($booking->ermaessigung && $adventure->fee_reduced !== null)
+                            <span class="text-xs text-stone-500 mr-1">{{ number_format($adventure->fee_reduced, 2, ',', '.') }} €</span>
+                            <span class="ui mini label" title="Ermäßigt">Erm.</span>
+                        @else
+                            <span class="text-xs text-stone-500 mr-1">{{ number_format($adventure->fee, 2, ',', '.') }} €</span>
+                        @endif
+                    @endif
                     @if ($booking->paid)
                         <span class="text-green-700">✓ bezahlt</span>
                     @else
@@ -120,13 +128,20 @@
 
 @if ($manage)
     @can('manage-payments')
-        @php($payable = $adventure->bookings->where('waitlisted', false))
-        @php($paidCount = $payable->where('paid', true)->count())
-        @php($openCount = $payable->count() - $paidCount)
-        <p class="text-stone-600 mb-2 mt-2">
-            Beitrag {{ number_format($adventure->fee, 2, ',', '.') }} € · bezahlt {{ $paidCount }}/{{ $payable->count() }}
-            · eingegangen {{ number_format($paidCount * $adventure->fee, 2, ',', '.') }} €
-            · offen {{ number_format($openCount * $adventure->fee, 2, ',', '.') }} €
-        </p>
+        @php($summary = $adventure->paymentSummary())
+        <div class="text-sm text-stone-600 mt-3 space-y-0.5">
+            <p>
+                Bezahlt: <strong>{{ $summary['paid_count'] }}/{{ $summary['total_count'] }}</strong>
+                · eingegangen <strong class="text-green-700">{{ number_format($summary['paid_amount'], 2, ',', '.') }} €</strong>
+                · offen <strong class="{{ $summary['open_amount'] > 0 ? 'text-orange-600' : 'text-stone-500' }}">{{ number_format($summary['open_amount'], 2, ',', '.') }} €</strong>
+                · gesamt {{ number_format($summary['total_amount'], 2, ',', '.') }} €
+            </p>
+            @if ($adventure->fee_reduced !== null && $summary['erm_count'] > 0)
+                <p class="text-xs text-stone-400">
+                    Davon {{ $summary['erm_count'] }} ermäßigt ({{ number_format($adventure->fee_reduced, 2, ',', '.') }} €),
+                    {{ $summary['total_count'] - $summary['erm_count'] }} regulär ({{ number_format($adventure->fee, 2, ',', '.') }} €)
+                </p>
+            @endif
+        </div>
     @endcan
 @endif

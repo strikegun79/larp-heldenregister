@@ -70,6 +70,7 @@ class ProjectleadRoleTest extends TestCase
         $this->actingAs($pl)
             ->post(route('adventures.store'), [
                 'name' => 'Frühlingsturnier Waldritter',
+                'kuerzel' => 'JuFölarp',
                 'start_at' => '2026-09-01 10:00',
                 'end_at' => '2026-09-03 18:00',
                 'event_status_id' => 30,
