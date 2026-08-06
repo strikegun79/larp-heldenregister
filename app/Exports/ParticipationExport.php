@@ -30,7 +30,7 @@ class ParticipationExport
     public function download(): StreamedResponse
     {
         $adventure = $this->adventure;
-        $adventure->load(['bookings.player.users', 'bookings.role', 'visits']);
+        $adventure->load(['bookings.player.users', 'bookings.role', 'bookings.bookedBy', 'visits']);
         $visitedIds = $adventure->visits->pluck('player_id');
 
         $spreadsheet = new Spreadsheet;
