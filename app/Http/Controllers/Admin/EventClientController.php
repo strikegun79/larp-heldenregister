@@ -76,7 +76,6 @@ class EventClientController extends Controller
     {
         return $request->validate([
             'name' => ['required', 'string', 'max:50'],
-            'kuerzel' => ['nullable', 'string', 'max:20'],
         ]);
     }
 

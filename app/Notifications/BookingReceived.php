@@ -27,7 +27,7 @@ class BookingReceived extends Notification implements ShouldQueue
 
     public function toMail(object $notifiable): MailMessage
     {
-        $booking = $this->booking->loadMissing(['adventure.client', 'player', 'role']);
+        $booking = $this->booking->loadMissing(['adventure', 'player', 'role']);
 
         $mail = (new MailMessage)
             ->subject('Anmeldung eingegangen: '.$booking->adventure?->name)
@@ -53,7 +53,7 @@ class BookingReceived extends Notification implements ShouldQueue
             $bank  = Setting::get('bank_name');
 
             if ($iban) {
-                $kuerzel = $booking->adventure?->client?->kuerzel;
+                $kuerzel = $booking->adventure?->kuerzel;
                 $date    = optional($booking->adventure?->start_at)->format('d.m.Y') ?? '—';
                 $player  = $booking->player?->full_name ?? '';
                 $verwendungszweck = trim(($kuerzel ? $kuerzel.' ' : '').$date.' '.$player);

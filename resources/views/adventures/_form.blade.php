@@ -3,11 +3,21 @@
     $selectClass = 'mt-1 block w-full border-gray-300 focus:border-amber-600 focus:ring-amber-600 rounded-md shadow-sm';
 @endphp
 <div class="space-y-6">
-    <div>
-        <x-input-label for="name" value="Name" />
-        <x-text-input id="name" name="name" type="text" class="mt-1 block w-full"
-                      :value="old('name', $adventure->name)" required />
-        <x-input-error :messages="$errors->get('name')" class="mt-2" />
+    <div class="grid grid-cols-3 gap-4">
+        <div class="col-span-2">
+            <x-input-label for="name" value="Name" />
+            <x-text-input id="name" name="name" type="text" class="mt-1 block w-full"
+                          :value="old('name', $adventure->name)" required />
+            <x-input-error :messages="$errors->get('name')" class="mt-2" />
+        </div>
+        <div>
+            <x-input-label for="kuerzel" value="Projekt-Kürzel *" />
+            <x-text-input id="kuerzel" name="kuerzel" type="text" class="mt-1 block w-full"
+                          :value="old('kuerzel', $adventure->kuerzel ?? 'JuFölarp')"
+                          maxlength="30" required placeholder="JuFölarp" />
+            <p class="text-xs text-gray-500 mt-1">Für den Verwendungszweck der Überweisung.</p>
+            <x-input-error :messages="$errors->get('kuerzel')" class="mt-2" />
+        </div>
     </div>
 
     <div>

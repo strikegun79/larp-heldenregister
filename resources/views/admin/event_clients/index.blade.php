@@ -15,7 +15,6 @@
                     <thead class="bg-black/5">
                         <tr>
                             <th class="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase">Name</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase">Kürzel</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase">Events</th>
                             <th class="px-6 py-3"></th>
                         </tr>
@@ -24,13 +23,6 @@
                         @forelse ($clients as $client)
                             <tr>
                                 <td class="px-6 py-4" data-label="Name">{{ $client->name }}</td>
-                                <td class="px-6 py-4" data-label="Kürzel">
-                                    @if ($client->kuerzel)
-                                        <code class="text-xs bg-stone-100 px-1.5 py-0.5 rounded">{{ $client->kuerzel }}</code>
-                                    @else
-                                        <span class="text-stone-400">—</span>
-                                    @endif
-                                </td>
                                 <td class="px-6 py-4" data-label="Events">{{ $client->adventures_count }}</td>
                                 <td class="px-6 py-4 text-right">
                                     <div class="flex items-center justify-end gap-3">

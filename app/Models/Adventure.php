@@ -14,6 +14,7 @@ class Adventure extends Model
 
     protected $fillable = [
         'name',
+        'kuerzel',
         'function_email',
         'location_id',
         'start_at',

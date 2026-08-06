@@ -403,6 +403,7 @@ class AdventureController extends Controller
     {
         $data = $request->validate([
             'name' => ['required', 'string', 'max:200'],
+            'kuerzel' => ['required', 'string', 'max:30'],
             'function_email' => ['nullable', 'email', 'max:255'],
             'gamemaster_id' => ['nullable', 'exists:users,id'],
             'eventleader_id' => ['nullable', 'exists:users,id'],

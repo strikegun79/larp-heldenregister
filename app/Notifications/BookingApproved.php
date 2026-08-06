@@ -30,7 +30,7 @@ class BookingApproved extends Notification implements ShouldQueue
 
     public function toMail(object $notifiable): MailMessage
     {
-        $booking = $this->booking->loadMissing(['adventure.client', 'player', 'role']);
+        $booking = $this->booking->loadMissing(['adventure', 'player', 'role']);
 
         $fee    = $booking->effectiveFee();
         $date   = optional($booking->adventure?->start_at)->format('d.m.Y') ?? '—';
@@ -62,7 +62,7 @@ class BookingApproved extends Notification implements ShouldQueue
             if ($bic)   $mail->line('BIC: '.$bic);
             if ($bank)  $mail->line($bank);
 
-            $kuerzel = $booking->adventure?->client?->kuerzel;
+            $kuerzel = $booking->adventure?->kuerzel;
             $verwendungszweck = trim(($kuerzel ? $kuerzel.' ' : '').$date.' '.$player);
             $mail->line('Verwendungszweck: "'.$verwendungszweck.'"');
         }

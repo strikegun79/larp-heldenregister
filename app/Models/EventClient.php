@@ -13,7 +13,6 @@ class EventClient extends Model
     protected $fillable = [
         'id',
         'name',
-        'kuerzel',
     ];
 
     public function adventures(): HasMany
