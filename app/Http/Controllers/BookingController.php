@@ -76,6 +76,7 @@ class BookingController extends Controller
             'medikamente' => ['nullable', 'string'],
             'erreichbarkeit' => ['nullable', 'string'],
             'kontakt_telefon' => ['required', 'string', 'max:100'],
+            'ermaessigung' => ['boolean'],
         ]);
 
         // Ohne book-any-player nur eigene/betreute Spieler buchen (BOOK-10).
@@ -121,6 +122,7 @@ class BookingController extends Controller
             'medikamente' => $data['medikamente'] ?? null,
             'erreichbarkeit' => $data['erreichbarkeit'] ?? null,
             'kontakt_telefon' => $data['kontakt_telefon'],
+            'ermaessigung' => $request->boolean('ermaessigung'),
             // Volles Event -> automatisch auf die Warteliste.
             'waitlisted' => $adventure->isFull(),
         ]);
@@ -168,6 +170,7 @@ class BookingController extends Controller
             'allergien' => ['nullable', 'string'],
             'erreichbarkeit' => ['nullable', 'string'],
             'kontakt_telefon' => ['required', 'string', 'max:100'],
+            'ermaessigung' => ['boolean'],
         ]);
 
         if (! $adventure->registrationOpen()) {
@@ -188,6 +191,7 @@ class BookingController extends Controller
             'allergien' => $data['allergien'] ?? null,
             'erreichbarkeit' => $data['erreichbarkeit'] ?? null,
             'kontakt_telefon' => $data['kontakt_telefon'],
+            'ermaessigung' => $request->boolean('ermaessigung'),
             'waitlisted' => $adventure->isFull(),
         ]);
 
@@ -235,6 +239,7 @@ class BookingController extends Controller
             'medikamente' => ['nullable', 'string'],
             'erreichbarkeit' => ['nullable', 'string'],
             'kontakt_telefon' => ['required', 'string', 'max:100'],
+            'ermaessigung' => ['boolean'],
         ]);
 
         $booking->update([
@@ -248,6 +253,7 @@ class BookingController extends Controller
             'medikamente' => $data['medikamente'] ?? null,
             'erreichbarkeit' => $data['erreichbarkeit'] ?? null,
             'kontakt_telefon' => $data['kontakt_telefon'],
+            'ermaessigung' => $request->boolean('ermaessigung'),
         ]);
 
         $message = 'Anmeldung aktualisiert.';

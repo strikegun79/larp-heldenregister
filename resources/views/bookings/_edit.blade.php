@@ -33,6 +33,22 @@
         </div>
     </fieldset>
 
+    @if ($adventure->fee_reduced !== null && $adventure->fee > 0)
+    <div class="field mt-1">
+        <label class="flex items-start gap-2 font-normal cursor-pointer">
+            <input type="checkbox" name="ermaessigung" value="1" class="mt-1 shrink-0" @checked($booking->ermaessigung)>
+            <span>
+                <strong>Ermäßigung</strong>
+                <span class="text-stone-400">({{ number_format($adventure->fee_reduced, 2, ',', '.') }} € statt {{ number_format($adventure->fee, 2, ',', '.') }} €)</span>
+            </span>
+        </label>
+        <p class="text-xs text-stone-500 mt-1 ml-6">
+            Die Ermäßigung muss beim Check-in nachgewiesen werden, z.&nbsp;B. durch einen Bescheid über
+            Grundsicherung (SGB II/XII), Kinderzuschlag oder Wohngeld.
+        </p>
+    </div>
+    @endif
+
     <div class="field">
         <label>Allergien / Unverträglichkeiten</label>
         <textarea name="allergien" rows="2" placeholder="z. B. Nüsse, Laktose, Bienen …">{{ $booking->allergien }}</textarea>

@@ -416,6 +416,7 @@ class AdventureController extends Controller
             'max_player' => ['required', 'integer', 'min:1'],
             'waitlist' => ['integer', 'min:0'],
             'fee' => ['required', 'numeric', 'min:0'],
+            'fee_reduced' => ['nullable', 'numeric', 'min:0'],
             'is_hidden' => ['boolean'],
         ]);
 

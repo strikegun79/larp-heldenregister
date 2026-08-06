@@ -11,6 +11,13 @@
         <input type="text" name="name" value="{{ old('name', $client->name) }}" required>
         <x-input-error :messages="$errors->get('name')" class="mt-2" />
     </div>
+
+    <div class="field">
+        <label>Kürzel (Verwendungszweck)</label>
+        <input type="text" name="kuerzel" value="{{ old('kuerzel', $client->kuerzel) }}" maxlength="20" placeholder="z. B. WR, JFG">
+        <small class="text-stone-400">Wird im Verwendungszweck der Überweisungsbestätigung vorangestellt: Kürzel + Datum + Teilnehmername.</small>
+        <x-input-error :messages="$errors->get('kuerzel')" class="mt-2" />
+    </div>
 </form>
 
 <div data-modal-actions hidden>

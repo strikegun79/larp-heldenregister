@@ -122,7 +122,7 @@
         </div>
     </div>
 
-    <div class="grid grid-cols-3 gap-4">
+    <div class="grid grid-cols-4 gap-4">
         <div>
             <x-input-label for="max_player" value="Max. Spieler" />
             <x-text-input id="max_player" name="max_player" type="number" min="1" class="mt-1 block w-full"
@@ -139,6 +139,13 @@
             <x-text-input id="fee" name="fee" type="number" step="0.01" min="0" class="mt-1 block w-full"
                           :value="old('fee', $adventure->fee)" required />
             <x-input-error :messages="$errors->get('fee')" class="mt-2" />
+        </div>
+        <div>
+            <x-input-label for="fee_reduced" value="Ermäßigter Beitrag (€)" />
+            <x-text-input id="fee_reduced" name="fee_reduced" type="number" step="0.01" min="0" class="mt-1 block w-full"
+                          :value="old('fee_reduced', $adventure->fee_reduced)" placeholder="optional" />
+            <p class="text-xs text-gray-500 mt-1">Für Ermäßigungsberechtigte (Grundsicherung etc.)</p>
+            <x-input-error :messages="$errors->get('fee_reduced')" class="mt-2" />
         </div>
     </div>
 

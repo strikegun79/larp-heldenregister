@@ -22,6 +22,10 @@
             <span class="text-stone-400">Beitrag:</span>
             @if ($adventure->fee > 0)
                 <strong>{{ number_format($adventure->fee, 2, ',', '.') }} €</strong>
+                @if ($adventure->fee_reduced !== null)
+                    <span class="text-stone-400">/ ermäßigt</span>
+                    <strong class="text-emerald-700">{{ number_format($adventure->fee_reduced, 2, ',', '.') }} €</strong>
+                @endif
             @else
                 <strong class="text-green-700">kostenlos</strong>
             @endif
@@ -101,6 +105,23 @@
                 </label>
             </div>
         </fieldset>
+
+        @if ($adventure->fee_reduced !== null && $adventure->fee > 0)
+        <div class="field mt-1">
+            <label class="flex items-start gap-2 font-normal cursor-pointer">
+                <input type="checkbox" name="ermaessigung" value="1" class="mt-1 shrink-0">
+                <span>
+                    <strong>Ermäßigung beantragen</strong>
+                    <span class="text-stone-400">({{ number_format($adventure->fee_reduced, 2, ',', '.') }} € statt {{ number_format($adventure->fee, 2, ',', '.') }} €)</span>
+                </span>
+            </label>
+            <p class="text-xs text-stone-500 mt-1 ml-6">
+                Die Ermäßigung muss beim Check-in nachgewiesen werden, z.&nbsp;B. durch einen Bescheid über
+                Grundsicherung (SGB II/XII), Kinderzuschlag oder Wohngeld.
+                Ohne Nachweis gilt der reguläre Beitrag.
+            </p>
+        </div>
+        @endif
 
         <div class="field">
             <label>Allergien / Unverträglichkeiten</label>

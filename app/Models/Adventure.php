@@ -29,6 +29,7 @@ class Adventure extends Model
         'waitlist',
         'is_hidden',
         'fee',
+        'fee_reduced',
         'legacy_id',
     ];
 
@@ -37,6 +38,7 @@ class Adventure extends Model
         'end_at' => 'datetime',
         'reminder_sent_at' => 'datetime',
         'fee' => 'decimal:2',
+        'fee_reduced' => 'decimal:2',
         'loot_ep_day' => 'integer',
         'max_player' => 'integer',
         'waitlist' => 'integer',

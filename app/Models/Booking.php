@@ -27,6 +27,7 @@ class Booking extends Model
         'nsc',
         'agb',
         'paid',
+        'ermaessigung',
         'allergien',
         'medikamente',
         'erreichbarkeit',
@@ -61,6 +62,7 @@ class Booking extends Model
         'nsc' => 'boolean',
         'agb' => 'boolean',
         'paid' => 'boolean',
+        'ermaessigung' => 'boolean',
         'waitlisted' => 'boolean',
         'approved_at' => 'datetime',
     ];
@@ -161,6 +163,21 @@ class Booking extends Model
         }
 
         return $this->guardian()?->city;
+    }
+
+    /**
+     * Zu zahlender Beitrag: ermäßigter Preis wenn Checkbox gesetzt und Veranstaltung
+     * einen Ermäßigungspreis hat, sonst Standardpreis.
+     */
+    public function effectiveFee(): float
+    {
+        $adventure = $this->relationLoaded('adventure') ? $this->adventure : $this->adventure()->first();
+
+        if ($this->ermaessigung && $adventure?->fee_reduced !== null) {
+            return (float) $adventure->fee_reduced;
+        }
+
+        return (float) ($adventure?->fee ?? 0);
     }
 
     public function isApproved(): bool

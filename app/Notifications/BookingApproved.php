@@ -30,16 +30,16 @@ class BookingApproved extends Notification implements ShouldQueue
 
     public function toMail(object $notifiable): MailMessage
     {
-        $booking = $this->booking->loadMissing(['adventure', 'player', 'role']);
+        $booking = $this->booking->loadMissing(['adventure.client', 'player', 'role']);
 
-        $fee    = $booking->adventure?->fee ?? 0;
+        $fee    = $booking->effectiveFee();
         $date   = optional($booking->adventure?->start_at)->format('d.m.Y') ?? '—';
         $player = $booking->player?->full_name ?? '';
 
         $mail = (new MailMessage)
             ->subject('Anmeldung bestätigt: '.$booking->adventure?->name)
             ->greeting('Hallo '.$player.'!')
-            ->line('Deine Anmeldung für „'.$booking->adventure?->name.'" wurde offiziell bestätigt.')
+            ->line('Deine Anmeldung für „'.$booking->adventure?->name.'" wurde bestätigt.')
             ->line('Rolle: '.($booking->role?->description ?? '—'))
             ->line('Datum: '.$date);
 
@@ -49,15 +49,22 @@ class BookingApproved extends Notification implements ShouldQueue
             $bic   = Setting::get('bank_bic');
             $bank  = Setting::get('bank_name');
 
+            $feeText = number_format($fee, 2, ',', '.').' €';
+            if ($booking->ermaessigung) {
+                $feeText .= ' *(ermäßigt – Nachweis beim Check-in erforderlich)*';
+            }
+
             $mail->line('');
-            $mail->line('Bitte überweise Deinen Kostendeckungsbeitrag von **'.number_format($fee, 2, ',', '.').' €** für die Anmeldung auf das folgende Konto:');
+            $mail->line('Bitte überweise Deinen Teilnahmebeitrag von **'.$feeText.'** für die Anmeldung auf das folgende Konto:');
 
             if ($owner) $mail->line('Empfänger: '.$owner);
             if ($iban)  $mail->line('IBAN: '.$iban);
             if ($bic)   $mail->line('BIC: '.$bic);
             if ($bank)  $mail->line($bank);
 
-            $mail->line('Verwendungszweck: "Giessen + '.$date.' + '.$player.'"');
+            $kuerzel = $booking->adventure?->client?->kuerzel;
+            $verwendungszweck = trim(($kuerzel ? $kuerzel.' ' : '').$date.' '.$player);
+            $mail->line('Verwendungszweck: "'.$verwendungszweck.'"');
         }
 
         $mail->line('');
