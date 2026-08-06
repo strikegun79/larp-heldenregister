@@ -132,7 +132,11 @@ class Booking extends Model
      */
     public function guardian(): ?User
     {
-        return $this->bookedBy ?? $this->player?->users->first();
+        $bookedBy = $this->relationLoaded('bookedBy')
+            ? $this->bookedBy
+            : $this->bookedBy()->first();
+
+        return $bookedBy ?? $this->player?->users->first();
     }
 
     /**
