@@ -137,8 +137,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('adventures/{adventure}/manage', [AdventureController::class, 'manage'])->name('adventures.manage');
     // Teilnehmerliste als PDF (ADV-17).
     Route::get('adventures/{adventure}/participants-pdf', [AdventureController::class, 'participantsPdf'])->name('adventures.participants-pdf');
-    // Teilnahme-/Belegungsreport als CSV (REP-03).
-    Route::get('adventures/{adventure}/participation-csv', [AdventureController::class, 'participationCsv'])->name('adventures.participation-csv');
+    // Teilnahme-/Belegungsreport als Excel (REP-03).
+    Route::get('adventures/{adventure}/participation-xlsx', [AdventureController::class, 'participationXlsx'])->name('adventures.participation-xlsx');
     // Event absagen (ADV-07).
     Route::patch('adventures/{adventure}/cancel', [AdventureController::class, 'cancel'])->name('adventures.cancel');
 

@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\ParticipationExport;
 use App\Models\Adventure;
 use App\Models\EventCategory;
 use App\Models\EventClient;
@@ -35,7 +36,7 @@ class AdventureController extends Controller
         // Teilnehmer-PDF: Projektleitung, Bürokrat, Admin (ADV-17).
         $this->middleware('can:take-signatures')->only('participantsPdf');
         // Teilnahme-/Belegungsreport (REP-03): Event-Verwalter.
-        $this->middleware('can:events.edit')->only('participationCsv');
+        $this->middleware('can:events.edit')->only('participationXlsx');
     }
 
     /**
@@ -289,40 +290,13 @@ class AdventureController extends Controller
     }
 
     /**
-     * Teilnahme-/Belegungsreport eines Events als CSV (REP-03): je Anmeldung
-     * Spieler/Rolle/Liste/Status/Beitrag/Anwesend, plus Summenzeile.
+     * Teilnahme-/Belegungsreport eines Events als Excel (REP-03).
+     * Blatt 1: Teilnehmerliste mit allen Daten inkl. Ermäßigung und Zahlungsstatus.
+     * Blatt 2: Kassenübersicht für die Kassenwartin.
      */
-    public function participationCsv(Adventure $adventure): StreamedResponse
+    public function participationXlsx(Adventure $adventure): StreamedResponse
     {
-        $adventure->load(['bookings.player', 'bookings.role', 'visits']);
-        $visitedIds = $adventure->visits->pluck('player_id');
-
-        return response()->streamDownload(function () use ($adventure, $visitedIds) {
-            $out = fopen('php://output', 'w');
-            fwrite($out, "\xEF\xBB\xBF");
-            fputcsv($out, ['Spieler', 'Rolle', 'Liste', 'Status', 'Beitrag', 'Anwesend'], ';');
-
-            foreach ($adventure->bookings as $b) {
-                fputcsv($out, [
-                    $b->participant_name.($b->is_guest ? ' (Gast)' : ''),
-                    $b->role?->description,
-                    $b->waitlisted ? 'Warteliste' : 'regulär',
-                    $b->status_label,
-                    $b->paid ? 'bezahlt' : 'offen',
-                    $visitedIds->contains($b->player_id) ? 'ja' : 'nein',
-                ], ';');
-            }
-
-            $payable = $adventure->bookings->where('waitlisted', false);
-            fputcsv($out, [], ';');
-            fputcsv($out, ['Summen'], ';');
-            fputcsv($out, ['Regulär', $payable->count()], ';');
-            fputcsv($out, ['Warteliste', $adventure->bookings->where('waitlisted', true)->count()], ';');
-            fputcsv($out, ['Bezahlt', $payable->where('paid', true)->count()], ';');
-            fputcsv($out, ['Offen', $payable->where('paid', false)->count()], ';');
-            fputcsv($out, ['Anwesend', $adventure->visits->count()], ';');
-            fclose($out);
-        }, 'belegung-'.$adventure->id.'.csv', ['Content-Type' => 'text/csv; charset=UTF-8']);
+        return (new ParticipationExport($adventure))->download();
     }
 
     public function edit(Adventure $adventure): View
