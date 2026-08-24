@@ -67,7 +67,9 @@
             <button type="button"
                     data-modal-stack="{{ route('adventures.bookings.create-guest', $adventure) }}"
                     class="ui button"
-                    title="Für Gäste werden keine EP gesammelt">Gast anmelden</button>
+                    data-tooltip="Anmelden für einmalige Teilnehmer"
+                    data-position="top left"
+                    data-inverted="">Gast anmelden</button>
         @endif
     @endcan
     @if (auth()->user()->hasAnyRole('teamer', 'lehrmeister') && $myTeamerSignup === null)

@@ -86,7 +86,10 @@
                                     @endif
                                     <a class="item"
                                        href="{{ route('adventures.bookings.create-guest', $adventure) }}"
-                                       data-modal-stack="{{ route('adventures.bookings.create-guest', $adventure) }}">
+                                       data-modal-stack="{{ route('adventures.bookings.create-guest', $adventure) }}"
+                                       data-tooltip="Anmelden für einmalige Teilnehmer"
+                                       data-position="top center"
+                                       data-inverted="">
                                         <i class="user outline icon"></i> Gast anmelden
                                     </a>
                                     @if ($isTeamer || $canManage)
@@ -133,7 +136,10 @@
                                 @endif
                                 <a href="{{ route('adventures.bookings.create-guest', $adventure) }}"
                                    data-modal-stack="{{ route('adventures.bookings.create-guest', $adventure) }}"
-                                   class="ui button">Gast anmelden</a>
+                                   class="ui button"
+                                   data-tooltip="Anmelden für einmalige Teilnehmer"
+                                   data-position="top center"
+                                   data-inverted="">Gast anmelden</a>
                             @endif
                         @endif
                     @endcan
