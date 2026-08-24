@@ -374,6 +374,7 @@ document.addEventListener('submit', function (e) {
                     if (form.hasAttribute('data-stack-close')) {
                         $('#app-modal-2').modal('hide');
                         if (window.appModalUrl) loadModalContent(window.appModalUrl, true);
+                        else window.location.reload();
                     } else if (data.refresh_modal && window.appModal2Url) {
                         loadStackContent(window.appModal2Url, true);
                     } else {
