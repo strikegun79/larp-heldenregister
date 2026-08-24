@@ -191,6 +191,25 @@ footer {
     border-top: 3px double rgba(200, 150, 42, .45);
 }
 
+/* --- Loading-Zustand: Spinner für Mini-Buttons verkleinern ------------ */
+/* Basis-Schriftgröße 17.5px macht Fomantics Standard-Spinner (~1.28em)
+   zu groß für ui.mini-Buttons. Pseudo-Elemente explizit auf 0.7em setzen. */
+.ui.mini.loading.button::before,
+.ui.mini.loading.button::after {
+    width: 0.7em !important;
+    height: 0.7em !important;
+    margin-top: -0.35em !important;
+    margin-left: -0.35em !important;
+    border-width: 2px !important;
+}
+/* Hover-Transform während des Ladens deaktivieren (kein „Pop" auf
+   hängendem Button), Fomantics eigene Transition greift bereits,
+   diese Regel entfernt zusätzlich den scale/translate-Effekt. */
+.ui.loading.button:hover {
+    transform: none !important;
+    filter: none !important;
+}
+
 /* --- Sanfter, warmer Scrollbalken ------------------------------------- */
 * { scrollbar-color: var(--wr-gold) transparent; }
 ::-webkit-scrollbar { width: 12px; height: 12px; }
