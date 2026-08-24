@@ -178,6 +178,9 @@ class AdventureController extends Controller
         $teamerSignups = $adventure->teamerSignups;
         $myTeamerSignup = $teamerSignups->firstWhere('user_id', $request->user()->id);
 
+        $profileComplete = $request->user()->hasCompleteAddress();
+        $userHasPlayers  = $request->user()->players()->exists();
+
         $data = [
             'adventure' => $adventure,
             'players' => $players,
@@ -185,6 +188,8 @@ class AdventureController extends Controller
             'visibleBookings' => $visibleBookings,
             'teamerSignups' => $teamerSignups,
             'myTeamerSignup' => $myTeamerSignup,
+            'profileComplete' => $profileComplete,
+            'userHasPlayers'  => $userHasPlayers,
         ];
 
         // ARCH-002: AJAX → Partial für Modal, Direktaufruf → Vollseite (wie HeroController@show).

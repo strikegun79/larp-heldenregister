@@ -40,14 +40,29 @@
                     $primVerwalten = !$primAnmelden && !$isTeamer && $canManage;
                     // Overflow-Dropdown zeigen wenn neben der Primäraktion noch Weiteres vorhanden ist
                     $hasDropdown  = $primAnmelden || ($primTeamer && $canManage);
+                    // Anmelde-Button deaktivieren wenn Profil oder Spieler fehlt
+                    $bookBlockedReason = null;
+                    if (! $profileComplete && ! $userHasPlayers) {
+                        $bookBlockedReason = 'Bitte vervollständige zuerst dein Profil und lege einen Spieler an.';
+                    } elseif (! $profileComplete) {
+                        $bookBlockedReason = 'Bitte vervollständige zuerst dein Profil, bevor du dich anmelden kannst.';
+                    } elseif (! $userHasPlayers) {
+                        $bookBlockedReason = 'Du benötigst zunächst einen Spieler, um dich anmelden zu können.';
+                    }
                 @endphp
 
                 {{-- Mobile (< sm): Primär-Button + Overflow-Dropdown --}}
                 <div class="sm:hidden flex w-full gap-2">
                     @if ($primAnmelden)
-                        <a href="{{ route('adventures.bookings.create', $adventure) }}"
-                           data-modal-stack="{{ route('adventures.bookings.create', $adventure) }}"
-                           class="ui primary button" style="flex:1">Anmelden</a>
+                        @if ($bookBlockedReason)
+                            <span data-tooltip="{{ $bookBlockedReason }}" data-position="top center" data-inverted="" style="flex:1; display:flex;">
+                                <span class="ui primary button disabled" style="flex:1; pointer-events:none;" aria-disabled="true">Anmelden</span>
+                            </span>
+                        @else
+                            <a href="{{ route('adventures.bookings.create', $adventure) }}"
+                               data-modal-stack="{{ route('adventures.bookings.create', $adventure) }}"
+                               class="ui primary button" style="flex:1">Anmelden</a>
+                        @endif
                     @elseif ($primTeamer)
                         <a href="{{ route('adventures.teamer.create', $adventure) }}"
                            data-modal-stack="{{ route('adventures.teamer.create', $adventure) }}"
@@ -101,15 +116,21 @@
                 <div class="hidden sm:flex items-center gap-3 flex-wrap">
                     @can('adventure.book')
                         @if ($adventure->registrationOpen())
-                            <a href="{{ route('adventures.bookings.create', $adventure) }}"
-                               data-modal-stack="{{ route('adventures.bookings.create', $adventure) }}"
-                               class="ui primary button">Anmelden</a>
-                            <a href="{{ route('adventures.group-bookings.create', $adventure) }}"
-                               data-modal-stack="{{ route('adventures.group-bookings.create', $adventure) }}"
-                               class="ui button">Gruppe anmelden</a>
-                            <a href="{{ route('adventures.bookings.create-guest', $adventure) }}"
-                               data-modal-stack="{{ route('adventures.bookings.create-guest', $adventure) }}"
-                               class="ui button">Gast anmelden</a>
+                            @if ($bookBlockedReason)
+                                <span data-tooltip="{{ $bookBlockedReason }}" data-position="top center" data-inverted="">
+                                    <span class="ui primary button disabled" style="pointer-events:none;" aria-disabled="true">Anmelden</span>
+                                </span>
+                            @else
+                                <a href="{{ route('adventures.bookings.create', $adventure) }}"
+                                   data-modal-stack="{{ route('adventures.bookings.create', $adventure) }}"
+                                   class="ui primary button">Anmelden</a>
+                                <a href="{{ route('adventures.group-bookings.create', $adventure) }}"
+                                   data-modal-stack="{{ route('adventures.group-bookings.create', $adventure) }}"
+                                   class="ui button">Gruppe anmelden</a>
+                                <a href="{{ route('adventures.bookings.create-guest', $adventure) }}"
+                                   data-modal-stack="{{ route('adventures.bookings.create-guest', $adventure) }}"
+                                   class="ui button">Gast anmelden</a>
+                            @endif
                         @endif
                     @endcan
                     @if (auth()->user()->hasAnyRole('teamer', 'lehrmeister') && $myTeamerSignup === null)

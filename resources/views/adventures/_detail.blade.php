@@ -45,9 +45,25 @@
 <div data-modal-actions hidden>
     @can('adventure.book')
         @if ($adventure->registrationOpen())
-            <button type="button"
-                    data-modal-stack="{{ route('adventures.bookings.create', $adventure) }}"
-                    class="ui primary button">Anmelden</button>
+            @php
+                $bookBlockedReason = null;
+                if (! $profileComplete && ! $userHasPlayers) {
+                    $bookBlockedReason = 'Bitte vervollständige zuerst dein Profil und lege einen Spieler an.';
+                } elseif (! $profileComplete) {
+                    $bookBlockedReason = 'Bitte vervollständige zuerst dein Profil, bevor du dich anmelden kannst.';
+                } elseif (! $userHasPlayers) {
+                    $bookBlockedReason = 'Du benötigst zunächst einen Spieler, um dich anmelden zu können.';
+                }
+            @endphp
+            @if ($bookBlockedReason)
+                <span data-tooltip="{{ $bookBlockedReason }}" data-position="top left" data-inverted="">
+                    <button type="button" class="ui primary button disabled" disabled>Anmelden</button>
+                </span>
+            @else
+                <button type="button"
+                        data-modal-stack="{{ route('adventures.bookings.create', $adventure) }}"
+                        class="ui primary button">Anmelden</button>
+            @endif
             <button type="button"
                     data-modal-stack="{{ route('adventures.bookings.create-guest', $adventure) }}"
                     class="ui button"
