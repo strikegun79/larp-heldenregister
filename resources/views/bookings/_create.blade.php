@@ -101,7 +101,7 @@
                     <input type="checkbox" name="nsc" value="1"> NSC
                     <span class="text-stone-400 text-xs cursor-help"
                           data-tooltip="Non-Spieler-Charakter: Dein Kind übernimmt eine Statistenrolle statt als eigener Held zu spielen."
-                          data-position="top center">(?)</span>
+                          data-position="top left">(?)</span>
                 </label>
             </div>
         </fieldset>
