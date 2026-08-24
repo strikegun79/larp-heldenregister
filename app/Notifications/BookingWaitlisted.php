@@ -9,12 +9,11 @@ use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
 /**
- * Benachrichtigung an einen Spieler, der von der Warteliste nachgerückt ist
- * (NOTI-03). Ausgelöst in BookingController@destroy (automatisch) oder
- * resendConfirmation (manuell durch Admin).
- * Enthält Bankdaten + QR-Code, da der Platz jetzt regulär bestätigt ist.
+ * Benachrichtigung an den Spieler/Betreuer, dass die Anmeldung eingegangen ist,
+ * aber auf der Warteliste steht (NOTI-02b).
+ * Kein Beitrag/Bankdaten – erst nach Nachrücken via BookingReceived.
  */
-class WaitlistPromoted extends Notification implements ShouldQueue
+class BookingWaitlisted extends Notification implements ShouldQueue
 {
     use Queueable;
 
@@ -31,8 +30,8 @@ class WaitlistPromoted extends Notification implements ShouldQueue
         $booking = $this->booking->loadMissing(['adventure', 'player', 'role']);
 
         return (new MailMessage)
-            ->subject('Nachgerückt: '.$booking->adventure?->name)
-            ->markdown('emails.waitlist_promoted', [
+            ->subject('Warteliste: '.$booking->adventure?->name)
+            ->markdown('emails.booking_waitlisted', [
                 'booking'      => $booking,
                 'dashboardUrl' => route('dashboard'),
             ]);

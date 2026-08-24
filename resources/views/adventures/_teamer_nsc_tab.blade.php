@@ -118,30 +118,46 @@
                         <td data-label="Alter">{{ $booking->participant_age ?? '—' }}</td>
                         <td data-label="Rolle">Eltern-NSC</td>
                         <td data-label="Status">
-                            @php($status = $booking->status ?? 'offen')
-                            <span class="ui mini label {{ match($status) {
-                                'bestaetigt' => 'green',
-                                'abgelehnt'  => 'red',
-                                'abgemeldet' => 'grey',
-                                default      => 'grey',
-                            } }}">{{ \App\Models\Booking::STATUS_LABELS[$status] ?? $status }}</span>
+                            @if ($booking->waitlisted)
+                                <span class="ui mini label yellow">Warteliste</span>
+                            @else
+                                @php($status = $booking->status ?? 'offen')
+                                <span class="ui mini label {{ match($status) {
+                                    'bestaetigt' => 'green',
+                                    'abgelehnt'  => 'red',
+                                    'abgemeldet' => 'grey',
+                                    default      => 'grey',
+                                } }}">{{ \App\Models\Booking::STATUS_LABELS[$status] ?? $status }}</span>
+                            @endif
                         </td>
                         <td>
                             <div class="flex items-center justify-end gap-1 flex-wrap">
                                 @can('approve-bookings')
+                                    @unless ($booking->is_guest)
                                     <form method="POST"
-                                          action="{{ route('adventures.bookings.approval', [$adventure, $booking]) }}"
+                                          action="{{ route('adventures.bookings.resend-confirmation', [$adventure, $booking]) }}"
                                           data-refresh-modal
-                                          data-confirm="{{ $booking->status === 'bestaetigt' ? 'Bestätigung zurücknehmen?' : 'Anmeldung bestätigen?' }}">
-                                        @csrf @method('PATCH')
-                                        <button type="submit"
-                                                class="ui mini icon button {{ $booking->status === 'bestaetigt' ? '' : 'green' }}"
-                                                data-tooltip="{{ $booking->status === 'bestaetigt' ? 'Bestätigung zurücknehmen' : 'Bestätigen' }}"
-                                                data-position="top center">
-                                            <i class="check icon"></i>
-                                            <span class="sm:hidden ml-1 text-xs">{{ $booking->status === 'bestaetigt' ? 'Zurück' : 'Bestät.' }}</span>
-                                        </button>
+                                          @if($booking->waitlisted) data-confirm="{{ $booking->player?->full_name ?? 'Spieler' }} von der Warteliste auf regulären Platz hochstufen?" @endif>
+                                        @csrf
+                                        @if ($booking->waitlisted)
+                                            <button type="submit"
+                                                    class="ui mini icon green button"
+                                                    data-tooltip="Von Warteliste bestätigen"
+                                                    data-position="top center">
+                                                <i class="check icon"></i>
+                                                <span class="sm:hidden ml-1 text-xs">Bestät.</span>
+                                            </button>
+                                        @else
+                                            <button type="submit"
+                                                    class="ui mini icon button"
+                                                    data-tooltip="Anmeldebestätigung erneut senden"
+                                                    data-position="top center">
+                                                <i class="envelope outline icon"></i>
+                                                <span class="sm:hidden ml-1 text-xs">Mail</span>
+                                            </button>
+                                        @endif
                                     </form>
+                                    @endunless
                                     <form method="POST"
                                           action="{{ route('adventures.bookings.rejection', [$adventure, $booking]) }}"
                                           data-refresh-modal

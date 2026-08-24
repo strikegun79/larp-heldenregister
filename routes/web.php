@@ -163,9 +163,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('adventures.bookings.edit');
     Route::put('adventures/{adventure}/bookings/{booking}', [BookingController::class, 'update'])
         ->name('adventures.bookings.update');
-    // Anmeldung bestätigen/freigeben – Toggle approved_at (BOOK-05).
-    Route::patch('adventures/{adventure}/bookings/{booking}/approval', [BookingController::class, 'approve'])
-        ->name('adventures.bookings.approval');
+    // Anmeldebestätigung erneut senden (BOOK-05).
+    Route::post('adventures/{adventure}/bookings/{booking}/resend-confirmation', [BookingController::class, 'resendConfirmation'])
+        ->name('adventures.bookings.resend-confirmation');
     // Anmeldung ablehnen – Toggle (ADV-18).
     Route::patch('adventures/{adventure}/bookings/{booking}/rejection', [BookingController::class, 'reject'])
         ->name('adventures.bookings.rejection');

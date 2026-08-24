@@ -32,16 +32,13 @@ class BookingApproved extends Notification implements ShouldQueue
     {
         $booking = $this->booking->loadMissing(['adventure', 'player', 'role']);
 
-        $fee    = $booking->effectiveFee();
-        $date   = optional($booking->adventure?->start_at)->format('d.m.Y') ?? '—';
-        $player = $booking->player?->full_name ?? '';
+        $fee     = $booking->effectiveFee();
+        $date    = optional($booking->adventure?->start_at)->format('d.m.Y') ?? '—';
+        $player  = $booking->player?->full_name ?? '';
 
-        $mail = (new MailMessage)
-            ->subject('Anmeldung bestätigt: '.$booking->adventure?->name)
-            ->greeting('Hallo '.$player.'!')
-            ->line('Deine Anmeldung für „'.$booking->adventure?->name.'" wurde bestätigt.')
-            ->line('Rolle: '.($booking->role?->description ?? '—'))
-            ->line('Datum: '.$date);
+        $bankData        = null;
+        $verwendungszweck = null;
+        $qrDataUri       = null;
 
         if ($fee > 0) {
             $iban  = Setting::get('bank_iban');
@@ -49,28 +46,28 @@ class BookingApproved extends Notification implements ShouldQueue
             $bic   = Setting::get('bank_bic');
             $bank  = Setting::get('bank_name');
 
-            $feeText = number_format($fee, 2, ',', '.').' €';
-            if ($booking->ermaessigung) {
-                $feeText .= ' *(ermäßigt – Nachweis beim Check-in erforderlich)*';
+            if ($iban) {
+                $kuerzel = $booking->adventure?->kuerzel;
+                $verwendungszweck = trim(($kuerzel ? $kuerzel.' ' : '').$date.' '.$player);
+                $bankData = compact('iban', 'owner', 'bic', 'bank');
+
+                if ($bic && $owner) {
+                    $qrDataUri = BookingReceived::buildEpcQrDataUri($bic, $owner, $iban, $fee, $verwendungszweck);
+                }
             }
-
-            $mail->line('');
-            $mail->line('Bitte überweise Deinen Teilnahmebeitrag von **'.$feeText.'** für die Anmeldung auf das folgende Konto:');
-
-            if ($owner) $mail->line('Empfänger: '.$owner);
-            if ($iban)  $mail->line('IBAN: '.$iban);
-            if ($bic)   $mail->line('BIC: '.$bic);
-            if ($bank)  $mail->line($bank);
-
-            $kuerzel = $booking->adventure?->kuerzel;
-            $verwendungszweck = trim(($kuerzel ? $kuerzel.' ' : '').$date.' '.$player);
-            $mail->line('Verwendungszweck: "'.$verwendungszweck.'"');
         }
 
-        $mail->line('');
-        $mail->line('Am Dienstag vor der Veranstaltung bekommst Du eine E-Mail mit allen Informationen und Spielortbeschreibung.');
-
-        return $mail->action('Zum Heldenregister', route('dashboard'));
+        return (new MailMessage)
+            ->subject('Anmeldung bestätigt: '.$booking->adventure?->name)
+            ->markdown('emails.booking_approved', [
+                'booking'          => $booking,
+                'fee'              => $fee,
+                'date'             => $date,
+                'bankData'         => $bankData,
+                'verwendungszweck' => $verwendungszweck,
+                'qrDataUri'        => $qrDataUri,
+                'dashboardUrl'     => route('dashboard'),
+            ]);
     }
 
     /** @return array<string, mixed> */

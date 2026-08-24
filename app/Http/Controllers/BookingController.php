@@ -7,8 +7,8 @@ use App\Models\Booking;
 use App\Models\EventRole;
 use App\Models\Player;
 use App\Models\User;
-use App\Notifications\BookingApproved;
 use App\Notifications\BookingCancelled;
+use App\Notifications\BookingWaitlisted;
 use App\Notifications\BookingCancelledParticipant;
 use App\Notifications\BookingReceived;
 use App\Notifications\BookingRejected;
@@ -31,8 +31,8 @@ class BookingController extends Controller
         $this->middleware('can:adventure.cancel')->only('destroy');
         // Anmeldedetails nachträglich ändern (BOOK-04).
         $this->middleware('can:adventure.modify')->only(['edit', 'update']);
-        // Anmeldung bestätigen/freigeben (BOOK-05) bzw. ablehnen (ADV-18).
-        $this->middleware('can:approve-bookings')->only(['approve', 'reject']);
+        // Anmeldebestätigung erneut senden (BOOK-05) bzw. ablehnen (ADV-18).
+        $this->middleware('can:approve-bookings')->only(['resendConfirmation', 'reject']);
         // Bezahlt-Status pflegen (BOOK-06).
         $this->middleware('can:manage-payments')->only('togglePaid');
     }
@@ -52,8 +52,10 @@ class BookingController extends Controller
 
         return view('bookings._create', [
             'adventure' => $adventure,
-            'players' => $players,
-            'roles' => EventRole::whereNotIn('id', EventRole::TEAMER_ROLE_IDS)->orderBy('id')->get(),
+            'players'   => $players,
+            'roles'     => Gate::allows('book-any-player')
+                ? EventRole::orderBy('id')->get()
+                : EventRole::whereNotIn('id', EventRole::TEAMER_ROLE_IDS)->orderBy('id')->get(),
             'userPhone' => $request->user()->phone,
         ]);
     }
@@ -65,7 +67,9 @@ class BookingController extends Controller
     {
         $data = $request->validate([
             'player_id' => ['required', 'exists:players,id'],
-            'event_role_id' => ['required', 'exists:event_roles,id', 'not_in:'.implode(',', EventRole::TEAMER_ROLE_IDS)],
+            'event_role_id' => Gate::allows('book-any-player')
+                ? ['required', 'exists:event_roles,id']
+                : ['required', 'exists:event_roles,id', 'not_in:'.implode(',', EventRole::TEAMER_ROLE_IDS)],
             'agb' => ['accepted'],
             'fotoerlaubnis' => ['boolean'],
             'vegetarier' => ['boolean'],
@@ -123,17 +127,31 @@ class BookingController extends Controller
             'erreichbarkeit' => $data['erreichbarkeit'] ?? null,
             'kontakt_telefon' => $data['kontakt_telefon'],
             'ermaessigung' => $request->boolean('ermaessigung'),
-            // Volles Event -> automatisch auf die Warteliste.
-            'waitlisted' => $adventure->isFull(),
+            // Teamer-Rollen ignorieren das Teilnehmerlimit und kommen nie auf die Warteliste.
+            'waitlisted' => in_array((int) $data['event_role_id'], EventRole::TEAMER_ROLE_IDS)
+                ? false
+                : $adventure->shouldWaitlist(),
+            // Keine manuelle Bestätigung mehr nötig – direkt bestätigt.
+            'approved_at' => now(),
+            'status' => 'bestaetigt',
         ]);
 
-        // NOTI-02: Bestätigung – primär Spieler-Email, Fallback auf buchenden Nutzer (z. B. Elternteil).
-        $recipientEmail = $player?->email ?: $request->user()->email;
-        if ($recipientEmail && $player?->notificationEnabled('notify_booking_received')) {
-            Notification::route('mail', $recipientEmail)->notify(new BookingReceived($booking));
+        // Wartelisten-Modus dauerhaft aktivieren, sobald erste Buchung auf Warteliste kommt.
+        if ($booking->waitlisted && ! $adventure->waitlist_mode) {
+            $adventure->update(['waitlist_mode' => true]);
         }
 
-        $message = $adventure->isFull()
+        $recipientEmail = $player?->email ?: $request->user()->email;
+        if ($recipientEmail && $player?->notificationEnabled('notify_booking_received')) {
+            // NOTI-02b: Warteliste → kein Beitrag, kein QR-Code.
+            // NOTI-02:  Regulär  → Bestätigung mit Bankdaten.
+            $notification = $booking->waitlisted
+                ? new BookingWaitlisted($booking)
+                : new BookingReceived($booking);
+            Notification::route('mail', $recipientEmail)->notify($notification);
+        }
+
+        $message = $booking->waitlisted
             ? 'Anmeldung erfolgt – das Abenteuer ist voll, daher auf der Warteliste.'
             : 'Anmeldung gespeichert.';
 
@@ -194,6 +212,8 @@ class BookingController extends Controller
             'kontakt_telefon' => $data['kontakt_telefon'],
             'ermaessigung' => $request->boolean('ermaessigung'),
             'waitlisted' => $adventure->isFull(),
+            'approved_at' => now(),
+            'status' => 'bestaetigt',
         ]);
 
         $message = 'Gast angemeldet.'.($adventure->isFull() ? ' (Warteliste – Event voll.)' : '');
@@ -265,30 +285,38 @@ class BookingController extends Controller
     }
 
     /**
-     * Anmeldung bestätigen bzw. Bestätigung zurücknehmen (BOOK-05).
-     * Setzt/leert `approved_at` (Toggle).
+     * Wartelisten-Buchung: von Warteliste auf regulären Platz hochstufen und
+     * Bestätigungs-Mail mit Bankdaten senden (BOOK-05).
+     * Reguläre Buchung: Bestätigungs-Mail erneut senden.
      */
-    public function approve(Request $request, Adventure $adventure, Booking $booking): RedirectResponse|JsonResponse
+    public function resendConfirmation(Request $request, Adventure $adventure, Booking $booking): RedirectResponse|JsonResponse
     {
         abort_unless($booking->adventure_id === $adventure->id, 404);
 
-        // Toggle bestätigt/offen; Status (ADV-18) und approved_at synchron halten.
-        $confirm = ! $booking->approved_at;
-        $booking->update([
-            'approved_at' => $confirm ? now() : null,
-            'status' => $confirm ? 'bestaetigt' : 'offen',
-        ]);
+        if ($booking->is_guest) {
+            return $request->expectsJson()
+                ? response()->json(['message' => 'Für Gäste kann keine Bestätigungsmail gesendet werden.'], 422)
+                : back()->with('error', 'Für Gäste kann keine Bestätigungsmail gesendet werden.');
+        }
 
-        $message = $confirm ? 'Anmeldung bestätigt.' : 'Bestätigung zurückgenommen.';
+        $booking->loadMissing(['player.users']);
+        $recipientEmail = $booking->player?->email ?: $booking->player?->users()->first()?->email;
 
-        // NOTI-10: Bestätigungs-Mail + Portal an den Spieler (nur beim Bestätigen, nicht beim Zurücknehmen).
-        if ($confirm && $booking->player?->notificationEnabled('notify_booking_approved')) {
-            $user = $booking->player->users()->first();
-            if ($user) {
-                $user->notify(new BookingApproved($booking));
-            } elseif ($booking->player->email) {
-                Notification::route('mail', $booking->player->email)->notify(new BookingApproved($booking));
-            }
+        if (! $recipientEmail) {
+            return $request->expectsJson()
+                ? response()->json(['message' => 'Kein E-Mail-Empfänger für diesen Spieler gefunden.'], 422)
+                : back()->with('error', 'Kein E-Mail-Empfänger für diesen Spieler gefunden.');
+        }
+
+        if ($booking->waitlisted) {
+            // Von Warteliste auf regulären Platz hochstufen.
+            $booking->update(['waitlisted' => false]);
+            Notification::route('mail', $recipientEmail)->notify(new BookingReceived($booking));
+            $message = ($booking->player?->full_name ?? 'Spieler').' von der Warteliste bestätigt. Bestätigungsmail gesendet an '.$recipientEmail.'.';
+        } else {
+            // Reguläre Buchung: Bestätigungs-Mail nochmals senden.
+            Notification::route('mail', $recipientEmail)->notify(new BookingReceived($booking));
+            $message = 'Anmeldebestätigung erneut gesendet an '.$recipientEmail.'.';
         }
 
         return $request->expectsJson()
@@ -409,9 +437,11 @@ class BookingController extends Controller
 
             if ($promoted) {
                 $promoted->update(['waitlisted' => false]);
-                // NOTI-03: Benachrichtigung an den nachgerückten Spieler.
-                if ($promoted->player?->email && $promoted->player->notificationEnabled('notify_waitlist_promoted')) {
-                    Notification::route('mail', $promoted->player->email)->notify(new WaitlistPromoted($promoted));
+                // NOTI-03: Benachrichtigung an den nachgerückten Spieler (mit Bankdaten).
+                $promotedEmail = $promoted->player?->email
+                    ?: $promoted->player?->users()->first()?->email;
+                if ($promotedEmail && $promoted->player?->notificationEnabled('notify_waitlist_promoted')) {
+                    Notification::route('mail', $promotedEmail)->notify(new WaitlistPromoted($promoted));
                 }
             }
         }

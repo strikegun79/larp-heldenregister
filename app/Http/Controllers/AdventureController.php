@@ -222,8 +222,8 @@ class AdventureController extends Controller
     {
         $adventure->load(['bookings.player.users', 'bookings.bookedBy', 'bookings.role', 'visits', 'status', 'teamerSignups.user']);
 
-        $nscBookings = $adventure->bookings->where('event_role_id', EventRole::NSC_ROLE_ID)->values();
-        $mainBookings = $adventure->bookings->where('event_role_id', '!=', EventRole::NSC_ROLE_ID)->values();
+        $nscBookings = $adventure->bookings->where('event_role_id', EventRole::NSC_ROLE_ID)->sortBy('created_at')->values();
+        $mainBookings = $adventure->bookings->where('event_role_id', '!=', EventRole::NSC_ROLE_ID)->sortBy('created_at')->values();
 
         $data = array_merge($this->formData($adventure), [
             'nscBookings' => $nscBookings,

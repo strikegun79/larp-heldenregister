@@ -4,6 +4,10 @@ namespace App\Notifications;
 
 use App\Models\Booking;
 use App\Models\Setting;
+use Endroid\QrCode\Encoding\Encoding;
+use Endroid\QrCode\ErrorCorrectionLevel;
+use Endroid\QrCode\QrCode;
+use Endroid\QrCode\Writer\PngWriter;
 use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -29,27 +33,15 @@ class BookingReceived extends Notification implements ShouldQueue
     {
         $booking = $this->booking->loadMissing(['adventure', 'player', 'role']);
 
-        $mail = (new MailMessage)
-            ->subject('Anmeldung eingegangen: '.$booking->adventure?->name)
-            ->greeting('Hallo '.($booking->player?->full_name ?: '').'!')
-            ->line('Deine Anmeldung für „'.$booking->adventure?->name.'" ist eingegangen.')
-            ->line('Rolle: '.($booking->role?->description ?? '—'));
+        $fee             = $booking->effectiveFee();
+        $bankData        = null;
+        $verwendungszweck = null;
+        $qrDataUri       = null;
 
-        if ($booking->waitlisted) {
-            $mail->line('Hinweis: Das Abenteuer ist derzeit voll – du stehst auf der Warteliste und rückst bei einem frei werdenden Platz automatisch nach.');
-        }
-
-        $fee = $booking->effectiveFee();
         if ($fee > 0) {
-            $mail->line('---');
-            $feeLabel = number_format($fee, 2, ',', '.') . ' €';
-            if ($booking->ermaessigung) {
-                $feeLabel .= ' *(ermäßigt – Nachweis beim Check-in erforderlich)*';
-            }
-            $mail->line('**Zu zahlender Beitrag:** ' . $feeLabel);
-
             $iban  = Setting::get('bank_iban');
             $owner = Setting::get('bank_account_owner');
+            $bic   = Setting::get('bank_bic');
             $bank  = Setting::get('bank_name');
 
             if ($iban) {
@@ -58,14 +50,62 @@ class BookingReceived extends Notification implements ShouldQueue
                 $player  = $booking->player?->full_name ?? '';
                 $verwendungszweck = trim(($kuerzel ? $kuerzel.' ' : '').$date.' '.$player);
 
-                $mail->line('**Bankverbindung:**');
-                if ($owner) $mail->line('Kontoinhaber: ' . $owner);
-                $mail->line('IBAN: ' . $iban);
-                if ($bank) $mail->line('Bank: ' . $bank);
-                $mail->line('Verwendungszweck: "'.$verwendungszweck.'"');
+                $bankData = compact('iban', 'owner', 'bic', 'bank');
+
+                if ($bic && $owner) {
+                    $qrDataUri = self::buildEpcQrDataUri($bic, $owner, $iban, $fee, $verwendungszweck);
+                }
             }
         }
 
-        return $mail->action('Zum Heldenregister', route('dashboard'));
+        return (new MailMessage)
+            ->subject('Anmeldung eingegangen: '.$booking->adventure?->name)
+            ->markdown('emails.booking_received', [
+                'booking'          => $booking,
+                'fee'              => $fee,
+                'bankData'         => $bankData,
+                'verwendungszweck' => $verwendungszweck,
+                'qrDataUri'        => $qrDataUri,
+                'dashboardUrl'     => route('dashboard'),
+            ]);
+    }
+
+    /**
+     * Erzeugt einen EPC-QR-Code (GiroCode, ISO 20022) als Base64-Data-URI.
+     * Gibt null zurück wenn die Generierung fehlschlägt.
+     */
+    public static function buildEpcQrDataUri(
+        string $bic,
+        string $owner,
+        string $iban,
+        float  $amount,
+        string $verwendungszweck,
+    ): ?string {
+        $epcContent = implode("\n", [
+            'BCD',
+            '002',
+            '1',
+            'SCT',
+            $bic,
+            mb_substr($owner, 0, 70),
+            $iban,
+            'EUR'.number_format($amount, 2, '.', ''),
+            '',
+            '',
+            mb_substr($verwendungszweck, 0, 140),
+        ]);
+
+        try {
+            $qrCode = new QrCode(
+                data: $epcContent,
+                encoding: new Encoding('UTF-8'),
+                errorCorrectionLevel: ErrorCorrectionLevel::Medium,
+                size: 220,
+                margin: 6,
+            );
+            return (new PngWriter())->write($qrCode)->getDataUri();
+        } catch (\Throwable) {
+            return null;
+        }
     }
 }

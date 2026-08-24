@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use App\Models\EventRole;
 
 class Adventure extends Model
 {
@@ -28,6 +29,7 @@ class Adventure extends Model
         'event_category_id',
         'max_player',
         'waitlist',
+        'waitlist_mode',
         'is_hidden',
         'fee',
         'fee_reduced',
@@ -43,6 +45,7 @@ class Adventure extends Model
         'loot_ep_day' => 'integer',
         'max_player' => 'integer',
         'waitlist' => 'integer',
+        'waitlist_mode' => 'boolean',
         'is_hidden' => 'boolean',
     ];
 
@@ -105,6 +108,17 @@ class Adventure extends Model
     }
 
     /**
+     * Soll die nächste Buchung auf die Warteliste?
+     * Ja, wenn das Event voll ist ODER der Wartelisten-Modus einmal aktiviert wurde.
+     * Einmal aktiviert, bleibt waitlist_mode dauerhaft true – damit keine spätere
+     * Buchung Wartende "überholt".
+     */
+    public function shouldWaitlist(): bool
+    {
+        return $this->isFull() || (bool) $this->waitlist_mode;
+    }
+
+    /**
      * Ist die Anmeldung grundsätzlich geöffnet (Status "Anmeldung offen")?
      */
     public function registrationOpen(): bool
@@ -120,7 +134,9 @@ class Adventure extends Model
      */
     public function paymentSummary(): array
     {
-        $payable    = $this->bookings->where('waitlisted', false);
+        $payable = $this->bookings
+            ->where('waitlisted', false)
+            ->whereNotIn('event_role_id', [EventRole::NSC_ROLE_ID, ...EventRole::TEAMER_ROLE_IDS]);
         $paidAmount = 0.0;
         $openAmount = 0.0;
 
@@ -179,7 +195,10 @@ class Adventure extends Model
      */
     public function freeSlots(): int
     {
-        return max(0, $this->max_player - $this->confirmedBookings()->count());
+        // Teamer-Rollen zählen nicht gegen das Teilnehmerlimit (sie können sich immer anmelden).
+        return max(0, $this->max_player - $this->confirmedBookings()
+            ->whereNotIn('event_role_id', EventRole::TEAMER_ROLE_IDS)
+            ->count());
     }
 
     /**

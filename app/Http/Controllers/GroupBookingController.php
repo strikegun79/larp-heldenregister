@@ -8,6 +8,7 @@ use App\Models\Group;
 use App\Models\Hero;
 use App\Models\Player;
 use App\Notifications\BookingReceived;
+use App\Notifications\BookingWaitlisted;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -122,13 +123,22 @@ class GroupBookingController extends Controller
                 'event_role_id' => $data['event_role_id'],
                 'agb' => true,
                 'kontakt_telefon' => $data['kontakt_telefon'],
-                // Kapazität nach jeder Buchung neu prüfen (Warteliste greift ab dem Moment, da das Event voll ist).
-                'waitlisted' => $adventure->fresh()->isFull(),
+                // Kapazität nach jeder Buchung neu prüfen; Wartelisten-Modus einbeziehen.
+                'waitlisted' => $adventure->fresh()->shouldWaitlist(),
+                'approved_at' => now(),
+                'status' => 'bestaetigt',
             ]);
+
+            if ($booking->waitlisted && ! $adventure->waitlist_mode) {
+                $adventure->update(['waitlist_mode' => true]);
+            }
 
             $recipientEmail = $player?->email ?: $request->user()->email;
             if ($recipientEmail && $player?->notificationEnabled('notify_booking_received')) {
-                Notification::route('mail', $recipientEmail)->notify(new BookingReceived($booking));
+                $notification = $booking->waitlisted
+                    ? new BookingWaitlisted($booking)
+                    : new BookingReceived($booking);
+                Notification::route('mail', $recipientEmail)->notify($notification);
             }
 
             $created++;
