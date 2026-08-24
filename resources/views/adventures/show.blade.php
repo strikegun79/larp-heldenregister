@@ -77,11 +77,13 @@
                             <i class="ellipsis vertical icon"></i>
                             <div class="menu">
                                 @if ($primAnmelden)
-                                    <a class="item"
-                                       href="{{ route('adventures.group-bookings.create', $adventure) }}"
-                                       data-modal-stack="{{ route('adventures.group-bookings.create', $adventure) }}">
-                                        <i class="users icon"></i> Gruppe anmelden
-                                    </a>
+                                    @if ($userHasBookableGroups)
+                                        <a class="item"
+                                           href="{{ route('adventures.group-bookings.create', $adventure) }}"
+                                           data-modal-stack="{{ route('adventures.group-bookings.create', $adventure) }}">
+                                            <i class="users icon"></i> Gruppe anmelden
+                                        </a>
+                                    @endif
                                     <a class="item"
                                        href="{{ route('adventures.bookings.create-guest', $adventure) }}"
                                        data-modal-stack="{{ route('adventures.bookings.create-guest', $adventure) }}">
@@ -124,9 +126,11 @@
                                 <a href="{{ route('adventures.bookings.create', $adventure) }}"
                                    data-modal-stack="{{ route('adventures.bookings.create', $adventure) }}"
                                    class="ui primary button">Anmelden</a>
-                                <a href="{{ route('adventures.group-bookings.create', $adventure) }}"
-                                   data-modal-stack="{{ route('adventures.group-bookings.create', $adventure) }}"
-                                   class="ui button">Gruppe anmelden</a>
+                                @if ($userHasBookableGroups)
+                                    <a href="{{ route('adventures.group-bookings.create', $adventure) }}"
+                                       data-modal-stack="{{ route('adventures.group-bookings.create', $adventure) }}"
+                                       class="ui button">Gruppe anmelden</a>
+                                @endif
                                 <a href="{{ route('adventures.bookings.create-guest', $adventure) }}"
                                    data-modal-stack="{{ route('adventures.bookings.create-guest', $adventure) }}"
                                    class="ui button">Gast anmelden</a>

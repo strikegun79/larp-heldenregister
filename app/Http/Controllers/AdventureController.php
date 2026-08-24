@@ -8,6 +8,8 @@ use App\Models\EventCategory;
 use App\Models\EventClient;
 use App\Models\EventRole;
 use App\Models\EventStatus;
+use App\Models\Group;
+use App\Models\Hero;
 use App\Models\Location;
 use App\Models\Player;
 use App\Models\User;
@@ -181,6 +183,18 @@ class AdventureController extends Controller
         $profileComplete = $request->user()->hasCompleteAddress();
         $userHasPlayers  = $request->user()->players()->exists();
 
+        if (Gate::allows('book-any-player')) {
+            $userHasBookableGroups = true;
+        } else {
+            $bookedPlayerIds = $adventure->bookings()->pluck('player_id')->toArray();
+            $userPlayerIds   = $request->user()->players()->pluck('players.id');
+            $userHeroIds     = Hero::whereIn('player_id', $userPlayerIds)->pluck('id');
+            $userHasBookableGroups = Group::whereHas('heroes', fn ($q) => $q
+                ->whereIn('heroes.id', $userHeroIds)
+                ->whereNotIn('player_id', $bookedPlayerIds)
+            )->exists();
+        }
+
         $data = [
             'adventure' => $adventure,
             'players' => $players,
@@ -188,8 +202,9 @@ class AdventureController extends Controller
             'visibleBookings' => $visibleBookings,
             'teamerSignups' => $teamerSignups,
             'myTeamerSignup' => $myTeamerSignup,
-            'profileComplete' => $profileComplete,
-            'userHasPlayers'  => $userHasPlayers,
+            'profileComplete'       => $profileComplete,
+            'userHasPlayers'        => $userHasPlayers,
+            'userHasBookableGroups' => $userHasBookableGroups,
         ];
 
         // ARCH-002: AJAX → Partial für Modal, Direktaufruf → Vollseite (wie HeroController@show).
