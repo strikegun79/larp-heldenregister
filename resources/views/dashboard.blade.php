@@ -22,7 +22,7 @@
                     role="region"
                     aria-labelledby="onboarding-heading"
                     x-data="{ elternOffen: false }"
-                    class="bg-amber-50/90 border-2 border-[#5a3a22]/40 rounded-lg p-4 sm:p-6 mb-6 sm:mb-8 text-stone-800">
+                    class="bg-amber-50 border-2 border-[#5a3a22]/40 rounded-lg p-4 sm:p-6 mb-6 sm:mb-8 text-stone-800">
 
                     <h2 id="onboarding-heading" class="font-uncial text-xl text-waldritter mb-1">
                         Deine ersten Schritte
@@ -38,9 +38,7 @@
                             @if ($profileComplete)
                                 <span aria-label="Erledigt"
                                       class="shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-green-600 text-white text-sm">
-                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3" aria-hidden="true">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
-                                    </svg>
+                                    <i class="check icon" aria-hidden="true" style="margin: 0;"></i>
                                 </span>
                             @else
                                 <span aria-hidden="true"
@@ -67,9 +65,7 @@
                             @if ($hasPlayers)
                                 <span aria-label="Erledigt"
                                       class="shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-green-600 text-white text-sm">
-                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3" aria-hidden="true">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
-                                    </svg>
+                                    <i class="check icon" aria-hidden="true" style="margin: 0;"></i>
                                 </span>
                             @else
                                 <span aria-hidden="true"
@@ -105,9 +101,7 @@
                             @if ($hasBookings)
                                 <span aria-label="Erledigt"
                                       class="shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-green-600 text-white text-sm">
-                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3" aria-hidden="true">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
-                                    </svg>
+                                    <i class="check icon" aria-hidden="true" style="margin: 0;"></i>
                                 </span>
                             @else
                                 <span aria-hidden="true"
