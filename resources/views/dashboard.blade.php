@@ -37,9 +37,7 @@
                         <li class="flex gap-3 items-start">
                             @if ($profileComplete)
                                 <span aria-label="Erledigt"
-                                      class="shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-green-600 text-white text-sm">
-                                    <i class="check icon" aria-hidden="true" style="margin: 0;"></i>
-                                </span>
+                                      class="shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-green-600 text-white font-bold">&#10003;</span>
                             @else
                                 <span aria-hidden="true"
                                       class="shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-[#5a3a22] text-amber-50 font-semibold text-sm">1</span>
@@ -61,12 +59,10 @@
                         </li>
 
                         {{-- Schritt 2: Spieler anlegen --}}
-                        <li class="flex gap-3 items-start {{ ! $profileComplete ? 'opacity-50' : '' }}">
+                        <li class="flex gap-3 items-start {{ ! $profileComplete && ! $hasPlayers ? 'opacity-50' : '' }}">
                             @if ($hasPlayers)
                                 <span aria-label="Erledigt"
-                                      class="shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-green-600 text-white text-sm">
-                                    <i class="check icon" aria-hidden="true" style="margin: 0;"></i>
-                                </span>
+                                      class="shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-green-600 text-white font-bold">&#10003;</span>
                             @else
                                 <span aria-hidden="true"
                                       class="shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-[#5a3a22] text-amber-50 font-semibold text-sm">2</span>
@@ -97,12 +93,10 @@
                         </li>
 
                         {{-- Schritt 3: Zur Veranstaltung anmelden --}}
-                        <li class="flex gap-3 items-start {{ ! $hasPlayers ? 'opacity-50' : '' }}">
+                        <li class="flex gap-3 items-start {{ ! $hasPlayers && ! $hasBookings ? 'opacity-50' : '' }}">
                             @if ($hasBookings)
                                 <span aria-label="Erledigt"
-                                      class="shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-green-600 text-white text-sm">
-                                    <i class="check icon" aria-hidden="true" style="margin: 0;"></i>
-                                </span>
+                                      class="shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-green-600 text-white font-bold">&#10003;</span>
                             @else
                                 <span aria-hidden="true"
                                       class="shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-[#5a3a22] text-amber-50 font-semibold text-sm">3</span>
