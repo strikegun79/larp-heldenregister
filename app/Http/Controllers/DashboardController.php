@@ -59,6 +59,13 @@ class DashboardController extends Controller
 
         $hasPlayers = $request->user()->players()->exists();
 
-        return view('dashboard', compact('metrics', 'nextAdventure', 'activeHero', 'activePlayer', 'activeHeroIsOwn', 'alreadyBooked', 'hasPlayers'));
+        $profileComplete = $request->user()->hasCompleteAddress();
+
+        $playerIds = $request->user()->players()->pluck('players.id');
+        $hasBookings = $playerIds->isNotEmpty() && Booking::whereIn('player_id', $playerIds)->exists();
+
+        $showOnboarding = ! $profileComplete || ! $hasPlayers || ! $hasBookings;
+
+        return view('dashboard', compact('metrics', 'nextAdventure', 'activeHero', 'activePlayer', 'activeHeroIsOwn', 'alreadyBooked', 'hasPlayers', 'profileComplete', 'hasBookings', 'showOnboarding'));
     }
 }

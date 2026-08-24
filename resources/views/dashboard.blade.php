@@ -16,61 +16,125 @@
                 <p>Willkommen im Heldenregister. Hier findest du alles rund um deine Spieler, Helden und Abenteuer.</p>
             </div>
 
-            {{-- Onboarding-Hinweis: nur wenn noch kein Spieler angelegt wurde --}}
-            @if (! $hasPlayers)
+            {{-- Onboarding-Fortschrittsbox: solange nicht alle drei Aufgaben erledigt sind --}}
+            @if ($showOnboarding)
                 <section
                     role="region"
                     aria-labelledby="onboarding-heading"
                     x-data="{ elternOffen: false }"
                     class="bg-amber-50/90 border-2 border-[#5a3a22]/40 rounded-lg p-4 sm:p-6 mb-6 sm:mb-8 text-stone-800">
 
-                    <h2 id="onboarding-heading" class="font-uncial text-xl text-waldritter mb-3">
+                    <h2 id="onboarding-heading" class="font-uncial text-xl text-waldritter mb-1">
                         Deine ersten Schritte
                     </h2>
-
-                    <p class="text-stone-700 text-sm sm:text-base mb-4">
-                        Herzlich willkommen bei den Waldritter! So geht's los:
+                    <p class="text-stone-600 text-sm mb-5">
+                        Herzlich willkommen bei den Waldritter! Erledige diese drei Aufgaben, um loszulegen.
                     </p>
 
                     <ol class="space-y-4 mb-5">
+
+                        {{-- Schritt 1: Profil vervollständigen --}}
                         <li class="flex gap-3 items-start">
-                            <span aria-hidden="true"
-                                  class="shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-[#5a3a22] text-amber-50 font-semibold text-sm">1</span>
-                            <div>
-                                <p class="font-semibold text-waldritter">Spieler anlegen</p>
-                                <p class="text-sm text-stone-700 mt-0.5">Lege zunächst deinen Spieler mit deinen Daten an – das geht direkt hier im Portal.</p>
-                            </div>
-                        </li>
-                        <li class="flex gap-3 items-start">
-                            <span aria-hidden="true"
-                                  class="shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-[#5a3a22] text-amber-50 font-semibold text-sm">2</span>
-                            <div>
-                                <p class="font-semibold text-waldritter">Zu einem Abenteuer anmelden</p>
-                                <p class="text-sm text-stone-700 mt-0.5">Such dir ein Abenteuer aus und melde deinen Spieler an.</p>
-                            </div>
-                        </li>
-                        <li class="flex gap-3 items-start">
-                            <span aria-hidden="true"
-                                  class="shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-[#5a3a22] text-amber-50 font-semibold text-sm">3</span>
-                            <div>
-                                <p class="font-semibold text-waldritter">
-                                    Held wird vor Ort erstellt
-                                    <span class="text-xs font-normal text-stone-500 ml-1">(kein Klick nötig)</span>
+                            @if ($profileComplete)
+                                <span aria-label="Erledigt"
+                                      class="shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-green-600 text-white text-sm">
+                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3" aria-hidden="true">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                                    </svg>
+                                </span>
+                            @else
+                                <span aria-hidden="true"
+                                      class="shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-[#5a3a22] text-amber-50 font-semibold text-sm">1</span>
+                            @endif
+                            <div class="flex-1 min-w-0">
+                                <p class="font-semibold {{ $profileComplete ? 'line-through text-stone-400' : 'text-waldritter' }}">
+                                    Profil vervollständigen
                                 </p>
-                                <p class="text-sm text-stone-700 mt-0.5">
-                                    Deinen Helden erstellst du direkt auf der Veranstaltung zusammen mit dem
-                                    <strong class="font-medium">Bürokraten</strong> – das ist ein Spielcharakter (NSC),
-                                    der dich beim Heldenregister anmeldet. Erst danach erscheint dein Held hier im Portal.
-                                </p>
+                                @unless ($profileComplete)
+                                    <p class="text-sm text-stone-600 mt-0.5 mb-2">
+                                        Trage deine Adresse und Telefonnummer ein – diese werden für die Anmeldung zu Veranstaltungen benötigt.
+                                    </p>
+                                    <a href="{{ route('profile.edit') }}"
+                                       class="ui small primary button focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-600 focus-visible:outline-offset-2">
+                                        Zum Profil
+                                    </a>
+                                @endunless
                             </div>
                         </li>
+
+                        {{-- Schritt 2: Spieler anlegen --}}
+                        <li class="flex gap-3 items-start {{ ! $profileComplete ? 'opacity-50' : '' }}">
+                            @if ($hasPlayers)
+                                <span aria-label="Erledigt"
+                                      class="shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-green-600 text-white text-sm">
+                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3" aria-hidden="true">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                                    </svg>
+                                </span>
+                            @else
+                                <span aria-hidden="true"
+                                      class="shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-[#5a3a22] text-amber-50 font-semibold text-sm">2</span>
+                            @endif
+                            <div class="flex-1 min-w-0">
+                                <p class="font-semibold {{ $hasPlayers ? 'line-through text-stone-400' : 'text-waldritter' }}">
+                                    Spieler anlegen
+                                </p>
+                                @unless ($hasPlayers)
+                                    <p class="text-sm text-stone-600 mt-0.5 mb-2">
+                                        Lege deinen Spieler (oder dein Kind) an – das geht direkt hier im Portal.
+                                    </p>
+                                    <div class="flex flex-wrap gap-3 items-center mb-2">
+                                        <a href="{{ route('players.create') }}"
+                                           class="ui small {{ $profileComplete ? 'primary' : '' }} button focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-600 focus-visible:outline-offset-2">
+                                            Spieler anlegen
+                                        </a>
+                                    </div>
+                                    <p class="text-xs text-stone-500">
+                                        Existiert ein Spieler bereits über ein anderes Elternteil?
+                                        Schreibe uns bitte eine E-Mail an
+                                        <a href="mailto:{{ config('portal.contact_email') }}"
+                                           class="underline hover:text-stone-800">{{ config('portal.contact_email') }}</a>,
+                                        damit wir den Spieler deinem Konto zuordnen können.
+                                    </p>
+                                @endunless
+                            </div>
+                        </li>
+
+                        {{-- Schritt 3: Zur Veranstaltung anmelden --}}
+                        <li class="flex gap-3 items-start {{ ! $hasPlayers ? 'opacity-50' : '' }}">
+                            @if ($hasBookings)
+                                <span aria-label="Erledigt"
+                                      class="shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-green-600 text-white text-sm">
+                                    <svg class="w-4 h-4" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="3" aria-hidden="true">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M5 13l4 4L19 7"/>
+                                    </svg>
+                                </span>
+                            @else
+                                <span aria-hidden="true"
+                                      class="shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-[#5a3a22] text-amber-50 font-semibold text-sm">3</span>
+                            @endif
+                            <div class="flex-1 min-w-0">
+                                <p class="font-semibold {{ $hasBookings ? 'line-through text-stone-400' : 'text-waldritter' }}">
+                                    Zu einer Veranstaltung anmelden
+                                </p>
+                                @unless ($hasBookings)
+                                    <p class="text-sm text-stone-600 mt-0.5 mb-2">
+                                        Such dir ein Abenteuer aus und melde deinen Spieler an. Deinen Helden erstellst du dann direkt vor Ort
+                                        beim <strong class="font-medium">Bürokraten</strong>.
+                                    </p>
+                                    @can('adventure.access')
+                                        <a href="{{ route('adventures.index') }}"
+                                           class="ui small {{ $hasPlayers ? 'primary' : '' }} button focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-600 focus-visible:outline-offset-2">
+                                            Abenteuer ansehen
+                                        </a>
+                                    @endcan
+                                @endunless
+                            </div>
+                        </li>
+
                     </ol>
 
-                    <div class="flex flex-wrap gap-3 items-center">
-                        <a href="{{ route('players.create') }}"
-                           class="ui small primary button focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-600 focus-visible:outline-offset-2">
-                            Ersten Spieler anlegen
-                        </a>
+                    <div class="pt-4 border-t border-[#5a3a22]/20">
                         <button type="button"
                                 x-on:click="elternOffen = !elternOffen"
                                 :aria-expanded="elternOffen.toString()"
@@ -78,15 +142,13 @@
                                 class="text-sm text-stone-600 hover:text-stone-900 underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-600 focus-visible:outline-offset-2">
                             Infos für Eltern &amp; Erziehungsberechtigte
                         </button>
-                    </div>
-
-                    <div id="onboarding-eltern"
-                         x-show="elternOffen"
-                         x-cloak
-                         class="mt-4 pt-4 border-t border-[#5a3a22]/20 text-sm text-stone-700 space-y-2">
-                        <p><strong class="font-semibold">Für Eltern und Erziehungsberechtigte:</strong></p>
-                        <p>Bitte legt zunächst euer Kind als Spieler an und meldet es zu einer Veranstaltung an. Auf der Veranstaltung erstellt die Spielleitung gemeinsam mit eurem Kind den Charakter (Helden). Der Bürokrat ist dabei ein Spielcharakter (NSC), der als Ansprechperson für das Heldenregister zuständig ist. Erst nach der ersten Veranstaltung erscheint der Held hier im Portal.</p>
-                        <p>Für Kinder unter 18 Jahren ist die Anmeldung nur mit Einwilligung der Erziehungsberechtigten möglich.</p>
+                        <div id="onboarding-eltern"
+                             x-show="elternOffen"
+                             x-cloak
+                             class="mt-3 text-sm text-stone-700 space-y-2">
+                            <p>Bitte legt zunächst euer Kind als Spieler an und meldet es zu einer Veranstaltung an. Auf der Veranstaltung erstellt die Spielleitung gemeinsam mit eurem Kind den Charakter (Helden). Der Bürokrat ist dabei ein Spielcharakter (NSC), der als Ansprechperson für das Heldenregister zuständig ist. Erst nach der ersten Veranstaltung erscheint der Held hier im Portal.</p>
+                            <p>Für Kinder unter 18 Jahren ist die Anmeldung nur mit Einwilligung der Erziehungsberechtigten möglich.</p>
+                        </div>
                     </div>
                 </section>
             @endif
