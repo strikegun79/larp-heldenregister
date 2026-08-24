@@ -127,9 +127,10 @@ class BookingController extends Controller
             'waitlisted' => $adventure->isFull(),
         ]);
 
-        // NOTI-02: Bestätigung an den Spieler (sofern E-Mail hinterlegt und Benachrichtigung aktiv).
-        if ($player?->email && $player->notificationEnabled('notify_booking_received')) {
-            Notification::route('mail', $player->email)->notify(new BookingReceived($booking));
+        // NOTI-02: Bestätigung – primär Spieler-Email, Fallback auf buchenden Nutzer (z. B. Elternteil).
+        $recipientEmail = $player?->email ?: $request->user()->email;
+        if ($recipientEmail && $player?->notificationEnabled('notify_booking_received')) {
+            Notification::route('mail', $recipientEmail)->notify(new BookingReceived($booking));
         }
 
         $message = $adventure->isFull()

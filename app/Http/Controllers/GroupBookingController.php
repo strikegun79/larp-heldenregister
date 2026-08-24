@@ -126,8 +126,9 @@ class GroupBookingController extends Controller
                 'waitlisted' => $adventure->fresh()->isFull(),
             ]);
 
-            if ($player?->email && $player->notificationEnabled('notify_booking_received')) {
-                Notification::route('mail', $player->email)->notify(new BookingReceived($booking));
+            $recipientEmail = $player?->email ?: $request->user()->email;
+            if ($recipientEmail && $player?->notificationEnabled('notify_booking_received')) {
+                Notification::route('mail', $recipientEmail)->notify(new BookingReceived($booking));
             }
 
             $created++;
