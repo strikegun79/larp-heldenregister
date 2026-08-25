@@ -33,10 +33,15 @@ class MatrixAccount extends Model
         'forbid_encrypted_room_creation',
     ];
 
+    // Passwort nie in JSON-Serialisierung ausgeben (z.B. toArray/toJson für Logs).
+    protected $hidden = ['auth_credential'];
+
     protected $casts = [
         'active' => 'boolean',
         'forbid_room_creation' => 'boolean',
         'forbid_encrypted_room_creation' => 'boolean',
+        // DSGVO K-1: Passwort im DB verschlüsselt; Laravel entschlüsselt transparant beim Lesen.
+        'auth_credential' => 'encrypted',
     ];
 
     /** Lesbare Bezeichnung für das Audit-Log (MTX-09). */
