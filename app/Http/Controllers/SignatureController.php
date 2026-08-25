@@ -52,7 +52,7 @@ class SignatureController extends Controller
         }
 
         $data = $request->validate([
-            'signature' => ['required', 'string', 'starts_with:data:image/png;base64,', 'max:2000000'],
+            'signature' => ['required', 'string', 'starts_with:data:image/png;base64,', 'max:200000'],
         ]);
 
         // Unterschrift = Check-in-Bestätigung (ADV-19): zugleich anwesend setzen.

@@ -13,11 +13,17 @@ import QRCode from 'qrcode';
 // ------------------------------------------------------------------
 // Toast (Fomantic UI)
 // ------------------------------------------------------------------
+function escapeHtml(str) {
+    const d = document.createElement('div');
+    d.appendChild(document.createTextNode(String(str)));
+    return d.innerHTML;
+}
+
 function showToast(message, type) {
     $('body').toast({
         class: type === 'error' ? 'error' : 'success',
         showIcon: type === 'error' ? 'exclamation circle' : 'check circle',
-        message: message,
+        message: escapeHtml(message),
         position: 'top right',
         displayTime: type === 'error' ? 7000 : 3000,
     });
@@ -387,7 +393,7 @@ document.addEventListener('submit', function (e) {
                 }
             } else if (resp.status === 422) {
                 const errors = data.errors ? Object.values(data.errors).flat() : [];
-                showToast(errors.join('<br>') || data.message || 'Bitte Eingaben prüfen.', 'error');
+                showToast(errors.join(' · ') || data.message || 'Bitte Eingaben prüfen.', 'error');
             } else {
                 showToast(data.message || 'Fehler beim Speichern.', 'error');
             }

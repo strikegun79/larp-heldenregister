@@ -93,9 +93,7 @@ class BookingController extends Controller
         if (! Gate::allows('book-any-player') && ! $request->user()->hasCompleteAddress()) {
             $missing = $request->user()->missingAddressFields();
             $fieldStr = implode(', ', $missing);
-            $url = route('profile.edit');
-            $msg = "Deine Kontaktdaten sind unvollständig ({$fieldStr}). "
-                      ."Bitte ergänze sie in deinem <a href=\"{$url}\">Profil</a>.";
+            $msg = "Deine Kontaktdaten sind unvollständig ({$fieldStr}). Bitte ergänze sie in deinem Profil.";
 
             return $this->fail($request, $msg);
         }
@@ -249,6 +247,13 @@ class BookingController extends Controller
     {
         abort_unless($booking->adventure_id === $adventure->id, 404);
 
+        // Nur eigene Anmeldungen bearbeiten – außer man hat Verwaltungsberechtigung (analog destroy).
+        if (! Gate::allows('adventure.modify') && ! $this->ownsBooking($request->user(), $booking)) {
+            abort(403);
+        }
+
+        $canManage = Gate::allows('adventure.modify');
+
         $data = $request->validate([
             'event_role_id' => ['required', 'exists:event_roles,id', 'not_in:'.implode(',', EventRole::TEAMER_ROLE_IDS)],
             'fotoerlaubnis' => ['boolean'],
@@ -260,10 +265,10 @@ class BookingController extends Controller
             'medikamente' => ['nullable', 'string'],
             'erreichbarkeit' => ['nullable', 'string'],
             'kontakt_telefon' => ['required', 'string', 'max:100'],
-            'ermaessigung' => ['boolean'],
+            'ermaessigung' => $canManage ? ['boolean'] : ['prohibited'],
         ]);
 
-        $booking->update([
+        $updateData = [
             'event_role_id' => $data['event_role_id'],
             'fotoerlaubnis' => $request->boolean('fotoerlaubnis'),
             'vegetarier' => $request->boolean('vegetarier'),
@@ -274,8 +279,13 @@ class BookingController extends Controller
             'medikamente' => $data['medikamente'] ?? null,
             'erreichbarkeit' => $data['erreichbarkeit'] ?? null,
             'kontakt_telefon' => $data['kontakt_telefon'],
-            'ermaessigung' => $request->boolean('ermaessigung'),
-        ]);
+        ];
+
+        if ($canManage) {
+            $updateData['ermaessigung'] = $request->boolean('ermaessigung');
+        }
+
+        $booking->update($updateData);
 
         $message = 'Anmeldung aktualisiert.';
 
