@@ -19,6 +19,9 @@ class Kernel extends ConsoleKernel
         // Tägliches Backup (INFRA-06): DB-Dump + Uploads als ZIP auf dem backup-Disk.
         $schedule->command('backup:clean')->dailyAt('01:00');
         $schedule->command('backup:run')->dailyAt('02:00');
+
+        // DSGVO Art. 5 Abs. 1 lit. e: Aufbewahrungsfristen täglich prüfen und bereinigen.
+        $schedule->command('dsgvo:prune')->dailyAt('03:00');
     }
 
     /**

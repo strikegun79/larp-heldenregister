@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Http\Requests\ProfileUpdateRequest;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
@@ -53,6 +54,64 @@ class ProfileController extends Controller
         $request->user()->save();
 
         return Redirect::route('profile.edit')->with('status', 'profile-updated');
+    }
+
+    /**
+     * DSGVO Art. 20: Alle personenbezogenen Daten des Nutzers als JSON-Download.
+     */
+    public function exportData(Request $request): Response
+    {
+        $user = $request->user();
+        $user->load([
+            'players.heroes',
+            'players.bookings.adventure',
+            'players.bookings.role',
+        ]);
+
+        $data = [
+            'export_erstellt_am' => now()->toIso8601String(),
+            'konto' => [
+                'vorname'        => $user->name,
+                'nachname'       => $user->lastname,
+                'email'          => $user->email,
+                'telefon'        => $user->phone,
+                'strasse'        => $user->street,
+                'hausnummer'     => $user->house_number,
+                'plz'            => $user->zip,
+                'ort'            => $user->city,
+                'registriert_am' => $user->created_at?->toIso8601String(),
+            ],
+            'spieler' => $user->players->map(fn ($player) => [
+                'vorname'      => $player->name,
+                'nachname'     => $player->lastname,
+                'geburtsdatum' => $player->dayofbirth?->toDateString(),
+                'geschlecht'   => $player->gender,
+                'helden' => $player->heroes->map(fn ($hero) => [
+                    'name'         => $hero->name,
+                    'klasse'       => $hero->heroClass?->name ?? null,
+                    'ep_gesamt'    => $hero->ep_total,
+                    'erstellt_am'  => $hero->created_at?->toIso8601String(),
+                ]),
+                'anmeldungen' => $player->bookings->map(fn ($b) => [
+                    'abenteuer'    => $b->adventure?->name,
+                    'datum'        => $b->adventure?->start_at?->toDateString(),
+                    'rolle'        => $b->role?->description,
+                    'status'       => $b->status,
+                    'warteliste'   => (bool) $b->waitlisted,
+                    'allergien'    => $b->allergien,
+                    'medikamente'  => $b->medikamente,
+                    'angemeldet_am' => $b->created_at?->toIso8601String(),
+                ]),
+            ]),
+        ];
+
+        $filename = 'meine-daten-heldenregister-'.now()->format('Y-m-d').'.json';
+        $json = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+
+        return response($json, 200, [
+            'Content-Type'        => 'application/json; charset=utf-8',
+            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+        ]);
     }
 
     /**

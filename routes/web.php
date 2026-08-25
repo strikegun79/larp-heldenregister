@@ -82,6 +82,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::get('/profile/export-data', [ProfileController::class, 'exportData'])->name('profile.export-data');
 
     // UI-45: Datensparmodus manuell umschalten.
     Route::post('/save-data/toggle', function (\Illuminate\Http\Request $request) {

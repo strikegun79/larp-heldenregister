@@ -171,6 +171,19 @@
                         Bei Fragen zum Datenschutz oder zur Löschung deiner Daten wende dich an:
                         <a href="mailto:datenschutz@waldritter.de" class="text-waldritter underline hover:opacity-75">datenschutz@waldritter.de</a>
                     </p>
+                    <div class="mt-4 flex flex-wrap gap-3">
+                        <a href="{{ route('profile.export-data') }}"
+                           class="ui mini button"
+                           download>
+                            <i class="download icon"></i>
+                            Meine Daten exportieren (Art. 20 DSGVO)
+                        </a>
+                        <a href="{{ route('datenschutz') }}" target="_blank"
+                           class="ui mini button basic">
+                            <i class="shield alternate icon"></i>
+                            Datenschutzerklärung
+                        </a>
+                    </div>
                 </div>
             </div>
 
