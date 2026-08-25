@@ -54,6 +54,9 @@ Route::get('/manifest.webmanifest', function () {
         ->header('Content-Type', 'application/manifest+json');
 })->name('manifest');
 
+// Datenschutzerklärung (DSGVO Art. 13) – öffentlich, ohne Auth.
+Route::get('/datenschutz', fn () => view('datenschutz'))->name('datenschutz');
+
 // PUB-02/03/06: Öffentliche Helden-Routen mit Rate-Limiting (30/min je IP).
 Route::middleware('throttle:public-hero')->group(function () {
     // PUB-03: Suchformular + Weiterleitung (vor {code}-Route registriert).

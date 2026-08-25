@@ -7,9 +7,7 @@
 
         <link rel="icon" href="{{ config('portal.favicon') }}">
 
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Uncial+Antiqua&family=EB+Garamond:wght@400;500&display=swap" rel="stylesheet">
+        <!-- Fonts: lokal via Fontsource (kein Google CDN, DSGVO-konform) -->
 
         <link rel="stylesheet" href="{{ asset('css/heldenregister.css') }}">
         @vite(['resources/css/vendor.css', 'resources/css/app.css', 'resources/js/app.js'])
@@ -45,6 +43,7 @@
                 </div>
                 <div></div>
                 <div class="sm:text-right">
+                    <a href="{{ route('datenschutz') }}" class="hover:underline text-waldritter">Datenschutzerklärung</a><br>
                     &copy; {{ date('Y') }} {{ config('portal.organization') }}
                 </div>
             </div>

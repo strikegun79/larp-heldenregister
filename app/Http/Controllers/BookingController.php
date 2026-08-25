@@ -20,6 +20,7 @@ use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Validation\Rule;
 
 class BookingController extends Controller
 {
@@ -78,6 +79,11 @@ class BookingController extends Controller
             'nsc' => ['boolean'],
             'allergien' => ['nullable', 'string'],
             'medikamente' => ['nullable', 'string'],
+            // DSGVO Art. 9: Einwilligung erforderlich wenn Gesundheitsdaten angegeben werden.
+            'health_data_consent' => [
+                Rule::requiredIf(fn () => filled($request->allergien) || filled($request->medikamente)),
+                'boolean',
+            ],
             'erreichbarkeit' => ['nullable', 'string'],
             'kontakt_telefon' => ['required', 'string', 'max:100'],
             'ermaessigung' => ['boolean'],
@@ -122,6 +128,7 @@ class BookingController extends Controller
             'nsc' => $request->boolean('nsc'),
             'allergien' => $data['allergien'] ?? null,
             'medikamente' => $data['medikamente'] ?? null,
+            'health_data_consent_at' => $request->boolean('health_data_consent') ? now() : null,
             'erreichbarkeit' => $data['erreichbarkeit'] ?? null,
             'kontakt_telefon' => $data['kontakt_telefon'],
             'ermaessigung' => $request->boolean('ermaessigung'),

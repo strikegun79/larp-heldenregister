@@ -68,7 +68,9 @@ class ProfileController extends Controller
 
         Auth::logout();
 
-        $user->delete();
+        // DSGVO Art. 17: Konto anonymisieren statt nur soft-deleten,
+        // damit das Versprechen "alle Daten dauerhaft entfernt" stimmt.
+        $user->anonymize();
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();

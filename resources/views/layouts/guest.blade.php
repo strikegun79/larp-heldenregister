@@ -9,10 +9,7 @@
 
         <link rel="icon" href="{{ config('portal.favicon') }}">
 
-        <!-- Fonts -->
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Uncial+Antiqua&family=EB+Garamond:wght@400;500&display=swap" rel="stylesheet">
+        <!-- Fonts: lokal via Fontsource (kein Google CDN, DSGVO-konform) -->
 
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])

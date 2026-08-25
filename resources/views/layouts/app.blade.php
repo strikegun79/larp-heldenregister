@@ -16,10 +16,7 @@
         <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
         <meta name="apple-mobile-web-app-title" content="{{ config('portal.short_name') }}">
 
-        <!-- Fonts: Body + mittelalterliche Überschriften (wie im Legacy) -->
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Uncial+Antiqua&family=MedievalSharp&family=EB+Garamond:wght@400;500&display=swap" rel="stylesheet">
+        <!-- Fonts: lokal via Fontsource (kein Google CDN, DSGVO-konform) -->
         <!-- Vendor: Fomantic UI + Cropper.js (lokal via Vite/npm, UI-10) -->
         @vite(['resources/css/vendor.css', 'resources/js/vendor.js'])
         <!-- Scripts (Tailwind/Breeze danach, damit das Theme gewinnt) -->
@@ -68,6 +65,7 @@
                         @endif
                     </div>
                     <div class="sm:text-right">
+                        <a href="{{ route('datenschutz') }}" class="hover:underline text-waldritter">Datenschutzerklärung</a><br>
                         &copy; {{ date('Y') }} {{ config('portal.organization') }}
                     </div>
                 </div>

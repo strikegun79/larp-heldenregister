@@ -30,6 +30,7 @@ class Booking extends Model
         'ermaessigung',
         'allergien',
         'medikamente',
+        'health_data_consent_at',
         'erreichbarkeit',
         'kontakt_telefon',
         'signature',
@@ -65,6 +66,7 @@ class Booking extends Model
         'ermaessigung' => 'boolean',
         'waitlisted' => 'boolean',
         'approved_at' => 'datetime',
+        'health_data_consent_at' => 'datetime',
     ];
 
     /** Gast-Anmeldung ohne hinterlegten Spieler (ADV-21). */
