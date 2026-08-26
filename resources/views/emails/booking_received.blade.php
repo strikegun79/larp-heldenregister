@@ -33,7 +33,7 @@ Deine Anmeldung für **{{ $booking->adventure?->name }}** ist eingegangen.
 @endif
 | Verwendungszweck | **{{ $verwendungszweck }}** |
 
-@if ($qrDataUri)
+@if ($qrCid)
 <x-mail::panel>
 
 **GiroCode – Schnell per Banking-App zahlen**
@@ -41,7 +41,7 @@ Deine Anmeldung für **{{ $booking->adventure?->name }}** ist eingegangen.
 Scanne diesen QR-Code mit deiner Banking-App (z. B. Sparkasse, DKB, ING, Volksbank), um die Überweisung direkt vorzubereiten:
 
 <div style="text-align:center;margin:12px 0;">
-<img src="{{ $qrDataUri }}" alt="GiroCode für die Überweisung" width="200" height="200" style="display:inline-block;border:1px solid #ddd;border-radius:6px;padding:4px;">
+<img src="{{ $qrCid }}" alt="GiroCode für die Überweisung" width="200" height="200" style="display:inline-block;border:1px solid #ddd;border-radius:6px;padding:4px;">
 </div>
 
 Betrag, IBAN und Verwendungszweck sind bereits ausgefüllt – bitte vor dem Absenden prüfen.

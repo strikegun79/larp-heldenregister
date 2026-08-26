@@ -9,6 +9,8 @@ use Illuminate\Bus\Queueable;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
+use Symfony\Component\Mime\Email;
+use Symfony\Component\Mime\Part\DataPart;
 
 /**
  * NOTI-10: Buchung offiziell bestätigt – an den Spieler/Betreuer.
@@ -38,7 +40,8 @@ class BookingApproved extends Notification implements ShouldQueue
 
         $bankData        = null;
         $verwendungszweck = null;
-        $qrDataUri       = null;
+        $qrCid           = null;
+        $qrPart          = null;
 
         if ($fee > 0) {
             $iban  = Setting::get('bank_iban');
@@ -52,12 +55,16 @@ class BookingApproved extends Notification implements ShouldQueue
                 $bankData = compact('iban', 'owner', 'bic', 'bank');
 
                 if ($bic && $owner) {
-                    $qrDataUri = BookingReceived::buildEpcQrDataUri($bic, $owner, $iban, $fee, $verwendungszweck);
+                    $qrPng = BookingReceived::buildEpcQrPng($bic, $owner, $iban, $fee, $verwendungszweck);
+                    if ($qrPng) {
+                        $qrPart = (new DataPart($qrPng, 'girocode.png', 'image/png'))->asInline();
+                        $qrCid  = 'cid:'.$qrPart->getContentId();
+                    }
                 }
             }
         }
 
-        return (new MailMessage)
+        $mail = (new MailMessage)
             ->subject('Anmeldung bestätigt: '.$booking->adventure?->name)
             ->markdown('emails.booking_approved', [
                 'booking'          => $booking,
@@ -65,9 +72,17 @@ class BookingApproved extends Notification implements ShouldQueue
                 'date'             => $date,
                 'bankData'         => $bankData,
                 'verwendungszweck' => $verwendungszweck,
-                'qrDataUri'        => $qrDataUri,
+                'qrCid'            => $qrCid,
                 'dashboardUrl'     => route('dashboard'),
             ]);
+
+        if ($qrPart) {
+            $mail->withSymfonyMessage(static function (Email $email) use ($qrPart): void {
+                $email->addPart($qrPart);
+            });
+        }
+
+        return $mail;
     }
 
     /** @return array<string, mixed> */

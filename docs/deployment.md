@@ -1,13 +1,16 @@
 # Deployment-Anleitung · Heldenregister
 
 Schritt-für-Schritt-Anleitung für das Einrichten und Aktualisieren der Produktivumgebung.
-Voraussetzung: PHP 8.3+, Composer, Node 20+, MySQL 8+, ein vhost auf `public/`.
+Voraussetzung: PHP 8.3+, Composer, Node 20+, MySQL 8+, **Supervisor**, ein vhost auf `public/`.
 
 ---
 
 ## Ersteinrichtung (Erstmalige Installation)
 
 ```bash
+# 0. Supervisor installieren (einmalig, als root)
+apt-get install -y supervisor
+
 # 1. Repository klonen
 git clone <repo-url> /var/www/heldenregister
 cd /var/www/heldenregister
@@ -135,74 +138,74 @@ Einmalig als `www-data`-Cron eintragen:
 
 ---
 
-## Queue-Worker (INFRA-04)
+## Queue-Worker
 
-Alle Notifications implementieren `ShouldQueue`; Mails werden asynchron
-versendet, sobald `QUEUE_CONNECTION=database` gesetzt ist.
+Alle Notifications implementieren `ShouldQueue`. Mails und andere Jobs werden
+**asynchron** versendet — der HTTP-Request kehrt sofort zurück, der Worker
+erledigt den Versand im Hintergrund. `QUEUE_CONNECTION=database` muss in `.env`
+gesetzt sein.
 
-**Voraussetzung:** `jobs`-Tabelle migrieren (einmalig, bereits in Migration enthalten):
+Die benötigten Tabellen (`jobs`, `failed_jobs`) sind in den Migrationen enthalten
+und werden mit `php artisan migrate` angelegt.
+
+### Supervisor einrichten (Pflicht für Produktivbetrieb)
 
 ```bash
-php artisan migrate
+# Supervisor installieren (falls noch nicht vorhanden)
+apt-get install -y supervisor
+systemctl enable supervisor
+systemctl start supervisor
 ```
 
-### Supervisor (empfohlen für Produktivbetrieb)
+Konfigurationsdatei anlegen:
 
 ```ini
 # /etc/supervisor/conf.d/heldenregister-worker.conf
 [program:heldenregister-worker]
 process_name=%(program_name)s_%(process_num)02d
-command=php /var/www/heldenregister/artisan queue:work --sleep=3 --tries=3 --max-time=3600
+command=php /var/www/heldenregister/artisan queue:work database --sleep=3 --tries=3 --max-time=3600
+directory=/var/www/heldenregister
+user=www-data
 autostart=true
 autorestart=true
 stopasgroup=true
 killasgroup=true
-user=www-data
-numprocs=1
+numprocs=2
 redirect_stderr=true
-stdout_logfile=/var/log/heldenregister-worker.log
-stopwaitsecs=3600
+stdout_logfile=/var/www/heldenregister/storage/logs/worker.log
+stdout_logfile_maxbytes=10MB
+stdout_logfile_backups=5
+stopwaitsecs=60
 ```
 
 ```bash
 supervisorctl reread
 supervisorctl update
-supervisorctl start heldenregister-worker:*
-```
-
-### systemd (Alternative)
-
-```ini
-# /etc/systemd/system/heldenregister-worker.service
-[Unit]
-Description=Heldenregister Queue Worker
-After=network.target
-
-[Service]
-User=www-data
-Group=www-data
-WorkingDirectory=/var/www/heldenregister
-ExecStart=/usr/bin/php artisan queue:work --sleep=3 --tries=3 --max-time=3600
-Restart=on-failure
-RestartSec=5s
-
-[Install]
-WantedBy=multi-user.target
-```
-
-```bash
-systemctl enable heldenregister-worker
-systemctl start heldenregister-worker
-systemctl status heldenregister-worker
+supervisorctl status   # → heldenregister-worker_00 RUNNING, _01 RUNNING
 ```
 
 ### Worker nach Deploy neu starten
 
+Nach jedem `git pull` müssen die Worker neu gestartet werden, damit sie den
+aktualisierten Code laden:
+
 ```bash
+# Graceful restart (Worker beenden laufende Jobs, dann Neustart durch Supervisor)
 php artisan queue:restart
+
+# Oder direkt via Supervisor:
+supervisorctl restart heldenregister-worker:*
 ```
 
-Supervisor/systemd startet den Worker danach automatisch neu.
+### Fehlgeschlagene Jobs prüfen
+
+```bash
+php artisan queue:failed          # Liste aller fehlgeschlagenen Jobs
+php artisan queue:retry all       # Alle fehlgeschlagenen Jobs erneut versuchen
+php artisan queue:flush           # Fehlgeschlagene Jobs löschen
+```
+
+Worker-Log: `storage/logs/worker.log`
 
 ---
 
@@ -338,3 +341,6 @@ php artisan config:cache
 - [ ] `php artisan storage:link` ausgeführt
 - [ ] SSL-Zertifikat aktiv
 - [ ] Cron-Eintrag für Scheduler gesetzt
+- [ ] Supervisor installiert und aktiv (`systemctl status supervisor`)
+- [ ] Queue-Worker läuft (`supervisorctl status heldenregister-worker:*`)
+- [ ] `QUEUE_CONNECTION=database` in `.env` gesetzt

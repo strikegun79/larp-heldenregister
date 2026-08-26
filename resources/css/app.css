@@ -198,8 +198,36 @@ footer {
     border-top: 3px double rgba(200, 150, 42, .45);
 }
 
-/* --- Loading-Zustand: Spinner für Mini-Buttons verkleinern ------------ */
-/* Basis-Schriftgröße 17.5px macht Fomantics Standard-Spinner (~1.28em)
+/* --- Loading-Zustand: Farb-Buttons behalten ihren Gradient ------------ */
+/* Fomantics .ui.disabled setzt opacity:0.45!important und background-image:none,
+   was auf .ui.primary/.red/.green den Gradient killt → grauer Einheitsbrei.
+   Diese Regeln greifen nur wenn .loading und .disabled gleichzeitig aktiv sind. */
+.ui.primary.button.loading,
+.ui.primary.button.loading.disabled {
+    background: linear-gradient(180deg, var(--wr-gold-light), var(--wr-gold)) !important;
+    opacity: 0.88 !important;
+}
+.ui.red.button.loading,
+.ui.red.button.loading.disabled {
+    background: linear-gradient(180deg, #cd6650, var(--wr-red)) !important;
+    opacity: 0.88 !important;
+}
+.ui.green.button.loading,
+.ui.green.button.loading.disabled {
+    background: linear-gradient(180deg, #88a851, var(--wr-green)) !important;
+    opacity: 0.88 !important;
+}
+/* Spinner auf dem Gold-Hintergrund: dunkel statt weiß (Primary-Button hat
+   dunkle Schrift, also muss auch der Spinner dunkel sein). */
+.ui.primary.button.loading::before {
+    border-color: rgba(58, 36, 16, 0.15) !important;
+}
+.ui.primary.button.loading::after {
+    color: rgba(58, 36, 16, 0.85) !important;
+}
+
+/* Loading-Zustand: Spinner für Mini-Buttons verkleinern.
+   Basis-Schriftgröße 17.5px macht Fomantics Standard-Spinner (~1.28em)
    zu groß für ui.mini-Buttons. Pseudo-Elemente explizit auf 0.7em setzen. */
 .ui.mini.loading.button::before,
 .ui.mini.loading.button::after {
@@ -210,8 +238,7 @@ footer {
     border-width: 2px !important;
 }
 /* Hover-Transform während des Ladens deaktivieren (kein „Pop" auf
-   hängendem Button), Fomantics eigene Transition greift bereits,
-   diese Regel entfernt zusätzlich den scale/translate-Effekt. */
+   hängendem Button), Fomantics eigene Transition greift bereits. */
 .ui.loading.button:hover {
     transform: none !important;
     filter: none !important;

@@ -20,6 +20,7 @@ verfolgen Charakterfortschritt über EP und Fertigkeiten.
 - Composer 2
 - Node 20+ / npm
 - MySQL 8
+- Supervisor (Queue-Worker, Produktion)
 
 ### Einrichten
 
@@ -169,7 +170,8 @@ php artisan db:seed              # Stammdaten einspielen
 php artisan migrate:legacy       # Legacy-Daten übernehmen (ETL)
 php artisan etl:check-hero-classes  # Klassen-Mapping prüfen
 php artisan backup:run           # Manuelles Backup (Produktion)
-php artisan queue:work           # Queue-Worker starten
+php artisan queue:restart        # Worker nach Deploy neu starten (Supervisor übernimmt)
+php artisan queue:failed         # Fehlgeschlagene Mail-Jobs anzeigen
 ```
 
 ---
