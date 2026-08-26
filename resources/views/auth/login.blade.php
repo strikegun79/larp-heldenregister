@@ -47,7 +47,24 @@
                 Jetzt registrieren
             </a>
         </div>
+
     @endif
+
+@push('before-card')
+{{-- Hinweis: Zugangsdaten aus dem alten Nymphenhain-Portal funktionieren nicht --}}
+<div class="wr-hinweis-banner w-full sm:max-w-md mt-4 px-4">
+    <div class="wr-hinweis-inner">
+        <div class="wr-hinweis-icon" aria-hidden="true">&#9876;</div>
+        <div class="wr-hinweis-text">
+            <strong class="font-uncial wr-hinweis-titel">Neues Portal &ndash; neues Konto</strong>
+            <p class="mt-1">
+                Die Zugangsdaten aus dem alten <strong>Nymphenhain-Portal</strong>
+                funktionieren hier <strong>nicht</strong>. Bitte registriert euch neu.
+            </p>
+        </div>
+    </div>
+</div>
+@endpush
 
     {{-- PUB-09: Heldensuche ohne Anmeldung --}}
     <div class="mt-8 pt-6 border-t-2 border-[#5a3a22]/20">

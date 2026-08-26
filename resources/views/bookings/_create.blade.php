@@ -123,45 +123,33 @@
         </div>
         @endif
 
-        <div class="field" id="health-data-fields">
+        <div class="field">
             <label>Allergien / Unverträglichkeiten</label>
-            <textarea name="allergien" rows="2" placeholder="z. B. Nüsse, Laktose, Bienen …"
-                      id="field-allergien" oninput="toggleHealthConsent()"></textarea>
+            <textarea name="allergien" rows="2" placeholder="z. B. Nüsse, Laktose, Bienen …"></textarea>
             <small class="text-stone-400">Optional – wird nur dem Organisationsteam angezeigt und dient ausschließlich der Sicherheit deines Kindes.</small>
         </div>
 
         <div class="field">
             <label>Medikamente</label>
-            <textarea name="medikamente" rows="2" placeholder="z. B. Epipen, Inhalator, tägliche Einnahme …"
-                      id="field-medikamente" oninput="toggleHealthConsent()"></textarea>
+            <textarea name="medikamente" rows="2" placeholder="z. B. Epipen, Inhalator, tägliche Einnahme …"></textarea>
             <small class="text-stone-400">Optional – regelmäßige Medikamente, die dein Kind während der Veranstaltung benötigt. Nur für das Orga-Team sichtbar.</small>
         </div>
 
-        {{-- DSGVO Art. 9: Einwilligung für Gesundheitsdaten – erscheint nur wenn Felder ausgefüllt --}}
-        <div class="field" id="health-consent-field" style="display:none;">
+        {{-- DSGVO Art. 9: Einwilligung für Gesundheitsdaten (Pflichtfeld wenn Allergien/Medikamente ausgefüllt) --}}
+        <div class="field">
             <div class="ui checkbox">
                 <input type="checkbox" name="health_data_consent" id="health_data_consent" value="1">
                 <label for="health_data_consent">
-                    <strong>Einwilligung Gesundheitsdaten (Pflichtfeld)</strong><br>
+                    <strong>Einwilligung Gesundheitsdaten</strong><br>
                     <span class="text-sm font-normal">
-                        Ich willige ausdrücklich ein, dass die oben angegebenen Gesundheitsdaten
-                        (Allergien / Medikamente) meines Kindes gemäß Art. 9 Abs. 2 lit. a DSGVO
-                        gespeichert und ausschließlich zum Schutz des Kindes in Notfallsituationen
-                        an das Veranstaltungsteam weitergegeben werden.
+                        Falls du oben Allergien oder Medikamente angegeben hast: Ich willige ausdrücklich ein,
+                        dass diese Gesundheitsdaten gemäß Art. 9 Abs. 2 lit. a DSGVO gespeichert und
+                        ausschließlich zum Schutz des Kindes in Notfallsituationen an das Veranstaltungsteam
+                        weitergegeben werden. <em>(Pflichtfeld wenn Gesundheitsdaten angegeben.)</em>
                     </span>
                 </label>
             </div>
         </div>
-        @push('scripts')
-        <script>
-        function toggleHealthConsent() {
-            const a = document.getElementById('field-allergien')?.value.trim();
-            const m = document.getElementById('field-medikamente')?.value.trim();
-            const box = document.getElementById('health-consent-field');
-            if (box) box.style.display = (a || m) ? '' : 'none';
-        }
-        </script>
-        @endpush
 
         <div class="field">
             <label>Erreichbarkeit während der Veranstaltung</label>

@@ -1,4 +1,17 @@
 <x-guest-layout>
+
+    {{-- Hinweis für Eltern/Erziehungsberechtigte --}}
+    <div class="ui info message mb-5 text-sm">
+        <div class="header mb-1">Wer registriert sich hier?</div>
+        <p>Hier werden <strong>Eltern und Erziehungsberechtigte</strong> registriert &mdash; nicht die Kinder selbst.</p>
+        <p class="mt-2">Kinder müssen sich <strong>nicht</strong> wie im alten Portal einzeln registrieren.
+            Ihr könnt eure Spieler&shy;kinder direkt in eurem Nutzer&shy;konto anlegen.</p>
+        <p class="mt-2">Läuft ein Kind bereits unter einem anderen Eltern&shy;konto und soll <strong>geteilt</strong> werden,
+            wendet euch bitte an:
+            <a href="mailto:verein@waldritter-giessen.de" class="font-medium underline">verein@waldritter-giessen.de</a>
+        </p>
+    </div>
+
     <form method="POST" action="{{ route('register') }}">
         @csrf
 

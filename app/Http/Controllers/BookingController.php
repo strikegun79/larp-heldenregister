@@ -32,8 +32,9 @@ class BookingController extends Controller
         $this->middleware('can:adventure.cancel')->only('destroy');
         // Anmeldedetails nachträglich ändern (BOOK-04).
         $this->middleware('can:adventure.modify')->only(['edit', 'update']);
-        // Anmeldebestätigung erneut senden (BOOK-05) bzw. ablehnen (ADV-18).
-        $this->middleware('can:approve-bookings')->only(['resendConfirmation', 'reject']);
+        // Anmeldebestätigung erneut senden (BOOK-05): Zugriff wird in der Methode geprüft.
+        // Ablehnen (ADV-18): nur Bürokrat/Admin.
+        $this->middleware('can:approve-bookings')->only(['reject']);
         // Bezahlt-Status pflegen (BOOK-06).
         $this->middleware('can:manage-payments')->only('togglePaid');
     }
@@ -270,6 +271,10 @@ class BookingController extends Controller
             'nsc' => ['boolean'],
             'allergien' => ['nullable', 'string'],
             'medikamente' => ['nullable', 'string'],
+            'health_data_consent' => [
+                Rule::requiredIf(fn () => filled($request->allergien) || filled($request->medikamente)),
+                'boolean',
+            ],
             'erreichbarkeit' => ['nullable', 'string'],
             'kontakt_telefon' => ['required', 'string', 'max:100'],
             'ermaessigung' => $canManage ? ['boolean'] : ['prohibited'],
@@ -284,6 +289,7 @@ class BookingController extends Controller
             'nsc' => $request->boolean('nsc'),
             'allergien' => $data['allergien'] ?? null,
             'medikamente' => $data['medikamente'] ?? null,
+            'health_data_consent_at' => $request->boolean('health_data_consent') ? ($booking->health_data_consent_at ?? now()) : null,
             'erreichbarkeit' => $data['erreichbarkeit'] ?? null,
             'kontakt_telefon' => $data['kontakt_telefon'],
         ];
@@ -309,6 +315,14 @@ class BookingController extends Controller
     public function resendConfirmation(Request $request, Adventure $adventure, Booking $booking): RedirectResponse|JsonResponse
     {
         abort_unless($booking->adventure_id === $adventure->id, 404);
+
+        $isAdmin = Gate::allows('approve-bookings');
+
+        // Eigene Buchung: nur erlaubt wenn nicht auf der Warteliste (Wartelisten-Promotion ist Bürokrat-Aktion).
+        if (! $isAdmin) {
+            abort_unless($this->ownsBooking($request->user(), $booking), 403);
+            abort_if($booking->waitlisted, 403);
+        }
 
         if ($booking->is_guest) {
             return $request->expectsJson()

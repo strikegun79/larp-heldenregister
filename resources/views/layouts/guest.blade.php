@@ -24,6 +24,8 @@
                 </a>
             </div>
 
+            @stack('before-card')
+
             <div class="w-full sm:max-w-md mt-6 px-6 py-4 bg-white/70 border-2 border-[#5a3a22]/40 shadow-md overflow-hidden sm:rounded-lg">
                 {{ $slot }}
             </div>

@@ -61,6 +61,23 @@
         <small class="text-stone-400">Optional – regelmäßige Medikamente, die dein Kind während der Veranstaltung benötigt. Nur für das Orga-Team sichtbar.</small>
     </div>
 
+    {{-- DSGVO Art. 9: Einwilligung – vorbelegt wenn bereits erteilt, Pflichtfeld wenn Gesundheitsdaten ausgefüllt --}}
+    <div class="field">
+        <div class="ui checkbox">
+            <input type="checkbox" name="health_data_consent" id="health_data_consent_edit" value="1"
+                   @checked($booking->health_data_consent_at !== null)>
+            <label for="health_data_consent_edit">
+                <strong>Einwilligung Gesundheitsdaten</strong><br>
+                <span class="text-sm font-normal">
+                    Falls du oben Allergien oder Medikamente angegeben hast: Ich willige ausdrücklich ein,
+                    dass diese Gesundheitsdaten gemäß Art. 9 Abs. 2 lit. a DSGVO gespeichert und
+                    ausschließlich zum Schutz des Kindes in Notfallsituationen an das Veranstaltungsteam
+                    weitergegeben werden. <em>(Pflichtfeld wenn Gesundheitsdaten angegeben.)</em>
+                </span>
+            </label>
+        </div>
+    </div>
+
     <div class="field">
         <label>Erreichbarkeit während der Veranstaltung</label>
         <textarea name="erreichbarkeit" rows="2" placeholder="z. B. Handy-Nummer vor Ort, Hotel, Zeltplatz …">{{ $booking->erreichbarkeit }}</textarea>

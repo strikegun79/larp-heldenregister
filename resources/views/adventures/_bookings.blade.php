@@ -73,24 +73,19 @@
                     <td>
                         <div class="flex items-center justify-end gap-1 flex-wrap">
                             @can('approve-bookings')
+                                {{-- Warteliste-Promotion: nur Bürokrat/Admin --}}
                                 @unless ($booking->is_guest)
+                                @if ($booking->waitlisted)
                                 <form method="POST" action="{{ route('adventures.bookings.resend-confirmation', [$adventure, $booking]) }}" data-refresh-modal
-                                      @if($booking->waitlisted) data-confirm="{{ $booking->player?->full_name ?? 'Spieler' }} von der Warteliste auf regulären Platz hochstufen?" @endif>
+                                      data-confirm="{{ $booking->player?->full_name ?? 'Spieler' }} von der Warteliste auf regulären Platz hochstufen?">
                                     @csrf
-                                    @if ($booking->waitlisted)
-                                        <button type="submit" class="ui mini icon green button"
-                                                data-tooltip="Von Warteliste bestätigen" data-position="top center">
-                                            <i class="check icon"></i>
-                                            <span class="sm:hidden ml-1 text-xs">Bestät.</span>
-                                        </button>
-                                    @else
-                                        <button type="submit" class="ui mini icon button"
-                                                data-tooltip="Anmeldebestätigung erneut senden" data-position="top center">
-                                            <i class="envelope outline icon"></i>
-                                            <span class="sm:hidden ml-1 text-xs">Mail</span>
-                                        </button>
-                                    @endif
+                                    <button type="submit" class="ui mini icon green button"
+                                            data-tooltip="Von Warteliste bestätigen" data-position="top center">
+                                        <i class="check icon"></i>
+                                        <span class="sm:hidden ml-1 text-xs">Bestät.</span>
+                                    </button>
                                 </form>
+                                @endif
                                 @endunless
                                 <form method="POST" action="{{ route('adventures.bookings.rejection', [$adventure, $booking]) }}" data-refresh-modal
                                       data-confirm="{{ $booking->status === 'abgelehnt' ? 'Ablehnung zurücknehmen?' : 'Anmeldung ablehnen?' }}">
@@ -102,6 +97,19 @@
                                     </button>
                                 </form>
                             @endcan
+                            {{-- Bestätigung erneut senden: Bürokrat/Admin ODER eigene nicht-wartegelistete Buchung --}}
+                            @unless ($booking->is_guest || $booking->waitlisted)
+                                @if (Gate::allows('approve-bookings') || $booking->booked_by_user_id === auth()->id())
+                                <form method="POST" action="{{ route('adventures.bookings.resend-confirmation', [$adventure, $booking]) }}" data-refresh-modal>
+                                    @csrf
+                                    <button type="submit" class="ui mini icon button"
+                                            data-tooltip="Anmeldebestätigung erneut senden" data-position="top center">
+                                        <i class="envelope outline icon"></i>
+                                        <span class="sm:hidden ml-1 text-xs">Mail</span>
+                                    </button>
+                                </form>
+                                @endif
+                            @endunless
                             @can('manage-payments')
                                 <form method="POST" action="{{ route('adventures.bookings.payment', [$adventure, $booking]) }}" data-refresh-modal
                                       data-confirm="{{ $booking->paid ? 'Beitrag als offen markieren?' : 'Beitrag als bezahlt markieren?' }}">
