@@ -201,27 +201,45 @@ class Hero extends Model
     /**
      * Perlen-/Bändchen-Zusammenfassung je Klasse und Farbe.
      * Gibt eine Collection von stdClass {class: HeroClass, perls: Collection<{color, count}>} zurück.
-     * Gruppierung nach hero_class_id der Fertigkeit – keine Vermischung zwischen Klassen.
+     *
+     * Wichtig: Ausgangspunkt sind die Klassen des Helden, nicht die Masterclass
+     * (hero_class_id) der Fertigkeit. Eine Fertigkeit gehört via skill_hero_class
+     * zu beliebig vielen Klassen – sie erscheint daher unter jeder Klasse des Helden,
+     * der sie zugeordnet ist, unabhängig davon, bei welcher Masterclass sie erworben
+     * werden kann.
+     *
      * Klassen ohne erlernte Perlenfertigkeiten werden ausgelassen.
      */
     public function getPerlSummaryByClassAttribute(): Collection
     {
-        $this->loadMissing('skills.perlColor', 'skills.heroClass');
+        // skills.classes lädt die skill_hero_class-Pivot-Zuordnungen.
+        $this->loadMissing('skills.perlColor', 'skills.classes', 'classes');
 
-        return $this->skills
-            ->filter(fn ($s) => $s->perlColor !== null && $s->heroClass !== null)
-            ->groupBy('hero_class_id')
-            ->map(fn ($group) => (object) [
-                'class' => $group->first()->heroClass,
-                'perls' => $group
-                    ->groupBy('perl_color_id')
-                    ->map(fn ($pg) => (object) [
-                        'color' => $pg->first()->perlColor,
-                        'count' => $pg->count(),
-                    ])
-                    ->sortBy('color.name')
-                    ->values(),
-            ])
+        return $this->classes
+            ->map(function ($class) {
+                // Gelernte Fertigkeiten des Helden, die dieser Klasse zugeordnet sind.
+                $classSkills = $this->skills->filter(
+                    fn ($s) => $s->perlColor !== null
+                            && $s->classes->contains('id', $class->id)
+                );
+
+                if ($classSkills->isEmpty()) {
+                    return null;
+                }
+
+                return (object) [
+                    'class' => $class,
+                    'perls' => $classSkills
+                        ->groupBy('perl_color_id')
+                        ->map(fn ($pg) => (object) [
+                            'color' => $pg->first()->perlColor,
+                            'count' => $pg->count(),
+                        ])
+                        ->sortBy('color.name')
+                        ->values(),
+                ];
+            })
+            ->filter()
             ->sortBy('class.name')
             ->values();
     }
