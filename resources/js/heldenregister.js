@@ -451,6 +451,46 @@ function refreshManageTab() {
         .catch(() => window.location.reload());
 }
 
+// ------------------------------------------------------------------
+// Helden-Detail per AJAX neu laden (#skilltree ersetzen, Tabs erhalten)
+// Wird nach EP-Buchungen und Skill-Aktionen auf /heroes/{id} genutzt.
+// ------------------------------------------------------------------
+function refreshHeroDetail() {
+    const tree = document.getElementById('skilltree');
+    if (!tree) { window.location.reload(); return; }
+
+    const activeItem = tree.querySelector('.ui.top.attached.tabular.menu .item.active[data-tab]');
+    const activeTab  = activeItem ? activeItem.getAttribute('data-tab') : null;
+
+    fetch(window.location.href, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+        .then(r => r.text())
+        .then(html => {
+            const doc     = new DOMParser().parseFromString(html, 'text/html');
+            const newTree = doc.getElementById('skilltree');
+            if (!newTree) { window.location.reload(); return; }
+
+            // data-Attribute am Root-Element aktualisieren (z. B. data-balance)
+            Array.from(newTree.attributes).forEach(attr => tree.setAttribute(attr.name, attr.value));
+            tree.innerHTML = newTree.innerHTML;
+
+            // Fomantic-Tabs neu initialisieren
+            $(tree).find('.menu .item[data-tab]').tab();
+
+            // Aktiven Tab wiederherstellen
+            if (activeTab) {
+                $(tree).find('[data-tab]').removeClass('active');
+                $(tree).find(`.menu .item[data-tab="${activeTab}"]`).addClass('active');
+                $(tree).find(`.ui.bottom.attached.tab.segment[data-tab="${activeTab}"]`).addClass('active');
+            }
+
+            // Weitere Fomantic-Komponenten neu initialisieren
+            $(tree).find('.ui.dropdown').dropdown();
+            $(tree).find('.ui.checkbox').checkbox();
+            $(tree).find('.ui.search.selection.dropdown').dropdown();
+        })
+        .catch(() => window.location.reload());
+}
+
 document.addEventListener('submit', function (e) {
     const form = e.target;
     // Nur außerhalb von Modalen — dort greift der eigene AJAX-Handler (s. o.)
@@ -471,7 +511,9 @@ document.addEventListener('submit', function (e) {
             const data = await resp.json().catch(() => ({}));
             if (resp.ok) {
                 showToast(data.message || 'Gespeichert.', 'success');
-                refreshManageTab();
+                // Helden-Detailseite hat #skilltree → alles neu laden
+                if (document.getElementById('skilltree')) refreshHeroDetail();
+                else refreshManageTab();
             } else if (resp.status === 422) {
                 const errors = data.errors ? Object.values(data.errors).flat() : [];
                 showToast(errors.join('<br>') || data.message || 'Bitte prüfen.', 'error');
@@ -551,6 +593,7 @@ function submitSkill(btn, url, method) {
                 showToast(data.message || 'Gespeichert.', 'success');
                 $('#skill-modal').modal('hide');
                 if (window.appModalUrl) loadModalContent(window.appModalUrl, true);
+                else refreshHeroDetail();
             } else {
                 showToast(data.message || 'Aktion fehlgeschlagen.', 'error');
             }
