@@ -36,6 +36,19 @@ class UserFactory extends Factory
             'house_number' => (string) fake()->numberBetween(1, 99),
             'zip' => fake()->postcode(),
             'city' => fake()->city(),
+            // Benachrichtigungs-Defaults explizit setzen, damit make()-Instanzen
+            // und DB-gespeicherte Nutzer identisches Verhalten zeigen.
+            'teamer_notifications'       => true,
+            'notify_new_user'            => true,
+            'notify_booking_received'    => true,
+            'notify_booking_approved'    => true,
+            'notify_booking_rejected'    => true,
+            'notify_booking_cancelled'   => true,
+            'notify_payment_confirmed'   => true,
+            'notify_waitlist_promoted'   => true,
+            'notify_event_cancelled'     => true,
+            'notify_event_reminder'      => true,
+            'notify_cancellation_report' => true,
         ];
     }
 

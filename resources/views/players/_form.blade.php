@@ -98,6 +98,40 @@
         </div>
     </div>
 
+    {{-- DSGVO Art. 9: Gesundheitsdaten am Spielerprofil (PLAY-15) --}}
+    <fieldset class="border border-amber-200 rounded-lg p-4 bg-amber-50">
+        <legend class="text-sm font-semibold text-amber-800 px-1">Gesundheitsdaten (optional)</legend>
+
+        <div class="bg-blue-50 border border-blue-200 rounded p-3 mb-4 text-xs text-blue-800">
+            <strong>Datenschutzhinweis (Art. 9 DSGVO):</strong>
+            Allergien und Medikamente sind besondere Kategorien personenbezogener Daten.
+            Diese Angaben werden ausschließlich zum Schutz deines Kindes in Notfallsituationen während
+            unserer Veranstaltungen verwendet und sind nur für das Organisationsteam sichtbar.
+            Sie werden nicht an Dritte weitergegeben und können jederzeit geändert oder gelöscht werden.
+            Wenn du diese Felder ausgefüllst, willigst du damit ausdrücklich in die Speicherung ein (Art. 9 Abs. 2 lit. a DSGVO).
+        </div>
+
+        <div class="space-y-4">
+            <div>
+                <x-input-label for="allergien" value="Allergien / Unverträglichkeiten" />
+                <textarea id="allergien" name="allergien" rows="2"
+                          class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-amber-600 focus:ring-amber-600 text-sm"
+                          placeholder="z. B. Nüsse, Laktose, Bienen …">{{ old('allergien', $player->allergien) }}</textarea>
+                <x-input-error :messages="$errors->get('allergien')" class="mt-2" />
+                <small class="text-stone-400">Wird bei einer Abenteuer-Anmeldung automatisch vorausgefüllt.</small>
+            </div>
+
+            <div>
+                <x-input-label for="medikamente" value="Medikamente" />
+                <textarea id="medikamente" name="medikamente" rows="2"
+                          class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-amber-600 focus:ring-amber-600 text-sm"
+                          placeholder="z. B. Epipen, Inhalator, tägliche Einnahme …">{{ old('medikamente', $player->medikamente) }}</textarea>
+                <x-input-error :messages="$errors->get('medikamente')" class="mt-2" />
+                <small class="text-stone-400">Regelmäßige Medikamente, die dein Kind während der Veranstaltung benötigt.</small>
+            </div>
+        </div>
+    </fieldset>
+
     <label class="flex items-center gap-2 text-stone-700">
         <input type="checkbox" name="self" value="1"
                class="rounded border-gray-300 text-amber-600 shadow-sm focus:ring-amber-600"

@@ -26,6 +26,8 @@ class Player extends Model
         'house_number',
         'zip',
         'city',
+        'allergien',
+        'medikamente',
         'active_hero_id',
         'legacy_id',
     ];
@@ -139,6 +141,8 @@ class Player extends Model
             'house_number'          => null,
             'zip'                   => null,
             'city'                  => null,
+            'allergien'             => null,
+            'medikamente'           => null,
             'address_same_as_guardian' => false,
         ])->save();
 

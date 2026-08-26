@@ -217,6 +217,20 @@ class PlayerController extends Controller
     }
 
     /**
+     * Gesundheitsdaten eines Spielers für die Anmeldevorausfüllung (PLAY-15).
+     * Nur eigene/betreute Spieler; keine Preisgabe an Dritte.
+     */
+    public function healthPrefill(Request $request, Player $player): \Illuminate\Http\JsonResponse
+    {
+        $this->authorize('view', $player);
+
+        return response()->json([
+            'allergien'   => $player->allergien,
+            'medikamente' => $player->medikamente,
+        ]);
+    }
+
+    /**
      * @return array<string, mixed>
      */
     private function validatePlayer(Request $request): array
@@ -236,6 +250,9 @@ class PlayerController extends Controller
             'house_number' => [$sameAsGuardian ? 'nullable' : 'required', 'string', 'max:10'],
             'zip' => [$sameAsGuardian ? 'nullable' : 'required', 'string', 'max:10'],
             'city' => [$sameAsGuardian ? 'nullable' : 'required', 'string', 'max:100'],
+            // DSGVO Art. 9: Gesundheitsdaten am Spielerprofil (PLAY-15).
+            'allergien' => ['nullable', 'string'],
+            'medikamente' => ['nullable', 'string'],
         ]);
     }
 }

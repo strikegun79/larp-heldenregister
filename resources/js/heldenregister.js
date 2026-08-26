@@ -84,6 +84,9 @@ function loadModalContent(url, preserveTab) {
             $content.find('.ui.checkbox').checkbox();
             // Durchsuchbare Dropdowns (z. B. Spieler-Auswahl beim Helden anlegen).
             $content.find('.ui.search.selection.dropdown').dropdown();
+            // BOOK-12: Consent-Pflichtfeld + PLAY-15: Spieler-Prefill (nach .checkbox()!).
+            updateHealthConsent($content);
+            initBookingPlayerPrefill($content);
             $('#app-modal').modal('refresh');
             // UI-11: Fokus nach AJAX-Load ins Modal verschieben.
             requestAnimationFrame(function () {
@@ -177,6 +180,9 @@ function loadStackContent(url, preserveTab) {
             $content.find('.ui.checkbox').checkbox();
             // Durchsuchbare Dropdowns im gestapelten Modal.
             $content.find('.ui.search.selection.dropdown').dropdown();
+            // BOOK-12: Einwilligungs-Checkbox + PLAY-15: Spieler-Prefill (gestapeltes Modal).
+            updateHealthConsent($content);
+            initBookingPlayerPrefill($content);
             $('#app-modal-2').modal('refresh');
             // UI-11: Fokus nach AJAX-Load ins gestapelte Modal verschieben.
             requestAnimationFrame(function () {
@@ -365,6 +371,15 @@ document.addEventListener('submit', function (e) {
 
     const submitBtn = e.submitter || form.querySelector('[type=submit]');
     submitBtn && submitBtn.classList.add('loading', 'disabled');
+
+    // BOOK-12: Einwilligung Gesundheitsdaten – Fallback falls nativer required-Check umgangen wird.
+    const _hcBox = form.querySelector('input[name="health_data_consent"]');
+    if (_hcBox && !_hcBox.checkValidity()) {
+        updateHealthConsent(form);
+        _hcBox.reportValidity();
+        submitBtn && submitBtn.classList.remove('loading', 'disabled');
+        return;
+    }
 
     fetch(form.action, {
         method:  'POST', // PUT/DELETE laufen via _method-Spoofing im FormData
@@ -740,6 +755,96 @@ function initFomanticCalendars($container) {
 function initQrCodes(root) {
     (root instanceof $ ? root[0] : root).querySelectorAll('canvas[data-qr-url]').forEach(function (canvas) {
         QRCode.toCanvas(canvas, canvas.dataset.qrUrl, { width: 160, margin: 2, color: { dark: '#5a3a22' } });
+    });
+}
+
+// ------------------------------------------------------------------
+// BOOK-12: Einwilligungs-Checkbox visuell aktualisieren.
+// Plain-HTML-Checkbox (kein Fomantic-Wrapper) → native Browser-Validierung.
+// Wird nach Modal-Load, Spieler-Prefill und Texteingabe aufgerufen.
+// ------------------------------------------------------------------
+function updateHealthConsent(scope) {
+    const root = scope instanceof $ ? scope[0] : scope;
+    if (!root) return;
+
+    const consentBox    = root.querySelector('input[name="health_data_consent"]');
+    if (!consentBox) return;
+
+    const allergienTA   = root.querySelector('textarea[name="allergien"]');
+    const medikamenteTA = root.querySelector('textarea[name="medikamente"]');
+    const consentField  = consentBox.closest('.field');
+    const badge         = consentField ? consentField.querySelector('[data-hcr-badge]') : null;
+
+    const hasData      = (allergienTA   && allergienTA.value.trim()   !== '')
+                      || (medikamenteTA && medikamenteTA.value.trim() !== '');
+    const needsConsent = hasData && !consentBox.checked;
+
+    consentBox.required = hasData;
+
+    // Roten Ring wenn Pflichtfeld noch nicht bestätigt.
+    consentBox.classList.toggle('ring-2',        needsConsent);
+    consentBox.classList.toggle('ring-red-400',  needsConsent);
+    consentBox.classList.toggle('ring-offset-1', needsConsent);
+
+    // Nativer Browser-Tooltip mit deutschem Hinweis.
+    consentBox.setCustomValidity(
+        needsConsent
+            ? 'Bitte bestätige die Einwilligung zur Speicherung der Gesundheitsdaten.'
+            : ''
+    );
+
+    if (badge) badge.hidden = !hasData;
+}
+
+// Document-level event delegation: greift unabhängig vom Modal-Load-Timing.
+document.addEventListener('input', function (e) {
+    const name = e.target.name;
+    if (name !== 'allergien' && name !== 'medikamente') return;
+    const scope = e.target.closest('#app-modal-2-content, #app-modal-content')
+               || e.target.closest('form')
+               || document.body;
+    updateHealthConsent(scope);
+});
+
+// Roten Ring sofort entfernen wenn Checkbox angehakt wird.
+document.addEventListener('change', function (e) {
+    if (e.target.name !== 'health_data_consent') return;
+    const scope = e.target.closest('#app-modal-2-content, #app-modal-content')
+               || e.target.closest('form')
+               || document.body;
+    updateHealthConsent(scope);
+});
+
+// ------------------------------------------------------------------
+// PLAY-15: Spieler-Auswahl → Gesundheitsdaten vorausfüllen.
+// Wird von loadModalContent/loadStackContent aufgerufen.
+// ------------------------------------------------------------------
+function initBookingPlayerPrefill(container) {
+    const root = container instanceof $ ? container[0] : container;
+    if (!root) return;
+
+    const sel = root.querySelector('#booking-player-select');
+    if (!sel) return;
+
+    sel.addEventListener('change', function () {
+        const playerId    = this.value;
+        const urlTemplate = this.dataset.prefillUrl;
+        if (!playerId || !urlTemplate) return;
+
+        fetch(urlTemplate.replace('__ID__', playerId), {
+            headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' },
+            credentials: 'same-origin',
+        })
+            .then(r => r.ok ? r.json() : null)
+            .then(data => {
+                if (!data) return;
+                const allergienTA   = root.querySelector('textarea[name="allergien"]');
+                const medikamenteTA = root.querySelector('textarea[name="medikamente"]');
+                if (allergienTA   && allergienTA.value.trim()   === '') allergienTA.value   = data.allergien   ?? '';
+                if (medikamenteTA && medikamenteTA.value.trim() === '') medikamenteTA.value = data.medikamente ?? '';
+                updateHealthConsent(root);
+            })
+            .catch(() => {});
     });
 }
 

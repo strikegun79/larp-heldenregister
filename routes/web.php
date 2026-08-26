@@ -105,6 +105,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Avatar-Upload und -Löschen im Avatar-Tab (PLAY-11).
     Route::post('players/{player}/avatar', [PlayerController::class, 'uploadAvatar'])->name('players.avatar');
     Route::delete('players/{player}/avatar', [PlayerController::class, 'deleteAvatar'])->name('players.avatar.destroy');
+    // Gesundheitsdaten zum Vorausfüllen der Anmeldung (PLAY-15).
+    Route::get('players/{player}/health-prefill', [PlayerController::class, 'healthPrefill'])->name('players.health-prefill');
     Route::resource('heroes', HeroController::class);
     // Verschollen-Status umschalten (HERO-08).
     Route::patch('heroes/{hero}/missing', [HeroController::class, 'toggleMissing'])->name('heroes.missing');

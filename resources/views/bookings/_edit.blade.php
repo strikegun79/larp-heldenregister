@@ -51,31 +51,33 @@
 
     <div class="field">
         <label>Allergien / Unverträglichkeiten</label>
-        <textarea name="allergien" rows="2" placeholder="z. B. Nüsse, Laktose, Bienen …">{{ $booking->allergien }}</textarea>
+        <textarea id="edit-allergien" name="allergien" rows="2"
+                  placeholder="z. B. Nüsse, Laktose, Bienen …">{{ $booking->allergien }}</textarea>
         <small class="text-stone-400">Optional – wird nur dem Organisationsteam angezeigt und dient ausschließlich der Sicherheit deines Kindes.</small>
     </div>
 
     <div class="field">
         <label>Medikamente</label>
-        <textarea name="medikamente" rows="2" placeholder="z. B. Epipen, Inhalator, tägliche Einnahme …">{{ $booking->medikamente }}</textarea>
+        <textarea id="edit-medikamente" name="medikamente" rows="2"
+                  placeholder="z. B. Epipen, Inhalator, tägliche Einnahme …">{{ $booking->medikamente }}</textarea>
         <small class="text-stone-400">Optional – regelmäßige Medikamente, die dein Kind während der Veranstaltung benötigt. Nur für das Orga-Team sichtbar.</small>
     </div>
 
     {{-- DSGVO Art. 9: Einwilligung – vorbelegt wenn bereits erteilt, Pflichtfeld wenn Gesundheitsdaten ausgefüllt --}}
-    <div class="field">
-        <div class="ui checkbox">
+    <div class="field" id="health-consent-field-edit">
+        <label class="flex items-start gap-2 font-normal cursor-pointer">
             <input type="checkbox" name="health_data_consent" id="health_data_consent_edit" value="1"
-                   @checked($booking->health_data_consent_at !== null)>
-            <label for="health_data_consent_edit">
-                <strong>Einwilligung Gesundheitsdaten</strong><br>
+                   class="mt-1 shrink-0" @checked($booking->health_data_consent_at !== null)>
+            <span>
+                <strong>Einwilligung Gesundheitsdaten</strong>
+                <span data-hcr-badge hidden class="text-red-600 font-semibold text-xs">&nbsp;* Pflichtfeld</span><br>
                 <span class="text-sm font-normal">
-                    Falls du oben Allergien oder Medikamente angegeben hast: Ich willige ausdrücklich ein,
-                    dass diese Gesundheitsdaten gemäß Art. 9 Abs. 2 lit. a DSGVO gespeichert und
-                    ausschließlich zum Schutz des Kindes in Notfallsituationen an das Veranstaltungsteam
-                    weitergegeben werden. <em>(Pflichtfeld wenn Gesundheitsdaten angegeben.)</em>
+                    Ich willige ausdrücklich ein, dass die oben angegebenen Gesundheitsdaten gemäß
+                    Art. 9 Abs. 2 lit. a DSGVO gespeichert und ausschließlich zum Schutz des Kindes
+                    in Notfallsituationen an das Veranstaltungsteam weitergegeben werden.
                 </span>
-            </label>
-        </div>
+            </span>
+        </label>
     </div>
 
     <div class="field">
@@ -103,3 +105,4 @@
 <div data-modal-actions hidden>
     <button type="submit" form="booking-edit-form" class="ui primary button">Speichern</button>
 </div>
+

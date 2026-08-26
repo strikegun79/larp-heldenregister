@@ -56,6 +56,27 @@ class User extends Authenticatable implements MustVerifyEmail
     ];
 
     /**
+     * PHP-seitige Defaults: spiegeln die DB-Defaults (DEFAULT true) wider,
+     * damit auch in-memory-Instanzen (new User / factory()->make()) korrekte
+     * Notification-Werte haben.
+     *
+     * @var array<string, mixed>
+     */
+    protected $attributes = [
+        'teamer_notifications'       => true,
+        'notify_new_user'            => true,
+        'notify_booking_received'    => true,
+        'notify_booking_approved'    => true,
+        'notify_booking_rejected'    => true,
+        'notify_booking_cancelled'   => true,
+        'notify_payment_confirmed'   => true,
+        'notify_waitlist_promoted'   => true,
+        'notify_event_cancelled'     => true,
+        'notify_event_reminder'      => true,
+        'notify_cancellation_report' => true,
+    ];
+
+    /**
      * The attributes that should be cast.
      *
      * @var array<string, string>
