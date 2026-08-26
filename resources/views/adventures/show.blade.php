@@ -39,7 +39,7 @@
                     $primTeamer   = !$primAnmelden && $isTeamer;
                     $primVerwalten = !$primAnmelden && !$isTeamer && $canManage;
                     // Overflow-Dropdown zeigen wenn neben der Primäraktion noch Weiteres vorhanden ist
-                    $hasDropdown  = $primAnmelden || ($primTeamer && $canManage);
+                    $hasDropdown  = $primAnmelden || ($primTeamer && $canManage) || auth()->user()->can('book-any-player');
                     // Anmelde-Button deaktivieren wenn Profil oder Spieler fehlt
                     $bookBlockedReason = null;
                     if (! $profileComplete && ! $userHasPlayers) {
@@ -112,6 +112,14 @@
                                         <i class="cog icon"></i> Verwalten
                                     </a>
                                 @endif
+                                @can('book-any-player')
+                                    <div class="divider"></div>
+                                    <a class="item"
+                                       href="{{ route('adventures.bookings.create', $adventure) . '?all_players=1' }}"
+                                       data-modal-stack="{{ route('adventures.bookings.create', $adventure) . '?all_players=1' }}">
+                                        <i class="shield alternate icon"></i> Admin-Anmeldung
+                                    </a>
+                                @endcan
                             </div>
                         </div>
                     @endif
@@ -148,6 +156,13 @@
                            data-modal-stack="{{ route('adventures.teamer.create', $adventure) }}"
                            class="ui teal button">Teamer-Anmeldung</a>
                     @endif
+                    @can('book-any-player')
+                        <a href="{{ route('adventures.bookings.create', $adventure) . '?all_players=1' }}"
+                           data-modal-stack="{{ route('adventures.bookings.create', $adventure) . '?all_players=1' }}"
+                           class="ui button">
+                            <i class="shield alternate icon"></i> Admin-Anmeldung
+                        </a>
+                    @endcan
                     @can('events.edit')
                         <a href="{{ route('adventures.manage', $adventure) }}" class="ui button">Verwalten</a>
                     @endcan

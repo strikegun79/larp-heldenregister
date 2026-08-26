@@ -42,7 +42,7 @@
     </div>
 </div>
 
-@if (! $adventure->registrationOpen())
+@if (! $adventure->registrationOpen() && ! ($adminMode ?? false))
     <p class="text-stone-500">Die Anmeldung ist derzeit nicht geöffnet (Status: {{ $adventure->status?->description }}).</p>
 @elseif ($players->isEmpty())
     <p class="text-stone-500">Alle wählbaren Spieler sind für dieses Abenteuer bereits angemeldet.</p>
@@ -51,6 +51,13 @@
         <div class="ui warning message" style="display:block">
             Das Abenteuer ist voll – neue Anmeldungen kommen auf die Warteliste.
         </div>
+    @endif
+
+    @if ($adminMode ?? false)
+    <div class="ui tiny yellow message mb-3">
+        <i class="shield alternate icon"></i>
+        <strong>Admin-Anmeldung:</strong> Alle Spieler sichtbar.
+    </div>
     @endif
 
     <form id="booking-create-form" data-stack-close method="POST" action="{{ route('adventures.bookings.store', $adventure) }}" class="ui form">

@@ -342,6 +342,45 @@ class HeroController extends Controller
             : back()->with('status', $message);
     }
 
+    /**
+     * Willkommens-Mail an Eltern/Betreuer des Spielers senden.
+     * Nur Bürokrat/Admin; setzt voraus dass der Held einem Spieler zugeordnet ist.
+     */
+    public function sendWelcomeMail(Request $request, Hero $hero): RedirectResponse|JsonResponse
+    {
+        $hero->loadMissing('player.users');
+
+        $player = $hero->player;
+
+        if (! $player) {
+            $msg = 'Diesem Helden ist kein Spieler zugeordnet – keine Mail gesendet.';
+            return $request->expectsJson()
+                ? response()->json(['message' => $msg], 422)
+                : back()->with('error', $msg);
+        }
+
+        // E-Mail aus direktem Player-Feld oder erstem verknüpften Nutzerkonto.
+        $email = filled($player->email)
+            ? $player->email
+            : $player->users->first()?->email;
+
+        if (! $email) {
+            $msg = 'Kein E-Mail-Empfänger für diesen Spieler gefunden.';
+            return $request->expectsJson()
+                ? response()->json(['message' => $msg], 422)
+                : back()->with('error', $msg);
+        }
+
+        \Illuminate\Support\Facades\Notification::route('mail', $email)
+            ->notify(new \App\Notifications\HeroWelcome($hero));
+
+        $msg = "Willkommens-Mail für {$hero->character_name} gesendet an {$email}.";
+
+        return $request->expectsJson()
+            ? response()->json(['message' => $msg, 'refresh_modal' => true])
+            : back()->with('status', $msg);
+    }
+
     /** Prüft ob der Nutzer öffentliche Einstellungen eines Helden ändern darf. */
     private function canManagePublicSettings(Request $request, Hero $hero): bool
     {

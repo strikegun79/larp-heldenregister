@@ -284,3 +284,163 @@ footer {
 * { scrollbar-color: var(--wr-gold) transparent; }
 ::-webkit-scrollbar { width: 12px; height: 12px; }
 ::-webkit-scrollbar-thumb { background: var(--wr-gold); border-radius: 999px; border: 3px solid transparent; background-clip: content-box; }
+
+/* ===========================================================================
+   Verwalten-Tab / -Accordion: Mittelalterliches Admin-Design
+   Ziel: Zwei klar abgegrenzte Panels (Siegel + Status), zusammengehörig
+   durch gemeinsame Randgestaltung. Kein Fomantic „ui segments" mehr,
+   stattdessen eigene Panel-Struktur, die Inline-Stile ersetzt.
+   =========================================================================== */
+
+/* Äußerer Container: Desktop nutzt Grid, Mobile Stack */
+.wr-verwalten-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1rem;
+}
+
+/* Mobile: einspaltig untereinander */
+.wr-verwalten-stack {
+    display: flex;
+    flex-direction: column;
+    gap: .85rem;
+}
+
+/* Gemeinsames Panel-Styling: Pergament-Hintergrund, Holz-Rahmen */
+.wr-verwalten-panel {
+    background: linear-gradient(160deg, #fdf6e3 0%, #f5e9c8 100%);
+    border: 2px solid rgba(200, 150, 42, .45);
+    border-radius: 12px;
+    padding: 1rem 1.1rem 1.1rem;
+    box-shadow:
+        0 2px 0 rgba(90, 58, 34, .10),
+        0 4px 14px rgba(90, 58, 34, .08);
+    position: relative;
+    overflow: hidden;
+}
+
+/* Zierborte oben (goldene Punktlinie wie auf einer Schriftrolle) */
+.wr-verwalten-panel::before {
+    content: '';
+    position: absolute;
+    top: 4px;
+    left: 10px;
+    right: 10px;
+    height: 2px;
+    background: repeating-linear-gradient(
+        90deg,
+        var(--wr-gold) 0px, var(--wr-gold) 5px,
+        transparent 5px, transparent 9px
+    );
+    opacity: .45;
+    border-radius: 1px;
+}
+
+/* --- Siegel-Panel: goldene Betonung ----------------------------------- */
+.wr-verwalten-siegel {
+    border-left: 4px solid var(--wr-gold);
+}
+
+/* --- Status-Panel aktiv (Held lebt): grüner Akzent ------------------- */
+.wr-verwalten-verschollen-aktiv {
+    border-left: 4px solid #4a7c2f;
+    background: linear-gradient(160deg, #f4fbef 0%, #e6f4d7 100%);
+}
+
+/* --- Status-Panel verschollen (Held weg): warnendes Rot/Dunkel -------- */
+.wr-verwalten-verschollen-warnung {
+    border-left: 4px solid #9b2c2c;
+    background: linear-gradient(160deg, #fff5f5 0%, #fed7d7 60%, #fec8c8 100%);
+    border-color: rgba(155, 44, 44, .40);
+}
+
+/* Überschriften in den Panels */
+.wr-verwalten-heading {
+    font-family: 'MedievalSharp', cursive;
+    font-size: .92rem;
+    color: var(--wr-ink);
+    margin: 0 0 .65rem;
+    display: flex;
+    align-items: center;
+    gap: .35rem;
+    text-shadow: 0 1px 0 rgba(255, 255, 255, .6);
+}
+
+/* Größere Variante für Desktop */
+.wr-verwalten-heading--lg {
+    font-size: 1rem;
+    margin-bottom: .8rem;
+}
+
+/* Icon in der Überschrift etwas heben */
+.wr-verwalten-heading .icon {
+    opacity: .85;
+}
+
+/* Im Warnung-Panel: Überschrift rot tönen */
+.wr-verwalten-verschollen-warnung .wr-verwalten-heading {
+    color: #742a2a;
+}
+
+/* Im Aktiv-Panel: Überschrift grün tönen */
+.wr-verwalten-verschollen-aktiv .wr-verwalten-heading {
+    color: #276221;
+}
+
+/* Hinweis-Texte (klein, gedämpft, aber WCAG-konform) */
+.wr-verwalten-hint {
+    font-size: .8rem;
+    color: #57534e;
+    line-height: 1.45;
+    margin: 0;
+}
+
+/* Willkommens-Mail-Unterbereich: leicht abgesetzt mit Teal-Rand */
+.wr-verwalten-mail-box {
+    background: rgba(56, 178, 172, .08);
+    border: 1px solid rgba(56, 178, 172, .35);
+    border-radius: 8px;
+    padding: .75rem .9rem;
+}
+
+/* Label der Mail-Box */
+.wr-verwalten-mail-label {
+    font-family: 'MedievalSharp', cursive;
+    font-size: .82rem;
+    color: #2c7a7b;
+    margin: 0 0 .5rem;
+    display: flex;
+    align-items: center;
+    gap: .3rem;
+}
+
+/* Das Siegel-Eingabefeld: stärker hervorgehoben */
+.siegel-input {
+    background: #fffbf0 !important;
+    border: 2px solid rgba(200, 150, 42, .55) !important;
+    border-radius: 8px !important;
+    letter-spacing: .25em;
+    font-size: 1.05rem;
+    color: var(--wr-ink);
+    text-align: center;
+}
+.siegel-input:focus {
+    border-color: var(--wr-gold) !important;
+    box-shadow: 0 0 0 3px rgba(200, 150, 42, .30) !important;
+}
+.siegel-input::placeholder { color: #c4a882; letter-spacing: .2em; }
+
+/* Tab-Segment ohne Fomantic-Innenrand neu einrahmen */
+.wr-verwalten-tab.ui.tab.segment {
+    background: transparent;
+    border: none;
+    padding: 1rem 0 0;
+    box-shadow: none;
+}
+
+/* Responsive: ab < 640px wird das Grid zur Spalte */
+@media (max-width: 639px) {
+    .wr-verwalten-grid {
+        grid-template-columns: 1fr;
+    }
+}

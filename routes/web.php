@@ -108,6 +108,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::resource('heroes', HeroController::class);
     // Verschollen-Status umschalten (HERO-08).
     Route::patch('heroes/{hero}/missing', [HeroController::class, 'toggleMissing'])->name('heroes.missing');
+    // Willkommens-Mail an Eltern/Betreuer senden (nur Bürokrat/Admin).
+    Route::post('heroes/{hero}/welcome-mail', [HeroController::class, 'sendWelcomeMail'])
+        ->middleware('can:heldenregister.edit')
+        ->name('heroes.welcome-mail');
     Route::patch('heroes/{hero}/visibility', [HeroController::class, 'toggleVisibility'])->name('heroes.visibility');
     Route::patch('heroes/{hero}/searchable', [HeroController::class, 'toggleSearchable'])->name('heroes.searchable');
     // EP-Buchung für einen Helden (HERO-12).

@@ -1,9 +1,16 @@
 @csrf
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    if (window.jQuery) $('#player_id').dropdown();
+});
+</script>
+@endpush
 <div class="space-y-6">
     <div>
         <x-input-label for="player_id" value="Spieler" />
         <select id="player_id" name="player_id"
-                class="mt-1 block w-full border-gray-300 focus:border-amber-600 focus:ring-amber-600 rounded-md shadow-sm">
+                class="ui fluid search selection dropdown mt-1">
             <option value="">— bitte wählen —</option>
             @foreach ($players as $player)
                 <option value="{{ $player->id }}"

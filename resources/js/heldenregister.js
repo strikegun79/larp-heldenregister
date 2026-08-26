@@ -82,6 +82,8 @@ function loadModalContent(url, preserveTab) {
             initQrCodes($content);
             // UX-901: Toggle-Checkboxen (z. B. Sichtbarkeit/Suchbarkeit im Helden-Detail).
             $content.find('.ui.checkbox').checkbox();
+            // Durchsuchbare Dropdowns (z. B. Spieler-Auswahl beim Helden anlegen).
+            $content.find('.ui.search.selection.dropdown').dropdown();
             $('#app-modal').modal('refresh');
             // UI-11: Fokus nach AJAX-Load ins Modal verschieben.
             requestAnimationFrame(function () {
@@ -173,6 +175,8 @@ function loadStackContent(url, preserveTab) {
             initQrCodes($content);
             // UX-901: Toggle-Checkboxen im gestapelten Modal initialisieren.
             $content.find('.ui.checkbox').checkbox();
+            // Durchsuchbare Dropdowns im gestapelten Modal.
+            $content.find('.ui.search.selection.dropdown').dropdown();
             $('#app-modal-2').modal('refresh');
             // UI-11: Fokus nach AJAX-Load ins gestapelte Modal verschieben.
             requestAnimationFrame(function () {

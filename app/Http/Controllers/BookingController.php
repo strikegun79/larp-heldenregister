@@ -42,22 +42,27 @@ class BookingController extends Controller
     /**
      * Anmeldeformular als Modal-Unteransicht (ADV-15). Spielerliste auf
      * eigene/betreute begrenzt (BOOK-10).
+     * Mit ?all_players=1 (nur für book-any-player) werden alle Spieler angezeigt.
      */
     public function create(Request $request, Adventure $adventure): View
     {
         // Bereits angemeldete Spieler nicht mehr zur Auswahl anbieten (ADV-13).
         $bookedPlayerIds = $adventure->bookings()->pluck('player_id');
 
-        $players = Gate::allows('book-any-player')
+        // Admin-Modus: alle Spieler anzeigen (nur wenn berechtigt und explizit angefordert).
+        $adminMode = $request->boolean('all_players') && Gate::allows('book-any-player');
+
+        $players = $adminMode
             ? Player::whereNotIn('id', $bookedPlayerIds)->orderBy('name')->get()
             : $request->user()->players()->whereNotIn('players.id', $bookedPlayerIds)->orderBy('name')->get();
 
         return view('bookings._create', [
             'adventure' => $adventure,
             'players'   => $players,
-            'roles'     => Gate::allows('book-any-player')
+            'roles'     => $adminMode
                 ? EventRole::orderBy('id')->get()
                 : EventRole::whereNotIn('id', EventRole::TEAMER_ROLE_IDS)->orderBy('id')->get(),
+            'adminMode' => $adminMode,
             'userPhone' => $request->user()->phone,
         ]);
     }
@@ -198,7 +203,7 @@ class BookingController extends Controller
             'ermaessigung' => ['boolean'],
         ]);
 
-        if (! $adventure->registrationOpen()) {
+        if (! $adventure->registrationOpen() && ! Gate::allows('book-any-player')) {
             return $this->fail($request, 'Für dieses Abenteuer ist die Anmeldung nicht geöffnet.');
         }
 

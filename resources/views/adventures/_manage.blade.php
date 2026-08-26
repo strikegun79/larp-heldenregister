@@ -27,7 +27,16 @@
     </x-mobile.accordion-section>
 
     <x-mobile.accordion-section :title="'Anmeldungen (' . $mainBookings->count() . ')'">
-        <a href="{{ route('adventures.participation-xlsx', $adventure) }}" class="ui small button mb-3" target="_blank" rel="noopener"><i class="file excel outline icon"></i> Belegungsreport (Excel)</a>
+        <div class="flex flex-wrap gap-2 mb-3">
+            <a href="{{ route('adventures.participation-xlsx', $adventure) }}" class="ui small button" target="_blank" rel="noopener"><i class="file excel outline icon"></i> Belegungsreport (Excel)</a>
+            @can('book-any-player')
+                <a href="{{ route('adventures.bookings.create', $adventure) . '?all_players=1' }}"
+                   data-modal-stack="{{ route('adventures.bookings.create', $adventure) . '?all_players=1' }}"
+                   class="ui small button">
+                    <i class="shield alternate icon"></i> Admin-Anmeldung
+                </a>
+            @endcan
+        </div>
         @include('adventures._bookings', ['bookings' => $mainBookings, 'manage' => true])
     </x-mobile.accordion-section>
 
@@ -87,7 +96,16 @@
     </div>
 
     <div class="ui bottom attached tab segment" data-tab="bookings">
-        <a href="{{ route('adventures.participation-xlsx', $adventure) }}" class="ui small button mb-3" target="_blank" rel="noopener"><i class="file excel outline icon"></i> Belegungsreport (Excel)</a>
+        <div class="flex flex-wrap gap-2 mb-3">
+            <a href="{{ route('adventures.participation-xlsx', $adventure) }}" class="ui small button" target="_blank" rel="noopener"><i class="file excel outline icon"></i> Belegungsreport (Excel)</a>
+            @can('book-any-player')
+                <a href="{{ route('adventures.bookings.create', $adventure) . '?all_players=1' }}"
+                   data-modal-stack="{{ route('adventures.bookings.create', $adventure) . '?all_players=1' }}"
+                   class="ui small button">
+                    <i class="shield alternate icon"></i> Admin-Anmeldung
+                </a>
+            @endcan
+        </div>
         @include('adventures._bookings', ['bookings' => $mainBookings, 'manage' => true])
     </div>
 
