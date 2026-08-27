@@ -111,7 +111,7 @@ class SkillController extends Controller
     public function heroes(Skill $skill): \Illuminate\View\View
     {
         $heroes = $skill->heroes()
-            ->with('player')
+            ->with('player', 'classes')
             ->whereNull('died')
             ->where('active', true)
             ->orderBy('character_name')

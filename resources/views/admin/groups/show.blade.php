@@ -23,8 +23,12 @@
                 @endif
                 <div class="flex flex-wrap gap-6 text-sm text-stone-600">
                     <div>
-                        <span class="font-medium text-waldritter">{{ $group->heroes->count() }}</span>
+                        <span class="font-medium text-waldritter">{{ $group->heroes->filter(fn($h) => $h->died === null)->count() }}</span>
                         Mitglied(er)
+                    </div>
+                    <div>
+                        <span class="font-medium text-waldritter">{{ $group->heroes->filter(fn($h) => $h->died === null && $h->player?->active)->pluck('player_id')->unique()->count() }}</span>
+                        Spieler (aktiv)
                     </div>
                     <div>
                         <span class="font-medium text-waldritter">

@@ -22,7 +22,9 @@ class PlayerController extends Controller
 
     public function index(Request $request): View
     {
-        $q = trim($request->string('q'));
+        $q          = trim($request->string('q'));
+        $hideAdults = $request->boolean('hide_adults');
+        $noHeroes   = $request->boolean('no_heroes');
         $sort = in_array($request->query('sort'), self::SORT_COLUMNS, true)
             ? $request->query('sort')
             : 'name';
@@ -39,6 +41,19 @@ class PlayerController extends Controller
             });
         }
 
+        // Nur Spieler unter 18 anzeigen (ohne Geburtsdatum werden eingeschlossen).
+        if ($hideAdults) {
+            $query->where(function ($b) {
+                $b->whereNull('dayofbirth')
+                  ->orWhereRaw('TIMESTAMPDIFF(YEAR, dayofbirth, CURDATE()) < 18');
+            });
+        }
+
+        // Nur Spieler ohne Helden anzeigen.
+        if ($noHeroes) {
+            $query->whereDoesntHave('heroes');
+        }
+
         // heroes_count ist ein aggregiertes Alias → orderByRaw nötig.
         if ($sort === 'heroes_count') {
             $query->orderByRaw("heroes_count {$dir}");
@@ -48,7 +63,7 @@ class PlayerController extends Controller
 
         $players = $query->paginate(30)->withQueryString();
 
-        return view('admin.players.index', compact('players', 'q', 'sort', 'dir'));
+        return view('admin.players.index', compact('players', 'q', 'sort', 'dir', 'hideAdults', 'noHeroes'));
     }
 
     /**

@@ -20,6 +20,7 @@
                             <th class="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase">Name</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase">Beschreibung</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase">Helden</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase">Spieler</th>
                             <th class="px-6 py-3"></th>
                         </tr>
                     </thead>
@@ -29,6 +30,7 @@
                                 <td class="px-6 py-4 font-medium" data-label="Name">{{ $group->name }}</td>
                                 <td class="px-6 py-4 text-stone-500" data-label="Beschreibung">{{ Str::limit($group->description, 60) ?: '—' }}</td>
                                 <td class="px-6 py-4" data-label="Helden">{{ $group->heroes_count }}</td>
+                                <td class="px-6 py-4" data-label="Spieler">{{ $group->active_players_count }}</td>
                                 <td class="px-6 py-4 text-right">
                                     <div class="flex items-center justify-end gap-3">
                                         <a href="{{ route('admin.groups.show', $group) }}"
@@ -48,7 +50,7 @@
                                 </td>
                             </tr>
                         @empty
-                            <tr><td colspan="4" class="px-6 py-4 text-stone-500">Noch keine Gruppen.</td></tr>
+                            <tr><td colspan="5" class="px-6 py-4 text-stone-500">Noch keine Gruppen.</td></tr>
                         @endforelse
                     </tbody>
                 </table>

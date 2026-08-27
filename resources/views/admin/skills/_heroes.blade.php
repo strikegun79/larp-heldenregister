@@ -7,6 +7,7 @@
         <thead>
             <tr>
                 <th>Held</th>
+                <th>Klasse</th>
                 <th>Spieler</th>
             </tr>
         </thead>
@@ -20,6 +21,7 @@
                             {{ $hero->character_name ?? '—' }}
                         </a>
                     </td>
+                    <td class="text-stone-500 text-sm">{{ $hero->classes->pluck('name')->implode(', ') ?: '—' }}</td>
                     <td class="text-stone-600">{{ $hero->player?->full_name ?? '—' }}</td>
                 </tr>
             @endforeach

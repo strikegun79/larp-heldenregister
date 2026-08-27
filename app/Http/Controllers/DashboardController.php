@@ -22,8 +22,8 @@ class DashboardController extends Controller
 
         if ($request->user()->isAdmin()) {
             $metrics = [
-                'players' => Player::count(),
-                'heroes' => Hero::count(),
+                'players' => Player::where('active', true)->count(),
+                'heroes' => Hero::whereNull('died')->count(),
                 'upcoming_events' => Adventure::whereNotNull('start_at')
                     ->where('start_at', '>=', now())
                     ->where('event_status_id', '!=', EventStatus::CANCELLED)
