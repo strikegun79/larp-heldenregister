@@ -161,28 +161,78 @@
            {{-- UI-43: Mobile-Dashboard (< sm) --}}
             <div class="sm:hidden space-y-4 mb-4">
 
-                {{-- Aktiver Held --}}
-                @if ($activeHero)
-                    <a href="{{ route('heroes.show', $activeHero) }}"
-                       class="flex items-center gap-4 bg-white/70 border-2 border-[#5a3a22]/40 rounded-lg p-4 shadow-sm active:bg-amber-50 transition-colors">
-                        <img src="{{ $activeHero->image_url }}" alt="{{ $activeHero->character_name }}"
-                             class="w-16 h-16 object-cover rounded border-2 border-[#5a3a22]/40 shrink-0" loading="lazy">
-                        <div class="flex-1 min-w-0">
-                            <div class="text-xs text-stone-500 uppercase tracking-wide mb-0.5">
-                                {{ $activeHeroIsOwn ? 'Mein aktiver Held' : 'Held von ' . $activePlayer->name }}
-                            </div>
-                            <div class="font-uncial text-waldritter text-lg leading-tight truncate">{{ $activeHero->character_name }}</div>
-                            <div class="text-xs text-stone-500 truncate">{{ $activeHero->classes->pluck('name')->implode(', ') ?: '—' }}</div>
-                            <div class="text-sm font-semibold text-waldritter mt-1">{{ number_format($activeHero->ep_balance, 0, ',', '.') }} EP verfügbar</div>
-                        </div>
-                        <svg class="h-5 w-5 text-stone-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
-                        </svg>
-                    </a>
+                {{-- Aktive Helden --}}
+                @if ($activePlayers->isNotEmpty())
+                    <div class="text-xs text-stone-400 uppercase tracking-wide mb-2">Helden deiner Spieler</div>
                 @endif
+                @foreach ($activePlayers as $activePlayer)
+                    @php($activeHero = $activePlayer->activeHero)
+                    @if ($activeHero)
+                        <a href="{{ route('heroes.show', $activeHero) }}"
+                           class="flex items-center gap-4 bg-white/70 border-2 border-[#5a3a22]/40 rounded-lg p-4 shadow-sm active:bg-amber-50 transition-colors">
+                            <img src="{{ $activeHero->image_url }}" alt="{{ $activeHero->character_name }}"
+                                 class="w-16 h-16 object-cover rounded border-2 border-[#5a3a22]/40 shrink-0" loading="lazy">
+                            <div class="flex-1 min-w-0">
+                                <div class="text-xs text-stone-500 uppercase tracking-wide mb-0.5">
+                                    {{ $activePlayer->pivot->self ? 'Mein aktiver Held' : 'Held von ' . $activePlayer->name }}
+                                </div>
+                                <div class="font-uncial text-waldritter text-lg leading-tight truncate">{{ $activeHero->character_name }}</div>
+                                <div class="text-xs text-stone-500 truncate">{{ $activeHero->classes->pluck('name')->implode(', ') ?: '—' }}</div>
+                                <div class="text-sm font-semibold text-waldritter mt-1">{{ number_format($activeHero->ep_balance, 0, ',', '.') }} EP verfügbar</div>
+                            </div>
+                            <svg class="h-5 w-5 text-stone-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
+                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+                            </svg>
+                        </a>
+                    @endif
+                @endforeach
 
-                {{-- Nächstes Abenteuer --}}
-                @if ($nextAdventure)
+                {{-- Meine Anmeldungen (mobile) --}}
+                @if ($upcomingBookedAdventures->isNotEmpty())
+                    <div>
+                        <div class="text-xs text-stone-400 uppercase tracking-wide mb-2">Meine Anmeldungen</div>
+                        <div class="space-y-2">
+                            @foreach ($upcomingBookedAdventures as $adventure)
+                                <a href="{{ route('adventures.show', $adventure) }}"
+                                   class="flex items-center gap-3 bg-white/70 border-2 border-[#5a3a22]/40 rounded-lg p-3 shadow-sm active:bg-amber-50 transition-colors">
+                                    <div class="flex-1 min-w-0">
+                                        <div class="font-uncial text-waldritter text-base leading-tight truncate">{{ $adventure->name }}</div>
+                                        <div class="text-xs text-stone-500 mt-0.5">
+                                            @if ($adventure->start_at)
+                                                {{ $adventure->start_at->format('d.m.Y') }}
+                                                @if ($adventure->location) · {{ $adventure->location->titel }} @endif
+                                            @endif
+                                        </div>
+                                        <div class="flex flex-wrap gap-1 mt-1">
+                                            @foreach ($adventure->bookings as $booking)
+                                                <span class="inline-flex items-center gap-1 text-xs px-1.5 py-0.5 rounded
+                                                    {{ $booking->waitlisted ? 'bg-stone-100 text-stone-600' : ($booking->status === 'bestaetigt' ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800') }}">
+                                                    @if ($booking->waitlisted)
+                                                        <i class="hourglass half icon" title="Warteliste" aria-label="Warteliste"></i>
+                                                    @else
+                                                        &#10003;
+                                                    @endif
+                                                    {{ $booking->participant_name }}
+                                                    @if ($adventure->fee > 0 && ! $booking->waitlisted)
+                                                        <i class="{{ $booking->paid ? 'money bill alternate icon' : 'clock outline icon' }} text-xs ml-0.5"
+                                                           style="color:{{ $booking->paid ? '#16a34a' : '#d97706' }}"
+                                                           title="{{ $booking->paid ? 'Bezahlt' : 'Zahlung ausstehend' }}"
+                                                           aria-label="{{ $booking->paid ? 'Bezahlt' : 'Zahlung ausstehend' }}"></i>
+                                                    @endif
+                                                </span>
+                                            @endforeach
+                                        </div>
+                                    </div>
+                                    <svg class="h-4 w-4 text-stone-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+                                    </svg>
+                                </a>
+                            @endforeach
+                        </div>
+                    </div>
+
+                {{-- Fallback: nächstes Abenteuer wenn keine eigenen Buchungen --}}
+                @elseif ($nextAdventure)
                     <a href="{{ route('adventures.show', $nextAdventure) }}"
                        class="block bg-white/70 border-2 border-[#5a3a22]/40 rounded-lg p-4 shadow-sm active:bg-amber-50 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-600 focus-visible:outline-offset-[-2px]">
                         <div class="text-xs text-stone-400 uppercase tracking-wide mb-1">Nächstes Abenteuer</div>
@@ -202,19 +252,11 @@
                             @endif
                             <div class="flex gap-2">
                                 <dt class="text-stone-400 shrink-0">Beitrag</dt>
-                                <dd>
-                                    @if ($nextAdventure->fee > 0)
-                                        {{ number_format($nextAdventure->fee, 2, ',', '.') }} €
-                                    @else
-                                        kostenlos
-                                    @endif
-                                </dd>
+                                <dd>{{ $nextAdventure->fee > 0 ? number_format($nextAdventure->fee, 2, ',', '.') . ' €' : 'kostenlos' }}</dd>
                             </div>
                         </dl>
                         <div class="flex items-center justify-between">
-                            @if ($alreadyBooked)
-                                <span class="text-green-700 text-sm font-medium">&#10003; Angemeldet</span>
-                            @elseif ($nextAdventure->registrationOpen())
+                            @if ($nextAdventure->registrationOpen())
                                 <span class="ui small primary button pointer-events-none">Jetzt anmelden</span>
                             @else
                                 <span class="text-stone-400 text-sm">Details ansehen</span>
@@ -226,8 +268,8 @@
                     </a>
                 @endif
 
-                {{-- Leerzustand: kein Held, kein Abenteuer --}}
-                @if (! $activeHero && ! $nextAdventure)
+                {{-- Leerzustand: kein Held, keine Abenteuer --}}
+                @if ($activePlayers->isEmpty() && $upcomingBookedAdventures->isEmpty() && ! $nextAdventure)
                     <div class="bg-white/60 border-2 border-[#5a3a22]/30 rounded-lg p-6 text-center text-stone-500">
                         <p class="font-uncial text-waldritter text-lg mb-1">Herzlich willkommen!</p>
                         <p class="text-sm">Erkunde die Abenteuer oder lege deinen ersten Spieler an.</p>
@@ -242,8 +284,67 @@
 
             </div>
 
-            {{-- Desktop: Nächstes Abenteuer (sm+) --}}
-            @if ($nextAdventure)
+            {{-- Desktop: Meine Anmeldungen (sm+) --}}
+            @if ($upcomingBookedAdventures->isNotEmpty())
+                @can('adventure.access')
+                <div class="hidden sm:block mb-6">
+                    <div class="text-xs text-stone-400 uppercase tracking-wide mb-2">Meine Anmeldungen</div>
+                    <div class="space-y-3">
+                        @foreach ($upcomingBookedAdventures as $adventure)
+                            <a href="{{ route('adventures.show', $adventure) }}"
+                               class="flex items-center gap-6 bg-white/70 border-2 border-[#5a3a22]/40 rounded-lg p-5 shadow hover:shadow-xl hover:-translate-y-0.5 transition-all group focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-600 focus-visible:outline-offset-[-2px]">
+                                <div class="flex-1 min-w-0">
+                                    <div class="font-uncial text-waldritter text-xl leading-tight mb-1 group-hover:text-amber-700 transition-colors">{{ $adventure->name }}</div>
+                                    <dl class="flex flex-wrap gap-x-6 gap-y-1 text-sm text-stone-600">
+                                        @if ($adventure->start_at)
+                                            <div class="flex items-center gap-1.5">
+                                                <dt><i class="calendar alternate outline icon text-stone-400" aria-hidden="true"></i></dt>
+                                                <dd>{{ $adventure->start_at->format('d.m.Y') }}</dd>
+                                            </div>
+                                        @endif
+                                        @if ($adventure->location)
+                                            <div class="flex items-center gap-1.5">
+                                                <dt><i class="map marker alternate icon text-stone-400" aria-hidden="true"></i></dt>
+                                                <dd>{{ $adventure->location->titel }}</dd>
+                                            </div>
+                                        @endif
+                                        <div class="flex items-center gap-1.5">
+                                            <dt><i class="euro sign icon text-stone-400" aria-hidden="true"></i></dt>
+                                            <dd>{{ $adventure->fee > 0 ? number_format($adventure->fee, 2, ',', '.') . ' €' : 'kostenlos' }}</dd>
+                                        </div>
+                                    </dl>
+                                </div>
+                                <div class="flex flex-wrap items-center gap-2 shrink-0">
+                                    @foreach ($adventure->bookings as $booking)
+                                        <span class="inline-flex items-center gap-1.5 text-sm font-medium px-2.5 py-1 rounded-full
+                                            {{ $booking->waitlisted ? 'bg-stone-100 text-stone-600' : ($booking->status === 'bestaetigt' ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800') }}"
+                                            title="{{ $booking->waitlisted ? 'Warteliste' : ($booking->status === 'bestaetigt' ? 'Bestätigt' : 'Angemeldet') }}">
+                                            @if ($booking->waitlisted)
+                                                <i class="hourglass half icon" aria-label="Warteliste"></i>
+                                            @else
+                                                &#10003;
+                                            @endif
+                                            {{ $booking->participant_name }}
+                                            @if ($adventure->fee > 0 && ! $booking->waitlisted)
+                                                <i class="{{ $booking->paid ? 'money bill alternate icon' : 'clock outline icon' }}"
+                                                   style="color:{{ $booking->paid ? '#16a34a' : '#d97706' }};font-size:.85em"
+                                                   title="{{ $booking->paid ? 'Bezahlt' : 'Zahlung ausstehend' }}"
+                                                   aria-label="{{ $booking->paid ? 'Bezahlt' : 'Zahlung ausstehend' }}"></i>
+                                            @endif
+                                        </span>
+                                    @endforeach
+                                    <svg class="h-5 w-5 text-stone-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+                                    </svg>
+                                </div>
+                            </a>
+                        @endforeach
+                    </div>
+                </div>
+                @endcan
+
+            {{-- Desktop: Fallback nächstes Abenteuer wenn keine eigenen Buchungen --}}
+            @elseif ($nextAdventure)
                 @can('adventure.access')
                 <a href="{{ route('adventures.show', $nextAdventure) }}"
                    class="hidden sm:flex items-center gap-6 bg-white/70 border-2 border-[#5a3a22]/40 rounded-lg p-5 shadow mb-6 hover:shadow-xl hover:-translate-y-0.5 transition-all group focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-600 focus-visible:outline-offset-[-2px]">
@@ -270,9 +371,7 @@
                         </dl>
                     </div>
                     <div class="flex items-center gap-3 shrink-0">
-                        @if ($alreadyBooked)
-                            <span class="text-green-700 text-sm font-medium">&#10003; Angemeldet</span>
-                        @elseif ($nextAdventure->registrationOpen())
+                        @if ($nextAdventure->registrationOpen())
                             <span class="ui small primary button pointer-events-none">Jetzt anmelden</span>
                         @else
                             <span class="ui small button pointer-events-none">Details ansehen</span>
@@ -354,25 +453,30 @@
                 @endcan
             </div>
 
-            {{-- Desktop: Aktiver Held (sm+) --}}
-            @if ($activeHero)
-                <div class="hidden sm:block mt-6 pt-6 border-t border-[#5a3a22]/30">
-                    <a href="{{ route('heroes.show', $activeHero) }}"
-                       class="flex items-center gap-4 bg-white/70 border-2 border-[#5a3a22]/40 rounded-lg p-4 shadow hover:shadow-xl hover:-translate-y-0.5 transition-all group focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-600 focus-visible:outline-offset-[-2px]">
-                        <img src="{{ $activeHero->image_url }}" alt="{{ $activeHero->character_name }}"
-                             class="w-16 h-16 object-cover rounded border-2 border-[#5a3a22]/40 shrink-0" loading="lazy">
-                        <div class="flex-1 min-w-0">
-                            <div class="text-xs text-stone-500 uppercase tracking-wide mb-0.5">
-                                {{ $activeHeroIsOwn ? 'Mein aktiver Held' : 'Held von ' . $activePlayer->name }}
-                            </div>
-                            <div class="font-uncial text-waldritter text-lg leading-tight truncate">{{ $activeHero->character_name }}</div>
-                            <div class="text-xs text-stone-500 truncate">{{ $activeHero->classes->pluck('name')->implode(', ') ?: '—' }}</div>
-                            <div class="text-sm font-semibold text-waldritter mt-1">{{ number_format($activeHero->ep_balance, 0, ',', '.') }} EP verfügbar</div>
-                        </div>
-                        <svg class="h-5 w-5 text-stone-400 shrink-0 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
-                        </svg>
-                    </a>
+            {{-- Desktop: Aktive Helden (sm+) --}}
+            @if ($activePlayers->isNotEmpty())
+                <div class="hidden sm:block mt-6 pt-6 border-t border-[#5a3a22]/30 space-y-3">
+                    @foreach ($activePlayers as $activePlayer)
+                        @php($activeHero = $activePlayer->activeHero)
+                        @if ($activeHero)
+                            <a href="{{ route('heroes.show', $activeHero) }}"
+                               class="flex items-center gap-4 bg-white/70 border-2 border-[#5a3a22]/40 rounded-lg p-4 shadow hover:shadow-xl hover:-translate-y-0.5 transition-all group focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-600 focus-visible:outline-offset-[-2px]">
+                                <img src="{{ $activeHero->image_url }}" alt="{{ $activeHero->character_name }}"
+                                     class="w-16 h-16 object-cover rounded border-2 border-[#5a3a22]/40 shrink-0" loading="lazy">
+                                <div class="flex-1 min-w-0">
+                                    <div class="text-xs text-stone-500 uppercase tracking-wide mb-0.5">
+                                        {{ $activePlayer->pivot->self ? 'Mein aktiver Held' : 'Held von ' . $activePlayer->name }}
+                                    </div>
+                                    <div class="font-uncial text-waldritter text-lg leading-tight truncate">{{ $activeHero->character_name }}</div>
+                                    <div class="text-xs text-stone-500 truncate">{{ $activeHero->classes->pluck('name')->implode(', ') ?: '—' }}</div>
+                                    <div class="text-sm font-semibold text-waldritter mt-1">{{ number_format($activeHero->ep_balance, 0, ',', '.') }} EP verfügbar</div>
+                                </div>
+                                <svg class="h-5 w-5 text-stone-400 shrink-0 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
+                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
+                                </svg>
+                            </a>
+                        @endif
+                    @endforeach
                 </div>
             @endif
 

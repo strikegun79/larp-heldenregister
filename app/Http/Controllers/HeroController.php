@@ -189,6 +189,12 @@ class HeroController extends Controller
         $hero->classes()->sync($request->input('classes', []));
         $this->handleImageUpload($request, $hero);
 
+        // Einziger Held des Spielers → sofort als aktiven Helden setzen.
+        $player = Player::find($hero->player_id);
+        if ($player && $player->heroes()->count() === 1) {
+            $player->update(['active_hero_id' => $hero->id]);
+        }
+
         return redirect()
             ->route('heroes.show', $hero)
             ->with('status', 'Held wurde angelegt.');
@@ -265,6 +271,12 @@ class HeroController extends Controller
         $this->handleImageUpload($request, $hero);
         // Klassen werden nicht mehr über das Formular gesynct – Hinzufügen/Entfernen
         // läuft über HeroClassController mit EP-Verbuchung (HERO-06).
+
+        // Einziger Held des Spielers und noch kein aktiver Held → jetzt setzen.
+        $player = Player::find($hero->player_id);
+        if ($player && $player->active_hero_id === null && $player->heroes()->count() === 1) {
+            $player->update(['active_hero_id' => $hero->id]);
+        }
 
         $message = 'Held wurde aktualisiert.';
 

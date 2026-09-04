@@ -189,8 +189,8 @@ class PlayerController extends Controller
     }
 
     /**
-     * Setzt den aktiven Helden des Spielers (Legacy: player.hero_active).
-     * Es kann nur ein aktiver Held je Spieler gesetzt sein (HERO-07).
+     * Setzt den aktuell gespielten Helden des Spielers (players.active_hero_id).
+     * heroes.active (Freigabe durch Bürokrat) wird hier nicht verändert.
      */
     public function setActiveHero(Request $request, Player $player): RedirectResponse|JsonResponse
     {
@@ -201,13 +201,7 @@ class PlayerController extends Controller
         // Der Held muss zu diesem Spieler gehören.
         abort_unless($player->heroes()->whereKey($data['hero_id'])->exists(), 422);
 
-        // Es kann nur einen aktiven Helden geben (HERO-21): alle anderen
-        // Helden des Spielers werden auf inaktiv gesetzt.
-        DB::transaction(function () use ($player, $data) {
-            $player->heroes()->update(['active' => false]);
-            $player->heroes()->whereKey($data['hero_id'])->update(['active' => true]);
-            $player->update(['active_hero_id' => $data['hero_id']]);
-        });
+        $player->update(['active_hero_id' => $data['hero_id']]);
 
         $message = 'Aktiver Held gesetzt.';
 
