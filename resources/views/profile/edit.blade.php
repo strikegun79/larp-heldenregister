@@ -62,20 +62,30 @@
                                 <p class="text-xs text-stone-500 mb-3">Rund um deine eigenen Anmeldungen zu Abenteuern.</p>
                                 <div class="divide-y divide-stone-200 border-t border-b border-stone-200">
                                     @foreach ([
-                                        ['notify_booking_received',  'Anmeldung eingegangen',         'Du bekommst eine Bestätigung, sobald deine Anmeldung bei uns eingeht.'],
-                                        ['notify_booking_approved',  'Anmeldung bestätigt',            'Wir sagen dir Bescheid, wenn dein Platz beim Abenteuer bestätigt ist.'],
-                                        ['notify_booking_rejected',  'Anmeldung abgelehnt',            'Du wirst informiert, falls deine Anmeldung nicht angenommen werden konnte.'],
-                                        ['notify_booking_cancelled', 'Stornierung bestätigt',          'Du erhältst eine Bestätigung, wenn du eine Anmeldung stornierst.'],
-                                        ['notify_payment_confirmed', 'Zahlung eingegangen',            'Wir bestätigen dir, wenn deine Zahlung bei uns angekommen ist.'],
-                                        ['notify_waitlist_promoted', 'Von der Warteliste nachgerückt', 'Du erfährst sofort, wenn für dich ein Platz frei geworden ist.'],
-                                        ['notify_event_cancelled',   'Abenteuer abgesagt',             'Wir benachrichtigen dich, falls ein Abenteuer nicht stattfinden kann.'],
-                                        ['notify_event_reminder',    'Erinnerung vor dem Abenteuer',   'Du bekommst kurz vorher eine Erinnerung, damit du nichts verpasst.'],
-                                    ] as [$col, $title, $desc])
+                                        ['notify_booking_received',  'Anmeldung eingegangen',          'Du bekommst eine Bestätigung, sobald deine Anmeldung bei uns eingeht.',     false],
+                                        ['notify_booking_cancelled', 'Stornierung bestätigt',          'Du erhältst eine Bestätigung, wenn du eine Anmeldung stornierst.',           false],
+                                        ['notify_payment_confirmed', 'Zahlung eingegangen',            'Wir bestätigen dir, wenn deine Zahlung bei uns angekommen ist.',             false],
+                                        ['notify_event_reminder',    'Erinnerung vor dem Abenteuer',   'Du bekommst kurz vorher eine Erinnerung, damit du nichts verpasst.',         false],
+                                        ['notify_booking_approved',  'Anmeldung bestätigt',            'Wir sagen dir Bescheid, wenn dein Platz beim Abenteuer bestätigt ist.',      true],
+                                        ['notify_booking_rejected',  'Anmeldung abgelehnt',            'Du wirst informiert, falls deine Anmeldung nicht angenommen werden konnte.', true],
+                                        ['notify_waitlist_promoted', 'Von der Warteliste nachgerückt', 'Du erfährst sofort, wenn für dich ein Platz frei geworden ist.',             true],
+                                        ['notify_event_cancelled',   'Abenteuer abgesagt',             'Wir benachrichtigen dich, falls ein Abenteuer nicht stattfinden kann.',      true],
+                                    ] as [$col, $title, $desc, $mandatory])
                                         <div class="py-4">
-                                            <div class="ui toggle checkbox">
-                                                <input type="checkbox" name="{{ $col }}" id="{{ $col }}" value="1"
-                                                       @checked($user->$col ?? true) aria-describedby="{{ $col }}_desc">
-                                                <label for="{{ $col }}" class="text-stone-800 font-medium">{{ $title }}</label>
+                                            {{-- Pflichtbenachrichtigungen: hidden-Input sichert Wert=1, Toggle ist deaktiviert --}}
+                                            @if ($mandatory)
+                                                <input type="hidden" name="{{ $col }}" value="1">
+                                            @endif
+                                            <div class="ui toggle checkbox{{ $mandatory ? ' disabled' : '' }}">
+                                                <input type="checkbox" {{ $mandatory ? '' : 'name="'.$col.'"' }} id="{{ $col }}" value="1"
+                                                       @checked($mandatory || ($user->$col ?? true)) @disabled($mandatory)
+                                                       aria-describedby="{{ $col }}_desc">
+                                                <label for="{{ $col }}" class="text-stone-800 font-medium">
+                                                    {{ $title }}
+                                                    @if ($mandatory)
+                                                        <span class="ui tiny label" style="background:#b45309;color:#fff;margin-left:0.4em;font-size:0.65em;vertical-align:middle">Pflicht</span>
+                                                    @endif
+                                                </label>
                                             </div>
                                             <p id="{{ $col }}_desc" class="text-sm text-stone-500 leading-snug mt-1 ml-[3.75rem]">{{ $desc }}</p>
                                         </div>

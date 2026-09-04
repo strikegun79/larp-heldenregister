@@ -51,6 +51,11 @@ class ProfileController extends Controller
             $user->$col = $request->boolean($col);
         }
 
+        // Pflichtbenachrichtigungen können nicht deaktiviert werden.
+        foreach (['notify_booking_approved', 'notify_booking_rejected', 'notify_waitlist_promoted', 'notify_event_cancelled'] as $col) {
+            $user->$col = true;
+        }
+
         $request->user()->save();
 
         return Redirect::route('profile.edit')->with('status', 'profile-updated');

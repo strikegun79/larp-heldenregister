@@ -164,20 +164,28 @@
                             </legend>
                             <div class="divide-y divide-stone-200 border-t border-b border-stone-200">
                                 @foreach ([
-                                    ['notify_booking_received',  'Anmeldung eingegangen'],
-                                    ['notify_booking_approved',  'Anmeldung bestätigt'],
-                                    ['notify_booking_rejected',  'Anmeldung abgelehnt'],
-                                    ['notify_booking_cancelled', 'Stornierung bestätigt'],
-                                    ['notify_payment_confirmed', 'Zahlung eingegangen'],
-                                    ['notify_waitlist_promoted', 'Von der Warteliste nachgerückt'],
-                                    ['notify_event_cancelled',   'Abenteuer abgesagt'],
-                                    ['notify_event_reminder',    'Erinnerung vor dem Abenteuer'],
-                                ] as [$col, $title])
+                                    ['notify_booking_received',  'Anmeldung eingegangen',          false],
+                                    ['notify_booking_cancelled', 'Stornierung bestätigt',          false],
+                                    ['notify_payment_confirmed', 'Zahlung eingegangen',            false],
+                                    ['notify_event_reminder',    'Erinnerung vor dem Abenteuer',   false],
+                                    ['notify_booking_approved',  'Anmeldung bestätigt',            true],
+                                    ['notify_booking_rejected',  'Anmeldung abgelehnt',            true],
+                                    ['notify_waitlist_promoted', 'Von der Warteliste nachgerückt', true],
+                                    ['notify_event_cancelled',   'Abenteuer abgesagt',             true],
+                                ] as [$col, $title, $mandatory])
                                     <div class="py-3">
-                                        <div class="ui toggle checkbox">
-                                            <input type="checkbox" name="{{ $col }}" id="adm_{{ $col }}" value="1"
-                                                   @checked($user->$col ?? true)>
-                                            <label for="adm_{{ $col }}" class="text-stone-800">{{ $title }}</label>
+                                        @if ($mandatory)
+                                            <input type="hidden" name="{{ $col }}" value="1">
+                                        @endif
+                                        <div class="ui toggle checkbox{{ $mandatory ? ' disabled' : '' }}">
+                                            <input type="checkbox" {{ $mandatory ? '' : 'name="'.$col.'"' }} id="adm_{{ $col }}" value="1"
+                                                   @checked($mandatory || ($user->$col ?? true)) @disabled($mandatory)>
+                                            <label for="adm_{{ $col }}" class="text-stone-800">
+                                                {{ $title }}
+                                                @if ($mandatory)
+                                                    <span class="ui tiny label" style="background:#b45309;color:#fff;margin-left:0.4em;font-size:0.65em;vertical-align:middle">Pflicht</span>
+                                                @endif
+                                            </label>
                                         </div>
                                     </div>
                                 @endforeach

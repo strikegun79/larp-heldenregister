@@ -22,12 +22,26 @@ class UserController extends Controller
 {
     /**
      * Liste aller Portal-Nutzer inkl. soft-gelöschter (AUTH-08).
+     * Unterstützt Freitextsuche nach Name und E-Mail.
      */
-    public function index(): View
+    public function index(Request $request): View
     {
-        $users = User::withTrashed()->with('roles')->orderBy('name')->paginate(25);
+        $q = trim($request->string('q'));
 
-        return view('admin.users.index', compact('users'));
+        $users = User::withTrashed()
+            ->with('roles')
+            ->when($q !== '', function ($query) use ($q) {
+                $query->where(function ($b) use ($q) {
+                    $b->where('name', 'like', "%{$q}%")
+                      ->orWhere('lastname', 'like', "%{$q}%")
+                      ->orWhere('email', 'like', "%{$q}%");
+                });
+            })
+            ->orderBy('name')
+            ->paginate(25)
+            ->withQueryString();
+
+        return view('admin.users.index', compact('users', 'q'));
     }
 
     /**
@@ -203,6 +217,12 @@ class UserController extends Controller
         foreach ($cols as $col) {
             $user->$col = $request->boolean($col);
         }
+
+        // Pflichtbenachrichtigungen können auch vom Admin nicht deaktiviert werden.
+        foreach (['notify_booking_approved', 'notify_booking_rejected', 'notify_waitlist_promoted', 'notify_event_cancelled'] as $col) {
+            $user->$col = true;
+        }
+
         $user->save();
 
         AuditLogger::log('user.notifications_updated', $user, ['by_admin' => $request->user()->id]);
