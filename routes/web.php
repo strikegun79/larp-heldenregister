@@ -17,6 +17,7 @@ use App\Http\Controllers\PublicHeroController;
 use App\Http\Controllers\SignatureController;
 use App\Http\Controllers\SkillController;
 use App\Http\Controllers\SkilltreeController;
+use App\Http\Controllers\SurveyController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -179,6 +180,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Anmeldung ablehnen – Toggle (ADV-18).
     Route::patch('adventures/{adventure}/bookings/{booking}/rejection', [BookingController::class, 'reject'])
         ->name('adventures.bookings.rejection');
+    Route::patch('adventures/{adventure}/bookings/{booking}/move-to-waitlist', [BookingController::class, 'moveToWaitlist'])
+        ->name('adventures.bookings.move-to-waitlist');
     // Unterschrift bei Teilnahme erfassen (ADV-17).
     Route::get('adventures/{adventure}/bookings/{booking}/signature', [SignatureController::class, 'edit'])
         ->name('adventures.bookings.signature.edit');
@@ -204,10 +207,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::patch('adventures/{adventure}/bookings/{booking}/deregister', [AttendanceController::class, 'deregister'])
         ->name('adventures.bookings.deregister');
 
+    // Rollen- & DSGVO-Übersicht (für alle Teamer-Rollen sichtbar).
+    Route::prefix('admin')->name('admin.')->middleware('can:roles.view')->group(function () {
+        Route::get('roles', [Admin\RoleController::class, 'index'])->name('roles.index');
+    });
+
     // Verwaltung (Portal-Administration, Berechtigung portal.manage).
     Route::prefix('admin')->name('admin.')->middleware('can:portal.manage')->group(function () {
         Route::get('/', [Admin\AdminController::class, 'index'])->name('index');
-        Route::get('roles', [Admin\RoleController::class, 'index'])->name('roles.index');
         // Nutzerverwaltung erfordert zusätzlich users.manage.
         Route::middleware('can:users.manage')->group(function () {
             Route::get('users', [Admin\UserController::class, 'index'])->name('users.index');
@@ -373,6 +380,34 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('groups/{group}/members', [Admin\GroupMemberController::class, 'store'])->name('groups.members.store');
         Route::delete('groups/{group}/members/{hero}', [Admin\GroupMemberController::class, 'destroy'])->name('groups.members.destroy');
     });
+});
+
+// Umfrage-System (SURV-01): Öffentliche Links ohne Login.
+Route::prefix('umfrage')->name('survey.')->group(function () {
+    Route::get('{token}', [SurveyController::class, 'start'])->name('start');
+    Route::get('{token}/formular', [SurveyController::class, 'show'])->name('show');
+    Route::post('{token}/formular', [SurveyController::class, 'submit'])->name('submit');
+    Route::get('{token}/danke', [SurveyController::class, 'danke'])->name('danke');
+});
+
+// Admin: Umfragen verwalten (survey.view = einsehen, survey.admin = alles).
+Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified'])->group(function () {
+    Route::get('surveys', [Admin\SurveyAdminController::class, 'index'])->name('surveys.index');
+    Route::get('surveys/create', [Admin\SurveyAdminController::class, 'create'])->name('surveys.create');
+    Route::post('surveys', [Admin\SurveyAdminController::class, 'store'])->name('surveys.store');
+    Route::get('surveys/{survey}/results', [Admin\SurveyAdminController::class, 'results'])->name('surveys.results');
+    Route::post('surveys/{survey}/send', [Admin\SurveyAdminController::class, 'send'])->name('surveys.send');
+    Route::post('surveys/{survey}/import-bookings', [Admin\SurveyAdminController::class, 'importBookings'])->name('surveys.import-bookings');
+    Route::post('surveys/{survey}/links/{link}/send', [Admin\SurveyAdminController::class, 'sendLink'])->name('surveys.links.send');
+    Route::delete('surveys/{survey}/links/{link}', [Admin\SurveyAdminController::class, 'destroyLink'])->name('surveys.links.destroy');
+    Route::get('surveys/{survey}/links/{link}/response', [Admin\SurveyAdminController::class, 'showResponse'])->name('surveys.links.response');
+    Route::get('surveys/{survey}/export/pdf', [Admin\SurveyAdminController::class, 'exportPdf'])->name('surveys.export.pdf');
+    Route::patch('surveys/{survey}/close', [Admin\SurveyAdminController::class, 'close'])->name('surveys.close');
+
+    // Vorlagenverwaltung: nur survey.admin.
+    Route::resource('surveys/templates', Admin\SurveyTemplateController::class)
+        ->names('surveys.templates')
+        ->parameters(['templates' => 'template']);
 });
 
 require __DIR__.'/auth.php';

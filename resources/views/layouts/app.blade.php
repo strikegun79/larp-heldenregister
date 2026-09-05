@@ -65,7 +65,12 @@
                         @endif
                     </div>
                     <div class="sm:text-right">
-                        <a href="{{ route('datenschutz') }}" class="hover:underline text-waldritter">Datenschutzerklärung</a><br>
+                        <a href="{{ route('datenschutz') }}" class="hover:underline text-waldritter">Datenschutzerklärung</a>
+                        @can('roles.view')
+                        &nbsp;·&nbsp;
+                        <a href="{{ route('admin.roles.index') }}" class="hover:underline text-waldritter">Rechte &amp; Datenschutz</a>
+                        @endcan
+                        <br>
                         &copy; {{ date('Y') }} {{ config('portal.organization') }}
                     </div>
                 </div>

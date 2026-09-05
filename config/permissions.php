@@ -24,6 +24,10 @@ return [
         'users.manage',
         'portal.manage',
         'groups.manage',
+        'roles.view',     // Rollen- & DSGVO-Übersicht einsehen
+        // Umfrage-System (SURV-01)
+        'survey.admin',   // Vorlagen verwalten, Umfragen erstellen/versenden, Ergebnisse einsehen
+        'survey.view',    // Nur Ergebnisse einsehen
     ],
 
     'roles' => [
@@ -37,6 +41,7 @@ return [
             'adventure.book', 'adventure.modify', 'adventure.cancel',
             'events.view', 'events.edit',
             'groups.manage',
+            'roles.view',
         ],
 
         // Projektleitung
@@ -45,6 +50,8 @@ return [
             'heldenregister.view',
             'adventure.book', 'adventure.modify', 'adventure.cancel',
             'events.view', 'events.edit',
+            'survey.view',
+            'roles.view',
         ],
 
         // Spielleiter
@@ -54,6 +61,7 @@ return [
             'adventure.book', 'adventure.modify', 'adventure.cancel',
             'events.view',
             'groups.manage',
+            'roles.view',
         ],
 
         // Lehrmeister (erweiterter Teamer mit Helden-Einsicht, ROLE-09)
@@ -62,6 +70,7 @@ return [
             'heldenregister.view',
             'adventure.book', 'adventure.modify', 'adventure.cancel',
             'events.view',
+            'roles.view',
         ],
 
         // Teamer (kein heldenregister.view, ROLE-09)
@@ -69,6 +78,7 @@ return [
             'profile.view', 'player.view',
             'adventure.book', 'adventure.modify', 'adventure.cancel',
             'events.view',
+            'roles.view',
         ],
 
         // Event buchen

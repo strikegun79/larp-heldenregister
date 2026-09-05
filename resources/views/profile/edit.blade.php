@@ -179,7 +179,7 @@
                     </p>
                     <p class="mt-3 text-sm text-stone-600">
                         Bei Fragen zum Datenschutz oder zur Löschung deiner Daten wende dich an:
-                        <a href="mailto:datenschutz@waldritter.de" class="text-waldritter underline hover:opacity-75">datenschutz@waldritter.de</a>
+                        <a href="mailto:info@waldritter-giessen.de" class="text-waldritter underline hover:opacity-75">info@waldritter-giessen.de</a>
                     </p>
                     <div class="mt-4 flex flex-wrap gap-3">
                         <a href="{{ route('profile.export-data') }}"

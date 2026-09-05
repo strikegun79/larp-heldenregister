@@ -45,6 +45,13 @@
                             {{ __('Verwaltung') }}
                         </x-nav-link>
                     @endcan
+                    @cannot('portal.manage')
+                        @canany(['survey.view', 'survey.admin'])
+                            <x-nav-link :href="route('admin.surveys.index')" :active="request()->routeIs('admin.surveys.*')">
+                                {{ __('Umfragen') }}
+                            </x-nav-link>
+                        @endcanany
+                    @endcannot
                 </div>
             </div>
 
@@ -265,6 +272,12 @@
                    class="flex items-center px-5 py-3 text-sm text-stone-700 hover:bg-stone-100 active:bg-stone-200 gap-3">
                     <i class="cogs icon text-stone-400 w-5 text-center shrink-0"></i>
                     Verwaltung
+                </a>
+                @elsecan('roles.view')
+                <a href="{{ route('admin.roles.index') }}" @click="moreOpen = false"
+                   class="flex items-center px-5 py-3 text-sm text-stone-700 hover:bg-stone-100 active:bg-stone-200 gap-3">
+                    <i class="shield alternate icon text-stone-400 w-5 text-center shrink-0"></i>
+                    Rollen & Datenschutz
                 </a>
                 @endcan
 
