@@ -159,6 +159,21 @@
         </div>
     </div>
 
+    <div class="grid grid-cols-4 gap-4">
+        <div>
+            <x-input-label for="min_age" value="Mindestalter (Jahre)" />
+            <x-text-input id="min_age" name="min_age" type="number" min="0" max="99" class="mt-1 block w-full"
+                          :value="old('min_age', $adventure->min_age)" placeholder="optional" />
+            <x-input-error :messages="$errors->get('min_age')" class="mt-2" />
+        </div>
+        <div>
+            <x-input-label for="max_age" value="Höchstalter (Jahre)" />
+            <x-text-input id="max_age" name="max_age" type="number" min="0" max="99" class="mt-1 block w-full"
+                          :value="old('max_age', $adventure->max_age)" placeholder="optional" />
+            <x-input-error :messages="$errors->get('max_age')" class="mt-2" />
+        </div>
+    </div>
+
     @unless($inModal ?? false)
     <div class="flex items-center gap-4">
         <x-primary-button>Speichern</x-primary-button>

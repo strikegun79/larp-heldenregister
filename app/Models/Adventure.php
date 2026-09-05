@@ -28,6 +28,8 @@ class Adventure extends Model
         'event_client_id',
         'event_category_id',
         'max_player',
+        'min_age',
+        'max_age',
         'waitlist',
         'waitlist_mode',
         'is_hidden',
@@ -44,10 +46,27 @@ class Adventure extends Model
         'fee_reduced' => 'decimal:2',
         'loot_ep_day' => 'integer',
         'max_player' => 'integer',
+        'min_age'    => 'integer',
+        'max_age'    => 'integer',
         'waitlist' => 'integer',
         'waitlist_mode' => 'boolean',
         'is_hidden' => 'boolean',
     ];
+
+    /** Gibt die Altersbeschränkung als lesbaren String zurück, z. B. „8–17 Jahre". */
+    public function getAgeRangeLabelAttribute(): string
+    {
+        if ($this->min_age && $this->max_age) {
+            return "{$this->min_age}–{$this->max_age} Jahre";
+        }
+        if ($this->min_age) {
+            return "ab {$this->min_age} Jahren";
+        }
+        if ($this->max_age) {
+            return "bis {$this->max_age} Jahren";
+        }
+        return '—';
+    }
 
     public function location(): BelongsTo
     {
@@ -207,6 +226,24 @@ class Adventure extends Model
     public function isFull(): bool
     {
         return $this->freeSlots() === 0;
+    }
+
+    /**
+     * Liegt das Alter des Spielers außerhalb des festgelegten Altersrahmens?
+     * Gibt false zurück, wenn keine Altersgrenzen gesetzt sind oder das Geburtsdatum fehlt.
+     */
+    public function isOutsideAgeRange(?Player $player): bool
+    {
+        if (! $player || (! $this->min_age && ! $this->max_age)) {
+            return false;
+        }
+        $age = $player->dayofbirth?->age;
+        if ($age === null) {
+            return false;
+        }
+
+        return ($this->min_age && $age < $this->min_age)
+            || ($this->max_age && $age > $this->max_age);
     }
 
     /**

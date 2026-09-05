@@ -1,6 +1,9 @@
 @php($manage = $manage ?? false)
-{{-- ROLE-07: Aktionen-Spalte nur rendern wenn der Nutzer mind. eine Verwaltungs-Berechtigung hat. --}}
-@php($canAnyBookingAction = auth()->user()?->canAny(['approve-bookings', 'manage-payments', 'adventure.modify', 'adventure.cancel']))
+{{-- Spalte erscheint wenn: Manage-Modus mit irgendeiner Verwaltungs-Berechtigung,
+     ODER Detailansicht mit Bearbeiten/Stornieren-Recht (nur eigene Buchungen). --}}
+@php($canAnyBookingAction = $manage
+    ? auth()->user()?->canAny(['approve-bookings', 'manage-payments', 'adventure.modify', 'adventure.cancel'])
+    : auth()->user()?->can('adventure.book'))
 <x-mobile.cards-or-table>
 <table class="ui very basic compact unstackable table">
     <thead class="mob-thead" hidden><tr>
@@ -72,55 +75,59 @@
                 @if ($canAnyBookingAction)
                     <td>
                         <div class="flex items-center justify-end gap-1 flex-wrap">
-                            @can('approve-bookings')
-                                {{-- Warteliste-Promotion: nur Bürokrat/Admin --}}
-                                @unless ($booking->is_guest)
-                                @if ($booking->waitlisted)
-                                <form method="POST" action="{{ route('adventures.bookings.resend-confirmation', [$adventure, $booking]) }}" data-refresh-modal
-                                      data-confirm="{{ $booking->player?->full_name ?? 'Spieler' }} von der Warteliste auf regulären Platz hochstufen?">
-                                    @csrf
-                                    <button type="submit" class="ui mini icon green button"
-                                            data-tooltip="Von Warteliste bestätigen" data-position="top center">
-                                        <i class="check icon"></i>
-                                        <span class="sm:hidden ml-1 text-xs">Bestät.</span>
-                                    </button>
-                                </form>
-                                @endif
+                            @if ($manage)
+                                @can('approve-bookings')
+                                    {{-- Warteliste-Promotion: nur in Verwaltungsansicht --}}
+                                    @unless ($booking->is_guest)
+                                    @if ($booking->waitlisted)
+                                        <form method="POST" action="{{ route('adventures.bookings.resend-confirmation', [$adventure, $booking]) }}" data-refresh-modal
+                                              data-confirm="{{ $booking->player?->full_name ?? 'Spieler' }} von der Warteliste auf regulären Platz hochstufen?">
+                                            @csrf
+                                            <button type="submit" class="ui mini icon green button"
+                                                    data-tooltip="Von Warteliste bestätigen" data-position="top center">
+                                                <i class="check icon"></i>
+                                                <span class="sm:hidden ml-1 text-xs">Bestät.</span>
+                                            </button>
+                                        </form>
+                                    @else
+                                        <form method="POST" action="{{ route('adventures.bookings.move-to-waitlist', [$adventure, $booking]) }}" data-refresh-modal
+                                              data-confirm="{{ $booking->player?->full_name ?? 'Spieler' }} auf die Warteliste verschieben? Der Teilnehmer wird per E-Mail informiert.">
+                                            @csrf @method('PATCH')
+                                            <button type="submit" class="ui mini icon yellow button"
+                                                    data-tooltip="Auf Warteliste verschieben" data-position="top center">
+                                                <i class="hourglass half icon"></i>
+                                                <span class="sm:hidden ml-1 text-xs">Warteliste</span>
+                                            </button>
+                                        </form>
+                                    @endif
+                                    @endunless
+                                @endcan
+                                {{-- Bestätigung erneut senden: nur in Verwaltungsansicht --}}
+                                @unless ($booking->is_guest || $booking->waitlisted)
+                                    @if (Gate::allows('approve-bookings') || $booking->booked_by_user_id === auth()->id())
+                                    <form method="POST" action="{{ route('adventures.bookings.resend-confirmation', [$adventure, $booking]) }}" data-refresh-modal>
+                                        @csrf
+                                        <button type="submit" class="ui mini icon button"
+                                                data-tooltip="Anmeldebestätigung erneut senden" data-position="top center">
+                                            <i class="envelope outline icon"></i>
+                                            <span class="sm:hidden ml-1 text-xs">Mail</span>
+                                        </button>
+                                    </form>
+                                    @endif
                                 @endunless
-                                <form method="POST" action="{{ route('adventures.bookings.rejection', [$adventure, $booking]) }}" data-refresh-modal
-                                      data-confirm="{{ $booking->status === 'abgelehnt' ? 'Ablehnung zurücknehmen?' : 'Anmeldung ablehnen?' }}">
-                                    @csrf @method('PATCH')
-                                    <button type="submit" class="ui mini icon button {{ $booking->status === 'abgelehnt' ? '' : 'orange' }}"
-                                            data-tooltip="{{ $booking->status === 'abgelehnt' ? 'Ablehnung zurücknehmen' : 'Ablehnen' }}" data-position="top center">
-                                        <i class="hand paper outline icon"></i>
-                                        <span class="sm:hidden ml-1 text-xs">{{ $booking->status === 'abgelehnt' ? 'Zurück' : 'Ablehnen' }}</span>
-                                    </button>
-                                </form>
-                            @endcan
-                            {{-- Bestätigung erneut senden: Bürokrat/Admin ODER eigene nicht-wartegelistete Buchung --}}
-                            @unless ($booking->is_guest || $booking->waitlisted)
-                                @if (Gate::allows('approve-bookings') || $booking->booked_by_user_id === auth()->id())
-                                <form method="POST" action="{{ route('adventures.bookings.resend-confirmation', [$adventure, $booking]) }}" data-refresh-modal>
-                                    @csrf
-                                    <button type="submit" class="ui mini icon button"
-                                            data-tooltip="Anmeldebestätigung erneut senden" data-position="top center">
-                                        <i class="envelope outline icon"></i>
-                                        <span class="sm:hidden ml-1 text-xs">Mail</span>
-                                    </button>
-                                </form>
-                                @endif
-                            @endunless
-                            @can('manage-payments')
-                                <form method="POST" action="{{ route('adventures.bookings.payment', [$adventure, $booking]) }}" data-refresh-modal
-                                      data-confirm="{{ $booking->paid ? 'Beitrag als offen markieren?' : 'Beitrag als bezahlt markieren?' }}">
-                                    @csrf @method('PATCH')
-                                    <button type="submit" class="ui mini icon button {{ $booking->paid ? '' : 'yellow' }}"
-                                            data-tooltip="{{ $booking->paid ? 'Als offen markieren' : 'Als bezahlt markieren' }}" data-position="top center">
-                                        <i class="coins icon"></i>
-                                        <span class="sm:hidden ml-1 text-xs">{{ $booking->paid ? 'Offen' : 'Bezahlt' }}</span>
-                                    </button>
-                                </form>
-                            @endcan
+                                @can('manage-payments')
+                                    <form method="POST" action="{{ route('adventures.bookings.payment', [$adventure, $booking]) }}" data-refresh-modal
+                                          data-confirm="{{ $booking->paid ? 'Beitrag als offen markieren?' : 'Beitrag als bezahlt markieren?' }}">
+                                        @csrf @method('PATCH')
+                                        <button type="submit" class="ui mini icon button {{ $booking->paid ? '' : 'yellow' }}"
+                                                data-tooltip="{{ $booking->paid ? 'Als offen markieren' : 'Als bezahlt markieren' }}" data-position="top center">
+                                            <i class="coins icon"></i>
+                                            <span class="sm:hidden ml-1 text-xs">{{ $booking->paid ? 'Offen' : 'Bezahlt' }}</span>
+                                        </button>
+                                    </form>
+                                @endcan
+                            @endif
+                            {{-- Bearbeiten + Stornieren: in beiden Ansichten für jeden mit Buchungsberechtigung --}}
                             @can('adventure.modify')
                                 <a href="{{ route('adventures.bookings.edit', [$adventure, $booking]) }}"
                                    data-modal-stack="{{ route('adventures.bookings.edit', [$adventure, $booking]) }}"

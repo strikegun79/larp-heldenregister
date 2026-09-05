@@ -97,6 +97,9 @@
                                                 · {{ $adventure->location->titel }}
                                             @endif
                                         </div>
+                                        @if ($adventure->min_age || $adventure->max_age)
+                                            <div class="text-xs text-stone-400 mt-0.5">Alter: {{ $adventure->age_range_label }}</div>
+                                        @endif
                                         <div class="mt-1 text-xs">
                                             @if ($free > 0)
                                                 <span class="text-green-700">Noch {{ $free }} frei</span>
@@ -116,6 +119,7 @@
                                             <th>Abenteuer</th>
                                             <th>Beginn</th>
                                             <th>Ort</th>
+                                            <th>Alter</th>
                                             <th>Plätze</th>
                                         </tr>
                                     </thead>
@@ -129,6 +133,7 @@
                                                 <td class="px-6 py-4 font-medium text-stone-800">{{ $adventure->name }}</td>
                                                 <td class="px-6 py-4">{{ optional($adventure->start_at)->format('d.m.Y H:i') }}</td>
                                                 <td class="px-6 py-4">{{ $adventure->location?->titel ?? '—' }}</td>
+                                                <td class="px-6 py-4 text-sm text-stone-500">{{ $adventure->age_range_label }}</td>
                                                 <td class="px-6 py-4 text-sm">
                                                     @if ($free > 0)
                                                         <span class="text-green-700">Noch {{ $free }} frei</span>
@@ -162,6 +167,9 @@
                                         · {{ $adventure->location->titel }}
                                     @endif
                                 </div>
+                                @if ($adventure->min_age || $adventure->max_age)
+                                    <div class="text-xs text-stone-400 mt-0.5">Alter: {{ $adventure->age_range_label }}</div>
+                                @endif
                                 <div class="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2 text-xs">
                                     <span class="inline-block rounded px-2 py-0.5"
                                           style="background: {{ $adventure->status?->color }}33;">
@@ -187,6 +195,7 @@
                                     <th class="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase">Abenteuer</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase">Beginn</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase">Ort</th>
+                                    <th class="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase">Alter</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase">Status</th>
                                     <th class="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase">Plätze</th>
                                 </tr>
@@ -201,6 +210,7 @@
                                         <td class="px-6 py-4 font-medium text-stone-800">{{ $adventure->name }}</td>
                                         <td class="px-6 py-4">{{ optional($adventure->start_at)->format('d.m.Y H:i') }}</td>
                                         <td class="px-6 py-4">{{ $adventure->location?->titel ?? '—' }}</td>
+                                        <td class="px-6 py-4 text-sm text-stone-500">{{ $adventure->age_range_label }}</td>
                                         <td class="px-6 py-4">
                                             <span class="inline-block rounded px-2 py-1 text-xs"
                                                   style="background: {{ $adventure->status?->color }}33;">
@@ -217,7 +227,7 @@
                                     </tr>
                                 @empty
                                     <tr>
-                                        <td colspan="5" class="px-6 py-10 text-center">
+                                        <td colspan="6" class="px-6 py-10 text-center">
                                             @include('adventures._empty_state')
                                         </td>
                                     </tr>

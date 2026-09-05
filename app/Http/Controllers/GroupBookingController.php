@@ -114,7 +114,11 @@ class GroupBookingController extends Controller
                 continue;
             }
 
-            $player = Player::find($playerId);
+            $player       = Player::find($playerId);
+            $freshAdv     = $adventure->fresh();
+            $ageViolation = $freshAdv->isOutsideAgeRange($player);
+            // Kapazität nach jeder Buchung neu prüfen; auch Altersgrenze einbeziehen.
+            $waitlisted   = $freshAdv->shouldWaitlist() || $ageViolation;
 
             $booking = $adventure->bookings()->create([
                 'player_id' => $playerId,
@@ -123,8 +127,7 @@ class GroupBookingController extends Controller
                 'event_role_id' => $data['event_role_id'],
                 'agb' => true,
                 'kontakt_telefon' => $data['kontakt_telefon'],
-                // Kapazität nach jeder Buchung neu prüfen; Wartelisten-Modus einbeziehen.
-                'waitlisted' => $adventure->fresh()->shouldWaitlist(),
+                'waitlisted' => $waitlisted,
                 'approved_at' => now(),
                 'status' => 'bestaetigt',
             ]);

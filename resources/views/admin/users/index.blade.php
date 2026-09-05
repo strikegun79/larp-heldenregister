@@ -10,6 +10,29 @@
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+            {{-- Suche --}}
+            <div class="bg-white/70 border-2 border-[#5a3a22]/40 shadow sm:rounded-lg p-4 mb-4">
+                <form method="GET" action="{{ route('admin.users.index') }}" class="ui form">
+                    <div class="flex items-center gap-3">
+                        <div class="ui action input">
+                            <input type="search" name="q" value="{{ $q }}"
+                                   placeholder="Name oder E-Mail suchen…"
+                                   style="min-width:260px"
+                                   autofocus>
+                            <button type="submit" class="ui icon button" aria-label="Suchen">
+                                <i class="search icon"></i>
+                            </button>
+                        </div>
+                        @if ($q !== '')
+                            <a href="{{ route('admin.users.index') }}" class="text-sm text-stone-500 hover:underline">
+                                Suche zurücksetzen
+                            </a>
+                        @endif
+                    </div>
+                </form>
+            </div>
+
             <div class="bg-white/70 border-2 border-[#5a3a22]/40 shadow sm:rounded-lg overflow-hidden">
                 <x-mobile.cards-or-table>
                 <table class="min-w-full divide-y divide-stone-200">
@@ -23,7 +46,7 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-stone-200 text-stone-800">
-                        @foreach ($users as $user)
+                        @forelse ($users as $user)
                             <tr @if (! $user->trashed())
                                     data-modal-url="{{ route('admin.users.edit', $user) }}"
                                     role="button" tabindex="0"
@@ -61,7 +84,13 @@
                                     @endif
                                 </td>
                             </tr>
-                        @endforeach
+                        @empty
+                            <tr>
+                                <td colspan="5" class="px-6 py-8 text-center text-stone-400">
+                                    Keine Nutzer für „{{ $q }}" gefunden.
+                                </td>
+                            </tr>
+                        @endforelse
                     </tbody>
                 </table>
                 </x-mobile.cards-or-table>

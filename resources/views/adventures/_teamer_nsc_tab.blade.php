@@ -158,19 +158,21 @@
                                         @endif
                                     </form>
                                     @endunless
+                                    @unless ($booking->is_guest || $booking->waitlisted)
                                     <form method="POST"
-                                          action="{{ route('adventures.bookings.rejection', [$adventure, $booking]) }}"
+                                          action="{{ route('adventures.bookings.move-to-waitlist', [$adventure, $booking]) }}"
                                           data-refresh-modal
-                                          data-confirm="{{ $booking->status === 'abgelehnt' ? 'Ablehnung zurücknehmen?' : 'Anmeldung ablehnen?' }}">
+                                          data-confirm="{{ $booking->player?->full_name ?? 'Spieler' }} auf die Warteliste verschieben? Der Teilnehmer wird per E-Mail informiert.">
                                         @csrf @method('PATCH')
                                         <button type="submit"
-                                                class="ui mini icon button {{ $booking->status === 'abgelehnt' ? '' : 'orange' }}"
-                                                data-tooltip="{{ $booking->status === 'abgelehnt' ? 'Ablehnung zurücknehmen' : 'Ablehnen' }}"
+                                                class="ui mini icon yellow button"
+                                                data-tooltip="Auf Warteliste verschieben"
                                                 data-position="top center">
-                                            <i class="hand paper outline icon"></i>
-                                            <span class="sm:hidden ml-1 text-xs">{{ $booking->status === 'abgelehnt' ? 'Zurück' : 'Ablehnen' }}</span>
+                                            <i class="hourglass half icon"></i>
+                                            <span class="sm:hidden ml-1 text-xs">Warteliste</span>
                                         </button>
                                     </form>
+                                    @endunless
                                 @endcan
                                 @can('adventure.modify')
                                     <a href="{{ route('adventures.bookings.edit', [$adventure, $booking]) }}"

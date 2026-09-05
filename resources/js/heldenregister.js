@@ -695,7 +695,12 @@ document.getElementById('photo-crop-save-btn').addEventListener('click', functio
             .then(data => {
                 showToast(data.message || 'Foto gespeichert.', 'success');
                 $('#photo-crop-modal').modal('hide');
-                if (photoCropCallback) photoCropCallback();
+                if (photoCropCallback) {
+                    photoCropCallback();
+                } else if (data.refresh_modal) {
+                    if (window.appModal2Url) loadStackContent(window.appModal2Url, true);
+                    else if (window.appModalUrl) loadModalContent(window.appModalUrl, true);
+                }
             })
             .catch(() => showToast('Netzwerkfehler.', 'error'))
             .finally(() => btn.classList.remove('loading', 'disabled'));

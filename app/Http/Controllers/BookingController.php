@@ -11,6 +11,7 @@ use App\Notifications\BookingCancelled;
 use App\Notifications\BookingWaitlisted;
 use App\Notifications\BookingCancelledParticipant;
 use App\Notifications\BookingReceived;
+use App\Notifications\BookingMovedToWaitlist;
 use App\Notifications\BookingRejected;
 use App\Notifications\PaymentConfirmed;
 use App\Notifications\WaitlistPromoted;
@@ -121,6 +122,10 @@ class BookingController extends Controller
         // Der teilnehmende Held ist automatisch der aktive Held des Spielers (HERO-21).
         $player = Player::find($data['player_id']);
 
+        $isTeamer     = in_array((int) $data['event_role_id'], EventRole::TEAMER_ROLE_IDS);
+        $ageViolation = ! $isTeamer && $adventure->isOutsideAgeRange($player);
+        $waitlisted   = $isTeamer ? false : ($adventure->shouldWaitlist() || $ageViolation);
+
         $booking = $adventure->bookings()->create([
             'player_id' => $data['player_id'],
             'hero_id' => $player?->active_hero_id,
@@ -138,10 +143,7 @@ class BookingController extends Controller
             'erreichbarkeit' => $data['erreichbarkeit'] ?? null,
             'kontakt_telefon' => $data['kontakt_telefon'],
             'ermaessigung' => $request->boolean('ermaessigung'),
-            // Teamer-Rollen ignorieren das Teilnehmerlimit und kommen nie auf die Warteliste.
-            'waitlisted' => in_array((int) $data['event_role_id'], EventRole::TEAMER_ROLE_IDS)
-                ? false
-                : $adventure->shouldWaitlist(),
+            'waitlisted' => $waitlisted,
             // Keine manuelle Bestätigung mehr nötig – direkt bestätigt.
             'approved_at' => now(),
             'status' => 'bestaetigt',
@@ -162,9 +164,14 @@ class BookingController extends Controller
             Notification::route('mail', $recipientEmail)->notify($notification);
         }
 
-        $message = $booking->waitlisted
-            ? 'Anmeldung erfolgt – das Abenteuer ist voll, daher auf der Warteliste.'
-            : 'Anmeldung gespeichert.';
+        if (! $booking->waitlisted) {
+            $message = 'Anmeldung gespeichert.';
+        } elseif ($ageViolation) {
+            $age = $player?->dayofbirth?->age;
+            $message = "Anmeldung erfolgt – Spieler ({$age} Jahre) liegt außerhalb des Alterslimits ({$adventure->age_range_label}), daher auf der Warteliste zur manuellen Prüfung.";
+        } else {
+            $message = 'Anmeldung erfolgt – das Abenteuer ist voll, daher auf der Warteliste.';
+        }
 
         return $request->expectsJson()
             ? response()->json(['message' => $message, 'refresh_modal' => true])
@@ -384,6 +391,44 @@ class BookingController extends Controller
             } elseif ($booking->player->email) {
                 Notification::route('mail', $booking->player->email)->notify(new BookingRejected($booking));
             }
+        }
+
+        return $request->expectsJson()
+            ? response()->json(['message' => $message, 'refresh_modal' => true])
+            : back()->with('status', $message);
+    }
+
+    /**
+     * Bestätigte Buchung auf die Warteliste verschieben und Teilnehmer/Betreuer benachrichtigen.
+     */
+    public function moveToWaitlist(Request $request, Adventure $adventure, Booking $booking): RedirectResponse|JsonResponse
+    {
+        abort_unless($booking->adventure_id === $adventure->id, 404);
+
+        if ($booking->waitlisted) {
+            $msg = 'Buchung ist bereits auf der Warteliste.';
+            return $request->expectsJson()
+                ? response()->json(['message' => $msg], 422)
+                : back()->with('error', $msg);
+        }
+
+        $booking->update(['waitlisted' => true]);
+
+        // E-Mail an Spieler-User oder Betreuer
+        $booking->loadMissing(['player.users']);
+        $user  = $booking->player?->users()->first();
+        $email = $booking->player?->email;
+
+        if ($user) {
+            $user->notify(new BookingMovedToWaitlist($booking));
+        } elseif ($email) {
+            Notification::route('mail', $email)->notify(new BookingMovedToWaitlist($booking));
+        }
+
+        $name = $booking->player?->full_name ?? 'Spieler';
+        $message = "{$name} wurde auf die Warteliste verschoben.";
+        if (! $user && ! $email) {
+            $message .= ' (Kein E-Mail-Empfänger gefunden, keine Mail versendet.)';
         }
 
         return $request->expectsJson()

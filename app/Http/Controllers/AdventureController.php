@@ -168,14 +168,13 @@ class AdventureController extends Controller
             ? Player::orderBy('name')->get()
             : $request->user()->players()->orderBy('name')->get();
 
-        // Sichtbare Anmeldungen (ADV-15): Bürokrat/Projektleitung/Spielleiter/Admin
-        // sehen alle, sonst nur eigene Spieler + selbst angemeldete Gäste (ADV-21).
+        // Sichtbare Anmeldungen: in der Detailansicht immer nur eigene Spieler
+        // und selbst angemeldete Gäste. Alle Buchungen sind ausschließlich in der
+        // Verwaltungsansicht (manage) sichtbar.
         $ownPlayerIds = $request->user()->players->pluck('id');
-        $visibleBookings = Gate::allows('view-all-bookings')
-            ? $adventure->bookings
-            : $adventure->bookings->filter(
-                fn ($b) => $ownPlayerIds->contains($b->player_id) || $b->booked_by_user_id === $request->user()->id
-            )->values();
+        $visibleBookings = $adventure->bookings->filter(
+            fn ($b) => $ownPlayerIds->contains($b->player_id) || $b->booked_by_user_id === $request->user()->id
+        )->values();
 
         $teamerSignups = $adventure->teamerSignups;
         $myTeamerSignup = $teamerSignups->firstWhere('user_id', $request->user()->id);
@@ -409,6 +408,8 @@ class AdventureController extends Controller
             'event_client_id' => ['required', 'exists:event_clients,id'],
             'event_category_id' => ['required', 'exists:event_categories,id'],
             'max_player' => ['required', 'integer', 'min:1'],
+            'min_age'    => ['nullable', 'integer', 'min:0', 'max:99'],
+            'max_age'    => ['nullable', 'integer', 'min:0', 'max:99'],
             'waitlist' => ['integer', 'min:0'],
             'fee' => ['required', 'numeric', 'min:0'],
             'fee_reduced' => ['nullable', 'numeric', 'min:0'],
@@ -417,6 +418,13 @@ class AdventureController extends Controller
 
         // Checkbox sendet keinen Wert wenn nicht angehakt → false setzen.
         $data['is_hidden'] = $request->boolean('is_hidden');
+
+        // Altersbereich: min muss kleiner als max sein wenn beide gesetzt
+        if (isset($data['min_age'], $data['max_age']) && $data['min_age'] >= $data['max_age']) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'min_age' => ['Das Mindestalter muss kleiner als das Höchstalter sein.'],
+            ]);
+        }
 
         return $data;
     }

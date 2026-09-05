@@ -6,6 +6,7 @@ use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Messages\MailMessage;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -23,6 +24,12 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
+        // HTTPS erzwingen wenn APP_URL auf https:// konfiguriert ist.
+        // Sicherungsnetz falls PHP-FPM das Schema nicht via HTTPS-FastCGI-Parameter erhält.
+        if (str_starts_with(config('app.url'), 'https://')) {
+            URL::forceScheme('https');
+        }
+
         // N+1-Schutz: wirft eine Exception im nicht-produktiven Betrieb,
         // wenn Relationen lazy-geladen werden (QA-06).
         Model::preventLazyLoading(! app()->isProduction());
