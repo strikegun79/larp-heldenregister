@@ -61,14 +61,19 @@
                     </div>
                     <p>
                         Das Heldenregister verarbeitet <strong>Gesundheitsdaten Minderjähriger</strong>: Allergien und Medikation
-                        werden im Spielerprofil und in Veranstaltungsanmeldungen erfasst. Diese Daten fallen unter Art. 9 Abs. 1 DSGVO
-                        (besondere Kategorien personenbezogener Daten) und unterliegen einem erhöhten Schutzbedarf.
-                        Der Einwilligungszeitstempel (<code>health_data_consent_at</code>) dokumentiert die Zustimmung der
-                        Erziehungsberechtigten.
+                        werden im Spielerprofil, in Veranstaltungsanmeldungen und in Teamer-Anmeldungen erfasst. Diese Daten fallen
+                        unter Art. 9 Abs. 1 DSGVO (besondere Kategorien personenbezogener Daten) und unterliegen einem erhöhten
+                        Schutzbedarf.
+                    </p>
+                    <p>
+                        Für Buchungen dokumentiert <code>health_data_consent_at</code> die ausdrückliche Einwilligung der
+                        Erziehungsberechtigten. <strong class="text-red-800">Offener Mangel:</strong> Im Spielerprofil
+                        (<code>players</code>) und in Teamer-Anmeldungen (<code>teamer_signups</code>) fehlt dieser
+                        Einwilligungszeitstempel noch — Art. 9 DSGVO-konformer Nachweis ausstehend.
                     </p>
                     <p class="mb-0">
-                        Im Umfragesystem werden zudem <strong>IP-Adressen</strong> der Teilnehmenden gespeichert
-                        (<code>survey_responses.ip_address</code>) — auch bei minderjährigen Teilnehmenden.
+                        Handschriftliche Unterschriften (biometrische Daten) sind seit September 2026 <strong>AES-256-verschlüsselt</strong>
+                        in der Datenbank gespeichert (<code>bookings.signature</code>, <code>encrypted</code>-Cast).
                     </p>
                 </div>
 
@@ -309,11 +314,11 @@
                     </div>
                     <div class="content active">
                         <p><strong>Felder:</strong> Allergien / Lebensmittelunverträglichkeiten (<code>allergien</code>), Medikation (<code>medikamente</code>), Einwilligungszeitstempel (<code>health_data_consent_at</code>)</p>
-                        <p><strong>Tabellen:</strong> <code>players</code> (Profil-Hinterlegung), <code>bookings</code> (veranstaltungsbezogene Angabe)</p>
+                        <p><strong>Tabellen:</strong> <code>players</code> (Profil-Hinterlegung), <code>bookings</code> (veranstaltungsbezogene Angabe), <code>teamer_signups</code> (Teamer-Anmeldung)</p>
                         <p><strong>Zweck:</strong> Sicherstellung der Gesundheitsversorgung und Fürsorge bei Veranstaltungen; Verpflegungsplanung (Allergien).</p>
-                        <p><strong>Rechtsgrundlage:</strong> Art. 9 Abs. 2 lit. c DSGVO (Schutz lebenswichtiger Interessen) i.V.m. Art. 6 Abs. 1 lit. b DSGVO. Der Einwilligungszeitstempel (<code>health_data_consent_at</code>) dokumentiert die ausdrückliche Einwilligung der Erziehungsberechtigten nach Art. 9 Abs. 2 lit. a DSGVO.</p>
+                        <p><strong>Rechtsgrundlage:</strong> Art. 9 Abs. 2 lit. c DSGVO (Schutz lebenswichtiger Interessen) i.V.m. Art. 6 Abs. 1 lit. b DSGVO. In Buchungen dokumentiert <code>health_data_consent_at</code> die ausdrückliche Einwilligung (Art. 9 Abs. 2 lit. a DSGVO). <strong class="text-red-700">Offener Mangel:</strong> In <code>players</code> und <code>teamer_signups</code> fehlt dieser Zeitstempel noch.</p>
                         <p><strong>Zugriff:</strong> Rollen mit <code>adventure.modify</code> können Gesundheitsdaten im Buchungskontext einsehen. Teilnehmer-PDF (Bürokrat, Projektleitung, Administrator) enthält ebenfalls Gesundheitsdaten. Der CSV-Spielerexport (nur Administrator) enthält Gesundheitsdaten aus dem Spielerprofil.</p>
-                        <p class="mb-0"><strong>Aufbewahrung:</strong> Ein automatisches Löschkonzept für Gesundheitsdaten in Buchungen ist noch nicht implementiert. Empfehlung: Pseudonymisierung oder Löschung 6 Monate nach Veranstaltungsende.</p>
+                        <p class="mb-0"><strong>Aufbewahrung:</strong> Gesundheitsdaten in <code>bookings</code> werden 2 Jahre nach Veranstaltungsende automatisch genullt (DsgvoPrune). Für <code>teamer_signups</code> fehlt dieses Löschkonzept noch (offener Mangel H-3).</p>
                     </div>
 
                     <div class="title">
@@ -338,7 +343,7 @@
                         <p><strong>Tabelle:</strong> <code>bookings</code></p>
                         <p><strong>Zweck:</strong> Durchführung und Verwaltung von LARP-Veranstaltungen; Kapazitätsplanung; Abwicklung der Teilnahmebeiträge.</p>
                         <p><strong>Rechtsgrundlage:</strong> Art. 6 Abs. 1 lit. b DSGVO (Vertragserfüllung).</p>
-                        <p class="mb-0"><strong>Unterschrift:</strong> Die digitale Unterschrift (<code>signature</code>) wird als Bilddatei in der Datenbank gespeichert. Biometrische Merkmale unterliegen erhöhtem Schutz nach Art. 9 DSGVO. Zugriff haben Projektleitung und Bürokrat.</p>
+                        <p class="mb-0"><strong>Unterschrift:</strong> Die digitale Unterschrift (<code>signature</code>) ist als biometrisches Merkmal (Art. 9 DSGVO) <strong>AES-256-verschlüsselt</strong> in der Datenbank gespeichert (<code>encrypted</code>-Cast, seit Sep. 2026). Sie wird 30 Tage nach Veranstaltungsende automatisch gelöscht (DsgvoPrune). Zugriff haben Projektleitung und Bürokrat.</p>
                     </div>
 
                     <div class="title">
@@ -351,7 +356,8 @@
                         <p><strong>Tabellen:</strong> <code>survey_links</code>, <code>survey_responses</code>, <code>survey_answers</code></p>
                         <p><strong>Zweck:</strong> Qualitätssicherung durch strukturiertes Teilnehmerfeedback.</p>
                         <p><strong>Rechtsgrundlage:</strong> Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse an Qualitätssicherung). Bei Kindern/Jugendlichen werden Umfrage-Links an die E-Mail-Adresse der Erziehungsberechtigten versandt.</p>
-                        <p class="mb-0"><strong>IP-Adressen:</strong> Die Speicherung von IP-Adressen (<code>survey_responses.ip_address</code>) stellt eine Verarbeitung personenbezogener Daten dar. Die Zweckmäßigkeit dieser Speicherung ist zu prüfen; empfohlen wird eine Anonymisierung unmittelbar nach Abgabe. Zugriff auf Umfrageergebnisse haben nur Projektleitung und Administrator.</p>
+                        <p><strong>IP-Adressen:</strong> <code>survey_responses.ip_address</code> wird ausschließlich für Anti-Spam-Rate-Limiting gespeichert und nach <strong>90 Tagen automatisch gelöscht</strong> (DsgvoPrune, seit Sep. 2026). Zugriff auf Umfrageergebnisse haben nur Projektleitung und Administrator.</p>
+                        <p class="mb-0"><strong>Freitexte Minderjähriger:</strong> Kinder (<code>participant_child</code>) können Freitextantworten eingeben, die 2 Jahre gespeichert und dann anonymisiert werden. Eine verstärkte Einwilligung für Freitexte bei unter-13-Jährigen ist empfohlen (offener Mangel N-3).</p>
                     </div>
 
                     <div class="title">
@@ -380,17 +386,63 @@
                             <div class="item"><i class="check circle green icon"></i> Anonymisierung nach Art. 17 DSGVO implementiert</div>
                             <div class="item"><i class="check circle green icon"></i> Datenexport nach Art. 20 DSGVO (JSON-Download)</div>
                             <div class="item"><i class="check circle green icon"></i> Öffentliche Helden-Profile: opt-in, kein Realname</div>
-                            <div class="item"><i class="check circle green icon"></i> Einwilligungszeitstempel für Gesundheitsdaten</div>
+                            <div class="item"><i class="check circle green icon"></i> Einwilligungszeitstempel für Gesundheitsdaten in Buchungen</div>
                             <div class="item"><i class="check circle green icon"></i> E-Mail-Verifikation bei Kontoanlage</div>
+                            <div class="item"><i class="check circle green icon"></i> Biometrische Unterschriften AES-256-verschlüsselt (Sep. 2026)</div>
+                            <div class="item"><i class="check circle green icon"></i> Automatisches Löschkonzept für Buchungsdaten (DsgvoPrune)</div>
+                            <div class="item"><i class="check circle green icon"></i> IP-Adressen in Umfragen nach 90 Tagen gelöscht (DsgvoPrune)</div>
+                            <div class="item"><i class="check circle green icon"></i> Datenpannen-Protokoll mit 72h-Frist (Art. 33, Sep. 2026)</div>
+                            <div class="item"><i class="check circle green icon"></i> Gesendete Mails im IMAP-Postfach nachvollziehbar (Sep. 2026)</div>
                         </div>
                     </div>
                     <div class="column">
                         <p class="text-sm font-medium text-stone-600 mb-2">Handlungsbedarf</p>
                         <div class="ui list">
-                            <div class="item"><i class="exclamation circle orange icon"></i> Kein automatisches Löschkonzept für Buchungsdaten</div>
-                            <div class="item"><i class="exclamation circle orange icon"></i> IP-Adressen in Umfrageantworten ohne Ablaufmechanismus</div>
-                            <div class="item"><i class="exclamation circle orange icon"></i> Biometrische Unterschriften ohne Verschlüsselung in der DB</div>
-                            <div class="item"><i class="exclamation circle orange icon"></i> Kein dokumentierter Meldeprozess für Datenpannen (Art. 33)</div>
+                            <div class="item">
+                                <i class="exclamation circle red icon"></i>
+                                <strong>[H-1]</strong> Gesundheitsdaten im Spielerprofil ohne Art.-9-Einwilligungsnachweis
+                                (<code>players</code> fehlt <code>health_data_consent_at</code>)
+                            </div>
+                            <div class="item">
+                                <i class="exclamation circle red icon"></i>
+                                <strong>[H-2]</strong> Gesundheitsdaten in Teamer-Anmeldungen ohne Art.-9-Einwilligungsnachweis
+                                (<code>teamer_signups</code> fehlt <code>health_data_consent_at</code>)
+                            </div>
+                            <div class="item">
+                                <i class="exclamation circle red icon"></i>
+                                <strong>[H-3]</strong> Kein Löschkonzept für Teamer-Gesundheitsdaten
+                                (<code>teamer_signups.allergien/medikamente</code> wird nie genullt)
+                            </div>
+                            <div class="item">
+                                <i class="exclamation circle red icon"></i>
+                                <strong>[H-4]</strong> Datenschutzerklärung nennt falsche Speicherdauer:
+                                „2 Jahre" statt korrekt „3 Jahre" für Buchungsdaten
+                            </div>
+                            <div class="item">
+                                <i class="exclamation circle red icon"></i>
+                                <strong>[H-5]</strong> Elterliche Einwilligung für Minderjährige (Art. 8 DSGVO)
+                                nicht nachweisbar dokumentiert — kein <code>parental_consent_at</code>-Feld
+                            </div>
+                            <div class="item">
+                                <i class="exclamation circle orange icon"></i>
+                                <strong>[M-1]</strong> Matrix-Dienst fehlt als Drittempfänger in der Datenschutzerklärung
+                            </div>
+                            <div class="item">
+                                <i class="exclamation circle orange icon"></i>
+                                <strong>[M-2]</strong> Teamer-Gesundheitsdaten fehlen in der Datenschutzerklärung (Abschnitt 2.4)
+                            </div>
+                            <div class="item">
+                                <i class="exclamation circle orange icon"></i>
+                                <strong>[M-3]</strong> Kein Audit-Log für Buchungsänderungen und Spielerprofil-Edits durch Admins
+                            </div>
+                            <div class="item">
+                                <i class="exclamation circle orange icon"></i>
+                                <strong>[N-1]</strong> Kein Verarbeitungsverzeichnis nach Art. 30 DSGVO
+                            </div>
+                            <div class="item">
+                                <i class="exclamation circle orange icon"></i>
+                                <strong>[N-2]</strong> Fotoerlaubnis ohne dedizierten Widerrufsmechanismus (Art. 7 DSGVO)
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -399,8 +451,15 @@
                 <div class="ui message mt-4">
                     <div class="header">Hinweis für den Datenschutzbeauftragten</div>
                     <p>
-                        Diese Übersicht basiert auf der technischen Analyse der Anwendung (Stand: {{ now()->format('d.m.Y') }}).
-                        Sie ersetzt nicht das Verarbeitungsverzeichnis nach Art. 30 DSGVO, das gesondert zu führen ist.
+                        Diese Übersicht basiert auf der technischen Analyse der Anwendung
+                        (Stand: {{ now()->format('d.m.Y') }}, Prüfung durch automatisiertes Privacy-Review).
+                        Sie ersetzt nicht das Verarbeitungsverzeichnis nach Art. 30 DSGVO (Mangel N-1), das gesondert zu führen ist.
+                    </p>
+                    <p>
+                        <strong>Prioritäre offene Mängel:</strong> H-1 bis H-5 betreffen Art. 9 DSGVO (besondere Datenkategorien)
+                        und Art. 8 DSGVO (Minderjährige) — diese sollten vorrangig adressiert werden.
+                        Das <a href="{{ route('admin.data-breaches.index') }}" class="text-blue-700 underline">Datenpannen-Protokoll</a>
+                        steht für die Dokumentation von Vorfällen bereit.
                     </p>
                     <p class="mb-0">
                         <strong>Betroffenenrechte:</strong>
