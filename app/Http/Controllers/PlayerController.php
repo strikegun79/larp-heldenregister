@@ -8,6 +8,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class PlayerController extends Controller
@@ -55,7 +56,7 @@ class PlayerController extends Controller
 
     public function store(Request $request): RedirectResponse|JsonResponse
     {
-        $data = $this->validatePlayer($request);
+        $data = $this->playerData($request);
 
         $player = Player::create($data);
         // Spieler dem Benutzer zuordnen (Legacy: user2player, self-Flag).
@@ -168,7 +169,7 @@ class PlayerController extends Controller
     {
         $this->authorize('update', $player);
 
-        $player->update($this->validatePlayer($request));
+        $player->update($this->playerData($request, $player));
         $this->enforceSingleSelf($request->user(), $player, $request->boolean('self'));
 
         $message = 'Spieler wurde aktualisiert.';
@@ -225,28 +226,43 @@ class PlayerController extends Controller
     }
 
     /**
+     * Validierte Felder + Consent-Timestamp für store/update aufbereiten (H-1).
+     *
      * @return array<string, mixed>
      */
-    private function validatePlayer(Request $request): array
+    private function playerData(Request $request, ?Player $existing = null): array
     {
         $sameAsGuardian = filter_var($request->input('address_same_as_guardian', '1'), FILTER_VALIDATE_BOOLEAN);
 
-        return $request->validate([
+        $data = $request->validate([
             'name' => ['required', 'string', 'max:50'],
             'lastname' => ['required', 'string', 'max:50'],
             'email' => ['nullable', 'email', 'max:150'],
-            // Plausibles Geburtsdatum: nicht in der Zukunft, nicht vor 1900 (PLAY-07).
             'dayofbirth' => ['nullable', 'date', 'before_or_equal:today', 'after:1900-01-01'],
             'gender' => ['nullable', 'in:weiblich,männlich,divers'],
-            // Kinder-Anschrift (PLAY-14 / ORGA-01): nur Pflicht bei abweichender Anschrift.
             'address_same_as_guardian' => ['boolean'],
             'street' => [$sameAsGuardian ? 'nullable' : 'required', 'string', 'max:100'],
             'house_number' => [$sameAsGuardian ? 'nullable' : 'required', 'string', 'max:10'],
             'zip' => [$sameAsGuardian ? 'nullable' : 'required', 'string', 'max:10'],
             'city' => [$sameAsGuardian ? 'nullable' : 'required', 'string', 'max:100'],
-            // DSGVO Art. 9: Gesundheitsdaten am Spielerprofil (PLAY-15).
+            // DSGVO Art. 9: Gesundheitsdaten – Einwilligung Pflicht wenn Felder befüllt (H-1).
             'allergien' => ['nullable', 'string'],
             'medikamente' => ['nullable', 'string'],
+            'health_data_consent' => [
+                Rule::requiredIf(fn () => filled($request->allergien) || filled($request->medikamente)),
+                'boolean',
+            ],
         ]);
+
+        // Checkbox → Timestamp konvertieren; Widerruf (leere Felder) löscht Timestamp.
+        $hasHealthData = filled($data['allergien'] ?? null) || filled($data['medikamente'] ?? null);
+        $consentGiven  = $request->boolean('health_data_consent');
+        $data['health_data_consent_at'] = ($hasHealthData && $consentGiven)
+            ? ($existing?->health_data_consent_at ?? now())
+            : null;
+        unset($data['health_data_consent']);
+
+        return $data;
     }
 }
+

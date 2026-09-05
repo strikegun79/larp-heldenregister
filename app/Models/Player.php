@@ -28,6 +28,7 @@ class Player extends Model
         'city',
         'allergien',
         'medikamente',
+        'health_data_consent_at',
         'active_hero_id',
         'legacy_id',
     ];
@@ -36,6 +37,7 @@ class Player extends Model
         'dayofbirth' => 'date',
         'active' => 'boolean',
         'address_same_as_guardian' => 'boolean',
+        'health_data_consent_at' => 'datetime',
     ];
 
     /** Aktuelles Alter in Jahren bzw. null (PLAY-07). */

@@ -98,25 +98,17 @@
         </div>
     </div>
 
-    {{-- DSGVO Art. 9: Gesundheitsdaten am Spielerprofil (PLAY-15) --}}
+    {{-- DSGVO Art. 9: Gesundheitsdaten am Spielerprofil (PLAY-15 / H-1) --}}
     <fieldset class="border border-amber-200 rounded-lg p-4 bg-amber-50">
         <legend class="text-sm font-semibold text-amber-800 px-1">Gesundheitsdaten (optional)</legend>
-
-        <div class="bg-blue-50 border border-blue-200 rounded p-3 mb-4 text-xs text-blue-800">
-            <strong>Datenschutzhinweis (Art. 9 DSGVO):</strong>
-            Allergien und Medikamente sind besondere Kategorien personenbezogener Daten.
-            Diese Angaben werden ausschließlich zum Schutz deines Kindes in Notfallsituationen während
-            unserer Veranstaltungen verwendet und sind nur für das Organisationsteam sichtbar.
-            Sie werden nicht an Dritte weitergegeben und können jederzeit geändert oder gelöscht werden.
-            Wenn du diese Felder ausgefüllst, willigst du damit ausdrücklich in die Speicherung ein (Art. 9 Abs. 2 lit. a DSGVO).
-        </div>
 
         <div class="space-y-4">
             <div>
                 <x-input-label for="allergien" value="Allergien / Unverträglichkeiten" />
                 <textarea id="allergien" name="allergien" rows="2"
                           class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-amber-600 focus:ring-amber-600 text-sm"
-                          placeholder="z. B. Nüsse, Laktose, Bienen …">{{ old('allergien', $player->allergien) }}</textarea>
+                          placeholder="z. B. Nüsse, Laktose, Bienen …"
+                          oninput="updateHealthConsent()">{{ old('allergien', $player->allergien) }}</textarea>
                 <x-input-error :messages="$errors->get('allergien')" class="mt-2" />
                 <small class="text-stone-400">Wird bei einer Abenteuer-Anmeldung automatisch vorausgefüllt.</small>
             </div>
@@ -125,12 +117,48 @@
                 <x-input-label for="medikamente" value="Medikamente" />
                 <textarea id="medikamente" name="medikamente" rows="2"
                           class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-amber-600 focus:ring-amber-600 text-sm"
-                          placeholder="z. B. Epipen, Inhalator, tägliche Einnahme …">{{ old('medikamente', $player->medikamente) }}</textarea>
+                          placeholder="z. B. Epipen, Inhalator, tägliche Einnahme …"
+                          oninput="updateHealthConsent()">{{ old('medikamente', $player->medikamente) }}</textarea>
                 <x-input-error :messages="$errors->get('medikamente')" class="mt-2" />
                 <small class="text-stone-400">Regelmäßige Medikamente, die dein Kind während der Veranstaltung benötigt.</small>
             </div>
+
+            {{-- Einwilligung: erscheint nur wenn Felder befüllt (JS), Pflicht dann auch per Server --}}
+            <div id="health-consent-block"
+                 class="{{ (old('allergien', $player->allergien) || old('medikamente', $player->medikamente)) ? '' : 'hidden' }}
+                         bg-blue-50 border border-blue-200 rounded p-3 text-xs text-blue-800">
+                <label class="flex items-start gap-2 cursor-pointer">
+                    <input type="checkbox" id="health_data_consent" name="health_data_consent" value="1"
+                           class="mt-0.5 rounded border-gray-300 text-amber-600 shadow-sm focus:ring-amber-600"
+                           @checked(old('health_data_consent', $player->health_data_consent_at ? '1' : ''))>
+                    <span>
+                        <strong>Einwilligung (Art. 9 Abs. 2 lit. a DSGVO):</strong>
+                        Ich willige ausdrücklich ein, dass die oben angegebenen Gesundheitsdaten
+                        (Allergien, Medikamente) im Spielerprofil gespeichert werden.
+                        Diese Daten werden ausschließlich zum Schutz meines Kindes in Notfallsituationen
+                        während der Veranstaltungen verwendet und sind nur für das Organisationsteam sichtbar.
+                        Die Einwilligung kann jederzeit widerrufen werden (Felder leeren und speichern).
+                    </span>
+                </label>
+                <x-input-error :messages="$errors->get('health_data_consent')" class="mt-2" />
+            </div>
         </div>
     </fieldset>
+
+    <script>
+    function updateHealthConsent() {
+        const allergien   = document.getElementById('allergien')?.value.trim() ?? '';
+        const medikamente = document.getElementById('medikamente')?.value.trim() ?? '';
+        const block       = document.getElementById('health-consent-block');
+        const checkbox    = document.getElementById('health_data_consent');
+        if (!block || !checkbox) return;
+        const hasData = allergien !== '' || medikamente !== '';
+        block.classList.toggle('hidden', !hasData);
+        checkbox.required = hasData;
+        if (!hasData) checkbox.checked = false;
+    }
+    document.addEventListener('DOMContentLoaded', updateHealthConsent);
+    </script>
 
     <label class="flex items-center gap-2 text-stone-700">
         <input type="checkbox" name="self" value="1"
