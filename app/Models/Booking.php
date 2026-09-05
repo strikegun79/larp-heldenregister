@@ -67,6 +67,8 @@ class Booking extends Model
         'waitlisted' => 'boolean',
         'approved_at' => 'datetime',
         'health_data_consent_at' => 'datetime',
+        // DSGVO Art. 9: Unterschrift = biometrisches Datum → AES-256 via APP_KEY
+        'signature' => 'encrypted',
     ];
 
     /** Gast-Anmeldung ohne hinterlegten Spieler (ADV-21). */
