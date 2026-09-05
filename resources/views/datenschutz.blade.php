@@ -70,6 +70,31 @@
     <p><strong>Rechtsgrundlage:</strong> Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse an
     Nachvollziehbarkeit von Änderungen).</p>
 
+    <h3>2.7 Veranstaltungs-Feedback (Umfragen zur Jugendförderung)</h3>
+    <p>
+        Nach Veranstaltungen können Teilnehmer, Teamer und Erziehungsberechtigte freiwillig
+        an einer Rückmeldebefragung teilnehmen. Die Einladung erfolgt per personalisiertem
+        Link per E-Mail; ein Passwort ist nicht erforderlich.
+    </p>
+    <p>
+        <strong>Erhoben werden:</strong> Bewertungen (Zahlenwerte 1–10), Ja/Nein-Antworten
+        sowie optionale Freitextantworten. Freitexte sind personenbezogen auswertbar und
+        werden daher <strong>ausschließlich von berechtigten Betreuer/innen</strong> eingesehen;
+        sie werden nach spätestens 2 Jahren automatisch anonymisiert. Aggregierte Bewertungen
+        (Durchschnittswerte) verbleiben dauerhaft für die Jugendförderungs-Dokumentation.
+    </p>
+    <p>
+        Die Teilnahme an Umfragen ist freiwillig. Bei Kindern unter 16 Jahren werden
+        Erziehungsberechtigte vorab über die Befragung informiert.
+    </p>
+    <p>
+        <strong>Zweck:</strong> Qualitätssicherung und Dokumentation für die Jugendförderung
+        gemäß den Anforderungen des SGB VIII (Kinder- und Jugendhilfe).
+    </p>
+    <p><strong>Rechtsgrundlage:</strong> Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse an
+    Qualitätssicherung und Fördernachweisen) sowie Art. 6 Abs. 1 lit. a DSGVO (Einwilligung
+    bei optionalen Freitextangaben).</p>
+
     <h2>3. Datenweitergabe an Dritte</h2>
     <p>
         Wir geben Daten nur weiter, soweit dies gesetzlich erlaubt oder erforderlich ist:
