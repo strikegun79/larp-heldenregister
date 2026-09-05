@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use App\Models\AuditLog;
 use App\Models\Booking;
 use App\Models\SurveyResponse;
+use App\Models\TeamerSignup;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
 
@@ -28,6 +29,7 @@ class DsgvoPrune extends Command
 
         $this->pruneSignatures($dryRun);
         $this->pruneHealthData($dryRun);
+        $this->pruneTeamerSignupHealthData($dryRun);
         $this->pruneBookings($dryRun);
         $this->pruneAuditLogs($dryRun);
         $this->pruneNotifications($dryRun);
@@ -61,6 +63,20 @@ class DsgvoPrune extends Command
 
         $count = $query->count();
         $this->line("  Gesundheitsdaten (Event > 2 Jahre): {$count}");
+
+        if (! $dryRun && $count > 0) {
+            $query->update(['allergien' => null, 'medikamente' => null, 'health_data_consent_at' => null]);
+        }
+    }
+
+    // Teamer-Gesundheitsdaten: 2 Jahre nach Event-Ende anonymisieren (H-3).
+    private function pruneTeamerSignupHealthData(bool $dryRun): void
+    {
+        $query = TeamerSignup::where(fn ($q) => $q->whereNotNull('allergien')->orWhereNotNull('medikamente'))
+            ->whereHas('adventure', fn ($q) => $q->where('end_at', '<', now()->subYears(2)));
+
+        $count = $query->count();
+        $this->line("  Teamer-Gesundheitsdaten (Event > 2 Jahre): {$count}");
 
         if (! $dryRun && $count > 0) {
             $query->update(['allergien' => null, 'medikamente' => null, 'health_data_consent_at' => null]);
