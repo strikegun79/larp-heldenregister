@@ -160,10 +160,50 @@
     document.addEventListener('DOMContentLoaded', updateHealthConsent);
     </script>
 
+    {{-- DSGVO Art. 8: Einwilligung Erziehungsberechtigte für Minderjährige (H-5) --}}
+    <div id="parental-consent-block"
+         class="{{ old('self', $self ?? false) ? 'hidden' : '' }}
+                 border border-green-300 rounded-lg p-4 bg-green-50">
+        <p class="text-sm font-semibold text-green-800 mb-2">
+            <i class="shield alternate icon"></i> Einwilligung Erziehungsberechtigte (Art. 8 DSGVO)
+        </p>
+        <label class="flex items-start gap-2 cursor-pointer text-sm text-green-900">
+            <input type="checkbox" id="parental_consent" name="parental_consent" value="1"
+                   class="mt-0.5 rounded border-gray-300 text-green-700 shadow-sm focus:ring-green-600"
+                   @checked(old('parental_consent', $player->parental_consent_at ? '1' : ''))>
+            <span>
+                Ich bestätige, dass ich als Erziehungsberechtigte/r berechtigt bin, für dieses Kind
+                personenbezogene Daten im Heldenregister zu verwalten, und willige in die Speicherung
+                der Profildaten zum Zweck der Veranstaltungsorganisation ein
+                (Art. 6 Abs. 1 lit. b und Art. 8 DSGVO).
+                @if ($player->parental_consent_at)
+                    <span class="text-green-700 font-medium">(Einwilligung erteilt am {{ $player->parental_consent_at->format('d.m.Y H:i') }})</span>
+                @endif
+            </span>
+        </label>
+        <x-input-error :messages="$errors->get('parental_consent')" class="mt-2" />
+    </div>
+
     <label class="flex items-center gap-2 text-stone-700">
-        <input type="checkbox" name="self" value="1"
+        <input type="checkbox" id="self_checkbox" name="self" value="1"
                class="rounded border-gray-300 text-amber-600 shadow-sm focus:ring-amber-600"
-               @checked(old('self', $self ?? false))>
+               @checked(old('self', $self ?? false))
+               onchange="toggleParentalConsent(this.checked)">
         Das bin ich selbst (eigener Spieler)
     </label>
+
+    <script>
+    function toggleParentalConsent(isSelf) {
+        const block = document.getElementById('parental-consent-block');
+        const cb    = document.getElementById('parental_consent');
+        if (!block || !cb) return;
+        block.classList.toggle('hidden', isSelf);
+        cb.required = !isSelf;
+        if (isSelf) cb.checked = false;
+    }
+    document.addEventListener('DOMContentLoaded', function () {
+        const selfCb = document.getElementById('self_checkbox');
+        if (selfCb) toggleParentalConsent(selfCb.checked);
+    });
+    </script>
 </div>

@@ -252,15 +252,26 @@ class PlayerController extends Controller
                 Rule::requiredIf(fn () => filled($request->allergien) || filled($request->medikamente)),
                 'boolean',
             ],
+            // DSGVO Art. 8: Elterliche Einwilligung – Pflicht wenn nicht eigener Spieler (H-5).
+            'parental_consent' => [
+                Rule::requiredIf(fn () => ! $request->boolean('self')),
+                'boolean',
+            ],
         ]);
 
-        // Checkbox → Timestamp konvertieren; Widerruf (leere Felder) löscht Timestamp.
+        // Gesundheitsdaten-Consent → Timestamp.
         $hasHealthData = filled($data['allergien'] ?? null) || filled($data['medikamente'] ?? null);
-        $consentGiven  = $request->boolean('health_data_consent');
-        $data['health_data_consent_at'] = ($hasHealthData && $consentGiven)
+        $data['health_data_consent_at'] = ($hasHealthData && $request->boolean('health_data_consent'))
             ? ($existing?->health_data_consent_at ?? now())
             : null;
         unset($data['health_data_consent']);
+
+        // Elterliche Einwilligung → Timestamp; bei eigenem Spieler nicht anwendbar.
+        $isSelf = $request->boolean('self');
+        $data['parental_consent_at'] = (! $isSelf && $request->boolean('parental_consent'))
+            ? ($existing?->parental_consent_at ?? now())
+            : null;
+        unset($data['parental_consent']);
 
         return $data;
     }
