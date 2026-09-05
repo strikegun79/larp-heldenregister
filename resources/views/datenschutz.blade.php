@@ -57,8 +57,8 @@
     <h3>2.5 Teilnahme-Unterschriften (Check-in)</h3>
     <p>
         Beim Veranstaltungs-Check-in wird eine digitale Unterschrift erfasst und der
-        Anmeldung zugeordnet. Diese Unterschrift wird nach Abschluss der Veranstaltung
-        automatisch gelöscht.
+        Anmeldung zugeordnet. Die Unterschrift ist verschlüsselt gespeichert und wird
+        automatisch <strong>30 Tage nach Veranstaltungsende</strong> gelöscht.
     </p>
     <p><strong>Rechtsgrundlage:</strong> Art. 6 Abs. 1 lit. b DSGVO.</p>
 
@@ -111,8 +111,9 @@
     <h2>4. Speicherdauer</h2>
     <ul>
         <li>Benutzerkontodaten werden bis zur Löschung des Kontos gespeichert.</li>
-        <li>Buchungsdaten vergangener Veranstaltungen werden nach 2 Jahren gelöscht oder anonymisiert.</li>
-        <li>Unterschriften werden nach Abschluss der Veranstaltung gelöscht.</li>
+        <li>Buchungsdaten vergangener Veranstaltungen werden <strong>3 Jahre</strong> nach Veranstaltungsende anonymisiert (personenbezogene Felder werden entfernt, statistische Daten bleiben erhalten).</li>
+        <li>Gesundheitsdaten (Allergien, Medikation) in Anmeldungen werden <strong>2 Jahre</strong> nach Veranstaltungsende gelöscht.</li>
+        <li>Unterschriften werden <strong>30 Tage</strong> nach Veranstaltungsende gelöscht.</li>
         <li>Audit-Logs werden nach 3 Jahren gelöscht.</li>
     </ul>
 
