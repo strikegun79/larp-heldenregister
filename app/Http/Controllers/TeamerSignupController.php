@@ -12,6 +12,7 @@ use App\Notifications\TeamerRejected;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 /**
@@ -55,10 +56,21 @@ class TeamerSignupController extends Controller
             'kontakt_telefon' => ['nullable', 'string', 'max:50'],
             'allergien' => ['nullable', 'string', 'max:500'],
             'medikamente' => ['nullable', 'string', 'max:500'],
+            // DSGVO Art. 9: Einwilligung Pflicht wenn Gesundheitsdaten angegeben (H-2).
+            'health_data_consent' => [
+                Rule::requiredIf(fn () => filled($request->allergien) || filled($request->medikamente)),
+                'boolean',
+            ],
             'leih_tunika' => ['boolean'],
             'leih_waffe' => ['boolean'],
             'anmerkung' => ['nullable', 'string', 'max:1000'],
         ]);
+
+        $hasHealthData = filled($data['allergien'] ?? null) || filled($data['medikamente'] ?? null);
+        $data['health_data_consent_at'] = ($hasHealthData && $request->boolean('health_data_consent'))
+            ? now()
+            : null;
+        unset($data['health_data_consent']);
 
         $adventure->teamerSignups()->create([
             ...$data,
@@ -134,11 +146,22 @@ class TeamerSignupController extends Controller
             'kontakt_telefon' => ['nullable', 'string', 'max:50'],
             'allergien' => ['nullable', 'string', 'max:500'],
             'medikamente' => ['nullable', 'string', 'max:500'],
+            // DSGVO Art. 9: Einwilligung Pflicht wenn Gesundheitsdaten angegeben (H-2).
+            'health_data_consent' => [
+                Rule::requiredIf(fn () => filled($request->allergien) || filled($request->medikamente)),
+                'boolean',
+            ],
             'leih_tunika' => ['boolean'],
             'leih_waffe' => ['boolean'],
             'anmerkung' => ['nullable', 'string', 'max:1000'],
             'teamer_role' => ['nullable', 'string', 'in:'.implode(',', TeamerSignup::ROLES)],
         ]);
+
+        $hasHealthData = filled($data['allergien'] ?? null) || filled($data['medikamente'] ?? null);
+        $data['health_data_consent_at'] = ($hasHealthData && $request->boolean('health_data_consent'))
+            ? ($signup->health_data_consent_at ?? now())
+            : null;
+        unset($data['health_data_consent']);
 
         $signup->update($data);
 

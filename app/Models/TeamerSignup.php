@@ -26,6 +26,7 @@ class TeamerSignup extends Model
         'teamer_role',
         'allergien',
         'medikamente',
+        'health_data_consent_at',
         'kontakt_telefon',
         'agb',
         'leih_tunika',
@@ -39,6 +40,7 @@ class TeamerSignup extends Model
         'agb' => 'boolean',
         'leih_tunika' => 'boolean',
         'leih_waffe' => 'boolean',
+        'health_data_consent_at' => 'datetime',
         'approved_at' => 'datetime',
         'rejected_at' => 'datetime',
     ];
