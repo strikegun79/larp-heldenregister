@@ -152,6 +152,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('adventures/{adventure}/participation-xlsx', [AdventureController::class, 'participationXlsx'])->name('adventures.participation-xlsx');
     // Event absagen (ADV-07).
     Route::patch('adventures/{adventure}/cancel', [AdventureController::class, 'cancel'])->name('adventures.cancel');
+    // Wartelistenmodus umschalten (ADV-WL).
+    Route::patch('adventures/{adventure}/toggle-waitlist-mode', [AdventureController::class, 'toggleWaitlistMode'])->name('adventures.toggle-waitlist-mode');
 
     // Anmeldungen zu einem Abenteuer.
     // Anmeldeformular als Modal-Unteransicht (ADV-15).

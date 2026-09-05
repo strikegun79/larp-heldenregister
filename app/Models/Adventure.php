@@ -128,13 +128,18 @@ class Adventure extends Model
 
     /**
      * Soll die nächste Buchung auf die Warteliste?
-     * Ja, wenn das Event voll ist ODER der Wartelisten-Modus einmal aktiviert wurde.
-     * Einmal aktiviert, bleibt waitlist_mode dauerhaft true – damit keine spätere
-     * Buchung Wartende "überholt".
+     * Ja, wenn das Event voll ist ODER noch jemand auf der Warteliste wartet
+     * (damit keine neue Buchung eine wartende Person "überholt").
+     * waitlist_mode allein ohne aktive Warteliste blockiert nicht mehr.
      */
     public function shouldWaitlist(): bool
     {
-        return $this->isFull() || (bool) $this->waitlist_mode;
+        if ($this->isFull()) {
+            return true;
+        }
+
+        return $this->waitlist_mode
+            && $this->bookings()->where('waitlisted', true)->exists();
     }
 
     /**

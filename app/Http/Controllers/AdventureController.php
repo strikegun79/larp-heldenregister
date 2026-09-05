@@ -14,6 +14,7 @@ use App\Models\Location;
 use App\Models\Player;
 use App\Models\User;
 use App\Notifications\EventCancelled;
+use App\Notifications\WaitlistPromoted;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -34,7 +35,7 @@ class AdventureController extends Controller
         $this->middleware('can:adventure.access')->only(['index', 'show', 'calendar']);
         // Events anlegen/bearbeiten/absagen + Verwaltungsliste: events.edit
         // (Admin, Bürokrat, Projektleitung).
-        $this->middleware('can:events.edit')->only(['create', 'store', 'edit', 'update', 'destroy', 'manage', 'cancel', 'manageIndex']);
+        $this->middleware('can:events.edit')->only(['create', 'store', 'edit', 'update', 'destroy', 'manage', 'cancel', 'manageIndex', 'toggleWaitlistMode']);
         // Teilnehmer-PDF: Projektleitung, Bürokrat, Admin (ADV-17).
         $this->middleware('can:take-signatures')->only('participantsPdf');
         // Teilnahme-/Belegungsreport (REP-03): Event-Verwalter.
@@ -306,6 +307,56 @@ class AdventureController extends Controller
         return $request->expectsJson()
             ? response()->json(['message' => $message], 422)
             : back()->with('error', $message);
+    }
+
+    /**
+     * Wartelistenmodus umschalten (ADV-WL): aktiviert oder deaktiviert den
+     * Wartelistenmodus. Beim Deaktivieren werden wartende Buchungen automatisch
+     * auf freie Plätze hochgestuft und benachrichtigt.
+     */
+    public function toggleWaitlistMode(Request $request, Adventure $adventure): RedirectResponse|JsonResponse
+    {
+        $newMode = ! $adventure->waitlist_mode;
+        $promoted = [];
+
+        if (! $newMode) {
+            // Wartelistenmodus deaktiviert → wartende Buchungen nachrücken lassen.
+            $waitlisted = $adventure->bookings()
+                ->where('waitlisted', true)
+                ->orderBy('created_at')
+                ->orderBy('id')
+                ->with('player.users')
+                ->get();
+
+            foreach ($waitlisted as $booking) {
+                if ($adventure->freeSlots() <= 0) {
+                    break;
+                }
+                $booking->update(['waitlisted' => false]);
+                $promoted[] = $booking->participant_name;
+
+                $email = $booking->player?->email
+                    ?: $booking->player?->users()->first()?->email;
+                if ($email && $booking->player?->notificationEnabled('notify_waitlist_promoted')) {
+                    Notification::route('mail', $email)->notify(new WaitlistPromoted($booking));
+                }
+            }
+        }
+
+        $adventure->update(['waitlist_mode' => $newMode]);
+
+        if ($newMode) {
+            $message = 'Wartelistenmodus aktiviert. Neue Anmeldungen kommen auf die Warteliste.';
+        } elseif (count($promoted) > 0) {
+            $names = implode(', ', $promoted);
+            $message = 'Wartelistenmodus deaktiviert. Nachgerückt: ' . $names . '.';
+        } else {
+            $message = 'Wartelistenmodus deaktiviert. Neue Anmeldungen füllen freie Plätze.';
+        }
+
+        return $request->expectsJson()
+            ? response()->json(['message' => $message, 'refresh_modal' => true])
+            : back()->with('status', $message);
     }
 
     /**

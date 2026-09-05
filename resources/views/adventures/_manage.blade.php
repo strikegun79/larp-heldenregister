@@ -27,6 +27,7 @@
     </x-mobile.accordion-section>
 
     <x-mobile.accordion-section :title="'Anmeldungen (' . $mainBookings->count() . ')'">
+        @include('adventures._waitlist_mode_toggle')
         <div class="flex flex-wrap gap-2 mb-3">
             <a href="{{ route('adventures.participation-xlsx', $adventure) }}" class="ui small button" target="_blank" rel="noopener"><i class="file excel outline icon"></i> Belegungsreport (Excel)</a>
             @can('book-any-player')
@@ -96,6 +97,7 @@
     </div>
 
     <div class="ui bottom attached tab segment" data-tab="bookings">
+        @include('adventures._waitlist_mode_toggle')
         <div class="flex flex-wrap gap-2 mb-3">
             <a href="{{ route('adventures.participation-xlsx', $adventure) }}" class="ui small button" target="_blank" rel="noopener"><i class="file excel outline icon"></i> Belegungsreport (Excel)</a>
             @can('book-any-player')
