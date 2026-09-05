@@ -410,4 +410,10 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified'])->group(
         ->parameters(['templates' => 'template']);
 });
 
+// Datenpannen-Protokoll (DSGVO Art. 33): nur data-breach.manage (Admin).
+Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified', 'can:data-breach.manage'])->group(function () {
+    Route::resource('data-breaches', Admin\DataBreachController::class)
+        ->parameters(['data-breaches' => 'dataBreach']);
+});
+
 require __DIR__.'/auth.php';

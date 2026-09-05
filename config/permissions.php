@@ -26,8 +26,10 @@ return [
         'groups.manage',
         'roles.view',     // Rollen- & DSGVO-Übersicht einsehen
         // Umfrage-System (SURV-01)
-        'survey.admin',   // Vorlagen verwalten, Umfragen erstellen/versenden, Ergebnisse einsehen
-        'survey.view',    // Nur Ergebnisse einsehen
+        'survey.admin',        // Vorlagen verwalten, Umfragen erstellen/versenden, Ergebnisse einsehen
+        'survey.view',         // Nur Ergebnisse einsehen
+        // Datenpannen-Protokoll (DSGVO Art. 33) – nur Admin via '*'
+        'data-breach.manage',
     ],
 
     'roles' => [
