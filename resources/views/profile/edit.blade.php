@@ -62,10 +62,10 @@
                                 <p class="text-xs text-stone-500 mb-3">Rund um deine eigenen Anmeldungen zu Abenteuern.</p>
                                 <div class="divide-y divide-stone-200 border-t border-b border-stone-200">
                                     @foreach ([
-                                        ['notify_booking_received',  'Anmeldung eingegangen',          'Du bekommst eine Bestätigung, sobald deine Anmeldung bei uns eingeht.',     true],
                                         ['notify_booking_cancelled', 'Stornierung bestätigt',          'Du erhältst eine Bestätigung, wenn du eine Anmeldung stornierst.',           false],
                                         ['notify_payment_confirmed', 'Zahlung eingegangen',            'Wir bestätigen dir, wenn deine Zahlung bei uns angekommen ist.',             false],
                                         ['notify_event_reminder',    'Erinnerung vor dem Abenteuer',   'Du bekommst kurz vorher eine Erinnerung, damit du nichts verpasst.',         false],
+                                        ['notify_booking_received',  'Anmeldung eingegangen',          'Du bekommst eine Bestätigung, sobald deine Anmeldung bei uns eingeht.',      true],
                                         ['notify_booking_approved',  'Anmeldung bestätigt',            'Wir sagen dir Bescheid, wenn dein Platz beim Abenteuer bestätigt ist.',      true],
                                         ['notify_booking_rejected',  'Anmeldung abgelehnt',            'Du wirst informiert, falls deine Anmeldung nicht angenommen werden konnte.', true],
                                         ['notify_waitlist_promoted', 'Von der Warteliste nachgerückt', 'Du erfährst sofort, wenn für dich ein Platz frei geworden ist.',             true],
