@@ -1,5 +1,18 @@
 <span data-modal-title hidden>Verwaltung: {{ $adventure->name }}</span>
 
+@php
+    $participantEmails = $mainBookings
+        ->where('waitlisted', false)
+        ->filter(fn($b) => ! $b->is_guest)
+        ->map(fn($b) => $b->guardian()?->email ?? $b->player?->email)
+        ->filter()
+        ->unique()
+        ->values();
+    $mailtoHref = $participantEmails->isNotEmpty()
+        ? 'mailto:' . config('portal.email') . '?bcc=' . $participantEmails->implode(',')
+        : null;
+@endphp
+
 {{-- UI-40: Mobile Accordion (< sm) --}}
 <div class="sm:hidden space-y-2">
     <x-mobile.accordion-section title="Event-Daten" :open="true">
@@ -37,6 +50,11 @@
                     <i class="shield alternate icon"></i> Admin-Anmeldung
                 </a>
             @endcan
+            @if ($mailtoHref)
+                <a href="{{ $mailtoHref }}" class="ui small teal button">
+                    <i class="mail icon"></i> E-Mail an alle Teilnehmer
+                </a>
+            @endif
         </div>
         @include('adventures._bookings', ['bookings' => $mainBookings, 'manage' => true])
     </x-mobile.accordion-section>
@@ -107,6 +125,11 @@
                     <i class="shield alternate icon"></i> Admin-Anmeldung
                 </a>
             @endcan
+            @if ($mailtoHref)
+                <a href="{{ $mailtoHref }}" class="ui small teal button">
+                    <i class="mail icon"></i> E-Mail an alle Teilnehmer
+                </a>
+            @endif
         </div>
         @include('adventures._bookings', ['bookings' => $mainBookings, 'manage' => true])
     </div>
