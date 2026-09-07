@@ -102,19 +102,6 @@
                                     @endif
                                     @endunless
                                 @endcan
-                                {{-- Bestätigung erneut senden: nur in Verwaltungsansicht --}}
-                                @unless ($booking->is_guest || $booking->waitlisted)
-                                    @if (Gate::allows('approve-bookings') || $booking->booked_by_user_id === auth()->id())
-                                    <form method="POST" action="{{ route('adventures.bookings.resend-confirmation', [$adventure, $booking]) }}" data-refresh-modal>
-                                        @csrf
-                                        <button type="submit" class="ui mini icon button"
-                                                data-tooltip="Anmeldebestätigung erneut senden" data-position="top center">
-                                            <i class="envelope outline icon"></i>
-                                            <span class="sm:hidden ml-1 text-xs">Mail</span>
-                                        </button>
-                                    </form>
-                                    @endif
-                                @endunless
                                 @can('manage-payments')
                                     <form method="POST" action="{{ route('adventures.bookings.payment', [$adventure, $booking]) }}" data-refresh-modal
                                           data-confirm="{{ $booking->paid ? 'Beitrag als offen markieren?' : 'Beitrag als bezahlt markieren?' }}">
@@ -127,6 +114,19 @@
                                     </form>
                                 @endcan
                             @endif
+                            {{-- Bestätigung erneut senden: in beiden Ansichten für Admin oder eigene Buchung --}}
+                            @unless ($booking->is_guest || $booking->waitlisted)
+                                @if (Gate::allows('approve-bookings') || $booking->booked_by_user_id === auth()->id())
+                                <form method="POST" action="{{ route('adventures.bookings.resend-confirmation', [$adventure, $booking]) }}" data-refresh-modal>
+                                    @csrf
+                                    <button type="submit" class="ui mini icon button"
+                                            data-tooltip="Anmeldebestätigung erneut senden" data-position="top center">
+                                        <i class="envelope outline icon"></i>
+                                        <span class="sm:hidden ml-1 text-xs">Mail</span>
+                                    </button>
+                                </form>
+                                @endif
+                            @endunless
                             {{-- Bearbeiten + Stornieren: in beiden Ansichten für jeden mit Buchungsberechtigung --}}
                             @can('adventure.modify')
                                 <a href="{{ route('adventures.bookings.edit', [$adventure, $booking]) }}"
