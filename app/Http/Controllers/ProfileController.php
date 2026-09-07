@@ -52,7 +52,7 @@ class ProfileController extends Controller
         }
 
         // Pflichtbenachrichtigungen können nicht deaktiviert werden.
-        foreach (['notify_booking_approved', 'notify_booking_rejected', 'notify_waitlist_promoted', 'notify_event_cancelled'] as $col) {
+        foreach (['notify_booking_received', 'notify_booking_approved', 'notify_booking_rejected', 'notify_waitlist_promoted', 'notify_event_cancelled'] as $col) {
             $user->$col = true;
         }
 

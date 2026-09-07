@@ -26,7 +26,6 @@ class ProfileUpdateRequest extends FormRequest
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', Rule::unique(User::class)->ignore($this->user()->id)],
             'teamer_notifications'       => ['nullable', 'boolean'],
             'notify_new_user'            => ['nullable', 'boolean'],
-            'notify_booking_received'    => ['nullable', 'boolean'],
             'notify_booking_approved'    => ['nullable', 'boolean'],
             'notify_booking_rejected'    => ['nullable', 'boolean'],
             'notify_booking_cancelled'   => ['nullable', 'boolean'],

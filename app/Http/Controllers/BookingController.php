@@ -155,9 +155,10 @@ class BookingController extends Controller
         }
 
         $recipientEmail = $player?->email ?: $request->user()->email;
-        if ($recipientEmail && $player?->notificationEnabled('notify_booking_received')) {
+        if ($recipientEmail) {
             // NOTI-02b: Warteliste → kein Beitrag, kein QR-Code.
             // NOTI-02:  Regulär  → Bestätigung mit Bankdaten.
+            // Pflichtbenachrichtigung: wird immer gesendet.
             $notification = $booking->waitlisted
                 ? new BookingWaitlisted($booking)
                 : new BookingReceived($booking);

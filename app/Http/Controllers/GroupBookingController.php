@@ -137,7 +137,8 @@ class GroupBookingController extends Controller
             }
 
             $recipientEmail = $player?->email ?: $request->user()->email;
-            if ($recipientEmail && $player?->notificationEnabled('notify_booking_received')) {
+            if ($recipientEmail) {
+                // Pflichtbenachrichtigung: wird immer gesendet.
                 $notification = $booking->waitlisted
                     ? new BookingWaitlisted($booking)
                     : new BookingReceived($booking);
