@@ -158,16 +158,17 @@
 
                     <div class="space-y-6">
 
+                        {{-- Anmeldungs-Benachrichtigungen: optional zuerst, Pflicht am Ende --}}
                         <fieldset class="border-0 p-0 m-0">
                             <legend class="text-sm font-semibold text-waldritter uppercase tracking-wide mb-1">
                                 Anmeldungen
                             </legend>
                             <div class="divide-y divide-stone-200 border-t border-b border-stone-200">
                                 @foreach ([
-                                    ['notify_booking_received',  'Anmeldung eingegangen',          false],
                                     ['notify_booking_cancelled', 'Stornierung bestätigt',          false],
                                     ['notify_payment_confirmed', 'Zahlung eingegangen',            false],
                                     ['notify_event_reminder',    'Erinnerung vor dem Abenteuer',   false],
+                                    ['notify_booking_received',  'Anmeldung eingegangen',          true],
                                     ['notify_booking_approved',  'Anmeldung bestätigt',            true],
                                     ['notify_booking_rejected',  'Anmeldung abgelehnt',            true],
                                     ['notify_waitlist_promoted', 'Von der Warteliste nachgerückt', true],
@@ -192,34 +193,52 @@
                             </div>
                         </fieldset>
 
+                        {{-- Rollen-spezifische Benachrichtigungen: nur anzeigen wenn Nutzer die Rolle hat --}}
+                        @if ($user->hasAnyRole('teamer', 'lehrmeister') || $user->hasRole('admin') || $user->hasRole('project_lead'))
                         <fieldset class="border-0 p-0 m-0">
                             <legend class="text-sm font-semibold text-waldritter uppercase tracking-wide mb-1">
-                                Weitere Rollen
+                                Rollen-Benachrichtigungen
                             </legend>
                             <div class="divide-y divide-stone-200 border-t border-b border-stone-200">
+                                @if ($user->hasAnyRole('teamer', 'lehrmeister'))
                                 <div class="py-3">
                                     <div class="ui toggle checkbox">
                                         <input type="checkbox" name="teamer_notifications" id="adm_teamer_notifications" value="1"
                                                @checked($user->teamer_notifications ?? true)>
-                                        <label for="adm_teamer_notifications" class="text-stone-800">Teamer-Einladungen</label>
+                                        <label for="adm_teamer_notifications" class="text-stone-800">
+                                            Teamer-Einladungen
+                                            <span class="text-xs text-stone-500 ml-1">(Teamer / Lehrmeister)</span>
+                                        </label>
                                     </div>
                                 </div>
+                                @endif
+                                @if ($user->hasRole('admin'))
                                 <div class="py-3">
                                     <div class="ui toggle checkbox">
                                         <input type="checkbox" name="notify_new_user" id="adm_notify_new_user" value="1"
                                                @checked($user->notify_new_user ?? true)>
-                                        <label for="adm_notify_new_user" class="text-stone-800">Neue Nutzer-Registrierung (Admin)</label>
+                                        <label for="adm_notify_new_user" class="text-stone-800">
+                                            Neue Nutzer-Registrierung
+                                            <span class="text-xs text-stone-500 ml-1">(Admin)</span>
+                                        </label>
                                     </div>
                                 </div>
+                                @endif
+                                @if ($user->hasRole('project_lead'))
                                 <div class="py-3">
                                     <div class="ui toggle checkbox">
                                         <input type="checkbox" name="notify_cancellation_report" id="adm_notify_cancellation_report" value="1"
                                                @checked($user->notify_cancellation_report ?? true)>
-                                        <label for="adm_notify_cancellation_report" class="text-stone-800">Stornierungen von Teilnehmern (Projektleitung)</label>
+                                        <label for="adm_notify_cancellation_report" class="text-stone-800">
+                                            Stornierungen von Teilnehmern
+                                            <span class="text-xs text-stone-500 ml-1">(Projektleitung)</span>
+                                        </label>
                                     </div>
                                 </div>
+                                @endif
                             </div>
                         </fieldset>
+                        @endif
 
                     </div>
 
