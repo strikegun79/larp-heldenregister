@@ -100,6 +100,11 @@
                                            class="ui small green button">
                                             <i class="paper plane icon"></i> Versenden
                                         </a>
+                                    @else
+                                        <a href="{{ route('admin.newsletter.show', $newsletter) }}"
+                                           class="ui small basic button">
+                                            <i class="eye icon"></i> Anzeigen
+                                        </a>
                                     @endif
                                     <form method="POST"
                                           action="{{ route('admin.newsletter.duplicate', $newsletter) }}"
@@ -160,6 +165,11 @@
                                 <a href="{{ route('admin.newsletter.edit', $newsletter) }}"
                                    class="ui small button">
                                     <i class="edit icon"></i> Bearbeiten
+                                </a>
+                            @else
+                                <a href="{{ route('admin.newsletter.show', $newsletter) }}"
+                                   class="ui small basic button">
+                                    <i class="eye icon"></i> Anzeigen
                                 </a>
                             @endif
                             <form method="POST"

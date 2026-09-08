@@ -405,6 +405,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified', 'can:new
     Route::get('newsletter', [Admin\NewsletterController::class, 'index'])->name('newsletter.index');
     Route::get('newsletter/erstellen', [Admin\NewsletterController::class, 'create'])->name('newsletter.create');
     Route::post('newsletter', [Admin\NewsletterController::class, 'store'])->name('newsletter.store');
+    Route::get('newsletter/{newsletter}', [Admin\NewsletterController::class, 'show'])->name('newsletter.show');
     Route::get('newsletter/{newsletter}/bearbeiten', [Admin\NewsletterController::class, 'edit'])->name('newsletter.edit');
     Route::patch('newsletter/{newsletter}', [Admin\NewsletterController::class, 'update'])->name('newsletter.update');
     Route::delete('newsletter/{newsletter}', [Admin\NewsletterController::class, 'destroy'])->name('newsletter.destroy');

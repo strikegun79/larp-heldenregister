@@ -55,6 +55,13 @@ class NewsletterController extends Controller
             ->with('success', 'Entwurf gespeichert.');
     }
 
+    public function show(Newsletter $newsletter): View
+    {
+        $sendsCount = $newsletter->sends()->count();
+
+        return view('admin.newsletter.show', compact('newsletter', 'sendsCount'));
+    }
+
     public function edit(Newsletter $newsletter): View
     {
         abort_if($newsletter->isSent(), 403, 'Versendete Newsletter können nicht bearbeitet werden.');
