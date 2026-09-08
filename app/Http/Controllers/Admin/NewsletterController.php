@@ -132,7 +132,7 @@ class NewsletterController extends Controller
         $path = $request->file('image')->store('newsletter/images', 'public');
 
         return response()->json([
-            'url' => Storage::url($path),
+            'url' => url(Storage::url($path)),
         ]);
     }
 

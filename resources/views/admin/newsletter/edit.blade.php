@@ -101,7 +101,8 @@
             </button>
             <form method="POST"
                   action="{{ route('admin.newsletter.send', $newsletter) }}"
-                  id="send-confirm-form">
+                  id="send-confirm-form"
+                  style="display:inline">
                 @csrf
                 <input type="hidden" name="confirm_word" id="confirm-word-hidden">
                 <button type="submit" id="send-confirm-btn"

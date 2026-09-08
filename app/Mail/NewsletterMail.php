@@ -22,7 +22,9 @@ class NewsletterMail extends Mailable implements ShouldQueue
 
     public function envelope(): Envelope
     {
-        return new Envelope(subject: $this->newsletter->title);
+        return new Envelope(
+            subject: config('app.name') . ' – ' . $this->newsletter->title,
+        );
     }
 
     public function content(): Content
