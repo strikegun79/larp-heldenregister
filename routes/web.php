@@ -409,6 +409,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified', 'can:new
     Route::patch('newsletter/{newsletter}', [Admin\NewsletterController::class, 'update'])->name('newsletter.update');
     Route::delete('newsletter/{newsletter}', [Admin\NewsletterController::class, 'destroy'])->name('newsletter.destroy');
     Route::post('newsletter/{newsletter}/duplizieren', [Admin\NewsletterController::class, 'duplicate'])->name('newsletter.duplicate');
+    Route::post('newsletter/{newsletter}/versenden', [Admin\NewsletterController::class, 'send'])->name('newsletter.send');
     Route::get('newsletter/abonnenten-anzahl', [Admin\NewsletterController::class, 'subscriberCount'])->name('newsletter.subscriber-count');
 });
 

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Jobs\SendNewsletterJob;
 use App\Models\Newsletter;
 use App\Models\NewsletterSubscription;
 use Illuminate\Http\RedirectResponse;
@@ -87,6 +88,30 @@ class NewsletterController extends Controller
 
         return redirect()->route('admin.newsletter.index')
             ->with('success', 'Newsletter gelöscht.');
+    }
+
+    public function send(Request $request, Newsletter $newsletter): RedirectResponse
+    {
+        abort_if(! $newsletter->isDraft(), 403, 'Nur Entwürfe können versendet werden.');
+
+        $request->validate([
+            'confirm_word' => ['required', 'in:VERSENDEN'],
+        ], [
+            'confirm_word.in' => 'Bitte tippe VERSENDEN zur Bestätigung.',
+        ]);
+
+        $activeSubscribers = NewsletterSubscription::whereNotNull('confirmed_at')
+            ->whereNull('unsubscribed_at')
+            ->count();
+
+        if ($activeSubscribers === 0) {
+            return back()->with('error', 'Keine aktiven Abonnenten vorhanden.');
+        }
+
+        SendNewsletterJob::dispatch($newsletter);
+
+        return redirect()->route('admin.newsletter.index')
+            ->with('success', "Newsletter wird an {$activeSubscribers} Abonnenten versendet.");
     }
 
     /** JSON: aktuelle Abonnenten-Anzahl für den Editor-Zähler auf der Create-Seite. */

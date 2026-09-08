@@ -322,7 +322,8 @@ class AdventureController extends Controller
         $promoted = [];
 
         if (! $newMode) {
-            // Wartelistenmodus deaktiviert → wartende Buchungen nachrücken lassen.
+            // Wartelistenmodus deaktiviert → wartende Buchungen ohne Altersverletzung nachrücken lassen.
+            // Buchungen mit Altersverletzung bleiben auf der Warteliste (manuelle Prüfung erforderlich).
             $waitlisted = $adventure->bookings()
                 ->where('waitlisted', true)
                 ->orderBy('created_at')
@@ -331,6 +332,9 @@ class AdventureController extends Controller
                 ->get();
 
             foreach ($waitlisted as $booking) {
+                if ($adventure->isOutsideAgeRange($booking->player)) {
+                    continue;
+                }
                 if ($adventure->freeSlots() <= 0) {
                     break;
                 }

@@ -149,8 +149,9 @@ class BookingController extends Controller
             'status' => 'bestaetigt',
         ]);
 
-        // Wartelisten-Modus dauerhaft aktivieren, sobald erste Buchung auf Warteliste kommt.
-        if ($booking->waitlisted && ! $adventure->waitlist_mode) {
+        // Wartelisten-Modus dauerhaft aktivieren, sobald die Kapazitätsgrenze erreicht ist.
+        // Altersverletzungen sind Ausnahmen und aktivieren den Modus nicht.
+        if ($booking->waitlisted && ! $ageViolation && ! $adventure->waitlist_mode) {
             $adventure->update(['waitlist_mode' => true]);
         }
 

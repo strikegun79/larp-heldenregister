@@ -1,7 +1,10 @@
 {{-- Wartelistenmodus-Leiste: Kapazität + Toggle-Button (ADV-WL) --}}
 @php
-    $freeSlots      = $adventure->freeSlots();
-    $waitlistedCount = $adventure->bookings->where('waitlisted', true)->count();
+    $freeSlots       = $adventure->freeSlots();
+    $allWaitlisted   = $adventure->bookings->where('waitlisted', true);
+    $waitlistedCount = $allWaitlisted->count();
+    $ageExceptions   = $allWaitlisted->filter(fn($b) => $adventure->isOutsideAgeRange($b->player))->count();
+    $promotable      = $waitlistedCount - $ageExceptions;
     $inWaitlistMode  = (bool) $adventure->waitlist_mode;
 @endphp
 <div class="flex flex-wrap items-center gap-3 mb-3 p-2 rounded border
@@ -11,8 +14,11 @@
     <span class="text-sm text-stone-700">
         <i class="users icon"></i>
         <strong>{{ $freeSlots }}</strong> freie Plätze
-        @if ($waitlistedCount > 0)
-            · <strong class="text-amber-700">{{ $waitlistedCount }}</strong> auf Warteliste
+        @if ($promotable > 0)
+            · <strong class="text-amber-700">{{ $promotable }}</strong> auf Warteliste
+        @endif
+        @if ($ageExceptions > 0)
+            · <strong class="text-red-600">{{ $ageExceptions }}</strong> Altersausnahme(n)
         @endif
     </span>
 
@@ -32,9 +38,9 @@
         @if ($inWaitlistMode)
             <form method="POST" action="{{ route('adventures.toggle-waitlist-mode', $adventure) }}"
                   data-refresh-modal
-                  data-confirm="{{ $waitlistedCount > 0
-                      ? 'Wartelistenmodus deaktivieren? ' . $waitlistedCount . ' wartende Anmeldung(en) rücken automatisch nach.'
-                      : 'Wartelistenmodus deaktivieren? Neue Anmeldungen füllen dann freie Plätze.' }}"
+                  data-confirm="{{ $promotable > 0
+                      ? 'Wartelistenmodus deaktivieren? ' . $promotable . ' Anmeldung(en) rücken automatisch nach.' . ($ageExceptions > 0 ? ' ' . $ageExceptions . ' Altersgrenzen-Ausnahme(n) bleiben auf der Warteliste.' : '')
+                      : 'Wartelistenmodus deaktivieren? Neue Anmeldungen füllen dann freie Plätze.' . ($ageExceptions > 0 ? ' (' . $ageExceptions . ' Altersgrenzen-Ausnahme(n) bleiben auf der Warteliste.)' : '') }}"
                   class="m-0">
                 @csrf @method('PATCH')
                 <button type="submit" class="ui small orange basic button">

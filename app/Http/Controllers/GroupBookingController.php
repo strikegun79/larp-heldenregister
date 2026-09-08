@@ -132,7 +132,8 @@ class GroupBookingController extends Controller
                 'status' => 'bestaetigt',
             ]);
 
-            if ($booking->waitlisted && ! $adventure->waitlist_mode) {
+            // Wartelisten-Modus nur bei Kapazitätsüberschreitung aktivieren, nicht bei Altersverletzung.
+            if ($booking->waitlisted && ! $ageViolation && ! $adventure->waitlist_mode) {
                 $adventure->update(['waitlist_mode' => true]);
             }
 
