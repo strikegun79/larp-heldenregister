@@ -411,6 +411,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified', 'can:new
     Route::post('newsletter/{newsletter}/duplizieren', [Admin\NewsletterController::class, 'duplicate'])->name('newsletter.duplicate');
     Route::post('newsletter/{newsletter}/versenden', [Admin\NewsletterController::class, 'send'])->name('newsletter.send');
     Route::get('newsletter/abonnenten-anzahl', [Admin\NewsletterController::class, 'subscriberCount'])->name('newsletter.subscriber-count');
+    Route::post('newsletter/bild-hochladen', [Admin\NewsletterController::class, 'uploadImage'])->name('newsletter.upload-image');
 });
 
 // Admin: Umfragen verwalten (survey.view = einsehen, survey.admin = alles).

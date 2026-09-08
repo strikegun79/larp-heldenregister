@@ -4,6 +4,10 @@
     /* Quill-Container ans Summernote-Look angleichen */
     #quill-container .ql-container { font-size: 1rem; min-height: 200px; }
     #quill-container .ql-editor    { min-height: 370px; font-family: inherit; }
+    /* Summernote Tabellen-Grundstil */
+    .note-editable table { border-collapse: collapse; width: 100%; }
+    .note-editable td,
+    .note-editable th  { border: 1px solid #ccc; padding: 6px 10px; }
 </style>
 <script>
 (function () {
@@ -55,23 +59,53 @@
         }, 3000);
     }
 
+    /* ── Bild-Upload an den Server ──────────────────────── */
+    function uploadImage(file) {
+        var token = document.querySelector('meta[name="csrf-token"]');
+        if (!token) return;
+        var data = new FormData();
+        data.append('image', file);
+        data.append('_token', token.getAttribute('content'));
+        fetch('{{ route('admin.newsletter.upload-image') }}', {
+            method: 'POST',
+            headers: { 'X-Requested-With': 'XMLHttpRequest' },
+            body: data,
+        }).then(function (r) { return r.json(); })
+          .then(function (d) {
+              if (d.url) {
+                  window.$('#body_html').summernote('insertImage', d.url);
+              }
+          })
+          .catch(function () {});
+    }
+
     /* ── Summernote initialisieren ───────────────────────── */
     function initSummernote() {
         var ta = document.getElementById('body_html');
         if (!ta || window.$('#body_html').data('summernote')) return;
         window.$('#body_html').summernote({
-            height: 400,
+            height: 420,
             minHeight: 200,
             toolbar: [
                 ['style',  ['style']],
-                ['font',   ['bold', 'italic', 'underline', 'strikethrough', 'clear']],
+                ['font',   ['fontsize', 'bold', 'italic', 'underline', 'strikethrough', 'clear']],
+                ['color',  ['forecolor', 'backcolor']],
                 ['para',   ['ul', 'ol', 'paragraph']],
+                ['table',  ['table']],
                 ['insert', ['link', 'picture', 'hr']],
                 ['misc',   ['undo', 'redo', 'fullscreen', 'codeview']],
             ],
             styleTags: ['p', 'h2', 'h3', 'blockquote'],
-            disableDragAndDrop: true,
-            callbacks: { onChange: scheduleAutoSave },
+            fontSizes: ['10', '12', '14', '16', '18', '20', '24', '28', '32'],
+            disableDragAndDrop: false,
+            callbacks: {
+                onChange: scheduleAutoSave,
+                onImageUpload: function (files) {
+                    for (var i = 0; i < files.length; i++) {
+                        uploadImage(files[i]);
+                    }
+                },
+            },
         });
     }
 
@@ -92,7 +126,6 @@
                 ],
             },
         });
-        // Vorhandenen Inhalt aus Textarea laden
         var ta = document.getElementById('body_html');
         if (ta && ta.value.trim()) {
             quillInstance.clipboard.dangerouslyPasteHTML(ta.value);
@@ -104,7 +137,7 @@
     function switchEditor(to) {
         if (to === activeEditor) return;
 
-        var html = getEditorHtml();  // Inhalt aus aktuellem Editor sichern
+        var html = getEditorHtml();
 
         var snContainer = document.getElementById('summernote-container');
         var qlContainer = document.getElementById('quill-container');
@@ -112,7 +145,6 @@
         var btnQl = document.getElementById('tab-quill');
 
         if (to === 'quill') {
-            // Summernote deaktivieren
             if (window.$ && window.$('#body_html').data('summernote')) {
                 window.$('#body_html').summernote('destroy');
             }
@@ -122,16 +154,13 @@
             btnQl.classList.add('active');
             activeEditor = 'quill';
             initQuill();
-            // Inhalt übernehmen
             if (quillInstance) quillInstance.clipboard.dangerouslyPasteHTML(html);
         } else {
-            // Quill → Summernote
             qlContainer.style.display = 'none';
             snContainer.style.display = 'block';
             btnQl.classList.remove('active');
             btnSn.classList.add('active');
             activeEditor = 'summernote';
-            // Inhalt in Textarea schreiben, dann Summernote neu initialisieren
             var ta = document.getElementById('body_html');
             if (ta) ta.value = html;
             initSummernote();
@@ -139,14 +168,13 @@
         }
     }
 
-    /* ── Beim Absenden Textarea synchronisieren ──────────── */
+    /* ── DOMContentLoaded ───────────────────────────────── */
     document.addEventListener('DOMContentLoaded', function () {
         var form = document.getElementById('newsletter-form');
         if (form) {
             form.addEventListener('submit', syncTextarea);
         }
 
-        // Tab-Buttons verdrahten
         var btnSn = document.getElementById('tab-summernote');
         var btnQl = document.getElementById('tab-quill');
         if (btnSn) btnSn.addEventListener('click', function () { switchEditor('summernote'); });
@@ -158,13 +186,13 @@
         script.onload = function () { initSummernote(); };
         document.head.appendChild(script);
 
-        // Quill ist kein jQuery-Plugin → direkt laden
+        // Quill direkt laden (kein jQuery nötig)
         var qlScript = document.createElement('script');
         qlScript.src = '/vendor/quill/quill.js';
         document.head.appendChild(qlScript);
 
         @if ($subscriberCount === 0)
-        fetch('/admin/newsletter/abonnenten-anzahl', {
+        fetch('{{ route('admin.newsletter.subscriber-count') }}', {
             headers: { 'X-Requested-With': 'XMLHttpRequest' }
         }).then(function (r) { return r.json(); })
           .then(function (d) {

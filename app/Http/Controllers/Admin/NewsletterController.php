@@ -8,6 +8,7 @@ use App\Models\Newsletter;
 use App\Models\NewsletterSubscription;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
 use Mews\Purifier\Facades\Purifier;
 
@@ -119,6 +120,20 @@ class NewsletterController extends Controller
 
         return redirect()->route('admin.newsletter.index')
             ->with('success', "Newsletter wird an {$activeSubscribers} Abonnenten versendet.");
+    }
+
+    /** Bild-Upload für den Newsletter-Editor – gibt die öffentliche URL zurück. */
+    public function uploadImage(Request $request): \Illuminate\Http\JsonResponse
+    {
+        $request->validate([
+            'image' => ['required', 'image', 'max:4096', 'mimes:jpeg,png,gif,webp'],
+        ]);
+
+        $path = $request->file('image')->store('newsletter/images', 'public');
+
+        return response()->json([
+            'url' => Storage::url($path),
+        ]);
     }
 
     /** JSON: aktuelle Abonnenten-Anzahl für den Editor-Zähler auf der Create-Seite. */

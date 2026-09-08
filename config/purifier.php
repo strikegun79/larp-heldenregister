@@ -33,8 +33,8 @@ return [
         // Newsletter: erlaubt Formatierungen des WYSIWYG-Editors, blockiert gefährliche Tags/Attribute
         'newsletter' => [
             'HTML.Doctype'             => 'HTML 4.01 Transitional',
-            'HTML.Allowed'             => 'h2,h3,p[style],br,strong,em,u,s,ul,ol,li,a[href|title|target],img[src|alt|width|height|style],blockquote,span[style]',
-            'CSS.AllowedProperties'    => 'color,background-color,text-align,font-size,font-weight,font-style,text-decoration',
+            'HTML.Allowed'             => 'h2,h3,p[style],br,strong,em,u,s,ul,ol,li,a[href|title|target],img[src|alt|width|height|style],blockquote,span[style],table[style],thead,tbody,tr,th[style|colspan|rowspan],td[style|colspan|rowspan]',
+            'CSS.AllowedProperties'    => 'color,background-color,text-align,font-size,font-weight,font-style,text-decoration,border,border-color,border-style,border-width,padding,padding-top,padding-right,padding-bottom,padding-left,width,height',
             'AutoFormat.RemoveEmpty'   => true,
             'URI.AllowedSchemes'       => ['http' => true, 'https' => true, 'mailto' => true],
         ],
