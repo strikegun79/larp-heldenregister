@@ -114,17 +114,15 @@
                                             <i class="copy icon"></i> Duplizieren
                                         </button>
                                     </form>
-                                    @if ($newsletter->isDraft())
-                                        <form method="POST"
-                                              action="{{ route('admin.newsletter.destroy', $newsletter) }}"
-                                              class="inline"
-                                              data-confirm="Newsletter &quot;{{ $newsletter->title }}&quot; wirklich löschen?">
-                                            @csrf @method('DELETE')
-                                            <button type="submit" class="ui small red basic icon button">
-                                                <i class="trash icon"></i>
-                                            </button>
-                                        </form>
-                                    @endif
+                                    <form method="POST"
+                                          action="{{ route('admin.newsletter.destroy', $newsletter) }}"
+                                          class="inline"
+                                          data-confirm="Newsletter &quot;{{ $newsletter->title }}&quot; wirklich löschen?">
+                                        @csrf @method('DELETE')
+                                        <button type="submit" class="ui small red basic icon button">
+                                            <i class="trash icon"></i>
+                                        </button>
+                                    </form>
                                 </td>
                             </tr>
                         @empty
@@ -179,16 +177,14 @@
                                     <i class="copy icon"></i> Duplizieren
                                 </button>
                             </form>
-                            @if ($newsletter->isDraft())
-                                <form method="POST"
-                                      action="{{ route('admin.newsletter.destroy', $newsletter) }}"
-                                      data-confirm="Newsletter &quot;{{ $newsletter->title }}&quot; wirklich löschen?">
-                                    @csrf @method('DELETE')
-                                    <button type="submit" class="ui small red basic button">
-                                        <i class="trash icon"></i> Löschen
-                                    </button>
-                                </form>
-                            @endif
+                            <form method="POST"
+                                  action="{{ route('admin.newsletter.destroy', $newsletter) }}"
+                                  data-confirm="Newsletter &quot;{{ $newsletter->title }}&quot; wirklich löschen?">
+                                @csrf @method('DELETE')
+                                <button type="submit" class="ui small red basic button">
+                                    <i class="trash icon"></i> Löschen
+                                </button>
+                            </form>
                         </div>
                     </div>
                 @empty

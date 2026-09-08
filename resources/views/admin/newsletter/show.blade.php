@@ -24,6 +24,15 @@
                         <i class="copy icon"></i> Duplizieren
                     </button>
                 </form>
+                <form method="POST"
+                      action="{{ route('admin.newsletter.destroy', $newsletter) }}"
+                      style="display:inline"
+                      data-confirm="Newsletter &quot;{{ $newsletter->title }}&quot; wirklich löschen?">
+                    @csrf @method('DELETE')
+                    <button type="submit" class="ui red basic button">
+                        <i class="trash icon"></i> Löschen
+                    </button>
+                </form>
             </div>
         </div>
     </x-slot>

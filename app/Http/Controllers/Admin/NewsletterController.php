@@ -97,8 +97,6 @@ class NewsletterController extends Controller
 
     public function destroy(Newsletter $newsletter): RedirectResponse
     {
-        abort_if($newsletter->isSent(), 403, 'Versendete Newsletter können nicht gelöscht werden.');
-
         $newsletter->delete();
 
         return redirect()->route('admin.newsletter.index')
