@@ -23,15 +23,10 @@ class SendNewsletterJob implements ShouldQueue
 
     public function handle(): void
     {
-        // Doppelversand verhindern: nur Entwürfe verarbeiten
-        if (! $this->newsletter->isDraft()) {
+        // Doppelversand verhindern: abbrechen wenn bereits E-Mails verschickt wurden
+        if ($this->newsletter->sends()->exists()) {
             return;
         }
-
-        $this->newsletter->update([
-            'status'  => Newsletter::STATUS_SENT,
-            'sent_at' => now(),
-        ]);
 
         NewsletterSubscription::whereNotNull('confirmed_at')
             ->whereNull('unsubscribed_at')

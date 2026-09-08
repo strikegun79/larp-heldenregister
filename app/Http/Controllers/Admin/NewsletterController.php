@@ -123,6 +123,11 @@ class NewsletterController extends Controller
             return back()->with('error', 'Keine aktiven Abonnenten vorhanden.');
         }
 
+        $newsletter->update([
+            'status'  => Newsletter::STATUS_SENT,
+            'sent_at' => now(),
+        ]);
+
         SendNewsletterJob::dispatch($newsletter);
 
         return redirect()->route('admin.newsletter.index')
