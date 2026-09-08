@@ -3,9 +3,11 @@
         <div class="flex items-center justify-between flex-wrap gap-3">
             <div>
                 <h2 class="font-uncial text-2xl text-waldritter leading-tight">Newsletter</h2>
-                <p class="text-sm text-stone-500 mt-0.5">
+                <button type="button" id="toggle-subscribers"
+                        class="text-sm text-stone-500 mt-0.5 hover:text-waldritter transition-colors cursor-pointer bg-transparent border-0 p-0">
                     <i class="users icon"></i> {{ $activeSubscribers }} aktive Abonnenten
-                </p>
+                    <i class="chevron down icon text-xs ml-1"></i>
+                </button>
             </div>
             <a href="{{ route('admin.newsletter.create') }}" class="ui primary button">
                 <i class="plus icon"></i> Neuer Newsletter
@@ -22,6 +24,41 @@
             @if (session('error'))
                 <div class="ui error message mb-4">{{ session('error') }}</div>
             @endif
+
+            {{-- Abonnenten-Accordion --}}
+            <div class="ui styled fluid accordion mb-6 bg-white/70 border-2 border-[#5a3a22]/40 rounded-lg overflow-hidden" id="subscribers-accordion">
+                <div class="title text-stone-700">
+                    <i class="dropdown icon"></i>
+                    <i class="users icon"></i>
+                    <strong>{{ $activeSubscribers }}</strong> aktive Abonnenten
+                </div>
+                <div class="content">
+                    @if ($subscriptions->isEmpty())
+                        <p class="text-stone-400 text-sm py-2">Noch keine bestätigten Abonnenten.</p>
+                    @else
+                        <div style="overflow-x: auto;">
+                            <table class="min-w-full divide-y divide-stone-200 text-sm">
+                                <thead class="bg-black/5">
+                                    <tr>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">E-Mail</th>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">Konto</th>
+                                        <th class="px-4 py-2 text-left text-xs font-medium text-stone-500 uppercase tracking-wider">Bestätigt am</th>
+                                    </tr>
+                                </thead>
+                                <tbody class="divide-y divide-stone-100">
+                                    @foreach ($subscriptions as $sub)
+                                        <tr class="hover:bg-black/5">
+                                            <td class="px-4 py-2 font-mono text-stone-800">{{ $sub->email }}</td>
+                                            <td class="px-4 py-2 text-stone-500">{{ $sub->user?->name ?? '—' }}</td>
+                                            <td class="px-4 py-2 text-stone-500">{{ $sub->confirmed_at->locale('de')->isoFormat('D. MMM YYYY') }}</td>
+                                        </tr>
+                                    @endforeach
+                                </tbody>
+                            </table>
+                        </div>
+                    @endif
+                </div>
+            </div>
 
             {{-- Desktop-Tabelle (sm+) --}}
             <div class="hidden sm:block bg-white/70 border-2 border-[#5a3a22]/40 shadow sm:rounded-lg overflow-hidden">
@@ -156,6 +193,20 @@
 
         </div>
     </div>
+
+    <script>
+    document.addEventListener('DOMContentLoaded', function () {
+        var acc = window.$('#subscribers-accordion');
+        acc.accordion();
+
+        var btn = document.getElementById('toggle-subscribers');
+        if (btn) {
+            btn.addEventListener('click', function () {
+                acc.accordion('toggle', 0);
+            });
+        }
+    });
+    </script>
 </x-app-layout>
 
 @php

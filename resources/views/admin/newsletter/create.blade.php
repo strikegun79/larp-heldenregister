@@ -25,9 +25,18 @@
 
                 {{-- Editor --}}
                 <div class="bg-white/70 border-2 border-[#5a3a22]/40 rounded-lg p-6 mb-4">
-                    <x-input-label for="body_html" value="Inhalt" />
-                    <div class="mt-2">
-                        <textarea id="body_html" name="body_html">{{ old('body_html') }}</textarea>
+                    <div class="flex items-center justify-between mb-2">
+                        <x-input-label for="body_html" value="Inhalt" />
+                        <div class="ui mini buttons">
+                            <button type="button" id="tab-summernote" class="ui button active">Summernote</button>
+                            <button type="button" id="tab-quill"      class="ui button">Quill</button>
+                        </div>
+                    </div>
+                    <div id="summernote-container">
+                        <textarea id="body_html" name="body_html">{!! old('body_html') !!}</textarea>
+                    </div>
+                    <div id="quill-container" style="display:none;">
+                        <div id="quill-editor"></div>
                     </div>
                     <x-input-error class="mt-2" :messages="$errors->get('body_html')" />
                     <p id="editor-save-status" class="text-xs text-stone-400 mt-2 h-4"></p>

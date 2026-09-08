@@ -21,11 +21,14 @@ class NewsletterController extends Controller
     public function index(): View
     {
         $newsletters       = Newsletter::withCount('sends')->latest()->paginate(20);
-        $activeSubscribers = NewsletterSubscription::whereNotNull('confirmed_at')
+        $subscriptions     = NewsletterSubscription::whereNotNull('confirmed_at')
             ->whereNull('unsubscribed_at')
-            ->count();
+            ->with('user')
+            ->orderBy('confirmed_at', 'desc')
+            ->get();
+        $activeSubscribers = $subscriptions->count();
 
-        return view('admin.newsletter.index', compact('newsletters', 'activeSubscribers'));
+        return view('admin.newsletter.index', compact('newsletters', 'activeSubscribers', 'subscriptions'));
     }
 
     public function create(): View
@@ -62,7 +65,7 @@ class NewsletterController extends Controller
         return view('admin.newsletter.edit', compact('newsletter', 'activeSubscribers'));
     }
 
-    public function update(Request $request, Newsletter $newsletter): RedirectResponse
+    public function update(Request $request, Newsletter $newsletter): RedirectResponse|\Illuminate\Http\JsonResponse
     {
         abort_if($newsletter->isSent(), 403);
 
@@ -72,9 +75,13 @@ class NewsletterController extends Controller
         ]);
 
         $newsletter->update([
-            'title'    => $validated['title'],
+            'title'     => $validated['title'],
             'body_html' => Purifier::clean($validated['body_html'], 'newsletter'),
         ]);
+
+        if ($request->expectsJson()) {
+            return response()->json(['message' => 'Gespeichert.']);
+        }
 
         return redirect()->route('admin.newsletter.edit', $newsletter)
             ->with('success', 'Änderungen gespeichert.');
