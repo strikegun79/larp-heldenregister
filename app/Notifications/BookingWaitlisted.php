@@ -17,7 +17,10 @@ class BookingWaitlisted extends Notification implements ShouldQueue
 {
     use Queueable;
 
-    public function __construct(private readonly Booking $booking) {}
+    public function __construct(
+        private readonly Booking $booking,
+        private readonly bool $ageViolation = false,
+    ) {}
 
     /** @return array<int, string> */
     public function via(object $notifiable): array
@@ -33,6 +36,7 @@ class BookingWaitlisted extends Notification implements ShouldQueue
             ->subject('Warteliste: '.$booking->adventure?->name)
             ->markdown('emails.booking_waitlisted', [
                 'booking'      => $booking,
+                'ageViolation' => $this->ageViolation,
                 'dashboardUrl' => route('dashboard'),
             ]);
     }

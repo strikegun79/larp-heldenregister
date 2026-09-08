@@ -160,7 +160,7 @@ class BookingController extends Controller
             // NOTI-02:  Regulär  → Bestätigung mit Bankdaten.
             // Pflichtbenachrichtigung: wird immer gesendet.
             $notification = $booking->waitlisted
-                ? new BookingWaitlisted($booking)
+                ? new BookingWaitlisted($booking, $ageViolation)
                 : new BookingReceived($booking);
             Notification::route('mail', $recipientEmail)->notify($notification);
         }

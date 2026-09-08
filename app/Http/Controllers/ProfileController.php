@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ProfileUpdateRequest;
+use App\Models\NewsletterSubscription;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -17,8 +18,15 @@ class ProfileController extends Controller
      */
     public function edit(Request $request): View
     {
+        $user = $request->user();
+
+        $nlSub = NewsletterSubscription::where('email', $user->email)->first();
+
         return view('profile.edit', [
-            'user' => $request->user(),
+            'user'                  => $user,
+            'newsletterSubscription' => $nlSub,
+            'nlActive'              => $nlSub !== null && $nlSub->isActive(),
+            'nlPending'             => $nlSub !== null && ! $nlSub->isConfirmed() && $nlSub->unsubscribed_at === null,
         ]);
     }
 

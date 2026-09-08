@@ -28,6 +28,8 @@ return [
         // Umfrage-System (SURV-01)
         'survey.admin',        // Vorlagen verwalten, Umfragen erstellen/versenden, Ergebnisse einsehen
         'survey.view',         // Nur Ergebnisse einsehen
+        // Newsletter-System (NL-01)
+        'newsletter.manage',   // Newsletter erstellen, bearbeiten, versenden
         // Datenpannen-Protokoll (DSGVO Art. 33) – nur Admin via '*'
         'data-breach.manage',
     ],
@@ -54,6 +56,7 @@ return [
             'events.view', 'events.edit',
             'survey.view',
             'roles.view',
+            'newsletter.manage',
         ],
 
         // Spielleiter

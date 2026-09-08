@@ -28,6 +28,83 @@
                 </div>
             </div>
 
+            {{-- NL-01: Newsletter-Opt-in --}}
+            <div class="p-4 sm:p-8 bg-white/60 border-2 border-[#5a3a22]/40 rounded-lg">
+                <div class="max-w-xl">
+                    <h2 class="font-uncial text-lg text-waldritter mb-1">Newsletter</h2>
+                    <p class="text-sm text-stone-600 mb-5">
+                        Bleib auf dem Laufenden: Neuigkeiten über Abenteuer, Termine und das Waldritter-Projekt –
+                        etwa einmal im Monat per E-Mail.
+                    </p>
+
+                    @if (session('newsletter_status') === 'confirmation_sent')
+                        <div class="ui info message mb-4">
+                            <i class="mail icon"></i>
+                            Wir haben dir einen Bestätigungs-Link an <strong>{{ $user->email }}</strong> geschickt.
+                            Bitte klicke ihn an, um deine Anmeldung abzuschließen.
+                        </div>
+                    @elseif (session('newsletter_status') === 'unsubscribed')
+                        <div class="ui message mb-4">
+                            <i class="check icon"></i>
+                            Du hast den Newsletter abbestellt. Schade – du kannst dich jederzeit wieder anmelden.
+                        </div>
+                    @elseif (session('newsletter_status') === 'already_subscribed')
+                        <div class="ui info message mb-4">
+                            Du bist bereits angemeldet.
+                        </div>
+                    @endif
+
+                    @if ($nlActive)
+                        {{-- Aktiv: Toggle AN, Abmelden-Formular --}}
+                        <div class="flex items-start gap-4">
+                            <div class="mt-1">
+                                <span class="ui green label"><i class="check icon"></i> Abonniert</span>
+                                @if ($newsletterSubscription?->confirmed_at)
+                                    <span class="text-xs text-stone-400 ml-1">seit {{ $newsletterSubscription->confirmed_at->locale('de')->isoFormat('D. MMM YYYY') }}</span>
+                                @endif
+                            </div>
+                        </div>
+                        <form method="POST" action="{{ route('newsletter.unsubscribe') }}" class="mt-4">
+                            @csrf
+                            <button type="submit" class="ui basic small button">
+                                <i class="times icon"></i> Newsletter abbestellen
+                            </button>
+                        </form>
+
+                    @elseif ($nlPending)
+                        {{-- Ausstehend: Bestätigungs-E-Mail noch offen --}}
+                        <div class="flex items-center gap-3 mb-4">
+                            <span class="ui yellow label"><i class="clock icon"></i> Bestätigung ausstehend</span>
+                            <span class="text-sm text-stone-500">Bitte klicke den Link in deiner E-Mail.</span>
+                        </div>
+                        <form method="POST" action="{{ route('newsletter.subscribe') }}" class="mt-1">
+                            @csrf
+                            <button type="submit" class="ui basic small button">
+                                <i class="redo icon"></i> Bestätigungs-E-Mail erneut senden
+                            </button>
+                        </form>
+
+                    @else
+                        {{-- Nicht angemeldet --}}
+                        <form method="POST" action="{{ route('newsletter.subscribe') }}">
+                            @csrf
+                            <div class="ui toggle checkbox mb-3">
+                                <input type="checkbox" id="newsletter_opt_in" name="newsletter_opt_in"
+                                       value="1" onchange="this.form.submit()">
+                                <label for="newsletter_opt_in" class="text-stone-800 font-medium">
+                                    Newsletter abonnieren
+                                </label>
+                            </div>
+                            <p class="text-xs text-stone-500 ml-14 leading-snug">
+                                Ich möchte den Waldritter-Newsletter erhalten. Meine E-Mail-Adresse wird
+                                ausschließlich dafür genutzt und nicht weitergegeben. Jederzeit widerrufbar.
+                                <a href="{{ route('datenschutz') }}" target="_blank" class="underline text-waldritter">Datenschutzerklärung</a>
+                            </p>
+                        </form>
+                    @endif
+                </div>
+            </div>
+
             <div class="p-4 sm:p-8 bg-white/60 border-2 border-[#5a3a22]/40 rounded-lg">
                 <div class="max-w-xl">
                     @include('profile.partials.update-password-form')
@@ -77,7 +154,7 @@
                                                 <input type="hidden" name="{{ $col }}" value="1">
                                             @endif
                                             <div class="ui toggle checkbox{{ $mandatory ? ' disabled' : '' }}">
-                                                <input type="checkbox" {{ $mandatory ? '' : 'name="'.$col.'"' }} id="{{ $col }}" value="1"
+                                                <input type="checkbox" {!! $mandatory ? '' : 'name="'.$col.'"' !!} id="{{ $col }}" value="1"
                                                        @checked($mandatory || ($user->$col ?? true)) @disabled($mandatory)
                                                        aria-describedby="{{ $col }}_desc">
                                                 <label for="{{ $col }}" class="text-stone-800 font-medium">
@@ -206,15 +283,7 @@
         </div>
     </div>
 
-    {{-- Fomantic-Toggle-Schalter der Benachrichtigungs-Sektion initialisieren
-         (auf normal gerenderten Seiten laeuft sonst keine .checkbox()-Init). --}}
-    @push('scripts')
-        <script>
-            document.addEventListener('DOMContentLoaded', function () {
-                if (window.jQuery) {
-                    window.jQuery('.ui.toggle.checkbox').checkbox();
-                }
-            });
-        </script>
-    @endpush
+    {{-- Fomantic-Toggle-Schalter: kein .checkbox()-Init nötig.
+         Das Toggle-CSS arbeitet nativ über input:checked. HTML-disabled
+         schützt die Pflicht-Checkboxen ohne JS. --}}
 </x-app-layout>

@@ -17,6 +17,7 @@ use App\Http\Controllers\PublicHeroController;
 use App\Http\Controllers\SignatureController;
 use App\Http\Controllers\SkillController;
 use App\Http\Controllers\SkilltreeController;
+use App\Http\Controllers\NewsletterSubscriptionController;
 use App\Http\Controllers\SurveyController;
 use Illuminate\Support\Facades\Route;
 
@@ -58,6 +59,9 @@ Route::get('/manifest.webmanifest', function () {
 // Datenschutzerklärung (DSGVO Art. 13) – öffentlich, ohne Auth.
 Route::get('/datenschutz', fn () => view('datenschutz'))->name('datenschutz');
 
+// Newsletter Double-Opt-in-Bestätigung (öffentlich, kein Login nötig).
+Route::get('/newsletter/bestaetigen/{token}', [NewsletterSubscriptionController::class, 'confirm'])->name('newsletter.confirm');
+
 // PUB-02/03/06: Öffentliche Helden-Routen mit Rate-Limiting (30/min je IP).
 Route::middleware('throttle:public-hero')->group(function () {
     // PUB-03: Suchformular + Weiterleitung (vor {code}-Route registriert).
@@ -84,6 +88,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     Route::get('/profile/export-data', [ProfileController::class, 'exportData'])->name('profile.export-data');
+
+    // Newsletter-Opt-in/-out aus dem Profil heraus.
+    Route::post('/newsletter/abonnieren', [NewsletterSubscriptionController::class, 'subscribe'])->name('newsletter.subscribe');
+    Route::post('/newsletter/abbestellen', [NewsletterSubscriptionController::class, 'unsubscribe'])->name('newsletter.unsubscribe');
 
     // UI-45: Datensparmodus manuell umschalten.
     Route::post('/save-data/toggle', function (\Illuminate\Http\Request $request) {
@@ -390,6 +398,18 @@ Route::prefix('umfrage')->name('survey.')->group(function () {
     Route::get('{token}/formular', [SurveyController::class, 'show'])->name('show');
     Route::post('{token}/formular', [SurveyController::class, 'submit'])->name('submit');
     Route::get('{token}/danke', [SurveyController::class, 'danke'])->name('danke');
+});
+
+// Admin: Newsletter verwalten (newsletter.manage).
+Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified', 'can:newsletter.manage'])->group(function () {
+    Route::get('newsletter', [Admin\NewsletterController::class, 'index'])->name('newsletter.index');
+    Route::get('newsletter/erstellen', [Admin\NewsletterController::class, 'create'])->name('newsletter.create');
+    Route::post('newsletter', [Admin\NewsletterController::class, 'store'])->name('newsletter.store');
+    Route::get('newsletter/{newsletter}/bearbeiten', [Admin\NewsletterController::class, 'edit'])->name('newsletter.edit');
+    Route::patch('newsletter/{newsletter}', [Admin\NewsletterController::class, 'update'])->name('newsletter.update');
+    Route::delete('newsletter/{newsletter}', [Admin\NewsletterController::class, 'destroy'])->name('newsletter.destroy');
+    Route::post('newsletter/{newsletter}/duplizieren', [Admin\NewsletterController::class, 'duplicate'])->name('newsletter.duplicate');
+    Route::get('newsletter/abonnenten-anzahl', [Admin\NewsletterController::class, 'subscriberCount'])->name('newsletter.subscriber-count');
 });
 
 // Admin: Umfragen verwalten (survey.view = einsehen, survey.admin = alles).

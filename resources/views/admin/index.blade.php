@@ -78,6 +78,30 @@
                 </div>
             @endforeach
 
+            {{-- Kommunikation: Newsletter (newsletter.manage) --}}
+            @can('newsletter.manage')
+                <div class="mb-10">
+                    <h3 class="font-uncial text-xl text-waldritter mb-4 flex items-center gap-2">
+                        <i class="newspaper icon" style="color:#5a3a22;"></i>
+                        Kommunikation
+                    </h3>
+                    <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+                        <a href="{{ route('admin.newsletter.index') }}"
+                           class="group block rounded-lg overflow-hidden border-2 border-[#5a3a22]/40 bg-white/60 shadow hover:shadow-xl hover:-translate-y-1 transition">
+                            <div class="h-36 overflow-hidden">
+                                <img src="/images/administration.jpg" alt="" aria-hidden="true" loading="lazy"
+                                     width="400" height="144"
+                                     class="w-full h-full object-cover group-hover:scale-105 transition">
+                            </div>
+                            <div class="p-3 text-center">
+                                <div class="font-uncial text-base text-waldritter">Newsletter</div>
+                                <div class="text-xs text-stone-600">Erstellen, bearbeiten &amp; versenden</div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            @endcan
+
             {{-- Feedback & Qualität: nur für Nutzer mit survey.view oder survey.admin --}}
             @canany(['survey.view', 'survey.admin'])
                 <div class="mb-10">

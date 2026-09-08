@@ -140,7 +140,7 @@ class GroupBookingController extends Controller
             if ($recipientEmail) {
                 // Pflichtbenachrichtigung: wird immer gesendet.
                 $notification = $booking->waitlisted
-                    ? new BookingWaitlisted($booking)
+                    ? new BookingWaitlisted($booking, $ageViolation)
                     : new BookingReceived($booking);
                 Notification::route('mail', $recipientEmail)->notify($notification);
             }

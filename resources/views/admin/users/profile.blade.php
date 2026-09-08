@@ -179,7 +179,7 @@
                                             <input type="hidden" name="{{ $col }}" value="1">
                                         @endif
                                         <div class="ui toggle checkbox{{ $mandatory ? ' disabled' : '' }}">
-                                            <input type="checkbox" {{ $mandatory ? '' : 'name="'.$col.'"' }} id="adm_{{ $col }}" value="1"
+                                            <input type="checkbox" {!! $mandatory ? '' : 'name="'.$col.'"' !!} id="adm_{{ $col }}" value="1"
                                                    @checked($mandatory || ($user->$col ?? true)) @disabled($mandatory)>
                                             <label for="adm_{{ $col }}" class="text-stone-800">
                                                 {{ $title }}
@@ -267,14 +267,6 @@
 
         </div>
     </div>
-    @push('scripts')
-        <script>
-            document.addEventListener('DOMContentLoaded', function () {
-                if (window.jQuery) {
-                    window.jQuery('.ui.toggle.checkbox').checkbox();
-                }
-            });
-        </script>
-    @endpush
+    {{-- Toggle-CSS arbeitet nativ über input:checked, kein .checkbox()-Init nötig. --}}
 
 </x-app-layout>

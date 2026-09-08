@@ -128,6 +128,8 @@ class AdventureController extends Controller
     {
         $adventures = Adventure::with('status')
             ->withCount(['confirmedBookings', 'bookings', 'teamerSignups', 'epTransactions'])
+            ->orderByRaw('(start_at < CURDATE()) ASC')
+            ->orderByRaw('CASE WHEN start_at >= CURDATE() THEN start_at END ASC')
             ->orderByDesc('start_at')
             ->paginate(25);
 
