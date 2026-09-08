@@ -6,6 +6,7 @@ use App\Models\Adventure;
 use App\Models\Booking;
 use App\Models\EventStatus;
 use App\Models\Hero;
+use App\Models\NewsletterSubscription;
 use App\Models\Player;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -73,6 +74,11 @@ class DashboardController extends Controller
 
         $showOnboarding = ! $profileComplete || ! $hasPlayers || ! $hasBookings;
 
-        return view('dashboard', compact('metrics', 'nextAdventure', 'upcomingBookedAdventures', 'activePlayers', 'hasPlayers', 'profileComplete', 'hasBookings', 'showOnboarding'));
+        $showNewsletterHint = ! NewsletterSubscription::where('email', $request->user()->email)
+            ->whereNotNull('confirmed_at')
+            ->whereNull('unsubscribed_at')
+            ->exists();
+
+        return view('dashboard', compact('metrics', 'nextAdventure', 'upcomingBookedAdventures', 'activePlayers', 'hasPlayers', 'profileComplete', 'hasBookings', 'showOnboarding', 'showNewsletterHint'));
     }
 }
