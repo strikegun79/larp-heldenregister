@@ -3,13 +3,11 @@
         <div class="flex items-center justify-between flex-wrap gap-3">
             <div>
                 <h2 class="font-uncial text-2xl text-waldritter leading-tight">{{ $newsletter->title }}</h2>
-                @php
-                    $statusMap = ['sent' => ['grey', 'Versendet'], 'scheduled' => ['blue', 'Geplant'], 'draft' => ['yellow', 'Entwurf']];
-                    [$badge, $label] = $statusMap[$newsletter->status] ?? ['yellow', 'Entwurf'];
-                @endphp
+                @php [$badge, $label] = $newsletter->statusBadge(); @endphp
                 <span class="ui {{ $badge }} label mt-1">{{ $label }}</span>
             </div>
-            <div class="flex gap-2 flex-wrap">
+            <div class="flex gap-2 flex-wrap items-center">
+                {{-- Primäre Navigation --}}
                 <a href="{{ route('admin.newsletter.index') }}" class="ui basic button">
                     <i class="arrow left icon"></i> Zurück
                 </a>
@@ -18,21 +16,34 @@
                         <i class="edit icon"></i> Bearbeiten
                     </a>
                 @endif
-                <form method="POST" action="{{ route('admin.newsletter.duplicate', $newsletter) }}" style="display:inline">
-                    @csrf
-                    <button type="submit" class="ui basic button">
-                        <i class="copy icon"></i> Duplizieren
-                    </button>
-                </form>
-                <form method="POST"
-                      action="{{ route('admin.newsletter.destroy', $newsletter) }}"
-                      style="display:inline"
-                      data-confirm="Newsletter &quot;{{ $newsletter->title }}&quot; wirklich löschen?">
-                    @csrf @method('DELETE')
-                    <button type="submit" class="ui red basic button">
-                        <i class="trash icon"></i> Löschen
-                    </button>
-                </form>
+                {{-- Objektaktionen visuell getrennt (UX-120 / UX-121) --}}
+                <div class="flex gap-2 items-center ml-1 pl-3 border-l border-stone-300/70">
+                    <form method="POST" action="{{ route('admin.newsletter.duplicate', $newsletter) }}" style="display:inline">
+                        @csrf
+                        <button type="submit"
+                                class="ui basic icon button"
+                                aria-label="Duplizieren"
+                                data-tooltip="Duplizieren"
+                                data-position="top center"
+                                data-inverted>
+                            <i class="copy icon" aria-hidden="true"></i>
+                        </button>
+                    </form>
+                    <form method="POST"
+                          action="{{ route('admin.newsletter.destroy', $newsletter) }}"
+                          style="display:inline"
+                          data-confirm="Newsletter &quot;{{ $newsletter->title }}&quot; wirklich löschen?">
+                        @csrf @method('DELETE')
+                        <button type="submit"
+                                class="ui red basic icon button"
+                                aria-label="Löschen"
+                                data-tooltip="Löschen"
+                                data-position="top center"
+                                data-inverted>
+                            <i class="trash icon" aria-hidden="true"></i>
+                        </button>
+                    </form>
+                </div>
             </div>
         </div>
     </x-slot>

@@ -69,7 +69,7 @@
                     </thead>
                     <tbody class="divide-y divide-stone-200 text-stone-800">
                         @forelse ($newsletters as $newsletter)
-                            @php [$badge, $label] = statusBadge($newsletter->status) @endphp
+                            @php [$badge, $label] = $newsletter->statusBadge() @endphp
                             <tr>
                                 <td class="px-4 py-3 font-medium">{{ $newsletter->title }}</td>
                                 <td class="px-4 py-3">
@@ -146,7 +146,7 @@
             {{-- Mobile Karten (< sm) --}}
             <div class="sm:hidden space-y-3">
                 @forelse ($newsletters as $newsletter)
-                    @php [$badge, $label] = statusBadge($newsletter->status) @endphp
+                    @php [$badge, $label] = $newsletter->statusBadge() @endphp
                     <div class="bg-white/70 border-2 border-[#5a3a22]/40 rounded-lg p-4 space-y-2">
                         <div class="flex items-start justify-between gap-2">
                             <span class="font-medium text-stone-800">{{ $newsletter->title }}</span>
@@ -218,13 +218,3 @@
     });
     </script>
 </x-app-layout>
-
-@php
-function statusBadge(string $status): array {
-    return match($status) {
-        'sent'      => ['grey',   'Versendet'],
-        'scheduled' => ['blue',   'Geplant'],
-        default     => ['yellow', 'Entwurf'],
-    };
-}
-@endphp

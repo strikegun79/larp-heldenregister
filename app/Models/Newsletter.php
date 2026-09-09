@@ -39,6 +39,16 @@ class Newsletter extends Model
         return $this->hasMany(NewsletterSend::class);
     }
 
+    /** Gibt [Fomantic-UI-Farbe, Label] für den Status-Badge zurück. */
+    public function statusBadge(): array
+    {
+        return match($this->status) {
+            self::STATUS_SENT      => ['grey',   'Versendet'],
+            self::STATUS_SCHEDULED => ['blue',   'Geplant'],
+            default                => ['yellow', 'Entwurf'],
+        };
+    }
+
     public function isDraft(): bool
     {
         return $this->status === self::STATUS_DRAFT;
