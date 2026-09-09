@@ -35,7 +35,7 @@
                          schliessen() { localStorage.setItem('newsletter_banner_dismissed', '1'); this.sichtbar = false; }
                      }"
                      x-show="sichtbar" x-cloak
-                     class="relative flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4
+                     class="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4
                             bg-[#f5f0e0] border-2 border-[#5a3a22]/30 border-l-4 border-l-[#2d5a27]
                             rounded-lg p-3 sm:p-4 mb-6 sm:mb-8">
                     <i class="envelope outline icon text-waldritter text-xl shrink-0 hidden sm:block" aria-hidden="true"></i>
@@ -43,17 +43,17 @@
                         <strong class="font-semibold text-waldritter">Kein Newsletter?</strong>
                         Verpasse keine Neuigkeiten zu Abenteuern und Ankündigungen der Waldritter.
                     </p>
-                    <form method="POST" action="{{ route('newsletter.subscribe') }}" class="shrink-0">
-                        @csrf
-                        <button type="submit" class="ui small basic button w-full sm:w-auto">
-                            <i class="envelope icon"></i> Jetzt abonnieren
+                    <div class="flex gap-2 shrink-0">
+                        <form method="POST" action="{{ route('newsletter.subscribe') }}">
+                            @csrf
+                            <button type="submit" class="ui small primary button">
+                                <i class="envelope icon"></i> Jetzt abonnieren
+                            </button>
+                        </form>
+                        <button type="button" @click="schliessen()" class="ui small basic button">
+                            Nein Danke
                         </button>
-                    </form>
-                    <button type="button" @click="schliessen()"
-                            class="absolute top-2 right-2 text-stone-600 hover:text-stone-900 transition-colors"
-                            aria-label="Hinweis schließen">
-                        <i class="close icon"></i>
-                    </button>
+                    </div>
                 </div>
             @endif
 
