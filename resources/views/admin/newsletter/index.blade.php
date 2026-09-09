@@ -79,7 +79,11 @@
                                     @if ($newsletter->isSent())
                                         {{ $newsletter->sends_count }}
                                     @else
-                                        {{ $activeSubscribers }} <span class="text-stone-400">(aktuell)</span>
+                                        {{ $activeSubscribers }}
+                                        <span class="text-stone-400 cursor-help border-b border-dotted border-stone-400"
+                                              data-tooltip="Zum Versandzeitpunkt kann die tatsächliche Empfängerzahl abweichen."
+                                              data-position="top center"
+                                              data-inverted>(aktuell)</span>
                                     @endif
                                 </td>
                                 <td class="px-4 py-3 text-sm text-stone-500">
