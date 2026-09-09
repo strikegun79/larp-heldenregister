@@ -90,23 +90,30 @@
                                     {{ $newsletter->sent_at?->locale('de')->isoFormat('D. MMM YYYY') ?? '—' }}
                                 </td>
                                 <td class="px-4 py-3 text-right whitespace-nowrap">
+                                    {{-- Primäraktion --}}
                                     @if ($newsletter->isDraft())
                                         <a href="{{ route('admin.newsletter.edit', $newsletter) }}"
-                                           class="ui small button">
+                                           class="ui small primary button">
                                             <i class="edit icon"></i> Bearbeiten
                                         </a>
                                     @else
                                         <a href="{{ route('admin.newsletter.show', $newsletter) }}"
-                                           class="ui small basic button">
+                                           class="ui small button">
                                             <i class="eye icon"></i> Anzeigen
                                         </a>
                                     @endif
+                                    {{-- Sekundäraktionen: Icon-only mit Tooltip --}}
                                     <form method="POST"
                                           action="{{ route('admin.newsletter.duplicate', $newsletter) }}"
                                           class="inline">
                                         @csrf
-                                        <button type="submit" class="ui small basic button">
-                                            <i class="copy icon"></i> Duplizieren
+                                        <button type="submit"
+                                                class="ui small basic icon button"
+                                                aria-label="Duplizieren"
+                                                data-tooltip="Duplizieren"
+                                                data-position="top center"
+                                                data-inverted>
+                                            <i class="copy icon" aria-hidden="true"></i>
                                         </button>
                                     </form>
                                     <form method="POST"
@@ -114,8 +121,12 @@
                                           class="inline"
                                           data-confirm="Newsletter &quot;{{ $newsletter->title }}&quot; wirklich löschen?">
                                         @csrf @method('DELETE')
-                                        <button type="submit" class="ui small red basic icon button"
-                                                aria-label="Löschen">
+                                        <button type="submit"
+                                                class="ui small red basic icon button"
+                                                aria-label="Löschen"
+                                                data-tooltip="Löschen"
+                                                data-position="top center"
+                                                data-inverted>
                                             <i class="trash icon" aria-hidden="true"></i>
                                         </button>
                                     </form>
@@ -154,33 +165,37 @@
                                 <span><i class="calendar icon"></i> {{ $newsletter->sent_at->locale('de')->isoFormat('D. MMM YYYY') }}</span>
                             @endif
                         </div>
-                        <div class="flex flex-wrap gap-2 pt-1">
+                        <div class="flex items-center gap-2 pt-1">
+                            {{-- Primäraktion --}}
                             @if ($newsletter->isDraft())
                                 <a href="{{ route('admin.newsletter.edit', $newsletter) }}"
-                                   class="ui small button">
+                                   class="ui small primary button">
                                     <i class="edit icon"></i> Bearbeiten
                                 </a>
                             @else
                                 <a href="{{ route('admin.newsletter.show', $newsletter) }}"
-                                   class="ui small basic button">
+                                   class="ui small button">
                                     <i class="eye icon"></i> Anzeigen
                                 </a>
                             @endif
-                            <form method="POST"
-                                  action="{{ route('admin.newsletter.duplicate', $newsletter) }}">
-                                @csrf
-                                <button type="submit" class="ui small basic button">
-                                    <i class="copy icon"></i> Duplizieren
-                                </button>
-                            </form>
-                            <form method="POST"
-                                  action="{{ route('admin.newsletter.destroy', $newsletter) }}"
-                                  data-confirm="Newsletter &quot;{{ $newsletter->title }}&quot; wirklich löschen?">
-                                @csrf @method('DELETE')
-                                <button type="submit" class="ui small red basic button">
-                                    <i class="trash icon"></i> Löschen
-                                </button>
-                            </form>
+                            {{-- Sekundäraktionen --}}
+                            <div class="flex gap-1 ml-auto">
+                                <form method="POST"
+                                      action="{{ route('admin.newsletter.duplicate', $newsletter) }}">
+                                    @csrf
+                                    <button type="submit" class="ui small basic icon button" aria-label="Duplizieren">
+                                        <i class="copy icon" aria-hidden="true"></i>
+                                    </button>
+                                </form>
+                                <form method="POST"
+                                      action="{{ route('admin.newsletter.destroy', $newsletter) }}"
+                                      data-confirm="Newsletter &quot;{{ $newsletter->title }}&quot; wirklich löschen?">
+                                    @csrf @method('DELETE')
+                                    <button type="submit" class="ui small red basic icon button" aria-label="Löschen">
+                                        <i class="trash icon" aria-hidden="true"></i>
+                                    </button>
+                                </form>
+                            </div>
                         </div>
                     </div>
                 @empty
