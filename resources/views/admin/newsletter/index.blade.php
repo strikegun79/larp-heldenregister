@@ -91,10 +91,6 @@
                                            class="ui small button">
                                             <i class="edit icon"></i> Bearbeiten
                                         </a>
-                                        <a href="{{ route('admin.newsletter.edit', $newsletter) }}#versenden"
-                                           class="ui small green button">
-                                            <i class="paper plane icon"></i> Versenden
-                                        </a>
                                     @else
                                         <a href="{{ route('admin.newsletter.show', $newsletter) }}"
                                            class="ui small basic button">
