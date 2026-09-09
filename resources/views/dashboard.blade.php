@@ -28,31 +28,41 @@
                 <p>Willkommen im Heldenregister. Hier findest du alles rund um deine Spieler, Helden und Abenteuer.</p>
             </div>
 
-            {{-- Newsletter-Hinweis für Nicht-Abonnenten --}}
+            {{-- Newsletter-Hinweis für Nicht-Abonnenten (Panoramabanner mit Hintergrundbild) --}}
             @if ($showNewsletterHint)
                 <div x-data="{
                          sichtbar: !localStorage.getItem('newsletter_banner_dismissed'),
                          schliessen() { localStorage.setItem('newsletter_banner_dismissed', '1'); this.sichtbar = false; }
                      }"
                      x-show="sichtbar" x-cloak
-                     class="flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4
-                            bg-[#f5f0e0] border-2 border-[#5a3a22]/30 border-l-4 border-l-[#2d5a27]
-                            rounded-lg p-3 sm:p-4 mb-6 sm:mb-8">
-                    <i class="envelope outline icon text-waldritter text-xl shrink-0 hidden sm:block" aria-hidden="true"></i>
-                    <p class="flex-1 text-sm text-stone-700">
-                        <strong class="font-semibold text-waldritter">Kein Newsletter?</strong>
-                        Verpasse keine Neuigkeiten zu Abenteuern und Ankündigungen der Waldritter.
-                    </p>
-                    <div class="flex gap-2 shrink-0">
-                        <form method="POST" action="{{ route('newsletter.subscribe') }}">
-                            @csrf
-                            <button type="submit" class="ui small primary button">
-                                <i class="envelope icon"></i> Jetzt abonnieren
+                     class="relative overflow-hidden rounded-xl mb-6 sm:mb-8 border-2 border-[#5a3a22]/40"
+                     style="background-image: url('/images/newsletter_banner.jpg'); background-size: cover; background-position: center; min-height: 120px;">
+
+                    {{-- Dunkles Overlay für Lesbarkeit des Texts über dem Panoramabild --}}
+                    <div class="absolute inset-0 bg-black/45 rounded-xl" aria-hidden="true"></div>
+
+                    {{-- Inhalt über dem Overlay --}}
+                    <div class="relative z-10 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 p-4 sm:p-5">
+                        {{-- Textbereich mit leichtem Pergament-Panel für zusätzliche Lesbarkeit --}}
+                        <div class="flex-1 bg-black/20 rounded-lg px-4 py-2">
+                            <p class="text-sm text-white leading-snug">
+                                <strong class="font-uncial text-[#f5d98b] text-base block mb-0.5">Kein Newsletter?</strong>
+                                Verpasse keine Neuigkeiten zu Abenteuern und Ankündigungen der Waldritter.
+                            </p>
+                        </div>
+                        {{-- Schaltflächen --}}
+                        <div class="flex gap-2 shrink-0">
+                            <form method="POST" action="{{ route('newsletter.subscribe') }}">
+                                @csrf
+                                <button type="submit" class="ui small primary button">
+                                    <i class="envelope icon"></i> Jetzt abonnieren
+                                </button>
+                            </form>
+                            <button type="button" @click="schliessen()"
+                                    class="ui small basic inverted button">
+                                Nein Danke
                             </button>
-                        </form>
-                        <button type="button" @click="schliessen()" class="ui small basic button">
-                            Nein Danke
-                        </button>
+                        </div>
                     </div>
                 </div>
             @endif
