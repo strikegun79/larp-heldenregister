@@ -222,9 +222,13 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('roles', [Admin\RoleController::class, 'index'])->name('roles.index');
     });
 
+    // Admin-Übersicht: alle Rollen mit mind. einem Verwaltungsbereich (NAV-01).
+    Route::prefix('admin')->name('admin.')->middleware('can:admin.panel')->group(function () {
+        Route::get('/', [Admin\AdminController::class, 'index'])->name('index');
+    });
+
     // Verwaltung (Portal-Administration, Berechtigung portal.manage).
     Route::prefix('admin')->name('admin.')->middleware('can:portal.manage')->group(function () {
-        Route::get('/', [Admin\AdminController::class, 'index'])->name('index');
         // Nutzerverwaltung erfordert zusätzlich users.manage.
         Route::middleware('can:users.manage')->group(function () {
             Route::get('users', [Admin\UserController::class, 'index'])->name('users.index');

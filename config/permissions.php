@@ -54,6 +54,7 @@ return [
             'heldenregister.view',
             'adventure.book', 'adventure.modify', 'adventure.cancel',
             'events.view', 'events.edit',
+            'survey.admin',       // Vorlagen + Umfragen vollständig verwalten (inkl. survey.view)
             'survey.view',
             'roles.view',
             'newsletter.manage',

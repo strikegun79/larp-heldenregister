@@ -40,18 +40,11 @@
                             {{ __('Abenteuer') }}
                         </x-nav-link>
                     @endcan
-                    @can('portal.manage')
+                    @canany(['portal.manage', 'newsletter.manage', 'survey.view', 'survey.admin', 'roles.view'])
                         <x-nav-link :href="route('admin.index')" :active="request()->routeIs('admin.*')">
                             {{ __('Verwaltung') }}
                         </x-nav-link>
-                    @endcan
-                    @cannot('portal.manage')
-                        @canany(['survey.view', 'survey.admin'])
-                            <x-nav-link :href="route('admin.surveys.index')" :active="request()->routeIs('admin.surveys.*')">
-                                {{ __('Umfragen') }}
-                            </x-nav-link>
-                        @endcanany
-                    @endcannot
+                    @endcanany
                 </div>
             </div>
 
@@ -267,19 +260,13 @@
                     EP buchen
                 </a>
                 @endcan
-                @can('portal.manage')
+                @canany(['portal.manage', 'newsletter.manage', 'survey.view', 'survey.admin', 'roles.view'])
                 <a href="{{ route('admin.index') }}" @click="moreOpen = false"
                    class="flex items-center px-5 py-3 text-sm text-stone-700 hover:bg-stone-100 active:bg-stone-200 gap-3">
                     <i class="cogs icon text-stone-400 w-5 text-center shrink-0"></i>
                     Verwaltung
                 </a>
-                @elsecan('roles.view')
-                <a href="{{ route('admin.roles.index') }}" @click="moreOpen = false"
-                   class="flex items-center px-5 py-3 text-sm text-stone-700 hover:bg-stone-100 active:bg-stone-200 gap-3">
-                    <i class="shield alternate icon text-stone-400 w-5 text-center shrink-0"></i>
-                    Rollen & Datenschutz
-                </a>
-                @endcan
+                @endcanany
 
                 <div class="border-t border-stone-200 mx-4 my-1"></div>
 

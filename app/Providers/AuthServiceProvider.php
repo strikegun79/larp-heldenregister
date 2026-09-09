@@ -67,6 +67,11 @@ class AuthServiceProvider extends ServiceProvider
         // geschlossen" (siehe Adventure::checkinAllowed()).
         Gate::define('manage-checkin', fn (User $user) => $user->hasAnyRole('project_lead', 'registrar'));
 
+        // Admin-Übersichtsseite zugänglich für alle Rollen mit mind. einem Verwaltungsbereich.
+        Gate::define('admin.panel', fn (User $user) => collect([
+            'portal.manage', 'newsletter.manage', 'survey.view', 'survey.admin', 'roles.view',
+        ])->contains(fn ($p) => $user->hasPermission($p)));
+
         // Admins dürfen grundsätzlich alles.
         Gate::before(fn (User $user) => $user->isAdmin() ? true : null);
     }

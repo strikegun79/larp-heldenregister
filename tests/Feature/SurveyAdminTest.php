@@ -47,7 +47,7 @@ class SurveyAdminTest extends TestCase
     private function projektleitung(): User
     {
         $user = User::factory()->create();
-        $user->roles()->attach(30); // survey.view only
+        $user->roles()->attach(30); // survey.admin + survey.view
 
         return $user;
     }
@@ -122,11 +122,11 @@ class SurveyAdminTest extends TestCase
             ->assertOk();
     }
 
-    public function test_projektleitung_kann_keine_umfrage_erstellen(): void
+    public function test_projektleitung_kann_umfrage_erstellen(): void
     {
         $this->actingAs($this->projektleitung())
             ->get(route('admin.surveys.create'))
-            ->assertForbidden();
+            ->assertOk();
     }
 
     public function test_admin_kann_umfrage_erstellen(): void

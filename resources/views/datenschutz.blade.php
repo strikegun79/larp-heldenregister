@@ -43,10 +43,15 @@
 
     <h3>2.4 Gesundheitsdaten (Allergien und Medikamente)</h3>
     <p>
-        Im Rahmen der Veranstaltungsanmeldung können auf freiwilliger Basis Allergien und
-        Medikamente angegeben werden. Diese Angaben werden <strong>ausschließlich zum Schutz
-        des Teilnehmers in Notfallsituationen</strong> an die Veranstaltungsleitung weitergegeben
-        und nicht für andere Zwecke verwendet.
+        Im Rahmen der <strong>Veranstaltungsanmeldung</strong> und der <strong>Teamer-Anmeldung</strong>
+        können auf freiwilliger Basis Allergien und Medikamente angegeben werden. Diese Angaben werden
+        <strong>ausschließlich zum Schutz des Teilnehmers in Notfallsituationen</strong> an die
+        Veranstaltungsleitung weitergegeben und nicht für andere Zwecke verwendet.
+    </p>
+    <p>
+        Die Einwilligung zur Verarbeitung dieser besonderen Datenkategorie wird mit einem
+        Einwilligungszeitstempel (<code>health_data_consent_at</code>) in der Datenbank dokumentiert
+        (Art. 9 Abs. 2 lit. a DSGVO).
     </p>
     <p>
         <strong>Rechtsgrundlage:</strong> Art. 9 Abs. 2 lit. c DSGVO (Schutz lebenswichtiger
@@ -95,26 +100,47 @@
     Qualitätssicherung und Fördernachweisen) sowie Art. 6 Abs. 1 lit. a DSGVO (Einwilligung
     bei optionalen Freitextangaben).</p>
 
+    <h3>2.8 Newsletter und Mitglieder-Kommunikation</h3>
+    <p>
+        Mitglieder können freiwillig einen Newsletter des Vereins abonnieren. Die Anmeldung
+        erfolgt im Double-Opt-in-Verfahren: Nach der Registrierung wird eine Bestätigungs-E-Mail
+        versandt; das Abonnement wird erst nach Bestätigung des enthaltenen Links aktiviert.
+    </p>
+    <p>
+        <strong>Erhoben werden:</strong> E-Mail-Adresse, Zeitpunkt der Einwilligung und Bestätigung.
+        Der Newsletter enthält einen Abmeldelink; die Abmeldung ist jederzeit auch über das eigene
+        Profil möglich.
+    </p>
+    <p><strong>Rechtsgrundlage:</strong> Art. 6 Abs. 1 lit. a DSGVO (Einwilligung).</p>
+
     <h2>3. Datenweitergabe an Dritte</h2>
     <p>
         Wir geben Daten nur weiter, soweit dies gesetzlich erlaubt oder erforderlich ist:
     </p>
     <ul>
-        <li><strong>E-Mail-Versand:</strong> Bestätigungs- und Benachrichtigungs-E-Mails werden über
+        <li><strong>E-Mail-Versand:</strong> Bestätigungs-, Benachrichtigungs- und Newsletter-E-Mails werden über
         den SMTP-Dienst unseres Hosters (netcup GmbH) versendet. Es besteht ein
         Auftragsverarbeitungsvertrag.</li>
         <li><strong>Datenbankhosting:</strong> Die Datenbank liegt auf einem Server in Deutschland
         (netcup GmbH, Karlsruhe).</li>
-        <li>Eine Weitergabe an andere Dritte findet nicht statt.</li>
+        <li><strong>Gruppen-Kommunikation (Matrix/Element):</strong> Für die interne Team-Kommunikation
+        wird ein selbst betriebener Matrix-Server (Element-Chat) genutzt. Dabei werden Nutzernamen
+        und Raum-Mitgliedschaften übertragen. Es besteht eine Auftragsverarbeitungsvereinbarung;
+        der Server wird in Deutschland betrieben.</li>
+        <li>Eine Weitergabe an sonstige Dritte findet nicht statt.</li>
     </ul>
 
     <h2>4. Speicherdauer</h2>
     <ul>
         <li>Benutzerkontodaten werden bis zur Löschung des Kontos gespeichert.</li>
         <li>Buchungsdaten vergangener Veranstaltungen werden <strong>3 Jahre</strong> nach Veranstaltungsende anonymisiert (personenbezogene Felder werden entfernt, statistische Daten bleiben erhalten).</li>
-        <li>Gesundheitsdaten (Allergien, Medikation) in Anmeldungen werden <strong>2 Jahre</strong> nach Veranstaltungsende gelöscht.</li>
+        <li>Gesundheitsdaten (Allergien, Medikation) in Veranstaltungs- und Teamer-Anmeldungen werden <strong>2 Jahre</strong> nach Veranstaltungsende gelöscht.</li>
         <li>Unterschriften werden <strong>30 Tage</strong> nach Veranstaltungsende gelöscht.</li>
-        <li>Audit-Logs werden nach 3 Jahren gelöscht.</li>
+        <li>Audit-Logs werden nach <strong>3 Jahren</strong> gelöscht.</li>
+        <li>Umfrage-Freitextantworten werden nach <strong>2 Jahren</strong> anonymisiert; aggregierte Bewertungen (Durchschnittswerte) bleiben dauerhaft erhalten.</li>
+        <li>IP-Adressen in Umfrage-Antworten werden nach <strong>90 Tagen</strong> gelöscht.</li>
+        <li>Newsletter-Abonnements werden bei Abmeldung als abgemeldet markiert und nach Ablauf der gesetzlichen Aufbewahrungsfrist vollständig gelöscht.</li>
+        <li>System-Benachrichtigungen werden nach <strong>1 Jahr</strong> gelöscht.</li>
     </ul>
 
     <h2>5. Rechte der betroffenen Personen</h2>

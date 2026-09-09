@@ -54,9 +54,9 @@
                 </h2>
 
                 {{-- Hinweis Gesundheitsdaten --}}
-                <div class="ui red message">
+                <div class="ui message">
                     <div class="header">
-                        <i class="exclamation triangle icon"></i>
+                        <i class="shield alternate icon"></i>
                         Besonders schützenswerte Daten nach Art. 9 DSGVO
                     </div>
                     <p>
@@ -66,14 +66,14 @@
                         Schutzbedarf.
                     </p>
                     <p>
-                        Für Buchungen dokumentiert <code>health_data_consent_at</code> die ausdrückliche Einwilligung der
-                        Erziehungsberechtigten. <strong class="text-red-800">Offener Mangel:</strong> Im Spielerprofil
-                        (<code>players</code>) und in Teamer-Anmeldungen (<code>teamer_signups</code>) fehlt dieser
-                        Einwilligungszeitstempel noch — Art. 9 DSGVO-konformer Nachweis ausstehend.
+                        Der Einwilligungszeitstempel (<code>health_data_consent_at</code>) ist in allen drei Tabellen implementiert:
+                        <code>bookings</code>, <code>players</code> und <code>teamer_signups</code>. Für Minderjährige dokumentiert
+                        <code>parental_consent_at</code> in <code>players</code> die elterliche Einwilligung nach Art. 8 DSGVO.
                     </p>
                     <p class="mb-0">
-                        Handschriftliche Unterschriften (biometrische Daten) sind seit September 2026 <strong>AES-256-verschlüsselt</strong>
-                        in der Datenbank gespeichert (<code>bookings.signature</code>, <code>encrypted</code>-Cast).
+                        Handschriftliche Unterschriften (biometrische Daten) sind <strong>AES-256-verschlüsselt</strong>
+                        in der Datenbank gespeichert (<code>bookings.signature</code>, <code>encrypted</code>-Cast) und werden
+                        automatisch 30 Tage nach Veranstaltungsende gelöscht.
                     </p>
                 </div>
 
@@ -91,7 +91,7 @@
                 </div>
 
                 <div style="overflow-x: auto;">
-                    <table class="ui celled structured small table" style="min-width: 950px;">
+                    <table class="ui celled structured small table" style="min-width: 1100px;">
                         <thead>
                             <tr>
                                 <th rowspan="2">Rolle</th>
@@ -100,6 +100,7 @@
                                 <th colspan="2" class="center aligned">Heldendaten</th>
                                 <th colspan="3" class="center aligned">Veranstaltungen</th>
                                 <th class="center aligned">Gruppen</th>
+                                <th class="center aligned">Komm.</th>
                                 <th colspan="2" class="center aligned">Umfragen</th>
                                 <th colspan="2" class="center aligned">Administration</th>
                             </tr>
@@ -115,6 +116,7 @@
                                 <th title="Alle Anmeldungen eines Events inkl. Gesundheitsdaten, Notfallkontakt" class="negative">Teilnehmer&shy;listen ⚠</th>
                                 <th title="PDF-Export der Teilnehmerliste mit Adress- und Gesundheitsdaten" class="negative">Teilnehmer&shy;PDF ⚠</th>
                                 <th title="Welcher Held welcher Gruppe angehört">Gruppen&shy;mitglied&shy;schaften</th>
+                                <th title="Newsletter-Abonnenten, Versand-Kampagnen, Einwilligungsnachweise (newsletter.manage)">Newsletter&shy;versand</th>
                                 <th title="Name, E-Mail der Eingeladenen, Altersgruppen-Typ, IP-Adresse der Antwort">Umfrage&shy;einladungen</th>
                                 <th title="Einzelantworten inkl. Freitext, IP-Adresse, Zeitstempel">Umfrage&shy;ergebnisse</th>
                                 <th title="Vollständige Nutzerliste, Rollenzuweisung, Aktivierung">Nutzer&shy;verwaltung</th>
@@ -139,6 +141,7 @@
                                 <td class="center aligned"><span class="ui blue tiny label">L+S</span></td>
                                 <td class="center aligned"><span class="ui blue tiny label">L+S</span></td>
                                 <td class="center aligned"><span class="ui blue tiny label">L+S</span></td>
+                                <td class="center aligned"><span class="ui blue tiny label">L+S</span></td>
                             </tr>
                             <tr class="warning">
                                 <td><strong>Bürokrat</strong><br><small class="ui grey text">registrar</small></td>
@@ -153,6 +156,7 @@
                                 <td class="center aligned"><span class="ui red tiny label">⚠ L</span></td>
                                 <td class="center aligned"><span class="ui red tiny label">⚠ L</span></td>
                                 <td class="center aligned"><span class="ui green tiny label">Lesen</span></td>
+                                <td class="center aligned"><span class="ui grey tiny label">Nein</span></td>
                                 <td class="center aligned"><span class="ui grey tiny label">Nein</span></td>
                                 <td class="center aligned"><span class="ui grey tiny label">Nein</span></td>
                                 <td class="center aligned"><span class="ui grey tiny label">Nein</span></td>
@@ -171,7 +175,8 @@
                                 <td class="center aligned"><span class="ui red tiny label">⚠ L</span></td>
                                 <td class="center aligned"><span class="ui red tiny label">⚠ L</span></td>
                                 <td class="center aligned"><span class="ui grey tiny label">Nein</span></td>
-                                <td class="center aligned"><span class="ui grey tiny label">Nein</span></td>
+                                <td class="center aligned"><span class="ui blue tiny label">L+S</span></td>
+                                <td class="center aligned"><span class="ui blue tiny label">L+S</span></td>
                                 <td class="center aligned"><span class="ui green tiny label">Lesen</span></td>
                                 <td class="center aligned"><span class="ui grey tiny label">Nein</span></td>
                                 <td class="center aligned"><span class="ui grey tiny label">Nein</span></td>
@@ -193,6 +198,7 @@
                                 <td class="center aligned"><span class="ui grey tiny label">Nein</span></td>
                                 <td class="center aligned"><span class="ui grey tiny label">Nein</span></td>
                                 <td class="center aligned"><span class="ui grey tiny label">Nein</span></td>
+                                <td class="center aligned"><span class="ui grey tiny label">Nein</span></td>
                             </tr>
                             <tr>
                                 <td><strong>Lehrmeister</strong><br><small class="ui grey text">lehrmeister</small></td>
@@ -204,6 +210,7 @@
                                 <td class="center aligned"><span class="ui green tiny label">Lesen</span></td>
                                 <td class="center aligned"><span class="ui grey tiny label">Nein</span></td>
                                 <td class="center aligned"><span class="ui green tiny label">Lesen</span></td>
+                                <td class="center aligned"><span class="ui grey tiny label">Nein</span></td>
                                 <td class="center aligned"><span class="ui grey tiny label">Nein</span></td>
                                 <td class="center aligned"><span class="ui grey tiny label">Nein</span></td>
                                 <td class="center aligned"><span class="ui grey tiny label">Nein</span></td>
@@ -229,6 +236,7 @@
                                 <td class="center aligned"><span class="ui grey tiny label">Nein</span></td>
                                 <td class="center aligned"><span class="ui grey tiny label">Nein</span></td>
                                 <td class="center aligned"><span class="ui grey tiny label">Nein</span></td>
+                                <td class="center aligned"><span class="ui grey tiny label">Nein</span></td>
                             </tr>
                             <tr>
                                 <td><strong>Event buchen</strong><br><small class="ui grey text">event_booking</small></td>
@@ -247,12 +255,14 @@
                                 <td class="center aligned"><span class="ui grey tiny label">Nein</span></td>
                                 <td class="center aligned"><span class="ui grey tiny label">Nein</span></td>
                                 <td class="center aligned"><span class="ui grey tiny label">Nein</span></td>
+                                <td class="center aligned"><span class="ui grey tiny label">Nein</span></td>
                             </tr>
                             <tr>
                                 <td><strong>Teilnehmer</strong><br><small class="ui grey text">participant</small></td>
                                 <td class="center aligned"><span class="ui green tiny label">Lesen</span></td>
                                 <td class="center aligned"><span class="ui green tiny label">Lesen</span></td>
                                 <td class="center aligned"><span class="ui green tiny label">Lesen</span></td>
+                                <td class="center aligned"><span class="ui grey tiny label">Nein</span></td>
                                 <td class="center aligned"><span class="ui grey tiny label">Nein</span></td>
                                 <td class="center aligned"><span class="ui grey tiny label">Nein</span></td>
                                 <td class="center aligned"><span class="ui grey tiny label">Nein</span></td>
@@ -316,9 +326,9 @@
                         <p><strong>Felder:</strong> Allergien / Lebensmittelunverträglichkeiten (<code>allergien</code>), Medikation (<code>medikamente</code>), Einwilligungszeitstempel (<code>health_data_consent_at</code>)</p>
                         <p><strong>Tabellen:</strong> <code>players</code> (Profil-Hinterlegung), <code>bookings</code> (veranstaltungsbezogene Angabe), <code>teamer_signups</code> (Teamer-Anmeldung)</p>
                         <p><strong>Zweck:</strong> Sicherstellung der Gesundheitsversorgung und Fürsorge bei Veranstaltungen; Verpflegungsplanung (Allergien).</p>
-                        <p><strong>Rechtsgrundlage:</strong> Art. 9 Abs. 2 lit. c DSGVO (Schutz lebenswichtiger Interessen) i.V.m. Art. 6 Abs. 1 lit. b DSGVO. In Buchungen dokumentiert <code>health_data_consent_at</code> die ausdrückliche Einwilligung (Art. 9 Abs. 2 lit. a DSGVO). <strong class="text-red-700">Offener Mangel:</strong> In <code>players</code> und <code>teamer_signups</code> fehlt dieser Zeitstempel noch.</p>
+                        <p><strong>Rechtsgrundlage:</strong> Art. 9 Abs. 2 lit. c DSGVO (Schutz lebenswichtiger Interessen) i.V.m. Art. 6 Abs. 1 lit. b DSGVO. <code>health_data_consent_at</code> dokumentiert die ausdrückliche Einwilligung (Art. 9 Abs. 2 lit. a DSGVO) in allen drei Tabellen (<code>bookings</code>, <code>players</code>, <code>teamer_signups</code>).</p>
                         <p><strong>Zugriff:</strong> Rollen mit <code>adventure.modify</code> können Gesundheitsdaten im Buchungskontext einsehen. Teilnehmer-PDF (Bürokrat, Projektleitung, Administrator) enthält ebenfalls Gesundheitsdaten. Der CSV-Spielerexport (nur Administrator) enthält Gesundheitsdaten aus dem Spielerprofil.</p>
-                        <p class="mb-0"><strong>Aufbewahrung:</strong> Gesundheitsdaten in <code>bookings</code> werden 2 Jahre nach Veranstaltungsende automatisch genullt (DsgvoPrune). Für <code>teamer_signups</code> fehlt dieses Löschkonzept noch (offener Mangel H-3).</p>
+                        <p class="mb-0"><strong>Aufbewahrung:</strong> Gesundheitsdaten in <code>bookings</code> und <code>teamer_signups</code> werden 2 Jahre nach Veranstaltungsende automatisch genullt (DsgvoPrune).</p>
                     </div>
 
                     <div class="title">
@@ -356,8 +366,8 @@
                         <p><strong>Tabellen:</strong> <code>survey_links</code>, <code>survey_responses</code>, <code>survey_answers</code></p>
                         <p><strong>Zweck:</strong> Qualitätssicherung durch strukturiertes Teilnehmerfeedback.</p>
                         <p><strong>Rechtsgrundlage:</strong> Art. 6 Abs. 1 lit. f DSGVO (berechtigtes Interesse an Qualitätssicherung). Bei Kindern/Jugendlichen werden Umfrage-Links an die E-Mail-Adresse der Erziehungsberechtigten versandt.</p>
-                        <p><strong>IP-Adressen:</strong> <code>survey_responses.ip_address</code> wird ausschließlich für Anti-Spam-Rate-Limiting gespeichert und nach <strong>90 Tagen automatisch gelöscht</strong> (DsgvoPrune, seit Sep. 2026). Zugriff auf Umfrageergebnisse haben nur Projektleitung und Administrator.</p>
-                        <p class="mb-0"><strong>Freitexte Minderjähriger:</strong> Kinder (<code>participant_child</code>) können Freitextantworten eingeben, die 2 Jahre gespeichert und dann anonymisiert werden. Eine verstärkte Einwilligung für Freitexte bei unter-13-Jährigen ist empfohlen (offener Mangel N-3).</p>
+                        <p><strong>IP-Adressen:</strong> <code>survey_responses.ip_address</code> wird ausschließlich für Anti-Spam-Rate-Limiting gespeichert und nach <strong>90 Tagen automatisch gelöscht</strong> (DsgvoPrune). Zugriff auf Umfrageergebnisse haben Projektleitung und Administrator.</p>
+                        <p class="mb-0"><strong>Freitexte Minderjähriger:</strong> Kinder (<code>participant_child</code>) können Freitextantworten eingeben, die 2 Jahre gespeichert und dann anonymisiert werden (DsgvoPrune). Aggregierte Bewertungen (Durchschnittswerte) bleiben dauerhaft für die Jugendförderungs-Dokumentation erhalten.</p>
                     </div>
 
                     <div class="title">
@@ -386,51 +396,22 @@
                             <div class="item"><i class="check circle green icon"></i> Anonymisierung nach Art. 17 DSGVO implementiert</div>
                             <div class="item"><i class="check circle green icon"></i> Datenexport nach Art. 20 DSGVO (JSON-Download)</div>
                             <div class="item"><i class="check circle green icon"></i> Öffentliche Helden-Profile: opt-in, kein Realname</div>
-                            <div class="item"><i class="check circle green icon"></i> Einwilligungszeitstempel für Gesundheitsdaten in Buchungen</div>
+                            <div class="item"><i class="check circle green icon"></i> Einwilligungsnachweis (<code>health_data_consent_at</code>) in Buchungen, Spielerprofil und Teamer-Anmeldungen [H-1, H-2]</div>
                             <div class="item"><i class="check circle green icon"></i> E-Mail-Verifikation bei Kontoanlage</div>
-                            <div class="item"><i class="check circle green icon"></i> Biometrische Unterschriften AES-256-verschlüsselt (Sep. 2026)</div>
-                            <div class="item"><i class="check circle green icon"></i> Automatisches Löschkonzept für Buchungsdaten (DsgvoPrune)</div>
+                            <div class="item"><i class="check circle green icon"></i> Biometrische Unterschriften AES-256-verschlüsselt</div>
+                            <div class="item"><i class="check circle green icon"></i> Automatisches Löschkonzept für Buchungs- und Teamer-Gesundheitsdaten (DsgvoPrune) [H-3]</div>
                             <div class="item"><i class="check circle green icon"></i> IP-Adressen in Umfragen nach 90 Tagen gelöscht (DsgvoPrune)</div>
-                            <div class="item"><i class="check circle green icon"></i> Datenpannen-Protokoll mit 72h-Frist (Art. 33, Sep. 2026)</div>
-                            <div class="item"><i class="check circle green icon"></i> Gesendete Mails im IMAP-Postfach nachvollziehbar (Sep. 2026)</div>
+                            <div class="item"><i class="check circle green icon"></i> Datenpannen-Protokoll mit 72h-Frist (Art. 33)</div>
+                            <div class="item"><i class="check circle green icon"></i> Gesendete Mails im IMAP-Postfach nachvollziehbar</div>
+                            <div class="item"><i class="check circle green icon"></i> Elterliche Einwilligung <code>parental_consent_at</code> in <code>players</code> (Art. 8 DSGVO) [H-5]</div>
+                            <div class="item"><i class="check circle green icon"></i> Matrix-Dienst in Datenschutzerklärung als Drittempfänger aufgeführt [M-1]</div>
+                            <div class="item"><i class="check circle green icon"></i> Teamer-Gesundheitsdaten in Datenschutzerklärung (Abschn. 2.4) dokumentiert [M-2]</div>
+                            <div class="item"><i class="check circle green icon"></i> Newsletter: Double-Opt-in, Einwilligung Art. 6 Abs. 1 lit. a, Abmeldelink</div>
                         </div>
                     </div>
                     <div class="column">
                         <p class="text-sm font-medium text-stone-600 mb-2">Handlungsbedarf</p>
                         <div class="ui list">
-                            <div class="item">
-                                <i class="exclamation circle red icon"></i>
-                                <strong>[H-1]</strong> Gesundheitsdaten im Spielerprofil ohne Art.-9-Einwilligungsnachweis
-                                (<code>players</code> fehlt <code>health_data_consent_at</code>)
-                            </div>
-                            <div class="item">
-                                <i class="exclamation circle red icon"></i>
-                                <strong>[H-2]</strong> Gesundheitsdaten in Teamer-Anmeldungen ohne Art.-9-Einwilligungsnachweis
-                                (<code>teamer_signups</code> fehlt <code>health_data_consent_at</code>)
-                            </div>
-                            <div class="item">
-                                <i class="exclamation circle red icon"></i>
-                                <strong>[H-3]</strong> Kein Löschkonzept für Teamer-Gesundheitsdaten
-                                (<code>teamer_signups.allergien/medikamente</code> wird nie genullt)
-                            </div>
-                            <div class="item">
-                                <i class="exclamation circle red icon"></i>
-                                <strong>[H-4]</strong> Datenschutzerklärung nennt falsche Speicherdauer:
-                                „2 Jahre" statt korrekt „3 Jahre" für Buchungsdaten
-                            </div>
-                            <div class="item">
-                                <i class="exclamation circle red icon"></i>
-                                <strong>[H-5]</strong> Elterliche Einwilligung für Minderjährige (Art. 8 DSGVO)
-                                nicht nachweisbar dokumentiert — kein <code>parental_consent_at</code>-Feld
-                            </div>
-                            <div class="item">
-                                <i class="exclamation circle orange icon"></i>
-                                <strong>[M-1]</strong> Matrix-Dienst fehlt als Drittempfänger in der Datenschutzerklärung
-                            </div>
-                            <div class="item">
-                                <i class="exclamation circle orange icon"></i>
-                                <strong>[M-2]</strong> Teamer-Gesundheitsdaten fehlen in der Datenschutzerklärung (Abschnitt 2.4)
-                            </div>
                             <div class="item">
                                 <i class="exclamation circle orange icon"></i>
                                 <strong>[M-3]</strong> Kein Audit-Log für Buchungsänderungen und Spielerprofil-Edits durch Admins
@@ -456,8 +437,8 @@
                         Sie ersetzt nicht das Verarbeitungsverzeichnis nach Art. 30 DSGVO (Mangel N-1), das gesondert zu führen ist.
                     </p>
                     <p>
-                        <strong>Prioritäre offene Mängel:</strong> H-1 bis H-5 betreffen Art. 9 DSGVO (besondere Datenkategorien)
-                        und Art. 8 DSGVO (Minderjährige) — diese sollten vorrangig adressiert werden.
+                        <strong>Offene Punkte:</strong> M-3 (Audit-Log für Buchungsänderungen), N-1 (Verarbeitungsverzeichnis nach Art. 30)
+                        und N-2 (Fotoerlaubnis-Widerruf) sind noch nicht implementiert.
                         Das <a href="{{ route('admin.data-breaches.index') }}" class="text-blue-700 underline">Datenpannen-Protokoll</a>
                         steht für die Dokumentation von Vorfällen bereit.
                     </p>

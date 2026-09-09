@@ -39,7 +39,7 @@ class SurveyTemplateTest extends TestCase
     private function projektleitung(): User
     {
         $user = User::factory()->create();
-        $user->roles()->attach(30); // survey.view, aber kein survey.admin
+        $user->roles()->attach(30); // survey.admin + survey.view
 
         return $user;
     }
@@ -58,11 +58,11 @@ class SurveyTemplateTest extends TestCase
     // Zugriffskontrolle
     // -------------------------------------------------------------------------
 
-    public function test_projektleitung_kann_vorlagen_nicht_verwalten(): void
+    public function test_projektleitung_kann_vorlagen_verwalten(): void
     {
         $this->actingAs($this->projektleitung())
             ->get(route('admin.surveys.templates.index'))
-            ->assertForbidden();
+            ->assertOk();
     }
 
     public function test_admin_kann_vorlagen_einsehen(): void
