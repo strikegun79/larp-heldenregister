@@ -45,8 +45,8 @@
                     <div class="relative z-10 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 p-4 sm:p-5">
                         {{-- Textbereich mit leichtem Pergament-Panel für zusätzliche Lesbarkeit --}}
                         <div class="flex-1 bg-black/20 rounded-lg px-4 py-2">
-                            <p class="text-sm text-white leading-snug">
-                                <strong class="font-uncial text-[#f5d98b] text-base block mb-0.5">Kein Newsletter?</strong>
+                            <p class="text-sm text-[#5a3a22] leading-snug">
+                                <strong class="font-uncial text-[#5a3a22] text-base block mb-0.5">Kein Newsletter?</strong>
                                 Verpasse keine Neuigkeiten zu Abenteuern und Ankündigungen der Waldritter.
                             </p>
                         </div>
