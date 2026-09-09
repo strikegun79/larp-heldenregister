@@ -434,10 +434,15 @@ function refreshManageTab() {
         .then(html => {
             const doc = new DOMParser().parseFromString(html, 'text/html');
 
-            // Tab-Menü aktualisieren (z. B. geänderte Zähler in den Labels)
-            const newMenu = doc.querySelector('.ui.top.attached.tabular.menu');
-            const curMenu = document.querySelector('.ui.top.attached.tabular.menu');
-            if (newMenu && curMenu) curMenu.innerHTML = newMenu.innerHTML;
+            // Tab-Labels einzeln aktualisieren (z. B. Anmeldungszähler), ohne die DOM-Knoten zu
+            // ersetzen – so bleiben Fomantic-Tab-Handler aktiv und der aktive Tab bleibt stabil.
+            doc.querySelectorAll('.ui.top.attached.tabular.menu .item[data-tab]').forEach(newItem => {
+                const tabName = newItem.getAttribute('data-tab');
+                const curItem = document.querySelector(
+                    '.ui.top.attached.tabular.menu .item[data-tab="' + tabName + '"]'
+                );
+                if (curItem) curItem.innerHTML = newItem.innerHTML;
+            });
 
             // Nur den aktiven Tab-Inhalt ersetzen
             if (activeTabName) {
@@ -445,15 +450,6 @@ function refreshManageTab() {
                 const newSeg = doc.querySelector(sel);
                 const curSeg = document.querySelector(sel);
                 if (newSeg && curSeg) curSeg.innerHTML = newSeg.innerHTML;
-            }
-
-            // Fomantic Tabs neu initialisieren und aktiven Tab wiederherstellen
-            if (curMenu) $(curMenu).find('.item[data-tab]').tab();
-            if (activeTabName) {
-                const $all = $('.ui.top.attached.tabular.menu .item[data-tab], .ui.bottom.attached.tab.segment[data-tab]');
-                $all.removeClass('active');
-                $(`.ui.top.attached.tabular.menu [data-tab="${activeTabName}"],` +
-                  `.ui.bottom.attached.tab.segment[data-tab="${activeTabName}"]`).addClass('active');
             }
 
             // Dropdowns und Checkboxen im aktualisierten Segment neu initialisieren

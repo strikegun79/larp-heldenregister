@@ -127,11 +127,17 @@ sind die eigenen (bzw. für Bürokrat alle).
 > tests ordnen den Spieler jetzt dem Bucher zu. Tests: `BookingPlayerScopeTest`
 > (Liste eigene/alle, Buchen fremd verboten/Bürokrat erlaubt).
 
-## Offen (🔲)
-
-### BOOK-11 Neuladen der Veranstaltung-Verwaltung verhindern 🔲
+### BOOK-11 Neuladen der Veranstaltung-Verwaltung verhindern ✅
 **Beschreibung:** wenn beim Teilnehmer in einer Verwaltung eins der Buttons geklickt wird, lädt sich die ganze Seite neu und man beginnt wieder in der Event-Daten Ansicht.
 Das macht die Listenbearbeitung schwierig.
 **Akzeptanzkriterien:**
-- [] Beim klicken auf die Buttons neben den Teilnehmer und Teamer kein neu laden der seite.
-- [] die Symbole für den Status der eben geändert wurde muss per JS geändert werden.
+- [x] Beim klicken auf die Buttons neben den Teilnehmer und Teamer kein neu laden der seite.
+- [x] die Symbole für den Status der eben geändert wurde muss per JS geändert werden.
+> Umgesetzt: `data-refresh-modal` auf allen Anmeldungs-/Teamer-Formularen in `_bookings.blade.php`
+> und `_teamer_nsc_tab.blade.php`. BOOK-11 Submit-Handler in `heldenregister.js` fängt Submits
+> außerhalb Modalen ab (AJAX → JSON), ruft `refreshManageTab()` auf. Diese Funktion aktualisiert
+> Tab-Labels einzeln (ohne DOM-Knoten zu ersetzen, Fomantic-Handler bleiben aktiv) und ersetzt
+> nur den Inhalt des aktiven Tab-Segments. Alle Controller-Methoden geben `refresh_modal: true`
+> per JSON zurück wenn `$request->expectsJson()` gilt.
+
+## Offen (🔲)
