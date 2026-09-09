@@ -34,7 +34,11 @@ class NewsletterController extends Controller
 
     public function create(): View
     {
-        return view('admin.newsletter.create');
+        $activeSubscribers = NewsletterSubscription::whereNotNull('confirmed_at')
+            ->whereNull('unsubscribed_at')
+            ->count();
+
+        return view('admin.newsletter.create', compact('activeSubscribers'));
     }
 
     public function store(Request $request): RedirectResponse

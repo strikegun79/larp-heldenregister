@@ -35,7 +35,7 @@
                 <div class="bg-white/70 border-2 border-[#5a3a22]/40 rounded-lg p-4 flex flex-wrap items-center justify-between gap-3">
                     <div class="text-sm text-stone-600">
                         <i class="users icon"></i>
-                        <span id="subscriber-count">–</span> aktive Abonnenten
+                        {{ $activeSubscribers }} aktive Abonnenten
                     </div>
                     <div class="flex gap-2">
                         <a href="{{ route('admin.newsletter.index') }}" class="ui basic button">Abbrechen</a>
@@ -49,5 +49,5 @@
         </div>
     </div>
 
-    @include('admin.newsletter._editor_scripts', ['subscriberCount' => 0])
+    @include('admin.newsletter._editor_scripts', ['subscriberCount' => $activeSubscribers])
 </x-app-layout>

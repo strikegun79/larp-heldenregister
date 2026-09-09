@@ -95,15 +95,6 @@
         script.onload = function () { initSummernote(); };
         document.head.appendChild(script);
 
-        @if ($subscriberCount === 0)
-        fetch('{{ route('admin.newsletter.subscriber-count') }}', {
-            headers: { 'X-Requested-With': 'XMLHttpRequest' }
-        }).then(function (r) { return r.json(); })
-          .then(function (d) {
-              var el = document.getElementById('subscriber-count');
-              if (el) el.textContent = d.count;
-          }).catch(function () {});
-        @endif
     });
 })();
 </script>
