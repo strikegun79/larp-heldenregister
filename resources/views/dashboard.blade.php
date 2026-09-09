@@ -32,7 +32,7 @@
             @if ($showNewsletterHint)
                 <div x-data="{ sichtbar: true }" x-show="sichtbar" x-cloak
                      class="relative flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4
-                            bg-[#f5f0e0] border-2 border-[#5a3a22]/30 border-l-4 border-l-waldritter
+                            bg-[#f5f0e0] border-2 border-[#5a3a22]/30 border-l-4 border-l-[#2d5a27]
                             rounded-lg p-3 sm:p-4 mb-6 sm:mb-8">
                     <i class="envelope outline icon text-waldritter text-xl shrink-0 hidden sm:block" aria-hidden="true"></i>
                     <p class="flex-1 text-sm text-stone-700">
@@ -46,7 +46,7 @@
                         </button>
                     </form>
                     <button type="button" @click="sichtbar = false"
-                            class="absolute top-2 right-2 text-stone-400 hover:text-stone-700 transition-colors"
+                            class="absolute top-2 right-2 text-stone-600 hover:text-stone-900 transition-colors"
                             aria-label="Hinweis schließen">
                         <i class="close icon"></i>
                     </button>

@@ -3,11 +3,6 @@
         <div class="flex items-center justify-between flex-wrap gap-3">
             <div>
                 <h2 class="font-uncial text-2xl text-waldritter leading-tight">Newsletter</h2>
-                <button type="button" id="toggle-subscribers"
-                        class="text-sm text-stone-500 mt-0.5 hover:text-waldritter transition-colors cursor-pointer bg-transparent border-0 p-0">
-                    <i class="users icon"></i> {{ $activeSubscribers }} aktive Abonnenten
-                    <i class="chevron down icon text-xs ml-1"></i>
-                </button>
             </div>
             <a href="{{ route('admin.newsletter.create') }}" class="ui primary button">
                 <i class="plus icon"></i> Neuer Newsletter
@@ -119,8 +114,9 @@
                                           class="inline"
                                           data-confirm="Newsletter &quot;{{ $newsletter->title }}&quot; wirklich löschen?">
                                         @csrf @method('DELETE')
-                                        <button type="submit" class="ui small red basic icon button">
-                                            <i class="trash icon"></i>
+                                        <button type="submit" class="ui small red basic icon button"
+                                                aria-label="Löschen">
+                                            <i class="trash icon" aria-hidden="true"></i>
                                         </button>
                                     </form>
                                 </td>
@@ -202,15 +198,8 @@
 
     <script>
     document.addEventListener('DOMContentLoaded', function () {
-        var acc = window.$('#subscribers-accordion');
-        acc.accordion();
-
-        var btn = document.getElementById('toggle-subscribers');
-        if (btn) {
-            btn.addEventListener('click', function () {
-                acc.accordion('toggle', 0);
-            });
-        }
+        // Accordion wird ausschliesslich ueber den Accordion-Titel gesteuert
+        window.$('#subscribers-accordion').accordion();
     });
     </script>
 </x-app-layout>
