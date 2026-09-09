@@ -44,15 +44,15 @@ class AuthServiceProvider extends ServiceProvider
         // Teilnahme/Check-in erfassen: Projektleitung, Spielleiter, Lehrmeister, Teamer (+ Admin via before).
         Gate::define('manage-attendance', fn (User $user) => $user->hasAnyRole('project_lead', 'game_master', 'lehrmeister', 'teamer'));
 
-        // Anmeldungen bestätigen/freigeben (BOOK-05): Bürokrat (+ Admin via before).
-        Gate::define('approve-bookings', fn (User $user) => $user->hasRole('registrar'));
+        // Anmeldungen bestätigen/freigeben (BOOK-05): Bürokrat, Projektleitung (+ Admin via before).
+        Gate::define('approve-bookings', fn (User $user) => $user->hasAnyRole('registrar', 'project_lead'));
 
-        // Teilnahmebeitrag-Status pflegen (BOOK-06): Bürokrat (+ Admin via before).
-        Gate::define('manage-payments', fn (User $user) => $user->hasRole('registrar'));
+        // Teilnahmebeitrag-Status pflegen (BOOK-06): Bürokrat, Projektleitung (+ Admin via before).
+        Gate::define('manage-payments', fn (User $user) => $user->hasAnyRole('registrar', 'project_lead'));
 
-        // Für beliebige Spieler buchen (BOOK-10): Bürokrat (+ Admin via before);
+        // Für beliebige Spieler buchen (BOOK-10): Bürokrat, Projektleitung (+ Admin via before);
         // alle anderen dürfen nur eigene/betreute Spieler buchen.
-        Gate::define('book-any-player', fn (User $user) => $user->hasRole('registrar'));
+        Gate::define('book-any-player', fn (User $user) => $user->hasAnyRole('registrar', 'project_lead'));
 
         // Alle Anmeldungen eines Events sehen (ADV-15): Bürokrat, Projektleitung,
         // Spielleiter (+ Admin). Teamer/Event buchen/Teilnehmer sehen nur eigene.
