@@ -66,7 +66,7 @@
                         @foreach ($group['cards'] as $c)
                             <a href="{{ $c['href'] }}"
                                class="group block rounded-lg overflow-hidden border-2 border-[#5a3a22]/40 bg-white/60 shadow hover:shadow-xl hover:-translate-y-1 transition">
-                                <div class="h-36 overflow-hidden">
+                                <div class="h-36 overflow-hidden save-data-hide">
                                     <img src="/images/{{ $c['img'] }}" alt="" aria-hidden="true" loading="lazy"
                                          width="400" height="144"
                                          class="w-full h-full object-cover group-hover:scale-105 transition">
@@ -92,7 +92,7 @@
                     <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
                         <a href="{{ route('admin.newsletter.index') }}"
                            class="group block rounded-lg overflow-hidden border-2 border-[#5a3a22]/40 bg-white/60 shadow hover:shadow-xl hover:-translate-y-1 transition">
-                            <div class="h-36 overflow-hidden">
+                            <div class="h-36 overflow-hidden save-data-hide">
                                 <img src="/images/verwaltung_newsletter.jpg" alt="" aria-hidden="true" loading="lazy"
                                      width="400" height="144"
                                      class="w-full h-full object-cover group-hover:scale-105 transition">
@@ -116,7 +116,7 @@
                     <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
                         <a href="{{ route('admin.surveys.index') }}"
                            class="group block rounded-lg overflow-hidden border-2 border-[#5a3a22]/40 bg-white/60 shadow hover:shadow-xl hover:-translate-y-1 transition">
-                            <div class="h-36 overflow-hidden">
+                            <div class="h-36 overflow-hidden save-data-hide">
                                 <img src="/images/verwaltung_umfragen.jpg" alt="" aria-hidden="true" loading="lazy"
                                      width="400" height="144"
                                      class="w-full h-full object-cover group-hover:scale-105 transition">
@@ -130,7 +130,7 @@
                         @can('survey.admin')
                             <a href="{{ route('admin.surveys.templates.index') }}"
                                class="group block rounded-lg overflow-hidden border-2 border-[#5a3a22]/40 bg-white/60 shadow hover:shadow-xl hover:-translate-y-1 transition">
-                                <div class="h-36 overflow-hidden">
+                                <div class="h-36 overflow-hidden save-data-hide">
                                     <img src="/images/verwaltung_umfragen-vorlagen.jpg" alt="" aria-hidden="true" loading="lazy"
                                          width="400" height="144"
                                          class="w-full h-full object-cover group-hover:scale-105 transition">

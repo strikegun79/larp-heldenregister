@@ -843,7 +843,7 @@ Detail-Modals); ersetzt teilweise UI-37; nutzt Footer-Wrap aus UI-26/27.
 > Offline-Content-Fallback, kein Bild-Lazy-Loading über die Kachel-Bilder hinaus.
 > **Lösungshinweise sind Vorschläge — in diesem Ticket wurde kein Code geändert.**
 
-### UI-45 · [P2] Light-Ansicht / Save-Data-Modus für langsame Verbindungen · ⏱ 6h · 🔲
+### UI-45 · [P2] Light-Ansicht / Save-Data-Modus für langsame Verbindungen · ⏱ 6h · ✅
 **Typ:** Feature / Performance
 
 **Priorität:** Medium (Hoch für Nutzung am Veranstaltungsort, aber kein Blocker
@@ -877,23 +877,27 @@ die kritischen Flows (Abenteuer ansehen, anmelden, Check-in). Weniger Ladeabbrü
 geringerer Datenverbrauch, besserer erster Eindruck.
 
 **Akzeptanzkriterien:**
-- [ ] Der Server erkennt den `Save-Data: on`-Request-Header (per Middleware) und
+- [x] Der Server erkennt den `Save-Data: on`-Request-Header (per Middleware) und
       stellt einen Blade-/View-Flag bereit (z. B. `View::share('saveData', …)`),
       auf das Views reagieren können (schwerere Bilder weglassen/klein ausliefern).
-- [ ] Nutzer können den Datensparmodus zusätzlich **manuell** aktivieren
+- [x] Nutzer können den Datensparmodus zusätzlich **manuell** aktivieren
       (unabhängig vom Browser-Header), z. B. via Toggle im Profil/Menü, per Cookie/
       Session persistiert — die Middleware berücksichtigt Header ODER manuelle Wahl.
-- [ ] Im Save-Data-Modus werden dekorative Kachel-/Hintergrundbilder weggelassen
+- [x] Im Save-Data-Modus werden dekorative Kachel-/Hintergrundbilder weggelassen
       oder durch leichte Platzhalter ersetzt; funktionale Bilder (Avatare) werden
       klein/lazy ausgeliefert.
-- [ ] CSS berücksichtigt `@media (prefers-reduced-data: reduce)`: dekorative
+- [x] CSS berücksichtigt `@media (prefers-reduced-data: reduce)`: dekorative
       Hintergrund-/Kachelbilder werden dort nicht geladen.
-- [ ] Alle inhaltlich nicht sofort sichtbaren `<img>` tragen projektweit
+- [x] Alle inhaltlich nicht sofort sichtbaren `<img>` tragen projektweit
       `loading="lazy"` (Erweiterung von UI-21 auf verbleibende Views).
-- [ ] Der Service Worker liefert bei fehlender Verbindung eine schlanke
+- [x] Der Service Worker liefert bei fehlender Verbindung eine schlanke
       Offline-Hinweisseite (statt Browser-Fehler) für Navigations-Requests.
-- [ ] Der Save-Data-Zustand ist für den Nutzer sichtbar (Hinweis/aktiver Toggle),
+- [x] Der Save-Data-Zustand ist für den Nutzer sichtbar (Hinweis/aktiver Toggle),
       damit klar ist, warum ggf. Bilder fehlen.
+> Umgesetzt: `DetectSaveData`-Middleware (Header + Session-Toggle), `View::share('saveData')`,
+> `save-data.toggle`-Route, CSS `body[data-save-data="1"]` + `@media (prefers-reduced-data)`,
+> `.save-data-hide`-Klasse auf dekorativen Bild-Containern (Dashboard, Admin, Spielerliste),
+> Toggle im Desktop-Dropdown + Mobile-Mehr-Sheet, `offline.html` + Service-Worker-Fallback.
 
 **Umsetzungshinweise (nur Vorschlag — kein Code in diesem Ticket geändert):**
 - **Save-Data-Header-Check (Server):** Eigene Middleware `DetectSaveData`

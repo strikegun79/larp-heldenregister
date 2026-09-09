@@ -440,7 +440,7 @@
                 {{-- Dein Profil --}}
                 <a href="{{ route('profile.edit') }}"
                    class="group block rounded-lg overflow-hidden border-2 border-[#5a3a22]/40 bg-white/60 shadow hover:shadow-xl hover:-translate-y-1 transition">
-                    <div class="h-44 overflow-hidden">
+                    <div class="h-44 overflow-hidden save-data-hide">
                         <img src="/images/dein_profil.jpg" alt="" aria-hidden="true" loading="lazy" width="400" height="176" class="w-full h-full object-cover group-hover:scale-105 transition">
                     </div>
                     <div class="p-4 text-center">
@@ -453,7 +453,7 @@
                 @can('heldenregister.view')
                     <a href="{{ route('heroes.index') }}"
                        class="group block rounded-lg overflow-hidden border-2 border-[#5a3a22]/40 bg-white/60 shadow hover:shadow-xl hover:-translate-y-1 transition">
-                        <div class="h-44 overflow-hidden">
+                        <div class="h-44 overflow-hidden save-data-hide">
                             <img src="/images/heroes_db.jpg" alt="" aria-hidden="true" loading="lazy" width="400" height="176" class="w-full h-full object-cover group-hover:scale-105 transition">
                         </div>
                         <div class="p-4 text-center">
@@ -467,7 +467,7 @@
                 @can('adventure.access')
                     <a href="{{ route('adventures.index') }}"
                        class="group block rounded-lg overflow-hidden border-2 border-[#5a3a22]/40 bg-white/60 shadow hover:shadow-xl hover:-translate-y-1 transition">
-                        <div class="h-44 overflow-hidden">
+                        <div class="h-44 overflow-hidden save-data-hide">
                             <img src="/images/abenteuer_v2.jpg" alt="" aria-hidden="true" loading="lazy" width="400" height="176" class="w-full h-full object-cover group-hover:scale-105 transition">
                         </div>
                         <div class="p-4 text-center">
@@ -480,7 +480,7 @@
                 {{-- Deine Spieler --}}
                 <a href="{{ route('players.index') }}"
                    class="group block rounded-lg overflow-hidden border-2 border-[#5a3a22]/40 bg-white/60 shadow hover:shadow-xl hover:-translate-y-1 transition">
-                    <div class="h-44 overflow-hidden">
+                    <div class="h-44 overflow-hidden save-data-hide">
                         <img src="/images/spieler_verwaltung2.jpg" alt="" aria-hidden="true" loading="lazy" width="400" height="176" class="w-full h-full object-cover group-hover:scale-105 transition">
                     </div>
                     <div class="p-4 text-center">
@@ -493,7 +493,7 @@
                 @can('portal.manage')
                     <a href="{{ route('admin.index') }}"
                        class="group block rounded-lg overflow-hidden border-2 border-[#5a3a22]/40 bg-white/60 shadow hover:shadow-xl hover:-translate-y-1 transition">
-                        <div class="h-44 overflow-hidden">
+                        <div class="h-44 overflow-hidden save-data-hide">
                             <img src="/images/verwaltung.jpg" alt="" aria-hidden="true" loading="lazy" width="400" height="176" class="w-full h-full object-cover group-hover:scale-105 transition">
                         </div>
                         <div class="p-4 text-center">

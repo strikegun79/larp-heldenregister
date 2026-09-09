@@ -282,6 +282,19 @@
                     Hilfe &amp; Übersicht
                 </a>
 
+                {{-- UI-45: Datensparmodus-Toggle im mobilen Mehr-Sheet --}}
+                <form method="POST" action="{{ route('save-data.toggle') }}" @click="moreOpen = false">
+                    @csrf
+                    <button type="submit" class="flex items-center w-full px-5 py-3 text-sm hover:bg-stone-100 active:bg-stone-200 gap-3
+                        {{ ($saveData ?? false) ? 'text-green-700' : 'text-stone-700' }}">
+                        <svg class="w-5 h-5 shrink-0 {{ ($saveData ?? false) ? 'text-green-600' : 'text-stone-400' }}"
+                             fill="none" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" aria-hidden="true">
+                            <path stroke-linecap="round" stroke-linejoin="round" d="M3.75 13.5l10.5-11.25L12 10.5h8.25L9.75 21.75 12 13.5H3.75z"/>
+                        </svg>
+                        {{ ($saveData ?? false) ? 'Datenspar-Modus aktiv' : 'Datenspar-Modus' }}
+                    </button>
+                </form>
+
                 <form method="POST" action="{{ route('logout') }}">
                     @csrf
                     <button type="submit"
