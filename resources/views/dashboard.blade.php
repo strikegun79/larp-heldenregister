@@ -12,6 +12,18 @@
     <div class="py-6 sm:py-12">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
+            @if (session('newsletter_status') === 'confirmation_sent')
+                <div class="ui success message mb-4">
+                    <i class="envelope icon"></i>
+                    <strong>Fast geschafft!</strong> Wir haben dir eine Bestätigungs-E-Mail geschickt. Bitte klicke auf den Link darin, um dein Abo zu aktivieren.
+                </div>
+            @elseif (session('newsletter_status') === 'already_subscribed')
+                <div class="ui info message mb-4">
+                    <i class="info circle icon"></i>
+                    Du bist bereits für den Newsletter angemeldet.
+                </div>
+            @endif
+
             <div class="bg-white/60 border-2 border-[#5a3a22]/30 rounded-lg p-4 sm:p-6 mb-6 sm:mb-8 text-stone-800">
                 <p>Willkommen im Heldenregister. Hier findest du alles rund um deine Spieler, Helden und Abenteuer.</p>
             </div>

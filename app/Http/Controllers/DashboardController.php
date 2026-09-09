@@ -74,8 +74,8 @@ class DashboardController extends Controller
 
         $showOnboarding = ! $profileComplete || ! $hasPlayers || ! $hasBookings;
 
+        // Banner ausblenden sobald ein Abo existiert – auch wenn noch nicht bestätigt
         $showNewsletterHint = ! NewsletterSubscription::where('email', $request->user()->email)
-            ->whereNotNull('confirmed_at')
             ->whereNull('unsubscribed_at')
             ->exists();
 
