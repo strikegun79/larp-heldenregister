@@ -229,9 +229,7 @@ Sichtbarkeit bewusst. Kein Realname wird auf der öffentlichen Seite angezeigt.
 
 ## 7. Offene Punkte (technische Schulden)
 
-| # | Beschreibung | Priorität |
-|---|---|---|
-| 3 | Kein Selbstauskunfts-/Export-Feature für Benutzer (Art. 20 DSGVO) | Niedrig |
+Alle dokumentierten DSGVO-Schulden sind behoben.
 
 **Behobene Punkte (Sep. 2026):**
 
@@ -242,7 +240,8 @@ Sichtbarkeit bewusst. Kein Realname wird auf der öffentlichen Seite angezeigt.
 | N-2 | Fotoerlaubnis ohne dedizierten Widerrufsmechanismus (Art. 7) | Commits 35b6b6c, 42b405f |
 | 2 | Profilfotos nicht gelöscht bei `Player::forceDelete` / `Hero::delete` | Commit cbf17e5 |
 | 1 | Kein automatischer Hard-Delete nach Ablauf der Aufbewahrungsfristen | Commit 43ce954 |
-| 4 | Unterschriften ohne gezielten Löschmechanismus / falsche Aufbewahrungsfrist | Commits dieser Session |
+| 4 | Unterschriften ohne gezielten Löschmechanismus / falsche Aufbewahrungsfrist | Commit da57867 |
+| 3 | Kein Selbstauskunfts-/Export-Feature für Benutzer (Art. 20 DSGVO) | Commits dieser Session |
 
 ---
 
