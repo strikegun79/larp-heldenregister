@@ -5,16 +5,24 @@
     ? auth()->user()?->canAny(['approve-bookings', 'manage-payments', 'adventure.modify', 'adventure.cancel'])
     : auth()->user()?->can('adventure.book'))
 <x-mobile.cards-or-table>
-<table class="ui very basic compact unstackable table">
+<table class="ui very basic compact unstackable table" @if ($manage) data-bookings-table @endif>
     <thead class="mob-thead" hidden><tr>
-        <th>Spieler</th><th>Alter</th><th>Rolle</th><th>Liste</th><th>Status</th><th>Beitrag</th>
-        @if ($manage)<th>Angemeldet</th>@endif
+        @if ($manage)
+            <th data-sort-col="name" class="cursor-pointer select-none">Spieler <i data-sort-icon class="sort icon text-stone-300 text-xs ml-0.5" aria-hidden="true"></i></th>
+            <th data-sort-col="age" class="cursor-pointer select-none">Alter <i data-sort-icon class="sort icon text-stone-300 text-xs ml-0.5" aria-hidden="true"></i></th>
+            <th>Rolle</th><th>Liste</th>
+            <th data-sort-col="status" class="cursor-pointer select-none">Status <i data-sort-icon class="sort icon text-stone-300 text-xs ml-0.5" aria-hidden="true"></i></th>
+            <th data-sort-col="paid" class="cursor-pointer select-none">Beitrag <i data-sort-icon class="sort icon text-stone-300 text-xs ml-0.5" aria-hidden="true"></i></th>
+            <th data-sort-col="created" class="cursor-pointer select-none whitespace-nowrap">Angemeldet <i data-sort-icon class="sort down icon text-xs ml-0.5" aria-hidden="true"></i></th>
+        @else
+            <th>Spieler</th><th>Alter</th><th>Rolle</th><th>Liste</th><th>Status</th><th>Beitrag</th>
+        @endif
         @if ($canAnyBookingAction)<th></th>@endif
     </tr></thead>
     <tbody>
         @forelse ($bookings as $booking)
             <tr>
-                <td data-label="Spieler">
+                <td data-label="Spieler" @if ($manage) data-col="name" data-sort-val="{{ $booking->participant_name }}" @endif>
                     {{ $booking->participant_name }}
                     @if ($booking->is_guest)<span class="ui mini label">Gast</span>@endif
                     @if ($manage)
@@ -38,10 +46,10 @@
                         @endcanany
                     @endif
                 </td>
-                <td data-label="Alter">{{ $booking->participant_age ?? '—' }}</td>
+                <td data-label="Alter" @if ($manage) data-col="age" data-sort-val="{{ $booking->participant_age ?? 9999 }}" @endif>{{ $booking->participant_age ?? '—' }}</td>
                 <td data-label="Rolle">{{ $booking->role?->description }}</td>
                 <td data-label="Liste">{{ $booking->waitlisted ? 'Warteliste' : 'regulär' }}</td>
-                <td data-label="Status">
+                <td data-label="Status" @if ($manage) data-col="status" data-sort-val="{{ $booking->waitlisted ? 0 : ($booking->status === 'bestaetigt' ? 2 : ($booking->status === 'abgemeldet' ? 3 : ($booking->status === 'abgelehnt' ? 4 : 1))) }}" @endif>
                     @if ($booking->waitlisted)
                         <span class="text-amber-600">⏳ Warteliste</span>
                     @elseif ($booking->status === 'bestaetigt')
@@ -54,7 +62,7 @@
                         <span class="text-stone-500">offen</span>
                     @endif
                 </td>
-                <td data-label="Beitrag">
+                <td data-label="Beitrag" @if ($manage) data-col="paid" data-sort-val="{{ $booking->paid ? 1 : 0 }}" @endif>
                     @if ($adventure->fee > 0)
                         @if ($booking->ermaessigung && $adventure->fee_reduced !== null)
                             <span class="text-xs text-stone-500 mr-1">{{ number_format($adventure->fee_reduced, 2, ',', '.') }} €</span>
@@ -70,7 +78,7 @@
                     @endif
                 </td>
                 @if ($manage)
-                    <td data-label="Angemeldet" class="text-xs text-stone-500 whitespace-nowrap">{{ $booking->created_at->format('d.m.Y H:i') }}</td>
+                    <td data-label="Angemeldet" data-col="created" data-sort-val="{{ $booking->created_at->timestamp }}" class="text-xs text-stone-500 whitespace-nowrap">{{ $booking->created_at->format('d.m.Y H:i') }}</td>
                 @endif
                 @if ($canAnyBookingAction)
                     <td>
@@ -156,7 +164,6 @@
     </tbody>
 </table>
 </x-mobile.cards-or-table>
-
 @if ($manage)
     @can('manage-payments')
         @php($summary = $adventure->paymentSummary())

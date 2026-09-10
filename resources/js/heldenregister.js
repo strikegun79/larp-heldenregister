@@ -88,6 +88,7 @@ function loadModalContent(url, preserveTab) {
             updateHealthConsent($content);
             initBookingPlayerPrefill($content);
             $('#app-modal').modal('refresh');
+            initBookingsTableSort($content);
             // UI-11: Fokus nach AJAX-Load ins Modal verschieben.
             requestAnimationFrame(function () {
                 const first = $content[0].querySelector(
@@ -184,6 +185,7 @@ function loadStackContent(url, preserveTab) {
             updateHealthConsent($content);
             initBookingPlayerPrefill($content);
             $('#app-modal-2').modal('refresh');
+            initBookingsTableSort($content);
             // UI-11: Fokus nach AJAX-Load ins gestapelte Modal verschieben.
             requestAnimationFrame(function () {
                 const first = $content[0].querySelector(
@@ -457,6 +459,7 @@ function refreshManageTab() {
             if (activeSeg) {
                 $(activeSeg).find('.ui.dropdown').dropdown();
                 $(activeSeg).find('.ui.checkbox').checkbox();
+                initBookingsTableSort(activeSeg);
             }
         })
         .catch(() => window.location.reload());
@@ -850,6 +853,64 @@ function initBookingPlayerPrefill(container) {
 }
 
 // ------------------------------------------------------------------
+// UX-120: Anmeldungs-Tabelle sortierbar machen.
+// Wird nach jedem AJAX-Tab-Refresh und Modal-Load neu aufgerufen,
+// weil innerHTML alle Event-Listener und table.__sortInit verwirft.
+// ------------------------------------------------------------------
+function initBookingsTableSort(root) {
+    const el     = (root instanceof $) ? root[0] : (root || document);
+    const tables = el.querySelectorAll ? el.querySelectorAll('[data-bookings-table]') : [];
+    tables.forEach(function (table) {
+        if (table.__sortInit) return;
+        table.__sortInit = true;
+
+        let sortCol = 'created';
+        let sortAsc  = false;
+        const numeric = new Set(['age', 'paid', 'created', 'status']);
+
+        function applySort(col, asc) {
+            const tbody = table.querySelector('tbody');
+            const rows  = Array.from(tbody.querySelectorAll('tr')).filter(function (r) {
+                return r.querySelector('[data-col]');
+            });
+
+            rows.sort(function (a, b) {
+                const av = (a.querySelector('[data-col="' + col + '"]') || {}).dataset?.sortVal ?? '';
+                const bv = (b.querySelector('[data-col="' + col + '"]') || {}).dataset?.sortVal ?? '';
+                const cmp = numeric.has(col)
+                    ? parseFloat(av || 0) - parseFloat(bv || 0)
+                    : av.localeCompare(bv, 'de', { sensitivity: 'base' });
+                return asc ? cmp : -cmp;
+            });
+
+            rows.forEach(function (r) { tbody.appendChild(r); });
+
+            table.querySelectorAll('[data-sort-col]').forEach(function (th) {
+                const icon = th.querySelector('[data-sort-icon]');
+                if (!icon) return;
+                if (th.dataset.sortCol === col) {
+                    icon.className = 'sort ' + (asc ? 'up' : 'down') + ' icon text-xs ml-0.5';
+                } else {
+                    icon.className = 'sort icon text-stone-300 text-xs ml-0.5';
+                }
+            });
+
+            sortCol = col;
+            sortAsc  = asc;
+        }
+
+        table.querySelectorAll('[data-sort-col]').forEach(function (th) {
+            th.addEventListener('click', function () {
+                const col = th.dataset.sortCol;
+                applySort(col, col === sortCol ? !sortAsc : col !== 'created');
+            });
+        });
+
+        applySort('created', false);
+    });
+}
+
+// ------------------------------------------------------------------
 // Siegel-Input: Kleinbuchstaben automatisch in Großbuchstaben umwandeln
 // ------------------------------------------------------------------
 document.addEventListener('input', function (e) {
@@ -869,6 +930,8 @@ document.addEventListener('DOMContentLoaded', function () {
     initFomanticCalendars($(document));
     // PUB-05: QR-Codes auf der Vollseite (z. B. heroes.show ohne Modal).
     initQrCodes(document);
+    // UX-120: Sortierbare Anmeldungs-Tabelle auf der Verwaltungs-Vollseite.
+    initBookingsTableSort(document);
 
     // UI-09: Session-Flash als Toast (Vollseiten-Redirects).
     // Daten kommen aus data-Attributen von #app-flash (gesetzt via Blade in app.blade.php).
