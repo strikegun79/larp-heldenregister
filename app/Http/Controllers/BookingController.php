@@ -578,6 +578,32 @@ class BookingController extends Controller
     }
 
     /**
+     * Fotoerlaubnis widerrufen oder erneut erteilen (N-2 / Art. 7 DSGVO).
+     * Zugänglich für den buchenden Erziehungsberechtigten und für adventure.modify.
+     */
+    public function toggleFotoerlaubnis(Request $request, Adventure $adventure, Booking $booking): RedirectResponse|JsonResponse
+    {
+        abort_unless($booking->adventure_id === $adventure->id, 404);
+
+        if (! Gate::allows('adventure.modify') && ! $this->ownsBooking($request->user(), $booking)) {
+            abort(403);
+        }
+
+        $booking->update(['fotoerlaubnis' => ! $booking->fotoerlaubnis]);
+
+        $action = $booking->fotoerlaubnis ? 'booking.fotoerlaubnis_granted' : 'booking.fotoerlaubnis_revoked';
+        AuditLogger::log($action, $booking, ['adventure' => $adventure->name]);
+
+        $message = $booking->fotoerlaubnis
+            ? 'Fotoerlaubnis erteilt.'
+            : 'Fotoerlaubnis widerrufen.';
+
+        return $request->expectsJson()
+            ? response()->json(['message' => $message, 'refresh_modal' => true])
+            : back()->with('status', $message);
+    }
+
+    /**
      * Fachlicher Fehler: bei AJAX als 422-JSON (Toast), sonst zurück mit Flash.
      */
     private function fail(Request $request, string $message): RedirectResponse|JsonResponse

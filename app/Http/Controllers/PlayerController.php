@@ -140,7 +140,16 @@ class PlayerController extends Controller
     public function show(Player $player, Request $request): View
     {
         $this->authorize('view', $player);
-        $player->load(['heroes.classes', 'heroes.epTransactions.type', 'visits.adventure']);
+        $player->load([
+            'heroes.classes',
+            'heroes.epTransactions.type',
+            'visits.adventure',
+            // N-2: aktive Buchungen für Fotoerlaubnis-Verwaltung.
+            'bookings' => fn ($q) => $q
+                ->with('adventure:id,name,start_at')
+                ->whereNotIn('status', ['abgemeldet', 'abgelehnt'])
+                ->latest(),
+        ]);
 
         if ($request->ajax()) {
             return view('players._detail', compact('player'));

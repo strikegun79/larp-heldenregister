@@ -408,6 +408,7 @@
                             <div class="item"><i class="check circle green icon"></i> Teamer-Gesundheitsdaten in Datenschutzerklärung (Abschn. 2.4) dokumentiert [M-2]</div>
                             <div class="item"><i class="check circle green icon"></i> Newsletter: Double-Opt-in, Einwilligung Art. 6 Abs. 1 lit. a, Abmeldelink</div>
                             <div class="item"><i class="check circle green icon"></i> Audit-Log für Buchungsänderungen und Spielerprofil-Edits durch Admins [M-3]</div>
+                            <div class="item"><i class="check circle green icon"></i> Fotoerlaubnis je Buchung widerrufbar (Art. 7 DSGVO) – Tab „Buchungen" im Spielerprofil [N-2]</div>
                         </div>
                     </div>
                     <div class="column">
@@ -416,10 +417,6 @@
                             <div class="item">
                                 <i class="exclamation circle orange icon"></i>
                                 <strong>[N-1]</strong> Kein Verarbeitungsverzeichnis nach Art. 30 DSGVO
-                            </div>
-                            <div class="item">
-                                <i class="exclamation circle orange icon"></i>
-                                <strong>[N-2]</strong> Fotoerlaubnis ohne dedizierten Widerrufsmechanismus (Art. 7 DSGVO)
                             </div>
                         </div>
                     </div>
@@ -434,8 +431,7 @@
                         Sie ersetzt nicht das Verarbeitungsverzeichnis nach Art. 30 DSGVO (Mangel N-1), das gesondert zu führen ist.
                     </p>
                     <p>
-                        <strong>Offene Punkte:</strong> M-3 (Audit-Log für Buchungsänderungen), N-1 (Verarbeitungsverzeichnis nach Art. 30)
-                        und N-2 (Fotoerlaubnis-Widerruf) sind noch nicht implementiert.
+                        <strong>Offener Punkt:</strong> N-1 (Verarbeitungsverzeichnis nach Art. 30 DSGVO) ist noch nicht implementiert.
                         Das <a href="{{ route('admin.data-breaches.index') }}" class="text-blue-700 underline">Datenpannen-Protokoll</a>
                         steht für die Dokumentation von Vorfällen bereit.
                     </p>

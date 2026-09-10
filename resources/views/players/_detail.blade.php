@@ -70,6 +70,34 @@
         @endforelse
     </x-mobile.accordion-section>
 
+    {{-- N-2: Fotoerlaubnis-Verwaltung je Buchung (mobile) --}}
+    @if ($player->bookings->isNotEmpty())
+    <x-mobile.accordion-section :title="'Buchungen (' . $player->bookings->count() . ')'">
+        @foreach ($player->bookings as $bk)
+        <div class="py-2 border-b border-stone-100 last:border-0">
+            <div class="text-sm font-medium text-stone-800">{{ $bk->adventure?->name ?? '—' }}</div>
+            <div class="text-xs text-stone-400 mb-1">{{ optional($bk->adventure?->start_at)->format('d.m.Y') ?? '' }}</div>
+            <div class="flex items-center gap-2">
+                @if ($bk->fotoerlaubnis)
+                    <span class="ui green tiny label"><i class="camera icon"></i> Fotoerlaubnis erteilt</span>
+                @else
+                    <span class="ui grey tiny label"><i class="camera icon"></i> keine Fotoerlaubnis</span>
+                @endif
+                <form method="POST"
+                      action="{{ route('adventures.bookings.fotoerlaubnis', [$bk->adventure_id, $bk]) }}"
+                      data-refresh-modal
+                      data-confirm="{{ $bk->fotoerlaubnis ? 'Fotoerlaubnis wirklich widerrufen?' : 'Fotoerlaubnis erneut erteilen?' }}">
+                    @csrf @method('PATCH')
+                    <button type="submit" class="ui tiny {{ $bk->fotoerlaubnis ? 'orange' : 'green' }} basic button">
+                        {{ $bk->fotoerlaubnis ? 'Widerrufen' : 'Erteilen' }}
+                    </button>
+                </form>
+            </div>
+        </div>
+        @endforeach
+    </x-mobile.accordion-section>
+    @endif
+
     @if ($canEdit)
     <x-mobile.accordion-section title="Avatar">
         <img src="{{ $player->avatar_url }}" alt="Avatar"
@@ -85,6 +113,7 @@
         <a class="item active" data-tab="p-allg" style="white-space: nowrap;">Allgemeines</a>
         <a class="item" data-tab="p-helden" style="white-space: nowrap;">Helden</a>
         <a class="item" data-tab="p-abenteuer" style="white-space: nowrap;">Abenteuer</a>
+        @if ($player->bookings->isNotEmpty())<a class="item" data-tab="p-buchungen" style="white-space: nowrap;">Buchungen ({{ $player->bookings->count() }})</a>@endif
         @if ($canEdit)<a class="item" data-tab="p-avatar" style="white-space: nowrap;">Avatar</a>@endif
     </div>
 
@@ -175,6 +204,56 @@
             </div>
         @endif
     </div>
+
+    {{-- Tab: Buchungen / Fotoerlaubnis-Verwaltung (N-2 / Art. 7 DSGVO) --}}
+    @if ($player->bookings->isNotEmpty())
+    <div class="ui bottom attached tab segment" data-tab="p-buchungen">
+        <p class="text-xs text-stone-500 mb-3">
+            Die Fotoerlaubnis kann jederzeit widerrufen werden (Art. 7 DSGVO).
+            Der Widerruf gilt ab sofort für zukünftige Aufnahmen; bereits veröffentlichte Fotos
+            werden auf Anfrage entfernt.
+        </p>
+        <div class="overflow-x-auto">
+        <table class="ui very basic compact table">
+            <thead>
+                <tr>
+                    <th>Veranstaltung</th>
+                    <th>Datum</th>
+                    <th>Fotoerlaubnis</th>
+                    <th></th>
+                </tr>
+            </thead>
+            <tbody>
+                @foreach ($player->bookings as $bk)
+                <tr>
+                    <td>{{ $bk->adventure?->name ?? '—' }}</td>
+                    <td class="text-stone-500">{{ optional($bk->adventure?->start_at)->format('d.m.Y') ?? '—' }}</td>
+                    <td>
+                        @if ($bk->fotoerlaubnis)
+                            <span class="ui green tiny label"><i class="check icon"></i> erteilt</span>
+                        @else
+                            <span class="ui grey tiny label"><i class="times icon"></i> nicht erteilt</span>
+                        @endif
+                    </td>
+                    <td>
+                        <form method="POST"
+                              action="{{ route('adventures.bookings.fotoerlaubnis', [$bk->adventure_id, $bk]) }}"
+                              data-refresh-modal
+                              data-confirm="{{ $bk->fotoerlaubnis ? 'Fotoerlaubnis für dieses Event wirklich widerrufen?' : 'Fotoerlaubnis für dieses Event erneut erteilen?' }}">
+                            @csrf @method('PATCH')
+                            <button type="submit"
+                                    class="ui tiny {{ $bk->fotoerlaubnis ? 'orange' : 'green' }} basic button">
+                                {{ $bk->fotoerlaubnis ? 'Widerrufen' : 'Erteilen' }}
+                            </button>
+                        </form>
+                    </td>
+                </tr>
+                @endforeach
+            </tbody>
+        </table>
+        </div>
+    </div>
+    @endif
 
     {{-- Tab: Avatar (Crop-Editor, PLAY-11) --}}
     @if ($canEdit)

@@ -204,6 +204,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('adventures.bookings.payment');
     Route::delete('adventures/{adventure}/bookings/{booking}', [BookingController::class, 'destroy'])
         ->name('adventures.bookings.destroy');
+    // Fotoerlaubnis widerrufen/erteilen – Art. 7 DSGVO (N-2).
+    Route::patch('adventures/{adventure}/bookings/{booking}/fotoerlaubnis', [BookingController::class, 'toggleFotoerlaubnis'])
+        ->name('adventures.bookings.fotoerlaubnis');
 
     // Teilnahme/Check-in erfassen (BOOK-08).
     Route::put('adventures/{adventure}/attendance', [AttendanceController::class, 'update'])
