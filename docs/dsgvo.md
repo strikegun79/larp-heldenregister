@@ -225,7 +225,6 @@ Sichtbarkeit bewusst. Kein Realname wird auf der öffentlichen Seite angezeigt.
 | # | Beschreibung | Priorität |
 |---|---|---|
 | 1 | Kein automatischer Hard-Delete-Befehl nach Ablauf der Fristen | Mittel |
-| 2 | Profilfotos von Spielern werden beim `Player::delete()` nicht gelöscht | Hoch |
 | 3 | Kein Selbstauskunfts-/Export-Feature für Benutzer (Art. 20 DSGVO) | Niedrig |
 | 4 | `bookings.signature` könnte nach Aufbewahrungsfrist gezielt gelöscht werden, ohne die Buchung selbst zu löschen | Mittel |
 
@@ -236,6 +235,7 @@ Sichtbarkeit bewusst. Kein Realname wird auf der öffentlichen Seite angezeigt.
 | M-3 | Kein Audit-Log für Buchungsänderungen und Spielerprofil-Edits | Commit 9d8184b |
 | N-1 | Kein Verarbeitungsverzeichnis nach Art. 30 DSGVO | Commit 0d0aa5d |
 | N-2 | Fotoerlaubnis ohne dedizierten Widerrufsmechanismus (Art. 7) | Commits 35b6b6c, 42b405f |
+| 2 | Profilfotos nicht gelöscht bei `Player::forceDelete` / `Hero::delete` | Commit cbf17e5 |
 
 ---
 
