@@ -409,14 +409,15 @@
                             <div class="item"><i class="check circle green icon"></i> Newsletter: Double-Opt-in, Einwilligung Art. 6 Abs. 1 lit. a, Abmeldelink</div>
                             <div class="item"><i class="check circle green icon"></i> Audit-Log für Buchungsänderungen und Spielerprofil-Edits durch Admins [M-3]</div>
                             <div class="item"><i class="check circle green icon"></i> Fotoerlaubnis je Buchung widerrufbar (Art. 7 DSGVO) – Tab „Buchungen" im Spielerprofil [N-2]</div>
+                            <div class="item"><i class="check circle green icon"></i> Verarbeitungsverzeichnis nach Art. 30 DSGVO – 9 Tätigkeiten dokumentiert, druckbar [N-1]</div>
                         </div>
                     </div>
                     <div class="column">
                         <p class="text-sm font-medium text-stone-600 mb-2">Handlungsbedarf</p>
                         <div class="ui list">
-                            <div class="item">
-                                <i class="exclamation circle orange icon"></i>
-                                <strong>[N-1]</strong> Kein Verarbeitungsverzeichnis nach Art. 30 DSGVO
+                            <div class="item text-stone-500 text-sm">
+                                <i class="check circle outline icon"></i>
+                                Keine offenen DSGVO-Mängel.
                             </div>
                         </div>
                     </div>
@@ -431,9 +432,11 @@
                         Sie ersetzt nicht das Verarbeitungsverzeichnis nach Art. 30 DSGVO (Mangel N-1), das gesondert zu führen ist.
                     </p>
                     <p>
-                        <strong>Offener Punkt:</strong> N-1 (Verarbeitungsverzeichnis nach Art. 30 DSGVO) ist noch nicht implementiert.
+                        Alle dokumentierten DSGVO-Mängel (M-3, N-1, N-2) wurden behoben.
                         Das <a href="{{ route('admin.data-breaches.index') }}" class="text-blue-700 underline">Datenpannen-Protokoll</a>
                         steht für die Dokumentation von Vorfällen bereit.
+                        Das <a href="{{ route('admin.processing-activities.index') }}" class="text-blue-700 underline">Verarbeitungsverzeichnis</a>
+                        (Art. 30 DSGVO) ist im Admin-Bereich einsehbar und druckbar.
                     </p>
                     <p class="mb-0">
                         <strong>Betroffenenrechte:</strong>

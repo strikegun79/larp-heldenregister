@@ -47,10 +47,11 @@
                         'title' => 'System & Portal',
                         'icon'  => 'cog',
                         'cards' => [
-                            $card('Rollen & Rechte',      'Berechtigungsübersicht',        'verwaltung_rollen-rechte.jpg',        route('admin.roles.index')),
-                            $card('Portal-Einstellungen', 'Vereins-Settings bearbeiten',   'verwaltung_portal-einstellungen.jpg', route('admin.settings.index')),
-                            $card('Audit-Log',            'Admin-Aktionen protokolliert',  'verwaltung_audit-log.jpg',            route('admin.audit-logs.index')),
-                            $card('Datenpannen',          'DSGVO Art. 33 – Vorfallsprotokoll', 'verwaltung_audit-log.jpg',       route('admin.data-breaches.index')),
+                            $card('Rollen & Rechte',          'Berechtigungsübersicht',              'verwaltung_rollen-rechte.jpg',        route('admin.roles.index')),
+                            $card('Portal-Einstellungen',     'Vereins-Settings bearbeiten',         'verwaltung_portal-einstellungen.jpg', route('admin.settings.index')),
+                            $card('Audit-Log',                'Admin-Aktionen protokolliert',         'verwaltung_audit-log.jpg',            route('admin.audit-logs.index')),
+                            $card('Datenpannen',              'DSGVO Art. 33 – Vorfallsprotokoll',   'verwaltung_audit-log.jpg',            route('admin.data-breaches.index')),
+                            $card('Verarbeitungsverzeichnis', 'DSGVO Art. 30 – VVT',                 'verwaltung_audit-log.jpg',            route('admin.processing-activities.index')),
                         ],
                     ],
                 ];

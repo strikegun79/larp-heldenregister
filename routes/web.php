@@ -442,6 +442,12 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified'])->group(
         ->parameters(['templates' => 'template']);
 });
 
+// Verarbeitungsverzeichnis (DSGVO Art. 30): portal.manage (Bürokrat/Admin).
+Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified', 'can:portal.manage'])->group(function () {
+    Route::get('processing-activities', [Admin\ProcessingActivityController::class, 'index'])
+        ->name('processing-activities.index');
+});
+
 // Datenpannen-Protokoll (DSGVO Art. 33): nur data-breach.manage (Admin).
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified', 'can:data-breach.manage'])->group(function () {
     Route::resource('data-breaches', Admin\DataBreachController::class)
