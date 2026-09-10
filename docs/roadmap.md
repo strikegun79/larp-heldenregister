@@ -1,11 +1,8 @@
 # Roadmap – LARP Heldenregister
 
-Produkt-Roadmap für die Laravel-Neuentwicklung des Heldenregisters
-(Waldritter-Gießen e.V.). Sie ordnet die Funktionsbereiche in Meilensteine
-und verweist auf das feingranulare [Backlog](backlog/README.md) (Aufgaben
-à 2–4 h).
+Produkt-Roadmap für das Waldritter-Gießen-Vereinsportal.
 
-> Stand: 2026-06-09 · Quelle der Analyse: aktueller `master` (PR #1).
+> Stand: 2026-09-10 · Basis: `master` (345 Commits seit Erstversion 2026-06-09)
 
 ---
 
@@ -17,124 +14,175 @@ Mitglieder verwalten **Spieler** (reale Personen) und deren **Helden**
 ihren Charakterfortschritt über **Erfahrungspunkte (EP)** und **Fertigkeiten**.
 Die Vereinsverwaltung pflegt Nutzer, Rollen, Events und die Matrix-Chat-Konten.
 
-Quelle der Produktziele ist [vision.md](vision.md). Daraus ergeben sich über den
-bereits gebauten Kern hinaus folgende Zielfunktionen, die im Backlog abgebildet
-sind:
+---
 
-- **Fertigkeiten-Baum pro Klasse** (mit Voraussetzungen), nicht nur flache Liste.
-- **Abenteuerhistorie** je Held/Spieler.
-- **Gruppenverwaltung** (LARP-Gruppen/Trupps).
-- **Öffentliche Heldenansicht ohne Realnamen** + **Heldensuche per 6-stelligem
-  Code**, den jedes Kind real erhält und im Heldenprofil sieht.
+## 2. Aktueller Stand – vollständig umgesetzt ✅
 
-## 2. Aktueller Stand (✅ umgesetzt)
+### Auth & Profil
+- Registrierung, Login, E-Mail-Verifizierung (Breeze)
+- Profilseite mit Adress-, Telefon- und Benachrichtigungseinstellungen
+- Kontolöschung mit DSGVO-konformer Anonymisierung (`User::anonymize()`)
+- Datenexport Art. 20 DSGVO (JSON-Download aller personenbezogenen Daten)
+- Passwort-Migration aus Legacy-Klartext
 
-| Bereich | Stand |
-|---|---|
-| Authentifizierung & Registrierung (Breeze) | ✅ inkl. E-Mail-Verifizierung |
-| Rollen & Rechte (Permission-Matrix, `config/permissions.php`) | ✅ |
-| Spielerverwaltung (eigene Spieler, self-Flag) | ✅ Basis |
-| Heldenregister (Helden-CRUD + Klassen) | ✅ Basis |
-| Abenteuer & Buchungen (anlegen, buchen, stornieren, Warteliste) | ✅ Basis |
-| Verwaltung (Nutzer-Rollen/Aktivierung, Spielerliste) | ✅ Basis |
-| Matrix-Integration (corporal-Policy + Provisionierung) | ✅ |
-| Daten-Migration aus Legacy (`migrate:legacy`) | ✅ |
-| Mail (Verifizierung, Admin-Benachrichtigung) | ✅ |
-| UI (Fomantic UI, Mittelalter-Theme, Modals, AJAX-Toasts) | ✅ |
+### Rollen & Rechte
+- Permission-Matrix (`config/permissions.php`), 10+ Rollen
+- Rollenübersicht für Bürokrat/Admin mit DSGVO-Zugriffsrechten
+- Pflichtbenachrichtigungen je Rolle; Teamer-Rollen mit eigenem Rechteumfang
 
-## 3. Wesentliche Lücken (🔲 offen)
+### Spielerverwaltung
+- Spieler-CRUD mit Eltern-Kind-Zuordnung (`self`-Flag, Guardian-Adresse)
+- Profilbild, Gesundheitsdaten (Art. 9 DSGVO, verschlüsselt), Altersprüfung
+- Admin-CSV-Export, Spielerliste mit Filtern
+- Profilfotos beim Hard-Delete sauber aus Storage entfernt
 
-- **Fertigkeiten & EP-Ökonomie** – `SkillController` ist ein Stub; kein
-  Skill-Lernen mit EP-Abzug, keine EP-Buchungs-Oberfläche, keine Klassenkosten.
-- **Event-Lebenszyklus** – keine Teilnahme-Erfassung (`event_visit`), keine
-  Buchungsbearbeitung (`adventure.modify`), keine automatische EP-Vergabe.
-- **Stammdaten-/Lookup-Verwaltung** – Orte, Kategorien, Status, Event-Rollen,
-  Perlenfarben, Matrix-Räume haben kein Admin-CRUD.
-- **Benachrichtigungen** – keine Buchungsbestätigung/Warteliste/Erinnerung.
-- **Auswertungen** – keine Helden-Statistik/EP-Übersichten/Exporte.
-- **Vision-Funktionen** – Fertigkeiten-Baum, Gruppenverwaltung, öffentliche
-  Heldenansicht + 6-stelliger Code, Abenteuerhistorie fehlen vollständig.
-- **Go-Live & Qualität** – Profil-Felder, Passwort-Migration, CI/Deployment,
-  Suche/Filter, Browser-Tests fehlen.
+### Heldenverwaltung
+- Helden-CRUD, Klassen, Fertigkeiten-Baum (Voraussetzungen, Stufen)
+- EP-Buchungsbuch: Gutschriften, Kosten, Saldo, Abenteuer-EP
+- Galerie-Bilder pro Held, öffentliche Heldenansicht (opt-in) + 6-stelliger Code
+- Helden-API (öffentlich, ohne Realnamen)
+- Heldenausweise generieren & zuweisen (PDF + QR-Code)
+- Abenteuerhistorie je Held
+
+### Abenteuerverwaltung
+- Event-CRUD (Ort, Kategorie, Status, Eventleiter, Spielleiter)
+- Anmeldungen: Teilnehmer, Gäste, Gruppenanmeldung, Teamer-Bypass
+- Wartelisten-System mit automatischem Aufrücken + Benachrichtigung
+- Altersgrenzen (Mindestalter/Höchstalter) mit Wartelisten-Override
+- Wartelistenmodus-Toggle in der Verwaltungsansicht
+- Teilnehmerlisten-PDF, GiroCode-QR für Zahlungen
+- Fotoerlaubnis je Buchung – Widerruf jederzeit (Art. 7 DSGVO)
+- E-Mail an alle Teilnehmer einer Veranstaltung
+
+### Check-in & Teilnahme
+- Unterschriften-Pad (Tablet/Canvas, AES-256-verschlüsselt, 30-Tage-Prune)
+- Direkter Löschen-Button für Unterschriften in der Check-in-Übersicht
+- Anwesenheitserfassung (`event_visits`), EP-Automatik nach Teilnahme
+- Aus- und Einchecken in der Verwaltungsansicht
+
+### Benachrichtigungen
+- E-Mail: Anmeldebestätigung (Pflicht), Annahme/Ablehnung/Stornierung,
+  Warteliste, Veranstaltungsabsage, Zahlungsbestätigung, Erinnerung
+- Abmeldebericht-Mail an Projektleitung
+- Fotoerlaubnis-Widerruf benachrichtigt Projektleitung + Kontakt-E-Mail
+- In-App-Benachrichtigungen (Glocke, Markierung gelesen/ungelesen)
+- Fehlerseite für abgelaufene Bestätigungslinks
+
+### Newsletter
+- Admin-CRUD (Erstellen, Bearbeiten, Vorschau, Versenden, Löschen)
+- WYSIWYG-Editor (Summernote) mit Tabellen, Farben, Bild-Upload
+- Abonnenten-Verwaltung mit Double-Opt-in per E-Mail
+- Dashboard-Banner für Nicht-Abonnenten
+- Abonnenten-Statusanzeige im Profil
+
+### Umfragen & Feedback
+- Template-basierte Umfragen (Jugendförderungs-Fokus)
+- Öffentlicher Teilnahme-Flow mit Link-Token
+- Admin-Ergebnisauswertung, Vorlagen-Verwaltung
+
+### Gruppen
+- Gruppen-CRUD (Gilden, Trupps), Mitgliederverwaltung mit Rollen
+- Gruppenanmeldung für Abenteuer
+
+### Admin-Werkzeuge
+- Stammdaten-CRUDs: Orte, Kategorien, Status, Event-Rollen, Perlenfarben,
+  EP-Buchungsarten, Auftraggeber, Matrix-Räume, Skill-Icons
+- Audit-Log (alle Admin-Aktionen auf Buchungen und Spielerprofilen)
+- Datenpannen-Protokoll Art. 33/34 DSGVO
+- Verarbeitungsverzeichnis Art. 30 DSGVO (druckbar)
+- Portal-Einstellungen (Vereinsname, Kontakt-E-Mail, etc.)
+- Nutzer-CRUD: Rollen vergeben, aktivieren, Profil bearbeiten
+
+### Matrix-Integration
+- Corporal-Policy (Provisionierung neuer Mitglieder)
+- Matrix-Konto-Verwaltung pro Spieler (Admin-CRUD)
+- Matrix-Räume pflegen
+
+### Daten-Migration
+- Legacy-Import (`migrate:legacy`) vollständig
+
+### DSGVO-Compliance
+- Verschlüsselung biometrischer Daten (Unterschriften AES-256)
+- Datenschutzerklärung, lokale Fonts (kein Google-Tracking)
+- Einwilligungsverwaltung: Gesundheitsdaten-Consent, Fotoerlaubnis
+- Automatischer Prune (`dsgvo:prune`, täglich 03:00):
+  Unterschriften (30 Tage), Gesundheitsdaten (2 Jahre), Buchungsdaten (3 Jahre),
+  Audit-Logs (3 Jahre), Notifications (1 Jahr), Spieler-Hard-Delete (3 Jahre),
+  User-Hard-Delete (3 Jahre)
+- Profilfotos und Galerie-Bilder beim Löschen sauber aus Storage entfernt
+- Datenexport Art. 20 (JSON-Download)
+
+### Infrastruktur & Qualität
+- Queue-Worker via Supervisor (database-Driver)
+- CI/CD-Pipeline, Deployment-Dokumentation
+- Lokale Fomantic-UI-Assets (kein CDN)
+- Save-Data / Light-Mode für schlechte Netzverbindungen
+- Onboarding-Dashboard mit Fortschrittsanzeige
+- Browser-Test-Suite (Feature-Tests für alle Kernflows)
 
 ---
 
-## 4. Meilensteine
+## 3. Meilensteine – alle abgeschlossen ✅
 
-Jeder Meilenstein bündelt Epics; die Details stehen in den Backlog-Dateien.
-
-### M1 · Go-Live-Reife
-Produktivschaltung des bereits gebauten Funktionsumfangs.
-- Profil um `lastname`/`phone` erweitern · Passwort-Migration (Legacy-Klartext)
-- Deployment, Prod-`.env`, Queue-Worker, CI-Pipeline
-- Resthärtung Auth/Autorisierung
-→ Backlog: [auth-profile](backlog/auth-profile.md), [infrastructure](backlog/infrastructure.md)
-
-### M2 · EP-Ökonomie & Fertigkeiten
-Das namensgebende LARP-Kernfeature.
-- Fertigkeiten-Verwaltung (CRUD, Klassenzuordnung, Perlenfarbe)
-- **Fertigkeiten-Baum pro Klasse** (Voraussetzungen) · Skill-Lernen mit EP-Abzug
-- EP-Buchungsbuch-Oberfläche · Klassenkosten
-→ Backlog: [skills-ep](backlog/skills-ep.md), [heroes](backlog/heroes.md)
-
-### M3 · Event-Lebenszyklus
-Vom geplanten Event bis zur abgerechneten Teilnahme.
-- Buchung bearbeiten · Teilnahme erfassen (`event_visit`)
-- Automatische EP-Vergabe nach Teilnahme · Status-Workflow · Wartelisten-Aufrücken
-→ Backlog: [adventures](backlog/adventures.md), [bookings-visits](backlog/bookings-visits.md)
-
-### M4 · Kommunikation
-- Buchungsbestätigung, Wartelisten-/Abmelde-/Erinnerungs-Mails (Mailables, Queue)
-→ Backlog: [notifications](backlog/notifications.md)
-
-### M5 · Admin-Werkzeuge
-- Lookup-CRUD (Orte, Kategorien, Status, Event-Rollen, Perlenfarben)
-- Matrix-Raum-Verwaltung · Audit-Log
-→ Backlog: [admin-lookups](backlog/admin-lookups.md), [matrix](backlog/matrix.md)
-
-### M6 · Auswertungen
-- Helden-Statistik · EP-Übersichten · Teilnahme-Reports · Charakterbogen-PDF
-→ Backlog: [reporting](backlog/reporting.md)
-
-### M7 · Härtung & Qualität
-- Suche/Filter/Sortierung · Browser-Tests · i18n · Accessibility · Performance
-→ Backlog: [ui-ux](backlog/ui-ux.md), [quality-testing](backlog/quality-testing.md)
-
-### M8 · Öffentlichkeit & Community (Vision)
-Die spielerseitigen Vision-Funktionen.
-- Öffentliche Heldenansicht ohne Realname · 6-stelliger Helden-Code + Suche
-- Abenteuerhistorie je Held · Gruppenverwaltung (Trupps)
-→ Backlog: [public-access](backlog/public-access.md), [groups](backlog/groups.md)
-
----
-
-## 5. Priorisierung (Kurzfassung)
-
-1. **M1** zuerst – das Bestehende live bringen (höchster Nutzen, geringes Risiko).
-2. **M2 + M3** parallel als nächste große Wertschöpfung (Charakterfortschritt
-   + Event-Abwicklung sind der eigentliche Vereinsalltag).
-3. **M4/M5** begleitend, sobald Events real laufen.
-4. **M6/M7** als Ausbau, wenn der Kernbetrieb stabil ist.
-
-## 6. Backlog-Übersicht
-
-| Datei | Bereich | Präfix |
+| # | Meilenstein | Abgeschlossen |
 |---|---|---|
-| [auth-profile](backlog/auth-profile.md) | Auth, Profil, Passwörter | AUTH |
-| [roles-permissions](backlog/roles-permissions.md) | Rollen & Rechte | ROLE |
-| [players](backlog/players.md) | Spielerverwaltung | PLAY |
-| [heroes](backlog/heroes.md) | Helden & Klassen | HERO |
-| [skills-ep](backlog/skills-ep.md) | Fertigkeiten & EP | SKILL/EP |
-| [adventures](backlog/adventures.md) | Events/Abenteuer | ADV |
-| [bookings-visits](backlog/bookings-visits.md) | Buchungen & Teilnahme | BOOK |
-| [matrix](backlog/matrix.md) | Matrix-Integration | MTX |
-| [public-access](backlog/public-access.md) | Öffentliche Heldenansicht & Code | PUB |
-| [groups](backlog/groups.md) | Gruppenverwaltung | GRP |
-| [admin-lookups](backlog/admin-lookups.md) | Stammdaten/Verwaltung | ADM |
-| [notifications](backlog/notifications.md) | Benachrichtigungen | NOTI |
-| [reporting](backlog/reporting.md) | Auswertungen/Exporte | REP |
-| [ui-ux](backlog/ui-ux.md) | Oberfläche | UI |
-| [data-migration](backlog/data-migration.md) | ETL/Legacy | ETL |
-| [infrastructure](backlog/infrastructure.md) | Betrieb/CI/Deploy | INFRA |
-| [quality-testing](backlog/quality-testing.md) | Tests/Qualität | QA |
-| [anforderungen] (backlog/anforderungen.md) | Anforderungen vom Vorstand | REQ |
+| M1 | Go-Live-Reife (Auth, Profile, Deployment) | Jun 2026 |
+| M2 | EP-Ökonomie & Fertigkeiten-Baum | Jun/Jul 2026 |
+| M3 | Event-Lebenszyklus (Check-in, EP-Vergabe, Warteliste) | Jun/Jul 2026 |
+| M4 | Kommunikation (Mails, Queue, Newsletter) | Jul/Aug 2026 |
+| M5 | Admin-Werkzeuge (Stammdaten, Audit, Datenpannen) | Aug 2026 |
+| M6 | Auswertungen & Exporte | Aug 2026 |
+| M7 | Qualität, Accessibility, Mobile, Performance | Aug 2026 |
+| M8 | Öffentlichkeit & Community (Heldenansicht, Gruppen) | Aug 2026 |
+| DSGVO | Vollständige DSGVO-Compliance | Sep 2026 |
+
+---
+
+## 4. Mögliche nächste Themen
+
+Das Kernprodukt ist feature-complete. Mögliche Folge-Iterationen:
+
+### Erweiterungen (konkret benannt, noch nicht priorisiert)
+
+| Thema | Beschreibung |
+|---|---|
+| Selbstauskunft im Portal | Art.-17/20-Anfragen direkt im Profil stellen (statt per E-Mail) |
+| Eltern-Zugang für Kinder | Minderjährige können sich selbst einloggen; Eltern erhalten Übersicht |
+| Öffentlicher Veranstaltungskalender | Events ohne Login sichtbar (opt-in per Event) |
+| Wartelisten-Priorisierung | Reihenfolge auf Warteliste manuell anpassbar |
+| Wiederholende Events | Serie/Template für regelmäßige Veranstaltungen |
+| Charakterbogen-PDF | Druckbarer Heldenbogen mit Fertigkeiten und EP |
+| Inventar-Verwaltung | Ausrüstungsgegenstände pro Held erfassen |
+
+### Technische Schulden (niedrig, kein akuter Handlungsbedarf)
+
+| # | Beschreibung |
+|---|---|
+| T-1 | Feature-Tests für Admin-CRUD-Flows (Orte, Kategorien etc.) fehlen weitgehend |
+| T-2 | API-Versionierung fehlt (aktuell `/api/` ohne Version) |
+| T-3 | Keine Rate-Limiting-Konfiguration für öffentliche Routen |
+| T-4 | Queue-Job-Monitoring (failed jobs, Alerting) nicht eingerichtet |
+
+---
+
+## 5. Backlog-Übersicht
+
+| Datei | Bereich | Präfix | Stand |
+|---|---|---|---|
+| [auth-profile](backlog/auth-profile.md) | Auth, Profil | AUTH | ✅ alle |
+| [roles-permissions](backlog/roles-permissions.md) | Rollen & Rechte | ROLE | ✅ alle |
+| [players](backlog/players.md) | Spielerverwaltung | PLAY | ✅ alle |
+| [heroes](backlog/heroes.md) | Helden & Klassen | HERO | ✅ alle |
+| [skills-ep](backlog/skills-ep.md) | Fertigkeiten & EP | SKILL/EP | ✅ alle |
+| [adventures](backlog/adventures.md) | Events/Abenteuer | ADV | ✅ alle |
+| [bookings-visits](backlog/bookings-visits.md) | Buchungen & Teilnahme | BOOK | ✅ alle |
+| [matrix](backlog/matrix.md) | Matrix-Integration | MTX | ✅ alle |
+| [public-access](backlog/public-access.md) | Öffentliche Heldenansicht | PUB | ✅ alle |
+| [groups](backlog/groups.md) | Gruppenverwaltung | GRP | ✅ alle |
+| [admin-lookups](backlog/admin-lookups.md) | Stammdaten | ADM | ✅ alle |
+| [notifications](backlog/notifications.md) | Benachrichtigungen | NOTI | ✅ alle |
+| [reporting](backlog/reporting.md) | Auswertungen/Exporte | REP | ✅ alle |
+| [ui-ux](backlog/ui-ux.md) | Oberfläche | UI | ✅ alle |
+| [data-migration](backlog/data-migration.md) | ETL/Legacy | ETL | ✅ alle |
+| [infrastructure](backlog/infrastructure.md) | Betrieb/CI/Deploy | INFRA | ✅ alle |
+| [quality-testing](backlog/quality-testing.md) | Tests/Qualität | QA | ✅ alle |
