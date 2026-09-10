@@ -161,20 +161,26 @@ $player->anonymize(); // überschreibt Klardaten, löscht Foto, soft-deletes
 
 ### 4.4 Hard-Delete nach Ablauf der Frist
 
-Nach Ablauf der Aufbewahrungsfrist (s. Abschnitt 3) können soft-deletete Datensätze
-endgültig gelöscht werden:
+Der Artisan-Befehl `dsgvo:prune` führt den Hard-Delete automatisch durch:
 
 ```bash
-# Benutzer die seit > 3 Jahren soft-deleted sind:
-php artisan tinker
-> User::onlyTrashed()->where('deleted_at', '<', now()->subYears(3))->forceDelete();
+# Vorschau (keine Änderungen):
+php artisan dsgvo:prune --dry-run
 
-# Spieler entsprechend:
-> Player::onlyTrashed()->where('deleted_at', '<', now()->subYears(3))->forceDelete();
+# Ausführen:
+php artisan dsgvo:prune
 ```
 
-Ein automatisierter Artisan-Befehl hierfür ist noch nicht implementiert
-(s. Abschnitt 5, offene Punkte).
+Der Befehl ist im Scheduler eingetragen und läuft täglich um 03:00 Uhr.
+
+**Spieler (seit > 3 Jahren soft-deleted):** Helden-Galerie und Profilfotos werden
+aus dem Storage entfernt, verbleibende `bookings.player_id`-Referenzen werden
+gekappt (Buchungsdatensätze bleiben für 10 Jahre erhalten), danach Hard-Delete
+inkl. DB-Cascade (heroes, ep_transactions, player_user).
+
+**Benutzer (seit > 3 Jahren soft-deleted):** Hard-Delete; DB-Cascade übernimmt
+role_user, player_user, notifications; `data_breach_logs.created_by_user_id` und
+`id_card_codes.created_by` werden per nullOnDelete gekappt.
 
 ---
 
@@ -224,7 +230,6 @@ Sichtbarkeit bewusst. Kein Realname wird auf der öffentlichen Seite angezeigt.
 
 | # | Beschreibung | Priorität |
 |---|---|---|
-| 1 | Kein automatischer Hard-Delete-Befehl nach Ablauf der Fristen | Mittel |
 | 3 | Kein Selbstauskunfts-/Export-Feature für Benutzer (Art. 20 DSGVO) | Niedrig |
 | 4 | `bookings.signature` könnte nach Aufbewahrungsfrist gezielt gelöscht werden, ohne die Buchung selbst zu löschen | Mittel |
 
@@ -236,6 +241,7 @@ Sichtbarkeit bewusst. Kein Realname wird auf der öffentlichen Seite angezeigt.
 | N-1 | Kein Verarbeitungsverzeichnis nach Art. 30 DSGVO | Commit 0d0aa5d |
 | N-2 | Fotoerlaubnis ohne dedizierten Widerrufsmechanismus (Art. 7) | Commits 35b6b6c, 42b405f |
 | 2 | Profilfotos nicht gelöscht bei `Player::forceDelete` / `Hero::delete` | Commit cbf17e5 |
+| 1 | Kein automatischer Hard-Delete nach Ablauf der Aufbewahrungsfristen | Commits dieser Session |
 
 ---
 

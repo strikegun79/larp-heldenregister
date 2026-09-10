@@ -4,10 +4,13 @@ namespace App\Console\Commands;
 
 use App\Models\AuditLog;
 use App\Models\Booking;
+use App\Models\Player;
 use App\Models\SurveyResponse;
 use App\Models\TeamerSignup;
+use App\Models\User;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 
 /**
  * DSGVO Art. 5 Abs. 1 lit. e: Speicherbegrenzung – automatische Bereinigung
@@ -31,6 +34,8 @@ class DsgvoPrune extends Command
         $this->pruneHealthData($dryRun);
         $this->pruneTeamerSignupHealthData($dryRun);
         $this->pruneBookings($dryRun);
+        $this->pruneExpiredPlayers($dryRun);
+        $this->pruneExpiredUsers($dryRun);
         $this->pruneAuditLogs($dryRun);
         $this->pruneNotifications($dryRun);
         $this->pruneSurveyTexts($dryRun);
@@ -170,6 +175,74 @@ class DsgvoPrune extends Command
                 ->whereNotNull('text_answer')
                 ->where('created_at', '<', now()->subYears(2))
                 ->update(['text_answer' => null]);
+        }
+    }
+
+    /**
+     * Spieler-Datensätze endgültig löschen, die seit > 3 Jahren soft-deleted sind.
+     *
+     * Reihenfolge pro Spieler:
+     * 1. Galerie-Bilder aller Helden aus dem Storage löschen (DB-Cascade würde nur
+     *    die Datensätze löschen, nicht die Storage-Dateien).
+     * 2. Helden-Profilfotos löschen (ebenso Cascade-Bypass).
+     * 3. Spieler-Profilfoto löschen (falls anonymize() es nicht bereits entfernt hat).
+     * 4. Verbleibende booking.player_id-Referenzen kappen (Buchungen bleiben erhalten;
+     *    pruneBookings() läuft vorher und deckt Events > 3 Jahre ab).
+     * 5. forceDelete(): DB-Cascade löscht heroes, ep_transactions, player_user usw.
+     */
+    private function pruneExpiredPlayers(bool $dryRun): void
+    {
+        $count = Player::onlyTrashed()->where('deleted_at', '<', now()->subYears(3))->count();
+        $this->line("  Spieler (soft-deleted > 3 Jahre): {$count}");
+
+        if (! $dryRun && $count > 0) {
+            Player::onlyTrashed()
+                ->where('deleted_at', '<', now()->subYears(3))
+                ->chunkById(50, function ($players) {
+                    foreach ($players as $player) {
+                        // Helden-Fotos und Galerie-Bilder (Model-Events feuern bei DB-Cascade nicht).
+                        foreach ($player->heroes()->with('galleryImages:id,hero_id,path')->get() as $hero) {
+                            foreach ($hero->galleryImages as $gi) {
+                                Storage::disk('public')->delete($gi->path);
+                            }
+                            if ($hero->image) {
+                                Storage::disk('public')->delete($hero->image);
+                            }
+                        }
+                        // Spieler-Foto (Sicherheitsnetz, falls nicht durch anonymize() bereinigt).
+                        if ($player->image) {
+                            Storage::disk('public')->delete($player->image);
+                        }
+                        // Buchungsreferenzen kappen (Buchungen selbst bleiben für 10 Jahre erhalten).
+                        DB::table('bookings')->where('player_id', $player->id)->update(['player_id' => null]);
+                        // Hard-Delete: DB-Cascade erledigt den Rest.
+                        $player->forceDelete();
+                    }
+                });
+        }
+    }
+
+    /**
+     * Benutzer-Datensätze endgültig löschen, die seit > 3 Jahren soft-deleted sind.
+     *
+     * Voraussetzungen (durch Migration sichergestellt):
+     * - data_breach_logs.created_by_user_id → nullOnDelete
+     * - id_card_codes.created_by              → nullOnDelete
+     * DB-Cascade übernimmt: role_user, player_user, notifications, newsletters.
+     */
+    private function pruneExpiredUsers(bool $dryRun): void
+    {
+        $count = User::onlyTrashed()->where('deleted_at', '<', now()->subYears(3))->count();
+        $this->line("  Benutzer (soft-deleted > 3 Jahre): {$count}");
+
+        if (! $dryRun && $count > 0) {
+            User::onlyTrashed()
+                ->where('deleted_at', '<', now()->subYears(3))
+                ->chunkById(50, function ($users) {
+                    foreach ($users as $user) {
+                        $user->forceDelete();
+                    }
+                });
         }
     }
 }

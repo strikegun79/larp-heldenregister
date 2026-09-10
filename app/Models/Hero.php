@@ -30,6 +30,10 @@ class Hero extends Model
             if ($hero->image) {
                 Storage::disk('public')->delete($hero->image);
             }
+            // Galerie-Bilder aus Storage entfernen (DB-Cascade löscht nur die Datensätze).
+            $hero->galleryImages()->each(function (HeroGalleryImage $gi) {
+                Storage::disk('public')->delete($gi->path);
+            });
         });
     }
 
