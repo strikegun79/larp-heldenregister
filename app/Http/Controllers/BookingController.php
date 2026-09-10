@@ -6,6 +6,7 @@ use App\Models\Adventure;
 use App\Models\Booking;
 use App\Models\EventRole;
 use App\Models\Player;
+use App\Models\Setting;
 use App\Models\User;
 use App\Notifications\BookingCancelled;
 use App\Notifications\BookingWaitlisted;
@@ -13,6 +14,7 @@ use App\Notifications\BookingCancelledParticipant;
 use App\Notifications\BookingReceived;
 use App\Notifications\BookingMovedToWaitlist;
 use App\Notifications\BookingRejected;
+use App\Notifications\FotoerlaubnisRevoked;
 use App\Notifications\PaymentConfirmed;
 use App\Notifications\WaitlistPromoted;
 use Illuminate\Contracts\View\View;
@@ -594,9 +596,32 @@ class BookingController extends Controller
         $action = $booking->fotoerlaubnis ? 'booking.fotoerlaubnis_granted' : 'booking.fotoerlaubnis_revoked';
         AuditLogger::log($action, $booking, ['adventure' => $adventure->name]);
 
+        // Bei Widerruf: Projektleitung + Portal-Kontakt benachrichtigen (N-2 / Art. 7 DSGVO).
+        if (! $booking->fotoerlaubnis) {
+            $notification = new FotoerlaubnisRevoked($booking, $adventure);
+
+            // Alle Nutzer mit Projektleiter-Rolle (id=30) + ggf. Event-Leitung.
+            $leaders = User::whereHas('roles', fn ($q) => $q->where('roles.id', 30))->get();
+            if ($adventure->eventleader_id && ! $leaders->contains('id', $adventure->eventleader_id)) {
+                $adventure->loadMissing('eventleader');
+                if ($adventure->eventleader) {
+                    $leaders->push($adventure->eventleader);
+                }
+            }
+            if ($leaders->isNotEmpty()) {
+                Notification::send($leaders, $notification);
+            }
+
+            // Portal-Kontakt-E-Mail aus den Einstellungen.
+            $contactEmail = Setting::get('contact_email');
+            if ($contactEmail) {
+                Notification::route('mail', $contactEmail)->notify($notification);
+            }
+        }
+
         $message = $booking->fotoerlaubnis
             ? 'Fotoerlaubnis erteilt.'
-            : 'Fotoerlaubnis widerrufen.';
+            : 'Fotoerlaubnis widerrufen. Projektleitung und Kontakt wurden benachrichtigt.';
 
         return $request->expectsJson()
             ? response()->json(['message' => $message, 'refresh_modal' => true])
