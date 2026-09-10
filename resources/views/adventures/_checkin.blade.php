@@ -33,7 +33,16 @@
                             </td>
                             <td data-label="Unterschrift">
                                 @if ($booking->signature)
-                                    <img src="{{ $booking->signature }}" alt="Unterschrift" style="height:34px; background:#fff; border:1px solid #ccc" loading="lazy">
+                                    <div class="flex items-center gap-2">
+                                        <img src="{{ $booking->signature }}" alt="Unterschrift" style="height:34px; background:#fff; border:1px solid #ccc" loading="lazy">
+                                        <form method="POST"
+                                              action="{{ route('adventures.bookings.signature.destroy', [$adventure, $booking]) }}"
+                                              data-refresh-modal
+                                              data-confirm="Unterschrift von {{ $booking->player?->full_name }} unwiderruflich löschen?">
+                                            @csrf @method('DELETE')
+                                            <button type="submit" class="ui mini basic red button" title="Unterschrift löschen (DSGVO Art. 17)">✕</button>
+                                        </form>
+                                    </div>
                                 @else
                                     <span class="text-stone-500">—</span>
                                 @endif

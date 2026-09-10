@@ -70,7 +70,8 @@ Ablauf der Aufbewahrungsfrist (s. Abschnitt 3).
 Admins/Bürokrat werden im Audit-Log protokolliert (`booking.created`,
 `booking.updated`, `booking.cancelled`, `booking.rejected`, `booking.paid_toggled`,
 `booking.moved_to_waitlist`, `booking.waitlist_promoted`,
-`booking.fotoerlaubnis_revoked`, `booking.fotoerlaubnis_granted`).
+`booking.fotoerlaubnis_revoked`, `booking.fotoerlaubnis_granted`,
+`booking.signature_deleted`).
 
 ### 1.5 Spieler-Profil-Edits durch Admins (`audit_logs`)
 
@@ -117,7 +118,7 @@ da Corporal der Datenverarbeiter ist.
 | Benutzerkonten (aktiv) | Bis Vereinsaustritt + 3 Jahre | Vereinsrecht, steuerliche Aufbewahrung |
 | Spielerdaten | Bis Vereinsaustritt + 3 Jahre | |
 | Teilnehmerlisten / Buchungen | 10 Jahre | Haftungsrecht (§ 195 BGB) |
-| Unterschriften (`bookings.signature`) | 10 Jahre | Haftungsrecht |
+| Unterschriften (`bookings.signature`) | 30 Tage nach Event-Ende | Biometrische Daten (Art. 9 DSGVO) – Zweck (Anwesenheitsbestätigung) endet mit Event; Nachweis über event_visits |
 | Audit-Log | 2 Jahre | Nachvollziehbarkeit |
 | System-Logs (`storage/logs`) | 30 Tage | INFRA-07 |
 | Backups | 30 Tage täglich, 1 Jahr monatlich | INFRA-06 |
@@ -231,7 +232,6 @@ Sichtbarkeit bewusst. Kein Realname wird auf der öffentlichen Seite angezeigt.
 | # | Beschreibung | Priorität |
 |---|---|---|
 | 3 | Kein Selbstauskunfts-/Export-Feature für Benutzer (Art. 20 DSGVO) | Niedrig |
-| 4 | `bookings.signature` könnte nach Aufbewahrungsfrist gezielt gelöscht werden, ohne die Buchung selbst zu löschen | Mittel |
 
 **Behobene Punkte (Sep. 2026):**
 
@@ -241,7 +241,8 @@ Sichtbarkeit bewusst. Kein Realname wird auf der öffentlichen Seite angezeigt.
 | N-1 | Kein Verarbeitungsverzeichnis nach Art. 30 DSGVO | Commit 0d0aa5d |
 | N-2 | Fotoerlaubnis ohne dedizierten Widerrufsmechanismus (Art. 7) | Commits 35b6b6c, 42b405f |
 | 2 | Profilfotos nicht gelöscht bei `Player::forceDelete` / `Hero::delete` | Commit cbf17e5 |
-| 1 | Kein automatischer Hard-Delete nach Ablauf der Aufbewahrungsfristen | Commits dieser Session |
+| 1 | Kein automatischer Hard-Delete nach Ablauf der Aufbewahrungsfristen | Commit 43ce954 |
+| 4 | Unterschriften ohne gezielten Löschmechanismus / falsche Aufbewahrungsfrist | Commits dieser Session |
 
 ---
 
