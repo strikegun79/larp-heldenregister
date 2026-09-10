@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Storage;
 
 class Hero extends Model
 {
@@ -15,12 +16,19 @@ class Hero extends Model
 
     /**
      * PUB-01: Eindeutigen 6-stelligen Code generieren und beim Erstellen setzen.
+     * DSGVO: Heldenfoto beim Löschen aus dem Storage entfernen.
      */
     protected static function booted(): void
     {
         static::creating(function (Hero $hero) {
             if (empty($hero->public_code)) {
                 $hero->public_code = static::generatePublicCode();
+            }
+        });
+
+        static::deleting(function (Hero $hero) {
+            if ($hero->image) {
+                Storage::disk('public')->delete($hero->image);
             }
         });
     }

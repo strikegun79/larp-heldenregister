@@ -8,10 +8,24 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Storage;
 
 class Player extends Model
 {
     use HasFactory, SoftDeletes;
+
+    /**
+     * DSGVO: Profilfoto beim Hard-Delete aus dem Storage entfernen.
+     * Soft-Delete (wiederherstellbar) lässt das Bild erhalten; anonymize() löscht es separat.
+     */
+    protected static function booted(): void
+    {
+        static::forceDeleting(function (Player $player) {
+            if ($player->image) {
+                Storage::disk('public')->delete($player->image);
+            }
+        });
+    }
 
     protected $fillable = [
         'name',
@@ -136,7 +150,7 @@ class Player extends Model
     public function anonymize(): void
     {
         if ($this->image) {
-            \Illuminate\Support\Facades\Storage::disk('public')->delete($this->image);
+            Storage::disk('public')->delete($this->image);
         }
 
         $this->forceFill([
