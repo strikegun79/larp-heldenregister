@@ -1,6 +1,6 @@
 # DSGVO-Datenschutzkonzept – Heldenregister
 
-Stand: 2026-06-29 · Verantwortlicher: Waldritter Gießen e. V.
+Stand: 2026-09-10 · Verantwortlicher: Waldritter Gießen e. V.
 
 ---
 
@@ -58,23 +58,37 @@ hergestellt.
 |---|---|---|
 | `player_id` | Referenz | → players |
 | `participant_name`, `guest_name`, `guest_lastname` | Identität | Gäste ohne Konto |
-| `signature` (base64) | **Besonders sensibel** | handschriftliche Unterschrift |
+| `signature` (base64, AES-256-verschlüsselt) | **Besonders sensibel** | handschriftliche Unterschrift |
 | `erreichbarkeit` | Kontakt | Notfallrufnummer für Veranstaltung |
+| `fotoerlaubnis` | Einwilligung | Widerrufbar jederzeit (Art. 7 DSGVO) – s. Abschnitt 9 |
+| `allergien`, `medikamente`, `health_data_consent_at` | **Art. 9 DSGVO** | Gesundheitsdaten mit Einwilligung |
 
 Teilnehmerlisten (inkl. Unterschriften) unterliegen der **Löschpflicht** nach
 Ablauf der Aufbewahrungsfrist (s. Abschnitt 3).
 
-### 1.5 Audit-Log (`audit_logs`)
+**Audit-Log für Admin-Aktionen (M-3):** Alle Änderungen an Buchungen durch
+Admins/Bürokrat werden im Audit-Log protokolliert (`booking.created`,
+`booking.updated`, `booking.cancelled`, `booking.rejected`, `booking.paid_toggled`,
+`booking.moved_to_waitlist`, `booking.waitlist_promoted`,
+`booking.fotoerlaubnis_revoked`, `booking.fotoerlaubnis_granted`).
+
+### 1.5 Spieler-Profil-Edits durch Admins (`audit_logs`)
+
+Admin- und Bürokrat-Aktionen auf Spielerprofilen werden protokolliert:
+`player.address_updated`, `player.deleted`, `player.restored`,
+`player.caretaker_attached`, `player.caretaker_detached`.
+
+### 1.6 Audit-Log (`audit_logs`)
 
 Enthält `actor_name` (Snapshot) und `subject_label` (Snapshot). Kein Verweis auf
 gelöschte Konten nötig – Snapshots bleiben lesbar. Keine Echtzeit-Personendaten.
 
-### 1.6 Benachrichtigungen (`notifications`)
+### 1.7 Benachrichtigungen (`notifications`)
 
 Transiente Systembenachrichtigungen (ungelesen/gelesen). Werden mit dem Benutzer
 gelöscht.
 
-### 1.7 Matrix-Konten (`matrix_accounts`)
+### 1.8 Matrix-Konten (`matrix_accounts`)
 
 `mxid` ist pseudonym (Vorname.Nachname:domain) und wird bei Deaktivierung des
 Matrix-Kontos durch Corporal gelöscht. Kein separates Löschkonzept erforderlich,
@@ -213,8 +227,15 @@ Sichtbarkeit bewusst. Kein Realname wird auf der öffentlichen Seite angezeigt.
 | 1 | Kein automatischer Hard-Delete-Befehl nach Ablauf der Fristen | Mittel |
 | 2 | Profilfotos von Spielern werden beim `Player::delete()` nicht gelöscht | Hoch |
 | 3 | Kein Selbstauskunfts-/Export-Feature für Benutzer (Art. 20 DSGVO) | Niedrig |
-| 4 | Keine Einwilligungsverwaltung für Fotos (nur implizit durch Upload) | Niedrig |
-| 5 | `bookings.signature` (base64) könnte nach Aufbewahrungsfrist gezielt gelöscht werden, ohne die Buchung selbst zu löschen | Mittel |
+| 4 | `bookings.signature` könnte nach Aufbewahrungsfrist gezielt gelöscht werden, ohne die Buchung selbst zu löschen | Mittel |
+
+**Behobene Punkte (Sep. 2026):**
+
+| # | Beschreibung | Gelöst durch |
+|---|---|---|
+| M-3 | Kein Audit-Log für Buchungsänderungen und Spielerprofil-Edits | Commit 9d8184b |
+| N-1 | Kein Verarbeitungsverzeichnis nach Art. 30 DSGVO | Commit 0d0aa5d |
+| N-2 | Fotoerlaubnis ohne dedizierten Widerrufsmechanismus (Art. 7) | Commits 35b6b6c, 42b405f |
 
 ---
 
@@ -227,3 +248,72 @@ Sichtbarkeit bewusst. Kein Realname wird auf der öffentlichen Seite angezeigt.
 - Audit-Log protokolliert sicherheitsrelevante Aktionen
 - Backups verschlüsselt (AES-256, `BACKUP_ARCHIVE_PASSWORD`)
 - Logs ohne Personendaten (nur User-ID, keine Klartextnamen)
+
+---
+
+## 9. Einwilligungsverwaltung Fotoerlaubnis (N-2, Art. 7 DSGVO)
+
+### 9.1 Anforderung
+
+Art. 7 Abs. 3 DSGVO: Eine erteilte Einwilligung muss jederzeit und so einfach
+widerrufbar sein, wie sie erteilt wurde.
+
+### 9.2 Umsetzung
+
+Das Feld `bookings.fotoerlaubnis` (boolean) speichert die Einwilligung je Buchung.
+Der Widerruf ist über zwei Wege möglich:
+
+1. **Spielerprofil-Modal** (`/players/{id}` → Tab „Buchungen"): Der Erziehungsberechtigte
+   oder Betreuer sieht alle aktiven Buchungen mit aktuellem Fotoerlaubnis-Status und
+   kann per Klick widerrufen oder neu erteilen.
+
+2. **Admin-Buchungsübersicht** (`/adventures/{id}/bookings`): Teamer und Admins
+   können die Fotoerlaubnis direkt in der Buchungsmaske umschalten.
+
+**Route:** `PATCH /adventures/{adventure}/bookings/{booking}/fotoerlaubnis`  
+**Controller:** `BookingController::toggleFotoerlaubnis()`
+
+### 9.3 Benachrichtigung bei Widerruf
+
+Bei jedem Widerruf (`fotoerlaubnis = false`) werden automatisch benachrichtigt:
+
+- Alle Nutzer mit Rolle **Projektleiter** (Rolle-ID 30)
+- Der **Eventleiter** der Veranstaltung (sofern nicht bereits Projektleiter)
+- Die **Portal-Kontakt-E-Mail** (`Setting::get('contact_email')`)
+
+Benachrichtigung: `App\Notifications\FotoerlaubnisRevoked` (queued, Mail-Kanal).
+
+### 9.4 Audit-Log
+
+Jede Änderung wird im Audit-Log protokolliert:
+
+- `booking.fotoerlaubnis_revoked` — Widerruf
+- `booking.fotoerlaubnis_granted` — Neuerteilung
+
+---
+
+## 10. Verarbeitungsverzeichnis (N-1, Art. 30 DSGVO)
+
+Das Verarbeitungsverzeichnis ist als Blade-View unter
+`/admin/processing-activities` erreichbar (Zugriff: `can:portal.manage`).
+
+Es umfasst alle 9 Verarbeitungstätigkeiten des Heldenregisters mit den nach
+Art. 30 Abs. 1 DSGVO Pflichtfeldern: Zweck, Rechtsgrundlage, Personengruppen,
+Datenkategorien, interne und externe Empfänger, Drittlandübermittlung,
+Löschfristen und technisch-organisatorische Maßnahmen (TOMs).
+
+Das Verzeichnis ist druckbar (`@media print` CSS).
+
+**Verarbeitungstätigkeiten:**
+
+| Nr. | Bezeichnung |
+|-----|-------------|
+| 1 | Benutzerkontenverwaltung |
+| 2 | Spielerverwaltung (inkl. Minderjährige) |
+| 3 | Heldenverwaltung |
+| 4 | Veranstaltungsanmeldung & Teilnehmerlisten |
+| 5 | Benachrichtigungen & Kommunikation |
+| 6 | Audit-Log & Protokollierung |
+| 7 | Datenpannen-Protokoll (Art. 33 DSGVO) |
+| 8 | Matrix-Konten (Corporal-Integration) |
+| 9 | Umfragen & Feedback |
