@@ -19,6 +19,7 @@ use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use App\Services\AuditLogger;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Validation\Rule;
@@ -164,6 +165,15 @@ class BookingController extends Controller
                 ? new BookingWaitlisted($booking, $ageViolation)
                 : new BookingReceived($booking);
             Notification::route('mail', $recipientEmail)->notify($notification);
+        }
+
+        // M-3: Admin-Buchung für fremden Spieler protokollieren.
+        if (Gate::allows('book-any-player')) {
+            AuditLogger::log('booking.created', $booking, [
+                'adventure' => $adventure->name,
+                'waitlisted' => $booking->waitlisted,
+                'event_role_id' => $booking->event_role_id,
+            ]);
         }
 
         if (! $booking->waitlisted) {
@@ -314,6 +324,12 @@ class BookingController extends Controller
 
         $booking->update($updateData);
 
+        // M-3: Buchungsänderung protokollieren.
+        AuditLogger::log('booking.updated', $booking, array_filter([
+            'adventure' => $adventure->name,
+            'ermaessigung' => $updateData['ermaessigung'] ?? null,
+        ], fn ($v) => $v !== null));
+
         $message = 'Anmeldung aktualisiert.';
 
         return $request->expectsJson()
@@ -357,6 +373,8 @@ class BookingController extends Controller
             // Von Warteliste auf regulären Platz hochstufen.
             $booking->update(['waitlisted' => false]);
             Notification::route('mail', $recipientEmail)->notify(new BookingReceived($booking));
+            // M-3: Wartelisten-Promotion durch Admin protokollieren.
+            AuditLogger::log('booking.waitlist_promoted', $booking, ['adventure' => $adventure->name]);
             $message = ($booking->player?->full_name ?? 'Spieler').' von der Warteliste bestätigt. Bestätigungsmail gesendet an '.$recipientEmail.'.';
         } else {
             // Reguläre Buchung: Bestätigungs-Mail nochmals senden.
@@ -382,6 +400,13 @@ class BookingController extends Controller
             'status' => $reject ? 'abgelehnt' : 'offen',
             'approved_at' => null,
         ]);
+
+        // M-3: Ablehnung/Rücknahme protokollieren.
+        AuditLogger::log(
+            $reject ? 'booking.rejected' : 'booking.rejection_revoked',
+            $booking,
+            ['adventure' => $adventure->name]
+        );
 
         $message = $reject ? 'Anmeldung abgelehnt.' : 'Ablehnung zurückgenommen.';
 
@@ -416,6 +441,9 @@ class BookingController extends Controller
 
         $booking->update(['waitlisted' => true]);
 
+        // M-3: Verschiebung auf Warteliste protokollieren.
+        AuditLogger::log('booking.moved_to_waitlist', $booking, ['adventure' => $adventure->name]);
+
         // E-Mail an Spieler-User oder Betreuer
         $booking->loadMissing(['player.users']);
         $user  = $booking->player?->users()->first();
@@ -447,6 +475,12 @@ class BookingController extends Controller
 
         $wasPaid = $booking->paid;
         $booking->update(['paid' => ! $booking->paid]);
+
+        // M-3: Zahlungsstatus-Änderung protokollieren.
+        AuditLogger::log('booking.paid_toggled', $booking, [
+            'adventure' => $adventure->name,
+            'paid' => $booking->paid,
+        ]);
 
         $message = $booking->paid ? 'Als bezahlt markiert.' : 'Als offen markiert.';
 
@@ -484,6 +518,9 @@ class BookingController extends Controller
         $cancelUser  = $booking->player?->users()->first();
         $cancelEmail = $booking->player?->email;
         $notifyCancel = $booking->player?->notificationEnabled('notify_booking_cancelled') ?? false;
+
+        // M-3: Stornierung protokollieren (vor delete, damit auditLabel noch greift).
+        AuditLogger::log('booking.cancelled', $booking, ['adventure' => $adventure->name]);
 
         // Wird ein regulärer Platz frei, rückt die älteste Wartelisten-Buchung nach (BOOK-07).
         $wasRegular = ! $booking->waitlisted;

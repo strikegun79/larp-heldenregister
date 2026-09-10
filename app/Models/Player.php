@@ -115,6 +115,11 @@ class Player extends Model
         return trim("{$this->name} {$this->lastname}");
     }
 
+    public function auditLabel(): string
+    {
+        return $this->full_name;
+    }
+
     /**
      * Das Matrix-Konto dieses Spielers (Legacy: matrix_account.player_id).
      */

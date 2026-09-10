@@ -192,4 +192,11 @@ class Booking extends Model
     {
         return $this->approved_at !== null;
     }
+
+    public function auditLabel(): string
+    {
+        $adventure = $this->relationLoaded('adventure') ? $this->adventure : $this->adventure()->first();
+
+        return $this->participant_name.' @ '.($adventure?->name ?? 'Abenteuer#'.$this->adventure_id);
+    }
 }

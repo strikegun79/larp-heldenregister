@@ -407,15 +407,12 @@
                             <div class="item"><i class="check circle green icon"></i> Matrix-Dienst in Datenschutzerklärung als Drittempfänger aufgeführt [M-1]</div>
                             <div class="item"><i class="check circle green icon"></i> Teamer-Gesundheitsdaten in Datenschutzerklärung (Abschn. 2.4) dokumentiert [M-2]</div>
                             <div class="item"><i class="check circle green icon"></i> Newsletter: Double-Opt-in, Einwilligung Art. 6 Abs. 1 lit. a, Abmeldelink</div>
+                            <div class="item"><i class="check circle green icon"></i> Audit-Log für Buchungsänderungen und Spielerprofil-Edits durch Admins [M-3]</div>
                         </div>
                     </div>
                     <div class="column">
                         <p class="text-sm font-medium text-stone-600 mb-2">Handlungsbedarf</p>
                         <div class="ui list">
-                            <div class="item">
-                                <i class="exclamation circle orange icon"></i>
-                                <strong>[M-3]</strong> Kein Audit-Log für Buchungsänderungen und Spielerprofil-Edits durch Admins
-                            </div>
                             <div class="item">
                                 <i class="exclamation circle orange icon"></i>
                                 <strong>[N-1]</strong> Kein Verarbeitungsverzeichnis nach Art. 30 DSGVO
