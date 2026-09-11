@@ -60,7 +60,9 @@ Route::get('/manifest.webmanifest', function () {
 Route::get('/datenschutz', fn () => view('datenschutz'))->name('datenschutz');
 
 // Newsletter Double-Opt-in-Bestätigung (öffentlich, kein Login nötig).
-Route::get('/newsletter/bestaetigen/{token}', [NewsletterSubscriptionController::class, 'confirm'])->name('newsletter.confirm');
+Route::middleware('throttle:newsletter')
+    ->get('/newsletter/bestaetigen/{token}', [NewsletterSubscriptionController::class, 'confirm'])
+    ->name('newsletter.confirm');
 
 // PUB-02/03/06: Öffentliche Helden-Routen mit Rate-Limiting (30/min je IP).
 Route::middleware('throttle:public-hero')->group(function () {

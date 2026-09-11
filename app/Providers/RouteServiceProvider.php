@@ -33,6 +33,16 @@ class RouteServiceProvider extends ServiceProvider
             return Limit::perMinute(30)->by($request->ip());
         });
 
+        // T-3: Passwort-Reset-Routen (forgot + reset) gegen Missbrauch absichern.
+        RateLimiter::for('password-reset', function (Request $request) {
+            return Limit::perMinutes(10, 5)->by($request->ip());
+        });
+
+        // T-3: Newsletter-Bestätigungslink gegen Token-Enumeration absichern.
+        RateLimiter::for('newsletter', function (Request $request) {
+            return Limit::perMinute(10)->by($request->ip());
+        });
+
         $this->routes(function () {
             Route::middleware('api')
                 ->prefix('api')
