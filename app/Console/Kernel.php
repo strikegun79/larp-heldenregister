@@ -22,6 +22,9 @@ class Kernel extends ConsoleKernel
 
         // DSGVO Art. 5 Abs. 1 lit. e: Aufbewahrungsfristen täglich prüfen und bereinigen.
         $schedule->command('dsgvo:prune')->dailyAt('03:00');
+
+        // T-4: Failed Jobs älter als 7 Tage aus der Datenbank entfernen.
+        $schedule->command('queue:prune-failed --hours=168')->dailyAt('04:00');
     }
 
     /**

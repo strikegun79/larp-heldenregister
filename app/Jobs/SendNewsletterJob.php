@@ -11,7 +11,9 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
+use Throwable;
 
 class SendNewsletterJob implements ShouldQueue
 {
@@ -20,6 +22,15 @@ class SendNewsletterJob implements ShouldQueue
     public int $tries = 1;
 
     public function __construct(private readonly Newsletter $newsletter) {}
+
+    public function failed(Throwable $e): void
+    {
+        Log::error('Newsletter-Versand fehlgeschlagen', [
+            'newsletter_id'    => $this->newsletter->id,
+            'newsletter_title' => $this->newsletter->title,
+            'exception'        => $e->getMessage(),
+        ]);
+    }
 
     public function handle(): void
     {

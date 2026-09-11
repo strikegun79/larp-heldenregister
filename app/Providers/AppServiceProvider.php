@@ -2,10 +2,14 @@
 
 namespace App\Providers;
 
+use App\Mail\QueueJobFailedMail;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Messages\MailMessage;
+use Illuminate\Queue\Events\JobFailed;
+use Illuminate\Support\Facades\Mail;
+use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 
@@ -29,6 +33,14 @@ class AppServiceProvider extends ServiceProvider
         if (str_starts_with(config('app.url'), 'https://')) {
             URL::forceScheme('https');
         }
+
+        // T-4: Admin-Alert per Mail wenn ein Queue-Job fehlschlägt.
+        Queue::failing(function (JobFailed $event): void {
+            $recipient = config('portal.contact_email');
+            if ($recipient) {
+                Mail::to($recipient)->send(new QueueJobFailedMail($event));
+            }
+        });
 
         // N+1-Schutz: wirft eine Exception im nicht-produktiven Betrieb,
         // wenn Relationen lazy-geladen werden (QA-06).
