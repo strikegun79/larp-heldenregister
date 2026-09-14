@@ -38,6 +38,7 @@
                 @if($logs->isEmpty())
                     <p class="p-6 text-stone-500">Noch keine Datenpannen dokumentiert.</p>
                 @else
+                    <x-mobile.cards-or-table>
                     <table class="min-w-full divide-y divide-stone-200 text-sm">
                         <thead class="bg-black/5">
                             <tr>
@@ -52,7 +53,7 @@
                         <tbody class="divide-y divide-stone-200">
                             @foreach($logs as $log)
                                 <tr class="hover:bg-stone-50">
-                                    <td class="px-4 py-3 whitespace-nowrap font-medium">
+                                    <td class="px-4 py-3 whitespace-nowrap font-medium" data-label="Entdeckt">
                                         {{ $log->discovered_at->format('d.m.Y H:i') }}
                                         @if($log->isOverdue())
                                             <span class="ui mini red label ml-1">Überfällig</span>
@@ -62,15 +63,15 @@
                                             </span>
                                         @endif
                                     </td>
-                                    <td class="px-4 py-3 max-w-xs truncate">{{ $log->description }}</td>
-                                    <td class="px-4 py-3">
+                                    <td class="px-4 py-3 max-w-xs truncate" data-label="Beschreibung">{{ $log->description }}</td>
+                                    <td class="px-4 py-3" data-label="Meldepflichtig">
                                         @if($log->reportable)
                                             <span class="ui mini orange label">Ja</span>
                                         @else
                                             <span class="ui mini label">Nein</span>
                                         @endif
                                     </td>
-                                    <td class="px-4 py-3">
+                                    <td class="px-4 py-3" data-label="Status">
                                         @if(! $log->reportable)
                                             <span class="text-stone-400">Nur intern</span>
                                         @elseif($log->reported_to_authority)
@@ -79,7 +80,7 @@
                                             <span class="text-red-700">Nicht gemeldet</span>
                                         @endif
                                     </td>
-                                    <td class="px-4 py-3 text-stone-500">{{ $log->createdBy?->name }}</td>
+                                    <td class="px-4 py-3 text-stone-500" data-label="Erfasst von">{{ $log->createdBy?->name }}</td>
                                     <td class="px-4 py-3 text-right">
                                         <a href="{{ route('admin.data-breaches.show', $log) }}"
                                            class="ui mini button">Details</a>
@@ -88,6 +89,7 @@
                             @endforeach
                         </tbody>
                     </table>
+                    </x-mobile.cards-or-table>
                     <div class="p-4">{{ $logs->links() }}</div>
                 @endif
             </div>

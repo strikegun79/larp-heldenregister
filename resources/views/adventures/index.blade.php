@@ -104,7 +104,7 @@
                                             @if ($free > 0)
                                                 <span class="text-green-700">Noch {{ $free }} frei</span>
                                             @else
-                                                <span class="text-red-600 font-medium">Ausgebucht</span>
+                                                <span class="text-red-600 font-medium">Warteliste</span>
                                             @endif
                                         </div>
                                     </a>
@@ -138,7 +138,7 @@
                                                     @if ($free > 0)
                                                         <span class="text-green-700">Noch {{ $free }} frei</span>
                                                     @else
-                                                        <span class="text-red-600 font-medium">Ausgebucht</span>
+                                                        <span class="text-red-600 font-medium">Warteliste</span>
                                                     @endif
                                                 </td>
                                             </tr>
@@ -178,7 +178,7 @@
                                     @if ($free > 0)
                                         <span class="text-green-700">Noch {{ $free }} frei</span>
                                     @else
-                                        <span class="text-red-600 font-medium">Ausgebucht</span>
+                                        <span class="text-red-600 font-medium">Warteliste</span>
                                     @endif
                                 </div>
                             </a>
@@ -221,7 +221,7 @@
                                             @if ($free > 0)
                                                 <span class="text-green-700">Noch {{ $free }} frei</span>
                                             @else
-                                                <span class="text-red-600 font-medium">Ausgebucht</span>
+                                                <span class="text-red-600 font-medium">Warteliste</span>
                                             @endif
                                         </td>
                                     </tr>

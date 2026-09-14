@@ -26,6 +26,7 @@
             @endif
 
             <div class="bg-white/70 border-2 border-[#5a3a22]/40 shadow sm:rounded-lg overflow-hidden">
+                <x-mobile.cards-or-table>
                 <table class="min-w-full divide-y divide-stone-200">
                     <thead class="bg-black/5">
                         <tr>
@@ -45,12 +46,12 @@
                                     : 0;
                             @endphp
                             <tr>
-                                <td class="px-4 py-3 text-sm">{{ $survey->adventure->name }}</td>
-                                <td class="px-4 py-3 font-medium">{{ $survey->title }}</td>
-                                <td class="px-4 py-3 text-sm text-stone-500">
+                                <td class="px-4 py-3 text-sm" data-label="Veranstaltung">{{ $survey->adventure->name }}</td>
+                                <td class="px-4 py-3 font-medium" data-label="Titel">{{ $survey->title }}</td>
+                                <td class="px-4 py-3 text-sm text-stone-500" data-label="Zielgruppe">
                                     {{ $survey->template->target_group_label }}
                                 </td>
-                                <td class="px-4 py-3">
+                                <td class="px-4 py-3" data-label="Status">
                                     @php
                                         $cls = match($survey->status) {
                                             'active' => 'green',
@@ -60,7 +61,7 @@
                                     @endphp
                                     <span class="ui {{ $cls }} label">{{ $survey->status_label }}</span>
                                 </td>
-                                <td class="px-4 py-3">
+                                <td class="px-4 py-3" data-label="Rücklauf">
                                     <div class="survey-rücklauf-bar" style="width:120px;">
                                         <div class="survey-rücklauf-fill" style="width:{{ $pct }}%"></div>
                                     </div>
@@ -97,6 +98,7 @@
                         @endforelse
                     </tbody>
                 </table>
+                </x-mobile.cards-or-table>
             </div>
 
             <div class="mt-4">{{ $surveys->links() }}</div>

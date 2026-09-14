@@ -34,6 +34,7 @@
                         <a href="{{ route('admin.matrix.rooms.create') }}" class="underline">Jetzt anlegen.</a>
                     </div>
                 @else
+                    <div class="overflow-x-auto">
                     <table class="ui very basic table w-full">
                         <thead>
                             <tr>
@@ -81,6 +82,7 @@
                             @endforeach
                         </tbody>
                     </table>
+                    </div>
                 @endif
             </div>
         </div>

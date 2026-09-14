@@ -307,6 +307,15 @@ footer {
     color: #5a3a22;
 }
 
+/* --- Suchfeld mit Button mobil: Button bleibt sichtbar (UX-130) ------- */
+/* Fomantic setzt display:inline-flex auf .ui.input. Das inner <input>
+   behält seine Browser-Mindestbreite, wodurch der Button bei w-full
+   aus dem Sichtbereich läuft. min-width:0 erlaubt das Schrumpfen. */
+.ui.action.input > input {
+    min-width: 0;
+    flex: 1 1 0%;
+}
+
 /* --- Sanfter, warmer Scrollbalken ------------------------------------- */
 * { scrollbar-color: var(--wr-gold) transparent; }
 ::-webkit-scrollbar { width: 12px; height: 12px; }

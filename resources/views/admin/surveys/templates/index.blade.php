@@ -22,6 +22,7 @@
             @endif
 
             <div class="bg-white/70 border-2 border-[#5a3a22]/40 shadow sm:rounded-lg overflow-hidden">
+                <x-mobile.cards-or-table>
                 <table class="min-w-full divide-y divide-stone-200">
                     <thead class="bg-black/5">
                         <tr>
@@ -36,15 +37,15 @@
                     <tbody class="divide-y divide-stone-200 text-stone-800">
                         @forelse($templates as $template)
                             <tr>
-                                <td class="px-4 py-3 font-medium">{{ $template->name }}</td>
-                                <td class="px-4 py-3 text-sm text-stone-500">
+                                <td class="px-4 py-3 font-medium" data-label="Name">{{ $template->name }}</td>
+                                <td class="px-4 py-3 text-sm text-stone-500" data-label="Zielgruppe">
                                     {{ $template->target_group_label }}
                                 </td>
-                                <td class="px-4 py-3 text-sm">{{ $template->questions_count }}</td>
-                                <td class="px-4 py-3 text-sm text-stone-500">
+                                <td class="px-4 py-3 text-sm" data-label="Fragen">{{ $template->questions_count }}</td>
+                                <td class="px-4 py-3 text-sm text-stone-500" data-label="Erstellt von">
                                     {{ $template->creator?->name ?? '–' }}
                                 </td>
-                                <td class="px-4 py-3">
+                                <td class="px-4 py-3" data-label="Status">
                                     <span class="ui {{ $template->active ? 'green' : 'grey' }} label">
                                         {{ $template->active ? 'Aktiv' : 'Inaktiv' }}
                                     </span>
@@ -73,6 +74,7 @@
                         @endforelse
                     </tbody>
                 </table>
+                </x-mobile.cards-or-table>
             </div>
 
         </div>
