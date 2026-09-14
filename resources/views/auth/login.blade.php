@@ -1,4 +1,10 @@
 <x-guest-layout>
+    @if(session('warning'))
+        <div class="ui error message mb-4 text-sm">
+            <i class="exclamation triangle icon"></i>{{ session('warning') }}
+        </div>
+    @endif
+
     <x-auth-session-status class="mb-4" :status="session('status')" />
 
     <form method="POST" action="{{ route('login') }}">
