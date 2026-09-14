@@ -259,7 +259,24 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('players/{player}/caretakers', [Admin\PlayerController::class, 'attachCaretaker'])->name('players.caretakers.store');
         Route::delete('players/{player}/caretakers/{user}', [Admin\PlayerController::class, 'detachCaretaker'])->name('players.caretakers.destroy');
 
-        // Helden-Klassen-Lookup pflegen (HERO-05).
+        Route::get('audit-logs', [Admin\AuditLogController::class, 'index'])->name('audit-logs.index');
+
+        Route::get('settings', [Admin\SettingController::class, 'index'])->name('settings.index');
+        Route::put('settings', [Admin\SettingController::class, 'update'])->name('settings.update');
+
+        // Matrix-Konto-Provisionierung pro Spieler (corporal User-DB).
+        Route::get('players/{player}/matrix', [Admin\MatrixAccountController::class, 'edit'])->name('players.matrix.edit');
+        Route::put('players/{player}/matrix', [Admin\MatrixAccountController::class, 'update'])->name('players.matrix.update');
+        Route::delete('players/{player}/matrix', [Admin\MatrixAccountController::class, 'destroy'])->name('players.matrix.destroy');
+
+        // Matrix-Räume verwalten (MTX-05).
+        Route::resource('matrix/rooms', Admin\MatrixRoomController::class)
+            ->parameters(['rooms' => 'room'])
+            ->names('matrix.rooms');
+    });
+
+    // Veranstaltungs-Lookups (ROLE-10): portal.manage (Admin) ODER events.admin (Projektleitung).
+    Route::prefix('admin')->name('admin.')->middleware('can:events.admin-access')->group(function () {
         // Veranstaltungsorte pflegen (ADV-08).
         Route::get('locations', [Admin\LocationController::class, 'index'])->name('locations.index');
         Route::get('locations/create', [Admin\LocationController::class, 'create'])->name('locations.create');
@@ -295,12 +312,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('event-statuses/{eventStatus}/edit', [Admin\EventStatusController::class, 'edit'])->name('event-statuses.edit');
         Route::put('event-statuses/{eventStatus}', [Admin\EventStatusController::class, 'update'])->name('event-statuses.update');
         Route::delete('event-statuses/{eventStatus}', [Admin\EventStatusController::class, 'destroy'])->name('event-statuses.destroy');
+    });
 
-        Route::get('audit-logs', [Admin\AuditLogController::class, 'index'])->name('audit-logs.index');
-
-        Route::get('settings', [Admin\SettingController::class, 'index'])->name('settings.index');
-        Route::put('settings', [Admin\SettingController::class, 'update'])->name('settings.update');
-
+    // Helden-Konfiguration (ROLE-10): portal.manage (Admin) ODER heroes.admin (Spielleiter).
+    Route::prefix('admin')->name('admin.')->middleware('can:heroes.admin-access')->group(function () {
+        // Helden-Klassen-Lookup pflegen (HERO-05).
         Route::get('hero-classes', [Admin\HeroClassController::class, 'index'])->name('hero-classes.index');
         Route::get('hero-classes/create', [Admin\HeroClassController::class, 'create'])->name('hero-classes.create');
         Route::post('hero-classes', [Admin\HeroClassController::class, 'store'])->name('hero-classes.store');
@@ -338,16 +354,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('ep-transaction-types/{epTransactionType}/edit', [Admin\EpTransactionTypeController::class, 'edit'])->name('ep-transaction-types.edit');
         Route::put('ep-transaction-types/{epTransactionType}', [Admin\EpTransactionTypeController::class, 'update'])->name('ep-transaction-types.update');
         Route::delete('ep-transaction-types/{epTransactionType}', [Admin\EpTransactionTypeController::class, 'destroy'])->name('ep-transaction-types.destroy');
-
-        // Matrix-Konto-Provisionierung pro Spieler (corporal User-DB).
-        Route::get('players/{player}/matrix', [Admin\MatrixAccountController::class, 'edit'])->name('players.matrix.edit');
-        Route::put('players/{player}/matrix', [Admin\MatrixAccountController::class, 'update'])->name('players.matrix.update');
-        Route::delete('players/{player}/matrix', [Admin\MatrixAccountController::class, 'destroy'])->name('players.matrix.destroy');
-
-        // Matrix-Räume verwalten (MTX-05).
-        Route::resource('matrix/rooms', Admin\MatrixRoomController::class)
-            ->parameters(['rooms' => 'room'])
-            ->names('matrix.rooms');
     });
 
     // Teamer-Anmeldungen (ADV-27): Teamer/Lehrmeister melden sich zu Events an.
@@ -370,8 +376,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::patch('adventures/{adventure}/teamer-signup/{signup}/reject', [\App\Http\Controllers\TeamerSignupController::class, 'reject'])
         ->name('adventures.teamer.reject');
 
-    // PUB-10: Heldenausweis-Generator (Admin/Bürokrat = heldenregister.edit).
-    Route::prefix('admin')->name('admin.')->middleware('can:heldenregister.edit')->group(function () {
+    // PUB-10: Heldenausweis-Generator (ROLE-10): heldenregister.edit (Bürokrat) ODER heroes.admin (Spielleiter).
+    Route::prefix('admin')->name('admin.')->middleware('can:id-cards.access')->group(function () {
         Route::get('id-cards', [Admin\IdCardController::class, 'index'])->name('id-cards.index');
         Route::post('id-cards/generate', [Admin\IdCardController::class, 'generate'])->name('id-cards.generate');
         Route::get('id-cards/{hero}/reprint', [Admin\IdCardController::class, 'reprint'])->name('id-cards.reprint');

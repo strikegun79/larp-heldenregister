@@ -11,76 +11,88 @@
             </div>
             @endcan
 
-            @can('portal.manage')
             @php
-                $card = fn(string $title, string $subtitle, string $img, string $href) =>
+                $adminCard = fn(string $title, string $subtitle, string $img, string $href) =>
                     compact('title', 'subtitle', 'img', 'href');
-
-                $groups = [
-                    [
-                        'title' => 'Helden & Spieler',
-                        'icon'  => 'shield alternate',
-                        'cards' => [
-                            $card('Portal-Nutzer',    'Nutzer & Rollen',               'verwaltung_portal-nutzer.jpg',     route('admin.users.index')),
-                            $card('Spieler',          'Alle Spieler/Teilnehmer',       'verwaltung_spieler.jpg',           route('admin.players.index')),
-                            $card('Helden-Klassen',   'Klassen anlegen & pflegen',     'verwaltung_helden-klassen.jpg',    route('admin.hero-classes.index')),
-                            $card('Gruppen',          'Gilden & Trupps verwalten',     'verwaltung_helden-gruppen.jpg',    route('admin.groups.index')),
-                            $card('Fertigkeiten',     'Fertigkeiten-Katalog pflegen',  'verwaltung_fertigkeiten.jpg',      route('admin.skills.index')),
-                            $card('Perlenfarben',     'Perlenfarben pflegen',          'verwaltung_perlenfarbe.jpg',       route('admin.perl-colors.index')),
-                            $card('EP-Buchungsarten', 'EP-Buchungsarten pflegen',      'verwaltung_ep-buchungsarten.jpg',  route('admin.ep-transaction-types.index')),
-                            $card('Heldenausweise',   'Ausweise generieren & zuweisen','verwaltung_heldenausweise.jpg',    route('admin.id-cards.index')),
-                        ],
-                    ],
-                    [
-                        'title' => 'Veranstaltungen',
-                        'icon'  => 'calendar alternate outline',
-                        'cards' => [
-                            $card('Veranstaltungen',  'Abenteuer administrieren',      'verwaltung_veranstaltungen.jpg',   route('adventures.manage-index')),
-                            $card('Orte',             'Veranstaltungsorte pflegen',    'verwaltung_orte.jpg',              route('admin.locations.index')),
-                            $card('Kategorien',       'Event-Kategorien pflegen',      'verwaltung_event-kategorien.jpg',  route('admin.event-categories.index')),
-                            $card('Auftraggeber',     'Auftraggeber pflegen',          'verwaltung_auftraggeber.jpg',      route('admin.event-clients.index')),
-                            $card('Teilnahme-Rollen', 'Event-Rollen pflegen',          'verwaltung_teilnahme-rollen.jpg',  route('admin.event-roles.index')),
-                            $card('Event-Status',     'Status-Lookups pflegen',        'verwaltung_event-status.jpg',      route('admin.event-statuses.index')),
-                        ],
-                    ],
-                    [
-                        'title' => 'System & Portal',
-                        'icon'  => 'cog',
-                        'cards' => [
-                            $card('Rollen & Rechte',          'Berechtigungsübersicht',              'verwaltung_rollen-rechte.jpg',        route('admin.roles.index')),
-                            $card('Portal-Einstellungen',     'Vereins-Settings bearbeiten',         'verwaltung_portal-einstellungen.jpg', route('admin.settings.index')),
-                            $card('Audit-Log',                'Admin-Aktionen protokolliert',         'verwaltung_audit-log.jpg',            route('admin.audit-logs.index')),
-                            $card('Datenpannen',              'DSGVO Art. 33 – Vorfallsprotokoll',   'verwaltung_audit-log.jpg',            route('admin.data-breaches.index')),
-                            $card('Verarbeitungsverzeichnis', 'DSGVO Art. 30 – VVT',                 'verwaltung_audit-log.jpg',            route('admin.processing-activities.index')),
-                        ],
-                    ],
-                ];
             @endphp
 
-            @foreach ($groups as $group)
-                <div class="mb-10">
-                    <h3 class="font-uncial text-xl text-waldritter mb-4 flex items-center gap-2">
-                        <i class="{{ $group['icon'] }} icon" style="color:#5a3a22;"></i>
-                        {{ $group['title'] }}
-                    </h3>
-                    <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
-                        @foreach ($group['cards'] as $c)
-                            <a href="{{ $c['href'] }}"
-                               class="group block rounded-lg overflow-hidden border-2 border-[#5a3a22]/40 bg-white/60 shadow hover:shadow-xl hover:-translate-y-1 transition">
-                                <div class="h-36 overflow-hidden save-data-hide">
-                                    <img src="/images/{{ $c['img'] }}" alt="" aria-hidden="true" loading="lazy"
-                                         width="400" height="144"
-                                         class="w-full h-full object-cover group-hover:scale-105 transition">
-                                </div>
-                                <div class="p-3 text-center">
-                                    <div class="font-uncial text-base text-waldritter">{{ $c['title'] }}</div>
-                                    <div class="text-xs text-stone-600">{{ $c['subtitle'] }}</div>
-                                </div>
-                            </a>
+            {{-- ── Helden & Spieler ───────────────────────────────────────────── --}}
+            @canany(['portal.manage', 'heroes.admin-access', 'groups.manage', 'id-cards.access'])
+            <div class="mb-10">
+                <h3 class="font-uncial text-xl text-waldritter mb-4 flex items-center gap-2">
+                    <i class="shield alternate icon" style="color:#5a3a22;"></i>
+                    Helden & Spieler
+                </h3>
+                <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+                    @can('portal.manage')
+                        @foreach ([
+                            $adminCard('Portal-Nutzer', 'Nutzer & Rollen',         'verwaltung_portal-nutzer.jpg', route('admin.users.index')),
+                            $adminCard('Spieler',       'Alle Spieler/Teilnehmer', 'verwaltung_spieler.jpg',       route('admin.players.index')),
+                        ] as $c)
+                            <x-admin.dashboard-card :card="$c" />
                         @endforeach
-                    </div>
+                    @endcan
+                    @can('heroes.admin-access')
+                        @foreach ([
+                            $adminCard('Helden-Klassen',   'Klassen anlegen & pflegen',    'verwaltung_helden-klassen.jpg',   route('admin.hero-classes.index')),
+                            $adminCard('Fertigkeiten',     'Fertigkeiten-Katalog pflegen', 'verwaltung_fertigkeiten.jpg',     route('admin.skills.index')),
+                            $adminCard('Perlenfarben',     'Perlenfarben pflegen',         'verwaltung_perlenfarbe.jpg',      route('admin.perl-colors.index')),
+                            $adminCard('EP-Buchungsarten', 'EP-Buchungsarten pflegen',     'verwaltung_ep-buchungsarten.jpg', route('admin.ep-transaction-types.index')),
+                        ] as $c)
+                            <x-admin.dashboard-card :card="$c" />
+                        @endforeach
+                    @endcan
+                    @can('groups.manage')
+                        <x-admin.dashboard-card :card="$adminCard('Gruppen', 'Gilden & Trupps verwalten', 'verwaltung_helden-gruppen.jpg', route('admin.groups.index'))" />
+                    @endcan
+                    @can('id-cards.access')
+                        <x-admin.dashboard-card :card="$adminCard('Heldenausweise', 'Ausweise generieren & zuweisen', 'verwaltung_heldenausweise.jpg', route('admin.id-cards.index'))" />
+                    @endcan
                 </div>
-            @endforeach
+            </div>
+            @endcanany
+
+            {{-- ── Veranstaltungen ────────────────────────────────────────────── --}}
+            @can('events.admin-access')
+            <div class="mb-10">
+                <h3 class="font-uncial text-xl text-waldritter mb-4 flex items-center gap-2">
+                    <i class="calendar alternate outline icon" style="color:#5a3a22;"></i>
+                    Veranstaltungen
+                </h3>
+                <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+                    @foreach ([
+                        $adminCard('Veranstaltungen',  'Abenteuer administrieren',   'verwaltung_veranstaltungen.jpg',  route('adventures.manage-index')),
+                        $adminCard('Orte',             'Veranstaltungsorte pflegen', 'verwaltung_orte.jpg',             route('admin.locations.index')),
+                        $adminCard('Kategorien',       'Event-Kategorien pflegen',   'verwaltung_event-kategorien.jpg', route('admin.event-categories.index')),
+                        $adminCard('Auftraggeber',     'Auftraggeber pflegen',       'verwaltung_auftraggeber.jpg',     route('admin.event-clients.index')),
+                        $adminCard('Teilnahme-Rollen', 'Event-Rollen pflegen',       'verwaltung_teilnahme-rollen.jpg', route('admin.event-roles.index')),
+                        $adminCard('Event-Status',     'Status-Lookups pflegen',     'verwaltung_event-status.jpg',     route('admin.event-statuses.index')),
+                    ] as $c)
+                        <x-admin.dashboard-card :card="$c" />
+                    @endforeach
+                </div>
+            </div>
+            @endcan
+
+            {{-- ── System & Portal ────────────────────────────────────────────── --}}
+            @can('portal.manage')
+            <div class="mb-10">
+                <h3 class="font-uncial text-xl text-waldritter mb-4 flex items-center gap-2">
+                    <i class="cog icon" style="color:#5a3a22;"></i>
+                    System & Portal
+                </h3>
+                <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+                    @foreach ([
+                        $adminCard('Rollen & Rechte',          'Berechtigungsübersicht',            'verwaltung_rollen-rechte.jpg',        route('admin.roles.index')),
+                        $adminCard('Portal-Einstellungen',     'Vereins-Settings bearbeiten',       'verwaltung_portal-einstellungen.jpg', route('admin.settings.index')),
+                        $adminCard('Audit-Log',                'Admin-Aktionen protokolliert',      'verwaltung_audit-log.jpg',            route('admin.audit-logs.index')),
+                        $adminCard('Datenpannen',              'DSGVO Art. 33 – Vorfallsprotokoll', 'verwaltung_audit-log.jpg',            route('admin.data-breaches.index')),
+                        $adminCard('Verarbeitungsverzeichnis', 'DSGVO Art. 30 – VVT',              'verwaltung_audit-log.jpg',            route('admin.processing-activities.index')),
+                    ] as $c)
+                        <x-admin.dashboard-card :card="$c" />
+                    @endforeach
+                </div>
+            </div>
             @endcan
 
             {{-- Kommunikation: Newsletter (newsletter.manage) --}}

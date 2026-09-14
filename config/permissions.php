@@ -32,6 +32,9 @@ return [
         'newsletter.manage',   // Newsletter erstellen, bearbeiten, versenden
         // Datenpannen-Protokoll (DSGVO Art. 33) – nur Admin via '*'
         'data-breach.manage',
+        // Verwaltungs-Dashboards für Teilrollen (ROLE-10)
+        'events.admin',   // Veranstaltungs-Lookups pflegen (Orte, Kategorien …)
+        'heroes.admin',   // Helden-Konfiguration pflegen (Klassen, Skills …)
     ],
 
     'roles' => [
@@ -54,6 +57,7 @@ return [
             'heldenregister.view',
             'adventure.book', 'adventure.modify', 'adventure.cancel',
             'events.view', 'events.edit',
+            'events.admin',       // Veranstaltungs-Lookups in der Verwaltung pflegen (ROLE-10)
             'survey.admin',       // Vorlagen + Umfragen vollständig verwalten (inkl. survey.view)
             'survey.view',
             'roles.view',
@@ -67,6 +71,7 @@ return [
             'adventure.book', 'adventure.modify', 'adventure.cancel',
             'events.view',
             'groups.manage',
+            'heroes.admin',       // Helden-Konfiguration in der Verwaltung pflegen (ROLE-10)
             'roles.view',
         ],
 
