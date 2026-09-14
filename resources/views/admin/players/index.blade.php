@@ -71,6 +71,32 @@
                 </form>
             </div>
 
+            {{-- UX-131: Sortierung mobil – nur unter 640px sichtbar, da thead dort ausgeblendet ist. --}}
+            <div class="sm:hidden bg-white/70 border-2 border-[#5a3a22]/40 shadow rounded-lg p-3 mb-4">
+                <form method="GET" action="{{ route('admin.players.index') }}">
+                    <input type="hidden" name="q" value="{{ $q }}">
+                    @if ($hideAdults)<input type="hidden" name="hide_adults" value="1">@endif
+                    @if ($noHeroes)  <input type="hidden" name="no_heroes"   value="1">@endif
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs text-stone-500 shrink-0">Sortieren:</span>
+                        <select name="sort" onchange="this.form.submit()"
+                                class="ui compact dropdown flex-1 text-sm"
+                                aria-label="Sortierspalte">
+                            <option value="name"         @selected($sort === 'name')>Name</option>
+                            <option value="lastname"     @selected($sort === 'lastname')>Nachname</option>
+                            <option value="dayofbirth"   @selected($sort === 'dayofbirth')>Alter</option>
+                            <option value="heroes_count" @selected($sort === 'heroes_count')>Helden</option>
+                        </select>
+                        <select name="dir" onchange="this.form.submit()"
+                                class="ui compact dropdown text-sm"
+                                aria-label="Sortierrichtung">
+                            <option value="asc"  @selected($dir === 'asc')>↑ aufst.</option>
+                            <option value="desc" @selected($dir === 'desc')>↓ abst.</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
+
             <div class="bg-white/70 border-2 border-[#5a3a22]/40 shadow sm:rounded-lg overflow-hidden">
                 <x-mobile.cards-or-table>
                 <table class="min-w-full divide-y divide-stone-200">
