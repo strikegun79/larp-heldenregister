@@ -14,18 +14,17 @@
             {{-- Suche --}}
             <div class="bg-white/70 border-2 border-[#5a3a22]/40 shadow sm:rounded-lg p-4 mb-4">
                 <form method="GET" action="{{ route('admin.users.index') }}" class="ui form">
-                    <div class="flex items-center gap-3">
-                        <div class="ui action input">
+                    <div class="flex flex-col sm:flex-row sm:items-center gap-2">
+                        <div class="ui action input w-full sm:w-auto">
                             <input type="search" name="q" value="{{ $q }}"
                                    placeholder="Name oder E-Mail suchen…"
-                                   style="min-width:260px"
                                    autofocus>
                             <button type="submit" class="ui icon button" aria-label="Suchen">
                                 <i class="search icon"></i>
                             </button>
                         </div>
                         @if ($q !== '')
-                            <a href="{{ route('admin.users.index') }}" class="text-sm text-stone-500 hover:underline">
+                            <a href="{{ route('admin.users.index') }}" class="text-sm text-stone-500 hover:underline shrink-0">
                                 Suche zurücksetzen
                             </a>
                         @endif

@@ -12,20 +12,22 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
 
             {{-- Suche + Klassenfilter --}}
-            <form method="GET" action="{{ route('admin.skills.index') }}" class="ui form mb-4 flex flex-wrap items-center gap-3">
-                <div class="ui action input">
-                    <input type="search" name="q" value="{{ $q }}" placeholder="Name suchen…" style="min-width:200px">
-                    <button type="submit" class="ui icon button" aria-label="Suchen"><i class="search icon"></i></button>
+            <form method="GET" action="{{ route('admin.skills.index') }}" class="ui form mb-4">
+                <div class="flex flex-col sm:flex-row sm:flex-wrap sm:items-center gap-2">
+                    <div class="ui action input w-full sm:w-auto">
+                        <input type="search" name="q" value="{{ $q }}" placeholder="Name suchen…">
+                        <button type="submit" class="ui icon button" aria-label="Suchen"><i class="search icon"></i></button>
+                    </div>
+                    <select name="class_id" onchange="this.form.submit()" class="ui dropdown w-full sm:w-auto">
+                        <option value="">Alle Klassen</option>
+                        @foreach ($heroClasses as $class)
+                            <option value="{{ $class->id }}" @selected($classId == $class->id)>{{ $class->name }}</option>
+                        @endforeach
+                    </select>
+                    @if ($q || $classId)
+                        <a href="{{ route('admin.skills.index') }}" class="text-sm text-stone-500 hover:underline shrink-0">Filter zurücksetzen</a>
+                    @endif
                 </div>
-                <select name="class_id" onchange="this.form.submit()" class="ui dropdown">
-                    <option value="">Alle Klassen</option>
-                    @foreach ($heroClasses as $class)
-                        <option value="{{ $class->id }}" @selected($classId == $class->id)>{{ $class->name }}</option>
-                    @endforeach
-                </select>
-                @if ($q || $classId)
-                    <a href="{{ route('admin.skills.index') }}" class="text-sm text-stone-500 hover:underline">Filter zurücksetzen</a>
-                @endif
             </form>
 
             <div class="bg-white/70 border-2 border-[#5a3a22]/40 shadow sm:rounded-lg overflow-hidden">

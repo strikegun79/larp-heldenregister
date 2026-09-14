@@ -29,8 +29,8 @@
                 <form method="GET" action="{{ route('admin.players.index') }}" class="ui form">
                     {{-- Zeile 1: Suchfeld --}}
                     <div class="flex items-center mb-3">
-                        <div class="ui action input">
-                            <input type="search" name="q" value="{{ $q }}" placeholder="Name / Nachname suchen…" style="min-width:220px">
+                        <div class="ui action input w-full sm:w-auto">
+                            <input type="search" name="q" value="{{ $q }}" placeholder="Name / Nachname suchen…">
                             <button type="submit" class="ui icon button" aria-label="Suchen"><i class="search icon"></i></button>
                         </div>
                     </div>
