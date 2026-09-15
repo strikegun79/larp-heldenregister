@@ -30,16 +30,16 @@
                                       action="{{ route('adventures.teamer.update-role', [$adventure, $signup]) }}"
                                       data-refresh-modal>
                                     @csrf @method('PATCH')
-                                    <select name="teamer_role" class="ui compact dropdown"
+                                    <select name="event_role_id" class="ui compact"
                                             onchange="this.closest('form').requestSubmit()">
                                         <option value="">— keine —</option>
-                                        @foreach (\App\Models\EventRole::forTeamer()->orderBy('id')->pluck('description') as $role)
-                                            <option value="{{ $role }}" @selected($signup->teamer_role === $role)>{{ $role }}</option>
+                                        @foreach (\App\Models\EventRole::forTeamer()->orderBy('id')->get() as $role)
+                                            <option value="{{ $role->id }}" @selected($signup->event_role_id === $role->id)>{{ $role->description }}</option>
                                         @endforeach
                                     </select>
                                 </form>
                             @else
-                                {{ $signup->teamer_role ?? '—' }}
+                                {{ $signup->eventRole?->description ?? '—' }}
                             @endcan
                         </td>
                         <td data-label="Status">

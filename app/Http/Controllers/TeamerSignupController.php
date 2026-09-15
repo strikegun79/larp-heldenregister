@@ -155,7 +155,7 @@ class TeamerSignupController extends Controller
             'leih_tunika' => ['boolean'],
             'leih_waffe' => ['boolean'],
             'anmerkung' => ['nullable', 'string', 'max:1000'],
-            'teamer_role' => ['nullable', 'string', Rule::in(EventRole::forTeamer()->pluck('description'))],
+            'event_role_id' => ['nullable', 'integer', Rule::exists('event_roles', 'id')->where('for_teamer', true)],
         ]);
 
         $hasHealthData = filled($data['allergien'] ?? null) || filled($data['medikamente'] ?? null);
@@ -248,10 +248,10 @@ class TeamerSignupController extends Controller
         abort_if($signup->adventure_id !== $adventure->id, 404);
 
         $data = $request->validate([
-            'teamer_role' => ['nullable', 'string', Rule::in(EventRole::forTeamer()->pluck('description'))],
+            'event_role_id' => ['nullable', 'integer', Rule::exists('event_roles', 'id')->where('for_teamer', true)],
         ]);
 
-        $signup->update(['teamer_role' => $data['teamer_role'] ?: null]);
+        $signup->update(['event_role_id' => $data['event_role_id'] ?: null]);
 
         $msg = 'Teamer-Rolle aktualisiert.';
 

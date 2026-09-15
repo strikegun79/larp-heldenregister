@@ -13,7 +13,7 @@ class TeamerSignup extends Model
     protected $fillable = [
         'adventure_id',
         'user_id',
-        'teamer_role',
+        'event_role_id',
         'allergien',
         'medikamente',
         'health_data_consent_at',
@@ -55,5 +55,10 @@ class TeamerSignup extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function eventRole(): BelongsTo
+    {
+        return $this->belongsTo(EventRole::class);
     }
 }

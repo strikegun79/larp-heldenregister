@@ -7,10 +7,10 @@
     <div class="two fields">
         <div class="field">
             <label>Teamer-Rolle</label>
-            <select name="teamer_role">
+            <select name="event_role_id">
                 <option value="">— keine —</option>
-                @foreach (\App\Models\EventRole::forTeamer()->orderBy('id')->pluck('description') as $role)
-                    <option value="{{ $role }}" @selected($signup->teamer_role === $role)>{{ $role }}</option>
+                @foreach (\App\Models\EventRole::forTeamer()->orderBy('id')->get() as $role)
+                    <option value="{{ $role->id }}" @selected($signup->event_role_id === $role->id)>{{ $role->description }}</option>
                 @endforeach
             </select>
         </div>
