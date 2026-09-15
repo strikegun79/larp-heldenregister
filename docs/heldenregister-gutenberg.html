@@ -1,0 +1,572 @@
+<!--
+=================================================================
+  DAS HELDENREGISTER – WordPress Gutenberg Seiteninhalt
+=================================================================
+  Verwendung:
+  1. In WordPress eine neue Seite erstellen
+  2. Im Gutenberg-Editor: Drei-Punkte-Menü (oben rechts) → Code-Editor
+  3. Diesen gesamten Inhalt (ab dem ersten <!-- wp: ) einfügen
+  4. Code-Editor schließen, Seite speichern
+  5. Bild-Platzhalter im Editor anklicken und eigene Bilder hochladen
+  6. Links im CTA-Bereich anpassen
+=================================================================
+-->
+
+<!-- wp:html -->
+<style>
+.hr-section-label{font-size:.78rem;letter-spacing:.1em;text-transform:uppercase;color:#9b6a35;display:block;margin-bottom:.4rem;font-family:sans-serif}
+.hr-feature-card{border:1px solid #ddc99a;border-radius:10px;height:100%}
+.hr-step-card{border:1px solid #ddc99a;border-radius:10px}
+.hr-audience-card{border:1px solid rgba(255,255,255,.2);border-radius:12px;text-align:center}
+.hr-dark-section .hr-section-label{color:#c8a060}
+.hr-dark-section h2,.hr-dark-section h3{color:#f5ddb0}
+.hr-dark-section p,.hr-dark-section li{color:#d4b896}
+.hr-feature-list{list-style:none;padding-left:0}
+.hr-feature-list li{padding:.25rem 0 .25rem 1.4rem;position:relative}
+.hr-feature-list li::before{content:"⚔";position:absolute;left:0;font-size:.8rem;top:.3rem}
+.wp-block-group.alignfull.has-background{padding-top:4rem;padding-bottom:4rem}
+.wp-block-group:not(.alignfull){padding-top:3.5rem;padding-bottom:3.5rem}
+</style>
+<!-- /wp:html -->
+
+
+<!-- ═══════════════════════════════════════════════
+     HERO
+═══════════════════════════════════════════════ -->
+<!-- wp:cover {"dimRatio":100,"customOverlayColor":"#3d1f0a","minHeight":420,"minHeightUnit":"px","isDark":true,"align":"full","layout":{"type":"constrained"}} -->
+<div class="wp-block-cover alignfull" style="min-height:420px">
+<span aria-hidden="true" class="wp-block-cover__background has-background-dim-100 has-background-dim" style="background-color:#3d1f0a"></span>
+<div class="wp-block-cover__inner-container">
+
+<!-- wp:paragraph {"align":"center","style":{"typography":{"fontSize":"0.78rem","letterSpacing":"0.1em","textTransform":"uppercase"}},"textColor":"pale-cyan-blue"} -->
+<p class="has-text-align-center has-pale-cyan-blue-color has-text-color" style="font-size:.78rem;letter-spacing:.1em;text-transform:uppercase">Digitale Heldenverwaltung</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:heading {"textAlign":"center","level":1,"textColor":"white"} -->
+<h1 class="wp-block-heading has-text-align-center has-white-color has-text-color">Das Heldenregister</h1>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph {"align":"center","style":{"typography":{"fontSize":"1.1rem"}},"textColor":"white"} -->
+<p class="has-text-align-center has-white-color has-text-color" style="font-size:1.1rem">Die zentrale Plattform für LARP-Projekte – von der Heldenerschaffung über die Abenteueranmeldung bis zum Feedback nach dem Event.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:spacer {"height":"24px"} -->
+<div style="height:24px" aria-hidden="true" class="wp-block-spacer"></div>
+<!-- /wp:spacer -->
+
+<!-- wp:image {"sizeSlug":"full","align":"center","style":{"border":{"radius":"10px"}}} -->
+<figure class="wp-block-image aligncenter size-full" style="border-radius:10px"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='1100' height='460'%3E%3Crect fill='%23e8d5b7' width='1100' height='460'/%3E%3Crect x='4' y='4' width='1092' height='452' fill='none' stroke='%23b8976a' stroke-width='2' stroke-dasharray='8'/%3E%3Ctext x='550' y='222' text-anchor='middle' font-family='sans-serif' font-size='20' fill='%237c5a35'%3EBild einfuegen%3C/text%3E%3Ctext x='550' y='250' text-anchor='middle' font-family='sans-serif' font-size='13' fill='%23a07850'%3EScreenshot Dashboard oder Startseite - 1100 x 460 px%3C/text%3E%3C/svg%3E" alt="Platzhalter: Screenshot des Dashboards"/><figcaption class="wp-element-caption">📷 Bild ersetzen: Screenshot des Dashboards / Startseite (1100 × 460 px)</figcaption></figure>
+<!-- /wp:image -->
+
+</div>
+</div>
+<!-- /wp:cover -->
+
+
+<!-- ═══════════════════════════════════════════════
+     EINLEITUNG
+═══════════════════════════════════════════════ -->
+<!-- wp:group {"layout":{"type":"constrained"}} -->
+<div class="wp-block-group">
+
+<!-- wp:media-text {"mediaPosition":"right","mediaType":"image","isStackedOnMobile":true} -->
+<div class="wp-block-media-text alignwide has-media-on-the-right is-stacked-on-mobile">
+<div class="wp-block-media-text__content">
+<!-- wp:paragraph {"className":"hr-section-label"} -->
+<p class="hr-section-label">Was ist das Heldenregister?</p>
+<!-- /wp:paragraph -->
+<!-- wp:heading -->
+<h2 class="wp-block-heading">Ein Portal für Abenteurer, Eltern und Teamer</h2>
+<!-- /wp:heading -->
+<!-- wp:paragraph -->
+<p>Das Heldenregister ist eine speziell entwickelte Webanwendung für Kinder- und Jugend-LARP-Projekte. Es bündelt alles, was für die Durchführung von Rollenspielevent-Projekten gebraucht wird: Helden, Abenteuer, Fähigkeiten und Kommunikation – an einem Ort.</p>
+<!-- /wp:paragraph -->
+<!-- wp:paragraph -->
+<p>Teilnehmer legen ihren Charakter an, entwickeln ihn über Abenteuer weiter und behalten jederzeit den Überblick über Erfahrungspunkte und Fähigkeiten. Projektleitungen verwalten Events, Anmeldungen und Teilnehmerdaten sicher und DSGVO-konform.</p>
+<!-- /wp:paragraph -->
+</div>
+<figure class="wp-block-media-text__media"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='700' height='400'%3E%3Crect fill='%23e8d5b7' width='700' height='400'/%3E%3Crect x='4' y='4' width='692' height='392' fill='none' stroke='%23b8976a' stroke-width='2' stroke-dasharray='8'/%3E%3Ctext x='350' y='193' text-anchor='middle' font-family='sans-serif' font-size='18' fill='%237c5a35'%3EBild einfuegen%3C/text%3E%3Ctext x='350' y='218' text-anchor='middle' font-family='sans-serif' font-size='12' fill='%23a07850'%3EStimmungsbild LARP-Gruppe - 700 x 400 px%3C/text%3E%3C/svg%3E" alt="Platzhalter: Stimmungsbild LARP-Gruppe"/></figure>
+</div>
+<!-- /wp:media-text -->
+
+</div>
+<!-- /wp:group -->
+
+<!-- wp:separator -->
+<hr class="wp-block-separator has-alpha-channel-opacity"/>
+<!-- /wp:separator -->
+
+
+<!-- ═══════════════════════════════════════════════
+     FEATURE-KARTEN
+═══════════════════════════════════════════════ -->
+<!-- wp:group {"align":"full","style":{"color":{"background":"#f5ece0"}},"layout":{"type":"constrained"}} -->
+<div class="wp-block-group alignfull has-background" style="background-color:#f5ece0">
+
+<!-- wp:paragraph {"align":"center","className":"hr-section-label"} -->
+<p class="has-text-align-center hr-section-label">Module &amp; Funktionen</p>
+<!-- /wp:paragraph -->
+<!-- wp:heading {"textAlign":"center"} -->
+<h2 class="wp-block-heading has-text-align-center">Alles in einem Portal</h2>
+<!-- /wp:heading -->
+<!-- wp:paragraph {"align":"center"} -->
+<p class="has-text-align-center">Von der Charaktererschaffung bis zum After-Event-Feedback – das Heldenregister begleitet jedes Abenteuer vollständig.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:spacer {"height":"2rem"} -->
+<div style="height:2rem" aria-hidden="true" class="wp-block-spacer"></div>
+<!-- /wp:spacer -->
+
+<!-- Karten-Reihe 1 -->
+<!-- wp:columns {"isStackedOnMobile":true} -->
+<div class="wp-block-columns">
+
+<!-- wp:column -->
+<div class="wp-block-column">
+<!-- wp:group {"className":"hr-feature-card","style":{"color":{"background":"#ffffff"},"spacing":{"padding":{"all":"1.5rem"}}},"layout":{"type":"flow"}} -->
+<div class="wp-block-group hr-feature-card" style="background-color:#ffffff;padding:1.5rem">
+<!-- wp:paragraph {"style":{"typography":{"fontSize":"2rem"}}} --><p style="font-size:2rem">🧙</p><!-- /wp:paragraph -->
+<!-- wp:heading {"level":3} --><h3 class="wp-block-heading">Heldenverwaltung</h3><!-- /wp:heading -->
+<!-- wp:paragraph {"style":{"typography":{"fontSize":"0.93rem"}}} --><p style="font-size:.93rem">Jeder Teilnehmer erstellt seinen eigenen Helden mit Name, Klasse und Hintergrundgeschichte. Der Held entwickelt sich über Abenteuer weiter und wächst mit dem Spieler.</p><!-- /wp:paragraph -->
+</div>
+<!-- /wp:group -->
+</div>
+<!-- /wp:column -->
+
+<!-- wp:column -->
+<div class="wp-block-column">
+<!-- wp:group {"className":"hr-feature-card","style":{"color":{"background":"#ffffff"},"spacing":{"padding":{"all":"1.5rem"}}},"layout":{"type":"flow"}} -->
+<div class="wp-block-group hr-feature-card" style="background-color:#ffffff;padding:1.5rem">
+<!-- wp:paragraph {"style":{"typography":{"fontSize":"2rem"}}} --><p style="font-size:2rem">🗺️</p><!-- /wp:paragraph -->
+<!-- wp:heading {"level":3} --><h3 class="wp-block-heading">Abenteuer &amp; Anmeldung</h3><!-- /wp:heading -->
+<!-- wp:paragraph {"style":{"typography":{"fontSize":"0.93rem"}}} --><p style="font-size:.93rem">Events werden mit Datum, Ort, Altersgrenzen und Teilnahmegebühr angelegt. Teilnehmer melden sich direkt im Portal an – inklusive automatischer Warteliste und Bestätigungs-E-Mail.</p><!-- /wp:paragraph -->
+</div>
+<!-- /wp:group -->
+</div>
+<!-- /wp:column -->
+
+<!-- wp:column -->
+<div class="wp-block-column">
+<!-- wp:group {"className":"hr-feature-card","style":{"color":{"background":"#ffffff"},"spacing":{"padding":{"all":"1.5rem"}}},"layout":{"type":"flow"}} -->
+<div class="wp-block-group hr-feature-card" style="background-color:#ffffff;padding:1.5rem">
+<!-- wp:paragraph {"style":{"typography":{"fontSize":"2rem"}}} --><p style="font-size:2rem">⚡</p><!-- /wp:paragraph -->
+<!-- wp:heading {"level":3} --><h3 class="wp-block-heading">Skillsystem</h3><!-- /wp:heading -->
+<!-- wp:paragraph {"style":{"typography":{"fontSize":"0.93rem"}}} --><p style="font-size:.93rem">Fähigkeiten sind in einem Skillbaum organisiert. Helden schalten durch Erfahrungspunkte neue Fähigkeiten frei und spezialisieren sich in verschiedene Klassen.</p><!-- /wp:paragraph -->
+</div>
+<!-- /wp:group -->
+</div>
+<!-- /wp:column -->
+
+<!-- wp:column -->
+<div class="wp-block-column">
+<!-- wp:group {"className":"hr-feature-card","style":{"color":{"background":"#ffffff"},"spacing":{"padding":{"all":"1.5rem"}}},"layout":{"type":"flow"}} -->
+<div class="wp-block-group hr-feature-card" style="background-color:#ffffff;padding:1.5rem">
+<!-- wp:paragraph {"style":{"typography":{"fontSize":"2rem"}}} --><p style="font-size:2rem">🏆</p><!-- /wp:paragraph -->
+<!-- wp:heading {"level":3} --><h3 class="wp-block-heading">Erfahrungspunkte (EP)</h3><!-- /wp:heading -->
+<!-- wp:paragraph {"style":{"typography":{"fontSize":"0.93rem"}}} --><p style="font-size:.93rem">Jedes absolvierte Abenteuer bringt EP. Die Projektleitung kann Punkte vergeben, anpassen und nachvollziehen. Alle Transaktionen sind transparent protokolliert.</p><!-- /wp:paragraph -->
+</div>
+<!-- /wp:group -->
+</div>
+<!-- /wp:column -->
+
+</div>
+<!-- /wp:columns -->
+
+<!-- wp:spacer {"height":"1rem"} -->
+<div style="height:1rem" aria-hidden="true" class="wp-block-spacer"></div>
+<!-- /wp:spacer -->
+
+<!-- Karten-Reihe 2 -->
+<!-- wp:columns {"isStackedOnMobile":true} -->
+<div class="wp-block-columns">
+
+<!-- wp:column -->
+<div class="wp-block-column">
+<!-- wp:group {"className":"hr-feature-card","style":{"color":{"background":"#ffffff"},"spacing":{"padding":{"all":"1.5rem"}}},"layout":{"type":"flow"}} -->
+<div class="wp-block-group hr-feature-card" style="background-color:#ffffff;padding:1.5rem">
+<!-- wp:paragraph {"style":{"typography":{"fontSize":"2rem"}}} --><p style="font-size:2rem">📋</p><!-- /wp:paragraph -->
+<!-- wp:heading {"level":3} --><h3 class="wp-block-heading">Umfragen &amp; Feedback</h3><!-- /wp:heading -->
+<!-- wp:paragraph {"style":{"typography":{"fontSize":"0.93rem"}}} --><p style="font-size:.93rem">Nach jedem Event erhalten Teilnehmer einen altersgerechten Feedbackbogen. Kinder, Jugendliche und Teamer beantworten jeweils angepasste Fragen – anonym auswertbar.</p><!-- /wp:paragraph -->
+</div>
+<!-- /wp:group -->
+</div>
+<!-- /wp:column -->
+
+<!-- wp:column -->
+<div class="wp-block-column">
+<!-- wp:group {"className":"hr-feature-card","style":{"color":{"background":"#ffffff"},"spacing":{"padding":{"all":"1.5rem"}}},"layout":{"type":"flow"}} -->
+<div class="wp-block-group hr-feature-card" style="background-color:#ffffff;padding:1.5rem">
+<!-- wp:paragraph {"style":{"typography":{"fontSize":"2rem"}}} --><p style="font-size:2rem">🛡️</p><!-- /wp:paragraph -->
+<!-- wp:heading {"level":3} --><h3 class="wp-block-heading">Teamerverwaltung</h3><!-- /wp:heading -->
+<!-- wp:paragraph {"style":{"typography":{"fontSize":"0.93rem"}}} --><p style="font-size:.93rem">Teamer melden sich zu Events an, werden ihrer Rolle zugewiesen und erhalten alle relevanten Informationen. Spielleiter und Eventleiter sind direkt im System hinterlegt.</p><!-- /wp:paragraph -->
+</div>
+<!-- /wp:group -->
+</div>
+<!-- /wp:column -->
+
+<!-- wp:column -->
+<div class="wp-block-column">
+<!-- wp:group {"className":"hr-feature-card","style":{"color":{"background":"#ffffff"},"spacing":{"padding":{"all":"1.5rem"}}},"layout":{"type":"flow"}} -->
+<div class="wp-block-group hr-feature-card" style="background-color:#ffffff;padding:1.5rem">
+<!-- wp:paragraph {"style":{"typography":{"fontSize":"2rem"}}} --><p style="font-size:2rem">👪</p><!-- /wp:paragraph -->
+<!-- wp:heading {"level":3} --><h3 class="wp-block-heading">Eltern &amp; Betreuer</h3><!-- /wp:heading -->
+<!-- wp:paragraph {"style":{"typography":{"fontSize":"0.93rem"}}} --><p style="font-size:.93rem">Eltern verwalten die Spielerprofile ihrer Kinder, stimmen der Teilnahme zu und werden bei Änderungen automatisch per E-Mail informiert. Gesundheitsdaten werden sicher gespeichert.</p><!-- /wp:paragraph -->
+</div>
+<!-- /wp:group -->
+</div>
+<!-- /wp:column -->
+
+<!-- wp:column -->
+<div class="wp-block-column">
+<!-- wp:group {"className":"hr-feature-card","style":{"color":{"background":"#ffffff"},"spacing":{"padding":{"all":"1.5rem"}}},"layout":{"type":"flow"}} -->
+<div class="wp-block-group hr-feature-card" style="background-color:#ffffff;padding:1.5rem">
+<!-- wp:paragraph {"style":{"typography":{"fontSize":"2rem"}}} --><p style="font-size:2rem">⚙️</p><!-- /wp:paragraph -->
+<!-- wp:heading {"level":3} --><h3 class="wp-block-heading">Administration</h3><!-- /wp:heading -->
+<!-- wp:paragraph {"style":{"typography":{"fontSize":"0.93rem"}}} --><p style="font-size:.93rem">Berechtigungsstufen für Admins, Bürokraten und Teamer. Übersichten zu Anmeldungen, Zahlungsständen, Altersstatistiken und QR-Code-Check-in bei Veranstaltungen.</p><!-- /wp:paragraph -->
+</div>
+<!-- /wp:group -->
+</div>
+<!-- /wp:column -->
+
+</div>
+<!-- /wp:columns -->
+
+</div>
+<!-- /wp:group -->
+
+<!-- wp:separator -->
+<hr class="wp-block-separator has-alpha-channel-opacity"/>
+<!-- /wp:separator -->
+
+
+<!-- ═══════════════════════════════════════════════
+     FÜR TEILNEHMER
+═══════════════════════════════════════════════ -->
+<!-- wp:group {"layout":{"type":"constrained"}} -->
+<div class="wp-block-group">
+
+<!-- wp:media-text {"mediaType":"image","isStackedOnMobile":true} -->
+<div class="wp-block-media-text alignwide is-stacked-on-mobile">
+<figure class="wp-block-media-text__media"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='700' height='400'%3E%3Crect fill='%23e8d5b7' width='700' height='400'/%3E%3Crect x='4' y='4' width='692' height='392' fill='none' stroke='%23b8976a' stroke-width='2' stroke-dasharray='8'/%3E%3Ctext x='350' y='193' text-anchor='middle' font-family='sans-serif' font-size='18' fill='%237c5a35'%3EBild einfuegen%3C/text%3E%3Ctext x='350' y='218' text-anchor='middle' font-family='sans-serif' font-size='12' fill='%23a07850'%3EHeldenprofil oder Skillbaum - 700 x 400 px%3C/text%3E%3C/svg%3E" alt="Platzhalter: Heldenprofil"/></figure>
+<div class="wp-block-media-text__content">
+<!-- wp:paragraph {"className":"hr-section-label"} --><p class="hr-section-label">Für Teilnehmer</p><!-- /wp:paragraph -->
+<!-- wp:heading --><h2 class="wp-block-heading">Dein Held. Deine Geschichte.</h2><!-- /wp:heading -->
+<!-- wp:paragraph --><p>Im Heldenregister hast du jederzeit Zugriff auf deinen Charakter, deine Fähigkeiten und alle Abenteuer, an denen du teilgenommen hast.</p><!-- /wp:paragraph -->
+<!-- wp:list {"className":"hr-feature-list"} -->
+<ul class="wp-block-list hr-feature-list">
+<!-- wp:list-item --><li>Heldenerschaffung mit Klasse, Namen und Avatar</li><!-- /wp:list-item -->
+<!-- wp:list-item --><li>Skillbaum – Fähigkeiten freischalten und spezialisieren</li><!-- /wp:list-item -->
+<!-- wp:list-item --><li>Übersicht aller vergangenen und geplanten Abenteuer</li><!-- /wp:list-item -->
+<!-- wp:list-item --><li>Direkte Anmeldung zu neuen Events im Browser oder Handy</li><!-- /wp:list-item -->
+<!-- wp:list-item --><li>Automatische Bestätigung und Erinnerungs-E-Mail</li><!-- /wp:list-item -->
+<!-- wp:list-item --><li>Persönliches Dashboard mit aktuellen Infos</li><!-- /wp:list-item -->
+</ul>
+<!-- /wp:list -->
+</div>
+</div>
+<!-- /wp:media-text -->
+
+</div>
+<!-- /wp:group -->
+
+<!-- wp:separator -->
+<hr class="wp-block-separator has-alpha-channel-opacity"/>
+<!-- /wp:separator -->
+
+
+<!-- ═══════════════════════════════════════════════
+     FÜR ELTERN
+═══════════════════════════════════════════════ -->
+<!-- wp:group {"align":"full","style":{"color":{"background":"#f5ece0"}},"layout":{"type":"constrained"}} -->
+<div class="wp-block-group alignfull has-background" style="background-color:#f5ece0">
+
+<!-- wp:media-text {"mediaPosition":"right","mediaType":"image","isStackedOnMobile":true} -->
+<div class="wp-block-media-text alignwide has-media-on-the-right is-stacked-on-mobile">
+<div class="wp-block-media-text__content">
+<!-- wp:paragraph {"className":"hr-section-label"} --><p class="hr-section-label">Für Eltern &amp; Betreuer</p><!-- /wp:paragraph -->
+<!-- wp:heading --><h2 class="wp-block-heading">Immer informiert und sicher.</h2><!-- /wp:heading -->
+<!-- wp:paragraph --><p>Eltern behalten die Übersicht über die Teilnahme ihrer Kinder – transparent, sicher und ohne Papierkram.</p><!-- /wp:paragraph -->
+<!-- wp:list {"className":"hr-feature-list"} -->
+<ul class="wp-block-list hr-feature-list">
+<!-- wp:list-item --><li>Spielerprofile für eigene Kinder anlegen und verwalten</li><!-- /wp:list-item -->
+<!-- wp:list-item --><li>Anmeldungen zu Events im Namen des Kindes durchführen</li><!-- /wp:list-item -->
+<!-- wp:list-item --><li>E-Mail-Benachrichtigungen bei Bestätigung, Warteliste oder Stornierung</li><!-- /wp:list-item -->
+<!-- wp:list-item --><li>Gesundheitsdaten (Allergien, Medikamente) sicher hinterlegen</li><!-- /wp:list-item -->
+<!-- wp:list-item --><li>DSGVO-konforme Einwilligung zur Foto-Erlaubnis</li><!-- /wp:list-item -->
+<!-- wp:list-item --><li>Ermäßigungsmöglichkeit direkt bei der Anmeldung</li><!-- /wp:list-item -->
+</ul>
+<!-- /wp:list -->
+</div>
+<figure class="wp-block-media-text__media"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='700' height='400'%3E%3Crect fill='%23e8d5b7' width='700' height='400'/%3E%3Crect x='4' y='4' width='692' height='392' fill='none' stroke='%23b8976a' stroke-width='2' stroke-dasharray='8'/%3E%3Ctext x='350' y='193' text-anchor='middle' font-family='sans-serif' font-size='18' fill='%237c5a35'%3EBild einfuegen%3C/text%3E%3Ctext x='350' y='218' text-anchor='middle' font-family='sans-serif' font-size='12' fill='%23a07850'%3ESpielerprofile oder Anmeldung - 700 x 400 px%3C/text%3E%3C/svg%3E" alt="Platzhalter: Spielerprofil"/></figure>
+</div>
+<!-- /wp:media-text -->
+
+</div>
+<!-- /wp:group -->
+
+<!-- wp:separator -->
+<hr class="wp-block-separator has-alpha-channel-opacity"/>
+<!-- /wp:separator -->
+
+
+<!-- ═══════════════════════════════════════════════
+     FÜR PROJEKTLEITUNG
+═══════════════════════════════════════════════ -->
+<!-- wp:group {"layout":{"type":"constrained"}} -->
+<div class="wp-block-group">
+
+<!-- wp:media-text {"mediaType":"image","isStackedOnMobile":true} -->
+<div class="wp-block-media-text alignwide is-stacked-on-mobile">
+<figure class="wp-block-media-text__media"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='700' height='400'%3E%3Crect fill='%23e8d5b7' width='700' height='400'/%3E%3Crect x='4' y='4' width='692' height='392' fill='none' stroke='%23b8976a' stroke-width='2' stroke-dasharray='8'/%3E%3Ctext x='350' y='193' text-anchor='middle' font-family='sans-serif' font-size='18' fill='%237c5a35'%3EBild einfuegen%3C/text%3E%3Ctext x='350' y='218' text-anchor='middle' font-family='sans-serif' font-size='12' fill='%23a07850'%3EVerwaltungsansicht Teilnehmerliste - 700 x 400 px%3C/text%3E%3C/svg%3E" alt="Platzhalter: Verwaltungsansicht"/></figure>
+<div class="wp-block-media-text__content">
+<!-- wp:paragraph {"className":"hr-section-label"} --><p class="hr-section-label">Für die Projektleitung</p><!-- /wp:paragraph -->
+<!-- wp:heading --><h2 class="wp-block-heading">Veranstaltungen professionell verwalten.</h2><!-- /wp:heading -->
+<!-- wp:paragraph --><p>Das Heldenregister nimmt der Projektleitung den organisatorischen Aufwand ab – von der Planung über die Durchführung bis zur Auswertung.</p><!-- /wp:paragraph -->
+<!-- wp:list {"className":"hr-feature-list"} -->
+<ul class="wp-block-list hr-feature-list">
+<!-- wp:list-item --><li>Abenteuer mit Ort, Datum, Altersgrenzen und Kapazität anlegen</li><!-- /wp:list-item -->
+<!-- wp:list-item --><li>Anmeldungen bestätigen, Warteliste verwalten, QR-Check-in</li><!-- /wp:list-item -->
+<!-- wp:list-item --><li>Zahlungsstände im Blick – bezahlt / offen auf einen Blick</li><!-- /wp:list-item -->
+<!-- wp:list-item --><li>Teilnehmerlisten als PDF exportieren</li><!-- /wp:list-item -->
+<!-- wp:list-item --><li>Feedback-Umfragen erstellen und anonym auswerten</li><!-- /wp:list-item -->
+<!-- wp:list-item --><li>Berechtigungsrollen für Teamer, Bürokrat und Admin</li><!-- /wp:list-item -->
+</ul>
+<!-- /wp:list -->
+</div>
+</div>
+<!-- /wp:media-text -->
+
+</div>
+<!-- /wp:group -->
+
+
+<!-- ═══════════════════════════════════════════════
+     ZIELGRUPPEN (dunkel)
+═══════════════════════════════════════════════ -->
+<!-- wp:group {"className":"hr-dark-section","align":"full","style":{"color":{"background":"#3d1f0a","text":"#f5ddb0"}},"layout":{"type":"constrained"}} -->
+<div class="wp-block-group alignfull hr-dark-section has-background has-text-color" style="background-color:#3d1f0a;color:#f5ddb0">
+
+<!-- wp:paragraph {"align":"center","className":"hr-section-label"} --><p class="has-text-align-center hr-section-label">Für wen?</p><!-- /wp:paragraph -->
+<!-- wp:heading {"textAlign":"center","textColor":"white"} --><h2 class="wp-block-heading has-text-align-center has-white-color has-text-color">Ein Portal – viele Nutzergruppen</h2><!-- /wp:heading -->
+
+<!-- wp:spacer {"height":"2rem"} -->
+<div style="height:2rem" aria-hidden="true" class="wp-block-spacer"></div>
+<!-- /wp:spacer -->
+
+<!-- wp:columns {"isStackedOnMobile":true} -->
+<div class="wp-block-columns">
+
+<!-- wp:column -->
+<div class="wp-block-column">
+<!-- wp:group {"className":"hr-audience-card","style":{"spacing":{"padding":{"all":"1.5rem"}}},"layout":{"type":"flow"}} -->
+<div class="wp-block-group hr-audience-card" style="padding:1.5rem">
+<!-- wp:paragraph {"align":"center","style":{"typography":{"fontSize":"2.2rem"}}} --><p class="has-text-align-center" style="font-size:2.2rem">🧒</p><!-- /wp:paragraph -->
+<!-- wp:heading {"textAlign":"center","level":3,"textColor":"white"} --><h3 class="wp-block-heading has-text-align-center has-white-color has-text-color">Kinder &amp; Jugendliche</h3><!-- /wp:heading -->
+<!-- wp:paragraph {"align":"center","style":{"typography":{"fontSize":"0.9rem"}},"textColor":"white"} --><p class="has-text-align-center has-white-color has-text-color" style="font-size:.9rem">Erschaffen ihren Helden, melden sich zu Abenteuern an und entwickeln ihre Fähigkeiten weiter.</p><!-- /wp:paragraph -->
+</div>
+<!-- /wp:group -->
+</div>
+<!-- /wp:column -->
+
+<!-- wp:column -->
+<div class="wp-block-column">
+<!-- wp:group {"className":"hr-audience-card","style":{"spacing":{"padding":{"all":"1.5rem"}}},"layout":{"type":"flow"}} -->
+<div class="wp-block-group hr-audience-card" style="padding:1.5rem">
+<!-- wp:paragraph {"align":"center","style":{"typography":{"fontSize":"2.2rem"}}} --><p class="has-text-align-center" style="font-size:2.2rem">👨‍👩‍👧</p><!-- /wp:paragraph -->
+<!-- wp:heading {"textAlign":"center","level":3,"textColor":"white"} --><h3 class="wp-block-heading has-text-align-center has-white-color has-text-color">Eltern &amp; Betreuer</h3><!-- /wp:heading -->
+<!-- wp:paragraph {"align":"center","style":{"typography":{"fontSize":"0.9rem"}},"textColor":"white"} --><p class="has-text-align-center has-white-color has-text-color" style="font-size:.9rem">Verwalten die Profile ihrer Kinder, erteilen Einwilligungen und bleiben stets informiert.</p><!-- /wp:paragraph -->
+</div>
+<!-- /wp:group -->
+</div>
+<!-- /wp:column -->
+
+<!-- wp:column -->
+<div class="wp-block-column">
+<!-- wp:group {"className":"hr-audience-card","style":{"spacing":{"padding":{"all":"1.5rem"}}},"layout":{"type":"flow"}} -->
+<div class="wp-block-group hr-audience-card" style="padding:1.5rem">
+<!-- wp:paragraph {"align":"center","style":{"typography":{"fontSize":"2.2rem"}}} --><p class="has-text-align-center" style="font-size:2.2rem">🛡️</p><!-- /wp:paragraph -->
+<!-- wp:heading {"textAlign":"center","level":3,"textColor":"white"} --><h3 class="wp-block-heading has-text-align-center has-white-color has-text-color">Teamer &amp; Spielleiter</h3><!-- /wp:heading -->
+<!-- wp:paragraph {"align":"center","style":{"typography":{"fontSize":"0.9rem"}},"textColor":"white"} --><p class="has-text-align-center has-white-color has-text-color" style="font-size:.9rem">Melden sich zu Events an, erhalten Teilnehmerlisten und koordinieren die Durchführung.</p><!-- /wp:paragraph -->
+</div>
+<!-- /wp:group -->
+</div>
+<!-- /wp:column -->
+
+<!-- wp:column -->
+<div class="wp-block-column">
+<!-- wp:group {"className":"hr-audience-card","style":{"spacing":{"padding":{"all":"1.5rem"}}},"layout":{"type":"flow"}} -->
+<div class="wp-block-group hr-audience-card" style="padding:1.5rem">
+<!-- wp:paragraph {"align":"center","style":{"typography":{"fontSize":"2.2rem"}}} --><p class="has-text-align-center" style="font-size:2.2rem">⚙️</p><!-- /wp:paragraph -->
+<!-- wp:heading {"textAlign":"center","level":3,"textColor":"white"} --><h3 class="wp-block-heading has-text-align-center has-white-color has-text-color">Projektleitung</h3><!-- /wp:heading -->
+<!-- wp:paragraph {"align":"center","style":{"typography":{"fontSize":"0.9rem"}},"textColor":"white"} --><p class="has-text-align-center has-white-color has-text-color" style="font-size:.9rem">Plant und verwaltet alle Events, behält Zahlungen im Blick und wertet Feedback aus.</p><!-- /wp:paragraph -->
+</div>
+<!-- /wp:group -->
+</div>
+<!-- /wp:column -->
+
+</div>
+<!-- /wp:columns -->
+
+</div>
+<!-- /wp:group -->
+
+
+<!-- ═══════════════════════════════════════════════
+     ABLAUF (5 Schritte)
+═══════════════════════════════════════════════ -->
+<!-- wp:group {"align":"full","style":{"color":{"background":"#f5ece0"}},"layout":{"type":"constrained"}} -->
+<div class="wp-block-group alignfull has-background" style="background-color:#f5ece0">
+
+<!-- wp:paragraph {"align":"center","className":"hr-section-label"} --><p class="has-text-align-center hr-section-label">Ablauf</p><!-- /wp:paragraph -->
+<!-- wp:heading {"textAlign":"center"} --><h2 class="wp-block-heading has-text-align-center">Von der Anmeldung bis zur Auswertung</h2><!-- /wp:heading -->
+
+<!-- wp:spacer {"height":"2rem"} -->
+<div style="height:2rem" aria-hidden="true" class="wp-block-spacer"></div>
+<!-- /wp:spacer -->
+
+<!-- wp:columns {"isStackedOnMobile":true} -->
+<div class="wp-block-columns">
+
+<!-- wp:column -->
+<div class="wp-block-column">
+<!-- wp:group {"className":"hr-step-card","style":{"color":{"background":"#ffffff"},"spacing":{"padding":{"all":"1.25rem"}}},"layout":{"type":"flow"}} -->
+<div class="wp-block-group hr-step-card" style="background-color:#ffffff;padding:1.25rem">
+<!-- wp:heading {"level":3,"style":{"typography":{"fontSize":"1rem"}}} --><h3 class="wp-block-heading" style="font-size:1rem">1 · Abenteuer veröffentlicht</h3><!-- /wp:heading -->
+<!-- wp:paragraph {"style":{"typography":{"fontSize":"0.88rem"}}} --><p style="font-size:.88rem">Die Projektleitung legt das Event mit allen Details an: Datum, Ort, Alterlimits, Teilnehmerzahl und Beitrag.</p><!-- /wp:paragraph -->
+</div>
+<!-- /wp:group -->
+</div>
+<!-- /wp:column -->
+
+<!-- wp:column -->
+<div class="wp-block-column">
+<!-- wp:group {"className":"hr-step-card","style":{"color":{"background":"#ffffff"},"spacing":{"padding":{"all":"1.25rem"}}},"layout":{"type":"flow"}} -->
+<div class="wp-block-group hr-step-card" style="background-color:#ffffff;padding:1.25rem">
+<!-- wp:heading {"level":3,"style":{"typography":{"fontSize":"1rem"}}} --><h3 class="wp-block-heading" style="font-size:1rem">2 · Anmeldung der Teilnehmer</h3><!-- /wp:heading -->
+<!-- wp:paragraph {"style":{"typography":{"fontSize":"0.88rem"}}} --><p style="font-size:.88rem">Eltern oder Jugendliche melden sich direkt im Portal an. Bei voller Teilnehmerzahl: automatische Warteliste.</p><!-- /wp:paragraph -->
+</div>
+<!-- /wp:group -->
+</div>
+<!-- /wp:column -->
+
+<!-- wp:column -->
+<div class="wp-block-column">
+<!-- wp:group {"className":"hr-step-card","style":{"color":{"background":"#ffffff"},"spacing":{"padding":{"all":"1.25rem"}}},"layout":{"type":"flow"}} -->
+<div class="wp-block-group hr-step-card" style="background-color:#ffffff;padding:1.25rem">
+<!-- wp:heading {"level":3,"style":{"typography":{"fontSize":"1rem"}}} --><h3 class="wp-block-heading" style="font-size:1rem">3 · Durchführung &amp; Check-in</h3><!-- /wp:heading -->
+<!-- wp:paragraph {"style":{"typography":{"fontSize":"0.88rem"}}} --><p style="font-size:.88rem">Teamer prüfen Teilnehmer per QR-Code ein. Alle Rollen und Informationen sind zentral abrufbar.</p><!-- /wp:paragraph -->
+</div>
+<!-- /wp:group -->
+</div>
+<!-- /wp:column -->
+
+<!-- wp:column -->
+<div class="wp-block-column">
+<!-- wp:group {"className":"hr-step-card","style":{"color":{"background":"#ffffff"},"spacing":{"padding":{"all":"1.25rem"}}},"layout":{"type":"flow"}} -->
+<div class="wp-block-group hr-step-card" style="background-color:#ffffff;padding:1.25rem">
+<!-- wp:heading {"level":3,"style":{"typography":{"fontSize":"1rem"}}} --><h3 class="wp-block-heading" style="font-size:1rem">4 · EP-Vergabe</h3><!-- /wp:heading -->
+<!-- wp:paragraph {"style":{"typography":{"fontSize":"0.88rem"}}} --><p style="font-size:.88rem">Die Spielleitung vergibt Erfahrungspunkte. Helden entwickeln sich weiter, neue Fähigkeiten werden freigeschaltet.</p><!-- /wp:paragraph -->
+</div>
+<!-- /wp:group -->
+</div>
+<!-- /wp:column -->
+
+<!-- wp:column -->
+<div class="wp-block-column">
+<!-- wp:group {"className":"hr-step-card","style":{"color":{"background":"#ffffff"},"spacing":{"padding":{"all":"1.25rem"}}},"layout":{"type":"flow"}} -->
+<div class="wp-block-group hr-step-card" style="background-color:#ffffff;padding:1.25rem">
+<!-- wp:heading {"level":3,"style":{"typography":{"fontSize":"1rem"}}} --><h3 class="wp-block-heading" style="font-size:1rem">5 · Feedback-Umfrage</h3><!-- /wp:heading -->
+<!-- wp:paragraph {"style":{"typography":{"fontSize":"0.88rem"}}} --><p style="font-size:.88rem">Alle Teilnehmer erhalten einen altersgerechten Feedbackbogen. Ergebnisse werden anonym ausgewertet.</p><!-- /wp:paragraph -->
+</div>
+<!-- /wp:group -->
+</div>
+<!-- /wp:column -->
+
+</div>
+<!-- /wp:columns -->
+
+</div>
+<!-- /wp:group -->
+
+
+<!-- ═══════════════════════════════════════════════
+     SCREENSHOT-GALERIE
+═══════════════════════════════════════════════ -->
+<!-- wp:group {"layout":{"type":"constrained"}} -->
+<div class="wp-block-group">
+
+<!-- wp:paragraph {"align":"center","className":"hr-section-label"} --><p class="has-text-align-center hr-section-label">Einblicke</p><!-- /wp:paragraph -->
+<!-- wp:heading {"textAlign":"center"} --><h2 class="wp-block-heading has-text-align-center">Das Portal in der Praxis</h2><!-- /wp:heading -->
+
+<!-- wp:spacer {"height":"2rem"} -->
+<div style="height:2rem" aria-hidden="true" class="wp-block-spacer"></div>
+<!-- /wp:spacer -->
+
+<!-- wp:gallery {"columns":3,"linkTo":"none","sizeSlug":"large"} -->
+<figure class="wp-block-gallery has-nested-images columns-3 is-cropped">
+
+<!-- wp:image {"sizeSlug":"large","linkDestination":"none"} -->
+<figure class="wp-block-image size-large"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='350'%3E%3Crect fill='%23e8d5b7' width='600' height='350'/%3E%3Crect x='4' y='4' width='592' height='342' fill='none' stroke='%23b8976a' stroke-width='2' stroke-dasharray='8'/%3E%3Ctext x='300' y='166' text-anchor='middle' font-family='sans-serif' font-size='16' fill='%237c5a35'%3EBild einfuegen%3C/text%3E%3Ctext x='300' y='188' text-anchor='middle' font-family='sans-serif' font-size='12' fill='%23a07850'%3E600 x 350 px%3C/text%3E%3C/svg%3E" alt="Platzhalter: Dashboard"/><figcaption class="wp-element-caption">Persönliches Dashboard</figcaption></figure>
+<!-- /wp:image -->
+
+<!-- wp:image {"sizeSlug":"large","linkDestination":"none"} -->
+<figure class="wp-block-image size-large"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='350'%3E%3Crect fill='%23e8d5b7' width='600' height='350'/%3E%3Crect x='4' y='4' width='592' height='342' fill='none' stroke='%23b8976a' stroke-width='2' stroke-dasharray='8'/%3E%3Ctext x='300' y='166' text-anchor='middle' font-family='sans-serif' font-size='16' fill='%237c5a35'%3EBild einfuegen%3C/text%3E%3Ctext x='300' y='188' text-anchor='middle' font-family='sans-serif' font-size='12' fill='%23a07850'%3E600 x 350 px%3C/text%3E%3C/svg%3E" alt="Platzhalter: Heldenprofil"/><figcaption class="wp-element-caption">Heldenprofil mit Fähigkeiten</figcaption></figure>
+<!-- /wp:image -->
+
+<!-- wp:image {"sizeSlug":"large","linkDestination":"none"} -->
+<figure class="wp-block-image size-large"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='350'%3E%3Crect fill='%23e8d5b7' width='600' height='350'/%3E%3Crect x='4' y='4' width='592' height='342' fill='none' stroke='%23b8976a' stroke-width='2' stroke-dasharray='8'/%3E%3Ctext x='300' y='166' text-anchor='middle' font-family='sans-serif' font-size='16' fill='%237c5a35'%3EBild einfuegen%3C/text%3E%3Ctext x='300' y='188' text-anchor='middle' font-family='sans-serif' font-size='12' fill='%23a07850'%3E600 x 350 px%3C/text%3E%3C/svg%3E" alt="Platzhalter: Abenteuer-Übersicht"/><figcaption class="wp-element-caption">Abenteuer-Übersicht</figcaption></figure>
+<!-- /wp:image -->
+
+<!-- wp:image {"sizeSlug":"large","linkDestination":"none"} -->
+<figure class="wp-block-image size-large"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='350'%3E%3Crect fill='%23e8d5b7' width='600' height='350'/%3E%3Crect x='4' y='4' width='592' height='342' fill='none' stroke='%23b8976a' stroke-width='2' stroke-dasharray='8'/%3E%3Ctext x='300' y='166' text-anchor='middle' font-family='sans-serif' font-size='16' fill='%237c5a35'%3EBild einfuegen%3C/text%3E%3Ctext x='300' y='188' text-anchor='middle' font-family='sans-serif' font-size='12' fill='%23a07850'%3E600 x 350 px%3C/text%3E%3C/svg%3E" alt="Platzhalter: Teilnehmerverwaltung"/><figcaption class="wp-element-caption">Teilnehmerverwaltung</figcaption></figure>
+<!-- /wp:image -->
+
+<!-- wp:image {"sizeSlug":"large","linkDestination":"none"} -->
+<figure class="wp-block-image size-large"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='350'%3E%3Crect fill='%23e8d5b7' width='600' height='350'/%3E%3Crect x='4' y='4' width='592' height='342' fill='none' stroke='%23b8976a' stroke-width='2' stroke-dasharray='8'/%3E%3Ctext x='300' y='166' text-anchor='middle' font-family='sans-serif' font-size='16' fill='%237c5a35'%3EBild einfuegen%3C/text%3E%3Ctext x='300' y='188' text-anchor='middle' font-family='sans-serif' font-size='12' fill='%23a07850'%3E600 x 350 px%3C/text%3E%3C/svg%3E" alt="Platzhalter: Feedback-Bogen"/><figcaption class="wp-element-caption">Feedback-Bogen nach dem Event</figcaption></figure>
+<!-- /wp:image -->
+
+<!-- wp:image {"sizeSlug":"large","linkDestination":"none"} -->
+<figure class="wp-block-image size-large"><img src="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='600' height='350'%3E%3Crect fill='%23e8d5b7' width='600' height='350'/%3E%3Crect x='4' y='4' width='592' height='342' fill='none' stroke='%23b8976a' stroke-width='2' stroke-dasharray='8'/%3E%3Ctext x='300' y='166' text-anchor='middle' font-family='sans-serif' font-size='16' fill='%237c5a35'%3EBild einfuegen%3C/text%3E%3Ctext x='300' y='188' text-anchor='middle' font-family='sans-serif' font-size='12' fill='%23a07850'%3E600 x 350 px%3C/text%3E%3C/svg%3E" alt="Platzhalter: Mobil-Ansicht"/><figcaption class="wp-element-caption">Optimiert für Smartphone &amp; Tablet</figcaption></figure>
+<!-- /wp:image -->
+
+</figure>
+<!-- /wp:gallery -->
+
+</div>
+<!-- /wp:group -->
+
+
+<!-- ═══════════════════════════════════════════════
+     CTA
+═══════════════════════════════════════════════ -->
+<!-- wp:cover {"dimRatio":100,"customOverlayColor":"#5a3a22","minHeight":320,"minHeightUnit":"px","isDark":true,"align":"full","layout":{"type":"constrained"}} -->
+<div class="wp-block-cover alignfull" style="min-height:320px">
+<span aria-hidden="true" class="wp-block-cover__background has-background-dim-100 has-background-dim" style="background-color:#5a3a22"></span>
+<div class="wp-block-cover__inner-container">
+
+<!-- wp:heading {"textAlign":"center","textColor":"white"} -->
+<h2 class="wp-block-heading has-text-align-center has-white-color has-text-color">Bereit für das nächste Abenteuer?</h2>
+<!-- /wp:heading -->
+
+<!-- wp:paragraph {"align":"center","style":{"typography":{"fontSize":"1.05rem"}},"textColor":"white"} -->
+<p class="has-text-align-center has-white-color has-text-color" style="font-size:1.05rem">Registriere dich jetzt im Heldenregister und bring deinen Helden ins Spiel – oder melde dein nächstes Event an.</p>
+<!-- /wp:paragraph -->
+
+<!-- wp:spacer {"height":"1rem"} -->
+<div style="height:1rem" aria-hidden="true" class="wp-block-spacer"></div>
+<!-- /wp:spacer -->
+
+<!-- wp:buttons {"layout":{"type":"flex","justifyContent":"center"}} -->
+<div class="wp-block-buttons">
+<!-- wp:button -->
+<div class="wp-block-button"><a class="wp-block-button__link wp-element-button" href="#">Jetzt registrieren</a></div>
+<!-- /wp:button -->
+<!-- wp:button {"className":"is-style-outline"} -->
+<div class="wp-block-button is-style-outline"><a class="wp-block-button__link wp-element-button" href="#">Mehr erfahren</a></div>
+<!-- /wp:button -->
+</div>
+<!-- /wp:buttons -->
+
+</div>
+</div>
+<!-- /wp:cover -->

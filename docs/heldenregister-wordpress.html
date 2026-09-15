@@ -1,0 +1,896 @@
+<!DOCTYPE html>
+<html lang="de">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Das Heldenregister – Digitale Verwaltung für LARP-Projekte</title>
+    <style>
+        /* ── Grundlayout ─────────────────────────────────────────────── */
+        *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: 'Georgia', serif;
+            color: #2c1a0e;
+            background: #fdf8f0;
+            line-height: 1.7;
+        }
+
+        .hr-page {
+            max-width: 1100px;
+            margin: 0 auto;
+            padding: 0 1.25rem;
+        }
+
+        /* ── Typographie ─────────────────────────────────────────────── */
+        .hr-h1 {
+            font-size: clamp(2rem, 5vw, 3.2rem);
+            font-weight: 700;
+            line-height: 1.2;
+            color: #3d1f0a;
+        }
+
+        .hr-h2 {
+            font-size: clamp(1.5rem, 3.5vw, 2rem);
+            font-weight: 700;
+            color: #3d1f0a;
+            margin-bottom: 0.5rem;
+        }
+
+        .hr-h3 {
+            font-size: 1.15rem;
+            font-weight: 700;
+            color: #5a3a22;
+            margin-bottom: 0.4rem;
+        }
+
+        .hr-lead {
+            font-size: 1.15rem;
+            color: #5c3d1e;
+            max-width: 680px;
+        }
+
+        /* ── Hero-Banner ─────────────────────────────────────────────── */
+        .hr-hero {
+            background: linear-gradient(135deg, #3d1f0a 0%, #7c4a1e 60%, #a06030 100%);
+            color: #fff;
+            padding: 5rem 1.25rem 4rem;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .hr-hero::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.04'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+        }
+
+        .hr-hero-inner {
+            position: relative;
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .hr-hero-badge {
+            display: inline-block;
+            background: rgba(255,255,255,0.15);
+            border: 1px solid rgba(255,255,255,0.3);
+            border-radius: 999px;
+            padding: 0.3rem 1rem;
+            font-size: 0.85rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            margin-bottom: 1.25rem;
+            color: #f5ddb0;
+        }
+
+        .hr-hero .hr-h1 {
+            color: #fff;
+            margin-bottom: 1rem;
+        }
+
+        .hr-hero-sub {
+            font-size: 1.2rem;
+            color: #f0d9b5;
+            margin-bottom: 2rem;
+            max-width: 600px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        /* ── Bild-Platzhalter ────────────────────────────────────────── */
+        .hr-img-placeholder {
+            background: linear-gradient(135deg, #e8d5b7 0%, #d4b896 100%);
+            border: 2px dashed #b8976a;
+            border-radius: 8px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 0.5rem;
+            color: #7c5a35;
+            font-size: 0.9rem;
+            text-align: center;
+            padding: 1rem;
+        }
+
+        .hr-img-placeholder svg {
+            opacity: 0.5;
+        }
+
+        .hr-hero-img {
+            max-width: 900px;
+            margin: 2rem auto 0;
+            height: 420px;
+            border-radius: 12px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.4);
+            font-size: 1rem;
+        }
+
+        /* ── Sektions-Abstand ────────────────────────────────────────── */
+        .hr-section {
+            padding: 4.5rem 0;
+        }
+
+        .hr-section-alt {
+            background: #f5ece0;
+        }
+
+        .hr-section-dark {
+            background: #3d1f0a;
+            color: #f5ddb0;
+        }
+
+        .hr-section-dark .hr-h2 {
+            color: #f5ddb0;
+        }
+
+        .hr-section-dark .hr-h3 {
+            color: #e8c88a;
+        }
+
+        .hr-section-dark p {
+            color: #d4b896;
+        }
+
+        .hr-section-header {
+            text-align: center;
+            margin-bottom: 3rem;
+        }
+
+        .hr-section-header .hr-h2 {
+            margin-bottom: 0.75rem;
+        }
+
+        .hr-section-label {
+            display: inline-block;
+            font-size: 0.78rem;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: #9b6a35;
+            font-family: sans-serif;
+            margin-bottom: 0.5rem;
+        }
+
+        .hr-section-dark .hr-section-label {
+            color: #c8a060;
+        }
+
+        /* ── Feature-Karten ──────────────────────────────────────────── */
+        .hr-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+            gap: 1.5rem;
+        }
+
+        .hr-card {
+            background: #fff;
+            border: 1px solid #ddc99a;
+            border-radius: 10px;
+            padding: 1.75rem;
+            transition: box-shadow 0.2s, transform 0.2s;
+        }
+
+        .hr-card:hover {
+            box-shadow: 0 8px 24px rgba(90,50,10,0.12);
+            transform: translateY(-2px);
+        }
+
+        .hr-card-icon {
+            width: 48px;
+            height: 48px;
+            background: linear-gradient(135deg, #7c4a1e, #a06030);
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-bottom: 1rem;
+            font-size: 1.4rem;
+        }
+
+        /* ── Zweispaltig (Text + Bild) ───────────────────────────────── */
+        .hr-split {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3.5rem;
+            align-items: center;
+        }
+
+        .hr-split.hr-split-reverse {
+            direction: rtl;
+        }
+
+        .hr-split.hr-split-reverse > * {
+            direction: ltr;
+        }
+
+        .hr-split-img {
+            height: 320px;
+            border-radius: 10px;
+        }
+
+        .hr-split-text p {
+            color: #5c3d1e;
+            margin-bottom: 1rem;
+        }
+
+        .hr-split-text ul {
+            list-style: none;
+            padding: 0;
+        }
+
+        .hr-split-text ul li {
+            padding: 0.4rem 0 0.4rem 1.6rem;
+            position: relative;
+            color: #5c3d1e;
+            font-size: 0.97rem;
+        }
+
+        .hr-split-text ul li::before {
+            content: '⚔';
+            position: absolute;
+            left: 0;
+            font-size: 0.85rem;
+            top: 0.45rem;
+        }
+
+        /* ── Zielgruppen-Badges ──────────────────────────────────────── */
+        .hr-audience {
+            display: flex;
+            gap: 1.5rem;
+            flex-wrap: wrap;
+            margin-top: 2.5rem;
+            justify-content: center;
+        }
+
+        .hr-audience-item {
+            background: rgba(255,255,255,0.08);
+            border: 1px solid rgba(255,255,255,0.2);
+            border-radius: 12px;
+            padding: 1.5rem 2rem;
+            text-align: center;
+            flex: 1;
+            min-width: 200px;
+            max-width: 280px;
+        }
+
+        .hr-audience-item .hr-audience-icon {
+            font-size: 2.2rem;
+            margin-bottom: 0.6rem;
+        }
+
+        .hr-audience-item strong {
+            display: block;
+            color: #f5ddb0;
+            font-size: 1rem;
+            margin-bottom: 0.4rem;
+        }
+
+        .hr-audience-item p {
+            font-size: 0.88rem;
+        }
+
+        /* ── Prozess-Schritte ────────────────────────────────────────── */
+        .hr-steps {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+            gap: 1rem;
+            counter-reset: steps;
+        }
+
+        .hr-step {
+            background: #fff;
+            border-radius: 10px;
+            padding: 1.5rem;
+            border: 1px solid #ddc99a;
+            position: relative;
+            padding-top: 2.5rem;
+        }
+
+        .hr-step::before {
+            counter-increment: steps;
+            content: counter(steps);
+            position: absolute;
+            top: -1px;
+            left: 1.25rem;
+            background: #7c4a1e;
+            color: #fff;
+            width: 2rem;
+            height: 2rem;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.85rem;
+            font-weight: 700;
+            font-family: sans-serif;
+        }
+
+        /* ── Screenshot-Galerie ──────────────────────────────────────── */
+        .hr-gallery {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+            gap: 1.25rem;
+        }
+
+        .hr-gallery-item {
+            border-radius: 8px;
+            overflow: hidden;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+        }
+
+        .hr-gallery-img {
+            height: 200px;
+            border-radius: 8px;
+        }
+
+        .hr-gallery-caption {
+            font-size: 0.85rem;
+            color: #7c5a35;
+            margin-top: 0.5rem;
+            text-align: center;
+            font-family: sans-serif;
+        }
+
+        /* ── Trennlinie ──────────────────────────────────────────────── */
+        .hr-divider {
+            border: none;
+            border-top: 2px solid #ddc99a;
+            margin: 0;
+        }
+
+        /* ── CTA-Bereich ─────────────────────────────────────────────── */
+        .hr-cta {
+            background: linear-gradient(135deg, #5a3a22 0%, #7c4a1e 100%);
+            color: #fff;
+            text-align: center;
+            padding: 4rem 1.25rem;
+        }
+
+        .hr-cta .hr-h2 {
+            color: #fff;
+            margin-bottom: 1rem;
+        }
+
+        .hr-cta p {
+            color: #f0d9b5;
+            font-size: 1.1rem;
+            max-width: 560px;
+            margin: 0 auto 2rem;
+        }
+
+        .hr-btn {
+            display: inline-block;
+            background: #c8860a;
+            color: #fff;
+            padding: 0.85rem 2rem;
+            border-radius: 6px;
+            text-decoration: none;
+            font-weight: 700;
+            font-family: sans-serif;
+            font-size: 1rem;
+            transition: background 0.2s;
+        }
+
+        .hr-btn:hover {
+            background: #a06030;
+        }
+
+        .hr-btn-outline {
+            background: transparent;
+            border: 2px solid rgba(255,255,255,0.5);
+            margin-left: 1rem;
+        }
+
+        .hr-btn-outline:hover {
+            background: rgba(255,255,255,0.1);
+        }
+
+        /* ── Responsive ──────────────────────────────────────────────── */
+        @media (max-width: 768px) {
+            .hr-split, .hr-split.hr-split-reverse {
+                grid-template-columns: 1fr;
+                direction: ltr;
+                gap: 2rem;
+            }
+
+            .hr-btn-outline {
+                margin-left: 0;
+                margin-top: 0.75rem;
+            }
+
+            .hr-hero-img {
+                height: 220px;
+            }
+
+            .hr-split-img {
+                height: 220px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════════════════════
+     HERO-BANNER
+══════════════════════════════════════════════════════════════════ -->
+<section class="hr-hero">
+    <div class="hr-hero-inner">
+        <span class="hr-hero-badge">Digitale Heldenverwaltung</span>
+        <h1 class="hr-h1">Das Heldenregister</h1>
+        <p class="hr-hero-sub">
+            Die zentrale Plattform für LARP-Projekte – von der Heldenerschaffung
+            über die Abenteueranmeldung bis zum Feedback nach dem Event.
+        </p>
+    </div>
+
+    <!-- BILD-PLATZHALTER: Screenshot der Startseite / Dashboard -->
+    <div class="hr-img-placeholder hr-hero-img">
+        <svg width="48" height="48" fill="none" viewBox="0 0 24 24" stroke="#7c5a35" stroke-width="1.5">
+            <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3 20.25h18M3.75 3h16.5A.75.75 0 0121 3.75v13.5a.75.75 0 01-.75.75H3.75A.75.75 0 013 17.25V3.75A.75.75 0 013.75 3z" />
+        </svg>
+        <span><strong>Bild einfügen:</strong> Screenshot des Dashboards / Startseite</span>
+        <span style="font-size:0.8rem;opacity:0.7;">Empfohlene Größe: 1200 × 600 px</span>
+    </div>
+</section>
+
+
+<!-- ══════════════════════════════════════════════════════════════════
+     EINLEITUNG
+══════════════════════════════════════════════════════════════════ -->
+<section class="hr-section">
+    <div class="hr-page">
+        <div class="hr-split">
+            <div class="hr-split-text">
+                <span class="hr-section-label">Was ist das Heldenregister?</span>
+                <h2 class="hr-h2">Ein Portal für Abenteurer, Eltern und Teamer</h2>
+                <p>
+                    Das Heldenregister ist eine speziell entwickelte Webanwendung für
+                    Kinder- und Jugend-LARP-Projekte. Es bündelt alles, was für die
+                    Durchführung von Rollenspieleventsprojekten gebraucht wird: Helden,
+                    Abenteuer, Fähigkeiten und Kommunikation – an einem Ort.
+                </p>
+                <p>
+                    Teilnehmer legen ihren Charakter an, entwickeln ihn über Abenteuer
+                    weiter und behalten jederzeit den Überblick über Erfahrungspunkte
+                    und Fähigkeiten. Projektleitungen verwalten Events, Anmeldungen und
+                    Teilnehmerdaten sicher und DSGVO-konform.
+                </p>
+            </div>
+
+            <!-- BILD-PLATZHALTER: Stimmungsbild LARP / Gruppe beim Spiel -->
+            <div class="hr-img-placeholder hr-split-img">
+                <svg width="40" height="40" fill="none" viewBox="0 0 24 24" stroke="#7c5a35" stroke-width="1.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3 20.25h18" />
+                </svg>
+                <span><strong>Bild einfügen:</strong> Stimmungsbild – LARP-Gruppe beim Abenteuer</span>
+                <span style="font-size:0.8rem;opacity:0.7;">Empfohlen: 700 × 480 px</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+<hr class="hr-divider">
+
+
+<!-- ══════════════════════════════════════════════════════════════════
+     FUNKTIONEN IM ÜBERBLICK
+══════════════════════════════════════════════════════════════════ -->
+<section class="hr-section hr-section-alt">
+    <div class="hr-page">
+        <div class="hr-section-header">
+            <span class="hr-section-label">Module & Funktionen</span>
+            <h2 class="hr-h2">Alles in einem Portal</h2>
+            <p style="color:#5c3d1e; max-width:580px; margin: 0 auto; font-family: sans-serif; font-size: 0.97rem;">
+                Von der Charaktererschaffung bis zum After-Event-Feedback – das
+                Heldenregister begleitet jedes Abenteuer vollständig.
+            </p>
+        </div>
+
+        <div class="hr-cards">
+
+            <div class="hr-card">
+                <div class="hr-card-icon">🧙</div>
+                <h3 class="hr-h3">Heldenverwaltung</h3>
+                <p style="font-size:0.93rem; color:#5c3d1e; font-family:sans-serif;">
+                    Jeder Teilnehmer erstellt seinen eigenen Helden mit Name, Klasse und
+                    Hintergrundgeschichte. Der Held entwickelt sich über Abenteuer weiter
+                    und wächst mit dem Spieler.
+                </p>
+            </div>
+
+            <div class="hr-card">
+                <div class="hr-card-icon">🗺️</div>
+                <h3 class="hr-h3">Abenteuer & Anmeldung</h3>
+                <p style="font-size:0.93rem; color:#5c3d1e; font-family:sans-serif;">
+                    Events werden mit Datum, Ort, Altersgrenzen und Teilnahmegebühr
+                    angelegt. Teilnehmer melden sich direkt im Portal an – inklusive
+                    automatischer Warteliste und Bestätigungs-E-Mail.
+                </p>
+            </div>
+
+            <div class="hr-card">
+                <div class="hr-card-icon">⚡</div>
+                <h3 class="hr-h3">Skillsystem</h3>
+                <p style="font-size:0.93rem; color:#5c3d1e; font-family:sans-serif;">
+                    Fähigkeiten sind in einem Skillbaum organisiert. Helden schalten durch
+                    Erfahrungspunkte neue Fähigkeiten frei und spezialisieren sich in
+                    verschiedene Klassen.
+                </p>
+            </div>
+
+            <div class="hr-card">
+                <div class="hr-card-icon">🏆</div>
+                <h3 class="hr-h3">Erfahrungspunkte (EP)</h3>
+                <p style="font-size:0.93rem; color:#5c3d1e; font-family:sans-serif;">
+                    Jedes absolvierte Abenteuer bringt EP. Die Projektleitung kann Punkte
+                    vergeben, anpassen und nachvollziehen. Alle Transaktionen sind
+                    transparent protokolliert.
+                </p>
+            </div>
+
+            <div class="hr-card">
+                <div class="hr-card-icon">📋</div>
+                <h3 class="hr-h3">Umfragen & Feedback</h3>
+                <p style="font-size:0.93rem; color:#5c3d1e; font-family:sans-serif;">
+                    Nach jedem Event erhalten Teilnehmer einen altersgerechten Feedbackbogen.
+                    Kinder, Jugendliche und Teamer beantworten jeweils angepasste Fragen –
+                    anonym und DSGVO-konform auswertbar.
+                </p>
+            </div>
+
+            <div class="hr-card">
+                <div class="hr-card-icon">🛡️</div>
+                <h3 class="hr-h3">Teamerverwaltung</h3>
+                <p style="font-size:0.93rem; color:#5c3d1e; font-family:sans-serif;">
+                    Teamer melden sich zu Events an, werden ihrer Rolle zugewiesen und
+                    erhalten alle relevanten Informationen. Spielleiter und Eventleiter
+                    sind direkt im System hinterlegt.
+                </p>
+            </div>
+
+            <div class="hr-card">
+                <div class="hr-card-icon">👪</div>
+                <h3 class="hr-h3">Eltern & Betreuer</h3>
+                <p style="font-size:0.93rem; color:#5c3d1e; font-family:sans-serif;">
+                    Eltern verwalten die Spielerprofile ihrer Kinder, stimmen der Teilnahme
+                    zu und werden bei Änderungen automatisch per E-Mail informiert.
+                    Gesundheitsdaten werden verschlüsselt gespeichert.
+                </p>
+            </div>
+
+            <div class="hr-card">
+                <div class="hr-card-icon">⚙️</div>
+                <h3 class="hr-h3">Administration</h3>
+                <p style="font-size:0.93rem; color:#5c3d1e; font-family:sans-serif;">
+                    Berechtigungsstufen für Admins, Bürokraten und Teamer. Übersichten zu
+                    Anmeldungen, Zahlungsständen, Altersstatistiken und QR-Code-Check-in
+                    bei Veranstaltungen.
+                </p>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+
+<!-- ══════════════════════════════════════════════════════════════════
+     FÜR TEILNEHMER
+══════════════════════════════════════════════════════════════════ -->
+<section class="hr-section">
+    <div class="hr-page">
+        <div class="hr-split">
+            <!-- BILD-PLATZHALTER: Heldenprofil / Charakterkarte -->
+            <div class="hr-img-placeholder hr-split-img">
+                <svg width="40" height="40" fill="none" viewBox="0 0 24 24" stroke="#7c5a35" stroke-width="1.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3 20.25h18" />
+                </svg>
+                <span><strong>Bild einfügen:</strong> Screenshot Heldenprofil / Charakterkarte</span>
+                <span style="font-size:0.8rem;opacity:0.7;">Empfohlen: 700 × 480 px</span>
+            </div>
+
+            <div class="hr-split-text">
+                <span class="hr-section-label">Für Teilnehmer</span>
+                <h2 class="hr-h2">Dein Held. Deine Geschichte.</h2>
+                <p>
+                    Im Heldenregister hast du jederzeit Zugriff auf deinen Charakter,
+                    deine Fähigkeiten und alle Abenteuer, an denen du teilgenommen hast.
+                </p>
+                <ul>
+                    <li>Heldenerschaffung mit Klasse, Namen und Avatar</li>
+                    <li>Skillbaum – Fähigkeiten freischalten und spezialisieren</li>
+                    <li>Übersicht aller vergangenen und geplanten Abenteuer</li>
+                    <li>Direkte Anmeldung zu neuen Events im Browser oder Handy</li>
+                    <li>Automatische Bestätigung und Erinnerungs-E-Mail</li>
+                    <li>Persönliches Dashboard mit aktuellen Infos</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</section>
+
+<hr class="hr-divider">
+
+
+<!-- ══════════════════════════════════════════════════════════════════
+     FÜR ELTERN & BETREUER
+══════════════════════════════════════════════════════════════════ -->
+<section class="hr-section hr-section-alt">
+    <div class="hr-page">
+        <div class="hr-split hr-split-reverse">
+            <!-- BILD-PLATZHALTER: Eltern-Dashboard / Spielerprofil -->
+            <div class="hr-img-placeholder hr-split-img">
+                <svg width="40" height="40" fill="none" viewBox="0 0 24 24" stroke="#7c5a35" stroke-width="1.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3 20.25h18" />
+                </svg>
+                <span><strong>Bild einfügen:</strong> Spielerprofil / Anmeldemaske</span>
+                <span style="font-size:0.8rem;opacity:0.7;">Empfohlen: 700 × 480 px</span>
+            </div>
+
+            <div class="hr-split-text">
+                <span class="hr-section-label">Für Eltern & Betreuer</span>
+                <h2 class="hr-h2">Immer informiert und sicher.</h2>
+                <p>
+                    Eltern behalten die Übersicht über die Teilnahme ihrer Kinder –
+                    transparent, sicher und ohne Papierkram.
+                </p>
+                <ul>
+                    <li>Spielerprofile für eigene Kinder anlegen und verwalten</li>
+                    <li>Anmeldungen zu Events im Namen des Kindes durchführen</li>
+                    <li>E-Mail-Benachrichtigungen bei Bestätigung, Warteliste oder Stornierung</li>
+                    <li>Gesundheitsdaten (Allergien, Medikamente) sicher hinterlegen</li>
+                    <li>DSGVO-konforme Einwilligung zur Foto-Erlaubnis</li>
+                    <li>Ermäßigungsmöglichkeit direkt bei der Anmeldung</li>
+                </ul>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ══════════════════════════════════════════════════════════════════
+     FÜR DIE PROJEKTLEITUNG
+══════════════════════════════════════════════════════════════════ -->
+<section class="hr-section">
+    <div class="hr-page">
+        <div class="hr-split">
+            <div class="hr-split-text">
+                <span class="hr-section-label">Für die Projektleitung</span>
+                <h2 class="hr-h2">Veranstaltungen professionell verwalten.</h2>
+                <p>
+                    Das Heldenregister nimmt der Projektleitung den organisatorischen
+                    Aufwand ab – von der Planung über die Durchführung bis zur Auswertung.
+                </p>
+                <ul>
+                    <li>Abenteuer mit Ort, Datum, Altergrenzen und Kapazität anlegen</li>
+                    <li>Anmeldungen bestätigen, Warteliste verwalten, QR-Check-in</li>
+                    <li>Zahlungsstände im Blick – bezahlt / offen auf einen Blick</li>
+                    <li>Teilnehmerlisten als PDF exportieren</li>
+                    <li>Feedback-Umfragen erstellen und anonym auswerten</li>
+                    <li>Berechtigungsrollen für Teamer, Bürokrat und Admin</li>
+                </ul>
+            </div>
+
+            <!-- BILD-PLATZHALTER: Verwaltungsansicht / Buchungsübersicht -->
+            <div class="hr-img-placeholder hr-split-img">
+                <svg width="40" height="40" fill="none" viewBox="0 0 24 24" stroke="#7c5a35" stroke-width="1.5">
+                    <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3 20.25h18" />
+                </svg>
+                <span><strong>Bild einfügen:</strong> Screenshot Verwaltungsansicht / Teilnehmerliste</span>
+                <span style="font-size:0.8rem;opacity:0.7;">Empfohlen: 700 × 480 px</span>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ══════════════════════════════════════════════════════════════════
+     ZIELGRUPPEN
+══════════════════════════════════════════════════════════════════ -->
+<section class="hr-section hr-section-dark">
+    <div class="hr-page">
+        <div class="hr-section-header">
+            <span class="hr-section-label">Für wen?</span>
+            <h2 class="hr-h2">Ein Portal – viele Nutzergruppen</h2>
+        </div>
+
+        <div class="hr-audience">
+            <div class="hr-audience-item">
+                <div class="hr-audience-icon">🧒</div>
+                <strong>Kinder & Jugendliche</strong>
+                <p>Erschaffen ihren Helden, melden sich zu Abenteuern an und entwickeln ihre Fähigkeiten weiter.</p>
+            </div>
+            <div class="hr-audience-item">
+                <div class="hr-audience-icon">👨‍👩‍👧</div>
+                <strong>Eltern & Betreuer</strong>
+                <p>Verwalten die Profile ihrer Kinder, erteilen Einwilligungen und bleiben stets informiert.</p>
+            </div>
+            <div class="hr-audience-item">
+                <div class="hr-audience-icon">🛡️</div>
+                <strong>Teamer & Spielleiter</strong>
+                <p>Melden sich zu Events an, erhalten Teilnehmerlisten und koordinieren die Durchführung.</p>
+            </div>
+            <div class="hr-audience-item">
+                <div class="hr-audience-icon">⚙️</div>
+                <strong>Projektleitung</strong>
+                <p>Plant und verwaltet alle Events, behält Zahlungen im Blick und wertet Feedback aus.</p>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ══════════════════════════════════════════════════════════════════
+     SO LÄUFT EIN ABENTEUER AB (Schritte)
+══════════════════════════════════════════════════════════════════ -->
+<section class="hr-section hr-section-alt">
+    <div class="hr-page">
+        <div class="hr-section-header">
+            <span class="hr-section-label">Ablauf</span>
+            <h2 class="hr-h2">Von der Anmeldung bis zur Auswertung</h2>
+        </div>
+
+        <div class="hr-steps">
+            <div class="hr-step">
+                <h3 class="hr-h3">Abenteuer wird veröffentlicht</h3>
+                <p style="font-size:0.9rem;color:#5c3d1e;font-family:sans-serif;">
+                    Die Projektleitung legt das Event mit allen Details an:
+                    Datum, Ort, Alterlimits, Teilnehmerzahl und Beitrag.
+                </p>
+            </div>
+            <div class="hr-step">
+                <h3 class="hr-h3">Anmeldung der Teilnehmer</h3>
+                <p style="font-size:0.9rem;color:#5c3d1e;font-family:sans-serif;">
+                    Eltern oder Jugendliche melden sich direkt im Portal an.
+                    Bei voller Teilnehmerzahl: automatische Warteliste.
+                </p>
+            </div>
+            <div class="hr-step">
+                <h3 class="hr-h3">Durchführung & Check-in</h3>
+                <p style="font-size:0.9rem;color:#5c3d1e;font-family:sans-serif;">
+                    Teamer prüfen Teilnehmer per QR-Code ein. Alle Rollen und
+                    Informationen sind zentral abrufbar.
+                </p>
+            </div>
+            <div class="hr-step">
+                <h3 class="hr-h3">EP-Vergabe nach dem Event</h3>
+                <p style="font-size:0.9rem;color:#5c3d1e;font-family:sans-serif;">
+                    Die Spielleitung vergibt Erfahrungspunkte. Helden
+                    entwickeln sich weiter, neue Fähigkeiten werden freigeschaltet.
+                </p>
+            </div>
+            <div class="hr-step">
+                <h3 class="hr-h3">Feedback-Umfrage</h3>
+                <p style="font-size:0.9rem;color:#5c3d1e;font-family:sans-serif;">
+                    Alle Teilnehmer erhalten einen altersgerechten Feedbackbogen.
+                    Ergebnisse werden anonym ausgewertet.
+                </p>
+            </div>
+        </div>
+    </div>
+</section>
+
+
+<!-- ══════════════════════════════════════════════════════════════════
+     SCREENSHOT-GALERIE
+══════════════════════════════════════════════════════════════════ -->
+<section class="hr-section">
+    <div class="hr-page">
+        <div class="hr-section-header">
+            <span class="hr-section-label">Einblicke</span>
+            <h2 class="hr-h2">Das Portal in der Praxis</h2>
+        </div>
+
+        <div class="hr-gallery">
+
+            <div class="hr-gallery-item">
+                <!-- BILD-PLATZHALTER: Dashboard-Ansicht -->
+                <div class="hr-img-placeholder hr-gallery-img">
+                    <svg width="32" height="32" fill="none" viewBox="0 0 24 24" stroke="#7c5a35" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3 20.25h18" />
+                    </svg>
+                    <span style="font-size:0.82rem;"><strong>Bild:</strong> Dashboard-Ansicht</span>
+                </div>
+                <p class="hr-gallery-caption">Persönliches Dashboard</p>
+            </div>
+
+            <div class="hr-gallery-item">
+                <!-- BILD-PLATZHALTER: Heldenprofil / Skillbaum -->
+                <div class="hr-img-placeholder hr-gallery-img">
+                    <svg width="32" height="32" fill="none" viewBox="0 0 24 24" stroke="#7c5a35" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3 20.25h18" />
+                    </svg>
+                    <span style="font-size:0.82rem;"><strong>Bild:</strong> Heldenprofil & Skillbaum</span>
+                </div>
+                <p class="hr-gallery-caption">Heldenprofil mit Fähigkeiten</p>
+            </div>
+
+            <div class="hr-gallery-item">
+                <!-- BILD-PLATZHALTER: Abenteuer-Übersicht -->
+                <div class="hr-img-placeholder hr-gallery-img">
+                    <svg width="32" height="32" fill="none" viewBox="0 0 24 24" stroke="#7c5a35" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3 20.25h18" />
+                    </svg>
+                    <span style="font-size:0.82rem;"><strong>Bild:</strong> Abenteuer-Übersicht</span>
+                </div>
+                <p class="hr-gallery-caption">Abenteuer-Übersicht</p>
+            </div>
+
+            <div class="hr-gallery-item">
+                <!-- BILD-PLATZHALTER: Verwaltungsansicht -->
+                <div class="hr-img-placeholder hr-gallery-img">
+                    <svg width="32" height="32" fill="none" viewBox="0 0 24 24" stroke="#7c5a35" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3 20.25h18" />
+                    </svg>
+                    <span style="font-size:0.82rem;"><strong>Bild:</strong> Verwaltung / Teilnehmerliste</span>
+                </div>
+                <p class="hr-gallery-caption">Teilnehmerverwaltung</p>
+            </div>
+
+            <div class="hr-gallery-item">
+                <!-- BILD-PLATZHALTER: Feedback-Umfrage -->
+                <div class="hr-img-placeholder hr-gallery-img">
+                    <svg width="32" height="32" fill="none" viewBox="0 0 24 24" stroke="#7c5a35" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3 20.25h18" />
+                    </svg>
+                    <span style="font-size:0.82rem;"><strong>Bild:</strong> Feedback-Umfrage</span>
+                </div>
+                <p class="hr-gallery-caption">Feedback-Bogen nach dem Event</p>
+            </div>
+
+            <div class="hr-gallery-item">
+                <!-- BILD-PLATZHALTER: Mobil-Ansicht -->
+                <div class="hr-img-placeholder hr-gallery-img">
+                    <svg width="32" height="32" fill="none" viewBox="0 0 24 24" stroke="#7c5a35" stroke-width="1.5">
+                        <path stroke-linecap="round" stroke-linejoin="round" d="M2.25 15.75l5.159-5.159a2.25 2.25 0 013.182 0l5.159 5.159m-1.5-1.5l1.409-1.409a2.25 2.25 0 013.182 0l2.909 2.909M3 20.25h18" />
+                    </svg>
+                    <span style="font-size:0.82rem;"><strong>Bild:</strong> Handy-Ansicht / mobiles Layout</span>
+                </div>
+                <p class="hr-gallery-caption">Optimiert für Smartphone & Tablet</p>
+            </div>
+
+        </div>
+    </div>
+</section>
+
+
+<!-- ══════════════════════════════════════════════════════════════════
+     CTA
+══════════════════════════════════════════════════════════════════ -->
+<section class="hr-cta">
+    <div class="hr-page">
+        <h2 class="hr-h2">Bereit für das nächste Abenteuer?</h2>
+        <p>
+            Registriere dich jetzt im Heldenregister und bring deinen Helden
+            ins Spiel – oder melde dein nächstes Event an.
+        </p>
+        <!-- Verlinkung zur eigenen Instanz des Portals eintragen -->
+        <a href="#" class="hr-btn">Jetzt registrieren</a>
+        <a href="#" class="hr-btn hr-btn-outline">Mehr erfahren</a>
+    </div>
+</section>
+
+
+</body>
+</html>
