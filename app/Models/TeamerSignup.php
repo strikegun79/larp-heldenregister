@@ -10,16 +10,6 @@ class TeamerSignup extends Model
 {
     use HasFactory;
 
-    /** Mögliche Teamer-Rollen, die der Projektleiter zuweisen kann. */
-    public const ROLES = [
-        'Spielleitung',
-        'Projektleiter',
-        'Teamer A',
-        'Teamer B',
-        'Teamer C',
-        'Bürokrat',
-    ];
-
     protected $fillable = [
         'adventure_id',
         'user_id',

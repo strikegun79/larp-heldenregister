@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Adventure;
+use App\Models\EventRole;
 use App\Models\Role;
 use App\Models\TeamerSignup;
 use App\Models\User;
@@ -154,7 +155,7 @@ class TeamerSignupController extends Controller
             'leih_tunika' => ['boolean'],
             'leih_waffe' => ['boolean'],
             'anmerkung' => ['nullable', 'string', 'max:1000'],
-            'teamer_role' => ['nullable', 'string', 'in:'.implode(',', TeamerSignup::ROLES)],
+            'teamer_role' => ['nullable', 'string', Rule::in(EventRole::forTeamer()->pluck('description'))],
         ]);
 
         $hasHealthData = filled($data['allergien'] ?? null) || filled($data['medikamente'] ?? null);
@@ -247,7 +248,7 @@ class TeamerSignupController extends Controller
         abort_if($signup->adventure_id !== $adventure->id, 404);
 
         $data = $request->validate([
-            'teamer_role' => ['nullable', 'string', 'in:'.implode(',', TeamerSignup::ROLES)],
+            'teamer_role' => ['nullable', 'string', Rule::in(EventRole::forTeamer()->pluck('description'))],
         ]);
 
         $signup->update(['teamer_role' => $data['teamer_role'] ?: null]);

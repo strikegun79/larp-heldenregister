@@ -9,7 +9,7 @@
             <label>Teamer-Rolle</label>
             <select name="teamer_role">
                 <option value="">— keine —</option>
-                @foreach (\App\Models\TeamerSignup::ROLES as $role)
+                @foreach (\App\Models\EventRole::forTeamer()->orderBy('id')->pluck('description') as $role)
                     <option value="{{ $role }}" @selected($signup->teamer_role === $role)>{{ $role }}</option>
                 @endforeach
             </select>
