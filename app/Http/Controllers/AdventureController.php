@@ -224,8 +224,8 @@ class AdventureController extends Controller
     {
         $adventure->load(['bookings.player.users', 'bookings.bookedBy', 'bookings.role', 'visits', 'status', 'teamerSignups.user']);
 
-        $nscBookings = $adventure->bookings->where('event_role_id', EventRole::NSC_ROLE_ID)->sortByDesc('created_at')->values();
-        $mainBookings = $adventure->bookings->where('event_role_id', '!=', EventRole::NSC_ROLE_ID)->sortByDesc('created_at')->values();
+        $nscBookings  = $adventure->bookings->filter(fn ($b) => $b->role?->is_teamer_like)->sortByDesc('created_at')->values();
+        $mainBookings = $adventure->bookings->filter(fn ($b) => ! $b->role?->is_teamer_like)->sortByDesc('created_at')->values();
 
         $data = array_merge($this->formData($adventure), [
             'nscBookings' => $nscBookings,
@@ -245,16 +245,16 @@ class AdventureController extends Controller
      */
     public function participantsPdf(Adventure $adventure): Response
     {
-        $adventure->load(['location', 'category', 'bookings.player.users', 'bookings.bookedBy', 'teamerSignups.user']);
+        $adventure->load(['location', 'category', 'bookings.player.users', 'bookings.bookedBy', 'bookings.role', 'teamerSignups.user']);
 
-        // Nur reguläre Teilnehmer (ohne NSC-Elternteil) in der Hauptliste.
+        // Nur reguläre Teilnehmer (ohne Teamer-artige Rollen) in der Hauptliste.
         $bookings = $adventure->bookings
-            ->where('event_role_id', '!=', EventRole::NSC_ROLE_ID)
+            ->filter(fn ($b) => ! $b->role?->is_teamer_like)
             ->sortBy([['player.lastname', 'asc'], ['player.name', 'asc']])
             ->values();
 
         $nscBookings = $adventure->bookings
-            ->where('event_role_id', EventRole::NSC_ROLE_ID)
+            ->filter(fn ($b) => $b->role?->is_teamer_like)
             ->values();
 
         $male = $bookings->filter(fn ($b) => $b->player?->gender === 'männlich')->count();

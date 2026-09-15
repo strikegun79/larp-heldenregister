@@ -44,7 +44,7 @@ class DashboardController extends Controller
                     ->whereIn('status', ['bestaetigt', 'offen']))
                 ->with(['location', 'bookings' => fn ($q) => $q->whereIn('player_id', $playerIds)
                     ->whereIn('status', ['bestaetigt', 'offen'])
-                    ->with('player')])
+                    ->with(['player', 'role'])])
                 ->orderBy('start_at')
                 ->get()
             : collect();

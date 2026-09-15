@@ -9,11 +9,13 @@ use App\Models\Hero;
 use App\Models\Player;
 use App\Notifications\BookingReceived;
 use App\Notifications\BookingWaitlisted;
+use App\Notifications\TeamerBookingReceived;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 /**
@@ -66,7 +68,7 @@ class GroupBookingController extends Controller
         return view('bookings._create_group', [
             'adventure' => $adventure,
             'groups' => $groups,
-            'roles' => EventRole::whereNotIn('id', EventRole::TEAMER_ROLE_IDS)->orderBy('id')->get(),
+            'roles' => EventRole::forParticipant()->orderBy('id')->get(),
             'userPhone' => $request->user()->phone,
         ]);
     }
@@ -77,7 +79,7 @@ class GroupBookingController extends Controller
         $data = $request->validate([
             'player_ids' => ['required', 'array', 'min:1'],
             'player_ids.*' => ['required', 'integer', 'exists:players,id'],
-            'event_role_id' => ['required', 'exists:event_roles,id', 'not_in:'.implode(',', EventRole::TEAMER_ROLE_IDS)],
+            'event_role_id' => ['required', Rule::in(EventRole::forParticipant()->pluck('id'))],
             'agb' => ['accepted'],
             'kontakt_telefon' => ['required', 'string', 'max:100'],
         ]);
@@ -116,9 +118,10 @@ class GroupBookingController extends Controller
 
             $player       = Player::find($playerId);
             $freshAdv     = $adventure->fresh();
-            $ageViolation = $freshAdv->isOutsideAgeRange($player);
-            // Kapazität nach jeder Buchung neu prüfen; auch Altersgrenze einbeziehen.
-            $waitlisted   = $freshAdv->shouldWaitlist() || $ageViolation;
+            $isTeamer     = EventRole::find($data['event_role_id'])?->is_teamer_like ?? false;
+            $ageViolation = ! $isTeamer && $freshAdv->isOutsideAgeRange($player);
+            // Teamer nie auf Warteliste; Kapazität nach jeder Buchung neu prüfen.
+            $waitlisted   = $isTeamer ? false : ($freshAdv->shouldWaitlist() || $ageViolation);
 
             $booking = $adventure->bookings()->create([
                 'player_id' => $playerId,
@@ -128,8 +131,8 @@ class GroupBookingController extends Controller
                 'agb' => true,
                 'kontakt_telefon' => $data['kontakt_telefon'],
                 'waitlisted' => $waitlisted,
-                'approved_at' => now(),
-                'status' => 'bestaetigt',
+                'approved_at' => $isTeamer ? null : now(),
+                'status' => $isTeamer ? 'offen' : 'bestaetigt',
             ]);
 
             // Wartelisten-Modus nur bei Kapazitätsüberschreitung aktivieren, nicht bei Altersverletzung.
@@ -139,11 +142,14 @@ class GroupBookingController extends Controller
 
             $recipientEmail = $player?->email ?: $request->user()->email;
             if ($recipientEmail) {
-                // Pflichtbenachrichtigung: wird immer gesendet.
-                $notification = $booking->waitlisted
-                    ? new BookingWaitlisted($booking, $ageViolation)
-                    : new BookingReceived($booking);
-                Notification::route('mail', $recipientEmail)->notify($notification);
+                if ($isTeamer) {
+                    Notification::route('mail', $recipientEmail)->notify(new TeamerBookingReceived($booking));
+                } else {
+                    $notification = $booking->waitlisted
+                        ? new BookingWaitlisted($booking, $ageViolation)
+                        : new BookingReceived($booking);
+                    Notification::route('mail', $recipientEmail)->notify($notification);
+                }
             }
 
             $created++;

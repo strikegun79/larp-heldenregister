@@ -7,6 +7,8 @@
         <thead class="bg-black/5">
             <tr>
                 <th class="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase">Bezeichnung</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase">Teilnehmer</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase">Teamer</th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase">Anmeldungen</th>
                 <th class="px-6 py-3"></th>
             </tr>
@@ -15,6 +17,20 @@
             @forelse ($roles as $role)
                 <tr>
                     <td class="px-6 py-4" data-label="Bezeichnung">{{ $role->description }}</td>
+                    <td class="px-6 py-4" data-label="Teilnehmer">
+                        @if ($role->for_participant)
+                            <span class="text-green-600" title="Ja">&#10003;</span>
+                        @else
+                            <span class="text-stone-400" title="Nein">&#8211;</span>
+                        @endif
+                    </td>
+                    <td class="px-6 py-4" data-label="Teamer">
+                        @if ($role->for_teamer)
+                            <span class="text-green-600" title="Ja">&#10003;</span>
+                        @else
+                            <span class="text-stone-400" title="Nein">&#8211;</span>
+                        @endif
+                    </td>
                     <td class="px-6 py-4" data-label="Anmeldungen">{{ $role->bookings_count }}</td>
                     <td class="px-6 py-4 text-right">
                         <div class="flex items-center justify-end gap-3">
@@ -32,7 +48,7 @@
                     </td>
                 </tr>
             @empty
-                <tr><td colspan="3" class="px-6 py-4 text-stone-500">Noch keine Rollen.</td></tr>
+                <tr><td colspan="5" class="px-6 py-4 text-stone-500">Noch keine Rollen.</td></tr>
             @endforelse
         </tbody>
     </table>

@@ -63,18 +63,22 @@
                     @endif
                 </td>
                 <td data-label="Beitrag" @if ($manage) data-col="paid" data-sort-val="{{ $booking->paid ? 1 : 0 }}" @endif>
-                    @if ($adventure->fee > 0)
-                        @if ($booking->ermaessigung && $adventure->fee_reduced !== null)
-                            <span class="text-xs text-stone-500 mr-1">{{ number_format($adventure->fee_reduced, 2, ',', '.') }} €</span>
-                            <span class="ui mini label" title="Ermäßigt">Erm.</span>
-                        @else
-                            <span class="text-xs text-stone-500 mr-1">{{ number_format($adventure->fee, 2, ',', '.') }} €</span>
-                        @endif
-                    @endif
-                    @if ($booking->paid)
-                        <span class="text-green-700">✓ bezahlt</span>
+                    @if ($booking->role?->is_teamer_like)
+                        <span class="text-stone-400">—</span>
                     @else
-                        <span class="text-stone-500">offen</span>
+                        @if ($adventure->fee > 0)
+                            @if ($booking->ermaessigung && $adventure->fee_reduced !== null)
+                                <span class="text-xs text-stone-500 mr-1">{{ number_format($adventure->fee_reduced, 2, ',', '.') }} €</span>
+                                <span class="ui mini label" title="Ermäßigt">Erm.</span>
+                            @else
+                                <span class="text-xs text-stone-500 mr-1">{{ number_format($adventure->fee, 2, ',', '.') }} €</span>
+                            @endif
+                        @endif
+                        @if ($booking->paid)
+                            <span class="text-green-700">✓ bezahlt</span>
+                        @else
+                            <span class="text-stone-500">offen</span>
+                        @endif
                     @endif
                 </td>
                 @if ($manage)
@@ -110,17 +114,19 @@
                                     @endif
                                     @endunless
                                 @endcan
-                                @can('manage-payments')
-                                    <form method="POST" action="{{ route('adventures.bookings.payment', [$adventure, $booking]) }}" data-refresh-modal
-                                          data-confirm="{{ $booking->paid ? 'Beitrag als offen markieren?' : 'Beitrag als bezahlt markieren?' }}">
-                                        @csrf @method('PATCH')
-                                        <button type="submit" class="ui mini icon button {{ $booking->paid ? '' : 'yellow' }}"
-                                                data-tooltip="{{ $booking->paid ? 'Als offen markieren' : 'Als bezahlt markieren' }}" data-position="top center">
-                                            <i class="coins icon"></i>
-                                            <span class="sm:hidden ml-1 text-xs">{{ $booking->paid ? 'Offen' : 'Bezahlt' }}</span>
-                                        </button>
-                                    </form>
-                                @endcan
+                                @if (! $booking->role?->is_teamer_like)
+                                    @can('manage-payments')
+                                        <form method="POST" action="{{ route('adventures.bookings.payment', [$adventure, $booking]) }}" data-refresh-modal
+                                              data-confirm="{{ $booking->paid ? 'Beitrag als offen markieren?' : 'Beitrag als bezahlt markieren?' }}">
+                                            @csrf @method('PATCH')
+                                            <button type="submit" class="ui mini icon button {{ $booking->paid ? '' : 'yellow' }}"
+                                                    data-tooltip="{{ $booking->paid ? 'Als offen markieren' : 'Als bezahlt markieren' }}" data-position="top center">
+                                                <i class="coins icon"></i>
+                                                <span class="sm:hidden ml-1 text-xs">{{ $booking->paid ? 'Offen' : 'Bezahlt' }}</span>
+                                            </button>
+                                        </form>
+                                    @endcan
+                                @endif
                             @endif
                             {{-- Bestätigung erneut senden: in beiden Ansichten für Admin oder eigene Buchung --}}
                             @unless ($booking->is_guest || $booking->waitlisted)

@@ -320,7 +320,7 @@ class SurveyAdminController extends Controller
      */
     private function resolveRecipient(Booking $booking, string $targetGroup): array
     {
-        $isTeamer = in_array($booking->event_role_id, EventRole::TEAMER_ROLE_IDS, true);
+        $isTeamer = $booking->role?->for_teamer ?? false;
         $age      = $booking->participant_age;   // getParticipantAgeAttribute()
 
         $resolvedType = match (true) {

@@ -79,7 +79,9 @@ class EventRoleController extends Controller
     private function validateRole(Request $request): array
     {
         return $request->validate([
-            'description' => ['required', 'string', 'max:50'],
+            'description'    => ['required', 'string', 'max:50'],
+            'for_participant' => ['boolean'],
+            'for_teamer'     => ['boolean'],
         ]);
     }
 }

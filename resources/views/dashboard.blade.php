@@ -264,7 +264,12 @@
                                                         &#10003;
                                                     @endif
                                                     {{ $booking->participant_name }}
-                                                    @if ($adventure->fee > 0 && ! $booking->waitlisted)
+                                                    @if ($booking->role?->is_teamer_like)
+                                                        <i class="shield alternate icon text-xs ml-0.5"
+                                                           style="color:#6366f1"
+                                                           title="Teamer"
+                                                           aria-label="Teamer"></i>
+                                                    @elseif ($adventure->fee > 0 && ! $booking->waitlisted)
                                                         <i class="{{ $booking->paid ? 'money bill alternate icon' : 'clock outline icon' }} text-xs ml-0.5"
                                                            style="color:{{ $booking->paid ? '#16a34a' : '#d97706' }}"
                                                            title="{{ $booking->paid ? 'Bezahlt' : 'Zahlung ausstehend' }}"
@@ -376,7 +381,12 @@
                                                 &#10003;
                                             @endif
                                             {{ $booking->participant_name }}
-                                            @if ($adventure->fee > 0 && ! $booking->waitlisted)
+                                            @if ($booking->role?->is_teamer_like)
+                                                <i class="shield alternate icon"
+                                                   style="color:#6366f1;font-size:.85em"
+                                                   title="Teamer"
+                                                   aria-label="Teamer"></i>
+                                            @elseif ($adventure->fee > 0 && ! $booking->waitlisted)
                                                 <i class="{{ $booking->paid ? 'money bill alternate icon' : 'clock outline icon' }}"
                                                    style="color:{{ $booking->paid ? '#16a34a' : '#d97706' }};font-size:.85em"
                                                    title="{{ $booking->paid ? 'Bezahlt' : 'Zahlung ausstehend' }}"

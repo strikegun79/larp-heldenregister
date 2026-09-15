@@ -187,6 +187,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Anmeldebestätigung erneut senden (BOOK-05).
     Route::post('adventures/{adventure}/bookings/{booking}/resend-confirmation', [BookingController::class, 'resendConfirmation'])
         ->name('adventures.bookings.resend-confirmation');
+    Route::patch('adventures/{adventure}/bookings/{booking}/confirm-teamer', [BookingController::class, 'confirmTeamer'])
+        ->name('adventures.bookings.confirm-teamer');
     // Anmeldung ablehnen – Toggle (ADV-18).
     Route::patch('adventures/{adventure}/bookings/{booking}/rejection', [BookingController::class, 'reject'])
         ->name('adventures.bookings.rejection');
@@ -375,6 +377,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('adventures.teamer.approve');
     Route::patch('adventures/{adventure}/teamer-signup/{signup}/reject', [\App\Http\Controllers\TeamerSignupController::class, 'reject'])
         ->name('adventures.teamer.reject');
+    Route::post('adventures/{adventure}/teamer-signup/{signup}/resend-confirmation', [\App\Http\Controllers\TeamerSignupController::class, 'resendConfirmation'])
+        ->name('adventures.teamer.resend-confirmation');
 
     // PUB-10: Heldenausweis-Generator (ROLE-10): heldenregister.edit (Bürokrat) ODER heroes.admin (Spielleiter).
     Route::prefix('admin')->name('admin.')->middleware('can:id-cards.access')->group(function () {

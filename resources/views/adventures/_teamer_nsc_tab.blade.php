@@ -54,32 +54,64 @@
                         <td>
                             <div class="flex items-center justify-end gap-1 flex-wrap">
                                 @can('events.edit')
-                                    <form method="POST"
-                                          action="{{ route('adventures.teamer.approve', [$adventure, $signup]) }}"
-                                          data-refresh-modal
-                                          data-confirm="{{ $signup->approved_at ? 'Bestätigung zurücknehmen?' : 'Teamer-Anmeldung bestätigen?' }}">
-                                        @csrf @method('PATCH')
-                                        <button type="submit"
-                                                class="ui mini icon button {{ $signup->approved_at ? '' : 'green' }}"
-                                                data-tooltip="{{ $signup->approved_at ? 'Bestätigung zurücknehmen' : 'Bestätigen' }}"
-                                                data-position="top center">
-                                            <i class="check icon"></i>
-                                            <span class="sm:hidden ml-1 text-xs">{{ $signup->approved_at ? 'Zurück' : 'Bestät.' }}</span>
-                                        </button>
-                                    </form>
-                                    <form method="POST"
-                                          action="{{ route('adventures.teamer.reject', [$adventure, $signup]) }}"
-                                          data-refresh-modal
-                                          data-confirm="{{ $signup->rejected_at ? 'Ablehnung zurücknehmen?' : 'Teamer-Anmeldung ablehnen?' }}">
-                                        @csrf @method('PATCH')
-                                        <button type="submit"
-                                                class="ui mini icon button {{ $signup->rejected_at ? '' : 'orange' }}"
-                                                data-tooltip="{{ $signup->rejected_at ? 'Ablehnung zurücknehmen' : 'Ablehnen' }}"
-                                                data-position="top center">
-                                            <i class="hand paper outline icon"></i>
-                                            <span class="sm:hidden ml-1 text-xs">{{ $signup->rejected_at ? 'Zurück' : 'Ablehnen' }}</span>
-                                        </button>
-                                    </form>
+                                    @if ($signup->approved_at)
+                                        {{-- Bestätigung zurücknehmen --}}
+                                        <form method="POST"
+                                              action="{{ route('adventures.teamer.approve', [$adventure, $signup]) }}"
+                                              data-refresh-modal
+                                              data-confirm="Bestätigung für {{ $signup->user->name }} zurücknehmen?">
+                                            @csrf @method('PATCH')
+                                            <button type="submit"
+                                                    class="ui mini icon button"
+                                                    data-tooltip="Bestätigung zurücknehmen"
+                                                    data-position="top center">
+                                                <i class="undo icon"></i>
+                                                <span class="sm:hidden ml-1 text-xs">Zurück</span>
+                                            </button>
+                                        </form>
+                                        {{-- Bestätigungsmail erneut senden --}}
+                                        <form method="POST"
+                                              action="{{ route('adventures.teamer.resend-confirmation', [$adventure, $signup]) }}"
+                                              data-refresh-modal>
+                                            @csrf
+                                            <button type="submit"
+                                                    class="ui mini icon button"
+                                                    data-tooltip="Bestätigungsmail erneut senden"
+                                                    data-position="top center">
+                                                <i class="envelope outline icon"></i>
+                                                <span class="sm:hidden ml-1 text-xs">Mail</span>
+                                            </button>
+                                        </form>
+                                    @else
+                                        {{-- Noch nicht bestätigt → Bestätigen-Button --}}
+                                        <form method="POST"
+                                              action="{{ route('adventures.teamer.approve', [$adventure, $signup]) }}"
+                                              data-refresh-modal
+                                              data-confirm="Teamer-Anmeldung von {{ $signup->user->name }} bestätigen?">
+                                            @csrf @method('PATCH')
+                                            <button type="submit"
+                                                    class="ui mini icon green button"
+                                                    data-tooltip="Bestätigen"
+                                                    data-position="top center">
+                                                <i class="check icon"></i>
+                                                <span class="sm:hidden ml-1 text-xs">Bestät.</span>
+                                            </button>
+                                        </form>
+                                        {{-- Ablehnen-Toggle bleibt erhalten --}}
+                                        <form method="POST"
+                                              action="{{ route('adventures.teamer.reject', [$adventure, $signup]) }}"
+                                              data-refresh-modal
+                                              data-confirm="{{ $signup->rejected_at ? 'Ablehnung zurücknehmen?' : 'Teamer-Anmeldung ablehnen?' }}">
+                                            @csrf @method('PATCH')
+                                            <button type="submit"
+                                                    class="ui mini icon button {{ $signup->rejected_at ? '' : 'orange' }}"
+                                                    data-tooltip="{{ $signup->rejected_at ? 'Ablehnung zurücknehmen' : 'Ablehnen' }}"
+                                                    data-position="top center">
+                                                <i class="hand paper outline icon"></i>
+                                                <span class="sm:hidden ml-1 text-xs">{{ $signup->rejected_at ? 'Zurück' : 'Ablehnen' }}</span>
+                                            </button>
+                                        </form>
+                                    @endif
                                     <a href="{{ route('adventures.teamer.edit', [$adventure, $signup]) }}"
                                        data-modal-stack="{{ route('adventures.teamer.edit', [$adventure, $signup]) }}"
                                        class="ui mini icon button"
@@ -116,7 +148,7 @@
                                 : ($booking->player?->name.' '.$booking->player?->lastname) }}
                         </td>
                         <td data-label="Alter">{{ $booking->participant_age ?? '—' }}</td>
-                        <td data-label="Rolle">Eltern-NSC</td>
+                        <td data-label="Rolle">{{ $booking->role?->description ?? '—' }}</td>
                         <td data-label="Status">
                             @if ($booking->waitlisted)
                                 <span class="ui mini label yellow">Warteliste</span>
@@ -134,44 +166,50 @@
                             <div class="flex items-center justify-end gap-1 flex-wrap">
                                 @can('approve-bookings')
                                     @unless ($booking->is_guest)
-                                    <form method="POST"
-                                          action="{{ route('adventures.bookings.resend-confirmation', [$adventure, $booking]) }}"
-                                          data-refresh-modal
-                                          @if($booking->waitlisted) data-confirm="{{ $booking->player?->full_name ?? 'Spieler' }} von der Warteliste auf regulären Platz hochstufen?" @endif>
-                                        @csrf
-                                        @if ($booking->waitlisted)
-                                            <button type="submit"
-                                                    class="ui mini icon green button"
-                                                    data-tooltip="Von Warteliste bestätigen"
-                                                    data-position="top center">
-                                                <i class="check icon"></i>
-                                                <span class="sm:hidden ml-1 text-xs">Bestät.</span>
-                                            </button>
-                                        @else
-                                            <button type="submit"
-                                                    class="ui mini icon button"
-                                                    data-tooltip="Anmeldebestätigung erneut senden"
-                                                    data-position="top center">
-                                                <i class="envelope outline icon"></i>
-                                                <span class="sm:hidden ml-1 text-xs">Mail</span>
-                                            </button>
+                                        @if ($booking->status !== 'bestaetigt' && ! $booking->waitlisted)
+                                            {{-- Noch nicht bestätigt → Bestätigen-Button --}}
+                                            <form method="POST"
+                                                  action="{{ route('adventures.bookings.confirm-teamer', [$adventure, $booking]) }}"
+                                                  data-refresh-modal
+                                                  data-confirm="{{ $booking->player?->full_name ?? 'Teamer' }} als Teamer bestätigen?">
+                                                @csrf @method('PATCH')
+                                                <button type="submit"
+                                                        class="ui mini icon green button"
+                                                        data-tooltip="Als Teamer bestätigen"
+                                                        data-position="top center">
+                                                    <i class="check icon"></i>
+                                                    <span class="sm:hidden ml-1 text-xs">Bestät.</span>
+                                                </button>
+                                            </form>
+                                        @elseif ($booking->status === 'bestaetigt')
+                                            {{-- Bestätigung zurücknehmen --}}
+                                            <form method="POST"
+                                                  action="{{ route('adventures.bookings.confirm-teamer', [$adventure, $booking]) }}"
+                                                  data-refresh-modal
+                                                  data-confirm="Bestätigung für {{ $booking->player?->full_name ?? 'Teamer' }} zurücknehmen?">
+                                                @csrf @method('PATCH')
+                                                <button type="submit"
+                                                        class="ui mini icon button"
+                                                        data-tooltip="Bestätigung zurücknehmen"
+                                                        data-position="top center">
+                                                    <i class="undo icon"></i>
+                                                    <span class="sm:hidden ml-1 text-xs">Zurück</span>
+                                                </button>
+                                            </form>
+                                            {{-- Bestätigungsmail erneut senden --}}
+                                            <form method="POST"
+                                                  action="{{ route('adventures.bookings.resend-confirmation', [$adventure, $booking]) }}"
+                                                  data-refresh-modal>
+                                                @csrf
+                                                <button type="submit"
+                                                        class="ui mini icon button"
+                                                        data-tooltip="Bestätigungsmail erneut senden"
+                                                        data-position="top center">
+                                                    <i class="envelope outline icon"></i>
+                                                    <span class="sm:hidden ml-1 text-xs">Mail</span>
+                                                </button>
+                                            </form>
                                         @endif
-                                    </form>
-                                    @endunless
-                                    @unless ($booking->is_guest || $booking->waitlisted)
-                                    <form method="POST"
-                                          action="{{ route('adventures.bookings.move-to-waitlist', [$adventure, $booking]) }}"
-                                          data-refresh-modal
-                                          data-confirm="{{ $booking->player?->full_name ?? 'Spieler' }} auf die Warteliste verschieben? Der Teilnehmer wird per E-Mail informiert.">
-                                        @csrf @method('PATCH')
-                                        <button type="submit"
-                                                class="ui mini icon yellow button"
-                                                data-tooltip="Auf Warteliste verschieben"
-                                                data-position="top center">
-                                            <i class="hourglass half icon"></i>
-                                            <span class="sm:hidden ml-1 text-xs">Warteliste</span>
-                                        </button>
-                                    </form>
                                     @endunless
                                 @endcan
                                 @can('adventure.modify')

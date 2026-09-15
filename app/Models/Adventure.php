@@ -160,7 +160,7 @@ class Adventure extends Model
     {
         $payable = $this->bookings
             ->where('waitlisted', false)
-            ->whereNotIn('event_role_id', [EventRole::NSC_ROLE_ID, ...EventRole::TEAMER_ROLE_IDS]);
+            ->whereNotIn('event_role_id', EventRole::teamerLike()->pluck('id'));
         $paidAmount = 0.0;
         $openAmount = 0.0;
 
@@ -221,7 +221,7 @@ class Adventure extends Model
     {
         // Teamer-Rollen zählen nicht gegen das Teilnehmerlimit (sie können sich immer anmelden).
         return max(0, $this->max_player - $this->confirmedBookings()
-            ->whereNotIn('event_role_id', EventRole::TEAMER_ROLE_IDS)
+            ->whereNotIn('event_role_id', EventRole::teamerLike()->pluck('id'))
             ->count());
     }
 

@@ -185,7 +185,7 @@ class TeamerSignupController extends Controller
         ]);
 
         if (! $wasApproved) {
-            $signup->user->notify(new TeamerApproved($adventure));
+            $signup->user->notify(new TeamerApproved($signup));
         }
 
         $msg = ! $wasApproved ? 'Teamer bestätigt.' : 'Bestätigung zurückgenommen.';
@@ -213,6 +213,27 @@ class TeamerSignupController extends Controller
 
         $msg = ! $wasRejected ? 'Teamer abgelehnt.' : 'Ablehnung zurückgenommen.';
 
+        return $request->expectsJson()
+            ? response()->json(['message' => $msg, 'refresh_modal' => true])
+            : back()->with('status', $msg);
+    }
+
+    /** Bestätigungsmail für eine bereits bestätigte Teamer-Anmeldung erneut senden. */
+    public function resendConfirmation(Request $request, Adventure $adventure, TeamerSignup $signup): RedirectResponse|JsonResponse
+    {
+        abort_unless($request->user()->can('events.edit'), 403);
+        abort_if($signup->adventure_id !== $adventure->id, 404);
+
+        if (! $signup->approved_at) {
+            $msg = 'Die Teamer-Anmeldung ist noch nicht bestätigt.';
+            return $request->expectsJson()
+                ? response()->json(['message' => $msg], 422)
+                : back()->with('error', $msg);
+        }
+
+        $signup->user->notify(new TeamerApproved($signup));
+
+        $msg = 'Bestätigungsmail erneut gesendet.';
         return $request->expectsJson()
             ? response()->json(['message' => $msg, 'refresh_modal' => true])
             : back()->with('status', $msg);
