@@ -36,6 +36,7 @@ class BookingController extends Controller
         // Buchen: adventure.book; Stornieren/Abmelden: adventure.cancel.
         $this->middleware('can:adventure.book')->only(['create', 'store', 'createGuest', 'storeGuest']);
         $this->middleware('can:adventure.cancel')->only('destroy');
+        $this->middleware('can:approve-bookings')->only('reinstate');
         // Anmeldedetails nachträglich ändern (BOOK-04).
         $this->middleware('can:adventure.modify')->only(['edit', 'update']);
         // Anmeldebestätigung erneut senden (BOOK-05): Zugriff wird in der Methode geprüft.
@@ -576,20 +577,25 @@ class BookingController extends Controller
             abort(403);
         }
 
-        // Auch bezahlte Anmeldungen dürfen storniert werden (ADV-21) – kein Block.
-        $participant = $booking->participant_name;
+        // Bereits stornierte Anmeldungen können nicht erneut storniert werden.
+        if ($booking->status === 'storniert') {
+            $msg = 'Diese Anmeldung ist bereits storniert.';
+            return $request->expectsJson()
+                ? response()->json(['message' => $msg], 422)
+                : back()->with('error', $msg);
+        }
 
-        // Für Stornierungsbenachrichtigung vorab laden, bevor das Modell gelöscht wird.
+        $participant = $booking->participant_name;
         $cancelUser  = $booking->player?->users()->first();
         $cancelEmail = $booking->player?->email;
         $notifyCancel = $booking->player?->notificationEnabled('notify_booking_cancelled') ?? false;
 
-        // M-3: Stornierung protokollieren (vor delete, damit auditLabel noch greift).
+        // M-3: Stornierung protokollieren.
         AuditLogger::log('booking.cancelled', $booking, ['adventure' => $adventure->name]);
 
-        // Wird ein regulärer Platz frei, rückt die älteste Wartelisten-Buchung nach (BOOK-07).
+        // Anmeldung auf "storniert" setzen – Datensatz bleibt erhalten (Nachweis bei bezahlten Buchungen).
         $wasRegular = ! $booking->waitlisted;
-        $booking->delete();
+        $booking->update(['status' => 'storniert']);
 
         // NOTI-10: Stornierungsbestätigung + Portal an den Teilnehmer selbst.
         if ($notifyCancel) {
@@ -640,6 +646,32 @@ class BookingController extends Controller
         return $request->expectsJson()
             ? response()->json(['message' => $message, 'refresh_modal' => true])
             : back()->with('status', $message);
+    }
+
+    /**
+     * Stornierte Anmeldung wiederherstellen (nur Projektleiter/Admin).
+     * Setzt Status zurück auf „offen" und gibt den regulären Platz zurück.
+     */
+    public function reinstate(Request $request, Adventure $adventure, Booking $booking): RedirectResponse|JsonResponse
+    {
+        abort_unless($booking->adventure_id === $adventure->id, 404);
+
+        if ($booking->status !== 'storniert') {
+            $msg = 'Diese Anmeldung ist nicht storniert.';
+            return $request->expectsJson()
+                ? response()->json(['message' => $msg], 422)
+                : back()->with('error', $msg);
+        }
+
+        $booking->update(['status' => 'offen', 'waitlisted' => false]);
+
+        AuditLogger::log('booking.reinstated', $booking, ['adventure' => $adventure->name]);
+
+        $msg = 'Anmeldung wurde wiederhergestellt.';
+
+        return $request->expectsJson()
+            ? response()->json(['message' => $msg, 'refresh_modal' => true])
+            : back()->with('status', $msg);
     }
 
     /**

@@ -42,10 +42,11 @@ class Booking extends Model
 
     /** Anmelde-Status (ADV-18) → Anzeige-Label. */
     public const STATUS_LABELS = [
-        'offen' => 'offen',
+        'offen'      => 'offen',
         'bestaetigt' => 'bestätigt',
-        'abgelehnt' => 'abgelehnt',
+        'abgelehnt'  => 'abgelehnt',
         'abgemeldet' => 'abgemeldet',
+        'storniert'  => 'storniert',
     ];
 
     /** Abwesenheitsgründe bei „abgemeldet". */

@@ -49,7 +49,7 @@
                 <td data-label="Alter" @if ($manage) data-col="age" data-sort-val="{{ $booking->participant_age ?? 9999 }}" @endif>{{ $booking->participant_age ?? '—' }}</td>
                 <td data-label="Rolle">{{ $booking->role?->description }}</td>
                 <td data-label="Liste">{{ $booking->waitlisted ? 'Warteliste' : 'regulär' }}</td>
-                <td data-label="Status" @if ($manage) data-col="status" data-sort-val="{{ $booking->waitlisted ? 0 : ($booking->status === 'bestaetigt' ? 2 : ($booking->status === 'abgemeldet' ? 3 : ($booking->status === 'abgelehnt' ? 4 : 1))) }}" @endif>
+                <td data-label="Status" @if ($manage) data-col="status" data-sort-val="{{ $booking->waitlisted ? 0 : ($booking->status === 'bestaetigt' ? 2 : ($booking->status === 'abgemeldet' ? 3 : ($booking->status === 'abgelehnt' ? 4 : ($booking->status === 'storniert' ? 5 : 1)))) }}" @endif>
                     @if ($booking->waitlisted)
                         <span class="text-amber-600">⏳ Warteliste</span>
                     @elseif ($booking->status === 'bestaetigt')
@@ -58,6 +58,8 @@
                         <span class="text-red-600">abgelehnt</span>
                     @elseif ($booking->status === 'abgemeldet')
                         <span class="text-orange-600">abgemeldet{{ $booking->absence_reason_label ? ' ('.$booking->absence_reason_label.')' : '' }}</span>
+                    @elseif ($booking->status === 'storniert')
+                        <span class="text-stone-400 line-through">storniert</span>
                     @else
                         <span class="text-stone-500">offen</span>
                     @endif
@@ -128,8 +130,8 @@
                                     @endcan
                                 @endif
                             @endif
-                            {{-- Bestätigung erneut senden: in beiden Ansichten für Admin oder eigene Buchung --}}
-                            @unless ($booking->is_guest || $booking->waitlisted)
+                            {{-- Bestätigung erneut senden: nur wenn nicht storniert --}}
+                            @unless ($booking->is_guest || $booking->waitlisted || $booking->status === 'storniert')
                                 @if (Gate::allows('approve-bookings') || $booking->booked_by_user_id === auth()->id())
                                 <form method="POST" action="{{ route('adventures.bookings.resend-confirmation', [$adventure, $booking]) }}" data-refresh-modal>
                                     @csrf
@@ -141,25 +143,39 @@
                                 </form>
                                 @endif
                             @endunless
-                            {{-- Bearbeiten + Stornieren: in beiden Ansichten für jeden mit Buchungsberechtigung --}}
-                            @can('adventure.modify')
-                                <a href="{{ route('adventures.bookings.edit', [$adventure, $booking]) }}"
-                                   data-modal-stack="{{ route('adventures.bookings.edit', [$adventure, $booking]) }}"
-                                   class="ui mini icon button" data-tooltip="Bearbeiten" data-position="top center">
-                                    <i class="edit icon"></i>
-                                    <span class="sm:hidden ml-1 text-xs">Bearb.</span>
-                                </a>
-                            @endcan
-                            @can('adventure.cancel')
-                                <form method="POST" action="{{ route('adventures.bookings.destroy', [$adventure, $booking]) }}"
-                                      data-refresh-modal data-confirm="Anmeldung stornieren?">
-                                    @csrf @method('DELETE')
-                                    <button type="submit" class="ui mini icon button red" data-tooltip="Stornieren" data-position="top center">
-                                        <i class="times icon"></i>
-                                        <span class="sm:hidden ml-1 text-xs">Storn.</span>
-                                    </button>
-                                </form>
-                            @endcan
+                            {{-- Bearbeiten: nur wenn nicht storniert --}}
+                            @if ($booking->status !== 'storniert')
+                                @can('adventure.modify')
+                                    <a href="{{ route('adventures.bookings.edit', [$adventure, $booking]) }}"
+                                       data-modal-stack="{{ route('adventures.bookings.edit', [$adventure, $booking]) }}"
+                                       class="ui mini icon button" data-tooltip="Bearbeiten" data-position="top center">
+                                        <i class="edit icon"></i>
+                                        <span class="sm:hidden ml-1 text-xs">Bearb.</span>
+                                    </a>
+                                @endcan
+                                @can('adventure.cancel')
+                                    <form method="POST" action="{{ route('adventures.bookings.destroy', [$adventure, $booking]) }}"
+                                          data-refresh-modal data-confirm="Anmeldung wirklich stornieren? Diese Aktion kann nur der Projektleiter rückgängig machen.">
+                                        @csrf @method('DELETE')
+                                        <button type="submit" class="ui mini icon button red" data-tooltip="Stornieren" data-position="top center">
+                                            <i class="times icon"></i>
+                                            <span class="sm:hidden ml-1 text-xs">Storn.</span>
+                                        </button>
+                                    </form>
+                                @endcan
+                            @else
+                                {{-- Stornierte Anmeldung wiederherstellen: nur Projektleiter/Admin --}}
+                                @can('approve-bookings')
+                                    <form method="POST" action="{{ route('adventures.bookings.reinstate', [$adventure, $booking]) }}"
+                                          data-refresh-modal data-confirm="Anmeldung von {{ $booking->participant_name }} wiederherstellen?">
+                                        @csrf @method('PATCH')
+                                        <button type="submit" class="ui mini icon button teal" data-tooltip="Anmeldung wiederherstellen" data-position="top center">
+                                            <i class="undo icon"></i>
+                                            <span class="sm:hidden ml-1 text-xs">Wiederherst.</span>
+                                        </button>
+                                    </form>
+                                @endcan
+                            @endif
                         </div>
                     </td>
                 @endif
