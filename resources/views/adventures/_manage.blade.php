@@ -5,19 +5,23 @@
 
     $emailGroups = [
         'all'       => $mainBookings
+            ->where('status', '!=', 'storniert')
             ->filter(fn($b) => ! $b->is_guest)
             ->map($collectEmail)->filter()->unique()->values()->all(),
         'confirmed' => $mainBookings
             ->where('waitlisted', false)
+            ->where('status', '!=', 'storniert')
             ->filter(fn($b) => ! $b->is_guest)
             ->map($collectEmail)->filter()->unique()->values()->all(),
         'unpaid'    => $mainBookings
             ->where('waitlisted', false)
+            ->where('status', '!=', 'storniert')
             ->where('paid', false)
             ->filter(fn($b) => ! $b->is_guest)
             ->map($collectEmail)->filter()->unique()->values()->all(),
         'waitlist'  => $mainBookings
             ->where('waitlisted', true)
+            ->where('status', '!=', 'storniert')
             ->filter(fn($b) => ! $b->is_guest)
             ->map($collectEmail)->filter()->unique()->values()->all(),
     ];
