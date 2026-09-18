@@ -59,6 +59,9 @@ Route::get('/manifest.webmanifest', function () {
 // Datenschutzerklärung (DSGVO Art. 13) – öffentlich, ohne Auth.
 Route::get('/datenschutz', fn () => view('datenschutz'))->name('datenschutz');
 
+// Allgemeine Teilnahmebedingungen – öffentlich, ohne Auth.
+Route::get('/agb', fn () => view('agb'))->name('agb');
+
 // Newsletter Double-Opt-in-Bestätigung (öffentlich, kein Login nötig).
 Route::get('/newsletter/bestaetigen/{token}', [NewsletterSubscriptionController::class, 'confirm'])->name('newsletter.confirm');
 

@@ -107,7 +107,7 @@
                 <input type="checkbox" name="agb" id="grp_agb" value="1" required>
                 <label for="grp_agb">
                     Ich bestätige, dass alle ausgewählten Mitglieder den
-                    <a href="/agb" target="_blank" class="text-waldritter underline">AGB</a>
+                    <a href="{{ route('agb') }}" target="_blank" class="text-waldritter underline">Teilnahmebedingungen</a>
                     zustimmen und zur Teilnahme berechtigt sind. <span class="text-red-500">*</span>
                 </label>
             </div>

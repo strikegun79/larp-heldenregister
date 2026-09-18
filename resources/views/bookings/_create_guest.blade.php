@@ -143,21 +143,8 @@
         <div class="field required mt-3">
             <label class="flex items-start gap-2 font-normal cursor-pointer">
                 <input type="checkbox" name="agb" value="1" required class="mt-1 shrink-0">
-                <span>Ich stimme den <strong>Teilnahmebedingungen</strong> zu.</span>
+                <span>Ich stimme den <a href="{{ route('agb') }}" target="_blank" class="text-waldritter underline">Teilnahmebedingungen</a> zu.</span>
             </label>
-            <details class="mt-1 ml-6">
-                <summary class="text-xs text-waldritter cursor-pointer hover:underline">Teilnahmebedingungen anzeigen</summary>
-                <div class="text-xs text-stone-600 mt-2 p-3 bg-stone-50 rounded border border-stone-200 leading-relaxed space-y-1">
-                    <p>Mit der Anmeldung erkläre ich mich einverstanden, dass:</p>
-                    <ul class="list-disc ml-4 space-y-1">
-                        <li>Der Gast sich an die Spielregeln und Anweisungen des Organisationsteams hält.</li>
-                        <li>Die angegebenen Gesundheitsdaten (Allergien) ausschließlich für Notfälle während der Veranstaltung verwendet werden.</li>
-                        <li>Bei Abmeldung nach Anmeldeschluss die Stornierungsbedingungen des Veranstalters gelten können.</li>
-                        <li>Fotos nur bei erteilter Fotoerlaubnis veröffentlicht werden.</li>
-                    </ul>
-                    <p class="text-stone-400 pt-1">Den vollständigen Text der Teilnahmebedingungen erhältst du beim Organisationsteam.</p>
-                </div>
-            </details>
         </div>
     </form>
 

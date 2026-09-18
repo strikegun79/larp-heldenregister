@@ -68,7 +68,7 @@
     <div class="field required">
         <label class="flex items-center gap-2">
             <input type="checkbox" name="agb" value="1" required>
-            Ich stimme der Hausordnung und den Teilnahmebedingungen zu.
+            Ich stimme der Hausordnung und den <a href="{{ route('agb') }}" target="_blank" class="text-waldritter underline">Teilnahmebedingungen</a> zu.
         </label>
     </div>
 
