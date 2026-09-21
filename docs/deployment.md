@@ -34,6 +34,7 @@ php artisan migrate --force
 
 # 7. Datenbank-Seeder (Stammdaten / Standard-Settings)
 php artisan db:seed --class=SettingsSeeder
+php artisan db:seed --class=TaskTypeDefinitionSeeder   # Task-Typ-Standardkonfiguration
 # weitere Seeder nach Bedarf: --class=EventStatusSeeder usw.
 
 # 8. Storage-Symlink anlegen
@@ -130,11 +131,35 @@ server {
 
 ## Scheduler (Cron)
 
-Einmalig als `www-data`-Cron eintragen:
+Einmalig als `www-data`-Cron eintragen (**Pflicht** — ohne diesen Eintrag laufen
+keine automatischen Aufgaben: kein Taskmanager, keine Erinnerungsmails, keine Backups):
 
 ```cron
 * * * * * cd /var/www/heldenregister && php artisan schedule:run >> /dev/null 2>&1
 ```
+
+Eintragen via:
+
+```bash
+(crontab -l -u www-data; echo "* * * * * cd /var/www/heldenregister && php artisan schedule:run >> /dev/null 2>&1") | crontab -u www-data -
+```
+
+Prüfen ob alle Tasks korrekt registriert sind:
+
+```bash
+php artisan schedule:list
+```
+
+### Geplante Aufgaben (Übersicht)
+
+| Zeit | Befehl | Funktion |
+|---|---|---|
+| 07:00 | `adventures:run-tasks` | Fällige Event-Aufgaben ausführen (Taskmanager) |
+| 08:00 | `events:send-reminders` | Erinnerungsmails an bestätigte Teilnehmer |
+| 01:00 | `backup:clean` | Alte Backups bereinigen |
+| 02:00 | `backup:run` | Neues Backup anlegen |
+| 03:00 | `dsgvo:prune` | DSGVO-Aufbewahrungsfristen prüfen |
+| 04:00 | `queue:prune-failed` | Failed Jobs älter als 7 Tage löschen |
 
 ---
 

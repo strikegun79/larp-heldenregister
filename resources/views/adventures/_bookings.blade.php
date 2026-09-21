@@ -101,7 +101,7 @@
                                               data-confirm="{{ $booking->player?->full_name ?? 'Spieler' }} von der Warteliste auf regulären Platz hochstufen?">
                                             @csrf
                                             <button type="submit" class="ui mini icon green button"
-                                                    data-tooltip="Von Warteliste bestätigen" data-position="top center">
+                                                    data-tooltip="Von Warteliste bestätigen" data-position="top right">
                                                 <i class="check icon"></i>
                                                 <span class="sm:hidden ml-1 text-xs">Bestät.</span>
                                             </button>
@@ -111,7 +111,7 @@
                                               data-confirm="{{ $booking->player?->full_name ?? 'Spieler' }} auf die Warteliste verschieben? Der Teilnehmer wird per E-Mail informiert.">
                                             @csrf @method('PATCH')
                                             <button type="submit" class="ui mini icon yellow button"
-                                                    data-tooltip="Auf Warteliste verschieben" data-position="top center">
+                                                    data-tooltip="Auf Warteliste verschieben" data-position="top right">
                                                 <i class="hourglass half icon"></i>
                                                 <span class="sm:hidden ml-1 text-xs">Warteliste</span>
                                             </button>
@@ -125,7 +125,7 @@
                                               data-confirm="{{ $booking->paid ? 'Beitrag als offen markieren?' : 'Beitrag als bezahlt markieren?' }}">
                                             @csrf @method('PATCH')
                                             <button type="submit" class="ui mini icon button {{ $booking->paid ? '' : 'yellow' }}"
-                                                    data-tooltip="{{ $booking->paid ? 'Als offen markieren' : 'Als bezahlt markieren' }}" data-position="top center">
+                                                    data-tooltip="{{ $booking->paid ? 'Als offen markieren' : 'Als bezahlt markieren' }}" data-position="top right">
                                                 <i class="coins icon"></i>
                                                 <span class="sm:hidden ml-1 text-xs">{{ $booking->paid ? 'Offen' : 'Bezahlt' }}</span>
                                             </button>
@@ -139,7 +139,7 @@
                                 <form method="POST" action="{{ route('adventures.bookings.resend-confirmation', [$adventure, $booking]) }}" data-refresh-modal>
                                     @csrf
                                     <button type="submit" class="ui mini icon button"
-                                            data-tooltip="Anmeldebestätigung erneut senden" data-position="top center">
+                                            data-tooltip="Anmeldebestätigung erneut senden" data-position="top right">
                                         <i class="envelope outline icon"></i>
                                         <span class="sm:hidden ml-1 text-xs">Mail</span>
                                     </button>
@@ -151,7 +151,7 @@
                                 @can('adventure.modify')
                                     <a href="{{ route('adventures.bookings.edit', [$adventure, $booking]) }}"
                                        data-modal-stack="{{ route('adventures.bookings.edit', [$adventure, $booking]) }}"
-                                       class="ui mini icon button" data-tooltip="Bearbeiten" data-position="top center">
+                                       class="ui mini icon button" data-tooltip="Bearbeiten" data-position="top right">
                                         <i class="edit icon"></i>
                                         <span class="sm:hidden ml-1 text-xs">Bearb.</span>
                                     </a>
@@ -160,7 +160,7 @@
                                     <form method="POST" action="{{ route('adventures.bookings.destroy', [$adventure, $booking]) }}"
                                           data-refresh-modal data-confirm="Anmeldung wirklich stornieren? Diese Aktion kann nur der Projektleiter rückgängig machen.">
                                         @csrf @method('DELETE')
-                                        <button type="submit" class="ui mini icon button red" data-tooltip="Stornieren" data-position="top center">
+                                        <button type="submit" class="ui mini icon button red" data-tooltip="Stornieren" data-position="top right">
                                             <i class="times icon"></i>
                                             <span class="sm:hidden ml-1 text-xs">Storn.</span>
                                         </button>
@@ -173,7 +173,7 @@
                                         <form method="POST" action="{{ route('adventures.bookings.reinstate', [$adventure, $booking]) }}"
                                               data-refresh-modal data-confirm="Anmeldung von {{ $booking->participant_name }} wiederherstellen?">
                                             @csrf @method('PATCH')
-                                            <button type="submit" class="ui mini icon button teal" data-tooltip="Anmeldung wiederherstellen" data-position="top center">
+                                            <button type="submit" class="ui mini icon button teal" data-tooltip="Anmeldung wiederherstellen" data-position="top right">
                                                 <i class="undo icon"></i>
                                                 <span class="sm:hidden ml-1 text-xs">Wiederherst.</span>
                                             </button>

@@ -50,7 +50,7 @@ mysql -uroot -e "CREATE USER 'heldenregister'@'localhost' IDENTIFIED BY 'geheim'
 mysql -uroot -e "GRANT ALL ON heldenregister.* TO 'heldenregister'@'localhost';"
 
 php artisan migrate
-php artisan db:seed        # Stammdaten: Rollen, Klassen, EP-Typen, Orte, …
+php artisan db:seed        # Stammdaten: Rollen, Klassen, EP-Typen, Orte, Task-Typen …
 php artisan storage:link
 
 # 4. Dev-Server starten
@@ -162,16 +162,32 @@ registriert.
 
 ---
 
+## Scheduler (Cron) — Pflicht für Produktion
+
+Damit automatische Aufgaben laufen (Taskmanager, Erinnerungsmails, Backups), muss
+der Laravel Scheduler als Cron eingetragen sein:
+
+```cron
+* * * * * cd /var/www/heldenregister && php artisan schedule:run >> /dev/null 2>&1
+```
+
+Detaillierte Anleitung: [docs/deployment.md](docs/deployment.md#scheduler-cron)
+
+---
+
 ## Wichtige Artisan-Befehle
 
 ```bash
-php artisan migrate              # Schema aktualisieren
-php artisan db:seed              # Stammdaten einspielen
-php artisan migrate:legacy       # Legacy-Daten übernehmen (ETL)
-php artisan etl:check-hero-classes  # Klassen-Mapping prüfen
-php artisan backup:run           # Manuelles Backup (Produktion)
-php artisan queue:restart        # Worker nach Deploy neu starten (Supervisor übernimmt)
-php artisan queue:failed         # Fehlgeschlagene Mail-Jobs anzeigen
+php artisan migrate                  # Schema aktualisieren
+php artisan db:seed                  # Stammdaten einspielen
+php artisan migrate:legacy           # Legacy-Daten übernehmen (ETL)
+php artisan etl:check-hero-classes   # Klassen-Mapping prüfen
+php artisan backup:run               # Manuelles Backup (Produktion)
+php artisan queue:restart            # Worker nach Deploy neu starten (Supervisor übernimmt)
+php artisan queue:failed             # Fehlgeschlagene Mail-Jobs anzeigen
+php artisan adventures:run-tasks     # Fällige Event-Aufgaben sofort ausführen
+php artisan adventures:run-tasks --dry-run  # Anzeigen was fällig wäre (keine Änderungen)
+php artisan schedule:list            # Alle geplanten Aufgaben mit nächster Ausführungszeit
 ```
 
 ---

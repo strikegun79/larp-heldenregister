@@ -67,6 +67,7 @@
                         $adminCard('Auftraggeber',     'Auftraggeber pflegen',       'verwaltung_auftraggeber.jpg',     route('admin.event-clients.index')),
                         $adminCard('Teilnahme-Rollen', 'Event-Rollen pflegen',       'verwaltung_teilnahme-rollen.jpg', route('admin.event-roles.index')),
                         $adminCard('Event-Status',     'Status-Lookups pflegen',     'verwaltung_event-status.jpg',     route('admin.event-statuses.index')),
+                        $adminCard('Taskmanager',      'Automatische Aufgaben konfigurieren', 'verwaltung_event-kategorien.jpg', route('admin.task-manager.index')),
                     ] as $c)
                         <x-admin.dashboard-card :card="$c" />
                     @endforeach

@@ -160,6 +160,10 @@
     <x-mobile.accordion-section title="Check-in">
         @include('adventures._checkin')
     </x-mobile.accordion-section>
+
+    <x-mobile.accordion-section title="Taskmanager">
+        @include('adventures._tasks', ['tasks' => $tasks])
+    </x-mobile.accordion-section>
 </div>
 
 {{-- Desktop: Fomantic-Tabs (sm+) --}}
@@ -169,6 +173,12 @@
         <a class="item" data-tab="bookings" style="white-space: nowrap;">{!! $bookingsTabLabel !!}</a>
         <a class="item" data-tab="teamer-nsc" style="white-space: nowrap;">Teamer/NSC ({{ $adventure->teamerSignups->count() + $nscBookings->count() }})</a>
         <a class="item" data-tab="checkin" style="white-space: nowrap;">Check-in</a>
+        <a class="item" data-tab="tasks" style="white-space: nowrap;">
+            <i class="clock icon"></i> Taskmanager
+            @if ($tasks->where('is_active', true)->isNotEmpty())
+                <span class="ui mini teal circular label ml-1">{{ $tasks->where('is_active', true)->count() }}</span>
+            @endif
+        </a>
     </div>
 
     <div class="ui bottom attached tab segment active" data-tab="data">
@@ -277,6 +287,10 @@
 
     <div class="ui bottom attached tab segment" data-tab="checkin">
         @include('adventures._checkin')
+    </div>
+
+    <div class="ui bottom attached tab segment" data-tab="tasks">
+        @include('adventures._tasks', ['tasks' => $tasks])
     </div>
 </div>
 

@@ -165,6 +165,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::patch('adventures/{adventure}/cancel', [AdventureController::class, 'cancel'])->name('adventures.cancel');
     // Wartelistenmodus umschalten (ADV-WL).
     Route::patch('adventures/{adventure}/toggle-waitlist-mode', [AdventureController::class, 'toggleWaitlistMode'])->name('adventures.toggle-waitlist-mode');
+    // Taskmanager-Einstellungen speichern (TASK-01).
+    Route::put('adventures/{adventure}/tasks', [AdventureController::class, 'saveTasks'])->name('adventures.tasks.save');
 
     // Anmeldungen zu einem Abenteuer.
     // Anmeldeformular als Modal-Unteransicht (ADV-15).
@@ -290,6 +292,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
 
     // Veranstaltungs-Lookups (ROLE-10): portal.manage (Admin) ODER events.admin (Projektleitung).
     Route::prefix('admin')->name('admin.')->middleware('can:events.admin-access')->group(function () {
+        // Taskmanager-Standardkonfiguration (TASK-01).
+        Route::get('task-manager', [Admin\TaskManagerController::class, 'index'])->name('task-manager.index');
+        Route::get('task-manager/{taskTypeDefinition}/edit', [Admin\TaskManagerController::class, 'edit'])->name('task-manager.edit');
+        Route::put('task-manager/{taskTypeDefinition}', [Admin\TaskManagerController::class, 'update'])->name('task-manager.update');
+
         // Veranstaltungsorte pflegen (ADV-08).
         Route::get('locations', [Admin\LocationController::class, 'index'])->name('locations.index');
         Route::get('locations/create', [Admin\LocationController::class, 'create'])->name('locations.create');

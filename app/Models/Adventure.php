@@ -118,6 +118,11 @@ class Adventure extends Model
         return $this->hasMany(EpTransaction::class);
     }
 
+    public function tasks(): HasMany
+    {
+        return $this->hasMany(AdventureTask::class);
+    }
+
     /**
      * Anmeldungen auf einem regulären Platz (nicht auf der Warteliste).
      */

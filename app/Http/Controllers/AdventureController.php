@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Exports\ParticipationExport;
 use App\Models\Adventure;
+use App\Models\AdventureTask;
 use App\Models\EventCategory;
 use App\Models\EventClient;
 use App\Models\EventRole;
@@ -35,7 +36,7 @@ class AdventureController extends Controller
         $this->middleware('can:adventure.access')->only(['index', 'show', 'calendar']);
         // Events anlegen/bearbeiten/absagen + Verwaltungsliste: events.edit
         // (Admin, Bürokrat, Projektleitung).
-        $this->middleware('can:events.edit')->only(['create', 'store', 'edit', 'update', 'destroy', 'manage', 'cancel', 'manageIndex', 'toggleWaitlistMode']);
+        $this->middleware('can:events.edit')->only(['create', 'store', 'edit', 'update', 'destroy', 'manage', 'cancel', 'manageIndex', 'toggleWaitlistMode', 'saveTasks']);
         // Teilnehmer-PDF: Projektleitung, Bürokrat, Admin (ADV-17).
         $this->middleware('can:take-signatures')->only('participantsPdf');
         // Teilnahme-/Belegungsreport (REP-03): Event-Verwalter.
@@ -228,9 +229,10 @@ class AdventureController extends Controller
         $mainBookings = $adventure->bookings->filter(fn ($b) => ! $b->role?->is_teamer_like)->sortByDesc('created_at')->values();
 
         $data = array_merge($this->formData($adventure), [
-            'nscBookings' => $nscBookings,
-            'mainBookings' => $mainBookings,
+            'nscBookings'     => $nscBookings,
+            'mainBookings'    => $mainBookings,
             'deletionBlocker' => $adventure->deletionBlocker(),
+            'tasks'           => $adventure->tasks,
         ]);
 
         // ARCH-002: AJAX → Partial für Modal, Direktaufruf → Vollseite.
@@ -406,6 +408,61 @@ class AdventureController extends Controller
         return $request->expectsJson()
             ? response()->json(['message' => $message, 'reload' => true])
             : redirect()->route('adventures.show', $adventure)->with('status', $message);
+    }
+
+    /**
+     * Taskmanager-Einstellungen für eine Veranstaltung speichern (TASK-01).
+     * Für jeden bekannten Task-Typ wird ein AdventureTask upserted.
+     */
+    public function saveTasks(Request $request, Adventure $adventure): RedirectResponse|JsonResponse
+    {
+        $knownTypes = array_keys(config('adventure_tasks.tasks', []));
+        $input      = $request->input('tasks', []);
+
+        foreach ($knownTypes as $type) {
+            $row = $input[$type] ?? [];
+
+            $isActive = isset($row['is_active']) && $row['is_active'];
+
+            $days = isset($row['trigger_days']) ? max(0, (int) $row['trigger_days']) : 0;
+
+            $reference = in_array($row['trigger_reference'] ?? '', ['start_at', 'end_at'], true)
+                ? $row['trigger_reference']
+                : config("adventure_tasks.tasks.{$type}.default_reference", 'start_at');
+
+            $direction = in_array($row['trigger_direction'] ?? '', ['before', 'after'], true)
+                ? $row['trigger_direction']
+                : config("adventure_tasks.tasks.{$type}.default_direction", 'before');
+
+            // Konfigurationsänderung setzt executed_at zurück (Task neu planen).
+            $existing = AdventureTask::where('adventure_id', $adventure->id)
+                ->where('task_type', $type)
+                ->first();
+
+            $configChanged = $existing && (
+                $existing->trigger_days      !== $days
+                || $existing->trigger_reference !== $reference
+                || $existing->trigger_direction !== $direction
+            );
+
+            AdventureTask::updateOrCreate(
+                ['adventure_id' => $adventure->id, 'task_type' => $type],
+                [
+                    'is_active'         => $isActive,
+                    'trigger_days'      => $days,
+                    'trigger_reference' => $reference,
+                    'trigger_direction' => $direction,
+                    'executed_at'       => ($configChanged && $isActive) ? null : ($existing?->executed_at),
+                    'result'            => ($configChanged && $isActive) ? null : ($existing?->result),
+                ]
+            );
+        }
+
+        $message = 'Aufgaben wurden gespeichert.';
+
+        return $request->expectsJson()
+            ? response()->json(['message' => $message, 'reload' => true])
+            : back()->with('status', $message);
     }
 
     public function destroy(Adventure $adventure): RedirectResponse

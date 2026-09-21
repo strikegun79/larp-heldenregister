@@ -12,6 +12,9 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
+        // TASK-01: Fällige Event-Aufgaben ausführen (Status-Automationen, Mails etc.).
+        $schedule->command('adventures:run-tasks')->dailyAt('07:00');
+
         // Tägliche Event-Erinnerungen (NOTI-05). Cron-Eintrag für den Scheduler:
         //   * * * * * cd /var/www/heldenregister && php artisan schedule:run >> /dev/null 2>&1
         $schedule->command('events:send-reminders')->dailyAt('08:00');
