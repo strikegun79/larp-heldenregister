@@ -18,6 +18,10 @@ class BookingCancelled extends Notification implements ShouldQueue
     public function __construct(
         private readonly Adventure $adventure,
         private readonly string $participant,
+        private readonly string $cancelledByName,
+        private readonly int $confirmedCount,
+        private readonly int $maxPlayers,
+        private readonly int $waitlistCount,
     ) {}
 
     /** @return array<int, string> */
@@ -34,16 +38,20 @@ class BookingCancelled extends Notification implements ShouldQueue
     public function toArray(object $notifiable): array
     {
         return [
-            'message' => 'Storniert: '.$this->participant.' – '.$this->adventure->name,
-            'url' => route('adventures.manage-index'),
+            'message' => 'Storniert: '.$this->participant.' – '.$this->adventure->name
+                .' (Stand: '.$this->confirmedCount.'/'.$this->maxPlayers
+                .', Warteliste: '.$this->waitlistCount.')',
+            'url' => route('adventures.manage', $this->adventure->id),
         ];
     }
 
     public function toMail(object $notifiable): MailMessage
     {
         return (new MailMessage)
-            ->subject('Anmeldung storniert: '.$this->adventure->name)
-            ->line($this->participant.' wurde von „'.$this->adventure->name.'" abgemeldet/storniert.')
-            ->action('Zur Event-Verwaltung', route('adventures.manage-index'));
+            ->subject('Stornierung einer Anmeldung: '.$this->adventure->name)
+            ->line('**'.$this->cancelledByName.'** hat die Anmeldung von **'.$this->participant.'** an der Veranstaltung „'.$this->adventure->name.'" storniert.')
+            ->line('**Aktueller Stand der Anmeldungen:** '.$this->confirmedCount.'/'.$this->maxPlayers)
+            ->line('**Aktuelle Spieler auf der Warteliste:** '.$this->waitlistCount)
+            ->action('Zur Veranstaltungsverwaltung', route('adventures.manage', $this->adventure->id));
     }
 }

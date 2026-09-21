@@ -17,7 +17,10 @@ class BookingCancelledParticipant extends Notification implements ShouldQueue
 {
     use Queueable;
 
-    public function __construct(private readonly Adventure $adventure) {}
+    public function __construct(
+        private readonly Adventure $adventure,
+        private readonly string $participantName,
+    ) {}
 
     /** @return array<int, string> */
     public function via(object $notifiable): array
@@ -33,7 +36,7 @@ class BookingCancelledParticipant extends Notification implements ShouldQueue
 
         return (new MailMessage)
             ->subject('Abmeldung bestätigt: '.$this->adventure->name)
-            ->line('Deine Anmeldung für „'.$this->adventure->name.'" ('.$date.') wurde storniert.')
+            ->line('Die Anmeldung von '.$this->participantName.' für „'.$this->adventure->name.'" ('.$date.') wurde storniert.')
             ->line('Falls dies ein Versehen war, melde dich bitte bei den Veranstaltern.')
             ->action('Zum Heldenregister', route('dashboard'));
     }
@@ -44,7 +47,7 @@ class BookingCancelledParticipant extends Notification implements ShouldQueue
         return [
             'adventure_id'   => $this->adventure->id,
             'adventure_name' => $this->adventure->name,
-            'message'        => 'Deine Anmeldung für „'.$this->adventure->name.'" wurde storniert.',
+            'message'        => 'Anmeldung von '.$this->participantName.' für „'.$this->adventure->name.'" wurde storniert.',
             'url'            => route('dashboard'),
         ];
     }

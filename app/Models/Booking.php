@@ -38,6 +38,7 @@ class Booking extends Model
         'approved_at',
         'status',
         'absence_reason',
+        'reinstate_requested',
     ];
 
     /** Anmelde-Status (ADV-18) → Anzeige-Label. */
@@ -66,6 +67,7 @@ class Booking extends Model
         'paid' => 'boolean',
         'ermaessigung' => 'boolean',
         'waitlisted' => 'boolean',
+        'reinstate_requested' => 'boolean',
         'approved_at' => 'datetime',
         'health_data_consent_at' => 'datetime',
         // DSGVO Art. 9: Unterschrift = biometrisches Datum → AES-256 via APP_KEY

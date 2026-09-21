@@ -44,6 +44,11 @@
             ->pluck('email')->filter()->unique()->values()->all(),
     ];
     $hasAnyTeamerEmails = count($teamerEmailGroups['all']) > 0 || count($teamerEmailGroups['missing']) > 0;
+
+    $cntActive    = $mainBookings->where('waitlisted', false)->where('status', '!=', 'storniert')->count();
+    $cntWaitlist  = $mainBookings->where('waitlisted', true)->count();
+    $cntCancelled = $mainBookings->where('status', 'storniert')->count();
+    $bookingsTabLabel = 'Anmeldungen (<span class="text-green-700">' . $cntActive . '</span>/<span class="text-amber-600">' . $cntWaitlist . '</span>/<span class="text-red-600">' . $cntCancelled . '</span>)';
 @endphp
 
 {{-- UI-40: Mobile Accordion (< sm) --}}
@@ -72,7 +77,7 @@
         @endif
     </x-mobile.accordion-section>
 
-    <x-mobile.accordion-section :title="'Anmeldungen (' . $mainBookings->count() . ')'">
+    <x-mobile.accordion-section :title="$bookingsTabLabel">
         @include('adventures._waitlist_mode_toggle')
         <div class="flex flex-wrap gap-2 mb-3">
             <a href="{{ route('adventures.participation-xlsx', $adventure) }}" class="ui small button" target="_blank" rel="noopener"><i class="file excel outline icon"></i> Belegungsreport (Excel)</a>
@@ -84,18 +89,27 @@
                 </a>
             @endcan
             @if ($hasAnyEmails)
-                <div class="flex items-center gap-1">
+                <div class="inline-flex rounded border border-stone-200 bg-white">
                     <select id="email-filter-mob"
                             onchange="updateManageMailto('mob', this.value)"
-                            style="border:1px solid rgba(34,36,38,.15);border-radius:.28571429rem;padding:.45em .7em;font-size:.85em;background:#fff;cursor:pointer">
+                            style="border:none;border-right:1px solid rgba(34,36,38,.15);border-radius:.28rem 0 0 .28rem;padding:.45em .6em;font-size:.85em;background:transparent;cursor:pointer;outline:none;">
                         <option value="all">Alle Teilnehmer ({{ count($emailGroups['all']) }})</option>
                         <option value="confirmed">Nur Angemeldete ({{ count($emailGroups['confirmed']) }})</option>
                         <option value="unpaid">Unbezahlte Teilnehmer ({{ count($emailGroups['unpaid']) }})</option>
                         <option value="waitlist">Wartelisten Teilnehmer ({{ count($emailGroups['waitlist']) }})</option>
                     </select>
-                    <a id="mailto-btn-mob" href="#" class="ui small teal button">
-                        <i class="mail icon"></i> E-Mail senden
-                    </a>
+                    <div class="ui small teal floating dropdown button" id="mailto-dropdown-mob"
+                         tabindex="0" style="margin:0;border-radius:0 .28rem .28rem 0;box-shadow:none;">
+                        <i class="mail icon"></i> E-Mail <i class="dropdown icon"></i>
+                        <div class="menu transition hidden" tabindex="-1" style="white-space:nowrap;">
+                            <a class="item" onclick="manageMailtoAction('client','mob'); return false;">
+                                <i class="external alternate icon"></i> An E-Mail-Client senden
+                            </a>
+                            <a class="item" onclick="manageMailtoAction('copy','mob'); return false;">
+                                <i class="copy outline icon"></i> E-Mail-Adressen kopieren
+                            </a>
+                        </div>
+                    </div>
                 </div>
             @endif
         </div>
@@ -104,18 +118,27 @@
 
     <x-mobile.accordion-section :title="'Teamer/NSC (' . ($adventure->teamerSignups->count() + $nscBookings->count()) . ')'">
         @if ($hasAnyTeamerEmails)
-            <div class="flex items-center gap-1 mb-3">
+            <div class="inline-flex rounded border border-stone-200 bg-white mb-3">
                 <select id="email-filter-teamer-mob"
                         onchange="updateTeamerMailto('mob', this.value)"
-                        style="border:1px solid rgba(34,36,38,.15);border-radius:.28571429rem;padding:.45em .7em;font-size:.85em;background:#fff;cursor:pointer">
+                        style="border:none;border-right:1px solid rgba(34,36,38,.15);border-radius:.28rem 0 0 .28rem;padding:.45em .6em;font-size:.85em;background:transparent;cursor:pointer;outline:none;">
                     <option value="all">Alle Teamer ({{ count($teamerEmailGroups['all']) }})</option>
                     <option value="approved">Bestätigte Teamer ({{ count($teamerEmailGroups['approved']) }})</option>
                     <option value="pending">Unbestätigte Teamer ({{ count($teamerEmailGroups['pending']) }})</option>
                     <option value="missing">Fehlende Teamer ({{ count($teamerEmailGroups['missing']) }})</option>
                 </select>
-                <a id="teamer-mailto-btn-mob" href="#" class="ui small teal button">
-                    <i class="mail icon"></i> E-Mail senden
-                </a>
+                <div class="ui small teal floating dropdown button" id="teamer-mailto-dropdown-mob"
+                     tabindex="0" style="margin:0;border-radius:0 .28rem .28rem 0;box-shadow:none;">
+                    <i class="mail icon"></i> E-Mail <i class="dropdown icon"></i>
+                    <div class="menu transition hidden" tabindex="-1" style="white-space:nowrap;">
+                        <a class="item" onclick="teamerMailtoAction('client','mob'); return false;">
+                            <i class="external alternate icon"></i> An E-Mail-Client senden
+                        </a>
+                        <a class="item" onclick="teamerMailtoAction('copy','mob'); return false;">
+                            <i class="copy outline icon"></i> E-Mail-Adressen kopieren
+                        </a>
+                    </div>
+                </div>
             </div>
         @endif
         @include('adventures._teamer_nsc_tab', [
@@ -143,7 +166,7 @@
 <div class="hidden sm:block">
     <div class="ui top attached tabular menu" style="overflow-x: auto; flex-wrap: nowrap;">
         <a class="item active" data-tab="data" style="white-space: nowrap;">Event-Daten</a>
-        <a class="item" data-tab="bookings" style="white-space: nowrap;">Anmeldungen ({{ $mainBookings->count() }})</a>
+        <a class="item" data-tab="bookings" style="white-space: nowrap;">{!! $bookingsTabLabel !!}</a>
         <a class="item" data-tab="teamer-nsc" style="white-space: nowrap;">Teamer/NSC ({{ $adventure->teamerSignups->count() + $nscBookings->count() }})</a>
         <a class="item" data-tab="checkin" style="white-space: nowrap;">Check-in</a>
     </div>
@@ -184,18 +207,27 @@
                 </a>
             @endcan
             @if ($hasAnyEmails)
-                <div class="flex items-center gap-1">
+                <div class="inline-flex rounded border border-stone-200 bg-white">
                     <select id="email-filter-desk"
                             onchange="updateManageMailto('desk', this.value)"
-                            style="border:1px solid rgba(34,36,38,.15);border-radius:.28571429rem;padding:.45em .7em;font-size:.85em;background:#fff;cursor:pointer">
+                            style="border:none;border-right:1px solid rgba(34,36,38,.15);border-radius:.28rem 0 0 .28rem;padding:.45em .6em;font-size:.85em;background:transparent;cursor:pointer;outline:none;">
                         <option value="all">Alle Teilnehmer ({{ count($emailGroups['all']) }})</option>
                         <option value="confirmed">Nur Angemeldete ({{ count($emailGroups['confirmed']) }})</option>
                         <option value="unpaid">Unbezahlte Teilnehmer ({{ count($emailGroups['unpaid']) }})</option>
                         <option value="waitlist">Wartelisten Teilnehmer ({{ count($emailGroups['waitlist']) }})</option>
                     </select>
-                    <a id="mailto-btn-desk" href="#" class="ui small teal button">
-                        <i class="mail icon"></i> E-Mail senden
-                    </a>
+                    <div class="ui small teal floating dropdown button" id="mailto-dropdown-desk"
+                         tabindex="0" style="margin:0;border-radius:0 .28rem .28rem 0;box-shadow:none;">
+                        <i class="mail icon"></i> E-Mail <i class="dropdown icon"></i>
+                        <div class="menu transition hidden" tabindex="-1" style="white-space:nowrap;">
+                            <a class="item" onclick="manageMailtoAction('client','desk'); return false;">
+                                <i class="external alternate icon"></i> An E-Mail-Client senden
+                            </a>
+                            <a class="item" onclick="manageMailtoAction('copy','desk'); return false;">
+                                <i class="copy outline icon"></i> E-Mail-Adressen kopieren
+                            </a>
+                        </div>
+                    </div>
                 </div>
             @endif
         </div>
@@ -204,18 +236,27 @@
 
     <div class="ui bottom attached tab segment" data-tab="teamer-nsc">
         @if ($hasAnyTeamerEmails)
-            <div class="flex items-center gap-1 mb-3">
+            <div class="inline-flex rounded border border-stone-200 bg-white mb-3">
                 <select id="email-filter-teamer-desk"
                         onchange="updateTeamerMailto('desk', this.value)"
-                        style="border:1px solid rgba(34,36,38,.15);border-radius:.28571429rem;padding:.45em .7em;font-size:.85em;background:#fff;cursor:pointer">
+                        style="border:none;border-right:1px solid rgba(34,36,38,.15);border-radius:.28rem 0 0 .28rem;padding:.45em .6em;font-size:.85em;background:transparent;cursor:pointer;outline:none;">
                     <option value="all">Alle Teamer ({{ count($teamerEmailGroups['all']) }})</option>
                     <option value="approved">Bestätigte Teamer ({{ count($teamerEmailGroups['approved']) }})</option>
                     <option value="pending">Unbestätigte Teamer ({{ count($teamerEmailGroups['pending']) }})</option>
                     <option value="missing">Fehlende Teamer ({{ count($teamerEmailGroups['missing']) }})</option>
                 </select>
-                <a id="teamer-mailto-btn-desk" href="#" class="ui small teal button">
-                    <i class="mail icon"></i> E-Mail senden
-                </a>
+                <div class="ui small teal floating dropdown button" id="teamer-mailto-dropdown-desk"
+                     tabindex="0" style="margin:0;border-radius:0 .28rem .28rem 0;box-shadow:none;">
+                    <i class="mail icon"></i> E-Mail <i class="dropdown icon"></i>
+                    <div class="menu transition hidden" tabindex="-1" style="white-space:nowrap;">
+                        <a class="item" onclick="teamerMailtoAction('client','desk'); return false;">
+                            <i class="external alternate icon"></i> An E-Mail-Client senden
+                        </a>
+                        <a class="item" onclick="teamerMailtoAction('copy','desk'); return false;">
+                            <i class="copy outline icon"></i> E-Mail-Adressen kopieren
+                        </a>
+                    </div>
+                </div>
             </div>
         @endif
         @include('adventures._teamer_nsc_tab', [
@@ -244,23 +285,34 @@
 (function () {
     var groups = {!! json_encode($emailGroups) !!};
     var to = {!! json_encode($manageMailTo) !!};
+    var currentEmails = {};
 
     window.updateManageMailto = function (suffix, key) {
         var emails = groups[key] || [];
-        var btn = document.getElementById('mailto-btn-' + suffix);
+        currentEmails[suffix] = emails;
+        var btn = document.getElementById('mailto-dropdown-' + suffix);
         if (!btn) return;
-        if (emails.length === 0) {
-            btn.classList.add('disabled');
-            btn.removeAttribute('href');
-        } else {
-            btn.classList.remove('disabled');
-            btn.href = 'mailto:' + to + '?bcc=' + emails.join(',');
+        btn.classList.toggle('disabled', emails.length === 0);
+    };
+
+    window.manageMailtoAction = function (action, suffix) {
+        var emails = currentEmails[suffix] || [];
+        if (!emails.length) return;
+        if (action === 'client') {
+            window.location.href = 'mailto:' + to + '?bcc=' + emails.join(',');
+        } else if (action === 'copy') {
+            navigator.clipboard.writeText(emails.join(', ')).then(function () {
+                if (window.showToast) showToast(emails.length + ' E-Mail-Adressen kopiert.', 'success');
+            }).catch(function () {
+                if (window.showToast) showToast('Kopieren fehlgeschlagen – bitte manuell kopieren.', 'error');
+            });
         }
     };
 
     ['mob', 'desk'].forEach(function (suffix) {
         var sel = document.getElementById('email-filter-' + suffix);
         if (sel) window.updateManageMailto(suffix, sel.value);
+        // Dropdown-Init übernimmt DOMContentLoaded in manage.blade.php
     });
 })();
 </script>
@@ -271,23 +323,34 @@
 (function () {
     var tGroups = {!! json_encode($teamerEmailGroups) !!};
     var tTo = {!! json_encode($manageMailTo) !!};
+    var currentTeamerEmails = {};
 
     window.updateTeamerMailto = function (suffix, key) {
         var emails = tGroups[key] || [];
-        var btn = document.getElementById('teamer-mailto-btn-' + suffix);
+        currentTeamerEmails[suffix] = emails;
+        var btn = document.getElementById('teamer-mailto-dropdown-' + suffix);
         if (!btn) return;
-        if (emails.length === 0) {
-            btn.classList.add('disabled');
-            btn.removeAttribute('href');
-        } else {
-            btn.classList.remove('disabled');
-            btn.href = 'mailto:' + tTo + '?bcc=' + emails.join(',');
+        btn.classList.toggle('disabled', emails.length === 0);
+    };
+
+    window.teamerMailtoAction = function (action, suffix) {
+        var emails = currentTeamerEmails[suffix] || [];
+        if (!emails.length) return;
+        if (action === 'client') {
+            window.location.href = 'mailto:' + tTo + '?bcc=' + emails.join(',');
+        } else if (action === 'copy') {
+            navigator.clipboard.writeText(emails.join(', ')).then(function () {
+                if (window.showToast) showToast(emails.length + ' E-Mail-Adressen kopiert.', 'success');
+            }).catch(function () {
+                if (window.showToast) showToast('Kopieren fehlgeschlagen – bitte manuell kopieren.', 'error');
+            });
         }
     };
 
     ['mob', 'desk'].forEach(function (suffix) {
         var sel = document.getElementById('email-filter-teamer-' + suffix);
         if (sel) window.updateTeamerMailto(suffix, sel.value);
+        // Dropdown-Init übernimmt DOMContentLoaded in manage.blade.php
     });
 })();
 </script>

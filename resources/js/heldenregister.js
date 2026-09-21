@@ -82,8 +82,8 @@ function loadModalContent(url, preserveTab) {
             initQrCodes($content);
             // UX-901: Toggle-Checkboxen (z. B. Sichtbarkeit/Suchbarkeit im Helden-Detail).
             $content.find('.ui.checkbox').checkbox();
-            // Durchsuchbare Dropdowns (z. B. Spieler-Auswahl beim Helden anlegen).
-            $content.find('.ui.search.selection.dropdown').dropdown();
+            // Durchsuchbare und Floating-Dropdowns im geladenen Modal-Inhalt initialisieren.
+            $content.find('.ui.search.selection.dropdown, .ui.floating.dropdown').dropdown();
             // BOOK-12: Consent-Pflichtfeld + PLAY-15: Spieler-Prefill (nach .checkbox()!).
             updateHealthConsent($content);
             initBookingPlayerPrefill($content);
@@ -308,6 +308,22 @@ document.getElementById('deregister-modal-save').addEventListener('click', funct
     const reason = document.getElementById('deregister-reason').value;
     if (!deregisterUrl || !reason) { showToast('Bitte einen Grund wählen.', 'error'); return; }
     sendModalAction(deregisterUrl, 'PATCH', { absence_reason: reason }, $('#deregister-modal'), this);
+});
+
+// --- Storno-Rücknahme anfragen (BOOK-09) -------------------------
+let reinstateRequestUrl = null;
+document.addEventListener('click', function (e) {
+    const t = e.target.closest('.reinstate-request-trigger');
+    if (!t) return;
+    e.preventDefault();
+    reinstateRequestUrl = t.getAttribute('data-url');
+    document.getElementById('reinstate-request-message').value = '';
+    $('#reinstate-request-modal').modal({ allowMultiple: true, autofocus: false }).modal('show');
+});
+document.getElementById('reinstate-request-send').addEventListener('click', function () {
+    const msg = document.getElementById('reinstate-request-message').value.trim();
+    if (!reinstateRequestUrl || !msg) { showToast('Bitte eine Nachricht eingeben.', 'error'); return; }
+    sendModalAction(reinstateRequestUrl, 'POST', { message: msg }, $('#reinstate-request-modal'), this);
 });
 
 // ------------------------------------------------------------------
@@ -866,7 +882,18 @@ function initBookingsTableSort(root) {
 
         let sortCol = 'created';
         let sortAsc  = false;
+        let filterVal = '';
         const numeric = new Set(['age', 'paid', 'created', 'status']);
+
+        function applyFilter() {
+            const tbody = table.querySelector('tbody');
+            Array.from(tbody.querySelectorAll('tr')).forEach(function (r) {
+                const nameCell = r.querySelector('[data-col="name"]');
+                if (!nameCell) return;
+                const name = (nameCell.dataset.sortVal || '').toLowerCase();
+                r.style.display = name.includes(filterVal) ? '' : 'none';
+            });
+        }
 
         function applySort(col, asc) {
             const tbody = table.querySelector('tbody');
@@ -884,6 +911,7 @@ function initBookingsTableSort(root) {
             });
 
             rows.forEach(function (r) { tbody.appendChild(r); });
+            applyFilter();
 
             table.querySelectorAll('[data-sort-col]').forEach(function (th) {
                 const icon = th.querySelector('[data-sort-icon]');
@@ -905,6 +933,14 @@ function initBookingsTableSort(root) {
                 applySort(col, col === sortCol ? !sortAsc : col !== 'created');
             });
         });
+
+        const searchInput = table.querySelector('[data-bookings-search]');
+        if (searchInput) {
+            searchInput.addEventListener('input', function (e) {
+                filterVal = (e.target.value || '').trim().toLowerCase();
+                applyFilter();
+            });
+        }
 
         applySort('created', false);
     });

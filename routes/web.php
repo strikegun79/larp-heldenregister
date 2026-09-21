@@ -211,6 +211,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('adventures.bookings.destroy');
     Route::patch('adventures/{adventure}/bookings/{booking}/reinstate', [BookingController::class, 'reinstate'])
         ->name('adventures.bookings.reinstate');
+    Route::post('adventures/{adventure}/bookings/{booking}/request-reinstate', [BookingController::class, 'requestReinstate'])
+        ->name('adventures.bookings.request-reinstate');
+    Route::get('adventures/{adventure}/bookings/{booking}/approve-reinstate', [BookingController::class, 'approveReinstate'])
+        ->name('adventures.bookings.approve-reinstate')->withoutMiddleware(['auth', 'verified']);
+    Route::get('adventures/{adventure}/bookings/{booking}/reject-reinstate', [BookingController::class, 'rejectReinstate'])
+        ->name('adventures.bookings.reject-reinstate')->withoutMiddleware(['auth', 'verified']);
     // Fotoerlaubnis widerrufen/erteilen – Art. 7 DSGVO (N-2).
     Route::patch('adventures/{adventure}/bookings/{booking}/fotoerlaubnis', [BookingController::class, 'toggleFotoerlaubnis'])
         ->name('adventures.bookings.fotoerlaubnis');

@@ -175,6 +175,32 @@
             </div>
         </div>
 
+        <!-- Storno-Rücknahme anfragen (BOOK-09) -->
+        <div class="ui small modal" id="reinstate-request-modal"
+             role="dialog" aria-modal="true" aria-labelledby="reinstate-request-modal-header">
+            <div class="header" id="reinstate-request-modal-header">Stornierung rückgängig machen</div>
+            <div class="content">
+                <div class="ui info message">
+                    <i class="info circle icon"></i>
+                    Die Rücknahme einer Stornierung muss vom <strong>Projektleiter der Veranstaltung</strong> genehmigt werden.
+                    Deine Anfrage wird per E-Mail an die Projektleitung weitergeleitet.
+                </div>
+                <div class="ui form">
+                    <div class="required field">
+                        <label for="reinstate-request-message">Deine Nachricht an die Projektleitung</label>
+                        <textarea id="reinstate-request-message" rows="4"
+                                  placeholder="Bitte erkläre kurz, warum du die Stornierung rückgängig machen möchtest …"></textarea>
+                    </div>
+                </div>
+            </div>
+            <div class="actions">
+                <button type="button" class="ui deny button"><i class="times icon"></i> Abbrechen</button>
+                <button type="button" class="ui primary button" id="reinstate-request-send">
+                    <i class="paper plane icon"></i> Anfrage senden
+                </button>
+            </div>
+        </div>
+
         <!-- Bestätigungs-Modal (UI-17) -->
         <div class="ui small modal" id="confirm-modal"
              role="alertdialog" aria-modal="true" aria-labelledby="confirm-modal-header">

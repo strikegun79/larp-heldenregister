@@ -14,6 +14,8 @@ use App\Notifications\BookingCancelledParticipant;
 use App\Notifications\BookingReceived;
 use App\Notifications\BookingMovedToWaitlist;
 use App\Notifications\BookingRejected;
+use App\Notifications\BookingReinstateRequested;
+use App\Notifications\BookingReinstateResult;
 use App\Notifications\FotoerlaubnisRevoked;
 use App\Notifications\PaymentConfirmed;
 use App\Notifications\TeamerBookingConfirmed;
@@ -26,13 +28,14 @@ use Illuminate\Http\Request;
 use App\Services\AuditLogger;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\URL;
 use Illuminate\Validation\Rule;
 
 class BookingController extends Controller
 {
     public function __construct()
     {
-        $this->middleware('auth');
+        $this->middleware('auth')->except(['approveReinstate', 'rejectReinstate']);
         // Buchen: adventure.book; Stornieren/Abmelden: adventure.cancel.
         $this->middleware('can:adventure.book')->only(['create', 'store', 'createGuest', 'storeGuest']);
         $this->middleware('can:adventure.cancel')->only('destroy');
@@ -597,25 +600,40 @@ class BookingController extends Controller
         $wasRegular = ! $booking->waitlisted;
         $booking->update(['status' => 'storniert']);
 
+        // Buchungsstatistiken nach der Stornierung berechnen.
+        $confirmedCount = $adventure->bookings()
+            ->where('waitlisted', false)
+            ->where('status', '!=', 'storniert')
+            ->count();
+        $waitlistCount = $adventure->bookings()
+            ->where('waitlisted', true)
+            ->where('status', '!=', 'storniert')
+            ->count();
+        $cancelledByName = trim(($request->user()->name ?? '').' '.($request->user()->lastname ?? '')) ?: 'Unbekannt';
+
         // NOTI-10: Stornierungsbestätigung + Portal an den Teilnehmer selbst.
         if ($notifyCancel) {
             if ($cancelUser) {
-                $cancelUser->notify(new BookingCancelledParticipant($adventure));
+                $cancelUser->notify(new BookingCancelledParticipant($adventure, $participant));
             } elseif ($cancelEmail) {
-                Notification::route('mail', $cancelEmail)->notify(new BookingCancelledParticipant($adventure));
+                Notification::route('mail', $cancelEmail)->notify(new BookingCancelledParticipant($adventure, $participant));
             }
         }
 
-        // ADV-21: Projektleitung über die Stornierung informieren.
-        $leaders = User::whereHas('roles', fn ($q) => $q->where('roles.id', 30))->get();
-        if ($adventure->eventleader_id && ! $leaders->contains('id', $adventure->eventleader_id)) {
-            $adventure->loadMissing('eventleader');
-            if ($adventure->eventleader) {
-                $leaders->push($adventure->eventleader);
-            }
-        }
+        // ADV-21: Nur den Projektleiter des Events über die Stornierung informieren.
+        $adventure->loadMissing('eventleader');
+        $leaders = $adventure->eventleader
+            ? collect([$adventure->eventleader])
+            : collect();
         if ($leaders->isNotEmpty()) {
-            Notification::send($leaders, new BookingCancelled($adventure, $participant));
+            Notification::send($leaders, new BookingCancelled(
+                $adventure,
+                $participant,
+                $cancelledByName,
+                $confirmedCount,
+                $adventure->max_player,
+                $waitlistCount,
+            ));
         }
 
         $promoted = null;
@@ -663,11 +681,11 @@ class BookingController extends Controller
                 : back()->with('error', $msg);
         }
 
-        $booking->update(['status' => 'offen', 'waitlisted' => false]);
+        $booking->update(['status' => 'bestaetigt', 'waitlisted' => false]);
 
         AuditLogger::log('booking.reinstated', $booking, ['adventure' => $adventure->name]);
 
-        $msg = 'Anmeldung wurde wiederhergestellt.';
+        $msg = 'Anmeldung wurde wiederhergestellt und bestätigt.';
 
         return $request->expectsJson()
             ? response()->json(['message' => $msg, 'refresh_modal' => true])
@@ -736,6 +754,112 @@ class BookingController extends Controller
     /**
      * Gehört die Anmeldung dem Nutzer (selbst angemeldet oder eigener Spieler)?
      */
+    /**
+     * Nutzer beantragt die Rücknahme einer stornierten Anmeldung.
+     * Sendet eine E-Mail mit Genehmigen-/Ablehnen-Links an die Projektleitung.
+     */
+    public function requestReinstate(Request $request, Adventure $adventure, Booking $booking): JsonResponse|RedirectResponse
+    {
+        abort_unless($booking->adventure_id === $adventure->id, 404);
+
+        if (! $this->ownsBooking($request->user(), $booking)) {
+            abort(403);
+        }
+
+        if ($booking->status !== 'storniert') {
+            $msg = 'Diese Anmeldung ist nicht storniert.';
+            return $request->expectsJson()
+                ? response()->json(['message' => $msg], 422)
+                : back()->with('error', $msg);
+        }
+
+        $validated = $request->validate([
+            'message' => ['required', 'string', 'max:1000'],
+        ]);
+
+        $participant     = $booking->participant_name;
+        $requesterName   = trim(($request->user()->name ?? '').' '.($request->user()->lastname ?? '')) ?: 'Unbekannt';
+
+        // Nur den Projektleiter der Veranstaltung benachrichtigen.
+        $adventure->loadMissing('eventleader');
+        $leaders = $adventure->eventleader
+            ? collect([$adventure->eventleader])
+            : collect();
+
+        if ($leaders->isNotEmpty()) {
+            Notification::send($leaders, new BookingReinstateRequested(
+                $adventure,
+                $booking,
+                $participant,
+                $requesterName,
+                $validated['message'],
+            ));
+        }
+
+        $booking->update(['reinstate_requested' => true]);
+        AuditLogger::log('booking.reinstate_requested', $booking, ['adventure' => $adventure->name]);
+
+        $msg = 'Deine Anfrage wurde an die Projektleitung gesendet.';
+        return $request->expectsJson()
+            ? response()->json(['message' => $msg])
+            : back()->with('status', $msg);
+    }
+
+    /**
+     * Projektleiter genehmigt die Rücknahme (signierter Link aus E-Mail).
+     */
+    public function approveReinstate(Request $request, Adventure $adventure, Booking $booking): RedirectResponse
+    {
+        abort_unless($request->hasValidSignature(), 403);
+        abort_unless($booking->adventure_id === $adventure->id, 404);
+
+        if ($booking->status !== 'storniert') {
+            return redirect()->route('adventures.manage-index')
+                ->with('status', 'Diese Anmeldung ist nicht storniert – keine Änderung nötig.');
+        }
+
+        $booking->update(['status' => 'bestaetigt', 'waitlisted' => false, 'reinstate_requested' => false]);
+        AuditLogger::log('booking.reinstated', $booking, ['adventure' => $adventure->name]);
+
+        // Nutzer über Genehmigung informieren.
+        $cancelUser  = $booking->player?->users()->first();
+        $cancelEmail = $booking->player?->email;
+        if ($cancelUser) {
+            $cancelUser->notify(new BookingReinstateResult($adventure, $booking->participant_name, true));
+        } elseif ($cancelEmail) {
+            Notification::route('mail', $cancelEmail)
+                ->notify(new BookingReinstateResult($adventure, $booking->participant_name, true));
+        }
+
+        return redirect()->route('adventures.manage-index')
+            ->with('status', 'Stornierung von '.$booking->participant_name.' wurde rückgängig gemacht.');
+    }
+
+    /**
+     * Projektleiter lehnt die Rücknahme ab (signierter Link aus E-Mail).
+     */
+    public function rejectReinstate(Request $request, Adventure $adventure, Booking $booking): RedirectResponse
+    {
+        abort_unless($request->hasValidSignature(), 403);
+        abort_unless($booking->adventure_id === $adventure->id, 404);
+
+        $booking->update(['reinstate_requested' => false]);
+        AuditLogger::log('booking.reinstate_rejected', $booking, ['adventure' => $adventure->name]);
+
+        // Nutzer über Ablehnung informieren.
+        $cancelUser  = $booking->player?->users()->first();
+        $cancelEmail = $booking->player?->email;
+        if ($cancelUser) {
+            $cancelUser->notify(new BookingReinstateResult($adventure, $booking->participant_name, false));
+        } elseif ($cancelEmail) {
+            Notification::route('mail', $cancelEmail)
+                ->notify(new BookingReinstateResult($adventure, $booking->participant_name, false));
+        }
+
+        return redirect()->route('adventures.manage-index')
+            ->with('status', 'Rücknahme-Anfrage von '.$booking->participant_name.' wurde abgelehnt.');
+    }
+
     private function ownsBooking(User $user, Booking $booking): bool
     {
         return $booking->booked_by_user_id === $user->id

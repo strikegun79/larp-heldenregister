@@ -8,7 +8,10 @@
 <table class="ui very basic compact unstackable table" @if ($manage) data-bookings-table @endif>
     <thead class="mob-thead" hidden><tr>
         @if ($manage)
-            <th data-sort-col="name" class="cursor-pointer select-none">Spieler <i data-sort-icon class="sort icon text-stone-300 text-xs ml-0.5" aria-hidden="true"></i></th>
+            <th data-sort-col="name" class="cursor-pointer select-none">Spieler <i data-sort-icon class="sort icon text-stone-300 text-xs ml-0.5" aria-hidden="true"></i>
+                <input type="search" data-bookings-search placeholder="Suchen…"
+                       class="ml-1 text-xs border border-stone-200 rounded px-1.5 py-0.5 font-normal cursor-text w-24 align-middle"
+                       onclick="event.stopPropagation()"></th>
             <th data-sort-col="age" class="cursor-pointer select-none">Alter <i data-sort-icon class="sort icon text-stone-300 text-xs ml-0.5" aria-hidden="true"></i></th>
             <th>Rolle</th><th>Liste</th>
             <th data-sort-col="status" class="cursor-pointer select-none">Status <i data-sort-icon class="sort icon text-stone-300 text-xs ml-0.5" aria-hidden="true"></i></th>
@@ -31,7 +34,7 @@
                             @if ($guardian)
                                 <div class="text-xs text-stone-500 mt-0.5">
                                     {{ $guardian->name }} {{ $guardian->lastname }}
-                                    @if ($guardian->email) · {{ $guardian->email }} @endif
+                                    @if ($guardian->email) · <a href="mailto:{{ $guardian->email }}" class="text-stone-500 hover:text-waldritter underline">{{ $guardian->email }}</a> @endif
                                     @if ($guardian->phone) · {{ $guardian->phone }} @endif
 										{{-- Braucht zu viel Platz
 										@if ($guardian->street)
@@ -164,17 +167,41 @@
                                     </form>
                                 @endcan
                             @else
-                                {{-- Stornierte Anmeldung wiederherstellen: nur Projektleiter/Admin --}}
-                                @can('approve-bookings')
-                                    <form method="POST" action="{{ route('adventures.bookings.reinstate', [$adventure, $booking]) }}"
-                                          data-refresh-modal data-confirm="Anmeldung von {{ $booking->participant_name }} wiederherstellen?">
-                                        @csrf @method('PATCH')
-                                        <button type="submit" class="ui mini icon button teal" data-tooltip="Anmeldung wiederherstellen" data-position="top center">
+                                @if ($manage)
+                                    {{-- Manage-View: Projektleiter/Admin kann direkt wiederherstellen --}}
+                                    @can('approve-bookings')
+                                        <form method="POST" action="{{ route('adventures.bookings.reinstate', [$adventure, $booking]) }}"
+                                              data-refresh-modal data-confirm="Anmeldung von {{ $booking->participant_name }} wiederherstellen?">
+                                            @csrf @method('PATCH')
+                                            <button type="submit" class="ui mini icon button teal" data-tooltip="Anmeldung wiederherstellen" data-position="top center">
+                                                <i class="undo icon"></i>
+                                                <span class="sm:hidden ml-1 text-xs">Wiederherst.</span>
+                                            </button>
+                                        </form>
+                                    @endcan
+                                @else
+                                    {{-- Detail-View: Nutzer beantragt Rücknahme beim Projektleiter (BOOK-09) --}}
+                                    @if ($booking->reinstate_requested)
+                                        <span data-tooltip="Rücknahme der Stornierung schon beantragt"
+                                              data-position="top right">
+                                            <button type="button" disabled
+                                                    class="ui mini icon button disabled"
+                                                    style="pointer-events:none;">
+                                                <i class="undo icon"></i>
+                                                <span class="sm:hidden ml-1 text-xs">Anfragen</span>
+                                            </button>
+                                        </span>
+                                    @else
+                                        <button type="button"
+                                                class="reinstate-request-trigger ui mini icon button orange"
+                                                data-url="{{ route('adventures.bookings.request-reinstate', [$adventure, $booking]) }}"
+                                                data-tooltip="Rücknahme der Stornierung anfragen"
+                                                data-position="top right">
                                             <i class="undo icon"></i>
-                                            <span class="sm:hidden ml-1 text-xs">Wiederherst.</span>
+                                            <span class="sm:hidden ml-1 text-xs">Anfragen</span>
                                         </button>
-                                    </form>
-                                @endcan
+                                    @endif
+                                @endif
                             @endif
                         </div>
                     </td>
