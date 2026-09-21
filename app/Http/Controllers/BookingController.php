@@ -636,8 +636,9 @@ class BookingController extends Controller
             ));
         }
 
+        // Automatisches Nachrücken nur wenn Wartelisten-Modus deaktiviert ist.
         $promoted = null;
-        if ($wasRegular) {
+        if ($wasRegular && ! $adventure->waitlist_mode) {
             $promoted = $adventure->bookings()
                 ->where('waitlisted', true)
                 ->orderBy('created_at')
