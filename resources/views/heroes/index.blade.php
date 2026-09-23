@@ -62,7 +62,15 @@
                         <a href="{{ route('heroes.show', $hero) }}"
                            data-modal-url="{{ route('heroes.show', $hero) }}"
                            class="block p-4 hover:bg-black/5 active:bg-black/10 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-600 focus-visible:outline-offset-[-2px] {{ $hero->died ? 'opacity-60' : '' }}">
-                            <div class="font-medium text-stone-800">{{ $hero->character_name ?? '—' }}</div>
+                            <div class="font-medium text-stone-800">
+                                {{ $hero->character_name ?? '—' }}
+                                @if ($hero->image)
+                                    <i class="image icon text-stone-400 text-xs ml-0.5" title="Avatar hochgeladen"></i>
+                                @endif
+                                @if ($hero->gallery_images_count > 0)
+                                    <i class="images icon text-stone-400 text-xs ml-0.5" title="{{ $hero->gallery_images_count }} Galeriebild(er)"></i>
+                                @endif
+                            </div>
                             <div class="text-sm text-stone-500 mt-0.5">{{ $hero->player?->full_name ?? '—' }}</div>
                             <div class="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2 text-xs text-stone-500">
                                 @if ($hero->classes->isNotEmpty())
@@ -111,7 +119,15 @@
                                     aria-label="Held {{ $hero->character_name ?? 'unbenannt' }} öffnen"
                                     class="cursor-pointer hover:bg-black/5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-600 focus-visible:outline-offset-[-2px] {{ $hero->died ? 'opacity-60' : '' }}">
                                     <td class="px-6 py-4">{{ $hero->player?->full_name ?? '—' }}</td>
-                                    <td class="px-6 py-4 font-medium">{{ $hero->character_name ?? '—' }}</td>
+                                    <td class="px-6 py-4 font-medium">
+                                        {{ $hero->character_name ?? '—' }}
+                                        @if ($hero->image)
+                                            <i class="image icon text-stone-400 text-xs ml-0.5" title="Avatar hochgeladen"></i>
+                                        @endif
+                                        @if ($hero->gallery_images_count > 0)
+                                            <i class="images icon text-stone-400 text-xs ml-0.5" title="{{ $hero->gallery_images_count }} Galeriebild(er)"></i>
+                                        @endif
+                                    </td>
                                     <td class="px-6 py-4 text-right">{{ number_format($hero->ep_total, 0, ',', '.') }}</td>
                                     <td class="px-6 py-4 text-right">{{ number_format($hero->ep_balance, 0, ',', '.') }}</td>
                                     <td class="px-6 py-4">{{ $hero->classes->pluck('name')->implode(', ') ?: '—' }}</td>

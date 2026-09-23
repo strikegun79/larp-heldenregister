@@ -69,7 +69,7 @@ return [
 
         'send_survey' => [
             'label'              => 'Feedback-Umfrage versenden',
-            'description'        => 'Versendet die verknüpfte Feedback-Umfrage an alle Teilnehmer.',
+            'description'        => '(noch nicht implementiert) Versendet die verknüpfte Feedback-Umfrage an alle Teilnehmer.',
             'icon'               => 'clipboard list',
             'category'           => 'communication',
             'default_reference'  => 'end_at',
@@ -111,7 +111,7 @@ return [
 
         'archive_bookings' => [
             'label'              => 'Stornierte Buchungen archivieren',
-            'description'        => 'Markiert stornierte Buchungen nach der Veranstaltung als archiviert.',
+            'description'        => '(noch nicht implementiert) Markiert stornierte Buchungen nach der Veranstaltung als archiviert.',
             'icon'               => 'archive',
             'category'           => 'management',
             'default_reference'  => 'end_at',

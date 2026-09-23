@@ -19,7 +19,10 @@ function escapeHtml(str) {
     return d.innerHTML;
 }
 
+let _sessionExpired = false;
+
 function showToast(message, type) {
+    if (_sessionExpired) return;
     $('body').toast({
         class: type === 'error' ? 'error' : 'success',
         showIcon: type === 'error' ? 'exclamation circle' : 'check circle',
@@ -29,6 +32,27 @@ function showToast(message, type) {
     });
 }
 window.showToast = showToast;
+
+// ------------------------------------------------------------------
+// Sitzung abgelaufen (SEC-01): globaler 419-Handler
+// ------------------------------------------------------------------
+function showSessionExpiredModal() {
+    _sessionExpired = true;
+    $('#session-expired-modal').modal({ closable: false, allowMultiple: true }).modal('show');
+}
+
+// 419 global abfangen: Modal zeigen, leere JSON-Antwort zurückgeben damit
+// alle bestehenden .then()-Handler still durchlaufen (Toast ist durch _sessionExpired unterdrückt).
+const _nativeFetch = window.fetch;
+window.fetch = function () {
+    return _nativeFetch.apply(this, arguments).then(function (resp) {
+        if (resp.status === 419) {
+            showSessionExpiredModal();
+            return new Response('{}', { status: 419, headers: { 'Content-Type': 'application/json' } });
+        }
+        return resp;
+    });
+};
 
 // ------------------------------------------------------------------
 // Modal-Zustandsvariablen (auf window: Blade-Partials lesen direkt)

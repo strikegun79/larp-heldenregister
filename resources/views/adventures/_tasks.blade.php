@@ -11,6 +11,16 @@
     @csrf
     @method('PUT')
 
+    {{-- Sticky-Leiste: immer sichtbar, klar vom Haupt-Speichern unterscheidbar --}}
+    <div class="sticky top-0 z-10 -mx-4 px-4 py-2 mb-4 bg-amber-50 border-b border-amber-200 flex items-center justify-between gap-3">
+        <span class="text-sm text-amber-800 font-medium">
+            <i class="clock icon"></i> Taskmanager-Einstellungen
+        </span>
+        <button type="submit" class="ui small teal button">
+            <i class="save icon"></i> Aufgaben speichern
+        </button>
+    </div>
+
     @foreach ($categories as $catKey => $cat)
         @php
             $catDefs = $definitions->filter(fn ($d) => $d->getCategoryKey() === $catKey);
@@ -138,11 +148,6 @@
         @endif
     @endforeach
 
-    <div class="mt-4 flex gap-2">
-        <button type="submit" class="ui primary small button">
-            <i class="save icon"></i> Aufgaben speichern
-        </button>
-    </div>
 </form>
 
 <script>

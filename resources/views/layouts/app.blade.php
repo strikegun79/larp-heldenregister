@@ -216,6 +216,24 @@
             </div>
         </div>
 
+        <!-- Sitzung abgelaufen (SEC-01) -->
+        <div class="ui small modal" id="session-expired-modal"
+             role="alertdialog" aria-modal="true" aria-labelledby="session-expired-modal-header">
+            <div class="header" id="session-expired-modal-header">
+                <i class="clock outline icon"></i> Sitzung abgelaufen
+            </div>
+            <div class="content">
+                <p class="text-stone-700">
+                    Sitzung abgelaufen wegen zu langer Inaktivität. Bitte neu anmelden.
+                </p>
+            </div>
+            <div class="actions">
+                <a href="{{ route('login') }}" class="ui primary button">
+                    <i class="sign in alternate icon"></i> Neu einloggen
+                </a>
+            </div>
+        </div>
+
         {{-- UI-09: Session-Flash-Daten für heldenregister.js (ARCH-001).
              Profil-spezifische Status-Werte werden übersprungen. --}}
         @php

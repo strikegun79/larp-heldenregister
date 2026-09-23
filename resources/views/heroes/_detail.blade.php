@@ -123,6 +123,15 @@
                 @endif
             </dl>
 
+            @if ($canEditPhoto)
+                <div class="mt-3 mb-2">
+                    <a data-modal-stack="{{ route('heroes.player-edit', $hero) }}"
+                       class="ui mini basic button">
+                        <i class="pencil alternate icon"></i> Charakter bearbeiten
+                    </a>
+                </div>
+            @endif
+
             @if ($hero->description)
                 <h4 class="font-uncial text-waldritter mb-1">Steckbrief</h4>
                 <p class="text-stone-700 whitespace-pre-line text-sm mb-4">{{ $hero->description }}</p>
@@ -364,7 +373,7 @@
                 {{-- Helden-Siegel --}}
                 <div class="wr-verwalten-panel wr-verwalten-siegel">
                     <h5 class="wr-verwalten-heading">
-                        <i class="id badge outline icon"></i> Helden-Siegel
+                        <i class="id badge icon"></i> Helden-Siegel
                     </h5>
                     <form method="POST" action="{{ route('heroes.assign-code', $hero) }}" data-refresh-modal class="ui form">
                         @csrf @method('PATCH')
@@ -394,12 +403,12 @@
                         {{-- Willkommens-Mail: eigener Unterbereich --}}
                         <div class="wr-verwalten-mail-box mt-3">
                             <p class="wr-verwalten-mail-label">
-                                <i class="envelope outline icon"></i> Aufnahme-Bestätigung
+                                <i class="envelope icon"></i> Aufnahme-Bestätigung
                             </p>
                             <form method="POST" action="{{ route('heroes.welcome-mail', $hero) }}" data-refresh-modal>
                                 @csrf
                                 <button type="submit" class="ui mini teal button">
-                                    <i class="paper plane outline icon"></i> Mail senden
+                                    <i class="paper plane icon"></i> Mail senden
                                 </button>
                             </form>
                             <p class="wr-verwalten-hint mt-1">Sendet die Bestätigung an Eltern/Betreuer.</p>
@@ -410,7 +419,7 @@
                 {{-- Verschollen / Wiedergefunden --}}
                 <div class="wr-verwalten-panel {{ $hero->died ? 'wr-verwalten-verschollen-aktiv' : 'wr-verwalten-verschollen-warnung' }}">
                     <h5 class="wr-verwalten-heading">
-                        <i class="user {{ $hero->died ? 'check circle outline' : 'times circle outline' }} icon"></i>
+                        <i class="user {{ $hero->died ? 'check circle' : 'times circle' }} icon"></i>
                         {{ $hero->died ? 'Held verschollen' : 'Held aktiv' }}
                     </h5>
                     @if ($hero->died)
@@ -454,7 +463,7 @@
             <a class="item" data-tab="ep" style="white-space: nowrap;">EP-Verlauf</a>
             @if ($hero->galleryImages->isNotEmpty() || $canEditPhoto)
             <a class="item" data-tab="gallery" style="white-space: nowrap;">
-                <i class="images outline icon"></i> Galerie
+                <i class="images icon"></i> Galerie
                 @if ($hero->galleryImages->isNotEmpty())
                     <span class="ui mini circular label ml-1">{{ $hero->galleryImages->count() }}</span>
                 @endif
@@ -615,6 +624,15 @@
             </dl>
             </div>{{-- /flex-1 --}}
             </div>{{-- /flex --}}
+
+            @if ($canEditPhoto)
+                <div class="mt-4">
+                    <a data-modal-stack="{{ route('heroes.player-edit', $hero) }}"
+                       class="ui mini basic button">
+                        <i class="pencil alternate icon"></i> Charakter bearbeiten
+                    </a>
+                </div>
+            @endif
 
             @if ($hero->description)
                 <h3 class="font-uncial text-lg text-waldritter mt-6 mb-2">Steckbrief</h3>
@@ -895,7 +913,7 @@
                 {{-- Helden-Siegel --}}
                 <div class="wr-verwalten-panel wr-verwalten-siegel">
                     <h4 class="wr-verwalten-heading wr-verwalten-heading--lg">
-                        <i class="id badge outline icon"></i> Helden-Siegel
+                        <i class="id badge icon"></i> Helden-Siegel
                     </h4>
                     <form method="POST" action="{{ route('heroes.assign-code', $hero) }}" data-refresh-modal class="ui form">
                         @csrf @method('PATCH')
@@ -925,12 +943,12 @@
                         {{-- Willkommens-Mail: eigener Unterbereich --}}
                         <div class="wr-verwalten-mail-box mt-4">
                             <p class="wr-verwalten-mail-label">
-                                <i class="envelope outline icon"></i> Aufnahme-Bestätigung
+                                <i class="envelope icon"></i> Aufnahme-Bestätigung
                             </p>
                             <form method="POST" action="{{ route('heroes.welcome-mail', $hero) }}" data-refresh-modal>
                                 @csrf
                                 <button type="submit" class="ui small teal button">
-                                    <i class="paper plane outline icon"></i> Willkommens-Mail senden
+                                    <i class="paper plane icon"></i> Willkommens-Mail senden
                                 </button>
                             </form>
                             <p class="wr-verwalten-hint mt-1">Sendet die Aufnahme-Bestätigung an die Eltern/Betreuer des Spielers.</p>
@@ -941,7 +959,7 @@
                 {{-- Verschollen / Wiedergefunden --}}
                 <div class="wr-verwalten-panel {{ $hero->died ? 'wr-verwalten-verschollen-aktiv' : 'wr-verwalten-verschollen-warnung' }}">
                     <h4 class="wr-verwalten-heading wr-verwalten-heading--lg">
-                        <i class="user {{ $hero->died ? 'check circle outline' : 'times circle outline' }} icon"></i>
+                        <i class="user {{ $hero->died ? 'check circle' : 'times circle' }} icon"></i>
                         {{ $hero->died ? 'Held verschollen' : 'Held aktiv' }}
                     </h4>
                     @if ($hero->died)

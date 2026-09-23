@@ -128,6 +128,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('heroes.welcome-mail');
     Route::patch('heroes/{hero}/visibility', [HeroController::class, 'toggleVisibility'])->name('heroes.visibility');
     Route::patch('heroes/{hero}/searchable', [HeroController::class, 'toggleSearchable'])->name('heroes.searchable');
+    Route::get('heroes/{hero}/player-edit', [HeroController::class, 'playerEditForm'])->name('heroes.player-edit');
+    Route::patch('heroes/{hero}/player-info', [HeroController::class, 'updatePlayerInfo'])->name('heroes.player-info');
     // EP-Buchung für einen Helden (HERO-12).
     Route::post('heroes/{hero}/ep', [EpTransactionController::class, 'store'])->name('heroes.ep.store');
     // EP-Konto-Auszug als CSV (REP-02).

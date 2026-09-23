@@ -2,7 +2,10 @@
 
 use Spatie\Backup\Notifications\Notifiable;
 use Spatie\Backup\Notifications\Notifications\BackupHasFailedNotification;
+use Spatie\Backup\Notifications\Notifications\BackupWasSuccessfulNotification;
 use Spatie\Backup\Notifications\Notifications\CleanupHasFailedNotification;
+use Spatie\Backup\Notifications\Notifications\CleanupWasSuccessfulNotification;
+use Spatie\Backup\Notifications\Notifications\HealthyBackupWasFoundNotification;
 use Spatie\Backup\Notifications\Notifications\UnhealthyBackupWasFoundNotification;
 use Spatie\Backup\Tasks\Cleanup\Strategies\DefaultStrategy;
 use Spatie\Backup\Tasks\Monitor\HealthChecks\MaximumAgeInDays;
@@ -63,11 +66,15 @@ return [
     ],
 
     // Nur Fehler-Benachrichtigungen – kein täglicher Erfolgs-Spam.
+    // Alle Klassen müssen als Key vorhanden sein (leeres Array = kein Versand).
     'notifications' => [
         'notifications' => [
-            BackupHasFailedNotification::class    => ['mail'],
+            BackupHasFailedNotification::class         => ['mail'],
             UnhealthyBackupWasFoundNotification::class => ['mail'],
-            CleanupHasFailedNotification::class   => ['mail'],
+            CleanupHasFailedNotification::class        => ['mail'],
+            BackupWasSuccessfulNotification::class     => [],
+            HealthyBackupWasFoundNotification::class   => [],
+            CleanupWasSuccessfulNotification::class    => [],
         ],
 
         'notifiable' => Notifiable::class,

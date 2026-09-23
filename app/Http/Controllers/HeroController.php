@@ -33,6 +33,7 @@ class HeroController extends Controller
         $q = trim((string) $request->query('q'));
 
         $heroes = Hero::with(['player', 'classes', 'epTransactions.type'])
+            ->withCount('galleryImages')
             ->when($status === 'missing', fn ($query) => $query->whereNotNull('died'))
             ->when($status === 'active', fn ($query) => $query->whereNull('died')->where('active', true))
             ->when($status === 'inactive', fn ($query) => $query->whereNull('died')->where('active', false))
@@ -184,6 +185,7 @@ class HeroController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $data = $this->validateHero($request);
+        $data['active'] = true; // Neue Helden immer aktiv anlegen.
 
         $hero = Hero::create($data);
         $hero->classes()->sync($request->input('classes', []));
@@ -391,6 +393,48 @@ class HeroController extends Controller
         return $request->expectsJson()
             ? response()->json(['message' => $msg, 'refresh_modal' => true])
             : back()->with('status', $msg);
+    }
+
+    /**
+     * Formular für Spieler-selbst-editierbare Felder (Charaktername, Heimatort, Steckbrief).
+     */
+    public function playerEditForm(Request $request, Hero $hero): \Illuminate\View\View
+    {
+        abort_unless($this->isHeroOwnerOrEditor($request, $hero), 403);
+
+        return view('heroes._player_edit_modal', compact('hero'));
+    }
+
+    /**
+     * Speichert Spieler-selbst-editierbare Felder: Charaktername, Heimatort, Steckbrief.
+     */
+    public function updatePlayerInfo(Request $request, Hero $hero): \Illuminate\Http\JsonResponse
+    {
+        abort_unless($this->isHeroOwnerOrEditor($request, $hero), 403);
+
+        $data = $request->validate([
+            'character_name' => ['nullable', 'string', 'max:150'],
+            'homeplace'      => ['nullable', 'string', 'max:150'],
+            'description'    => ['nullable', 'string', 'max:5000'],
+        ]);
+
+        $hero->update($data);
+
+        return response()->json(['message' => 'Charakter aktualisiert.', 'refresh_modal' => true]);
+    }
+
+    /** Spieler-selbst-Bearbeitung: Eigentümer des Helden oder heldenregister.edit-Berechtigung. */
+    private function isHeroOwnerOrEditor(Request $request, Hero $hero): bool
+    {
+        if ($request->user()->can('heldenregister.edit')) {
+            return true;
+        }
+
+        return $hero->player_id !== null
+            && \Illuminate\Support\Facades\DB::table('player_user')
+                ->where('player_id', $hero->player_id)
+                ->where('user_id', $request->user()->id)
+                ->exists();
     }
 
     /** Prüft ob der Nutzer öffentliche Einstellungen eines Helden ändern darf. */

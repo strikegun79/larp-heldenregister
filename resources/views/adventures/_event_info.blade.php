@@ -20,7 +20,7 @@
     <div><dt class="text-sm text-stone-500">Kategorie</dt><dd>{{ $adventure->category?->name }}</dd></div>
     <div><dt class="text-sm text-stone-500">Auftraggeber</dt><dd>{{ $adventure->client?->name }}</dd></div>
     <div><dt class="text-sm text-stone-500">Beitrag</dt><dd>{{ number_format($adventure->fee, 2, ',', '.') }} €</dd></div>
-    <div><dt class="text-sm text-stone-500">Belegung</dt><dd class="font-semibold">{{ $adventure->confirmedBookings()->count() }} / {{ $adventure->max_player }} ({{ $adventure->freeSlots() }} frei)</dd></div>
+    <div><dt class="text-sm text-stone-500">Belegung</dt><dd class="font-semibold">{{ $adventure->max_player - $adventure->freeSlots() }} / {{ $adventure->max_player }} ({{ $adventure->freeSlots() }} frei)</dd></div>
     @if ($adventure->min_age || $adventure->max_age)
         <div><dt class="text-sm text-stone-500">Alter</dt><dd>{{ $adventure->age_range_label }}</dd></div>
     @endif
