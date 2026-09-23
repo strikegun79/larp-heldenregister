@@ -263,6 +263,18 @@
     }
 }
 
+/* UI-44: #app-modal-2 – ab sm leichter Versatz gegenüber #app-modal,
+   damit das gestapelte Modal als eigene Ebene erkennbar bleibt.
+   Fomantic positioniert Modale via JS mit top/margin; der Offset
+   verschiebt das zweite Modal zusätzlich ohne die JS-Logik zu stören. */
+@media (min-width: 640px) {
+    #app-modal-2 {
+        /* 1.5rem nach rechts, 1.5rem nach unten – leichter Karten-Effekt */
+        margin-left: 1.5rem !important;
+        margin-top: 1.5rem !important;
+    }
+}
+
 /* UI-44: #app-modal-2 als Bottom-Sheet auf < sm.
    Fomantic setzt top/margin via JS – alles mit !important überschreiben.
    Ab sm bleibt das Verhalten des zentrierten Modals unverändert. */
