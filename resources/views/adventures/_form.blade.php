@@ -142,7 +142,8 @@
         <div>
             <x-input-label for="loot_ep_day" value="EP pro Tag" />
             <x-text-input id="loot_ep_day" name="loot_ep_day" type="number" min="0" class="mt-1 block w-full"
-                          :value="old('loot_ep_day', $adventure->loot_ep_day)" />
+                          :value="old('loot_ep_day', $adventure->loot_ep_day)" placeholder="0" />
+            <x-input-error :messages="$errors->get('loot_ep_day')" class="mt-2" />
         </div>
         <div>
             <x-input-label for="fee" value="Teilnahmebeitrag (€)" />

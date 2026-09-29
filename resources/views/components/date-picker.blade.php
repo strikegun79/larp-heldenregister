@@ -11,10 +11,10 @@
 <div class="ui calendar mt-1" data-cal-type="{{ $type }}" data-initial="{{ $value }}">
     <div class="relative">
         <span class="absolute inset-y-0 left-3 flex items-center pointer-events-none text-stone-400">
-            <i class="calendar alternate outline icon" style="margin:0"></i>
+            <i class="calendar alternate icon" style="margin:0"></i>
         </span>
-        <input type="text" placeholder="{{ $placeholder }}" autocomplete="off"
-               class="block w-full border-gray-300 rounded-md shadow-sm focus:border-amber-600 focus:ring-amber-600 pl-9"
+        <input type="text" placeholder="{{ $placeholder }}" autocomplete="off" readonly
+               class="block w-full border-gray-300 rounded-md shadow-sm focus:border-amber-600 focus:ring-amber-600 pl-9 cursor-pointer"
                @required($required)>
     </div>
     <input type="hidden" name="{{ $name }}" id="{{ $name }}" value="{{ $value }}">

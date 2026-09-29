@@ -128,7 +128,7 @@ class AdventureController extends Controller
     public function manageIndex(): View
     {
         $adventures = Adventure::with('status')
-            ->withCount(['confirmedBookings', 'bookings', 'teamerSignups', 'epTransactions'])
+            ->withCount(['activeBookings', 'waitlistedBookings', 'activeTeamerSignups', 'bookings', 'teamerSignups', 'epTransactions'])
             ->orderByRaw('(start_at < CURDATE()) ASC')
             ->orderByRaw('CASE WHEN start_at >= CURDATE() THEN start_at END ASC')
             ->orderByDesc('start_at')
@@ -517,14 +517,14 @@ class AdventureController extends Controller
             'location_id' => ['nullable', 'exists:locations,id'],
             'start_at' => ['required', 'date'],
             'end_at' => ['required', 'date', 'after_or_equal:start_at'],
-            'loot_ep_day' => ['integer', 'min:0'],
+            'loot_ep_day' => ['nullable', 'integer', 'min:0'],
             'event_status_id' => ['required', 'exists:event_statuses,id'],
             'event_client_id' => ['required', 'exists:event_clients,id'],
             'event_category_id' => ['required', 'exists:event_categories,id'],
             'max_player' => ['required', 'integer', 'min:1'],
             'min_age'    => ['nullable', 'integer', 'min:0', 'max:99'],
             'max_age'    => ['nullable', 'integer', 'min:0', 'max:99'],
-            'waitlist' => ['integer', 'min:0'],
+            'waitlist' => ['nullable', 'integer', 'min:0'],
             'fee' => ['required', 'numeric', 'min:0'],
             'fee_reduced' => ['nullable', 'numeric', 'min:0'],
             'is_hidden' => ['boolean'],
@@ -532,6 +532,9 @@ class AdventureController extends Controller
 
         // Checkbox sendet keinen Wert wenn nicht angehakt → false setzen.
         $data['is_hidden'] = $request->boolean('is_hidden');
+
+        // Leeres Feld (NOT NULL mit Default 0) → Integer-Default setzen.
+        $data['loot_ep_day'] = (int) ($data['loot_ep_day'] ?? 0);
 
         // Altersbereich: min muss kleiner als max sein wenn beide gesetzt
         if (isset($data['min_age'], $data['max_age']) && $data['min_age'] >= $data['max_age']) {

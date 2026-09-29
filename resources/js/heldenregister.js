@@ -582,16 +582,17 @@ document.addEventListener('submit', function (e) {
 // ------------------------------------------------------------------
 // Skilltree: Klick auf eine Fertigkeit -> Skill-Modal (HERO-14/16)
 // ------------------------------------------------------------------
-let skillBaseUrl = null, skillCurrentId = null, skillCanEdit = false;
+let skillBaseUrl = null, skillCurrentId = null, skillCanEdit = false, skillCanBypassLock = false;
 
 document.addEventListener('click', function (e) {
     const node = e.target.closest('.skill-trigger');
     if (!node) return;
     e.preventDefault();
-    const tree    = node.closest('#skilltree');
-    skillBaseUrl  = tree ? tree.getAttribute('data-learn-url') : null;
-    skillCanEdit  = tree ? tree.getAttribute('data-can-edit') === '1' : false;
-    skillCurrentId = node.getAttribute('data-skill-id');
+    const tree         = node.closest('#skilltree');
+    skillBaseUrl       = tree ? tree.getAttribute('data-learn-url') : null;
+    skillCanEdit       = tree ? tree.getAttribute('data-can-edit') === '1' : false;
+    skillCanBypassLock = tree ? tree.getAttribute('data-can-bypass-lock') === '1' : false;
+    skillCurrentId     = node.getAttribute('data-skill-id');
     const balance  = parseFloat(tree ? tree.getAttribute('data-balance') : '0') || 0;
     const cost     = parseFloat(node.getAttribute('data-skill-cost')) || 0;
     const learned  = node.getAttribute('data-skill-learned') === '1';
@@ -613,17 +614,22 @@ document.addEventListener('click', function (e) {
         $revoke.toggle(skillCanEdit);
     } else if (locked) {
         // SKILL-06: Voraussetzungen nicht erfüllt.
+        // Bürokrat darf trotzdem zuteilen (Sonderfall via data-can-bypass-lock).
         $('#skill-modal-meta').html('Kosten: <strong>' + cost + ' EP</strong>');
         $warn.text('Voraussetzungen fehlen: ' + prereqs + '.').show();
-        $accept.hide();
         $revoke.hide();
+        if (skillCanBypassLock) {
+            $accept.show().removeClass('disabled').text('Trotzdem zuteilen (Sonderfall)');
+        } else {
+            $accept.hide();
+        }
     } else {
         const enough   = balance >= cost;
         const epColor  = enough ? 'text-green-700' : 'text-red-700';
         $('#skill-modal-meta').html('Kosten: <strong>' + cost + ' EP</strong> &nbsp;·&nbsp; Verfügbar: <span class="' + epColor + ' font-medium">' + balance + ' EP</span>');
         $warn.text('Nicht genug EP. EP werden durch Abenteuer-Teilnahme gutgeschrieben.').toggle(!enough);
         $revoke.hide();
-        $accept.toggle(skillCanEdit).toggleClass('disabled', !enough);
+        $accept.text('Fertigkeit erlernen').toggle(skillCanEdit).toggleClass('disabled', !enough);
     }
 
     $('#skill-modal').modal({ allowMultiple: true, autofocus: false }).modal('show');
@@ -763,13 +769,26 @@ function initFomanticCalendars($container) {
         const fmtDate     = (d) => pad(d.getDate()) + '.' + pad(d.getMonth() + 1) + '.' + d.getFullYear();
         const fmtDatetime = (d) => fmtDate(d) + ' ' + pad(d.getHours()) + ':' + pad(d.getMinutes());
 
+        const deText = {
+            days:         ['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'],
+            dayNamesShort:['So', 'Mo', 'Di', 'Mi', 'Do', 'Fr', 'Sa'],
+            dayNames:     ['Sonntag', 'Montag', 'Dienstag', 'Mittwoch', 'Donnerstag', 'Freitag', 'Samstag'],
+            months:       ['Januar', 'Februar', 'März', 'April', 'Mai', 'Juni',
+                           'Juli', 'August', 'September', 'Oktober', 'November', 'Dezember'],
+            monthsShort:  ['Jan', 'Feb', 'Mär', 'Apr', 'Mai', 'Jun',
+                           'Jul', 'Aug', 'Sep', 'Okt', 'Nov', 'Dez'],
+            today: 'Heute', now: 'Jetzt', am: 'AM', pm: 'PM', weekNo: 'KW',
+        };
+
         const opts = {
-            type:       type === 'datetime' ? 'datetime' : 'date',
-            monthFirst: false,
-            today:      true,
-            closable:   true,
-            formatter:  type === 'datetime'
-                ? { datetime: (d) => d ? fmtDatetime(d) : '' }
+            type:         type === 'datetime' ? 'datetime' : 'date',
+            monthFirst:   false,
+            today:        true,
+            closable:     true,
+            firstDayOfWeek: 1,
+            text:         deText,
+            formatter:    type === 'datetime'
+                ? { datetime: (d) => d ? fmtDatetime(d) : '', cellTime: 'HH:mm' }
                 : { date:     (d) => d ? fmtDate(d)     : '' },
             onChange: function (date) {
                 if (!date) { $hidden.val(''); return; }
