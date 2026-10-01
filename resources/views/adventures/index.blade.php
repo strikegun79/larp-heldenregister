@@ -87,7 +87,7 @@
                             {{-- Mobile: Kartenliste --}}
                             <div class="sm:hidden divide-y divide-stone-200">
                                 @foreach ($group as $adventure)
-                                    @php $free = $adventure->max_player - $adventure->confirmed_bookings_count; @endphp
+                                    @php $free = $adventure->max_player - $adventure->occupied_slots_count; @endphp
                                     <a href="{{ route('adventures.show', $adventure) }}"
                                        class="block p-4 hover:bg-stone-50 active:bg-stone-100 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-600 focus-visible:outline-offset-[-2px]">
                                         <div class="font-medium text-stone-800">{{ $adventure->name }}</div>
@@ -125,7 +125,7 @@
                                     </thead>
                                     <tbody class="divide-y divide-stone-200 text-stone-800">
                                         @foreach ($group as $adventure)
-                                            @php $free = $adventure->max_player - $adventure->confirmed_bookings_count; @endphp
+                                            @php $free = $adventure->max_player - $adventure->occupied_slots_count; @endphp
                                             <tr data-modal-url="{{ route('adventures.show', $adventure) }}"
                                                 role="button" tabindex="0"
                                                 aria-label="Abenteuer {{ $adventure->name }} öffnen"
@@ -157,7 +157,7 @@
                     {{-- Mobile: Kartenliste --}}
                     <div class="sm:hidden divide-y divide-stone-200">
                         @forelse ($adventures as $adventure)
-                            @php $free = $adventure->max_player - $adventure->confirmed_bookings_count; @endphp
+                            @php $free = $adventure->max_player - $adventure->occupied_slots_count; @endphp
                             <a href="{{ route('adventures.show', $adventure) }}"
                                class="block p-4 hover:bg-stone-50 active:bg-stone-100 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-600 focus-visible:outline-offset-[-2px]">
                                 <div class="font-medium text-stone-800">{{ $adventure->name }}</div>
@@ -202,7 +202,7 @@
                             </thead>
                             <tbody class="divide-y divide-stone-200 text-stone-800">
                                 @forelse ($adventures as $adventure)
-                                    @php $free = $adventure->max_player - $adventure->confirmed_bookings_count; @endphp
+                                    @php $free = $adventure->max_player - $adventure->occupied_slots_count; @endphp
                                     <tr data-modal-url="{{ route('adventures.show', $adventure) }}"
                                         role="button" tabindex="0"
                                         aria-label="Abenteuer {{ $adventure->name }} öffnen"

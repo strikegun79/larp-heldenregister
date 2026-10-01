@@ -131,6 +131,33 @@ class Adventure extends Model
         return $this->bookings()->where('waitlisted', false);
     }
 
+    /** Aktive Teilnehmer: regulärer Platz, nicht storniert. */
+    public function activeBookings(): HasMany
+    {
+        return $this->bookings()->where('waitlisted', false)->where('status', '!=', 'storniert');
+    }
+
+    /** Belegte Spieler-Plätze: regulär, nicht storniert, keine Teamer-Rollen. */
+    public function occupiedSlots(): HasMany
+    {
+        return $this->bookings()
+            ->where('waitlisted', false)
+            ->where('status', '!=', 'storniert')
+            ->whereNotIn('event_role_id', EventRole::teamerLike()->pluck('id'));
+    }
+
+    /** Wartende Anmeldungen: auf Warteliste, nicht storniert. */
+    public function waitlistedBookings(): HasMany
+    {
+        return $this->bookings()->where('waitlisted', true)->where('status', '!=', 'storniert');
+    }
+
+    /** Teamer-Anmeldungen ohne abgelehnte. */
+    public function activeTeamerSignups(): HasMany
+    {
+        return $this->teamerSignups()->whereNull('rejected_at');
+    }
+
     /**
      * Soll die nächste Buchung auf die Warteliste?
      * Ja, wenn das Event voll ist ODER noch jemand auf der Warteliste wartet

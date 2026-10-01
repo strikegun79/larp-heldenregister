@@ -32,7 +32,7 @@
                             </div>
                             <div class="text-right shrink-0">
                                 <div>@include('adventures._status_badge', ['status' => $event->status])</div>
-                                <div class="text-sm text-stone-500 mt-1">{{ $event->confirmed_bookings_count }} / {{ $event->max_player }} Plätze</div>
+                                <div class="text-sm text-stone-500 mt-1">{{ $event->occupied_slots_count }} / {{ $event->max_player }} Plätze</div>
                             </div>
                         </div>
                     @endforeach

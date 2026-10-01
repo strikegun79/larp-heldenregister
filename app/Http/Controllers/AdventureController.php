@@ -67,7 +67,7 @@ class AdventureController extends Controller
         }
 
         $base = Adventure::with(['location', 'status', 'category'])
-            ->withCount('confirmedBookings')
+            ->withCount('occupiedSlots')
             ->visibleFor($request->user())
             ->when($q, fn ($query) => $query->where('name', 'like', "%{$q}%"));
 
@@ -110,7 +110,7 @@ class AdventureController extends Controller
     public function calendar(Request $request): View
     {
         $events = Adventure::with(['location', 'status'])
-            ->withCount('confirmedBookings')
+            ->withCount('occupiedSlots')
             ->visibleFor($request->user())
             ->whereNotNull('start_at')
             ->where('start_at', '>=', now()->startOfDay())
