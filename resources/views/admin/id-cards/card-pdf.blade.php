@@ -107,6 +107,39 @@
         padding: 0;
     }
 
+    /*
+     * Name über der Namenslinie (Template: x 270–870 px, Linie bei y 423 px)
+     * → left 2,072 cm / top 2,745 cm (leicht angehoben für Unterlängen) / 4,604 × 0,381 cm (Zeilenhöhe, da DOMPDF
+     *   Tabellenhöhen in absolut positionierten Boxen ignoriert).
+     */
+    .card-name {
+        position: absolute;
+        left: 2.072cm;
+        top: 2.745cm;
+        width: 4.604cm;
+        height: 0.381cm;
+        line-height: 0.381cm;
+        font-weight: bold;
+        color: #1a0a00;
+        white-space: nowrap;
+    }
+
+    /*
+     * Klassen-Kästchen (Template: x 113–174 px, je 62 × 63 px)
+     * → left 0,867 cm, 0,476 × 0,480 cm; top je Klasse siehe $classBoxes.
+     */
+    .card-class-x {
+        position: absolute;
+        left: 0.867cm;
+        width: 0.476cm;
+        height: 0.480cm;
+        line-height: 0.400cm;
+        text-align: center;
+        font-size: 13pt;
+        font-weight: bold;
+        color: #1a0a00;
+    }
+
     /* Fallback ohne Vorderseiten-Template */
     .card-fallback-header {
         background: #5a3a22;
@@ -183,6 +216,15 @@
     $hasFront = file_exists(resource_path('images/template_helden_ausweis_vorderseite.png'));
     $hasBack  = $backTemplateUri !== null;
     $chunks   = collect($cards)->chunk(3);
+
+    // Oberkante der aufgedruckten Klassen-Kästchen (y-Pixel / 1312 px × 10 cm).
+    $classBoxes = [
+        'Krieger'    => 3.651,
+        'Magier'     => 4.360,
+        'Waldläufer' => 5.069,
+        'Heiler'     => 5.777,
+        'Alchemist'  => 6.486,
+    ];
 @endphp
 
 @foreach ($chunks as $chunkIndex => $chunk)
@@ -212,6 +254,19 @@
             @if (! $hasFront)
                 <div class="card-fallback-header">Heldenausweis – {{ $card['code'] }}</div>
             @endif
+
+            {{-- Name (Charakter- oder Spielername); leer bei Blanko-Ausweisen --}}
+            @if (filled($card['name'] ?? null))
+                @php($nameLen = mb_strlen($card['name']))
+                <div class="card-name" style="font-size: {{ $nameLen <= 16 ? 11 : ($nameLen <= 24 ? 9 : 7) }}pt;">{{ $card['name'] }}</div>
+            @endif
+
+            {{-- X in die Kästchen der Klassen des Helden --}}
+            @foreach ($card['classes'] ?? [] as $className)
+                @if (isset($classBoxes[$className]))
+                    <div class="card-class-x" style="top: {{ $classBoxes[$className] }}cm;">X</div>
+                @endif
+            @endforeach
 
             @if ($hasFront)
                 <div class="card-qr">

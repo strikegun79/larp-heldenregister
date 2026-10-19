@@ -197,6 +197,9 @@ class HeroController extends Controller
             'cards' => [[
                 'code'           => $hero->public_code,
                 'character_name' => $hero->character_name,
+                // Name-Feld: Charaktername, sonst Spielername.
+                'name'           => $hero->character_name ?: $hero->player?->full_name,
+                'classes'        => $hero->classes->pluck('name')->all(),
                 'url'            => $url,
                 'qr'             => $qrUri,
             ]],
