@@ -39,8 +39,9 @@ document.addEventListener('DOMContentLoaded', function () {
     {{-- Steckbrief: Hintergrund-Freitext + Avatar-Bild (HERO-09). --}}
     <div>
         <x-input-label for="description" value="Steckbrief / Hintergrund" />
-        <textarea id="description" name="description" rows="4"
-                  class="mt-1 block w-full border-gray-300 focus:border-amber-600 focus:ring-amber-600 rounded-md shadow-sm">{{ old('description', $hero->description) }}</textarea>
+        <div class="mt-1">
+            @include('heroes._steckbrief_editor', ['id' => 'description', 'value' => old('description', $hero->description_html)])
+        </div>
         <x-input-error :messages="$errors->get('description')" class="mt-2" />
     </div>
 

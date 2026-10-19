@@ -33,7 +33,7 @@
 
     <x-mobile.accordion-section :title="'Helden (' . $player->heroes->count() . ')'">
         @forelse ($player->heroes as $hero)
-            <a href="{{ route('heroes.show', $hero) }}" data-modal-stack="{{ route('heroes.show', $hero) }}"
+            <a href="{{ route('heroes.show', $hero) }}"
                class="flex items-center gap-3 py-2 border-b border-stone-100 last:border-0 hover:bg-amber-50 active:bg-amber-100 transition-colors rounded px-1">
                 <img src="{{ $hero->image_url }}" alt="{{ $hero->character_name }}"
                      class="w-10 h-10 object-cover rounded border" loading="lazy">
@@ -151,8 +151,8 @@
             <thead><tr><th>Foto</th><th>Name</th><th>Klasse(n)</th><th class="right aligned">EP</th><th>Aktiv</th></tr></thead>
             <tbody>
                 @forelse ($player->heroes as $hero)
-                    <tr data-modal-stack="{{ route('heroes.show', $hero) }}"
-                        role="button" tabindex="0"
+                    <tr data-navigate="{{ route('heroes.show', $hero) }}"
+                        role="link" tabindex="0"
                         aria-label="Held {{ $hero->character_name ?? 'unbenannt' }} öffnen"
                         class="cursor-pointer hover:bg-stone-50 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-600 focus-visible:outline-offset-[-2px]">
                         <td>

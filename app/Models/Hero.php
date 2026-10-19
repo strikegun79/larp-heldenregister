@@ -9,10 +9,16 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Storage;
+use Mews\Purifier\Facades\Purifier;
 
 class Hero extends Model
 {
     use HasFactory;
+
+    /** Maximale Länge des Steckbriefs als reiner Text bzw. als gespeichertes HTML. */
+    public const DESCRIPTION_MAX_TEXT = 12000;
+
+    public const DESCRIPTION_MAX_HTML = 60000;
 
     /**
      * PUB-01: Eindeutigen 6-stelligen Code generieren und beim Erstellen setzen.
@@ -81,6 +87,63 @@ class Hero extends Model
     public function getImageUrlAttribute(): string
     {
         return $this->image ? '/storage/'.$this->image : '/images/heroes_db.jpg';
+    }
+
+    /**
+     * Steckbrief-HTML aus dem Editor bereinigen; leerer Inhalt wird zu null.
+     */
+    public static function sanitizeDescription(?string $html): ?string
+    {
+        if ($html === null || trim(self::descriptionToPlain($html)) === '') {
+            return null;
+        }
+
+        return Purifier::clean($html, 'steckbrief');
+    }
+
+    /**
+     * Steckbrief als reiner Text (für Vorschau und Längenprüfung).
+     */
+    public static function descriptionToPlain(?string $value): string
+    {
+        if ($value === null || $value === '') {
+            return '';
+        }
+        if (! self::isEditorHtml($value)) {
+            return $value; // Alt-Daten: bereits reiner Text.
+        }
+
+        // Block-Enden als Zeilenumbruch erhalten, dann Tags entfernen.
+        $text = preg_replace('#<br\s*/?>|</(p|li|div)>#i', "\n", $value);
+
+        return trim(html_entity_decode(strip_tags($text), ENT_QUOTES | ENT_HTML5, 'UTF-8'));
+    }
+
+    /**
+     * Editor-HTML erkennen: Summernote erzeugt immer Absätze/Listen/Umbrüche.
+     * Alt-Daten (reiner Text, ggf. mit "<" im Text) enthalten diese nicht.
+     */
+    private static function isEditorHtml(string $value): bool
+    {
+        return (bool) preg_match('#</(p|li)>|<br\s*/?>#i', $value);
+    }
+
+    /** Steckbrief als sicheres HTML; Alt-Daten (reiner Text) mit Zeilenumbrüchen. */
+    public function getDescriptionHtmlAttribute(): string
+    {
+        $value = (string) $this->description;
+
+        if (! self::isEditorHtml($value)) {
+            return nl2br(e($value));
+        }
+
+        return Purifier::clean($value, 'steckbrief');
+    }
+
+    /** Steckbrief als reiner Text. */
+    public function getDescriptionPlainAttribute(): string
+    {
+        return self::descriptionToPlain($this->description);
     }
 
     /**

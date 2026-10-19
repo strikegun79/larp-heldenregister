@@ -4,7 +4,7 @@
     "scripts": {
         "dev": "vite",
         "build": "vite build",
-        "copy-summernote": "mkdir -p public/vendor/summernote/font && cp node_modules/summernote/dist/summernote-lite.min.js node_modules/summernote/dist/summernote-lite.min.css public/vendor/summernote/ && cp node_modules/summernote/dist/font/* public/vendor/summernote/font/",
+        "copy-summernote": "mkdir -p public/vendor/summernote/font && cp node_modules/summernote/dist/summernote-lite.min.js node_modules/summernote/dist/summernote-lite.min.css public/vendor/summernote/ && cp node_modules/summernote/dist/font/* public/vendor/summernote/font/ && mkdir -p public/vendor/summernote/lang && cp node_modules/summernote/dist/lang/summernote-de-DE.min.js public/vendor/summernote/lang/",
         "copy-quill": "mkdir -p public/vendor/quill && cp node_modules/quill/dist/quill.js node_modules/quill/dist/quill.snow.css public/vendor/quill/"
     },
     "devDependencies": {

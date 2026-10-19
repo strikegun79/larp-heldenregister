@@ -38,6 +38,13 @@ return [
             'AutoFormat.RemoveEmpty'   => true,
             'URI.AllowedSchemes'       => ['http' => true, 'https' => true, 'mailto' => true],
         ],
+        // Helden-Steckbrief: nur Textformatierung (Farbe, Stil, Größe), keine Links/Bilder
+        'steckbrief' => [
+            'HTML.Doctype'             => 'HTML 4.01 Transitional',
+            'HTML.Allowed'             => 'p[style],br,strong,b,em,i,u,s,ul,ol,li[style],span[style]',
+            'CSS.AllowedProperties'    => 'color,background-color,font-size,font-weight,font-style,text-decoration,text-align',
+            'AutoFormat.RemoveEmpty'   => true,
+        ],
         'test'    => [
             'Attr.EnableID' => 'true',
         ],

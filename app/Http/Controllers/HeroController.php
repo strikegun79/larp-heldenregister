@@ -168,6 +168,47 @@ class HeroController extends Controller
     }
 
     /**
+     * PUB-10: Heldenausweis-PDF für den Besitzer des Helden (oder Bürokrat/Admin).
+     * Gleiche Ausgabe wie Admin\IdCardController::reprint().
+     */
+    public function ausweisDownload(Request $request, Hero $hero): \Symfony\Component\HttpFoundation\Response
+    {
+        $this->authorizePhotoAccess($request, $hero);
+        abort_unless((bool) $hero->public_code, 404);
+
+        $url      = route('public.hero', $hero->public_code);
+        $qr       = new \Endroid\QrCode\QrCode($url, size: 400);
+        $writer   = new \Endroid\QrCode\Writer\PngWriter();
+        $qrUri    = 'data:image/png;base64,'.base64_encode($writer->write($qr)->getString());
+
+        $backPath = resource_path('images/template_helden_ausweis_rueckseite.png');
+        $backUri  = null;
+        if (file_exists($backPath) && function_exists('imagecreatefrompng')) {
+            $img = @imagecreatefrompng($backPath);
+            if ($img !== false) {
+                $rotated = imagerotate($img, 180, 0);
+                ob_start(); imagepng($rotated); $data = ob_get_clean();
+                imagedestroy($img); imagedestroy($rotated);
+                $backUri = 'data:image/png;base64,'.base64_encode($data);
+            }
+        }
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('admin.id-cards.card-pdf', [
+            'cards' => [[
+                'code'           => $hero->public_code,
+                'character_name' => $hero->character_name,
+                'url'            => $url,
+                'qr'             => $qrUri,
+            ]],
+            'backTemplateUri' => $backUri,
+        ])->setPaper('a4', 'landscape')
+          ->setOption('dpi', 150)
+          ->setOption('isFontSubsettingEnabled', true);
+
+        return $pdf->stream('ausweis-'.$hero->public_code.'.pdf');
+    }
+
+    /**
      * Formular für einen neuen Helden.
      */
     public function create(): View
@@ -406,6 +447,20 @@ class HeroController extends Controller
     }
 
     /**
+     * Vollständiger Steckbrief eines Helden als Modal-Inhalt.
+     */
+    public function steckbrief(Request $request, Hero $hero): View
+    {
+        // Gleiche Sichtbarkeit wie die Detailansicht.
+        abort_unless(
+            $request->user()->can('heldenregister.view') || ($hero->player && $request->user()->can('view', $hero->player)),
+            403
+        );
+
+        return view('heroes._steckbrief_modal', compact('hero'));
+    }
+
+    /**
      * Speichert Spieler-selbst-editierbare Felder: Charaktername, Heimatort, Steckbrief.
      */
     public function updatePlayerInfo(Request $request, Hero $hero): \Illuminate\Http\JsonResponse
@@ -415,8 +470,12 @@ class HeroController extends Controller
         $data = $request->validate([
             'character_name' => ['nullable', 'string', 'max:150'],
             'homeplace'      => ['nullable', 'string', 'max:150'],
-            'description'    => ['nullable', 'string', 'max:5000'],
+            'description'    => $this->descriptionRules(),
         ]);
+
+        if (array_key_exists('description', $data)) {
+            $data['description'] = Hero::sanitizeDescription($data['description']);
+        }
 
         $hero->update($data);
 
@@ -461,7 +520,7 @@ class HeroController extends Controller
             'born' => ['nullable', 'date'],
             'died' => ['nullable', 'date', 'after_or_equal:born'],
             'homeplace' => ['nullable', 'string', 'max:150'],
-            'description' => ['nullable', 'string', 'max:5000'],
+            'description' => $this->descriptionRules(),
             'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
             'active'         => ['boolean'],
             'public_visible' => ['boolean'],
@@ -473,10 +532,34 @@ class HeroController extends Controller
         $validated['active']         = $request->boolean('active');
         $validated['public_visible'] = $request->boolean('public_visible');
 
+        // Steckbrief-HTML aus dem Editor bereinigen.
+        if (array_key_exists('description', $validated)) {
+            $validated['description'] = Hero::sanitizeDescription($validated['description']);
+        }
+
         // 'classes' (Pivot) und 'image' (Datei-Upload) werden separat behandelt.
         unset($validated['classes'], $validated['image']);
 
         return $validated;
+    }
+
+    /**
+     * Validierung für den Steckbrief (WYSIWYG-HTML): Länge als reiner Text und als HTML.
+     *
+     * @return array<int, mixed>
+     */
+    private function descriptionRules(): array
+    {
+        return [
+            'nullable',
+            'string',
+            'max:'.Hero::DESCRIPTION_MAX_HTML,
+            function (string $attribute, mixed $value, \Closure $fail) {
+                if (mb_strlen(Hero::descriptionToPlain($value)) > Hero::DESCRIPTION_MAX_TEXT) {
+                    $fail('Der Steckbrief darf höchstens '.number_format(Hero::DESCRIPTION_MAX_TEXT, 0, ',', '.').' Zeichen lang sein.');
+                }
+            },
+        ];
     }
 
     /**

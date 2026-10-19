@@ -22,9 +22,7 @@
 
     <div class="field">
         <label for="pem-description">Steckbrief / Hintergrund</label>
-        <textarea id="pem-description" name="description"
-                  rows="7" maxlength="5000"
-                  placeholder="Hintergrundgeschichte, Aussehen, Besonderheiten …">{{ old('description', $hero->description) }}</textarea>
+        @include('heroes._steckbrief_editor', ['id' => 'pem-description', 'value' => old('description', $hero->description_html)])
     </div>
 
     <div data-modal-actions hidden>

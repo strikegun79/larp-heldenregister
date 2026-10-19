@@ -67,8 +67,8 @@
         {{-- Steckbrief --}}
         <div class="bg-white/70 border-2 border-[#5a3a22]/40 shadow sm:rounded-lg p-5 mb-6">
             <h2 class="font-uncial text-lg text-waldritter mb-2">Steckbrief</h2>
-            @if (filled($hero->description))
-                <p class="text-stone-700 whitespace-pre-line">{{ $hero->description }}</p>
+            @if (filled($hero->description_plain))
+                <div class="wr-steckbrief text-stone-700 break-words">{!! $hero->description_html !!}</div>
             @else
                 <p class="text-stone-400 italic">Noch keine Eintragungen</p>
             @endif

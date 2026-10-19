@@ -129,6 +129,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::patch('heroes/{hero}/visibility', [HeroController::class, 'toggleVisibility'])->name('heroes.visibility');
     Route::patch('heroes/{hero}/searchable', [HeroController::class, 'toggleSearchable'])->name('heroes.searchable');
     Route::get('heroes/{hero}/player-edit', [HeroController::class, 'playerEditForm'])->name('heroes.player-edit');
+    Route::get('heroes/{hero}/steckbrief', [HeroController::class, 'steckbrief'])->name('heroes.steckbrief');
     Route::patch('heroes/{hero}/player-info', [HeroController::class, 'updatePlayerInfo'])->name('heroes.player-info');
     // EP-Buchung für einen Helden (HERO-12).
     Route::post('heroes/{hero}/ep', [EpTransactionController::class, 'store'])->name('heroes.ep.store');
@@ -136,6 +137,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('heroes/{hero}/ep-export', [HeroController::class, 'epExport'])->name('heroes.ep.export');
     // Charakterbogen als PDF (REP-05).
     Route::get('heroes/{hero}/sheet-pdf', [HeroController::class, 'sheetPdf'])->name('heroes.sheet-pdf');
+    // Heldenausweis-PDF für Besitzer/Bürokrat (PUB-10).
+    Route::get('heroes/{hero}/ausweis', [HeroController::class, 'ausweisDownload'])->name('heroes.ausweis');
     // Helden-Foto Upload + Löschen (HERO-22).
     Route::post('heroes/{hero}/photo', [HeroController::class, 'uploadPhoto'])->name('heroes.photo');
     Route::delete('heroes/{hero}/photo', [HeroController::class, 'deletePhoto'])->name('heroes.photo.destroy');

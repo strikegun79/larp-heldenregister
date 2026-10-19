@@ -71,8 +71,31 @@
                     <dd class="text-xs text-stone-500">Held spielt nicht mehr aktiv</dd>
                 </div>
                 @endif
-                @if ($hero->public_code)
-                <div class="border-t border-[#5a3a22]/30 pt-3 mt-1">
+            </dl>
+
+            @if (($hero->public_code && $canManagePublic) || $canEditPhoto)
+                {{-- Beide Buttons gleich breit, so breit wie die längste Beschriftung --}}
+                <div style="display: inline-flex; flex-direction: column; gap: 0.5rem;">
+                    @if ($hero->public_code && $canManagePublic)
+                        <a href="{{ route('heroes.ausweis', $hero) }}"
+                           class="ui mini basic button" style="margin: 0;" target="_blank" rel="noopener">
+                            <i class="id card icon"></i> Ausweis (PDF)
+                        </a>
+                    @endif
+
+                    @if ($canEditPhoto)
+                        <a data-modal-stack="{{ route('heroes.player-edit', $hero) }}"
+                           class="ui mini basic button" style="margin: 0;">
+                            <i class="pencil alternate icon"></i> Charakter bearbeiten
+                        </a>
+                    @endif
+                </div>
+                <div class="ui divider my-3"></div>
+            @endif
+
+            @if ($hero->public_code)
+            <dl class="mb-4">
+                <div>
                     <dt class="text-xs font-medium text-stone-500">Helden-Siegel</dt>
                     <dd class="flex flex-wrap items-center gap-2">
                         <code class="font-mono tracking-widest text-waldritter bg-stone-100 rounded px-2 py-0.5 text-sm">{{ $hero->public_code }}</code>
@@ -120,21 +143,24 @@
                         </dd>
                     @endif
                 </div>
-                @endif
             </dl>
-
-            @if ($canEditPhoto)
-                <div class="mt-3 mb-2">
-                    <a data-modal-stack="{{ route('heroes.player-edit', $hero) }}"
-                       class="ui mini basic button">
-                        <i class="pencil alternate icon"></i> Charakter bearbeiten
-                    </a>
-                </div>
             @endif
 
             @if ($hero->description)
                 <h4 class="font-uncial text-waldritter mb-1">Steckbrief</h4>
-                <p class="text-stone-700 whitespace-pre-line text-sm mb-4">{{ $hero->description }}</p>
+                @if (mb_strlen($hero->description_plain) > 100)
+                    {{-- Steckbrief gekürzt anzeigen, vollständig im gestapelten Modal --}}
+                    <div class="mb-4">
+                        <p class="text-stone-700 whitespace-pre-line break-words text-sm mb-1">{{ \Illuminate\Support\Str::limit($hero->description_plain, 100) }}</p>
+                        <a href="{{ route('heroes.steckbrief', $hero) }}"
+                           data-modal-stack="{{ route('heroes.steckbrief', $hero) }}"
+                           class="text-waldritter underline font-semibold text-sm">
+                            Ganzen Steckbrief lesen <i class="angle right icon"></i>
+                        </a>
+                    </div>
+                @else
+                    <div class="wr-steckbrief text-stone-700 break-words text-sm mb-4">{!! $hero->description_html !!}</div>
+                @endif
             @endif
 
             <h4 class="font-uncial text-waldritter mb-2">Erworbene Fertigkeiten</h4>
@@ -516,6 +542,27 @@
                         @endif
                     </div>
                 @endif
+
+                @if ($hero->public_code && $canManagePublic)
+                    <div class="ui horizontal divider" style="margin: 0.75rem 0; font-size: 0.65rem;"></div>
+                @endif
+
+                {{-- Beide Buttons gleich breit, so breit wie die längste Beschriftung --}}
+                <div style="display: inline-flex; flex-direction: column; gap: 0.5rem;">
+                    @if ($hero->public_code && $canManagePublic)
+                        <a href="{{ route('heroes.ausweis', $hero) }}"
+                           class="ui mini basic button" style="margin: 0;" target="_blank" rel="noopener">
+                            <i class="id card icon"></i> Ausweis (PDF)
+                        </a>
+                    @endif
+
+                    @if ($canEditPhoto)
+                        <a data-modal-stack="{{ route('heroes.player-edit', $hero) }}"
+                           class="ui mini basic button" style="margin: 0;">
+                            <i class="pencil alternate icon"></i> Charakter bearbeiten
+                        </a>
+                    @endif
+                </div>
             </div>{{-- /shrink-0 Foto --}}
             <div class="flex-1 min-w-0">
             <div class="bg-amber-50 border border-amber-200 rounded px-3 py-2 mb-3 text-sm text-amber-900 leading-snug">
@@ -625,18 +672,19 @@
             </div>{{-- /flex-1 --}}
             </div>{{-- /flex --}}
 
-            @if ($canEditPhoto)
-                <div class="mt-4">
-                    <a data-modal-stack="{{ route('heroes.player-edit', $hero) }}"
-                       class="ui mini basic button">
-                        <i class="pencil alternate icon"></i> Charakter bearbeiten
-                    </a>
-                </div>
-            @endif
-
             @if ($hero->description)
                 <h3 class="font-uncial text-lg text-waldritter mt-6 mb-2">Steckbrief</h3>
-                <p class="text-stone-700 whitespace-pre-line">{{ $hero->description }}</p>
+                @if (mb_strlen($hero->description_plain) > 100)
+                    {{-- Steckbrief gekürzt anzeigen, vollständig im gestapelten Modal --}}
+                    <p class="text-stone-700 whitespace-pre-line break-words mb-1">{{ \Illuminate\Support\Str::limit($hero->description_plain, 100) }}</p>
+                    <a href="{{ route('heroes.steckbrief', $hero) }}"
+                       data-modal-stack="{{ route('heroes.steckbrief', $hero) }}"
+                       class="text-waldritter underline font-semibold text-sm">
+                        Ganzen Steckbrief lesen <i class="angle right icon"></i>
+                    </a>
+                @else
+                    <div class="wr-steckbrief text-stone-700 break-words">{!! $hero->description_html !!}</div>
+                @endif
             @endif
 
             <h3 class="font-uncial text-lg text-waldritter mt-6 mb-2">Erworbene Fertigkeiten</h3>
