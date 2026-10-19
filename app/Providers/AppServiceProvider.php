@@ -5,11 +5,13 @@ namespace App\Providers;
 use App\Mail\QueueJobFailedMail;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Auth\Notifications\VerifyEmail;
+use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Queue\Events\JobFailed;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Queue;
+use Illuminate\Support\Facades\RateLimiter;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Support\ServiceProvider;
 
@@ -33,6 +35,12 @@ class AppServiceProvider extends ServiceProvider
         if (str_starts_with(config('app.url'), 'https://')) {
             URL::forceScheme('https');
         }
+
+        // Newsletter-Versand: maximal NEWSLETTER_EMAILS_PER_HOUR Mails pro Stunde.
+        // Transaktionale Mails sind davon nicht betroffen.
+        RateLimiter::for('newsletter-versand', function (object $job) {
+            return Limit::perHour(config('portal.newsletter_emails_per_hour', 100));
+        });
 
         // T-4: Admin-Alert per Mail wenn ein Queue-Job fehlschlägt.
         Queue::failing(function (JobFailed $event): void {

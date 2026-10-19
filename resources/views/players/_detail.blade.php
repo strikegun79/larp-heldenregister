@@ -142,10 +142,19 @@
                 <div><dt class="text-sm text-stone-500">Status</dt><dd>{{ $player->active ? 'aktiv' : 'inaktiv' }}</dd></div>
             </dl>
         </div>
+        @if ($canEdit)
+            <div class="ui divider"></div>
+            <a href="{{ route('players.edit', $player) }}"
+               data-modal-url="{{ route('players.edit', $player) }}"
+               class="ui small primary button">
+                <i class="pencil icon"></i> Bearbeiten
+            </a>
+        @endif
     </div>
 
     {{-- Tab: Helden (mit Helden-Foto) --}}
     <div class="ui bottom attached tab segment" data-tab="p-helden">
+        <p class="text-xs text-stone-400 mb-2"><i class="mouse pointer icon"></i> Auf einen Helden klicken, um ihn zu öffnen.</p>
         <div class="overflow-x-auto">
         <table class="ui very basic compact table">
             <thead><tr><th>Foto</th><th>Name</th><th>Klasse(n)</th><th class="right aligned">EP</th><th>Aktiv</th></tr></thead>
@@ -154,7 +163,7 @@
                     <tr data-navigate="{{ route('heroes.show', $hero) }}"
                         role="link" tabindex="0"
                         aria-label="Held {{ $hero->character_name ?? 'unbenannt' }} öffnen"
-                        class="cursor-pointer hover:bg-stone-50 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-600 focus-visible:outline-offset-[-2px]">
+                        class="cursor-pointer hover:bg-amber-50 hover:shadow-sm transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-600 focus-visible:outline-offset-[-2px]">
                         <td>
                             <img src="{{ $hero->image_url }}" alt="{{ $hero->character_name }}"
                                  class="w-12 h-12 object-cover rounded border" loading="lazy">
@@ -296,8 +305,3 @@
     @endif
 </div>
 
-<div data-modal-actions hidden>
-    @if ($canEdit)
-        <a href="{{ route('players.edit', $player) }}" data-modal-url="{{ route('players.edit', $player) }}" class="ui primary button">Bearbeiten</a>
-    @endif
-</div>

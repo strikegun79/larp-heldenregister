@@ -140,7 +140,7 @@
                                     @csrf
                                     <button type="submit" class="ui mini icon button"
                                             data-tooltip="Anmeldebestätigung erneut senden" data-position="top right">
-                                        <i class="envelope outline icon"></i>
+                                        <i class="envelope icon"></i>
                                         <span class="sm:hidden ml-1 text-xs">Mail</span>
                                     </button>
                                 </form>

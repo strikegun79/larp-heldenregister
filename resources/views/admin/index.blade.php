@@ -56,7 +56,7 @@
             @can('events.admin-access')
             <div class="mb-10">
                 <h3 class="font-uncial text-xl text-waldritter mb-4 flex items-center gap-2">
-                    <i class="calendar alternate outline icon" style="color:#5a3a22;"></i>
+                    <i class="calendar alternate icon" style="color:#5a3a22;"></i>
                     Veranstaltungen
                 </h3>
                 <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
@@ -67,7 +67,7 @@
                         $adminCard('Auftraggeber',     'Auftraggeber pflegen',       'verwaltung_auftraggeber.jpg',     route('admin.event-clients.index')),
                         $adminCard('Teilnahme-Rollen', 'Event-Rollen pflegen',       'verwaltung_teilnahme-rollen.jpg', route('admin.event-roles.index')),
                         $adminCard('Event-Status',     'Status-Lookups pflegen',     'verwaltung_event-status.jpg',     route('admin.event-statuses.index')),
-                        $adminCard('Taskmanager',      'Automatische Aufgaben konfigurieren', 'verwaltung_event-kategorien.jpg', route('admin.task-manager.index')),
+                        $adminCard('Taskmanager',      'Automatische Aufgaben konfigurieren', 'verwaltung_taskmanager.jpg', route('admin.task-manager.index')),
                     ] as $c)
                         <x-admin.dashboard-card :card="$c" />
                     @endforeach

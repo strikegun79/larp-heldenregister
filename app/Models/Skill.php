@@ -68,18 +68,29 @@ class Skill extends Model
     }
 
     /**
-     * Fertigkeiten, die ein Held bereits kennen muss, bevor er diese lernen kann.
+     * SKILL-10: Alle Voraussetzungen dieser Fertigkeit über alle Klassen hinweg.
+     * Enthält hero_class_id als Pivot. Für Zyklen-Prüfung und Admin-Übersicht.
      */
     public function prerequisites(): BelongsToMany
     {
-        return $this->belongsToMany(Skill::class, 'skill_prerequisites', 'skill_id', 'required_skill_id');
+        return $this->belongsToMany(
+            Skill::class,
+            'skill_class_prerequisites',
+            'skill_id',
+            'required_skill_id'
+        )->withPivot('hero_class_id');
     }
 
     /**
-     * Fertigkeiten, für die diese Fertigkeit Voraussetzung ist.
+     * Fertigkeiten, für die diese Fertigkeit (in irgendeiner Klasse) Voraussetzung ist.
      */
     public function prerequisiteFor(): BelongsToMany
     {
-        return $this->belongsToMany(Skill::class, 'skill_prerequisites', 'required_skill_id', 'skill_id');
+        return $this->belongsToMany(
+            Skill::class,
+            'skill_class_prerequisites',
+            'required_skill_id',
+            'skill_id'
+        )->withPivot('hero_class_id');
     }
 }

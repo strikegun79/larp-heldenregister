@@ -79,25 +79,63 @@
         </div>
     </div>
 
-    <div>
-        <span class="block font-medium text-stone-700 mb-2">Voraussetzungen (muss der Held bereits können)</span>
-        @forelse ($allSkills->groupBy(fn ($s) => $s->heroClass?->name ?? 'Ohne Klasse') as $className => $classSkills)
-            <div class="mb-3">
-                <div class="text-xs font-semibold text-stone-500 uppercase tracking-wide mb-1">{{ $className }}</div>
-                <div class="grid grid-cols-2 sm:grid-cols-3 gap-1">
-                    @foreach ($classSkills as $s)
-                        <label class="flex items-center gap-2 text-stone-700 text-sm">
-                            <input type="checkbox" name="prerequisites[]" value="{{ $s->id }}"
-                                   @checked(in_array($s->id, old('prerequisites', $assignedPrerequisites)))>
-                            {{ $s->name }} (Lv.{{ $s->level }})
-                        </label>
-                    @endforeach
+    {{-- SKILL-10: Voraussetzungen pro Klasse --}}
+    <div id="prereq-sections">
+        <span class="block font-medium text-stone-700 mb-2">Voraussetzungen pro Klasse</span>
+        <p class="text-xs text-stone-400 mb-3">
+            Für jede zugeordnete Klasse können eigene Voraussetzungen definiert werden.
+            Wähle zuerst die Klassen oben aus.
+        </p>
+        @foreach ($heroClasses as $class)
+            @php($classAssigned = in_array($class->id, old('classes', $assigned)))
+            <div class="prereq-class-section mb-4 border border-stone-200 rounded p-3
+                        {{ $classAssigned ? '' : 'hidden' }}"
+                 data-class-id="{{ $class->id }}">
+                <div class="text-xs font-semibold text-waldritter uppercase tracking-wide mb-2">
+                    Voraussetzungen für {{ $class->name }}
                 </div>
+                @forelse ($allSkills->groupBy(fn ($s) => $s->heroClass?->name ?? 'Ohne Klasse') as $groupName => $groupSkills)
+                    <div class="mb-2">
+                        <div class="text-xs text-stone-400 mb-1">{{ $groupName }}</div>
+                        <div class="grid grid-cols-2 sm:grid-cols-3 gap-1">
+                            @foreach ($groupSkills as $s)
+                                <label class="flex items-center gap-2 text-stone-700 text-sm">
+                                    <input type="checkbox"
+                                           name="prereqs[{{ $class->id }}][]"
+                                           value="{{ $s->id }}"
+                                           @checked(in_array($s->id, old("prereqs.{$class->id}", $assignedPrerequisitesByClass[$class->id] ?? [])))>
+                                    {{ $s->name }} (Lv.{{ $s->level }})
+                                </label>
+                            @endforeach
+                        </div>
+                    </div>
+                @empty
+                    <p class="text-sm text-stone-500">Keine anderen Fertigkeiten vorhanden.</p>
+                @endforelse
             </div>
-        @empty
-            <p class="text-sm text-stone-500">Noch keine anderen Fertigkeiten vorhanden.</p>
-        @endforelse
+        @endforeach
     </div>
+
+    <script>
+    (function () {
+        function togglePrereqSection(classId, visible) {
+            document.querySelectorAll('.prereq-class-section[data-class-id="' + classId + '"]')
+                .forEach(function (el) {
+                    el.classList.toggle('hidden', !visible);
+                    if (!visible) {
+                        el.querySelectorAll('input[type=checkbox]').forEach(function (cb) {
+                            cb.checked = false;
+                        });
+                    }
+                });
+        }
+        document.querySelectorAll('input[name="classes[]"]').forEach(function (cb) {
+            cb.addEventListener('change', function () {
+                togglePrereqSection(this.value, this.checked);
+            });
+        });
+    }());
+    </script>
 </form>
 
 {{-- SKILL-08: Symbol hochladen (separater Upload, kein Cropper) --}}
@@ -116,7 +154,7 @@
             </form>
         @else
             <div class="w-12 h-12 rounded border-2 border-dashed border-stone-300 flex items-center justify-center text-stone-400">
-                <i class="image outline icon"></i>
+                <i class="image icon"></i>
             </div>
         @endif
         <form method="POST" action="{{ route('admin.skills.icon.store', $skill) }}"

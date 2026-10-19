@@ -9,6 +9,7 @@ use App\Models\Skill;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 /**
@@ -56,7 +57,7 @@ class SkillController extends Controller
 
         $skill = Skill::create($data);
         $skill->classes()->sync($request->input('classes', []));
-        $skill->prerequisites()->sync($request->input('prerequisites', []));
+        $this->syncPrerequisites($skill, $request);
 
         return $this->respond($request, 'Fertigkeit wurde angelegt.');
     }
@@ -72,9 +73,11 @@ class SkillController extends Controller
 
     public function update(Request $request, Skill $skill): RedirectResponse|JsonResponse
     {
-        $prerequisiteIds = array_filter(array_map('intval', $request->input('prerequisites', [])));
+        // Alle Voraussetzungen aller Klassen gesammelt für Zyklen-Prüfung.
+        $allPrereqIds = collect($request->input('prereqs', []))
+            ->flatten()->map('intval')->filter()->unique()->values()->all();
 
-        if ($this->hasCycle($skill->id, $prerequisiteIds)) {
+        if ($this->hasCycle($skill->id, $allPrereqIds)) {
             $msg = 'Voraussetzungen würden einen Kreisbezug erzeugen.';
 
             return $request->expectsJson()
@@ -84,7 +87,7 @@ class SkillController extends Controller
 
         $skill->update($this->validated($request));
         $skill->classes()->sync($request->input('classes', []));
-        $skill->prerequisites()->sync($prerequisiteIds);
+        $this->syncPrerequisites($skill, $request);
 
         return $this->respond($request, 'Fertigkeit wurde aktualisiert.');
     }
@@ -129,14 +132,44 @@ class SkillController extends Controller
             ->when($skill->exists, fn ($q) => $q->where('id', '!=', $skill->id))
             ->get();
 
+        // SKILL-10: Voraussetzungen pro Klasse laden.
+        $assignedPrerequisitesByClass = [];
+        if ($skill->exists) {
+            DB::table('skill_class_prerequisites')
+                ->where('skill_id', $skill->id)
+                ->get()
+                ->each(function ($row) use (&$assignedPrerequisitesByClass) {
+                    $assignedPrerequisitesByClass[$row->hero_class_id][] = $row->required_skill_id;
+                });
+        }
+
         return [
-            'skill' => $skill,
-            'heroClasses' => HeroClass::where('disabled', false)->orderBy('name')->get(),
-            'perlColors' => PerlColor::orderBy('name')->get(),
-            'assigned' => $skill->exists ? $skill->classes->pluck('id')->all() : [],
-            'allSkills' => $allSkills,
-            'assignedPrerequisites' => $skill->exists ? $skill->prerequisites->pluck('id')->all() : [],
+            'skill'                       => $skill,
+            'heroClasses'                 => HeroClass::where('disabled', false)->orderBy('name')->get(),
+            'perlColors'                  => PerlColor::orderBy('name')->get(),
+            'assigned'                    => $skill->exists ? $skill->classes->pluck('id')->all() : [],
+            'allSkills'                   => $allSkills,
+            'assignedPrerequisitesByClass' => $assignedPrerequisitesByClass,
         ];
+    }
+
+    /**
+     * SKILL-10: Voraussetzungen pro Klasse speichern.
+     * Input: $request->prereqs[hero_class_id][] = skill_id
+     */
+    private function syncPrerequisites(Skill $skill, Request $request): void
+    {
+        DB::table('skill_class_prerequisites')->where('skill_id', $skill->id)->delete();
+
+        foreach ($request->input('prereqs', []) as $classId => $skillIds) {
+            foreach (array_filter(array_map('intval', (array) $skillIds)) as $reqId) {
+                DB::table('skill_class_prerequisites')->insertOrIgnore([
+                    'skill_id'          => $skill->id,
+                    'hero_class_id'     => (int) $classId,
+                    'required_skill_id' => $reqId,
+                ]);
+            }
+        }
     }
 
     /**
@@ -146,7 +179,7 @@ class SkillController extends Controller
     private function hasCycle(int $skillId, array $prerequisiteIds): bool
     {
         $visited = [];
-        $queue = $prerequisiteIds;
+        $queue   = array_values(array_unique($prerequisiteIds));
 
         while ($current = array_shift($queue)) {
             if ($current === $skillId) {
@@ -156,7 +189,12 @@ class SkillController extends Controller
                 continue;
             }
             $visited[$current] = true;
-            $next = Skill::find($current)?->prerequisites()->pluck('skills.id')->all() ?? [];
+            $next = DB::table('skill_class_prerequisites')
+                ->where('skill_id', $current)
+                ->pluck('required_skill_id')
+                ->unique()
+                ->values()
+                ->all();
             array_push($queue, ...$next);
         }
 

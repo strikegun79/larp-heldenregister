@@ -25,7 +25,7 @@
                     @foreach ($byLevel[$level] as $skill)
                         @php
                             $learned  = $learnedIds->contains($skill->id);
-                            $missing  = $skill->prerequisites->filter(fn ($p) => ! $learnedIds->contains($p->id));
+                            $missing  = ($prereqMap->get("{$class->id}_{$skill->id}") ?? collect())->filter(fn ($r) => ! $learnedIds->contains($r->req_id));
                             $locked   = ! $learned && $missing->isNotEmpty();
                         @endphp
                         <div class="rounded border px-3 py-2 text-sm cursor-pointer select-none skill-trigger
@@ -40,7 +40,7 @@
                              data-skill-cost="{{ $skill->ep_costs }}"
                              data-skill-learned="{{ $learned ? 1 : 0 }}"
                              data-skill-locked="{{ $locked ? 1 : 0 }}"
-                             data-skill-prereqs="{{ $locked ? $missing->pluck('name')->join(', ') : '' }}">
+                             data-skill-prereqs="{{ $locked ? $missing->pluck('req_name')->join(', ') : '' }}">
 
                             {{-- Perlenfarbe + Name --}}
                             <div class="flex items-start gap-1.5 leading-snug">

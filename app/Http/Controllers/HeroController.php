@@ -10,6 +10,7 @@ use App\Models\Player;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -261,7 +262,6 @@ class HeroController extends Controller
         $hero->load([
             'player.bookings.adventure',
             'player.users',
-            'classes.skills.prerequisites',
             'classes.skills.perlColor', // SKILL-07: Perlenfarbe je Knoten in Spaltenansicht.
             'skills.perlColor',
             'epTransactions.type',
@@ -270,8 +270,12 @@ class HeroController extends Controller
             'galleryImages', // HERO-24: Galerie-Bilder.
         ]);
 
+        // SKILL-10: Voraussetzungen klassenspezifisch als Map laden.
+        $prereqMap = $this->buildPrereqMap($hero);
+
         $data = [
             'hero' => $hero,
+            'prereqMap' => $prereqMap,
             'epTypes' => EpTransactionType::orderBy('id')->get(),
             // Aktive, noch nicht zugewiesene Klassen für die Klassenverwaltung (HERO-06).
             'availableClasses' => HeroClass::where('disabled', false)
@@ -576,5 +580,28 @@ class HeroController extends Controller
             }
             $hero->update(['image' => $request->file('image')->store('heroes', 'public')]);
         }
+    }
+
+    /**
+     * SKILL-10: Voraussetzungs-Map für einen Helden bauen.
+     * Rückgabe: Collection, Key = "{hero_class_id}_{skill_id}"
+     *           Wert = Collection von Objekten mit req_id und req_name.
+     */
+    private function buildPrereqMap(Hero $hero): \Illuminate\Support\Collection
+    {
+        $classIds = $hero->classes->pluck('id');
+        $skillIds = $hero->classes->flatMap(fn ($c) => $c->skills->pluck('id'));
+
+        if ($classIds->isEmpty() || $skillIds->isEmpty()) {
+            return collect();
+        }
+
+        return DB::table('skill_class_prerequisites as scp')
+            ->join('skills as req', 'req.id', '=', 'scp.required_skill_id')
+            ->whereIn('scp.skill_id', $skillIds)
+            ->whereIn('scp.hero_class_id', $classIds)
+            ->select('scp.skill_id', 'scp.hero_class_id', 'req.id as req_id', 'req.name as req_name')
+            ->get()
+            ->groupBy(fn ($r) => "{$r->hero_class_id}_{$r->skill_id}");
     }
 }

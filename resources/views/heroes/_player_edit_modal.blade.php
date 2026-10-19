@@ -1,6 +1,7 @@
 <span data-modal-title hidden>Charakter bearbeiten</span>
 
 <form method="POST" action="{{ route('heroes.player-info', $hero) }}"
+      id="player-edit-form"
       data-stack-close
       class="ui form">
     @csrf
@@ -26,7 +27,7 @@
     </div>
 
     <div data-modal-actions hidden>
-        <button type="submit" class="ui primary button">
+        <button type="submit" form="player-edit-form" class="ui primary button">
             <i class="save icon"></i> Speichern
         </button>
     </div>

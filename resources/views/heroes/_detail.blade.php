@@ -10,7 +10,8 @@
 <div id="skilltree"
      data-learn-url="{{ route('heroes.skills.store', $hero) }}"
      data-balance="{{ $hero->ep_balance }}"
-     data-can-edit="{{ auth()->user()?->can('heldenregister.edit') ? 1 : 0 }}">
+     data-can-edit="{{ auth()->user()?->can('heldenregister.edit') ? 1 : 0 }}"
+     data-can-bypass-lock="{{ auth()->user()?->can('heldenregister.edit') ? 1 : 0 }}">
 
     {{-- UI-33/UI-40: Mobile Accordion (< sm) --}}
     <div class="sm:hidden space-y-2">
@@ -227,7 +228,7 @@
                                     @php($unset = ($skill->pivot->x_percentage == 0 && $skill->pivot->y_percentage == 0))
                                     @php($px = $unset ? 6 + ($loop->index % 10) * 9 : (int) $skill->pivot->x_percentage)
                                     @php($py = $unset ? 8 + intdiv($loop->index, 10) * 11 : (int) $skill->pivot->y_percentage)
-                                    @php($missingPrereqs = $skill->prerequisites->filter(fn ($p) => ! $learnedIds->contains($p->id)))
+                                    @php($missingPrereqs = ($prereqMap->get("{$class->id}_{$skill->id}") ?? collect())->filter(fn ($r) => ! $learnedIds->contains($r->req_id)))
                                     @php($locked = ! $learned && $missingPrereqs->isNotEmpty())
                                     <button type="button"
                                             class="skill-marker skill-trigger {{ $learned ? 'learned' : ($locked ? 'locked' : 'unlearned') }}"
@@ -239,7 +240,7 @@
                                             data-skill-cost="{{ $skill->ep_costs }}"
                                             data-skill-learned="{{ $learned ? 1 : 0 }}"
                                             data-skill-locked="{{ $locked ? 1 : 0 }}"
-                                            data-skill-prereqs="{{ $locked ? $missingPrereqs->pluck('name')->join(', ') : '' }}"></button>
+                                            data-skill-prereqs="{{ $locked ? $missingPrereqs->pluck('req_name')->join(', ') : '' }}"></button>
                                 @endforeach
                             </div>
                             @if ($class->skills->isEmpty())
@@ -248,7 +249,7 @@
                                 <div class="ui middle aligned divided list skill-list">
                                     @foreach ($class->skills as $skill)
                                         @php($learned = $learnedIds->contains($skill->id))
-                                        @php($missingPrereqs = $skill->prerequisites->filter(fn ($p) => ! $learnedIds->contains($p->id)))
+                                        @php($missingPrereqs = ($prereqMap->get("{$class->id}_{$skill->id}") ?? collect())->filter(fn ($r) => ! $learnedIds->contains($r->req_id)))
                                         @php($locked = ! $learned && $missingPrereqs->isNotEmpty())
                                         <div class="item">
                                             <div class="content">
@@ -259,7 +260,7 @@
                                                    data-skill-cost="{{ $skill->ep_costs }}"
                                                    data-skill-learned="{{ $learned ? 1 : 0 }}"
                                                    data-skill-locked="{{ $locked ? 1 : 0 }}"
-                                                   data-skill-prereqs="{{ $locked ? $missingPrereqs->pluck('name')->join(', ') : '' }}">
+                                                   data-skill-prereqs="{{ $locked ? $missingPrereqs->pluck('req_name')->join(', ') : '' }}">
                                                     {{ $learned ? '✓ ' : ($locked ? '🔒 ' : '') }}{{ $skill->name }} ({{ $skill->ep_costs }} EP)
                                                 </a>
                                             </div>
@@ -271,7 +272,7 @@
 
                         {{-- Spalten-Ansicht nach Stufe --}}
                         <div x-show="view === 'columns'">
-                            @include('heroes.partials._skill_columns', ['class' => $class, 'learnedIds' => $learnedIds])
+                            @include('heroes.partials._skill_columns', ['class' => $class, 'learnedIds' => $learnedIds, 'prereqMap' => $prereqMap])
                         </div>
 
                         @can('heldenregister.edit')
@@ -804,7 +805,7 @@
                                     @php($unset = ($skill->pivot->x_percentage == 0 && $skill->pivot->y_percentage == 0))
                                     @php($px = $unset ? 6 + ($loop->index % 10) * 9 : (int) $skill->pivot->x_percentage)
                                     @php($py = $unset ? 8 + intdiv($loop->index, 10) * 11 : (int) $skill->pivot->y_percentage)
-                                    @php($missingPrereqs = $skill->prerequisites->filter(fn ($p) => ! $learnedIds->contains($p->id)))
+                                    @php($missingPrereqs = ($prereqMap->get("{$class->id}_{$skill->id}") ?? collect())->filter(fn ($r) => ! $learnedIds->contains($r->req_id)))
                                     @php($locked = ! $learned && $missingPrereqs->isNotEmpty())
                                     <button type="button"
                                             class="skill-marker skill-trigger {{ $learned ? 'learned' : ($locked ? 'locked' : 'unlearned') }}"
@@ -816,7 +817,7 @@
                                             data-skill-cost="{{ $skill->ep_costs }}"
                                             data-skill-learned="{{ $learned ? 1 : 0 }}"
                                             data-skill-locked="{{ $locked ? 1 : 0 }}"
-                                            data-skill-prereqs="{{ $locked ? $missingPrereqs->pluck('name')->join(', ') : '' }}"></button>
+                                            data-skill-prereqs="{{ $locked ? $missingPrereqs->pluck('req_name')->join(', ') : '' }}"></button>
                                 @endforeach
                             </div>
 
@@ -826,7 +827,7 @@
                                 <div class="ui middle aligned divided list skill-list">
                                     @foreach ($class->skills as $skill)
                                         @php($learned = $learnedIds->contains($skill->id))
-                                        @php($missingPrereqs = $skill->prerequisites->filter(fn ($p) => ! $learnedIds->contains($p->id)))
+                                        @php($missingPrereqs = ($prereqMap->get("{$class->id}_{$skill->id}") ?? collect())->filter(fn ($r) => ! $learnedIds->contains($r->req_id)))
                                         @php($locked = ! $learned && $missingPrereqs->isNotEmpty())
                                         <div class="item">
                                             <div class="content">
@@ -837,7 +838,7 @@
                                                    data-skill-cost="{{ $skill->ep_costs }}"
                                                    data-skill-learned="{{ $learned ? 1 : 0 }}"
                                                    data-skill-locked="{{ $locked ? 1 : 0 }}"
-                                                   data-skill-prereqs="{{ $locked ? $missingPrereqs->pluck('name')->join(', ') : '' }}">
+                                                   data-skill-prereqs="{{ $locked ? $missingPrereqs->pluck('req_name')->join(', ') : '' }}">
                                                     {{ $learned ? '✓ ' : ($locked ? '🔒 ' : '') }}{{ $skill->name }} ({{ $skill->ep_costs }} EP)
                                                 </a>
                                             </div>
@@ -852,6 +853,7 @@
                             @include('heroes.partials._skill_columns', [
                                 'class'      => $class,
                                 'learnedIds' => $learnedIds,
+                                'prereqMap'  => $prereqMap,
                             ])
                         </div>
 

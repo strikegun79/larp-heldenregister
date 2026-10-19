@@ -73,7 +73,7 @@
                             {{ $newsletter->isSent() ? 'Versendet am' : 'Erstellt am' }}
                         </dt>
                         <dd class="text-stone-800">
-                            {{ ($newsletter->sent_at ?? $newsletter->created_at)->locale('de')->isoFormat('D. MMMM YYYY, HH:mm') }} Uhr
+                            {{ ($newsletter->sent_at ?? $newsletter->created_at)->tz('Europe/Berlin')->locale('de')->isoFormat('D. MMMM YYYY, HH:mm') }} Uhr
                         </dd>
                     </div>
                 </dl>

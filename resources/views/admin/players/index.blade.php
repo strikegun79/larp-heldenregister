@@ -177,6 +177,12 @@
                                             </form>
                                         @else
                                             {{-- Aktions-Links als kleine Buttons (D) --}}
+                                            <a href="{{ route('players.show', $player) }}"
+                                               data-modal-url="{{ route('players.show', $player) }}"
+                                               class="ui mini basic button"
+                                               title="Spielerprofil anzeigen / bearbeiten">
+                                                <i class="user icon"></i> Profil
+                                            </a>
                                             <a href="{{ route('admin.players.edit', $player) }}"
                                                data-modal-url="{{ route('admin.players.edit', $player) }}"
                                                class="ui mini basic button"

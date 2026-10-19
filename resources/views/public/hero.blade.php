@@ -8,6 +8,14 @@
 
 <x-public-layout :title="$displayName . ' – Heldenregister'">
 
+{{-- PUB-12: Alpine-Wrapper für Read-only Skill-Modal --}}
+<div x-data="{
+        showSkillModal: false,
+        skill: { name:'', desc:'', cost:0, learned:false, locked:false, prereqs:'' }
+     }"
+     @open-skill.window="skill = $event.detail; showSkillModal = true"
+     @keydown.escape.window="showSkillModal = false">
+
     <div class="max-w-2xl mx-auto px-4 sm:px-6">
 
         {{-- Helden-Header --}}
@@ -110,12 +118,12 @@
 
                         {{-- Skilltree: Bildansicht --}}
                         <div x-show="view === 'baum'" x-cloak>
-                            @include('public._skill_tree_image', ['class' => $class, 'learnedIds' => $learnedIds])
+                            @include('public._skill_tree_image', ['class' => $class, 'learnedIds' => $learnedIds, 'prereqMap' => $prereqMap])
                         </div>
 
                         {{-- Skill-Stufen: Spaltenansicht --}}
                         <div x-show="view === 'stufen'" x-cloak>
-                            @include('public._skill_tree', ['class' => $class, 'learnedIds' => $learnedIds])
+                            @include('public._skill_tree', ['class' => $class, 'learnedIds' => $learnedIds, 'prereqMap' => $prereqMap])
                         </div>
                     </div>
                 @endforeach
@@ -181,5 +189,50 @@
         </div>
 
     </div>
+
+    {{-- Read-only Skill-Info-Modal --}}
+    <div x-show="showSkillModal"
+         x-cloak
+         class="fixed inset-0 z-50 flex items-center justify-center p-4"
+         style="background: rgba(0,0,0,0.55);"
+         @click.self="showSkillModal = false"
+         role="dialog" aria-modal="true">
+        <div class="bg-white rounded-lg shadow-xl w-full max-w-sm border-2 border-[#5a3a22]/30 overflow-hidden">
+            {{-- Header --}}
+            <div class="flex items-start justify-between bg-[#f5e9d0] border-b border-[#5a3a22]/20 px-5 py-4">
+                <h3 class="font-uncial text-lg text-waldritter leading-tight pr-4" x-text="skill.name"></h3>
+                <button type="button" @click="showSkillModal = false"
+                        class="text-stone-400 hover:text-waldritter shrink-0 mt-0.5"
+                        aria-label="Schließen">
+                    <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                        <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd" />
+                    </svg>
+                </button>
+            </div>
+            {{-- Body --}}
+            <div class="px-5 py-4 space-y-3">
+                <p class="text-stone-700 text-sm" x-text="skill.desc || '(Keine Beschreibung hinterlegt.)'"></p>
+                <p class="text-sm text-stone-500">
+                    Kosten: <strong class="text-stone-800" x-text="skill.cost + ' EP'"></strong>
+                </p>
+                <template x-if="skill.learned">
+                    <p class="text-green-700 font-medium text-sm">✓ Diese Fertigkeit wurde erlernt.</p>
+                </template>
+                <template x-if="skill.locked && !skill.learned">
+                    <p class="text-amber-700 text-sm">
+                        🔒 Gesperrt – fehlende Voraussetzungen:
+                        <span class="font-medium" x-text="skill.prereqs"></span>
+                    </p>
+                </template>
+            </div>
+            {{-- Footer --}}
+            <div class="px-5 py-3 bg-stone-50 border-t border-stone-200 text-right">
+                <button type="button" @click="showSkillModal = false"
+                        class="ui small button">Schließen</button>
+            </div>
+        </div>
+    </div>
+
+</div>{{-- Ende Alpine-Wrapper --}}
 
 </x-public-layout>

@@ -416,7 +416,7 @@
                         <p class="text-sm font-medium text-stone-600 mb-2">Handlungsbedarf</p>
                         <div class="ui list">
                             <div class="item text-stone-500 text-sm">
-                                <i class="check circle outline icon"></i>
+                                <i class="check circle icon"></i>
                                 Keine offenen DSGVO-Mängel.
                             </div>
                         </div>

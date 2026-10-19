@@ -62,4 +62,18 @@ return [
     'theme_color'      => env('PORTAL_THEME_COLOR', '#5a3a22'),
     'background_color' => env('PORTAL_BACKGROUND_COLOR', '#e4cea5'),
 
+    /*
+    |--------------------------------------------------------------------------
+    | Newsletter-Versand: Rate-Limit
+    |--------------------------------------------------------------------------
+    | Maximale Anzahl Newsletter-E-Mails pro Stunde.
+    | Transaktionale Mails (Anmeldung, Passwort-Reset etc.) sind davon
+    | nicht betroffen und werden immer sofort versendet.
+    |
+    | Der Wert muss unter dem Limit des Hosting-Providers bleiben.
+    | Überschüssige Mails werden automatisch in die Queue zurückgestellt
+    | und in der nächsten Stunde versendet.
+    */
+    'newsletter_emails_per_hour' => env('NEWSLETTER_EMAILS_PER_HOUR', 100),
+
 ];

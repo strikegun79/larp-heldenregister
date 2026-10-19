@@ -50,7 +50,15 @@
                                 <td class="font-medium">{{ $adventure->name }}</td>
                                 <td>{{ optional($adventure->start_at)->format('d.m.Y H:i') }}</td>
                                 <td>@include('adventures._status_badge', ['status' => $adventure->status])</td>
-                                <td>{{ $adventure->confirmed_bookings_count }} / {{ $adventure->max_player }}</td>
+                                <td class="whitespace-nowrap">
+                                    <span class="text-green-700 font-semibold" title="Teilnehmer">{{ $adventure->active_bookings_count }}</span>
+                                    <span class="text-stone-400 mx-0.5">/</span>
+                                    <span class="font-semibold" title="Maximalplätze">{{ $adventure->max_player }}</span>
+                                    @if($adventure->waitlisted_bookings_count > 0)
+                                        <span class="text-amber-600 font-semibold ml-1" title="Warteliste">+{{ $adventure->waitlisted_bookings_count }}</span>
+                                    @endif
+                                    <span class="text-blue-600 ml-2" title="Teamer"><i class="users icon"></i>{{ $adventure->active_teamer_signups_count }}</span>
+                                </td>
                                 <td onclick="event.stopPropagation()" class="collapsing">
                                     @if($deletable)
                                         <form method="POST"
@@ -114,7 +122,13 @@
                             </div>
                             <div class="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2 text-xs">
                                 @include('adventures._status_badge', ['status' => $adventure->status])
-                                <span class="text-stone-500">{{ $adventure->confirmed_bookings_count }}/{{ $adventure->max_player }} Plätze</span>
+                                <span title="Teilnehmer" class="text-green-700 font-semibold">{{ $adventure->active_bookings_count }}</span>
+                                <span class="text-stone-400">/</span>
+                                <span class="font-semibold" title="Maximalplätze">{{ $adventure->max_player }}</span>
+                                @if($adventure->waitlisted_bookings_count > 0)
+                                    <span class="text-amber-600 font-semibold" title="Warteliste">+{{ $adventure->waitlisted_bookings_count }}</span>
+                                @endif
+                                <span class="text-blue-600" title="Teamer"><i class="users icon"></i>{{ $adventure->active_teamer_signups_count }}</span>
                             </div>
                         </a>
                         <div class="pr-3">

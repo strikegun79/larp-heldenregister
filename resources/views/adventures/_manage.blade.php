@@ -80,7 +80,7 @@
     <x-mobile.accordion-section :title="$bookingsTabLabel">
         @include('adventures._waitlist_mode_toggle')
         <div class="flex flex-wrap gap-2 mb-3">
-            <a href="{{ route('adventures.participation-xlsx', $adventure) }}" class="ui small button" target="_blank" rel="noopener"><i class="file excel outline icon"></i> Belegungsreport (Excel)</a>
+            <a href="{{ route('adventures.participation-xlsx', $adventure) }}" class="ui small button" target="_blank" rel="noopener"><i class="file excel icon"></i> Belegungsreport (Excel)</a>
             @can('book-any-player')
                 <a href="{{ route('adventures.bookings.create', $adventure) . '?all_players=1' }}"
                    data-modal-stack="{{ route('adventures.bookings.create', $adventure) . '?all_players=1' }}"
@@ -106,7 +106,7 @@
                                 <i class="external alternate icon"></i> An E-Mail-Client senden
                             </a>
                             <a class="item" onclick="manageMailtoAction('copy','mob'); return false;">
-                                <i class="copy outline icon"></i> E-Mail-Adressen kopieren
+                                <i class="copy icon"></i> E-Mail-Adressen kopieren
                             </a>
                         </div>
                     </div>
@@ -135,7 +135,7 @@
                             <i class="external alternate icon"></i> An E-Mail-Client senden
                         </a>
                         <a class="item" onclick="teamerMailtoAction('copy','mob'); return false;">
-                            <i class="copy outline icon"></i> E-Mail-Adressen kopieren
+                            <i class="copy icon"></i> E-Mail-Adressen kopieren
                         </a>
                     </div>
                 </div>
@@ -208,7 +208,7 @@
     <div class="ui bottom attached tab segment" data-tab="bookings">
         @include('adventures._waitlist_mode_toggle')
         <div class="flex flex-wrap gap-2 mb-3">
-            <a href="{{ route('adventures.participation-xlsx', $adventure) }}" class="ui small button" target="_blank" rel="noopener"><i class="file excel outline icon"></i> Belegungsreport (Excel)</a>
+            <a href="{{ route('adventures.participation-xlsx', $adventure) }}" class="ui small button" target="_blank" rel="noopener"><i class="file excel icon"></i> Belegungsreport (Excel)</a>
             @can('book-any-player')
                 <a href="{{ route('adventures.bookings.create', $adventure) . '?all_players=1' }}"
                    data-modal-stack="{{ route('adventures.bookings.create', $adventure) . '?all_players=1' }}"
@@ -234,7 +234,7 @@
                                 <i class="external alternate icon"></i> An E-Mail-Client senden
                             </a>
                             <a class="item" onclick="manageMailtoAction('copy','desk'); return false;">
-                                <i class="copy outline icon"></i> E-Mail-Adressen kopieren
+                                <i class="copy icon"></i> E-Mail-Adressen kopieren
                             </a>
                         </div>
                     </div>
@@ -263,7 +263,7 @@
                             <i class="external alternate icon"></i> An E-Mail-Client senden
                         </a>
                         <a class="item" onclick="teamerMailtoAction('copy','desk'); return false;">
-                            <i class="copy outline icon"></i> E-Mail-Adressen kopieren
+                            <i class="copy icon"></i> E-Mail-Adressen kopieren
                         </a>
                     </div>
                 </div>

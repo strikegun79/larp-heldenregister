@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Hero;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 /**
@@ -64,17 +65,41 @@ class PublicHeroController extends Controller
             ->with([
                 'player',
                 'classes.skills.perlColor',
-                'classes.skills.prerequisites',
                 'skills.perlColor',
                 'groups',
                 'epTransactions.type',
-                'galleryImages', // HERO-24: Galerie-Bilder.
+                'galleryImages',
             ])
             ->firstOrFail();
 
         $learnedIds  = $hero->skills->pluck('id');
         $perlSummary = $hero->perlSummary;
 
-        return view('public.hero', compact('hero', 'perlSummary', 'learnedIds'));
+        // SKILL-10: Voraussetzungen klassenspezifisch laden.
+        $prereqMap = $this->buildPrereqMap($hero);
+
+        return view('public.hero', compact('hero', 'perlSummary', 'learnedIds', 'prereqMap'));
+    }
+
+    /**
+     * SKILL-10: Voraussetzungs-Map aufbauen.
+     * Key = "{hero_class_id}_{skill_id}", Wert = Collection mit req_id + req_name.
+     */
+    private function buildPrereqMap(Hero $hero): \Illuminate\Support\Collection
+    {
+        $classIds = $hero->classes->pluck('id');
+        $skillIds = $hero->classes->flatMap(fn ($c) => $c->skills->pluck('id'));
+
+        if ($classIds->isEmpty() || $skillIds->isEmpty()) {
+            return collect();
+        }
+
+        return DB::table('skill_class_prerequisites as scp')
+            ->join('skills as req', 'req.id', '=', 'scp.required_skill_id')
+            ->whereIn('scp.skill_id', $skillIds)
+            ->whereIn('scp.hero_class_id', $classIds)
+            ->select('scp.skill_id', 'scp.hero_class_id', 'req.id as req_id', 'req.name as req_name')
+            ->get()
+            ->groupBy(fn ($r) => "{$r->hero_class_id}_{$r->skill_id}");
     }
 }

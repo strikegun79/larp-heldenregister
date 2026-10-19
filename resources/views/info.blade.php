@@ -71,7 +71,7 @@
 
                     <div class="bg-white/70 border border-[#5a3a22]/20 rounded-xl p-5">
                         <div class="flex items-center gap-2 mb-2 font-semibold text-stone-800">
-                            <i class="calendar alternate outline icon text-waldritter"></i> Anmeldungen zu Abenteuern
+                            <i class="calendar alternate icon text-waldritter"></i> Anmeldungen zu Abenteuern
                         </div>
                         <ul class="text-sm text-stone-600 space-y-1 list-disc list-inside">
                             <li>Abenteuer in der Listenansicht oder Kalender durchsuchen</li>
@@ -85,7 +85,7 @@
 
                     <div class="bg-white/70 border border-[#5a3a22]/20 rounded-xl p-5">
                         <div class="flex items-center gap-2 mb-2 font-semibold text-stone-800">
-                            <i class="bell outline icon text-waldritter"></i> E-Mail-Benachrichtigungen
+                            <i class="bell icon text-waldritter"></i> E-Mail-Benachrichtigungen
                         </div>
                         <ul class="text-sm text-stone-600 space-y-1 list-disc list-inside">
                             <li>Buchungseingang, Bestätigung, Ablehnung</li>
@@ -104,7 +104,7 @@
             {{-- ===== ABSCHNITT: HELDEN & CHARAKTERE ===== --}}
             <section>
                 <h3 class="font-uncial text-lg text-waldritter mb-4 flex items-center gap-2">
-                    <i class="id card outline icon text-[#5a3a22]"></i> Helden &amp; Charaktere
+                    <i class="id card icon text-[#5a3a22]"></i> Helden &amp; Charaktere
                 </h3>
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
 
@@ -125,7 +125,7 @@
 
                     <div class="bg-white/70 border border-[#5a3a22]/20 rounded-xl p-5">
                         <div class="flex items-center gap-2 mb-2 font-semibold text-stone-800">
-                            <i class="star outline icon text-waldritter"></i> Erfahrungspunkte (EP)
+                            <i class="star icon text-waldritter"></i> Erfahrungspunkte (EP)
                         </div>
                         <ul class="text-sm text-stone-600 space-y-1 list-disc list-inside">
                             <li>EP-Konto je Held mit Transaktionsverlauf</li>
@@ -178,7 +178,7 @@
 
                     <div class="bg-white/70 border border-[#5a3a22]/20 rounded-xl p-5">
                         <div class="flex items-center gap-2 mb-2 font-semibold text-stone-800">
-                            <i class="edit outline icon text-waldritter"></i> Veranstaltungsverwaltung
+                            <i class="edit icon text-waldritter"></i> Veranstaltungsverwaltung
                         </div>
                         <ul class="text-sm text-stone-600 space-y-1 list-disc list-inside">
                             <li>Anlegen und Bearbeiten von Events mit allen Stammdaten</li>
@@ -207,7 +207,7 @@
 
                     <div class="bg-white/70 border border-[#5a3a22]/20 rounded-xl p-5">
                         <div class="flex items-center gap-2 mb-2 font-semibold text-stone-800">
-                            <i class="check circle outline icon text-waldritter"></i> Check-in &amp; Anwesenheit
+                            <i class="check circle icon text-waldritter"></i> Check-in &amp; Anwesenheit
                         </div>
                         <ul class="text-sm text-stone-600 space-y-1 list-disc list-inside">
                             <li>Digitaler Check-in je Teilnehmer vor Ort</li>
@@ -283,7 +283,7 @@
 
                     <div class="bg-white/70 border border-[#5a3a22]/20 rounded-xl p-5">
                         <div class="flex items-center gap-2 mb-2 font-semibold text-stone-800">
-                            <i class="file alternate outline icon text-waldritter"></i> Exporte &amp; Berichte
+                            <i class="file alternate icon text-waldritter"></i> Exporte &amp; Berichte
                         </div>
                         <ul class="text-sm text-stone-600 space-y-1 list-disc list-inside">
                             <li>Charakterbogen je Held als PDF</li>
@@ -297,7 +297,7 @@
 
                     <div class="bg-white/70 border border-[#5a3a22]/20 rounded-xl p-5 md:col-span-2">
                         <div class="flex items-center gap-2 mb-2 font-semibold text-stone-800">
-                            <i class="object group outline icon text-waldritter"></i> Gruppen
+                            <i class="object group icon text-waldritter"></i> Gruppen
                         </div>
                         <ul class="text-sm text-stone-600 space-y-1 list-disc list-inside sm:columns-2">
                             <li>Spielergruppen anlegen und verwalten</li>

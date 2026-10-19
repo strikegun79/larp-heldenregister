@@ -78,7 +78,7 @@
                                                     class="ui mini icon button"
                                                     data-tooltip="Bestätigungsmail erneut senden"
                                                     data-position="top center">
-                                                <i class="envelope outline icon"></i>
+                                                <i class="envelope icon"></i>
                                                 <span class="sm:hidden ml-1 text-xs">Mail</span>
                                             </button>
                                         </form>
@@ -107,7 +107,7 @@
                                                     class="ui mini icon button {{ $signup->rejected_at ? '' : 'orange' }}"
                                                     data-tooltip="{{ $signup->rejected_at ? 'Ablehnung zurücknehmen' : 'Ablehnen' }}"
                                                     data-position="top center">
-                                                <i class="hand paper outline icon"></i>
+                                                <i class="hand paper icon"></i>
                                                 <span class="sm:hidden ml-1 text-xs">{{ $signup->rejected_at ? 'Zurück' : 'Ablehnen' }}</span>
                                             </button>
                                         </form>
@@ -205,7 +205,7 @@
                                                         class="ui mini icon button"
                                                         data-tooltip="Bestätigungsmail erneut senden"
                                                         data-position="top center">
-                                                    <i class="envelope outline icon"></i>
+                                                    <i class="envelope icon"></i>
                                                     <span class="sm:hidden ml-1 text-xs">Mail</span>
                                                 </button>
                                             </form>

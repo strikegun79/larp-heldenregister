@@ -90,7 +90,7 @@
                                        data-tooltip="Anmelden für einmalige Teilnehmer"
                                        data-position="top center"
                                        data-inverted="">
-                                        <i class="user outline icon"></i> Gast anmelden
+                                        <i class="user icon"></i> Gast anmelden
                                     </a>
                                     @if ($isTeamer || $canManage)
                                         <div class="divider"></div>

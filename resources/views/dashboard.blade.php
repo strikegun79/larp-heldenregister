@@ -270,7 +270,7 @@
                                                            title="Teamer"
                                                            aria-label="Teamer"></i>
                                                     @elseif ($adventure->fee > 0 && ! $booking->waitlisted)
-                                                        <i class="{{ $booking->paid ? 'money bill alternate icon' : 'clock outline icon' }} text-xs ml-0.5"
+                                                        <i class="{{ $booking->paid ? 'money bill alternate icon' : 'clock icon' }} text-xs ml-0.5"
                                                            style="color:{{ $booking->paid ? '#16a34a' : '#d97706' }}"
                                                            title="{{ $booking->paid ? 'Bezahlt' : 'Zahlung ausstehend' }}"
                                                            aria-label="{{ $booking->paid ? 'Bezahlt' : 'Zahlung ausstehend' }}"></i>
@@ -354,7 +354,7 @@
                                     <dl class="flex flex-wrap gap-x-6 gap-y-1 text-sm text-stone-600">
                                         @if ($adventure->start_at)
                                             <div class="flex items-center gap-1.5">
-                                                <dt><i class="calendar alternate outline icon text-stone-400" aria-hidden="true"></i></dt>
+                                                <dt><i class="calendar alternate icon text-stone-400" aria-hidden="true"></i></dt>
                                                 <dd>{{ $adventure->start_at->format('d.m.Y') }}</dd>
                                             </div>
                                         @endif
@@ -387,7 +387,7 @@
                                                    title="Teamer"
                                                    aria-label="Teamer"></i>
                                             @elseif ($adventure->fee > 0 && ! $booking->waitlisted)
-                                                <i class="{{ $booking->paid ? 'money bill alternate icon' : 'clock outline icon' }}"
+                                                <i class="{{ $booking->paid ? 'money bill alternate icon' : 'clock icon' }}"
                                                    style="color:{{ $booking->paid ? '#16a34a' : '#d97706' }};font-size:.85em"
                                                    title="{{ $booking->paid ? 'Bezahlt' : 'Zahlung ausstehend' }}"
                                                    aria-label="{{ $booking->paid ? 'Bezahlt' : 'Zahlung ausstehend' }}"></i>
@@ -415,7 +415,7 @@
                         <dl class="flex flex-wrap gap-x-6 gap-y-1 text-sm text-stone-600">
                             @if ($nextAdventure->start_at)
                                 <div class="flex items-center gap-1.5">
-                                    <dt><i class="calendar alternate outline icon text-stone-400" aria-hidden="true"></i></dt>
+                                    <dt><i class="calendar alternate icon text-stone-400" aria-hidden="true"></i></dt>
                                     <dd>{{ $nextAdventure->start_at->format('d.m.Y') }}</dd>
                                 </div>
                             @endif

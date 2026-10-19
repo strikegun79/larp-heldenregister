@@ -85,7 +85,7 @@
                                                 </span>
                                             @else
                                                 <span class="ui mini teal label">
-                                                    <i class="calendar alternate outline icon"></i>
+                                                    <i class="calendar alternate icon"></i>
                                                     {{ $triggerDate->format('d.m.Y') }}
                                                 </span>
                                             @endif

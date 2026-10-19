@@ -220,7 +220,7 @@
         <div class="ui small modal" id="session-expired-modal"
              role="alertdialog" aria-modal="true" aria-labelledby="session-expired-modal-header">
             <div class="header" id="session-expired-modal-header">
-                <i class="clock outline icon"></i> Sitzung abgelaufen
+                <i class="clock icon"></i> Sitzung abgelaufen
             </div>
             <div class="content">
                 <p class="text-stone-700">

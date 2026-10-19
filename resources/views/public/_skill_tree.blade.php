@@ -1,7 +1,8 @@
 {{--
-    PUB-11: Read-only Fertigkeitsbaum für die öffentliche Heldenseite.
-    Erwartet: $class (HeroClass mit skills.perlColor geladen),
+    PUB-11: Read-only Fertigkeitsbaum (Stufen-Spaltenansicht) für die öffentliche Heldenseite.
+    Erwartet: $class (HeroClass mit skills.perlColor + skills.prerequisites geladen),
               $learnedIds (Collection<int>).
+    Klick → dispatcht 'open-skill' an Alpine-Modal in hero.blade.php.
 --}}
 
 @php
@@ -24,10 +25,29 @@
 
                     @foreach ($byLevel[$level] as $skill)
                         @php($learned = $learnedIds->contains($skill->id))
-                        <div class="rounded border px-2.5 py-1.5 text-sm
-                            {{ $learned
-                                ? 'bg-green-50 border-green-300 text-green-800'
-                                : 'bg-stone-50 border-stone-200 text-stone-400' }}">
+                        @php($missing = ($prereqMap->get("{$class->id}_{$skill->id}") ?? collect())->filter(fn ($r) => ! $learnedIds->contains($r->req_id)))
+                        @php($locked  = ! $learned && $missing->isNotEmpty())
+                        <button type="button"
+                                class="rounded border px-2.5 py-1.5 text-sm text-left w-full
+                                    cursor-pointer transition-colors hover:brightness-95
+                                    {{ $learned ? 'bg-green-50 border-green-300 text-green-800'
+                                                : ($locked ? 'bg-stone-100 border-stone-300 text-stone-400'
+                                                           : 'bg-stone-50 border-stone-200 text-stone-600') }}"
+                                data-skill-name="{{ $skill->name }}"
+                                data-skill-desc="{{ $skill->description ?? '' }}"
+                                data-skill-cost="{{ $skill->ep_costs }}"
+                                data-skill-learned="{{ $learned ? '1' : '0' }}"
+                                data-skill-locked="{{ $locked ? '1' : '0' }}"
+                                data-skill-prereqs="{{ $locked ? $missing->pluck('req_name')->join(', ') : '' }}"
+                                x-on:click="$dispatch('open-skill', {
+                                    name:    $el.dataset.skillName,
+                                    desc:    $el.dataset.skillDesc,
+                                    cost:    $el.dataset.skillCost,
+                                    learned: $el.dataset.skillLearned === '1',
+                                    locked:  $el.dataset.skillLocked  === '1',
+                                    prereqs: $el.dataset.skillPrereqs
+                                })"
+                                title="{{ $skill->name }}{{ $locked ? ' – gesperrt' : '' }}">
                             <div class="flex items-start gap-1.5 leading-snug">
                                 @if ($skill->perlColor)
                                     <span class="inline-block w-2.5 h-2.5 rounded-full shrink-0 mt-0.5"
@@ -40,12 +60,14 @@
                                     @if ($learned) ✓ @endif{{ $skill->name }}
                                 </span>
                             </div>
-                            @if ($learned)
-                                <div class="text-xs mt-0.5 text-green-600">
-                                    {{ $skill->ep_costs }} EP · gelernt
-                                </div>
-                            @endif
-                        </div>
+                            <div class="text-xs mt-0.5
+                                {{ $learned ? 'text-green-600' : ($locked ? 'text-stone-400' : 'text-stone-400') }}">
+                                {{ $skill->ep_costs }} EP
+                                @if ($learned) · gelernt
+                                @elseif ($locked) · gesperrt
+                                @endif
+                            </div>
+                        </button>
                     @endforeach
                 </div>
             @endforeach

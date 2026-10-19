@@ -61,11 +61,7 @@
 }
 
 .skill-marker.locked::after {
-    content: "🔒";
-    font-size: 11px;
-    line-height: 24px;
-    display: block;
-    text-align: center;
+    content: "";
 }
 
 /* ===========================================================================
@@ -184,9 +180,26 @@
     }
 }
 
-/* UI-11: Close-Icon als <i> mit role=button – Fomantic-Styling ergänzt. */
+/* UI-11/UI-44: Close-Icon für app-modal/app-modal-2 immer innerhalb des Modals.
+   Fomantic platziert .close standardmäßig außerhalb (top:-2.5rem / right:-2.5rem).
+   Wir überschreiben das global für beide App-Modale. */
 .ui.modal > i.close.icon {
     cursor: pointer;
+}
+
+#app-modal > i.close.icon,
+#app-modal-2 > i.close.icon {
+    position: absolute !important;
+    top: 0.625rem !important;
+    right: 0.75rem !important;
+    color: #5a3a22 !important;
+    z-index: 10 !important;
+}
+
+/* Titel nicht hinter das X laufen lassen. */
+#app-modal > .header,
+#app-modal-2 > .header {
+    padding-right: 2.5rem !important;
 }
 
 /* UI-08: Modals auf Mobilgeräten vollbreit und mit kompakten Rändern. */
@@ -263,17 +276,6 @@
     }
 }
 
-/* UI-44: #app-modal-2 – ab sm leichter Versatz gegenüber #app-modal,
-   damit das gestapelte Modal als eigene Ebene erkennbar bleibt.
-   Fomantic positioniert Modale via JS mit top/margin; der Offset
-   verschiebt das zweite Modal zusätzlich ohne die JS-Logik zu stören. */
-@media (min-width: 640px) {
-    #app-modal-2 {
-        /* 1.5rem nach rechts, 1.5rem nach unten – leichter Karten-Effekt */
-        margin-left: 1.5rem !important;
-        margin-top: 1.5rem !important;
-    }
-}
 
 /* UI-44: #app-modal-2 als Bottom-Sheet auf < sm.
    Fomantic setzt top/margin via JS – alles mit !important überschreiben.
