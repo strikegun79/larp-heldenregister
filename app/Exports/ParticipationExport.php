@@ -4,10 +4,12 @@ namespace App\Exports;
 
 use App\Models\Adventure;
 use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
+use PhpOffice\PhpSpreadsheet\Cell\DataType;
 use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
+use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
 use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -150,15 +152,15 @@ class ParticipationExport
             $sheet->setCellValue(Coordinate::stringFromColumnIndex(self::COL_PAID)        . $row, $b->paid ? 'ja' : 'nein');
             $sheet->setCellValue(Coordinate::stringFromColumnIndex(self::COL_ANWESEND)    . $row, $visitedIds->contains($b->player_id) ? 'ja' : 'nein');
             $sheet->setCellValue(Coordinate::stringFromColumnIndex(self::COL_GUARDIAN)    . $row, $guardian ? trim($guardian->name . ' ' . $guardian->lastname) : '—');
-            $sheet->setCellValue(Coordinate::stringFromColumnIndex(self::COL_CONTACT)     . $row, $b->kontakt_telefon ?? '—');
+            $sheet->setCellValueExplicit(Coordinate::stringFromColumnIndex(self::COL_CONTACT)     . $row, (string) ($b->kontakt_telefon ?? '—'), DataType::TYPE_STRING);
             $sheet->setCellValue(Coordinate::stringFromColumnIndex(self::COL_FOTO)        . $row, $b->fotoerlaubnis ? 'ja' : 'nein');
             $sheet->setCellValue(Coordinate::stringFromColumnIndex(self::COL_VEGETARIER)  . $row, $b->vegetarier ? 'ja' : 'nein');
             $sheet->setCellValue(Coordinate::stringFromColumnIndex(self::COL_LEIH_TUNIKA) . $row, $b->leih_tunika ? 'ja' : 'nein');
             $sheet->setCellValue(Coordinate::stringFromColumnIndex(self::COL_LEIH_WAFFE)  . $row, $b->leih_waffe ? 'ja' : 'nein');
             $sheet->setCellValue(Coordinate::stringFromColumnIndex(self::COL_NSC)         . $row, $b->nsc ? 'ja' : 'nein');
-            $sheet->setCellValue(Coordinate::stringFromColumnIndex(self::COL_ALLERGIEN)   . $row, $b->allergien ?? '—');
-            $sheet->setCellValue(Coordinate::stringFromColumnIndex(self::COL_MEDIKAMENTE) . $row, $b->medikamente ?? '—');
-            $sheet->setCellValue(Coordinate::stringFromColumnIndex(self::COL_ERREICHBAR)  . $row, $b->erreichbarkeit ?? '—');
+            $sheet->setCellValueExplicit(Coordinate::stringFromColumnIndex(self::COL_ALLERGIEN)   . $row, (string) ($b->allergien ?? '—'), DataType::TYPE_STRING);
+            $sheet->setCellValueExplicit(Coordinate::stringFromColumnIndex(self::COL_MEDIKAMENTE) . $row, (string) ($b->medikamente ?? '—'), DataType::TYPE_STRING);
+            $sheet->setCellValueExplicit(Coordinate::stringFromColumnIndex(self::COL_ERREICHBAR)  . $row, (string) ($b->erreichbarkeit ?? '—'), DataType::TYPE_STRING);
 
             // Betrag als Zahl formatieren
             $sheet->getStyle(Coordinate::stringFromColumnIndex(self::COL_BETRAG) . $row)
@@ -188,8 +190,18 @@ class ParticipationExport
             $row++;
         }
 
-        // Rahmen um Datentabelle
         $lastDataRow = $row - 1;
+
+        // Rufnummer und Freitext als Text formatieren, damit Excel sie nicht als Zahl deutet
+        if ($lastDataRow > $headerRow) {
+            foreach ([self::COL_CONTACT, self::COL_ALLERGIEN, self::COL_MEDIKAMENTE, self::COL_ERREICHBAR] as $col) {
+                $letter = Coordinate::stringFromColumnIndex($col);
+                $sheet->getStyle($letter . ($headerRow + 1) . ':' . $letter . $lastDataRow)
+                    ->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_TEXT);
+            }
+        }
+
+        // Rahmen um Datentabelle
         if ($lastDataRow >= $headerRow) {
             $tableRange = 'A' . $headerRow . ':' . $lastColLetter . $lastDataRow;
             $sheet->getStyle($tableRange)->applyFromArray([
