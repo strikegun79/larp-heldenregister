@@ -206,7 +206,7 @@
              role="alertdialog" aria-modal="true" aria-labelledby="confirm-modal-header">
             <div class="header" id="confirm-modal-header">Möchtest du?</div>
             <div class="content">
-                <p id="confirm-modal-message" class="text-stone-700"></p>
+                <p id="confirm-modal-message" class="text-stone-700" style="white-space: pre-line"></p>
             </div>
             <div class="actions">
                 <button type="button" class="ui deny button"><i class="times icon"></i> Abbrechen</button>

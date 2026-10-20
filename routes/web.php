@@ -107,10 +107,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('skills', [SkillController::class, 'index'])->name('skills.catalog');
     Route::get('skills/{skill}/heroes', [SkillController::class, 'heroes'])->name('skills.catalog.heroes');
 
-    // Eigenständige EP-Buchung (EP-02).
-    Route::get('ep-booking', [EpTransactionController::class, 'create'])->name('ep.create');
-    Route::post('ep-booking', [EpTransactionController::class, 'storeManual'])->name('ep.store-manual');
-
     Route::resource('players', PlayerController::class);
     // Aktiven Helden eines Spielers setzen (HERO-07).
     Route::patch('players/{player}/active-hero', [PlayerController::class, 'setActiveHero'])->name('players.active-hero');

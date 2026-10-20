@@ -286,8 +286,10 @@ function sendModalAction(url, method, fields, $modal, btn) {
             if (r.ok) {
                 showToast(d.message || 'Gespeichert.', 'success');
                 $modal.modal('hide');
-                // Modal-Kontext: Inhalt per AJAX neu laden. Vollseite: Standard-Reload.
+                // Modal-Kontext: Inhalt per AJAX neu laden. Verwaltungsseite: nur aktiven
+                // Tab/offene Abschnitte aktualisieren (Tab + Scroll bleiben). Sonst: Reload.
                 if (window.appModalUrl) loadModalContent(window.appModalUrl, true);
+                else if (document.querySelector('.ui.top.attached.tabular.menu .item[data-tab]')) refreshManageTab();
                 else window.location.reload();
             } else {
                 const errs = d.errors ? Object.values(d.errors).flat().join('<br>') : '';
@@ -501,6 +503,21 @@ function refreshManageTab() {
                 $(activeSeg).find('.ui.checkbox').checkbox();
                 initBookingsTableSort(activeSeg);
             }
+
+            // Mobile (Accordion): geöffnete Abschnitte aktualisieren, Zuordnung per Reihenfolge.
+            // Abschnitte mit dem Event-Daten-Formular bleiben unangetastet (ungespeicherte Eingaben).
+            const newSections = doc.querySelectorAll('details.mobile-accordion-section');
+            document.querySelectorAll('details.mobile-accordion-section').forEach((curSec, i) => {
+                if (!curSec.open || !newSections[i]) return;
+                if (curSec.querySelector('#manage-adventure-form-mobile')) return;
+                const curBody = curSec.querySelector(':scope > div');
+                const newBody = newSections[i].querySelector(':scope > div');
+                if (!curBody || !newBody) return;
+                curBody.innerHTML = newBody.innerHTML;
+                $(curBody).find('.ui.dropdown').dropdown();
+                $(curBody).find('.ui.checkbox').checkbox();
+                initBookingsTableSort(curBody);
+            });
         })
         .catch(() => window.location.reload());
 }

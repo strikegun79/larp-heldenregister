@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Collection;
 use App\Models\EventRole;
 
 class Adventure extends Model
@@ -225,6 +226,46 @@ class Adventure extends Model
     public function checkinAllowed(): bool
     {
         return (int) $this->event_status_id >= EventStatus::REGISTRATION_CLOSED;
+    }
+
+    /**
+     * Spieler-IDs, die für dieses Abenteuer bereits Abenteuer-EP erhalten haben –
+     * unabhängig davon, welcher ihrer Helden die EP bekam (Schutz bei Heldenwechsel).
+     */
+    public function epAwardedPlayerIds(): Collection
+    {
+        return EpTransaction::query()
+            ->join('heroes', 'heroes.id', '=', 'ep_transactions.hero_id')
+            ->where('ep_transactions.adventure_id', $this->id)
+            ->where('ep_transactions.ep_transaction_type_id', Hero::ADVENTURE_EP_TYPE)
+            ->distinct()
+            ->pluck('heroes.player_id');
+    }
+
+    /**
+     * Übersicht für die EP-Vergabe an Anwesende: gesamt, ohne aktiven Helden
+     * (unbekannt), bereits vergeben und jetzt neu zu vergeben.
+     *
+     * @return array{total: int, unknown: int, already: int, pending: int}
+     */
+    public function epAwardSummary(): array
+    {
+        $this->loadMissing('visits.player.activeHero');
+        $awarded = $this->epAwardedPlayerIds()->flip();
+
+        $summary = ['total' => 0, 'unknown' => 0, 'already' => 0, 'pending' => 0];
+        foreach ($this->visits as $visit) {
+            $summary['total']++;
+            if ($awarded->has($visit->player_id)) {
+                $summary['already']++;
+            } elseif (! $visit->player?->activeHero) {
+                $summary['unknown']++;
+            } else {
+                $summary['pending']++;
+            }
+        }
+
+        return $summary;
     }
 
     /**

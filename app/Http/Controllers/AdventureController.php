@@ -223,7 +223,7 @@ class AdventureController extends Controller
      */
     public function manage(Request $request, Adventure $adventure): View
     {
-        $adventure->load(['bookings.player.users', 'bookings.bookedBy', 'bookings.role', 'visits', 'status', 'teamerSignups.user']);
+        $adventure->load(['bookings.player.users', 'bookings.player.activeHero.classes', 'bookings.bookedBy', 'bookings.role', 'visits', 'status', 'teamerSignups.user']);
 
         $nscBookings  = $adventure->bookings->filter(fn ($b) => $b->role?->is_teamer_like)->sortByDesc('created_at')->values();
         $mainBookings = $adventure->bookings->filter(fn ($b) => ! $b->role?->is_teamer_like)->sortByDesc('created_at')->values();
@@ -247,23 +247,60 @@ class AdventureController extends Controller
      */
     public function participantsPdf(Adventure $adventure): Response
     {
-        $adventure->load(['location', 'category', 'bookings.player.users', 'bookings.bookedBy', 'bookings.role', 'teamerSignups.user']);
+        // Stornierte Anmeldungen erscheinen nicht in der Teilnehmerliste.
+        $adventure->load([
+            'location',
+            'category',
+            'bookings' => fn ($q) => $q->where('status', '!=', 'storniert'),
+            'bookings.player.users',
+            'bookings.bookedBy',
+            'bookings.role',
+            'teamerSignups.user',
+        ]);
+
+        // Deutsche Sortierung: ohne Groß-/Kleinschreibung, Umlaute korrekt; Gäste mit Gastnamen.
+        $collator = new \Collator('de_DE');
+        $sortKey = fn ($b) => $b->is_guest
+            ? [$b->guest_lastname ?? '', $b->guest_name ?? '']
+            : [$b->player?->lastname ?? '', $b->player?->name ?? ''];
 
         // Nur reguläre Teilnehmer (ohne Teamer-artige Rollen) in der Hauptliste.
         $bookings = $adventure->bookings
             ->filter(fn ($b) => ! $b->role?->is_teamer_like)
-            ->sortBy([['player.lastname', 'asc'], ['player.name', 'asc']])
+            ->sort(function ($a, $b) use ($collator, $sortKey) {
+                [$aLast, $aFirst] = $sortKey($a);
+                [$bLast, $bFirst] = $sortKey($b);
+
+                return $collator->compare($aLast, $bLast) ?: $collator->compare($aFirst, $bFirst);
+            })
             ->values();
 
         $nscBookings = $adventure->bookings
             ->filter(fn ($b) => $b->role?->is_teamer_like)
             ->values();
 
+        // Wartelistenplatz nach Anmeldezeitpunkt (wie beim Nachrücken): booking_id => Platz.
+        $waitlistPositions = $adventure->bookings
+            ->where('waitlisted', true)
+            ->sortBy([['created_at', 'asc'], ['id', 'asc']])
+            ->values()
+            ->mapWithKeys(fn ($b, $i) => [$b->id => $i + 1]);
+
         $male = $bookings->filter(fn ($b) => $b->player?->gender === 'männlich')->count();
         $female = $bookings->filter(fn ($b) => $b->player?->gender === 'weiblich')->count();
         $diverse = $bookings->filter(fn ($b) => $b->player?->gender === 'divers')->count();
 
-        $pdf = Pdf::loadView('adventures.participants_pdf', compact('adventure', 'bookings', 'nscBookings', 'male', 'female', 'diverse'));
+        $pdf = Pdf::loadView('adventures.participants_pdf', compact('adventure', 'bookings', 'nscBookings', 'waitlistPositions', 'male', 'female', 'diverse'))
+            ->setPaper('a4', 'landscape');
+
+        // Fußzeile jeder Seite: Titel links, „Seite X/Y" rechts.
+        $pdf->render();
+        $dompdf = $pdf->getDomPDF();
+        $canvas = $dompdf->getCanvas();
+        $font = $dompdf->getFontMetrics()->getFont('DejaVu Sans');
+        $footerY = $canvas->get_height() - 28;
+        $canvas->page_text(30, $footerY, 'Teilnehmerliste – '.$adventure->name, $font, 8, [0.33, 0.33, 0.33]);
+        $canvas->page_text($canvas->get_width() - 90, $footerY, 'Seite {PAGE_NUM}/{PAGE_COUNT}', $font, 8, [0.33, 0.33, 0.33]);
 
         // Inline (ADV-19): öffnet im Browser-Tab/Popup statt Download.
         return $pdf->stream('teilnehmerliste-'.$adventure->id.'.pdf');

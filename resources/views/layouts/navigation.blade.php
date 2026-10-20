@@ -30,11 +30,6 @@
                             {{ __('Fertigkeiten') }}
                         </x-nav-link>
                     @endcan
-                    @can('heldenregister.edit')
-                        <x-nav-link :href="route('ep.create')" :active="request()->routeIs('ep.*')">
-                            {{ __('EP buchen') }}
-                        </x-nav-link>
-                    @endcan
                     @can('adventure.access')
                         <x-nav-link :href="route('adventures.index')" :active="request()->routeIs('adventures.*')">
                             {{ __('Abenteuer') }}
@@ -251,13 +246,6 @@
                    class="flex items-center px-5 py-3 text-sm text-stone-700 hover:bg-stone-100 active:bg-stone-200 gap-3">
                     <i class="book icon text-stone-400 w-5 text-center shrink-0"></i>
                     Fertigkeiten
-                </a>
-                @endcan
-                @can('heldenregister.edit')
-                <a href="{{ route('ep.create') }}" @click="moreOpen = false"
-                   class="flex items-center px-5 py-3 text-sm text-stone-700 hover:bg-stone-100 active:bg-stone-200 gap-3">
-                    <i class="star icon text-stone-400 w-5 text-center shrink-0"></i>
-                    EP buchen
                 </a>
                 @endcan
                 @canany(['portal.manage', 'newsletter.manage', 'survey.view', 'survey.admin', 'roles.view'])

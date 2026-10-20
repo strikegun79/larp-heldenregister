@@ -9,7 +9,6 @@ use App\Services\AuditLogger;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\View\View;
 
 class EpTransactionController extends Controller
 {
@@ -17,37 +16,6 @@ class EpTransactionController extends Controller
     {
         $this->middleware('auth');
         $this->middleware('can:heldenregister.edit');
-    }
-
-    /**
-     * Eigenständiges EP-Buchungsformular (EP-02): Held + Betrag + Art + Datum.
-     */
-    public function create(): View
-    {
-        $heroes = Hero::orderBy('character_name')->get();
-        $epTypes = EpTransactionType::orderBy('id')->get();
-
-        return view('ep_transactions.create', compact('heroes', 'epTypes'));
-    }
-
-    /**
-     * Verarbeitet das eigenständige Buchungsformular (EP-02).
-     */
-    public function storeManual(Request $request): RedirectResponse
-    {
-        $data = $request->validate([
-            'hero_id' => ['required', 'exists:heroes,id'],
-            'ep_count' => ['required', 'numeric', 'min:0.5'],
-            'ep_transaction_type_id' => ['required', 'exists:ep_transaction_types,id'],
-            'transacted_at' => ['nullable', 'date'],
-        ]);
-
-        $hero = Hero::findOrFail($data['hero_id']);
-
-        $this->book($hero, $data);
-
-        return redirect()->route('ep.create')
-            ->with('status', "EP für „{$hero->character_name}“ gebucht.");
     }
 
     /**
@@ -72,7 +40,7 @@ class EpTransactionController extends Controller
     }
 
     /**
-     * Gemeinsame Buchungslogik für beide Eingabewege.
+     * Buchungslogik inkl. Audit-Log.
      *
      * @param  array<string, mixed>  $data
      */

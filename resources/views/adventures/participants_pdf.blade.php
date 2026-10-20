@@ -3,6 +3,7 @@
 <head>
     <meta charset="utf-8">
     <style>
+        @page { margin: 30px 30px 45px 30px; }
         * { font-family: "DejaVu Sans", sans-serif; }
         body { font-size: 11px; color: #1a1a1a; }
         h1 { font-size: 16px; margin: 0 0 4px; }
@@ -12,7 +13,12 @@
         table.list th, table.list td { border: 1px solid #888; padding: 4px 6px; text-align: left; vertical-align: middle; }
         table.list th { background: #eee; font-size: 10px; text-transform: uppercase; }
         td.nr { width: 28px; text-align: right; }
-        td.sig img { height: 38px; }
+        /* Ort und Kontakt gleich breit, langer Inhalt wird umgebrochen */
+        .col-city, .col-phone { width: 130px; word-wrap: break-word; }
+        .col-sig { width: 260px; }
+        td.sig { height: 57px; }
+        td.sig img { height: 57px; }
+        .waitlist { font-size: 9px; font-style: italic; }
     </style>
 </head>
 <body>
@@ -35,9 +41,10 @@
                 <th>Nr.</th>
                 <th>Nachname</th>
                 <th>Vorname</th>
-                <th>Ort</th>
-                <th>Kontaktrufnummer</th>
-                <th>Unterschrift</th>
+                <th>Rolle</th>
+                <th class="col-city">Ort</th>
+                <th class="col-phone">Kontaktrufnummer</th>
+                <th class="col-sig">Unterschrift</th>
             </tr>
         </thead>
         <tbody>
@@ -46,8 +53,14 @@
                     <td class="nr">{{ $i + 1 }}</td>
                     <td>{{ $booking->is_guest ? $booking->guest_lastname : $booking->player?->lastname }}@if ($booking->is_guest) <strong>(Gast)</strong>@endif</td>
                     <td>{{ $booking->is_guest ? $booking->guest_name : $booking->player?->name }}</td>
-                    <td>{{ $booking->effective_city ?? '—' }}</td>
-                    <td>{{ $booking->kontakt_telefon ?? $booking->guardian()?->phone ?? '—' }}</td>
+                    <td>
+                        {{ $booking->role?->description ?? '—' }} ({{ $booking->paid ? 'bezahlt' : 'unbezahlt' }})
+                        @if ($booking->waitlisted)
+                            <br><span class="waitlist">(Warteliste, Platz {{ $waitlistPositions[$booking->id] ?? '?' }})</span>
+                        @endif
+                    </td>
+                    <td class="col-city">{{ $booking->effective_city ?? '—' }}</td>
+                    <td class="col-phone">{{ $booking->kontakt_telefon ?? $booking->guardian()?->phone ?? '—' }}</td>
                     <td class="sig">
                         @if ($booking->signature)
                             <img src="{{ $booking->signature }}" alt="">
@@ -55,7 +68,7 @@
                     </td>
                 </tr>
             @empty
-                <tr><td colspan="6">Keine Anmeldungen.</td></tr>
+                <tr><td colspan="7">Keine Anmeldungen.</td></tr>
             @endforelse
         </tbody>
     </table>
