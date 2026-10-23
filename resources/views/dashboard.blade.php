@@ -24,9 +24,21 @@
                 </div>
             @endif
 
-            <div class="bg-white/60 border-2 border-[#5a3a22]/30 rounded-lg p-4 sm:p-6 mb-6 sm:mb-8 text-stone-800">
-                <p>Willkommen im Heldenregister. Hier findest du alles rund um deine Spieler, Helden und Abenteuer.</p>
-            </div>
+            {{-- Willkommenstext nur ohne Startseiten-Nachricht; bei wegklickbarer MOTD erscheint er nach dem Schließen --}}
+            @if (! $motd || $motd->dismissible)
+                <div @if ($motd)
+                         x-data="{
+                             zeigen: false,
+                             init() { try { this.zeigen = !!localStorage.getItem('{{ $motd->dismiss_key }}'); } catch (e) {} }
+                         }"
+                         x-show="zeigen" x-cloak @motd-dismissed.window="zeigen = true"
+                     @endif
+                     class="bg-white/60 border-2 border-[#5a3a22]/30 rounded-lg p-4 sm:p-6 mb-6 sm:mb-8 text-stone-800">
+                    <p>Willkommen im Heldenregister. Hier findest du alles rund um deine Spieler, Helden und Abenteuer.</p>
+                </div>
+            @endif
+
+            @include('dashboard._motd')
 
             {{-- Newsletter-Hinweis für Nicht-Abonnenten (Panoramabanner mit Hintergrundbild) --}}
             @if ($showNewsletterHint)

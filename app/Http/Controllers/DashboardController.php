@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Adventure;
 use App\Models\Booking;
 use App\Models\EventStatus;
+use App\Models\Motd;
 use App\Models\Hero;
 use App\Models\NewsletterSubscription;
 use App\Models\Player;
@@ -79,6 +80,9 @@ class DashboardController extends Controller
             ->whereNull('unsubscribed_at')
             ->exists();
 
-        return view('dashboard', compact('metrics', 'nextAdventure', 'upcomingBookedAdventures', 'activePlayers', 'hasPlayers', 'profileComplete', 'hasBookings', 'showOnboarding', 'showNewsletterHint'));
+        // Startseiten-Nachricht (nur wenn aktiv und im Zeitraum).
+        $motd = Motd::current();
+
+        return view('dashboard', compact('motd', 'metrics', 'nextAdventure', 'upcomingBookedAdventures', 'activePlayers', 'hasPlayers', 'profileComplete', 'hasBookings', 'showOnboarding', 'showNewsletterHint'));
     }
 }

@@ -280,6 +280,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('settings', [Admin\SettingController::class, 'index'])->name('settings.index');
         Route::put('settings', [Admin\SettingController::class, 'update'])->name('settings.update');
 
+        // Startseiten-Nachrichten (MOTD) mit Verlauf.
+        Route::resource('motd', Admin\MotdController::class)->except('show');
+        Route::post('motd/{motd}/activate', [Admin\MotdController::class, 'activate'])->name('motd.activate');
+        Route::post('motd/{motd}/deactivate', [Admin\MotdController::class, 'deactivate'])->name('motd.deactivate');
+        Route::post('motd/{motd}/duplicate', [Admin\MotdController::class, 'duplicate'])->name('motd.duplicate');
+
         // Matrix-Konto-Provisionierung pro Spieler (corporal User-DB).
         Route::get('players/{player}/matrix', [Admin\MatrixAccountController::class, 'edit'])->name('players.matrix.edit');
         Route::put('players/{player}/matrix', [Admin\MatrixAccountController::class, 'update'])->name('players.matrix.update');
