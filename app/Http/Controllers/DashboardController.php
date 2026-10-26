@@ -60,6 +60,13 @@ class DashboardController extends Controller
                 ->first()
             : null;
 
+        // Plätze und Anmeldestatus für das Segment „Nächstes Abenteuer“ (einmal berechnet für mobil + Desktop).
+        $nextAdventureSlots = $nextAdventure ? [
+            'free' => $nextAdventure->freeSlots(),
+            'max' => (int) $nextAdventure->max_player,
+            'state' => $nextAdventure->registrationState(),
+        ] : null;
+
         $activePlayers = $request->user()
             ->players()
             ->withPivot('self')
@@ -83,6 +90,6 @@ class DashboardController extends Controller
         // Startseiten-Nachricht (nur wenn aktiv und im Zeitraum).
         $motd = Motd::current();
 
-        return view('dashboard', compact('motd', 'metrics', 'nextAdventure', 'upcomingBookedAdventures', 'activePlayers', 'hasPlayers', 'profileComplete', 'hasBookings', 'showOnboarding', 'showNewsletterHint'));
+        return view('dashboard', compact('motd', 'metrics', 'nextAdventure', 'nextAdventureSlots', 'upcomingBookedAdventures', 'activePlayers', 'hasPlayers', 'profileComplete', 'hasBookings', 'showOnboarding', 'showNewsletterHint'));
     }
 }

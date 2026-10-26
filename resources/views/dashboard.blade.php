@@ -323,6 +323,7 @@
                                 <dd>{{ $nextAdventure->fee > 0 ? number_format($nextAdventure->fee, 2, ',', '.') . ' €' : 'kostenlos' }}</dd>
                             </div>
                         </dl>
+                        @include('dashboard._adventure_status', ['slots' => $nextAdventureSlots, 'class' => 'mb-3'])
                         <div class="flex items-center justify-between">
                             @if ($nextAdventure->registrationOpen())
                                 <span class="ui small primary button pointer-events-none">Jetzt anmelden</span>
@@ -442,6 +443,7 @@
                                 <dd>{{ $nextAdventure->fee > 0 ? number_format($nextAdventure->fee, 2, ',', '.') . ' €' : 'kostenlos' }}</dd>
                             </div>
                         </dl>
+                        @include('dashboard._adventure_status', ['slots' => $nextAdventureSlots, 'class' => 'mt-2'])
                     </div>
                     <div class="flex items-center gap-3 shrink-0">
                         @if ($nextAdventure->registrationOpen())

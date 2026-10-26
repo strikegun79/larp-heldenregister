@@ -184,6 +184,19 @@ class Adventure extends Model
     }
 
     /**
+     * Anmeldestatus für die Anzeige: 'open' (Platz frei), 'waitlist'
+     * (Anmeldung offen, neue Buchungen landen auf der Warteliste) oder 'closed'.
+     */
+    public function registrationState(): string
+    {
+        if (! $this->registrationOpen()) {
+            return 'closed';
+        }
+
+        return $this->shouldWaitlist() ? 'waitlist' : 'open';
+    }
+
+    /**
      * Beitrags-Zusammenfassung für die Verwaltungsansicht.
      * Berücksichtigt pro Buchung den ermäßigten oder regulären Preis.
      *
