@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -62,6 +63,37 @@ class Motd extends Model
     public function updater(): BelongsTo
     {
         return $this->belongsTo(User::class, 'updated_by');
+    }
+
+    public function linkClicks(): HasMany
+    {
+        return $this->hasMany(MotdLinkClick::class);
+    }
+
+    /**
+     * Alle zählbaren Link-Ziele: Bild-Link und die href-Werte aus dem Nachrichtentext.
+     *
+     * @return list<string>
+     */
+    public function trackableUrls(): array
+    {
+        $urls = $this->image_link ? [$this->image_link] : [];
+
+        if (filled($this->html)) {
+            $dom = new \DOMDocument();
+            libxml_use_internal_errors(true);
+            $dom->loadHTML('<?xml encoding="UTF-8"><div>'.$this->html.'</div>');
+            libxml_clear_errors();
+
+            foreach ($dom->getElementsByTagName('a') as $link) {
+                $href = trim($link->getAttribute('href'));
+                if ($href !== '') {
+                    $urls[] = $href;
+                }
+            }
+        }
+
+        return array_values(array_unique($urls));
     }
 
     /** Aktiv und innerhalb des Zeitraums. */

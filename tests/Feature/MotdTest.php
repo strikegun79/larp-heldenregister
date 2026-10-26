@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Motd;
+use App\Models\MotdLinkClick;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -299,5 +300,92 @@ class MotdTest extends TestCase
 
         $this->actingAs($admin)->put(route('admin.motd.update', $motd), $this->payload(['html' => '<p>Neu</p>']));
         $this->assertNotSame($key, $motd->fresh()->dismiss_key);
+    }
+
+    // ── Klickzähler ────────────────────────────────────────────────────────
+
+    public function test_click_on_link_is_counted(): void
+    {
+        $motd = $this->motd([
+            'html' => '<p>Zur <a href="https://example.org/anmeldung">Anmeldung</a></p>',
+            'image_link' => 'https://example.org/banner',
+        ]);
+        $user = User::factory()->create();
+
+        $this->actingAs($user)->post(route('motd.click', $motd), ['url' => 'https://example.org/anmeldung'])
+            ->assertNoContent();
+        $this->actingAs($user)->post(route('motd.click', $motd), ['url' => 'https://example.org/banner'])
+            ->assertNoContent();
+        $this->actingAs(User::factory()->create())->post(route('motd.click', $motd), ['url' => 'https://example.org/anmeldung']);
+
+        $this->assertSame(2, MotdLinkClick::where('url', 'https://example.org/anmeldung')->value('clicks'));
+        $this->assertSame(1, MotdLinkClick::where('url', 'https://example.org/banner')->value('clicks'));
+        $this->assertDatabaseMissing('motd_link_clicks', ['url' => 'https://example.org/anmeldung', 'clicks' => 0]);
+    }
+
+    public function test_repeated_quick_clicks_count_once(): void
+    {
+        $motd = $this->motd(['image_link' => 'https://example.org/banner']);
+        $user = User::factory()->create();
+
+        $this->actingAs($user)->post(route('motd.click', $motd), ['url' => 'https://example.org/banner']);
+        $this->actingAs($user)->post(route('motd.click', $motd), ['url' => 'https://example.org/banner']);
+
+        $this->assertSame(1, MotdLinkClick::value('clicks'));
+    }
+
+    public function test_unknown_url_is_not_counted(): void
+    {
+        $motd = $this->motd(['html' => '<p><a href="https://example.org/a">A</a></p>']);
+
+        $this->actingAs(User::factory()->create())
+            ->post(route('motd.click', $motd), ['url' => 'https://boese.example/spam'])
+            ->assertStatus(422);
+
+        $this->assertDatabaseCount('motd_link_clicks', 0);
+    }
+
+    public function test_guest_cannot_count_clicks(): void
+    {
+        $motd = $this->motd(['image_link' => 'https://example.org/banner']);
+
+        $this->post(route('motd.click', $motd), ['url' => 'https://example.org/banner'])
+            ->assertRedirect(route('login'));
+
+        $this->assertDatabaseCount('motd_link_clicks', 0);
+    }
+
+    public function test_dashboard_contains_click_tracking(): void
+    {
+        $motd = $this->motd();
+
+        $this->dashboard()->assertSee(route('motd.click', $motd), false);
+    }
+
+    public function test_admin_sees_click_counts(): void
+    {
+        $motd = $this->motd(['image_link' => 'https://example.org/banner']);
+        MotdLinkClick::record($motd, 'https://example.org/banner');
+        MotdLinkClick::record($motd, 'https://example.org/banner');
+        $admin = $this->admin();
+
+        $this->actingAs($admin)->get(route('admin.motd.index'))->assertSee('Klicks');
+        $this->actingAs($admin)->get(route('admin.motd.edit', $motd))
+            ->assertSee('Link-Klicks')
+            ->assertSee('https://example.org/banner');
+        $this->assertSame(2, (int) Motd::withSum('linkClicks as clicks_total', 'clicks')->find($motd->id)->clicks_total);
+    }
+
+    public function test_clicks_are_removed_with_motd_and_not_duplicated(): void
+    {
+        $motd = $this->motd(['image_link' => 'https://example.org/banner']);
+        MotdLinkClick::record($motd, 'https://example.org/banner');
+        $admin = $this->admin();
+
+        $this->actingAs($admin)->post(route('admin.motd.duplicate', $motd));
+        $this->assertDatabaseCount('motd_link_clicks', 1);
+
+        $this->actingAs($admin)->delete(route('admin.motd.destroy', $motd));
+        $this->assertDatabaseCount('motd_link_clicks', 0);
     }
 }

@@ -27,6 +27,7 @@
                                 <th class="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase">Status</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase">Farbe</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase">Zeitraum</th>
+                                <th class="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase">Klicks</th>
                                 <th class="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase">Zuletzt geändert</th>
                                 <th class="px-6 py-3"></th>
                             </tr>
@@ -52,6 +53,7 @@
                                             <span class="text-stone-400">unbegrenzt</span>
                                         @endif
                                     </td>
+                                    <td class="px-6 py-4" data-label="Klicks">{{ (int) $motd->clicks_total }}</td>
                                     <td class="px-6 py-4" data-label="Zuletzt geändert">
                                         {{ $motd->updated_at?->format('d.m.Y H:i') }}
                                         @if ($motd->updater)
@@ -86,7 +88,7 @@
                                     </td>
                                 </tr>
                             @empty
-                                <tr><td colspan="6" class="px-6 py-4 text-stone-500">Noch keine Nachrichten angelegt.</td></tr>
+                                <tr><td colspan="7" class="px-6 py-4 text-stone-500">Noch keine Nachrichten angelegt.</td></tr>
                             @endforelse
                         </tbody>
                     </table>

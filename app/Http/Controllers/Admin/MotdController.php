@@ -21,6 +21,7 @@ class MotdController extends Controller
     public function index(): View
     {
         $motds = Motd::with('updater')
+            ->withSum('linkClicks as clicks_total', 'clicks')
             ->orderByDesc('is_active')
             ->orderByDesc('updated_at')
             ->get();
@@ -62,6 +63,7 @@ class MotdController extends Controller
         return view('admin.motd.edit', [
             'motd' => $motd,
             'variants' => Motd::VARIANTS,
+            'linkClicks' => $motd->linkClicks()->orderByDesc('clicks')->get(),
         ]);
     }
 

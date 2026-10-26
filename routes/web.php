@@ -87,6 +87,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('notifications/{notification}/read', [NotificationController::class, 'read'])->name('notifications.read');
     Route::post('notifications/read-all', [NotificationController::class, 'readAll'])->name('notifications.read-all');
 
+    // Klickzähler für Links der Startseiten-Nachricht (MOTD).
+    Route::post('motd/{motd}/click', [\App\Http\Controllers\MotdClickController::class, 'store'])
+        ->middleware('throttle:30,1')->name('motd.click');
+
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');

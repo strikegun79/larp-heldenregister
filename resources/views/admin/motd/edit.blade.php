@@ -23,6 +23,40 @@
                 </form>
             </div>
 
+            {{-- Klickzähler: nur Summen je Link, ohne Zuordnung zu Nutzern --}}
+            <div class="bg-white/70 border-2 border-[#5a3a22]/40 shadow sm:rounded-lg p-6 mt-6">
+                <h3 class="font-semibold text-stone-800 mb-3">Link-Klicks</h3>
+                @if ($linkClicks->isEmpty())
+                    <p class="text-stone-500 text-sm">Bisher wurden keine Links dieser Nachricht angeklickt.</p>
+                @else
+                    <table class="min-w-full text-sm">
+                        <thead>
+                            <tr class="text-left text-xs text-stone-500 uppercase">
+                                <th class="py-2 pr-4">Link</th>
+                                <th class="py-2 pr-4 text-right">Klicks</th>
+                                <th class="py-2">Letzter Klick</th>
+                            </tr>
+                        </thead>
+                        <tbody class="divide-y divide-stone-200 text-stone-800">
+                            @foreach ($linkClicks as $click)
+                                <tr>
+                                    <td class="py-2 pr-4 break-all">{{ $click->url }}</td>
+                                    <td class="py-2 pr-4 text-right">{{ $click->clicks }}</td>
+                                    <td class="py-2 whitespace-nowrap">{{ $click->last_clicked_at?->format('d.m.Y H:i') }}</td>
+                                </tr>
+                            @endforeach
+                        </tbody>
+                        <tfoot>
+                            <tr class="font-semibold">
+                                <td class="py-2 pr-4">Gesamt</td>
+                                <td class="py-2 pr-4 text-right">{{ $linkClicks->sum('clicks') }}</td>
+                                <td></td>
+                            </tr>
+                        </tfoot>
+                    </table>
+                @endif
+            </div>
+
             <div class="mt-4">
                 <a href="{{ route('admin.motd.index') }}">
                     <x-primary-button>Zurück zur Übersicht</x-primary-button>
