@@ -14,11 +14,19 @@ return new class extends Migration
         Schema::create('users', function (Blueprint $table) {
             $table->id();
             $table->string('name');
+            $table->string('lastname')->nullable();
             $table->string('email')->unique();
+            $table->string('phone', 50)->nullable();
             $table->timestamp('email_verified_at')->nullable();
             $table->string('password');
+            // Account aktiviert (Legacy: portal_user.activated)
+            $table->boolean('activated')->default(true);
+            $table->timestamp('lastlogin_at')->nullable();
+            // Verweis auf den Legacy-Datensatz (portal_user.id) für die ETL-Migration
+            $table->unsignedBigInteger('legacy_id')->nullable()->unique();
             $table->rememberToken();
             $table->timestamps();
+            $table->softDeletes();
         });
     }
 
