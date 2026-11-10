@@ -81,6 +81,10 @@ Route::get('/dashboard', [\App\Http\Controllers\DashboardController::class, 'ind
 // Funktionsübersicht & Hilfe für Vorstand/Auftraggeber (INFO-01).
 Route::get('/info', fn () => view('info'))->middleware(['auth', 'verified'])->name('info');
 
+// Versionsverlauf aus CHANGELOG.md (nur für angemeldete Nutzer).
+Route::get('/versionsverlauf', \App\Http\Controllers\ChangelogController::class)
+    ->middleware(['auth', 'verified'])->name('changelog');
+
 // Alle Portal-Routen erfordern Login UND verifizierte E-Mail-Adresse (AUTH-07/AUTH-02).
 Route::middleware(['auth', 'verified'])->group(function () {
     // In-App-Benachrichtigungen (NOTI-07).

@@ -72,6 +72,15 @@
                         @endcan
                         <br>
                         &copy; {{ date('Y') }} {{ config('portal.organization') }}
+                        @auth
+                            @php
+                                $portalVersion = app(\App\Support\Changelog::class)->currentVersion();
+                            @endphp
+                            <br>
+                            <a href="{{ route('changelog') }}" class="hover:underline text-waldritter">
+                                {{ $portalVersion ? 'Version ' . $portalVersion . ' · ' : '' }}Versionsverlauf
+                            </a>
+                        @endauth
                     </div>
                 </div>
             </footer>
