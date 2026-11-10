@@ -512,6 +512,7 @@
                         <div class="text-sm text-stone-600">Spielerdatenbank</div>
                     </div>
                 </a>
+				
 
                 {{-- Verwaltung (nur Admins) --}}
                 @can('portal.manage')
@@ -526,7 +527,19 @@
                         </div>
                     </a>
                 @endcan
+				{{-- Brans Tagebuch --}}
+				<a href="https://www.waldritter-giessen.de/brans-tagebuch/"
+                       class="group block rounded-lg overflow-hidden border-2 border-[#5a3a22]/40 bg-white/60 shadow hover:shadow-xl hover:-translate-y-1 transition">
+                        <div class="h-44 overflow-hidden save-data-hide">
+                            <img src="/images/Brans-Tagebuch-400x176.jpg" alt="" aria-hidden="true" loading="lazy" width="400" height="176" class="w-full h-full object-cover group-hover:scale-105 transition">
+                        </div>
+                        <div class="p-4 text-center">
+                            <div class="font-uncial text-lg text-waldritter">Brans Tagebuch</div>
+                            <div class="text-sm text-stone-600">Erzählungen aus den Abenteuern</div>
+                        </div>
+                    </a>
             </div>
+			
 
             {{-- Desktop: Aktive Helden (sm+) --}}
             @if ($activePlayers->isNotEmpty())
