@@ -3,13 +3,17 @@
 namespace App\Http\Controllers;
 
 use App\Models\Adventure;
+use App\Models\EventRole;
 use App\Models\Role;
 use App\Models\TeamerSignup;
 use App\Models\User;
+use App\Notifications\TeamerApproved;
 use App\Notifications\TeamerInvitation;
+use App\Notifications\TeamerRejected;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 /**
@@ -53,10 +57,21 @@ class TeamerSignupController extends Controller
             'kontakt_telefon' => ['nullable', 'string', 'max:50'],
             'allergien' => ['nullable', 'string', 'max:500'],
             'medikamente' => ['nullable', 'string', 'max:500'],
+            // DSGVO Art. 9: Einwilligung Pflicht wenn Gesundheitsdaten angegeben (H-2).
+            'health_data_consent' => [
+                Rule::requiredIf(fn () => filled($request->allergien) || filled($request->medikamente)),
+                'boolean',
+            ],
             'leih_tunika' => ['boolean'],
             'leih_waffe' => ['boolean'],
             'anmerkung' => ['nullable', 'string', 'max:1000'],
         ]);
+
+        $hasHealthData = filled($data['allergien'] ?? null) || filled($data['medikamente'] ?? null);
+        $data['health_data_consent_at'] = ($hasHealthData && $request->boolean('health_data_consent'))
+            ? now()
+            : null;
+        unset($data['health_data_consent']);
 
         $adventure->teamerSignups()->create([
             ...$data,
@@ -132,11 +147,22 @@ class TeamerSignupController extends Controller
             'kontakt_telefon' => ['nullable', 'string', 'max:50'],
             'allergien' => ['nullable', 'string', 'max:500'],
             'medikamente' => ['nullable', 'string', 'max:500'],
+            // DSGVO Art. 9: Einwilligung Pflicht wenn Gesundheitsdaten angegeben (H-2).
+            'health_data_consent' => [
+                Rule::requiredIf(fn () => filled($request->allergien) || filled($request->medikamente)),
+                'boolean',
+            ],
             'leih_tunika' => ['boolean'],
             'leih_waffe' => ['boolean'],
             'anmerkung' => ['nullable', 'string', 'max:1000'],
-            'teamer_role' => ['nullable', 'string', 'in:'.implode(',', TeamerSignup::ROLES)],
+            'event_role_id' => ['nullable', 'integer', Rule::exists('event_roles', 'id')->where('for_teamer', true)],
         ]);
+
+        $hasHealthData = filled($data['allergien'] ?? null) || filled($data['medikamente'] ?? null);
+        $data['health_data_consent_at'] = ($hasHealthData && $request->boolean('health_data_consent'))
+            ? ($signup->health_data_consent_at ?? now())
+            : null;
+        unset($data['health_data_consent']);
 
         $signup->update($data);
 
@@ -153,12 +179,17 @@ class TeamerSignupController extends Controller
         abort_unless($request->user()->can('events.edit'), 403);
         abort_if($signup->adventure_id !== $adventure->id, 404);
 
+        $wasApproved = (bool) $signup->approved_at;
         $signup->update([
-            'approved_at' => $signup->approved_at ? null : now(),
+            'approved_at' => $wasApproved ? null : now(),
             'rejected_at' => null,
         ]);
 
-        $msg = $signup->approved_at ? 'Teamer bestätigt.' : 'Bestätigung zurückgenommen.';
+        if (! $wasApproved) {
+            $signup->user->notify(new TeamerApproved($signup));
+        }
+
+        $msg = ! $wasApproved ? 'Teamer bestätigt.' : 'Bestätigung zurückgenommen.';
 
         return $request->expectsJson()
             ? response()->json(['message' => $msg, 'refresh_modal' => true])
@@ -171,13 +202,39 @@ class TeamerSignupController extends Controller
         abort_unless($request->user()->can('events.edit'), 403);
         abort_if($signup->adventure_id !== $adventure->id, 404);
 
+        $wasRejected = (bool) $signup->rejected_at;
         $signup->update([
-            'rejected_at' => $signup->rejected_at ? null : now(),
+            'rejected_at' => $wasRejected ? null : now(),
             'approved_at' => null,
         ]);
 
-        $msg = $signup->rejected_at ? 'Teamer abgelehnt.' : 'Ablehnung zurückgenommen.';
+        if (! $wasRejected) {
+            $signup->user->notify(new TeamerRejected($adventure));
+        }
 
+        $msg = ! $wasRejected ? 'Teamer abgelehnt.' : 'Ablehnung zurückgenommen.';
+
+        return $request->expectsJson()
+            ? response()->json(['message' => $msg, 'refresh_modal' => true])
+            : back()->with('status', $msg);
+    }
+
+    /** Bestätigungsmail für eine bereits bestätigte Teamer-Anmeldung erneut senden. */
+    public function resendConfirmation(Request $request, Adventure $adventure, TeamerSignup $signup): RedirectResponse|JsonResponse
+    {
+        abort_unless($request->user()->can('events.edit'), 403);
+        abort_if($signup->adventure_id !== $adventure->id, 404);
+
+        if (! $signup->approved_at) {
+            $msg = 'Die Teamer-Anmeldung ist noch nicht bestätigt.';
+            return $request->expectsJson()
+                ? response()->json(['message' => $msg], 422)
+                : back()->with('error', $msg);
+        }
+
+        $signup->user->notify(new TeamerApproved($signup));
+
+        $msg = 'Bestätigungsmail erneut gesendet.';
         return $request->expectsJson()
             ? response()->json(['message' => $msg, 'refresh_modal' => true])
             : back()->with('status', $msg);
@@ -191,10 +248,10 @@ class TeamerSignupController extends Controller
         abort_if($signup->adventure_id !== $adventure->id, 404);
 
         $data = $request->validate([
-            'teamer_role' => ['nullable', 'string', 'in:'.implode(',', TeamerSignup::ROLES)],
+            'event_role_id' => ['nullable', 'integer', Rule::exists('event_roles', 'id')->where('for_teamer', true)],
         ]);
 
-        $signup->update(['teamer_role' => $data['teamer_role'] ?: null]);
+        $signup->update(['event_role_id' => $data['event_role_id'] ?: null]);
 
         $msg = 'Teamer-Rolle aktualisiert.';
 

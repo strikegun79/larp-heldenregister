@@ -15,9 +15,13 @@ class SettingController extends Controller
 {
     /** Bekannte editierbare Keys mit Label und Validierungsregel. */
     private const FIELDS = [
-        'association_name' => ['label' => 'Vereinsname',     'rules' => ['required', 'string', 'max:100']],
-        'contact_email' => ['label' => 'Kontakt-E-Mail',  'rules' => ['required', 'email', 'max:255']],
-        'portal_logo' => ['label' => 'Logo-Dateiname',  'rules' => ['required', 'string', 'max:100']],
+        'association_name'   => ['label' => 'Vereinsname',       'rules' => ['required', 'string', 'max:100']],
+        'contact_email'      => ['label' => 'Kontakt-E-Mail',    'rules' => ['required', 'email', 'max:255']],
+        'portal_logo'        => ['label' => 'Logo-Dateiname',    'rules' => ['required', 'string', 'max:100']],
+        'bank_account_owner' => ['label' => 'Kontoinhaber',      'rules' => ['nullable', 'string', 'max:100']],
+        'bank_iban'          => ['label' => 'IBAN',              'rules' => ['nullable', 'string', 'max:40']],
+        'bank_bic'           => ['label' => 'BIC',              'rules' => ['nullable', 'string', 'max:20']],
+        'bank_name'          => ['label' => 'Bankname',          'rules' => ['nullable', 'string', 'max:100']],
     ];
 
     public function index(): View
@@ -36,7 +40,7 @@ class SettingController extends Controller
         $data = $request->validate($rules);
 
         foreach ($data as $key => $value) {
-            Setting::set($key, $value);
+            Setting::set($key, filled($value) ? $value : null);
         }
 
         return redirect()->route('admin.settings.index')->with('status', 'Einstellungen wurden gespeichert.');

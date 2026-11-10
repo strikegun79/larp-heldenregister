@@ -21,7 +21,11 @@ class TeamerInvitation extends Notification implements ShouldQueue
     /** @return array<int, string> */
     public function via(object $notifiable): array
     {
-        return ['mail', 'database'];
+        $channels = ['database'];
+        if ($notifiable->teamer_notifications ?? true) {
+            $channels[] = 'mail';
+        }
+        return $channels;
     }
 
     public function toMail(object $notifiable): MailMessage

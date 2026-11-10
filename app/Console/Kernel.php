@@ -12,9 +12,22 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
+        // TASK-01: Fällige Event-Aufgaben ausführen (Status-Automationen, Mails etc.).
+        $schedule->command('adventures:run-tasks')->dailyAt('07:00');
+
         // Tägliche Event-Erinnerungen (NOTI-05). Cron-Eintrag für den Scheduler:
         //   * * * * * cd /var/www/heldenregister && php artisan schedule:run >> /dev/null 2>&1
         $schedule->command('events:send-reminders')->dailyAt('08:00');
+
+        // Tägliches Backup (INFRA-06): DB-Dump + Uploads als ZIP auf dem backup-Disk.
+        $schedule->command('backup:clean')->dailyAt('01:00');
+        $schedule->command('backup:run')->dailyAt('02:00');
+
+        // DSGVO Art. 5 Abs. 1 lit. e: Aufbewahrungsfristen täglich prüfen und bereinigen.
+        $schedule->command('dsgvo:prune')->dailyAt('03:00');
+
+        // T-4: Failed Jobs älter als 7 Tage aus der Datenbank entfernen.
+        $schedule->command('queue:prune-failed --hours=168')->dailyAt('04:00');
     }
 
     /**

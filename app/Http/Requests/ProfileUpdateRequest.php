@@ -17,14 +17,23 @@ class ProfileUpdateRequest extends FormRequest
     {
         return [
             'name' => ['required', 'string', 'max:255'],
-            'lastname' => ['required', 'string', 'max:255'],
-            'phone' => ['required', 'string', 'max:50'],
+            'lastname' => ['nullable', 'string', 'max:255'],
+            'phone' => ['nullable', 'string', 'max:50'],
             'street' => ['nullable', 'string', 'max:100'],
             'house_number' => ['nullable', 'string', 'max:10'],
             'zip' => ['nullable', 'string', 'max:10'],
             'city' => ['nullable', 'string', 'max:100'],
             'email' => ['required', 'string', 'lowercase', 'email', 'max:255', Rule::unique(User::class)->ignore($this->user()->id)],
-            'teamer_notifications' => ['nullable', 'boolean'],
+            'teamer_notifications'       => ['nullable', 'boolean'],
+            'notify_new_user'            => ['nullable', 'boolean'],
+            'notify_booking_approved'    => ['nullable', 'boolean'],
+            'notify_booking_rejected'    => ['nullable', 'boolean'],
+            'notify_booking_cancelled'   => ['nullable', 'boolean'],
+            'notify_payment_confirmed'   => ['nullable', 'boolean'],
+            'notify_waitlist_promoted'   => ['nullable', 'boolean'],
+            'notify_event_cancelled'     => ['nullable', 'boolean'],
+            'notify_event_reminder'      => ['nullable', 'boolean'],
+            'notify_cancellation_report' => ['nullable', 'boolean'],
         ];
     }
 }

@@ -3,10 +3,12 @@
 namespace App\Providers;
 
 use App\Listeners\AssignParticipantRole;
+use App\Listeners\CopyMailToSentFolder;
 use App\Listeners\NotifyAdminsOfNewUser;
 use Illuminate\Auth\Events\Registered;
 use Illuminate\Auth\Listeners\SendEmailVerificationNotification;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
+use Illuminate\Mail\Events\MessageSent;
 use Illuminate\Support\Facades\Event;
 
 class EventServiceProvider extends ServiceProvider
@@ -21,6 +23,9 @@ class EventServiceProvider extends ServiceProvider
             SendEmailVerificationNotification::class,
             AssignParticipantRole::class,
             NotifyAdminsOfNewUser::class,
+        ],
+        MessageSent::class => [
+            CopyMailToSentFolder::class,
         ],
     ];
 

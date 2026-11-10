@@ -10,6 +10,7 @@ use App\Models\Player;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -33,6 +34,7 @@ class HeroController extends Controller
         $q = trim((string) $request->query('q'));
 
         $heroes = Hero::with(['player', 'classes', 'epTransactions.type'])
+            ->withCount('galleryImages')
             ->when($status === 'missing', fn ($query) => $query->whereNotNull('died'))
             ->when($status === 'active', fn ($query) => $query->whereNull('died')->where('active', true))
             ->when($status === 'inactive', fn ($query) => $query->whereNull('died')->where('active', false))
@@ -40,6 +42,7 @@ class HeroController extends Controller
             ->when($playerId, fn ($query) => $query->where('player_id', $playerId))
             ->when($q !== '', fn ($query) => $query->where(function ($w) use ($q) {
                 $w->where('character_name', 'like', "%{$q}%")
+                    ->orWhere('public_code', 'like', "%{$q}%") // HERO-25: Suche per Siegel
                     ->orWhereHas('player', fn ($p) => $p
                         ->where('name', 'like', "%{$q}%")
                         ->orWhere('lastname', 'like', "%{$q}%"))
@@ -166,6 +169,50 @@ class HeroController extends Controller
     }
 
     /**
+     * PUB-10: Heldenausweis-PDF für den Besitzer des Helden (oder Bürokrat/Admin).
+     * Gleiche Ausgabe wie Admin\IdCardController::reprint().
+     */
+    public function ausweisDownload(Request $request, Hero $hero): \Symfony\Component\HttpFoundation\Response
+    {
+        $this->authorizePhotoAccess($request, $hero);
+        abort_unless((bool) $hero->public_code, 404);
+
+        $url      = route('public.hero', $hero->public_code);
+        $qr       = new \Endroid\QrCode\QrCode($url, size: 400);
+        $writer   = new \Endroid\QrCode\Writer\PngWriter();
+        $qrUri    = 'data:image/png;base64,'.base64_encode($writer->write($qr)->getString());
+
+        $backPath = resource_path('images/template_helden_ausweis_rueckseite.png');
+        $backUri  = null;
+        if (file_exists($backPath) && function_exists('imagecreatefrompng')) {
+            $img = @imagecreatefrompng($backPath);
+            if ($img !== false) {
+                $rotated = imagerotate($img, 180, 0);
+                ob_start(); imagepng($rotated); $data = ob_get_clean();
+                imagedestroy($img); imagedestroy($rotated);
+                $backUri = 'data:image/png;base64,'.base64_encode($data);
+            }
+        }
+
+        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('admin.id-cards.card-pdf', [
+            'cards' => [[
+                'code'           => $hero->public_code,
+                'character_name' => $hero->character_name,
+                // Name-Feld: Charaktername, sonst Spielername.
+                'name'           => $hero->character_name ?: $hero->player?->full_name,
+                'classes'        => $hero->classes->pluck('name')->all(),
+                'url'            => $url,
+                'qr'             => $qrUri,
+            ]],
+            'backTemplateUri' => $backUri,
+        ])->setPaper('a4', 'landscape')
+          ->setOption('dpi', 150)
+          ->setOption('isFontSubsettingEnabled', true);
+
+        return $pdf->stream('ausweis-'.$hero->public_code.'.pdf');
+    }
+
+    /**
      * Formular für einen neuen Helden.
      */
     public function create(): View
@@ -183,10 +230,17 @@ class HeroController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $data = $this->validateHero($request);
+        $data['active'] = true; // Neue Helden immer aktiv anlegen.
 
         $hero = Hero::create($data);
         $hero->classes()->sync($request->input('classes', []));
         $this->handleImageUpload($request, $hero);
+
+        // Einziger Held des Spielers → sofort als aktiven Helden setzen.
+        $player = Player::find($hero->player_id);
+        if ($player && $player->heroes()->count() === 1) {
+            $player->update(['active_hero_id' => $hero->id]);
+        }
 
         return redirect()
             ->route('heroes.show', $hero)
@@ -208,14 +262,20 @@ class HeroController extends Controller
         $hero->load([
             'player.bookings.adventure',
             'player.users',
-            'classes.skills',
+            'classes.skills.perlColor', // SKILL-07: Perlenfarbe je Knoten in Spaltenansicht.
             'skills.perlColor',
             'epTransactions.type',
             'epTransactions.adventure',
+            'groups', // GRP-05: Gruppenzugehörigkeit im Detail anzeigen.
+            'galleryImages', // HERO-24: Galerie-Bilder.
         ]);
+
+        // SKILL-10: Voraussetzungen klassenspezifisch als Map laden.
+        $prereqMap = $this->buildPrereqMap($hero);
 
         $data = [
             'hero' => $hero,
+            'prereqMap' => $prereqMap,
             'epTypes' => EpTransactionType::orderBy('id')->get(),
             // Aktive, noch nicht zugewiesene Klassen für die Klassenverwaltung (HERO-06).
             'availableClasses' => HeroClass::where('disabled', false)
@@ -262,6 +322,12 @@ class HeroController extends Controller
         // Klassen werden nicht mehr über das Formular gesynct – Hinzufügen/Entfernen
         // läuft über HeroClassController mit EP-Verbuchung (HERO-06).
 
+        // Einziger Held des Spielers und noch kein aktiver Held → jetzt setzen.
+        $player = Player::find($hero->player_id);
+        if ($player && $player->active_hero_id === null && $player->heroes()->count() === 1) {
+            $player->update(['active_hero_id' => $hero->id]);
+        }
+
         $message = 'Held wurde aktualisiert.';
 
         return $request->expectsJson()
@@ -301,6 +367,154 @@ class HeroController extends Controller
     }
 
     /**
+     * PUB-07: Öffentliche Sichtbarkeit umschalten.
+     * Erlaubt für: heldenregister.edit ODER Betreuer des Spielers.
+     */
+    public function toggleVisibility(Request $request, Hero $hero): RedirectResponse|JsonResponse
+    {
+        abort_unless($this->canManagePublicSettings($request, $hero), 403);
+
+        $hero->update(['public_visible' => ! $hero->public_visible]);
+
+        $message = $hero->public_visible
+            ? "{$hero->character_name} ist jetzt öffentlich sichtbar."
+            : "{$hero->character_name} ist jetzt nicht mehr öffentlich sichtbar.";
+
+        return $request->expectsJson()
+            ? response()->json(['message' => $message, 'refresh_modal' => true])
+            : back()->with('status', $message);
+    }
+
+    /**
+     * PUB-08: Auffindbarkeit in der öffentlichen Suche umschalten.
+     * Erlaubt für: heldenregister.edit ODER Betreuer des Spielers.
+     */
+    public function toggleSearchable(Request $request, Hero $hero): RedirectResponse|JsonResponse
+    {
+        abort_unless($this->canManagePublicSettings($request, $hero), 403);
+
+        $hero->update(['public_searchable' => ! $hero->public_searchable]);
+
+        $message = $hero->public_searchable
+            ? "{$hero->character_name} ist jetzt in der Suche auffindbar."
+            : "{$hero->character_name} ist jetzt nicht mehr in der Suche auffindbar.";
+
+        return $request->expectsJson()
+            ? response()->json(['message' => $message, 'refresh_modal' => true])
+            : back()->with('status', $message);
+    }
+
+    /**
+     * Willkommens-Mail an Eltern/Betreuer des Spielers senden.
+     * Nur Bürokrat/Admin; setzt voraus dass der Held einem Spieler zugeordnet ist.
+     */
+    public function sendWelcomeMail(Request $request, Hero $hero): RedirectResponse|JsonResponse
+    {
+        $hero->loadMissing('player.users');
+
+        $player = $hero->player;
+
+        if (! $player) {
+            $msg = 'Diesem Helden ist kein Spieler zugeordnet – keine Mail gesendet.';
+            return $request->expectsJson()
+                ? response()->json(['message' => $msg], 422)
+                : back()->with('error', $msg);
+        }
+
+        // E-Mail aus direktem Player-Feld oder erstem verknüpften Nutzerkonto.
+        $email = filled($player->email)
+            ? $player->email
+            : $player->users->first()?->email;
+
+        if (! $email) {
+            $msg = 'Kein E-Mail-Empfänger für diesen Spieler gefunden.';
+            return $request->expectsJson()
+                ? response()->json(['message' => $msg], 422)
+                : back()->with('error', $msg);
+        }
+
+        \Illuminate\Support\Facades\Notification::route('mail', $email)
+            ->notify(new \App\Notifications\HeroWelcome($hero));
+
+        $msg = "Willkommens-Mail für {$hero->character_name} gesendet an {$email}.";
+
+        return $request->expectsJson()
+            ? response()->json(['message' => $msg, 'refresh_modal' => true])
+            : back()->with('status', $msg);
+    }
+
+    /**
+     * Formular für Spieler-selbst-editierbare Felder (Charaktername, Heimatort, Steckbrief).
+     */
+    public function playerEditForm(Request $request, Hero $hero): \Illuminate\View\View
+    {
+        abort_unless($this->isHeroOwnerOrEditor($request, $hero), 403);
+
+        return view('heroes._player_edit_modal', compact('hero'));
+    }
+
+    /**
+     * Vollständiger Steckbrief eines Helden als Modal-Inhalt.
+     */
+    public function steckbrief(Request $request, Hero $hero): View
+    {
+        // Gleiche Sichtbarkeit wie die Detailansicht.
+        abort_unless(
+            $request->user()->can('heldenregister.view') || ($hero->player && $request->user()->can('view', $hero->player)),
+            403
+        );
+
+        return view('heroes._steckbrief_modal', compact('hero'));
+    }
+
+    /**
+     * Speichert Spieler-selbst-editierbare Felder: Charaktername, Heimatort, Steckbrief.
+     */
+    public function updatePlayerInfo(Request $request, Hero $hero): \Illuminate\Http\JsonResponse
+    {
+        abort_unless($this->isHeroOwnerOrEditor($request, $hero), 403);
+
+        $data = $request->validate([
+            'character_name' => ['nullable', 'string', 'max:150'],
+            'homeplace'      => ['nullable', 'string', 'max:150'],
+            'description'    => $this->descriptionRules(),
+        ]);
+
+        if (array_key_exists('description', $data)) {
+            $data['description'] = Hero::sanitizeDescription($data['description']);
+        }
+
+        $hero->update($data);
+
+        return response()->json(['message' => 'Charakter aktualisiert.', 'refresh_modal' => true]);
+    }
+
+    /** Spieler-selbst-Bearbeitung: Eigentümer des Helden oder heldenregister.edit-Berechtigung. */
+    private function isHeroOwnerOrEditor(Request $request, Hero $hero): bool
+    {
+        if ($request->user()->can('heldenregister.edit')) {
+            return true;
+        }
+
+        return $hero->player_id !== null
+            && \Illuminate\Support\Facades\DB::table('player_user')
+                ->where('player_id', $hero->player_id)
+                ->where('user_id', $request->user()->id)
+                ->exists();
+    }
+
+    /** Prüft ob der Nutzer öffentliche Einstellungen eines Helden ändern darf. */
+    private function canManagePublicSettings(Request $request, Hero $hero): bool
+    {
+        if ($request->user()->can('heldenregister.edit')) {
+            return true;
+        }
+
+        return $hero->player !== null
+            && $request->user()->can('update', $hero->player);
+    }
+
+    /**
      * Validierungsregeln für Anlegen und Bearbeiten.
      *
      * @return array<string, mixed>
@@ -313,20 +527,46 @@ class HeroController extends Controller
             'born' => ['nullable', 'date'],
             'died' => ['nullable', 'date', 'after_or_equal:born'],
             'homeplace' => ['nullable', 'string', 'max:150'],
-            'description' => ['nullable', 'string', 'max:5000'],
+            'description' => $this->descriptionRules(),
             'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
-            'active' => ['boolean'],
-            'classes' => ['array'],
-            'classes.*' => ['exists:hero_classes,id'],
+            'active'         => ['boolean'],
+            'public_visible' => ['boolean'],
+            'classes'        => ['array'],
+            'classes.*'      => ['exists:hero_classes,id'],
         ]);
 
-        // Checkbox liefert nichts, wenn nicht gesetzt.
-        $validated['active'] = $request->boolean('active');
+        // Checkboxen liefern nichts, wenn nicht gesetzt.
+        $validated['active']         = $request->boolean('active');
+        $validated['public_visible'] = $request->boolean('public_visible');
+
+        // Steckbrief-HTML aus dem Editor bereinigen.
+        if (array_key_exists('description', $validated)) {
+            $validated['description'] = Hero::sanitizeDescription($validated['description']);
+        }
 
         // 'classes' (Pivot) und 'image' (Datei-Upload) werden separat behandelt.
         unset($validated['classes'], $validated['image']);
 
         return $validated;
+    }
+
+    /**
+     * Validierung für den Steckbrief (WYSIWYG-HTML): Länge als reiner Text und als HTML.
+     *
+     * @return array<int, mixed>
+     */
+    private function descriptionRules(): array
+    {
+        return [
+            'nullable',
+            'string',
+            'max:'.Hero::DESCRIPTION_MAX_HTML,
+            function (string $attribute, mixed $value, \Closure $fail) {
+                if (mb_strlen(Hero::descriptionToPlain($value)) > Hero::DESCRIPTION_MAX_TEXT) {
+                    $fail('Der Steckbrief darf höchstens '.number_format(Hero::DESCRIPTION_MAX_TEXT, 0, ',', '.').' Zeichen lang sein.');
+                }
+            },
+        ];
     }
 
     /**
@@ -340,5 +580,28 @@ class HeroController extends Controller
             }
             $hero->update(['image' => $request->file('image')->store('heroes', 'public')]);
         }
+    }
+
+    /**
+     * SKILL-10: Voraussetzungs-Map für einen Helden bauen.
+     * Rückgabe: Collection, Key = "{hero_class_id}_{skill_id}"
+     *           Wert = Collection von Objekten mit req_id und req_name.
+     */
+    private function buildPrereqMap(Hero $hero): \Illuminate\Support\Collection
+    {
+        $classIds = $hero->classes->pluck('id');
+        $skillIds = $hero->classes->flatMap(fn ($c) => $c->skills->pluck('id'));
+
+        if ($classIds->isEmpty() || $skillIds->isEmpty()) {
+            return collect();
+        }
+
+        return DB::table('skill_class_prerequisites as scp')
+            ->join('skills as req', 'req.id', '=', 'scp.required_skill_id')
+            ->whereIn('scp.skill_id', $skillIds)
+            ->whereIn('scp.hero_class_id', $classIds)
+            ->select('scp.skill_id', 'scp.hero_class_id', 'req.id as req_id', 'req.name as req_name')
+            ->get()
+            ->groupBy(fn ($r) => "{$r->hero_class_id}_{$r->skill_id}");
     }
 }

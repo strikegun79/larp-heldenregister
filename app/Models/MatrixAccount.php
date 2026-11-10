@@ -7,10 +7,14 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Cache;
 
 class MatrixAccount extends Model
 {
     use HasFactory, SoftDeletes;
+
+    /** Cache-Schlüssel der corporal-Policy (MTX-08). */
+    const CORPORAL_CACHE_KEY = 'matrix.corporal.policy';
 
     protected $primaryKey = 'mxid';
 
@@ -29,11 +33,31 @@ class MatrixAccount extends Model
         'forbid_encrypted_room_creation',
     ];
 
+    // Passwort nie in JSON-Serialisierung ausgeben (z.B. toArray/toJson für Logs).
+    protected $hidden = ['auth_credential'];
+
     protected $casts = [
         'active' => 'boolean',
         'forbid_room_creation' => 'boolean',
         'forbid_encrypted_room_creation' => 'boolean',
+        // DSGVO K-1: Passwort im DB verschlüsselt; Laravel entschlüsselt transparant beim Lesen.
+        'auth_credential' => 'encrypted',
     ];
+
+    /** Lesbare Bezeichnung für das Audit-Log (MTX-09). */
+    public function auditLabel(): string
+    {
+        return $this->mxid;
+    }
+
+    protected static function booted(): void
+    {
+        // Cache der corporal-Policy bei jeder Kontoänderung invalidieren (MTX-08).
+        $flush = fn () => Cache::forget(self::CORPORAL_CACHE_KEY);
+        static::saved($flush);
+        static::deleted($flush);
+        static::restored($flush);
+    }
 
     /**
      * Der Spieler hinter dem Matrix-Konto.

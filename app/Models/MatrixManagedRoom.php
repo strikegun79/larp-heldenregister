@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Support\Facades\Cache;
 
 class MatrixManagedRoom extends Model
 {
@@ -25,6 +26,14 @@ class MatrixManagedRoom extends Model
         'default_allow' => 'boolean',
         'default_deny' => 'boolean',
     ];
+
+    protected static function booted(): void
+    {
+        // Cache der corporal-Policy bei Raumänderungen invalidieren (MTX-08).
+        $flush = fn () => Cache::forget(MatrixAccount::CORPORAL_CACHE_KEY);
+        static::saved($flush);
+        static::deleted($flush);
+    }
 
     /**
      * Mitglieder dieses Raums.

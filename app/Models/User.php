@@ -17,7 +17,7 @@ class User extends Authenticatable implements MustVerifyEmail
     /**
      * The attributes that are mass assignable.
      *
-     * @var array<int, string>
+     * @var list<string>
      */
     protected $fillable = [
         'name',
@@ -33,16 +33,47 @@ class User extends Authenticatable implements MustVerifyEmail
         'lastlogin_at',
         'legacy_id',
         'teamer_notifications',
+        'notify_new_user',
+        'notify_booking_received',
+        'notify_booking_approved',
+        'notify_booking_rejected',
+        'notify_booking_cancelled',
+        'notify_payment_confirmed',
+        'notify_waitlist_promoted',
+        'notify_event_cancelled',
+        'notify_event_reminder',
+        'notify_cancellation_report',
     ];
 
     /**
      * The attributes that should be hidden for serialization.
      *
-     * @var array<int, string>
+     * @var list<string>
      */
     protected $hidden = [
         'password',
         'remember_token',
+    ];
+
+    /**
+     * PHP-seitige Defaults: spiegeln die DB-Defaults (DEFAULT true) wider,
+     * damit auch in-memory-Instanzen (new User / factory()->make()) korrekte
+     * Notification-Werte haben.
+     *
+     * @var array<string, mixed>
+     */
+    protected $attributes = [
+        'teamer_notifications'       => true,
+        'notify_new_user'            => true,
+        'notify_booking_received'    => true,
+        'notify_booking_approved'    => true,
+        'notify_booking_rejected'    => true,
+        'notify_booking_cancelled'   => true,
+        'notify_payment_confirmed'   => true,
+        'notify_waitlist_promoted'   => true,
+        'notify_event_cancelled'     => true,
+        'notify_event_reminder'      => true,
+        'notify_cancellation_report' => true,
     ];
 
     /**
@@ -55,7 +86,17 @@ class User extends Authenticatable implements MustVerifyEmail
         'lastlogin_at' => 'datetime',
         'activated' => 'boolean',
         'needs_password_reset' => 'boolean',
-        'teamer_notifications' => 'boolean',
+        'teamer_notifications'      => 'boolean',
+        'notify_new_user'           => 'boolean',
+        'notify_booking_received'   => 'boolean',
+        'notify_booking_approved'   => 'boolean',
+        'notify_booking_rejected'   => 'boolean',
+        'notify_booking_cancelled'  => 'boolean',
+        'notify_payment_confirmed'  => 'boolean',
+        'notify_waitlist_promoted'  => 'boolean',
+        'notify_event_cancelled'    => 'boolean',
+        'notify_event_reminder'     => 'boolean',
+        'notify_cancellation_report' => 'boolean',
         'password' => 'hashed',
     ];
 
@@ -140,6 +181,33 @@ class User extends Authenticatable implements MustVerifyEmail
         }
 
         return $missing;
+    }
+
+    /**
+     * DSGVO Art. 17: Konto anonymisieren (Recht auf Löschung).
+     * Überschreibt alle Klardaten durch Platzhalter und soft-deleted den Datensatz.
+     * Audit-Log-Snapshots (actor_name) bleiben erhalten.
+     */
+    public function anonymize(): void
+    {
+        $this->tokens()->delete();
+        $this->notifications()->delete();
+
+        $this->forceFill([
+            'name'              => 'Gelöscht',
+            'lastname'          => null,
+            'email'             => 'deleted+'.$this->id.'@deleted.invalid',
+            'phone'             => null,
+            'street'            => null,
+            'house_number'      => null,
+            'zip'               => null,
+            'city'              => null,
+            'password'          => \Illuminate\Support\Str::random(64),
+            'remember_token'    => null,
+            'email_verified_at' => null,
+        ])->save();
+
+        $this->delete();
     }
 
     /**

@@ -3,8 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Http\Requests\ProfileUpdateRequest;
+use App\Models\NewsletterSubscription;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Http\Response;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Redirect;
 use Illuminate\View\View;
@@ -16,8 +18,15 @@ class ProfileController extends Controller
      */
     public function edit(Request $request): View
     {
+        $user = $request->user();
+
+        $nlSub = NewsletterSubscription::where('email', $user->email)->first();
+
         return view('profile.edit', [
-            'user' => $request->user(),
+            'user'                  => $user,
+            'newsletterSubscription' => $nlSub,
+            'nlActive'              => $nlSub !== null && $nlSub->isActive(),
+            'nlPending'             => $nlSub !== null && ! $nlSub->isConfirmed() && $nlSub->unsubscribed_at === null,
         ]);
     }
 
@@ -32,12 +41,109 @@ class ProfileController extends Controller
             $request->user()->email_verified_at = null;
         }
 
-        // Checkbox sendet keinen Wert wenn deaktiviert → explizit setzen.
-        $request->user()->teamer_notifications = $request->boolean('teamer_notifications');
+        // Checkboxen senden keinen Wert wenn deaktiviert → explizit setzen.
+        $user = $request->user();
+        foreach ([
+            'teamer_notifications',
+            'notify_new_user',
+            'notify_booking_received',
+            'notify_booking_approved',
+            'notify_booking_rejected',
+            'notify_booking_cancelled',
+            'notify_payment_confirmed',
+            'notify_waitlist_promoted',
+            'notify_event_cancelled',
+            'notify_event_reminder',
+            'notify_cancellation_report',
+        ] as $col) {
+            $user->$col = $request->boolean($col);
+        }
+
+        // Pflichtbenachrichtigungen können nicht deaktiviert werden.
+        foreach (['notify_booking_received', 'notify_booking_approved', 'notify_booking_rejected', 'notify_waitlist_promoted', 'notify_event_cancelled'] as $col) {
+            $user->$col = true;
+        }
 
         $request->user()->save();
 
         return Redirect::route('profile.edit')->with('status', 'profile-updated');
+    }
+
+    /**
+     * DSGVO Art. 20: Alle personenbezogenen Daten des Nutzers als JSON-Download.
+     */
+    public function exportData(Request $request): Response
+    {
+        $user = $request->user();
+        $user->load([
+            'players.heroes.classes',
+            'players.heroes.epTransactions.type',
+            'players.matrixAccount',
+            'players.bookings.adventure:id,name,start_at',
+            'players.bookings.role:id,description',
+        ]);
+
+        $nlSub = NewsletterSubscription::where('email', $user->email)->first();
+
+        $data = [
+            'export_erstellt_am'  => now()->toIso8601String(),
+            'konto' => [
+                'vorname'              => $user->name,
+                'nachname'             => $user->lastname,
+                'email'                => $user->email,
+                'telefon'              => $user->phone,
+                'strasse'              => $user->street,
+                'hausnummer'           => $user->house_number,
+                'plz'                  => $user->zip,
+                'ort'                  => $user->city,
+                'registriert_am'       => $user->created_at?->toIso8601String(),
+                'zuletzt_eingeloggt'   => $user->lastlogin_at?->toIso8601String(),
+                'newsletter_abonniert' => $nlSub?->isActive() ?? false,
+            ],
+            'spieler' => $user->players->map(fn ($player) => [
+                'vorname'      => $player->name,
+                'nachname'     => $player->lastname,
+                'geburtsdatum' => $player->dayofbirth?->toDateString(),
+                'geschlecht'   => $player->gender,
+                'strasse'      => $player->address_same_as_guardian ? null : $player->street,
+                'hausnummer'   => $player->address_same_as_guardian ? null : $player->house_number,
+                'plz'          => $player->address_same_as_guardian ? null : $player->zip,
+                'ort'          => $player->address_same_as_guardian ? null : $player->city,
+                'matrix_konto' => $player->matrixAccount?->mxid,
+                'helden'       => $player->heroes->map(fn ($hero) => [
+                    'charaktername' => $hero->character_name,
+                    'klassen'       => $hero->classes->pluck('name'),
+                    'ep_gesamt'     => $hero->ep_total,
+                    'ep_guthaben'   => $hero->ep_balance,
+                    'ep_verlauf'    => $hero->epTransactions->map(fn ($tx) => [
+                        'art'        => $tx->type?->description,
+                        'ep'         => $tx->ep_count,
+                        'gutschrift' => (bool) $tx->type?->is_credit,
+                        'datum'      => $tx->transacted_at?->toDateString(),
+                    ]),
+                    'erstellt_am'   => $hero->created_at?->toIso8601String(),
+                ]),
+                'anmeldungen' => $player->bookings->map(fn ($b) => [
+                    'abenteuer'      => $b->adventure?->name,
+                    'datum'          => $b->adventure?->start_at?->toDateString(),
+                    'rolle'          => $b->role?->description,
+                    'status'         => $b->status,
+                    'warteliste'     => (bool) $b->waitlisted,
+                    'fotoerlaubnis'  => (bool) $b->fotoerlaubnis,
+                    'allergien'      => $b->allergien,
+                    'medikamente'    => $b->medikamente,
+                    'angemeldet_am'  => $b->created_at?->toIso8601String(),
+                ]),
+            ]),
+        ];
+
+        $filename = 'meine-daten-heldenregister-'.now()->format('Y-m-d').'.json';
+        $json = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
+
+        return response($json, 200, [
+            'Content-Type'        => 'application/json; charset=utf-8',
+            'Content-Disposition' => "attachment; filename=\"{$filename}\"",
+        ]);
     }
 
     /**
@@ -53,7 +159,9 @@ class ProfileController extends Controller
 
         Auth::logout();
 
-        $user->delete();
+        // DSGVO Art. 17: Konto anonymisieren statt nur soft-deleten,
+        // damit das Versprechen "alle Daten dauerhaft entfernt" stimmt.
+        $user->anonymize();
 
         $request->session()->invalidate();
         $request->session()->regenerateToken();

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\MatrixAccount;
 use App\Models\MatrixManagedRoom;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\Cache;
 
 /**
  * Liefert die matrix-corporal Policy als JSON. matrix-corporal ruft diesen
@@ -17,29 +18,35 @@ class CorporalPolicyController extends Controller
 {
     public function __invoke(): JsonResponse
     {
-        $managedRoomIds = MatrixManagedRoom::orderBy('roomid')->pluck('roomid');
+        $ttl = (int) config('matrix.corporal_cache_ttl', 60);
 
-        // Nur aktive (nicht gelöschte) Konten, jeweils mit ihren Räumen.
-        $accounts = MatrixAccount::with('rooms')->get();
+        $policy = Cache::remember(MatrixAccount::CORPORAL_CACHE_KEY, $ttl, function () {
+            $managedRoomIds = MatrixManagedRoom::orderBy('roomid')->pluck('roomid');
 
-        $users = $accounts->map(fn (MatrixAccount $account) => [
-            'id' => $account->mxid,
-            'active' => $account->active,
-            'authType' => 'plain',
-            'authCredential' => (string) $account->auth_credential,
-            'displayName' => (string) $account->display_name,
-            'avatarUri' => (string) $account->avatar_uri,
-            'joinedRoomIds' => $account->rooms->pluck('roomid')->values(),
-            'forbidRoomCreation' => $account->forbid_room_creation,
-            'forbidEncryptedRoomCreation' => $account->forbid_encrypted_room_creation,
-        ])->values();
+            // Nur aktive (nicht gelöschte) Konten, jeweils mit ihren Räumen.
+            $accounts = MatrixAccount::with('rooms')->get();
 
-        return response()->json([
-            'schemaVersion' => 1,
-            'flags' => (object) config('matrix.flags'),
-            'managedRoomIds' => $managedRoomIds,
-            'hooks' => config('matrix.hooks'),
-            'users' => $users,
-        ]);
+            $users = $accounts->map(fn (MatrixAccount $account) => [
+                'id' => $account->mxid,
+                'active' => $account->active,
+                'authType' => 'plain',
+                'authCredential' => (string) $account->auth_credential,
+                'displayName' => (string) $account->display_name,
+                'avatarUri' => (string) $account->avatar_uri,
+                'joinedRoomIds' => $account->rooms->pluck('roomid')->values(),
+                'forbidRoomCreation' => $account->forbid_room_creation,
+                'forbidEncryptedRoomCreation' => $account->forbid_encrypted_room_creation,
+            ])->values();
+
+            return [
+                'schemaVersion' => 1,
+                'flags' => (object) config('matrix.flags'),
+                'managedRoomIds' => $managedRoomIds,
+                'hooks' => config('matrix.hooks'),
+                'users' => $users,
+            ];
+        });
+
+        return response()->json($policy);
     }
 }

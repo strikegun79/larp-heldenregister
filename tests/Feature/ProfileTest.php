@@ -2,6 +2,8 @@
 
 namespace Tests\Feature;
 
+use App\Models\Hero;
+use App\Models\Player;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -187,5 +189,58 @@ class ProfileTest extends TestCase
             ->assertRedirect('/profile');
 
         $this->assertNotNull($user->fresh());
+    }
+
+    public function test_daten_export_erfordert_authentifizierung(): void
+    {
+        $this->get(route('profile.export-data'))
+            ->assertRedirect(route('login'));
+    }
+
+    public function test_daten_export_liefert_json_download(): void
+    {
+        $user = User::factory()->create();
+
+        $response = $this->actingAs($user)
+            ->get(route('profile.export-data'));
+
+        $response->assertOk();
+        $response->assertHeader('Content-Type', 'application/json; charset=utf-8');
+        $this->assertStringContainsString('attachment', $response->headers->get('Content-Disposition'));
+        $this->assertStringContainsString('.json', $response->headers->get('Content-Disposition'));
+    }
+
+    public function test_daten_export_enthaelt_konto_und_spieler(): void
+    {
+        $user = User::factory()->create(['name' => 'Max', 'lastname' => 'Mustermann']);
+        $player = Player::factory()->create(['name' => 'Kind', 'lastname' => 'Muster']);
+        $user->players()->attach($player);
+        Hero::factory()->create(['player_id' => $player->id, 'character_name' => 'Aldric']);
+
+        $response = $this->actingAs($user)
+            ->get(route('profile.export-data'));
+
+        $json = json_decode($response->getContent(), true);
+
+        $this->assertArrayHasKey('export_erstellt_am', $json);
+        $this->assertSame('Max', $json['konto']['vorname']);
+        $this->assertSame('Mustermann', $json['konto']['nachname']);
+        $this->assertCount(1, $json['spieler']);
+        $this->assertSame('Kind', $json['spieler'][0]['vorname']);
+        $this->assertCount(1, $json['spieler'][0]['helden']);
+        $this->assertSame('Aldric', $json['spieler'][0]['helden'][0]['charaktername']);
+        $this->assertArrayHasKey('ep_gesamt', $json['spieler'][0]['helden'][0]);
+        $this->assertArrayHasKey('ep_verlauf', $json['spieler'][0]['helden'][0]);
+    }
+
+    public function test_daten_export_enthaelt_keine_unterschriften(): void
+    {
+        $user = User::factory()->create();
+
+        $response = $this->actingAs($user)
+            ->get(route('profile.export-data'));
+
+        $this->assertStringNotContainsString('signature', $response->getContent());
+        $this->assertStringNotContainsString('unterschrift', strtolower($response->getContent()));
     }
 }

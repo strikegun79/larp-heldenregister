@@ -9,7 +9,7 @@
             @if ($user->pivot->self)<span class="ui mini label">self</span>@endif
         </div>
         <form method="POST" action="{{ route('admin.players.caretakers.destroy', [$player, $user]) }}" data-refresh-modal
-              onsubmit="return confirm('Betreuer „{{ trim("{$user->name} {$user->lastname}") }}“ entfernen?');">
+              data-confirm="Betreuer {{ $user->name }} {{ $user->lastname }} entfernen?">
             @csrf @method('DELETE')
             <button type="submit" class="ui mini red icon button" data-tooltip="Entfernen" data-position="top center"><i class="times icon"></i></button>
         </form>

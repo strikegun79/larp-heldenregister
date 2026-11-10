@@ -8,10 +8,24 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Facades\Storage;
 
 class Player extends Model
 {
     use HasFactory, SoftDeletes;
+
+    /**
+     * DSGVO: Profilfoto beim Hard-Delete aus dem Storage entfernen.
+     * Soft-Delete (wiederherstellbar) lässt das Bild erhalten; anonymize() löscht es separat.
+     */
+    protected static function booted(): void
+    {
+        static::forceDeleting(function (Player $player) {
+            if ($player->image) {
+                Storage::disk('public')->delete($player->image);
+            }
+        });
+    }
 
     protected $fillable = [
         'name',
@@ -26,6 +40,10 @@ class Player extends Model
         'house_number',
         'zip',
         'city',
+        'allergien',
+        'medikamente',
+        'health_data_consent_at',
+        'parental_consent_at',
         'active_hero_id',
         'legacy_id',
     ];
@@ -34,6 +52,8 @@ class Player extends Model
         'dayofbirth' => 'date',
         'active' => 'boolean',
         'address_same_as_guardian' => 'boolean',
+        'health_data_consent_at' => 'datetime',
+        'parental_consent_at' => 'datetime',
     ];
 
     /** Aktuelles Alter in Jahren bzw. null (PLAY-07). */
@@ -89,11 +109,29 @@ class Player extends Model
     }
 
     /**
+     * Prüft ob der verknüpfte Nutzer eine bestimmte E-Mail-Benachrichtigung aktiviert hat.
+     * Gibt true zurück wenn kein Nutzerkonto verknüpft ist (Versand als Fallback).
+     */
+    public function notificationEnabled(string $column): bool
+    {
+        $user = $this->relationLoaded('users')
+            ? $this->users->first()
+            : $this->users()->first();
+
+        return $user?->$column ?? true;
+    }
+
+    /**
      * Voller Name des Spielers.
      */
     public function getFullNameAttribute(): string
     {
         return trim("{$this->name} {$this->lastname}");
+    }
+
+    public function auditLabel(): string
+    {
+        return $this->full_name;
     }
 
     /**
@@ -105,6 +143,36 @@ class Player extends Model
     }
 
     /**
+     * DSGVO Art. 17: Spieler anonymisieren (Recht auf Löschung).
+     * Überschreibt alle Klardaten, löscht das Profilfoto und soft-deleted.
+     * Verknüpfte Helden bleiben erhalten (Charaktername ist kein Realname).
+     */
+    public function anonymize(): void
+    {
+        if ($this->image) {
+            Storage::disk('public')->delete($this->image);
+        }
+
+        $this->forceFill([
+            'name'                  => 'Gelöscht',
+            'lastname'              => null,
+            'email'                 => null,
+            'dayofbirth'            => null,
+            'gender'                => null,
+            'image'                 => null,
+            'street'                => null,
+            'house_number'          => null,
+            'zip'                   => null,
+            'city'                  => null,
+            'allergien'             => null,
+            'medikamente'           => null,
+            'address_same_as_guardian' => false,
+        ])->save();
+
+        $this->delete();
+    }
+
+    /**
      * Leitet die Matrix-User-ID aus dem Namen ab (Legacy:
      * "@vorname.nachname:domain"). Wird nur bei der Erstanlage genutzt –
      * eine bestehende mxid bleibt als stabile Matrix-Identität erhalten.
@@ -112,7 +180,69 @@ class Player extends Model
     public function deriveMatrixId(): string
     {
         $domain = config('matrix.domain');
+        $local  = self::sanitizeMxidLocalpart($this->name)
+                . '.'
+                . self::sanitizeMxidLocalpart($this->lastname);
 
-        return '@'.mb_strtolower($this->name).'.'.mb_strtolower($this->lastname).':'.$domain;
+        return '@'.$local.':'.$domain;
+    }
+
+    /**
+     * Wie deriveMatrixId(), aber prüft auf Kollisionen in matrix_accounts
+     * und hängt eine Zahl an, falls der Localpart bereits an einen anderen
+     * Spieler vergeben ist (@max.muster → @max.muster2 → @max.muster3 …).
+     */
+    public function uniqueMatrixId(): string
+    {
+        $domain = config('matrix.domain');
+        $base   = self::sanitizeMxidLocalpart($this->name)
+                . '.'
+                . self::sanitizeMxidLocalpart($this->lastname);
+
+        $candidate = '@'.$base.':'.$domain;
+        $i = 2;
+
+        while (MatrixAccount::where('mxid', $candidate)
+                ->where('player_id', '!=', $this->id)
+                ->exists()) {
+            $candidate = '@'.$base.$i.':'.$domain;
+            $i++;
+        }
+
+        return $candidate;
+    }
+
+    /**
+     * Konvertiert einen Namensteil in einen gültigen Matrix-Localpart-Abschnitt.
+     * Matrix-Spec erlaubt nur [a-z0-9._-] im Localpart.
+     */
+    private static function sanitizeMxidLocalpart(string $name): string
+    {
+        // Umlaute und häufige Akzente in ASCII-Äquivalente auflösen
+        $name = strtr($name, [
+            'ä' => 'ae', 'ö' => 'oe', 'ü' => 'ue', 'ß' => 'ss',
+            'Ä' => 'ae', 'Ö' => 'oe', 'Ü' => 'ue',
+            'à' => 'a',  'á' => 'a',  'â' => 'a',  'ã' => 'a',
+            'è' => 'e',  'é' => 'e',  'ê' => 'e',  'ë' => 'e',
+            'ì' => 'i',  'í' => 'i',  'î' => 'i',  'ï' => 'i',
+            'ò' => 'o',  'ó' => 'o',  'ô' => 'o',  'õ' => 'o',
+            'ù' => 'u',  'ú' => 'u',  'û' => 'u',
+            'ý' => 'y',  'ÿ' => 'y',  'ç' => 'c',  'ñ' => 'n',
+            'ø' => 'o',  'å' => 'a',
+            'À' => 'a',  'Á' => 'a',  'Â' => 'a',  'Ã' => 'a',
+            'È' => 'e',  'É' => 'e',  'Ê' => 'e',  'Ë' => 'e',
+            'Ì' => 'i',  'Í' => 'i',  'Î' => 'i',  'Ï' => 'i',
+            'Ò' => 'o',  'Ó' => 'o',  'Ô' => 'o',  'Õ' => 'o',
+            'Ù' => 'u',  'Ú' => 'u',  'Û' => 'u',
+            'Ý' => 'y',  'Ç' => 'c',  'Ñ' => 'n',
+            'Ø' => 'o',  'Å' => 'a',
+        ]);
+
+        $name = mb_strtolower($name);
+        $name = str_replace([' ', '-'], '_', $name);
+        $name = preg_replace('/[^a-z0-9._-]/', '', $name);
+        $name = trim($name, '._-');
+
+        return $name !== '' ? $name : 'user';
     }
 }

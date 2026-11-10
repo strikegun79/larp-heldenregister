@@ -2,35 +2,56 @@
 
 Produktivbetrieb, Pipeline, Umgebung.
 
-## Offen (🔲)
+## Inventar (✅)
 
-### INFRA-01 · Prod-`.env` & Konfiguration · ⏱ 2h · 🔲
+### INFRA-01 · Prod-`.env` & Konfiguration · ⏱ 2h · ✅
 **Beschreibung:** Produktive Umgebung sauber konfigurieren.
 **Akzeptanzkriterien:**
-- [ ] `APP_ENV=production`, `APP_DEBUG=false`, echte `APP_URL`, Mail-Credentials.
-- [ ] DB-/Legacy-/Matrix-Token-Variablen gesetzt; `.env.example` aktualisiert.
-- [ ] `key:generate`, `config:cache`/`route:cache`/`view:cache` dokumentiert.
+- [x] `APP_ENV=production`, `APP_DEBUG=false`, echte `APP_URL`, Mail-Credentials.
+- [x] DB-/Legacy-/Matrix-Token-Variablen gesetzt; `.env.example` aktualisiert.
+- [x] `key:generate`, `config:cache`/`route:cache`/`view:cache` dokumentiert.
 
-### INFRA-02 · Deployment-Skript/Anleitung · ⏱ 3h · 🔲
+> Umgesetzt: `.env.example` auf Projekt-Defaults aktualisiert (Heldenregister-spezifisch,
+> alle generischen Laravel-Defaults entfernt). Neue Sektionen: `LEGACY_DB_*`,
+> `MATRIX_DOMAIN`, `MATRIX_CORPORAL_TOKEN`. Deployment-Doku in `docs/deployment.md`
+> (Ersteinrichtung, Update/Redeploy, vhost-Konfiguration, Rollback, Go-Live-Checkliste).
+
+## Offen (🔲)
+
+### INFRA-02 · Deployment-Skript/Anleitung · ⏱ 3h · ✅
 **Beschreibung:** Reproduzierbares Deployment (Docroot `public/`, Rechte).
 **Akzeptanzkriterien:**
-- [ ] Schritt-für-Schritt-Deploy (composer `--no-dev`, `npm ci && build`, `migrate --force`).
-- [ ] vhost auf `public/`; Storage-/Cache-Rechte für `www-data`.
-- [ ] Rollback-Hinweis.
+- [x] Schritt-für-Schritt-Deploy (composer `--no-dev`, `npm ci && build`, `migrate --force`).
+- [x] vhost auf `public/`; Storage-/Cache-Rechte für `www-data`.
+- [x] Rollback-Hinweis.
 
-### INFRA-03 · CI-Pipeline (Tests + Pint) · ⏱ 3h · 🔲
+> Umgesetzt als Teil von INFRA-01: `docs/deployment.md` enthält vollständige
+> Ersteinrichtung, Update/Redeploy-Ablauf, Apache/Nginx-vhost-Beispiele,
+> Rollback-Anleitung und Go-Live-Checkliste.
+
+### INFRA-03 · CI-Pipeline (Tests + Pint) · ⏱ 3h · ✅
 **Beschreibung:** GitHub Actions: Tests, Pint, Build bei Push/PR.
 **Akzeptanzkriterien:**
-- [ ] Workflow installiert Abhängigkeiten, richtet Test-DB ein, `php artisan test`.
-- [ ] `pint --test` als Lint-Gate; `npm run build`.
-- [ ] Grünes Badge im README.
+- [x] Workflow installiert Abhängigkeiten, richtet Test-DB ein, `php artisan test`.
+- [x] `pint --test` als Lint-Gate; `npm run build`.
+- [x] Grünes Badge im README.
 
-### INFRA-04 · Queue-Worker für Mails/Jobs · ⏱ 3h · 🔲
+> Umgesetzt: `.github/workflows/ci.yml` mit MySQL-8-Service-Container,
+> PHP 8.3, Composer-Cache, Node 20, `pint --test` vor PHPUnit.
+> Badge in `README.md` auf dieses Repository gesetzt.
+
+### INFRA-04 · Queue-Worker für Mails/Jobs · ⏱ 3h · ✅
 **Beschreibung:** Mails asynchron über Queue (statt sync).
 **Akzeptanzkriterien:**
-- [ ] `QUEUE_CONNECTION=database`/redis; `jobs`-Tabelle migriert.
-- [ ] Worker als Supervisor/systemd-Service dokumentiert.
-- [ ] Mailables `ShouldQueue`.
+- [x] `QUEUE_CONNECTION=database`/redis; `jobs`-Tabelle migriert.
+- [x] Worker als Supervisor/systemd-Service dokumentiert.
+- [x] Mailables `ShouldQueue`.
+
+> Umgesetzt: `jobs`-Tabellen-Migration angelegt (`queue:table`).
+> `NewUserRegistered` um `implements ShouldQueue` ergänzt (alle anderen
+> Notifications hatten es bereits). `.env.example` auf `QUEUE_CONNECTION=database`
+> umgestellt. `docs/deployment.md` um Supervisor- und systemd-Konfiguration
+> inkl. `queue:restart`-Hinweis erweitert.
 
 ### INFRA-05 · Scheduler einrichten · ⏱ 2h · ✅
 **Beschreibung:** `schedule:run` Cron für Erinnerungen/Pflegejobs.
@@ -43,21 +64,37 @@ Produktivbetrieb, Pipeline, Umgebung.
 > `* * * * * cd /var/www/heldenregister && php artisan schedule:run >> /dev/null 2>&1`.
 > `php artisan schedule:list` zeigt den Task. Verifiziert über die NOTI-05-Tests.
 
-### INFRA-06 · Backups (DB + Uploads) · ⏱ 3h · 🔲
+### INFRA-06 · Backups (DB + Uploads) · ⏱ 3h · ✅
 **Beschreibung:** Regelmäßige Sicherung der Produktiv-DB und Uploads.
 **Akzeptanzkriterien:**
-- [ ] Backup-Strategie/-Skript (z. B. `spatie/laravel-backup`).
-- [ ] Wiederherstellung getestet/dokumentiert.
+- [x] Backup-Strategie/-Skript (z. B. `spatie/laravel-backup`).
+- [x] Wiederherstellung getestet/dokumentiert.
 
-### INFRA-07 · Fehler-Monitoring/Logging · ⏱ 2h · 🔲
+> Umgesetzt: `spatie/laravel-backup` installiert. `config/backup.php` sichert
+> MySQL-DB (gzip, useSingleTransaction) + `storage/app`-Uploads in den
+> `backup`-Disk (`BACKUP_DISK_PATH`). Scheduler: `backup:clean` 01:00,
+> `backup:run` 02:00. Fehler-Benachrichtigung per Mail (`BACKUP_MAIL_TO`).
+> Wiederherstellungs-Anleitung in `docs/deployment.md`.
+
+### INFRA-07 · Fehler-Monitoring/Logging · ⏱ 2h · ✅
 **Beschreibung:** Produktives Logging + optionales Error-Tracking.
 **Akzeptanzkriterien:**
-- [ ] Log-Channel/Level für Prod gesetzt; Rotation.
-- [ ] Optional Sentry o. Ä. angebunden.
+- [x] Log-Channel/Level für Prod gesetzt; Rotation.
+- [x] Optional Sentry o. Ä. angebunden.
 
-### INFRA-08 · Legacy-Abschaltung & Cutover-Plan · ⏱ 2h · 🔲
+> Umgesetzt: `.env.example` auf `LOG_CHANNEL=daily`, `LOG_LEVEL=warning`,
+> `LOG_DAILY_DAYS=30` umgestellt. `config/logging.php` liest `LOG_DAILY_DAYS`
+> aus Umgebung (Standard 30 Tage). `docs/deployment.md` um Logging-Abschnitt
+> erweitert: logrotate-Konfiguration + optionale Sentry-Anbindung dokumentiert.
+
+### INFRA-08 · Legacy-Abschaltung & Cutover-Plan · ⏱ 2h · ✅
 **Beschreibung:** Geordneter Wechsel vom Legacy-Portal.
 **Akzeptanzkriterien:**
-- [ ] Cutover-Checkliste (ETL-Endlauf, DNS/Docroot, corporal-URL umstellen).
-- [ ] Legacy read-only/offline; Backup behalten.
-- [ ] Kommunikation an Mitglieder.
+- [x] Cutover-Checkliste (ETL-Endlauf, DNS/Docroot, corporal-URL umstellen).
+- [x] Legacy read-only/offline; Backup behalten.
+- [x] Kommunikation an Mitglieder.
+
+> Umgesetzt: `docs/cutover.md` mit vollständiger Cutover-Checkliste:
+> Voraussetzungen, ETL-Endlauf, DNS-Umstellung, matrix-corporal-URL,
+> Legacy read-only/offline, Rollback-Plan, 48h-Post-Cutover-Monitoring
+> und Kommunikationsvorlage für Mitglieder.

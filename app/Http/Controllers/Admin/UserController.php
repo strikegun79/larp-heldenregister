@@ -22,12 +22,26 @@ class UserController extends Controller
 {
     /**
      * Liste aller Portal-Nutzer inkl. soft-gelöschter (AUTH-08).
+     * Unterstützt Freitextsuche nach Name und E-Mail.
      */
-    public function index(): View
+    public function index(Request $request): View
     {
-        $users = User::withTrashed()->with('roles')->orderBy('name')->paginate(25);
+        $q = trim($request->string('q'));
 
-        return view('admin.users.index', compact('users'));
+        $users = User::withTrashed()
+            ->with('roles')
+            ->when($q !== '', function ($query) use ($q) {
+                $query->where(function ($b) use ($q) {
+                    $b->where('name', 'like', "%{$q}%")
+                      ->orWhere('lastname', 'like', "%{$q}%")
+                      ->orWhere('email', 'like', "%{$q}%");
+                });
+            })
+            ->orderBy('name')
+            ->paginate(25)
+            ->withQueryString();
+
+        return view('admin.users.index', compact('users', 'q'));
     }
 
     /**
@@ -85,6 +99,44 @@ class UserController extends Controller
     }
 
     /**
+     * Admin: vollständiges Nutzerprofil anzeigen (AUTH-14).
+     */
+    public function showProfile(User $user): View
+    {
+        return view('admin.users.profile', compact('user'));
+    }
+
+    /**
+     * Admin: Stammdaten eines Nutzers speichern (AUTH-14).
+     */
+    public function updateProfile(Request $request, User $user): RedirectResponse
+    {
+        $data = $request->validate([
+            'name'         => ['required', 'string', 'max:255'],
+            'lastname'     => ['nullable', 'string', 'max:255'],
+            'email'        => ['required', 'string', 'lowercase', 'email', 'max:255', \Illuminate\Validation\Rule::unique('users', 'email')->ignore($user->id)],
+            'phone'        => ['nullable', 'string', 'max:50'],
+            'street'       => ['nullable', 'string', 'max:100'],
+            'house_number' => ['nullable', 'string', 'max:10'],
+            'zip'          => ['nullable', 'string', 'max:10'],
+            'city'         => ['nullable', 'string', 'max:100'],
+        ]);
+
+        $user->fill($data);
+
+        if ($user->isDirty('email')) {
+            $user->email_verified_at = null;
+        }
+
+        $user->save();
+
+        AuditLogger::log('user.profile_updated', $user, ['by_admin' => $request->user()->id]);
+
+        return redirect()->route('admin.users.profile', $user)
+            ->with('status', 'Profil von "'.$user->name.'" wurde aktualisiert.');
+    }
+
+    /**
      * Nutzer bearbeiten: Rollen + Aktivierung.
      */
     public function edit(User $user, Request $request): View
@@ -105,24 +157,78 @@ class UserController extends Controller
     /**
      * Nutzer soft-löschen. Schutz: kein Selbst-Löschen, keine Admins löschen.
      */
-    public function destroy(int $id, Request $request): RedirectResponse
+    public function destroy(int $id, Request $request): RedirectResponse|JsonResponse
     {
         $user = User::findOrFail($id);
 
         if ($user->id === $request->user()->id) {
-            return back()->withErrors(['delete' => 'Du kannst dein eigenes Konto hier nicht löschen.']);
+            return $request->expectsJson()
+                ? response()->json(['message' => 'Du kannst dein eigenes Konto hier nicht löschen.'], 422)
+                : back()->withErrors(['delete' => 'Du kannst dein eigenes Konto hier nicht löschen.']);
         }
 
         if ($user->hasRole('admin')) {
-            return back()->withErrors(['delete' => 'Admin-Konten können nicht gelöscht werden.']);
+            return $request->expectsJson()
+                ? response()->json(['message' => 'Admin-Konten können nicht gelöscht werden.'], 422)
+                : back()->withErrors(['delete' => 'Admin-Konten können nicht gelöscht werden.']);
         }
 
         $user->delete();
 
         AuditLogger::log('user.deleted', $user);
 
-        return redirect()->route('admin.users.index')
-            ->with('status', 'Konto '.$user->name.' wurde gelöscht.');
+        $message = 'Konto '.$user->name.' wurde gelöscht.';
+
+        return $request->expectsJson()
+            ? response()->json(['message' => $message, 'reload' => true])
+            : redirect()->route('admin.users.index')->with('status', $message);
+    }
+
+    /**
+     * Admin: Passwort eines Nutzers setzen (AUTH-14).
+     */
+    public function updatePassword(Request $request, User $user): RedirectResponse
+    {
+        $request->validate([
+            'password' => ['required', 'string', 'min:8', 'confirmed'],
+        ]);
+
+        $user->password = Hash::make($request->input('password'));
+        $user->save();
+
+        AuditLogger::log('user.password_changed', $user, ['by_admin' => $request->user()->id]);
+
+        return redirect()->route('admin.users.profile', $user)
+            ->with('status', 'Passwort von "'.$user->name.'" wurde geändert.');
+    }
+
+    /**
+     * Admin: E-Mail-Benachrichtigungen eines Nutzers speichern (AUTH-14).
+     */
+    public function updateNotifications(Request $request, User $user): RedirectResponse
+    {
+        $cols = [
+            'teamer_notifications', 'notify_new_user', 'notify_booking_received',
+            'notify_booking_approved', 'notify_booking_rejected', 'notify_booking_cancelled',
+            'notify_payment_confirmed', 'notify_waitlist_promoted', 'notify_event_cancelled',
+            'notify_event_reminder', 'notify_cancellation_report',
+        ];
+
+        foreach ($cols as $col) {
+            $user->$col = $request->boolean($col);
+        }
+
+        // Pflichtbenachrichtigungen können auch vom Admin nicht deaktiviert werden.
+        foreach (['notify_booking_received', 'notify_booking_approved', 'notify_booking_rejected', 'notify_waitlist_promoted', 'notify_event_cancelled'] as $col) {
+            $user->$col = true;
+        }
+
+        $user->save();
+
+        AuditLogger::log('user.notifications_updated', $user, ['by_admin' => $request->user()->id]);
+
+        return redirect()->route('admin.users.profile', $user)
+            ->with('status', 'Benachrichtigungen von "'.$user->name.'" wurden gespeichert.');
     }
 
     /**

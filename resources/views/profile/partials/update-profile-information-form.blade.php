@@ -1,7 +1,7 @@
 <section>
     <header>
-        <h2 class="text-lg font-medium text-gray-900">Angaben der erziehungsberechtigten Person</h2>
-        <p class="mt-1 text-sm text-gray-600">Diese Angaben beziehen sich auf die erziehungsberechtigte Person – nicht auf das Kind.</p>
+        <h2 class="font-uncial text-lg text-waldritter">Angaben der erziehungsberechtigten Person</h2>
+        <p class="mt-1 text-sm text-stone-600">Diese Angaben beziehen sich auf die erziehungsberechtigte Person – nicht auf das Kind.</p>
     </header>
 
     <form id="send-verification" method="post" action="{{ route('verification.send') }}">
@@ -35,7 +35,7 @@
         </div>
 
         <div class="pt-2">
-            <h3 class="text-base font-medium text-gray-800">Anschrift</h3>
+            <h3 class="font-uncial text-base text-waldritter">Anschrift</h3>
             <p class="text-sm text-gray-500 mb-3">Diese Anschrift wird für Anmeldung, Kontakt und rechtliche Einwilligungen verwendet.</p>
 
             @if (! auth()->user()->hasCompleteAddress())
@@ -83,10 +83,10 @@
 
             @if ($user instanceof \Illuminate\Contracts\Auth\MustVerifyEmail && ! $user->hasVerifiedEmail())
                 <div>
-                    <p class="text-sm mt-2 text-gray-800">
+                    <p class="text-sm mt-2 text-stone-800">
                         {{ __('Your email address is unverified.') }}
 
-                        <button form="send-verification" class="underline text-sm text-gray-600 hover:text-gray-900 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
+                        <button form="send-verification" class="underline text-sm text-stone-600 hover:text-stone-800 rounded-md focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500">
                             {{ __('Click here to re-send the verification email.') }}
                         </button>
                     </p>
@@ -109,7 +109,7 @@
                     x-show="show"
                     x-transition
                     x-init="setTimeout(() => show = false, 2000)"
-                    class="text-sm text-gray-600"
+                    class="text-sm text-stone-600"
                 >Gespeichert.</p>
             @endif
         </div>

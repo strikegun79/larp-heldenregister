@@ -2,23 +2,30 @@
 
 namespace App\Http\Controllers;
 
+use App\Exports\ParticipationExport;
 use App\Models\Adventure;
+use App\Models\AdventureTask;
 use App\Models\EventCategory;
 use App\Models\EventClient;
 use App\Models\EventRole;
 use App\Models\EventStatus;
+use App\Models\Group;
+use App\Models\Hero;
 use App\Models\Location;
 use App\Models\Player;
 use App\Models\User;
 use App\Notifications\EventCancelled;
+use App\Notifications\WaitlistPromoted;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\Response;
+use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class AdventureController extends Controller
 {
@@ -29,34 +36,82 @@ class AdventureController extends Controller
         $this->middleware('can:adventure.access')->only(['index', 'show', 'calendar']);
         // Events anlegen/bearbeiten/absagen + Verwaltungsliste: events.edit
         // (Admin, Bürokrat, Projektleitung).
-        $this->middleware('can:events.edit')->only(['create', 'store', 'edit', 'update', 'destroy', 'manage', 'cancel', 'manageIndex']);
+        $this->middleware('can:events.edit')->only(['create', 'store', 'edit', 'update', 'destroy', 'manage', 'cancel', 'manageIndex', 'toggleWaitlistMode', 'saveTasks']);
         // Teilnehmer-PDF: Projektleitung, Bürokrat, Admin (ADV-17).
         $this->middleware('can:take-signatures')->only('participantsPdf');
         // Teilnahme-/Belegungsreport (REP-03): Event-Verwalter.
-        $this->middleware('can:events.edit')->only('participationCsv');
+        $this->middleware('can:events.edit')->only('participationXlsx');
     }
 
     /**
      * Liste aller Abenteuer.
+     * sort=grouped (Standard): nach Status gruppiert, keine Paginierung.
+     * sort=asc: nach Datum aufsteigend (nächstes zuerst), paginiert.
+     * sort=desc: nach Datum absteigend (letztes zuerst), paginiert.
      */
-    public function index(): View
+    public function index(Request $request): View
     {
-        $adventures = Adventure::with(['location', 'status', 'category'])
-            ->withCount('confirmedBookings')
-            ->orderByDesc('start_at')
-            ->paginate(20);
+        $q = trim($request->string('q'));
 
-        return view('adventures.index', compact('adventures'));
+        // GET-Parameter hat Vorrang; sonst gespeicherte Präferenz aus Cookie lesen.
+        // Bei aktiver Auswahl Cookie für 30 Tage aktualisieren.
+        if ($request->has('sort')) {
+            $sort = $request->get('sort');
+            Cookie::queue('adventures_sort', $sort, 60 * 24 * 30);
+        } else {
+            $sort = $request->cookie('adventures_sort', 'grouped');
+        }
+
+        if (! in_array($sort, ['grouped', 'asc', 'desc'], true)) {
+            $sort = 'grouped';
+        }
+
+        $base = Adventure::with(['location', 'status', 'category'])
+            ->withCount('occupiedSlots')
+            ->visibleFor($request->user())
+            ->when($q, fn ($query) => $query->where('name', 'like', "%{$q}%"));
+
+        if ($sort === 'grouped') {
+            // Definierte Reihenfolge der Status-Gruppen.
+            $groupOrder = [30, 20, 10, 40, 50, 60, 70, 0];
+
+            $all = $base->orderBy('start_at')->get();
+
+            $grouped = collect($groupOrder)
+                ->filter(fn ($id) => $all->where('event_status_id', $id)->isNotEmpty())
+                ->mapWithKeys(fn ($id) => [$id => $all->where('event_status_id', $id)->values()]);
+
+            return view('adventures.index', [
+                'adventures' => null,
+                'grouped'    => $grouped,
+                'q'          => $q,
+                'sort'       => $sort,
+            ]);
+        }
+
+        $adventures = $base
+            ->when($sort === 'asc',  fn ($query) => $query->orderBy('start_at'))
+            ->when($sort === 'desc', fn ($query) => $query->orderByDesc('start_at'))
+            ->paginate(20)
+            ->withQueryString();
+
+        return view('adventures.index', [
+            'adventures' => $adventures,
+            'grouped'    => null,
+            'q'          => $q,
+            'sort'       => $sort,
+        ]);
     }
 
     /**
      * Kalender-/Listenansicht kommender Events, chronologisch nach Monat
      * gruppiert (ADV-12).
      */
-    public function calendar(): View
+    public function calendar(Request $request): View
     {
         $events = Adventure::with(['location', 'status'])
-            ->withCount('confirmedBookings')
+            ->withCount('occupiedSlots')
+            ->visibleFor($request->user())
             ->whereNotNull('start_at')
             ->where('start_at', '>=', now()->startOfDay())
             ->orderBy('start_at')
@@ -73,7 +128,9 @@ class AdventureController extends Controller
     public function manageIndex(): View
     {
         $adventures = Adventure::with('status')
-            ->withCount('confirmedBookings')
+            ->withCount(['activeBookings', 'waitlistedBookings', 'activeTeamerSignups', 'bookings', 'teamerSignups', 'epTransactions'])
+            ->orderByRaw('(start_at < CURDATE()) ASC')
+            ->orderByRaw('CASE WHEN start_at >= CURDATE() THEN start_at END ASC')
             ->orderByDesc('start_at')
             ->paginate(25);
 
@@ -100,27 +157,46 @@ class AdventureController extends Controller
             ->with('status', 'Abenteuer wurde angelegt.');
     }
 
-    public function show(Adventure $adventure): View
+    public function show(Request $request, Adventure $adventure): View
     {
+        // Ausgeblendete / abgeschlossene / abgesagte Events: nur für Verwalter
+        // oder angemeldete Nutzer zugänglich (ADV-HIDE).
+        if (! $adventure->isVisibleFor($request->user())) {
+            abort(404);
+        }
+
         $adventure->load(['location', 'status', 'category', 'client', 'bookings.player', 'bookings.role', 'visits', 'gamemaster', 'eventleader', 'teamerSignups.user']);
 
         // Buchbare Spieler: Bürokrat/Admin alle, sonst nur eigene/betreute (BOOK-10).
         $players = Gate::allows('book-any-player')
             ? Player::orderBy('name')->get()
-            : request()->user()->players()->orderBy('name')->get();
+            : $request->user()->players()->orderBy('name')->get();
 
-        // Sichtbare Anmeldungen (ADV-15): Bürokrat/Projektleitung/Spielleiter/Admin
-        // sehen alle, sonst nur eigene Spieler + selbst angemeldete Gäste (ADV-21).
-        $user = request()->user();
-        $ownPlayerIds = $user->players->pluck('id');
-        $visibleBookings = Gate::allows('view-all-bookings')
-            ? $adventure->bookings
-            : $adventure->bookings->filter(
-                fn ($b) => $ownPlayerIds->contains($b->player_id) || $b->booked_by_user_id === $user->id
-            )->values();
+        // Sichtbare Anmeldungen: in der Detailansicht immer nur eigene Spieler
+        // und selbst angemeldete Gäste. Alle Buchungen sind ausschließlich in der
+        // Verwaltungsansicht (manage) sichtbar.
+        $ownPlayerIds = $request->user()->players->pluck('id');
+        $visibleBookings = $adventure->bookings->filter(
+            fn ($b) => $ownPlayerIds->contains($b->player_id) || $b->booked_by_user_id === $request->user()->id
+        )->values();
 
         $teamerSignups = $adventure->teamerSignups;
-        $myTeamerSignup = $teamerSignups->firstWhere('user_id', request()->user()->id);
+        $myTeamerSignup = $teamerSignups->firstWhere('user_id', $request->user()->id);
+
+        $profileComplete = $request->user()->hasCompleteAddress();
+        $userHasPlayers  = $request->user()->players()->exists();
+
+        if (Gate::allows('book-any-player')) {
+            $userHasBookableGroups = true;
+        } else {
+            $bookedPlayerIds = $adventure->bookings()->pluck('player_id')->toArray();
+            $userPlayerIds   = $request->user()->players()->pluck('players.id');
+            $userHeroIds     = Hero::whereIn('player_id', $userPlayerIds)->pluck('id');
+            $userHasBookableGroups = Group::whereHas('heroes', fn ($q) => $q
+                ->whereIn('heroes.id', $userHeroIds)
+                ->whereNotIn('player_id', $bookedPlayerIds)
+            )->exists();
+        }
 
         $data = [
             'adventure' => $adventure,
@@ -129,13 +205,15 @@ class AdventureController extends Controller
             'visibleBookings' => $visibleBookings,
             'teamerSignups' => $teamerSignups,
             'myTeamerSignup' => $myTeamerSignup,
+            'profileComplete'       => $profileComplete,
+            'userHasPlayers'        => $userHasPlayers,
+            'userHasBookableGroups' => $userHasBookableGroups,
         ];
 
-        if (request()->ajax()) {
-            return view('adventures._detail', $data);
-        }
-
-        return view('adventures.show', $data);
+        // ARCH-002: AJAX → Partial für Modal, Direktaufruf → Vollseite (wie HeroController@show).
+        return $request->ajax()
+            ? view('adventures._detail', $data)
+            : view('adventures.show', $data);
     }
 
     /**
@@ -143,17 +221,24 @@ class AdventureController extends Controller
      * mit Aktionen und Check-in. Für die Verwaltung → Abenteuer; keine
      * Selbst-Anmeldung.
      */
-    public function manage(Adventure $adventure): View
+    public function manage(Request $request, Adventure $adventure): View
     {
-        $adventure->load(['bookings.player.users', 'bookings.bookedBy', 'bookings.role', 'visits', 'status', 'teamerSignups.user']);
+        $adventure->load(['bookings.player.users', 'bookings.player.activeHero.classes', 'bookings.bookedBy', 'bookings.role', 'visits', 'status', 'teamerSignups.user']);
 
-        $nscBookings = $adventure->bookings->where('event_role_id', EventRole::NSC_ROLE_ID)->values();
-        $mainBookings = $adventure->bookings->where('event_role_id', '!=', EventRole::NSC_ROLE_ID)->values();
+        $nscBookings  = $adventure->bookings->filter(fn ($b) => $b->role?->is_teamer_like)->sortByDesc('created_at')->values();
+        $mainBookings = $adventure->bookings->filter(fn ($b) => ! $b->role?->is_teamer_like)->sortByDesc('created_at')->values();
 
-        return view('adventures._manage', array_merge($this->formData($adventure), [
-            'nscBookings' => $nscBookings,
-            'mainBookings' => $mainBookings,
-        ]));
+        $data = array_merge($this->formData($adventure), [
+            'nscBookings'     => $nscBookings,
+            'mainBookings'    => $mainBookings,
+            'deletionBlocker' => $adventure->deletionBlocker(),
+            'tasks'           => $adventure->tasks,
+        ]);
+
+        // ARCH-002: AJAX → Partial für Modal, Direktaufruf → Vollseite.
+        return $request->ajax()
+            ? view('adventures._manage', $data)
+            : view('adventures.manage', $data);
     }
 
     /**
@@ -162,23 +247,60 @@ class AdventureController extends Controller
      */
     public function participantsPdf(Adventure $adventure): Response
     {
-        $adventure->load(['location', 'category', 'bookings.player.users', 'bookings.bookedBy', 'teamerSignups.user']);
+        // Stornierte Anmeldungen erscheinen nicht in der Teilnehmerliste.
+        $adventure->load([
+            'location',
+            'category',
+            'bookings' => fn ($q) => $q->where('status', '!=', 'storniert'),
+            'bookings.player.users',
+            'bookings.bookedBy',
+            'bookings.role',
+            'teamerSignups.user',
+        ]);
 
-        // Nur reguläre Teilnehmer (ohne NSC-Elternteil) in der Hauptliste.
+        // Deutsche Sortierung: ohne Groß-/Kleinschreibung, Umlaute korrekt; Gäste mit Gastnamen.
+        $collator = new \Collator('de_DE');
+        $sortKey = fn ($b) => $b->is_guest
+            ? [$b->guest_lastname ?? '', $b->guest_name ?? '']
+            : [$b->player?->lastname ?? '', $b->player?->name ?? ''];
+
+        // Nur reguläre Teilnehmer (ohne Teamer-artige Rollen) in der Hauptliste.
         $bookings = $adventure->bookings
-            ->where('event_role_id', '!=', EventRole::NSC_ROLE_ID)
-            ->sortBy([['player.lastname', 'asc'], ['player.name', 'asc']])
+            ->filter(fn ($b) => ! $b->role?->is_teamer_like)
+            ->sort(function ($a, $b) use ($collator, $sortKey) {
+                [$aLast, $aFirst] = $sortKey($a);
+                [$bLast, $bFirst] = $sortKey($b);
+
+                return $collator->compare($aLast, $bLast) ?: $collator->compare($aFirst, $bFirst);
+            })
             ->values();
 
         $nscBookings = $adventure->bookings
-            ->where('event_role_id', EventRole::NSC_ROLE_ID)
+            ->filter(fn ($b) => $b->role?->is_teamer_like)
             ->values();
+
+        // Wartelistenplatz nach Anmeldezeitpunkt (wie beim Nachrücken): booking_id => Platz.
+        $waitlistPositions = $adventure->bookings
+            ->where('waitlisted', true)
+            ->sortBy([['created_at', 'asc'], ['id', 'asc']])
+            ->values()
+            ->mapWithKeys(fn ($b, $i) => [$b->id => $i + 1]);
 
         $male = $bookings->filter(fn ($b) => $b->player?->gender === 'männlich')->count();
         $female = $bookings->filter(fn ($b) => $b->player?->gender === 'weiblich')->count();
         $diverse = $bookings->filter(fn ($b) => $b->player?->gender === 'divers')->count();
 
-        $pdf = Pdf::loadView('adventures.participants_pdf', compact('adventure', 'bookings', 'nscBookings', 'male', 'female', 'diverse'));
+        $pdf = Pdf::loadView('adventures.participants_pdf', compact('adventure', 'bookings', 'nscBookings', 'waitlistPositions', 'male', 'female', 'diverse'))
+            ->setPaper('a4', 'landscape');
+
+        // Fußzeile jeder Seite: Titel links, „Seite X/Y" rechts.
+        $pdf->render();
+        $dompdf = $pdf->getDomPDF();
+        $canvas = $dompdf->getCanvas();
+        $font = $dompdf->getFontMetrics()->getFont('DejaVu Sans');
+        $footerY = $canvas->get_height() - 28;
+        $canvas->page_text(30, $footerY, 'Teilnehmerliste – '.$adventure->name, $font, 8, [0.33, 0.33, 0.33]);
+        $canvas->page_text($canvas->get_width() - 90, $footerY, 'Seite {PAGE_NUM}/{PAGE_COUNT}', $font, 8, [0.33, 0.33, 0.33]);
 
         // Inline (ADV-19): öffnet im Browser-Tab/Popup statt Download.
         return $pdf->stream('teilnehmerliste-'.$adventure->id.'.pdf');
@@ -200,13 +322,18 @@ class AdventureController extends Controller
 
         $adventure->update(['event_status_id' => EventStatus::CANCELLED]);
 
-        // NOTI-04: Absage-Mails an alle gebuchten Spieler mit E-Mail.
-        $recipients = $adventure->bookings()->with('player')->get()
-            ->map(fn ($b) => $b->player?->email)
-            ->filter()
-            ->unique();
-        foreach ($recipients as $email) {
-            Notification::route('mail', $email)->notify(new EventCancelled($adventure));
+        // NOTI-04: Absage-Mails an gebuchte Spieler (sofern Benachrichtigung aktiv).
+        $bookings = $adventure->bookings()->with('player.users')->get();
+        $notified = [];
+        foreach ($bookings as $b) {
+            $player = $b->player;
+            if (! $player?->email || isset($notified[$player->email])) {
+                continue;
+            }
+            if ($player->notificationEnabled('notify_event_cancelled')) {
+                Notification::route('mail', $player->email)->notify(new EventCancelled($adventure));
+                $notified[$player->email] = true;
+            }
         }
 
         $message = 'Event wurde abgesagt.';
@@ -224,40 +351,67 @@ class AdventureController extends Controller
     }
 
     /**
-     * Teilnahme-/Belegungsreport eines Events als CSV (REP-03): je Anmeldung
-     * Spieler/Rolle/Liste/Status/Beitrag/Anwesend, plus Summenzeile.
+     * Wartelistenmodus umschalten (ADV-WL): aktiviert oder deaktiviert den
+     * Wartelistenmodus. Beim Deaktivieren werden wartende Buchungen automatisch
+     * auf freie Plätze hochgestuft und benachrichtigt.
      */
-    public function participationCsv(Adventure $adventure): \Symfony\Component\HttpFoundation\StreamedResponse
+    public function toggleWaitlistMode(Request $request, Adventure $adventure): RedirectResponse|JsonResponse
     {
-        $adventure->load(['bookings.player', 'bookings.role', 'visits']);
-        $visitedIds = $adventure->visits->pluck('player_id');
+        $newMode = ! $adventure->waitlist_mode;
+        $promoted = [];
 
-        return response()->streamDownload(function () use ($adventure, $visitedIds) {
-            $out = fopen('php://output', 'w');
-            fwrite($out, "\xEF\xBB\xBF");
-            fputcsv($out, ['Spieler', 'Rolle', 'Liste', 'Status', 'Beitrag', 'Anwesend'], ';');
+        if (! $newMode) {
+            // Wartelistenmodus deaktiviert → wartende Buchungen ohne Altersverletzung nachrücken lassen.
+            // Buchungen mit Altersverletzung bleiben auf der Warteliste (manuelle Prüfung erforderlich).
+            $waitlisted = $adventure->bookings()
+                ->where('waitlisted', true)
+                ->orderBy('created_at')
+                ->orderBy('id')
+                ->with('player.users')
+                ->get();
 
-            foreach ($adventure->bookings as $b) {
-                fputcsv($out, [
-                    $b->participant_name.($b->is_guest ? ' (Gast)' : ''),
-                    $b->role?->description,
-                    $b->waitlisted ? 'Warteliste' : 'regulär',
-                    $b->status_label,
-                    $b->paid ? 'bezahlt' : 'offen',
-                    $visitedIds->contains($b->player_id) ? 'ja' : 'nein',
-                ], ';');
+            foreach ($waitlisted as $booking) {
+                if ($adventure->isOutsideAgeRange($booking->player)) {
+                    continue;
+                }
+                if ($adventure->freeSlots() <= 0) {
+                    break;
+                }
+                $booking->update(['waitlisted' => false]);
+                $promoted[] = $booking->participant_name;
+
+                $email = $booking->player?->email
+                    ?: $booking->player?->users()->first()?->email;
+                if ($email && $booking->player?->notificationEnabled('notify_waitlist_promoted')) {
+                    Notification::route('mail', $email)->notify(new WaitlistPromoted($booking));
+                }
             }
+        }
 
-            $payable = $adventure->bookings->where('waitlisted', false);
-            fputcsv($out, [], ';');
-            fputcsv($out, ['Summen'], ';');
-            fputcsv($out, ['Regulär', $payable->count()], ';');
-            fputcsv($out, ['Warteliste', $adventure->bookings->where('waitlisted', true)->count()], ';');
-            fputcsv($out, ['Bezahlt', $payable->where('paid', true)->count()], ';');
-            fputcsv($out, ['Offen', $payable->where('paid', false)->count()], ';');
-            fputcsv($out, ['Anwesend', $adventure->visits->count()], ';');
-            fclose($out);
-        }, 'belegung-'.$adventure->id.'.csv', ['Content-Type' => 'text/csv; charset=UTF-8']);
+        $adventure->update(['waitlist_mode' => $newMode]);
+
+        if ($newMode) {
+            $message = 'Wartelistenmodus aktiviert. Neue Anmeldungen kommen auf die Warteliste.';
+        } elseif (count($promoted) > 0) {
+            $names = implode(', ', $promoted);
+            $message = 'Wartelistenmodus deaktiviert. Nachgerückt: ' . $names . '.';
+        } else {
+            $message = 'Wartelistenmodus deaktiviert. Neue Anmeldungen füllen freie Plätze.';
+        }
+
+        return $request->expectsJson()
+            ? response()->json(['message' => $message, 'refresh_modal' => true])
+            : back()->with('status', $message);
+    }
+
+    /**
+     * Teilnahme-/Belegungsreport eines Events als Excel (REP-03).
+     * Blatt 1: Teilnehmerliste mit allen Daten inkl. Ermäßigung und Zahlungsstatus.
+     * Blatt 2: Kassenübersicht für die Kassenwartin.
+     */
+    public function participationXlsx(Adventure $adventure): StreamedResponse
+    {
+        return (new ParticipationExport($adventure))->download();
     }
 
     public function edit(Adventure $adventure): View
@@ -293,13 +447,74 @@ class AdventureController extends Controller
             : redirect()->route('adventures.show', $adventure)->with('status', $message);
     }
 
+    /**
+     * Taskmanager-Einstellungen für eine Veranstaltung speichern (TASK-01).
+     * Für jeden bekannten Task-Typ wird ein AdventureTask upserted.
+     */
+    public function saveTasks(Request $request, Adventure $adventure): RedirectResponse|JsonResponse
+    {
+        $knownTypes = array_keys(config('adventure_tasks.tasks', []));
+        $input      = $request->input('tasks', []);
+
+        foreach ($knownTypes as $type) {
+            $row = $input[$type] ?? [];
+
+            $isActive = isset($row['is_active']) && $row['is_active'];
+
+            $days = isset($row['trigger_days']) ? max(0, (int) $row['trigger_days']) : 0;
+
+            $reference = in_array($row['trigger_reference'] ?? '', ['start_at', 'end_at'], true)
+                ? $row['trigger_reference']
+                : config("adventure_tasks.tasks.{$type}.default_reference", 'start_at');
+
+            $direction = in_array($row['trigger_direction'] ?? '', ['before', 'after'], true)
+                ? $row['trigger_direction']
+                : config("adventure_tasks.tasks.{$type}.default_direction", 'before');
+
+            // Konfigurationsänderung setzt executed_at zurück (Task neu planen).
+            $existing = AdventureTask::where('adventure_id', $adventure->id)
+                ->where('task_type', $type)
+                ->first();
+
+            $configChanged = $existing && (
+                $existing->trigger_days      !== $days
+                || $existing->trigger_reference !== $reference
+                || $existing->trigger_direction !== $direction
+            );
+
+            AdventureTask::updateOrCreate(
+                ['adventure_id' => $adventure->id, 'task_type' => $type],
+                [
+                    'is_active'         => $isActive,
+                    'trigger_days'      => $days,
+                    'trigger_reference' => $reference,
+                    'trigger_direction' => $direction,
+                    'executed_at'       => ($configChanged && $isActive) ? null : ($existing?->executed_at),
+                    'result'            => ($configChanged && $isActive) ? null : ($existing?->result),
+                ]
+            );
+        }
+
+        $message = 'Aufgaben wurden gespeichert.';
+
+        return $request->expectsJson()
+            ? response()->json(['message' => $message, 'reload' => true])
+            : back()->with('status', $message);
+    }
+
     public function destroy(Adventure $adventure): RedirectResponse
     {
+        $blocker = $adventure->deletionBlocker();
+        if ($blocker !== null) {
+            return back()->with('error', $blocker);
+        }
+
+        $name = $adventure->name;
         $adventure->delete();
 
         return redirect()
-            ->route('adventures.index')
-            ->with('status', 'Abenteuer wurde gelöscht.');
+            ->route('adventures.manage-index')
+            ->with('status', '„'.$name.'" wurde gelöscht.');
     }
 
     /**
@@ -330,21 +545,41 @@ class AdventureController extends Controller
      */
     private function validateAdventure(Request $request): array
     {
-        return $request->validate([
+        $data = $request->validate([
             'name' => ['required', 'string', 'max:200'],
+            'kuerzel' => ['required', 'string', 'max:30'],
             'function_email' => ['nullable', 'email', 'max:255'],
             'gamemaster_id' => ['nullable', 'exists:users,id'],
             'eventleader_id' => ['nullable', 'exists:users,id'],
             'location_id' => ['nullable', 'exists:locations,id'],
             'start_at' => ['required', 'date'],
             'end_at' => ['required', 'date', 'after_or_equal:start_at'],
-            'loot_ep_day' => ['integer', 'min:0'],
+            'loot_ep_day' => ['nullable', 'integer', 'min:0'],
             'event_status_id' => ['required', 'exists:event_statuses,id'],
             'event_client_id' => ['required', 'exists:event_clients,id'],
             'event_category_id' => ['required', 'exists:event_categories,id'],
             'max_player' => ['required', 'integer', 'min:1'],
-            'waitlist' => ['integer', 'min:0'],
+            'min_age'    => ['nullable', 'integer', 'min:0', 'max:99'],
+            'max_age'    => ['nullable', 'integer', 'min:0', 'max:99'],
+            'waitlist' => ['nullable', 'integer', 'min:0'],
             'fee' => ['required', 'numeric', 'min:0'],
+            'fee_reduced' => ['nullable', 'numeric', 'min:0'],
+            'is_hidden' => ['boolean'],
         ]);
+
+        // Checkbox sendet keinen Wert wenn nicht angehakt → false setzen.
+        $data['is_hidden'] = $request->boolean('is_hidden');
+
+        // Leeres Feld (NOT NULL mit Default 0) → Integer-Default setzen.
+        $data['loot_ep_day'] = (int) ($data['loot_ep_day'] ?? 0);
+
+        // Altersbereich: min muss kleiner als max sein wenn beide gesetzt
+        if (isset($data['min_age'], $data['max_age']) && $data['min_age'] >= $data['max_age']) {
+            throw \Illuminate\Validation\ValidationException::withMessages([
+                'min_age' => ['Das Mindestalter muss kleiner als das Höchstalter sein.'],
+            ]);
+        }
+
+        return $data;
     }
 }

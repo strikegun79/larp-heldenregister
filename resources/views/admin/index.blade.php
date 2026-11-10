@@ -5,44 +5,161 @@
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="bg-white/60 border-2 border-[#5a3a22]/30 rounded-lg p-4 mb-6 text-stone-700">
+            @can('portal.manage')
+            <div class="bg-white/60 border-2 border-[#5a3a22]/30 rounded-lg p-4 mb-8 text-stone-700">
                 Administration des Heldenregisters. Sei behutsam – lieber fragen als Versagen ;-)
             </div>
+            @endcan
 
-            <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                @php
-                    $cards = [
-                        ['Portal-Nutzer', 'Nutzer & Rollen', 'admin_users.jpg', route('admin.users.index')],
-                        ['Spieler', 'Alle Spieler/Teilnehmer', 'admin_players.jpg', route('admin.players.index')],
-                        ['Veranstaltungen', 'Abenteuer administrieren', 'admin_events.jpg', route('adventures.manage-index')],
-                        ['Helden-Klassen', 'Klassen anlegen & pflegen', 'admin_classes.jpg', route('admin.hero-classes.index')],
-                        ['Orte', 'Veranstaltungsorte pflegen', 'admin_orte.jpg', route('admin.locations.index')],
-                        ['Kategorien', 'Event-Kategorien pflegen', 'admin_katagorien.jpg', route('admin.event-categories.index')],
-                        ['Auftraggeber', 'Auftraggeber pflegen', 'admin_auftraggeber.jpg', route('admin.event-clients.index')],
-                        ['Teilnahme-Rollen', 'Event-Rollen pflegen', 'admin_rollen.jpg', route('admin.event-roles.index')],
-                        ['Event-Status', 'Status-Lookups pflegen', 'admin_katagorien.jpg', route('admin.event-statuses.index')],
-                        ['Gruppen', 'Gilden & Trupps verwalten', 'admin_players.jpg', route('admin.groups.index')],
-                        ['Audit-Log', 'Admin-Aktionen protokolliert', 'admin_users.jpg', route('admin.audit-logs.index')],
-                        ['Portal-Einstellungen', 'Vereins-Settings bearbeiten', 'admin_katagorien.jpg', route('admin.settings.index')],
-                        ['Rollen & Rechte', 'Berechtigungsübersicht', 'admin_players.jpg', route('admin.roles.index')],
-                        ['Fertigkeiten', 'Fertigkeiten-Katalog pflegen', 'admin_classes.jpg', route('admin.skills.index')],
-                        ['Perlenfarben', 'Perlenfarben pflegen', 'admin_classes.jpg', route('admin.perl-colors.index')],
-                        ['EP-Buchungsarten', 'EP-Buchungsarten pflegen', 'admin_katagorien.jpg', route('admin.ep-transaction-types.index')],
-                    ];
-                @endphp
-                @foreach ($cards as [$title, $subtitle, $img, $href])
-                    <a href="{{ $href }}"
-                       class="group block rounded-lg overflow-hidden border-2 border-[#5a3a22]/40 bg-white/60 shadow hover:shadow-xl hover:-translate-y-1 transition">
-                        <div class="h-44 overflow-hidden">
-                            <img src="/images/{{ $img }}" alt="" class="w-full h-full object-cover group-hover:scale-105 transition">
-                        </div>
-                        <div class="p-4 text-center">
-                            <div class="font-uncial text-lg text-waldritter">{{ $title }}</div>
-                            <div class="text-sm text-stone-600">{{ $subtitle }}</div>
-                        </div>
-                    </a>
-                @endforeach
+            @php
+                $adminCard = fn(string $title, string $subtitle, string $img, string $href) =>
+                    compact('title', 'subtitle', 'img', 'href');
+            @endphp
+
+            {{-- ── Helden & Spieler ───────────────────────────────────────────── --}}
+            @canany(['portal.manage', 'heroes.admin-access', 'groups.manage', 'id-cards.access'])
+            <div class="mb-10">
+                <h3 class="font-uncial text-xl text-waldritter mb-4 flex items-center gap-2">
+                    <i class="shield alternate icon" style="color:#5a3a22;"></i>
+                    Helden & Spieler
+                </h3>
+                <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+                    @can('portal.manage')
+                        @foreach ([
+                            $adminCard('Portal-Nutzer', 'Nutzer & Rollen',         'verwaltung_portal-nutzer.jpg', route('admin.users.index')),
+                            $adminCard('Spieler',       'Alle Spieler/Teilnehmer', 'verwaltung_spieler.jpg',       route('admin.players.index')),
+                        ] as $c)
+                            <x-admin.dashboard-card :card="$c" />
+                        @endforeach
+                    @endcan
+                    @can('heroes.admin-access')
+                        @foreach ([
+                            $adminCard('Helden-Klassen',   'Klassen anlegen & pflegen',    'verwaltung_helden-klassen.jpg',   route('admin.hero-classes.index')),
+                            $adminCard('Fertigkeiten',     'Fertigkeiten-Katalog pflegen', 'verwaltung_fertigkeiten.jpg',     route('admin.skills.index')),
+                            $adminCard('Perlenfarben',     'Perlenfarben pflegen',         'verwaltung_perlenfarbe.jpg',      route('admin.perl-colors.index')),
+                            $adminCard('EP-Buchungsarten', 'EP-Buchungsarten pflegen',     'verwaltung_ep-buchungsarten.jpg', route('admin.ep-transaction-types.index')),
+                        ] as $c)
+                            <x-admin.dashboard-card :card="$c" />
+                        @endforeach
+                    @endcan
+                    @can('groups.manage')
+                        <x-admin.dashboard-card :card="$adminCard('Gruppen', 'Gilden & Trupps verwalten', 'verwaltung_helden-gruppen.jpg', route('admin.groups.index'))" />
+                    @endcan
+                    @can('id-cards.access')
+                        <x-admin.dashboard-card :card="$adminCard('Heldenausweise', 'Ausweise generieren & zuweisen', 'verwaltung_heldenausweise.jpg', route('admin.id-cards.index'))" />
+                    @endcan
+                </div>
             </div>
+            @endcanany
+
+            {{-- ── Veranstaltungen ────────────────────────────────────────────── --}}
+            @can('events.admin-access')
+            <div class="mb-10">
+                <h3 class="font-uncial text-xl text-waldritter mb-4 flex items-center gap-2">
+                    <i class="calendar alternate icon" style="color:#5a3a22;"></i>
+                    Veranstaltungen
+                </h3>
+                <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+                    @foreach ([
+                        $adminCard('Veranstaltungen',  'Abenteuer administrieren',   'verwaltung_veranstaltungen.jpg',  route('adventures.manage-index')),
+                        $adminCard('Orte',             'Veranstaltungsorte pflegen', 'verwaltung_orte.jpg',             route('admin.locations.index')),
+                        $adminCard('Kategorien',       'Event-Kategorien pflegen',   'verwaltung_event-kategorien.jpg', route('admin.event-categories.index')),
+                        $adminCard('Auftraggeber',     'Auftraggeber pflegen',       'verwaltung_auftraggeber.jpg',     route('admin.event-clients.index')),
+                        $adminCard('Teilnahme-Rollen', 'Event-Rollen pflegen',       'verwaltung_teilnahme-rollen.jpg', route('admin.event-roles.index')),
+                        $adminCard('Event-Status',     'Status-Lookups pflegen',     'verwaltung_event-status.jpg',     route('admin.event-statuses.index')),
+                        $adminCard('Taskmanager',      'Automatische Aufgaben konfigurieren', 'verwaltung_taskmanager.jpg', route('admin.task-manager.index')),
+                    ] as $c)
+                        <x-admin.dashboard-card :card="$c" />
+                    @endforeach
+                </div>
+            </div>
+            @endcan
+
+            {{-- ── System & Portal ────────────────────────────────────────────── --}}
+            @can('portal.manage')
+            <div class="mb-10">
+                <h3 class="font-uncial text-xl text-waldritter mb-4 flex items-center gap-2">
+                    <i class="cog icon" style="color:#5a3a22;"></i>
+                    System & Portal
+                </h3>
+                <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+                    @foreach ([
+                        $adminCard('Rollen & Rechte',          'Berechtigungsübersicht',            'verwaltung_rollen-rechte.jpg',        route('admin.roles.index')),
+                        $adminCard('Portal-Einstellungen',     'Vereins-Settings bearbeiten',       'verwaltung_portal-einstellungen.jpg', route('admin.settings.index')),
+                        $adminCard('Startseiten-Nachricht',    'Banner/Text auf der Startseite',    'verwaltung_portal-einstellungen.jpg', route('admin.motd.index')),
+                        $adminCard('Audit-Log',                'Admin-Aktionen protokolliert',      'verwaltung_audit-log.jpg',            route('admin.audit-logs.index')),
+                        $adminCard('Datenpannen',              'DSGVO Art. 33 – Vorfallsprotokoll', 'verwaltung_audit-log.jpg',            route('admin.data-breaches.index')),
+                        $adminCard('Verarbeitungsverzeichnis', 'DSGVO Art. 30 – VVT',              'verwaltung_audit-log.jpg',            route('admin.processing-activities.index')),
+                    ] as $c)
+                        <x-admin.dashboard-card :card="$c" />
+                    @endforeach
+                </div>
+            </div>
+            @endcan
+
+            {{-- Kommunikation: Newsletter (newsletter.manage) --}}
+            @can('newsletter.manage')
+                <div class="mb-10">
+                    <h3 class="font-uncial text-xl text-waldritter mb-4 flex items-center gap-2">
+                        <i class="newspaper icon" style="color:#5a3a22;"></i>
+                        Kommunikation
+                    </h3>
+                    <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+                        <a href="{{ route('admin.newsletter.index') }}"
+                           class="group block rounded-lg overflow-hidden border-2 border-[#5a3a22]/40 bg-white/60 shadow hover:shadow-xl hover:-translate-y-1 transition">
+                            <div class="h-36 overflow-hidden save-data-hide">
+                                <img src="/images/verwaltung_newsletter.jpg" alt="" aria-hidden="true" loading="lazy"
+                                     width="400" height="144"
+                                     class="w-full h-full object-cover group-hover:scale-105 transition">
+                            </div>
+                            <div class="p-3 text-center">
+                                <div class="font-uncial text-base text-waldritter">Newsletter</div>
+                                <div class="text-xs text-stone-600">Erstellen, bearbeiten &amp; versenden</div>
+                            </div>
+                        </a>
+                    </div>
+                </div>
+            @endcan
+
+            {{-- Feedback & Qualität: nur für Nutzer mit survey.view oder survey.admin --}}
+            @canany(['survey.view', 'survey.admin'])
+                <div class="mb-10">
+                    <h3 class="font-uncial text-xl text-waldritter mb-4 flex items-center gap-2">
+                        <i class="clipboard list icon" style="color:#5a3a22;"></i>
+                        Feedback & Qualität
+                    </h3>
+                    <div class="grid gap-6 sm:grid-cols-2 lg:grid-cols-4">
+                        <a href="{{ route('admin.surveys.index') }}"
+                           class="group block rounded-lg overflow-hidden border-2 border-[#5a3a22]/40 bg-white/60 shadow hover:shadow-xl hover:-translate-y-1 transition">
+                            <div class="h-36 overflow-hidden save-data-hide">
+                                <img src="/images/verwaltung_umfragen.jpg" alt="" aria-hidden="true" loading="lazy"
+                                     width="400" height="144"
+                                     class="w-full h-full object-cover group-hover:scale-105 transition">
+                            </div>
+                            <div class="p-3 text-center">
+                                <div class="font-uncial text-base text-waldritter">Umfragen</div>
+                                <div class="text-xs text-stone-600">Ergebnisse & Übersicht</div>
+                            </div>
+                        </a>
+
+                        @can('survey.admin')
+                            <a href="{{ route('admin.surveys.templates.index') }}"
+                               class="group block rounded-lg overflow-hidden border-2 border-[#5a3a22]/40 bg-white/60 shadow hover:shadow-xl hover:-translate-y-1 transition">
+                                <div class="h-36 overflow-hidden save-data-hide">
+                                    <img src="/images/verwaltung_umfragen-vorlagen.jpg" alt="" aria-hidden="true" loading="lazy"
+                                         width="400" height="144"
+                                         class="w-full h-full object-cover group-hover:scale-105 transition">
+                                </div>
+                                <div class="p-3 text-center">
+                                    <div class="font-uncial text-base text-waldritter">Umfrage-Vorlagen</div>
+                                    <div class="text-xs text-stone-600">Fragenvorlagen anlegen & bearbeiten</div>
+                                </div>
+                            </a>
+                        @endcan
+                    </div>
+                </div>
+            @endcanany
+
         </div>
     </div>
 </x-app-layout>

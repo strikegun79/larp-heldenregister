@@ -2,10 +2,13 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Collection;
+use App\Models\EventRole;
 
 class Adventure extends Model
 {
@@ -13,6 +16,7 @@ class Adventure extends Model
 
     protected $fillable = [
         'name',
+        'kuerzel',
         'function_email',
         'location_id',
         'start_at',
@@ -25,8 +29,13 @@ class Adventure extends Model
         'event_client_id',
         'event_category_id',
         'max_player',
+        'min_age',
+        'max_age',
         'waitlist',
+        'waitlist_mode',
+        'is_hidden',
         'fee',
+        'fee_reduced',
         'legacy_id',
     ];
 
@@ -35,10 +44,30 @@ class Adventure extends Model
         'end_at' => 'datetime',
         'reminder_sent_at' => 'datetime',
         'fee' => 'decimal:2',
+        'fee_reduced' => 'decimal:2',
         'loot_ep_day' => 'integer',
         'max_player' => 'integer',
+        'min_age'    => 'integer',
+        'max_age'    => 'integer',
         'waitlist' => 'integer',
+        'waitlist_mode' => 'boolean',
+        'is_hidden' => 'boolean',
     ];
+
+    /** Gibt die Altersbeschränkung als lesbaren String zurück, z. B. „8–17 Jahre". */
+    public function getAgeRangeLabelAttribute(): string
+    {
+        if ($this->min_age && $this->max_age) {
+            return "{$this->min_age}–{$this->max_age} Jahre";
+        }
+        if ($this->min_age) {
+            return "ab {$this->min_age} Jahren";
+        }
+        if ($this->max_age) {
+            return "bis {$this->max_age} Jahren";
+        }
+        return '—';
+    }
 
     public function location(): BelongsTo
     {
@@ -85,12 +114,65 @@ class Adventure extends Model
         return $this->hasMany(EventVisit::class);
     }
 
+    public function epTransactions(): HasMany
+    {
+        return $this->hasMany(EpTransaction::class);
+    }
+
+    public function tasks(): HasMany
+    {
+        return $this->hasMany(AdventureTask::class);
+    }
+
     /**
      * Anmeldungen auf einem regulären Platz (nicht auf der Warteliste).
      */
     public function confirmedBookings(): HasMany
     {
         return $this->bookings()->where('waitlisted', false);
+    }
+
+    /** Aktive Teilnehmer: regulärer Platz, nicht storniert. */
+    public function activeBookings(): HasMany
+    {
+        return $this->bookings()->where('waitlisted', false)->where('status', '!=', 'storniert');
+    }
+
+    /** Belegte Spieler-Plätze: regulär, nicht storniert, keine Teamer-Rollen. */
+    public function occupiedSlots(): HasMany
+    {
+        return $this->bookings()
+            ->where('waitlisted', false)
+            ->where('status', '!=', 'storniert')
+            ->whereNotIn('event_role_id', EventRole::teamerLike()->pluck('id'));
+    }
+
+    /** Wartende Anmeldungen: auf Warteliste, nicht storniert. */
+    public function waitlistedBookings(): HasMany
+    {
+        return $this->bookings()->where('waitlisted', true)->where('status', '!=', 'storniert');
+    }
+
+    /** Teamer-Anmeldungen ohne abgelehnte. */
+    public function activeTeamerSignups(): HasMany
+    {
+        return $this->teamerSignups()->whereNull('rejected_at');
+    }
+
+    /**
+     * Soll die nächste Buchung auf die Warteliste?
+     * Ja, wenn das Event voll ist ODER noch jemand auf der Warteliste wartet
+     * (damit keine neue Buchung eine wartende Person "überholt").
+     * waitlist_mode allein ohne aktive Warteliste blockiert nicht mehr.
+     */
+    public function shouldWaitlist(): bool
+    {
+        if ($this->isFull()) {
+            return true;
+        }
+
+        return $this->waitlist_mode
+            && $this->bookings()->where('waitlisted', true)->exists();
     }
 
     /**
@@ -102,11 +184,101 @@ class Adventure extends Model
     }
 
     /**
+     * Anmeldestatus für die Anzeige: 'open' (Platz frei), 'waitlist'
+     * (Anmeldung offen, neue Buchungen landen auf der Warteliste) oder 'closed'.
+     */
+    public function registrationState(): string
+    {
+        if (! $this->registrationOpen()) {
+            return 'closed';
+        }
+
+        return $this->shouldWaitlist() ? 'waitlist' : 'open';
+    }
+
+    /**
+     * Beitrags-Zusammenfassung für die Verwaltungsansicht.
+     * Berücksichtigt pro Buchung den ermäßigten oder regulären Preis.
+     *
+     * @return array{paid_count:int,total_count:int,paid_amount:float,open_amount:float,total_amount:float,erm_count:int}
+     */
+    public function paymentSummary(): array
+    {
+        $payable = $this->bookings
+            ->where('waitlisted', false)
+            ->where('status', '!=', 'storniert')
+            ->whereNotIn('event_role_id', EventRole::teamerLike()->pluck('id'));
+        $paidAmount = 0.0;
+        $openAmount = 0.0;
+
+        foreach ($payable as $booking) {
+            $fee = ($booking->ermaessigung && $this->fee_reduced !== null)
+                ? (float) $this->fee_reduced
+                : (float) $this->fee;
+
+            if ($booking->paid) {
+                $paidAmount += $fee;
+            } else {
+                $openAmount += $fee;
+            }
+        }
+
+        return [
+            'paid_count'   => $payable->where('paid', true)->count(),
+            'total_count'  => $payable->count(),
+            'paid_amount'  => $paidAmount,
+            'open_amount'  => $openAmount,
+            'total_amount' => $paidAmount + $openAmount,
+            'erm_count'    => $payable->where('ermaessigung', true)->count(),
+        ];
+    }
+
+    /**
      * Ist der Check-in erlaubt? Erst ab „Anmeldung geschlossen" (Status ≥ 40, ADV-14).
      */
     public function checkinAllowed(): bool
     {
         return (int) $this->event_status_id >= EventStatus::REGISTRATION_CLOSED;
+    }
+
+    /**
+     * Spieler-IDs, die für dieses Abenteuer bereits Abenteuer-EP erhalten haben –
+     * unabhängig davon, welcher ihrer Helden die EP bekam (Schutz bei Heldenwechsel).
+     */
+    public function epAwardedPlayerIds(): Collection
+    {
+        return EpTransaction::query()
+            ->join('heroes', 'heroes.id', '=', 'ep_transactions.hero_id')
+            ->where('ep_transactions.adventure_id', $this->id)
+            ->where('ep_transactions.ep_transaction_type_id', Hero::ADVENTURE_EP_TYPE)
+            ->distinct()
+            ->pluck('heroes.player_id');
+    }
+
+    /**
+     * Übersicht für die EP-Vergabe an Anwesende: gesamt, ohne aktiven Helden
+     * (unbekannt), bereits vergeben und jetzt neu zu vergeben.
+     *
+     * @return array{total: int, unknown: int, already: int, pending: int}
+     */
+    public function epAwardSummary(): array
+    {
+        $this->loadMissing('visits.player.activeHero');
+        $awarded = $this->epAwardedPlayerIds()->flip();
+
+        $summary = ['total' => 0, 'unknown' => 0, 'already' => 0, 'pending' => 0];
+        foreach ($this->visits as $visit) {
+            $summary['total']++;
+            if ($awarded->has($visit->player_id)) {
+                $summary['already']++;
+            } elseif (! $visit->player?->activeHero) {
+                $summary['unknown']++;
+            } else {
+                $summary['pending']++;
+            }
+        }
+
+        return $summary;
     }
 
     /**
@@ -134,7 +306,11 @@ class Adventure extends Model
      */
     public function freeSlots(): int
     {
-        return max(0, $this->max_player - $this->confirmedBookings()->count());
+        // Teamer-Rollen zählen nicht gegen das Teilnehmerlimit (sie können sich immer anmelden).
+        return max(0, $this->max_player - $this->confirmedBookings()
+            ->whereNotIn('event_role_id', EventRole::teamerLike()->pluck('id'))
+            ->where('status', '!=', 'storniert')
+            ->count());
     }
 
     /**
@@ -143,5 +319,95 @@ class Adventure extends Model
     public function isFull(): bool
     {
         return $this->freeSlots() === 0;
+    }
+
+    /**
+     * Liegt das Alter des Spielers außerhalb des festgelegten Altersrahmens?
+     * Gibt false zurück, wenn keine Altersgrenzen gesetzt sind oder das Geburtsdatum fehlt.
+     */
+    public function isOutsideAgeRange(?Player $player): bool
+    {
+        if (! $player || (! $this->min_age && ! $this->max_age)) {
+            return false;
+        }
+        $age = $player->dayofbirth?->age;
+        if ($age === null) {
+            return false;
+        }
+
+        return ($this->min_age && $age < $this->min_age)
+            || ($this->max_age && $age > $this->max_age);
+    }
+
+    /**
+     * Scope: nur für diesen Nutzer sichtbare Abenteuer.
+     * Verwalter (events.edit) sehen immer alles.
+     * Alle anderen sehen nur nicht-ausgeblendete Events – und bei Status
+     * „Abgeschlossen" oder „abgesagt" nur dann, wenn sie angemeldet sind.
+     *
+     * @param  Builder<Adventure>  $query
+     */
+    public function scopeVisibleFor(Builder $query, User $user): Builder
+    {
+        if ($user->hasPermission('events.edit')) {
+            return $query;
+        }
+
+        $playerIds = $user->players()->pluck('players.id');
+
+        return $query
+            ->where('is_hidden', false)
+            ->where(function (Builder $q) use ($user, $playerIds) {
+                // Status weder abgeschlossen noch abgesagt: immer zeigen.
+                $q->whereNotIn('event_status_id', [EventStatus::COMPLETED, EventStatus::CANCELLED])
+                    // Abgeschlossen/abgesagt: nur zeigen, wenn angemeldet.
+                    ->orWhere(function (Builder $reg) use ($user, $playerIds) {
+                        $reg->whereHas('teamerSignups', fn (Builder $ts) => $ts->where('user_id', $user->id));
+                        if ($playerIds->isNotEmpty()) {
+                            $reg->orWhereHas('bookings', fn (Builder $b) => $b->whereIn('player_id', $playerIds->all()));
+                        }
+                    });
+            });
+    }
+
+    /**
+     * Gibt den Grund zurück, warum das Abenteuer nicht gelöscht werden kann,
+     * oder null wenn es löschbar ist.
+     * Sperrgründe (in Priorität): Buchungen → Teamer-Anmeldungen → EP-Transaktionen.
+     */
+    public function deletionBlocker(): ?string
+    {
+        if ($this->bookings()->exists()) {
+            return 'Es gibt bereits Spieler-Anmeldungen für dieses Abenteuer.';
+        }
+        if ($this->teamerSignups()->exists()) {
+            return 'Es gibt bereits Teamer-Anmeldungen für dieses Abenteuer.';
+        }
+        if ($this->epTransactions()->exists()) {
+            return 'Es wurden bereits EP-Transaktionen für dieses Abenteuer erfasst.';
+        }
+
+        return null;
+    }
+
+    /**
+     * Ist dieses Abenteuer für den angegebenen Nutzer sichtbar (für show()-Zugriff).
+     */
+    public function isVisibleFor(User $user): bool
+    {
+        if ($user->hasPermission('events.edit')) {
+            return true;
+        }
+        if ($this->is_hidden) {
+            return false;
+        }
+        if (! in_array($this->event_status_id, [EventStatus::COMPLETED, EventStatus::CANCELLED], true)) {
+            return true;
+        }
+        // Abgeschlossen/abgesagt: nur wenn angemeldet.
+        $playerIds = $user->players()->pluck('players.id');
+
+        return $this->teamerSignups()->where('user_id', $user->id)->exists()
+            || ($playerIds->isNotEmpty() && $this->bookings()->whereIn('player_id', $playerIds->all())->exists());
     }
 }

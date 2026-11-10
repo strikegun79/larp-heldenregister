@@ -10,7 +10,30 @@
 
     <div class="py-12">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+            {{-- Suche --}}
+            <div class="bg-white/70 border-2 border-[#5a3a22]/40 shadow sm:rounded-lg p-4 mb-4">
+                <form method="GET" action="{{ route('admin.users.index') }}" class="ui form">
+                    <div class="flex flex-col sm:flex-row sm:items-center gap-2">
+                        <div class="ui action input w-full sm:w-auto">
+                            <input type="search" name="q" value="{{ $q }}"
+                                   placeholder="Name oder E-Mail suchen…"
+                                   autofocus>
+                            <button type="submit" class="ui icon button" aria-label="Suchen">
+                                <i class="search icon"></i>
+                            </button>
+                        </div>
+                        @if ($q !== '')
+                            <a href="{{ route('admin.users.index') }}" class="text-sm text-stone-500 hover:underline shrink-0">
+                                Suche zurücksetzen
+                            </a>
+                        @endif
+                    </div>
+                </form>
+            </div>
+
             <div class="bg-white/70 border-2 border-[#5a3a22]/40 shadow sm:rounded-lg overflow-hidden">
+                <x-mobile.cards-or-table>
                 <table class="min-w-full divide-y divide-stone-200">
                     <thead class="bg-black/5">
                         <tr>
@@ -22,42 +45,54 @@
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-stone-200 text-stone-800">
-                        @foreach ($users as $user)
-                            <tr class="{{ $user->trashed() ? 'opacity-50 bg-stone-50' : '' }}">
-                                <td class="px-6 py-4">
+                        @forelse ($users as $user)
+                            <tr @if (! $user->trashed())
+                                    data-modal-url="{{ route('admin.users.edit', $user) }}"
+                                    role="button" tabindex="0"
+                                    aria-label="Nutzer {{ trim($user->name . ' ' . $user->lastname) }} bearbeiten"
+                                    class="cursor-pointer hover:bg-black/5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-600 focus-visible:outline-offset-[-2px]"
+                                @else
+                                    class="opacity-50 bg-stone-50"
+                                @endif>
+                                <td class="px-6 py-4" data-label="Name">
                                     {{ trim("{$user->name} {$user->lastname}") }}
                                     @if ($user->trashed())
                                         <span class="ml-2 text-xs text-red-600 font-semibold">[gelöscht]</span>
                                     @endif
                                 </td>
-                                <td class="px-6 py-4">{{ $user->email }}</td>
-                                <td class="px-6 py-4 text-sm">{{ $user->roles->pluck('label')->implode(', ') ?: '—' }}</td>
-                                <td class="px-6 py-4">{{ $user->activated ? 'ja' : 'nein' }}</td>
-                                <td class="px-6 py-4 text-right">
+                                <td class="px-6 py-4" data-label="E-Mail">{{ $user->email }}</td>
+                                <td class="px-6 py-4 text-sm" data-label="Rollen">{{ $user->roles->pluck('label')->implode(', ') ?: '—' }}</td>
+                                <td class="px-6 py-4" data-label="Aktiv">{{ $user->activated ? 'ja' : 'nein' }}</td>
+                                {{-- stopPropagation verhindert, dass Klick auf Aktions-Buttons den Row-Modal-Trigger auslöst --}}
+                                <td class="px-6 py-4 text-right" onclick="event.stopPropagation()">
                                     @if ($user->trashed())
                                         <form method="POST" action="{{ route('admin.users.restore', $user->id) }}" class="inline"
-                                              onsubmit="return confirm('Konto von {{ addslashes(trim($user->name . ' ' . $user->lastname)) }} wiederherstellen?')">
+                                              data-confirm="Konto von {{ trim($user->name . ' ' . $user->lastname) }} wiederherstellen?">
                                             @csrf @method('PATCH')
-                                            <button type="submit" class="text-green-700 hover:underline">Wiederherstellen</button>
+                                            <button type="submit" class="ui mini basic green button">
+                                                <i class="redo icon"></i> Wiederherstellen
+                                            </button>
                                         </form>
                                     @else
-                                        <a href="{{ route('admin.users.edit', $user) }}"
-                                           data-modal-url="{{ route('admin.users.edit', $user) }}"
-                                           class="text-indigo-700 hover:underline">Bearbeiten</a>
-                                        @if (! $user->hasRole('admin') && $user->id !== Auth::id())
-                                            <form method="POST" action="{{ route('admin.users.destroy', $user->id) }}"
-                                                  class="inline ms-3"
-                                                  onsubmit="return confirm('Konto von {{ addslashes(trim($user->name . ' ' . $user->lastname)) }} löschen?')">
-                                                @csrf @method('DELETE')
-                                                <button type="submit" class="text-red-600 hover:underline">Löschen</button>
-                                            </form>
-                                        @endif
+                                        {{-- AUTH-14: Lösch-Button ist ins Bearbeitungs-Modal gewandert;
+                                             stattdessen Profil-Seite öffnen --}}
+                                        <a href="{{ route('admin.users.profile', $user) }}"
+                                           class="ui mini basic icon button" title="Profil öffnen">
+                                            <i class="user icon"></i>
+                                        </a>
                                     @endif
                                 </td>
                             </tr>
-                        @endforeach
+                        @empty
+                            <tr>
+                                <td colspan="5" class="px-6 py-8 text-center text-stone-400">
+                                    Keine Nutzer für „{{ $q }}" gefunden.
+                                </td>
+                            </tr>
+                        @endforelse
                     </tbody>
                 </table>
+                </x-mobile.cards-or-table>
             </div>
 
             <div class="mt-4">{{ $users->links() }}</div>

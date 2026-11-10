@@ -49,11 +49,11 @@ class EventLookupSeeder extends Seeder
         }
 
         $roles = [
-            ['id' => 1, 'description' => 'Spieler'],
-            ['id' => 2, 'description' => 'NSC Elternteil'],
-            ['id' => 3, 'description' => 'Teamer A'],
-            ['id' => 4, 'description' => 'Teamer B'],
-            ['id' => 5, 'description' => 'Teamer C'],
+            ['id' => 1, 'description' => 'Spieler',       'for_participant' => true,  'for_teamer' => false],
+            ['id' => 2, 'description' => 'NSC Elternteil', 'for_participant' => true,  'for_teamer' => false],
+            ['id' => 3, 'description' => 'Teamer A',       'for_participant' => false, 'for_teamer' => true],
+            ['id' => 4, 'description' => 'Teamer B',       'for_participant' => false, 'for_teamer' => true],
+            ['id' => 5, 'description' => 'Teamer C',       'for_participant' => false, 'for_teamer' => true],
         ];
         foreach ($roles as $row) {
             EventRole::updateOrCreate(['id' => $row['id']], $row);

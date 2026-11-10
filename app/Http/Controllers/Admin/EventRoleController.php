@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Admin;
 
+use App\Http\Controllers\Concerns\RespondsToLookup;
 use App\Http\Controllers\Controller;
 use App\Models\EventRole;
 use Illuminate\Http\JsonResponse;
@@ -15,6 +16,13 @@ use Illuminate\View\View;
  */
 class EventRoleController extends Controller
 {
+    use RespondsToLookup;
+
+    protected function indexRoute(): string
+    {
+        return 'admin.event-roles.index';
+    }
+
     public function index(): View
     {
         $roles = EventRole::withCount('bookings')->orderBy('id')->get();
@@ -60,11 +68,7 @@ class EventRoleController extends Controller
     public function destroy(Request $request, EventRole $eventRole): RedirectResponse|JsonResponse
     {
         if ($eventRole->bookings()->exists()) {
-            $message = 'Rolle wird noch von Anmeldungen verwendet und kann nicht gelöscht werden.';
-
-            return $request->expectsJson()
-                ? response()->json(['message' => $message], 422)
-                : back()->with('error', $message);
+            return $this->respondError($request, 'Rolle wird noch von Anmeldungen verwendet und kann nicht gelöscht werden.');
         }
 
         $eventRole->delete();
@@ -75,14 +79,9 @@ class EventRoleController extends Controller
     private function validateRole(Request $request): array
     {
         return $request->validate([
-            'description' => ['required', 'string', 'max:50'],
+            'description'    => ['required', 'string', 'max:50'],
+            'for_participant' => ['boolean'],
+            'for_teamer'     => ['boolean'],
         ]);
-    }
-
-    private function respond(Request $request, string $message): RedirectResponse|JsonResponse
-    {
-        return $request->expectsJson()
-            ? response()->json(['message' => $message, 'reload' => true])
-            : redirect()->route('admin.event-roles.index')->with('status', $message);
     }
 }

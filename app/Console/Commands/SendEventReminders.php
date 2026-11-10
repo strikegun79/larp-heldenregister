@@ -23,7 +23,7 @@ class SendEventReminders extends Command
         $days = max(0, (int) $this->option('days'));
         $until = now()->addDays($days)->endOfDay();
 
-        $events = Adventure::with('bookings.player')
+        $events = Adventure::with('bookings.player.users')
             ->whereNull('reminder_sent_at')
             ->whereNotNull('start_at')
             ->where('start_at', '>=', now())
@@ -35,8 +35,9 @@ class SendEventReminders extends Command
 
         foreach ($events as $event) {
             foreach ($event->bookings as $booking) {
-                // Nur bestätigte Anmeldungen mit hinterlegter E-Mail.
-                if ($booking->status === 'bestaetigt' && $booking->player?->email) {
+                // Nur bestätigte Anmeldungen mit hinterlegter E-Mail und aktivierter Benachrichtigung.
+                if ($booking->status === 'bestaetigt' && $booking->player?->email
+                    && $booking->player->notificationEnabled('notify_event_reminder')) {
                     Notification::route('mail', $booking->player->email)->notify(new EventReminder($event));
                     $sent++;
                 }

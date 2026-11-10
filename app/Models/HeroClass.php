@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Support\Facades\Storage;
 
 class HeroClass extends Model
 {
@@ -16,6 +17,8 @@ class HeroClass extends Model
         'name',
         'disabled',
         'ep_cost',
+        'ribbon_color',
+        'ribbon_image',
     ];
 
     protected $casts = [
@@ -51,5 +54,23 @@ class HeroClass extends Model
         $slug = $map[$this->slug] ?? $this->slug;
 
         return "/images/skilltree_{$slug}.jpg";
+    }
+
+    /**
+     * URL des Klassenband-Bilds (162×600 px).
+     * Vorrang: hochgeladenes Bild → Fallback auf Klassenbanner-{Name}.png in public/images/.
+     */
+    public function ribbonImageUrl(): ?string
+    {
+        if ($this->ribbon_image) {
+            return Storage::disk('public')->url($this->ribbon_image);
+        }
+
+        $fallback = public_path("images/Klassenbanner-{$this->name}.png");
+        if (file_exists($fallback)) {
+            return asset("images/Klassenbanner-{$this->name}.png");
+        }
+
+        return null;
     }
 }

@@ -8,10 +8,57 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Storage;
+use Mews\Purifier\Facades\Purifier;
 
 class Hero extends Model
 {
     use HasFactory;
+
+    /** Maximale Länge des Steckbriefs als reiner Text bzw. als gespeichertes HTML. */
+    public const DESCRIPTION_MAX_TEXT = 12000;
+
+    public const DESCRIPTION_MAX_HTML = 60000;
+
+    /**
+     * PUB-01: Eindeutigen 6-stelligen Code generieren und beim Erstellen setzen.
+     * DSGVO: Heldenfoto beim Löschen aus dem Storage entfernen.
+     */
+    protected static function booted(): void
+    {
+        static::creating(function (Hero $hero) {
+            if (empty($hero->public_code)) {
+                $hero->public_code = static::generatePublicCode();
+            }
+        });
+
+        static::deleting(function (Hero $hero) {
+            if ($hero->image) {
+                Storage::disk('public')->delete($hero->image);
+            }
+            // Galerie-Bilder aus Storage entfernen (DB-Cascade löscht nur die Datensätze).
+            $hero->galleryImages()->each(function (HeroGalleryImage $gi) {
+                Storage::disk('public')->delete($gi->path);
+            });
+        });
+    }
+
+    /** Kollisionsfreien 6-stelligen Code aus dem BASE31-Alphabet erzeugen. */
+    public static function generatePublicCode(): string
+    {
+        do {
+            $code = '';
+            $len  = strlen(self::CODE_ALPHABET);
+            for ($i = 0; $i < 6; $i++) {
+                $code .= self::CODE_ALPHABET[random_int(0, $len - 1)];
+            }
+        } while (static::where('public_code', $code)->exists());
+
+        return $code;
+    }
+
+    /** PUB-01: Alphabet ohne visuell verwechselbare Zeichen (0, O, 1, I, L). */
+    private const CODE_ALPHABET = 'ABCDEFGHJKMNPQRSTUVWXYZ23456789';
 
     protected $fillable = [
         'player_id',
@@ -23,18 +70,80 @@ class Hero extends Model
         'image',
         'active',
         'legacy_id',
+        'public_code',
+        'public_visible',
+        'public_searchable',
     ];
 
     protected $casts = [
-        'born' => 'date',
-        'died' => 'date',
-        'active' => 'boolean',
+        'born'              => 'date',
+        'died'              => 'date',
+        'active'            => 'boolean',
+        'public_visible'    => 'boolean',
+        'public_searchable' => 'boolean',
     ];
 
     /** Öffentliche URL des Helden-Fotos; Standardbild wenn keins hochgeladen (HERO-22). */
     public function getImageUrlAttribute(): string
     {
         return $this->image ? '/storage/'.$this->image : '/images/heroes_db.jpg';
+    }
+
+    /**
+     * Steckbrief-HTML aus dem Editor bereinigen; leerer Inhalt wird zu null.
+     */
+    public static function sanitizeDescription(?string $html): ?string
+    {
+        if ($html === null || trim(self::descriptionToPlain($html)) === '') {
+            return null;
+        }
+
+        return Purifier::clean($html, 'steckbrief');
+    }
+
+    /**
+     * Steckbrief als reiner Text (für Vorschau und Längenprüfung).
+     */
+    public static function descriptionToPlain(?string $value): string
+    {
+        if ($value === null || $value === '') {
+            return '';
+        }
+        if (! self::isEditorHtml($value)) {
+            return $value; // Alt-Daten: bereits reiner Text.
+        }
+
+        // Block-Enden als Zeilenumbruch erhalten, dann Tags entfernen.
+        $text = preg_replace('#<br\s*/?>|</(p|li|div)>#i', "\n", $value);
+
+        return trim(html_entity_decode(strip_tags($text), ENT_QUOTES | ENT_HTML5, 'UTF-8'));
+    }
+
+    /**
+     * Editor-HTML erkennen: Summernote erzeugt immer Absätze/Listen/Umbrüche.
+     * Alt-Daten (reiner Text, ggf. mit "<" im Text) enthalten diese nicht.
+     */
+    private static function isEditorHtml(string $value): bool
+    {
+        return (bool) preg_match('#</(p|li)>|<br\s*/?>#i', $value);
+    }
+
+    /** Steckbrief als sicheres HTML; Alt-Daten (reiner Text) mit Zeilenumbrüchen. */
+    public function getDescriptionHtmlAttribute(): string
+    {
+        $value = (string) $this->description;
+
+        if (! self::isEditorHtml($value)) {
+            return nl2br(e($value));
+        }
+
+        return Purifier::clean($value, 'steckbrief');
+    }
+
+    /** Steckbrief als reiner Text. */
+    public function getDescriptionPlainAttribute(): string
+    {
+        return self::descriptionToPlain($this->description);
     }
 
     /**
@@ -75,7 +184,9 @@ class Hero extends Model
      */
     public function epTransactions(): HasMany
     {
-        return $this->hasMany(EpTransaction::class);
+        // type immer mitladen: signedAmount() und ep_total/ep_balance-Accessors
+        // greifen auf type->is_credit zu.
+        return $this->hasMany(EpTransaction::class)->with('type');
     }
 
     /**
@@ -163,10 +274,62 @@ class Hero extends Model
     }
 
     /**
+     * Perlen-/Bändchen-Zusammenfassung je Klasse und Farbe.
+     * Gibt eine Collection von stdClass {class: HeroClass, perls: Collection<{color, count}>} zurück.
+     *
+     * Wichtig: Ausgangspunkt sind die Klassen des Helden, nicht die Masterclass
+     * (hero_class_id) der Fertigkeit. Eine Fertigkeit gehört via skill_hero_class
+     * zu beliebig vielen Klassen – sie erscheint daher unter jeder Klasse des Helden,
+     * der sie zugeordnet ist, unabhängig davon, bei welcher Masterclass sie erworben
+     * werden kann.
+     *
+     * Klassen ohne erlernte Perlenfertigkeiten werden ausgelassen.
+     */
+    public function getPerlSummaryByClassAttribute(): Collection
+    {
+        // skills.classes lädt die skill_hero_class-Pivot-Zuordnungen.
+        $this->loadMissing('skills.perlColor', 'skills.classes', 'classes');
+
+        return $this->classes
+            ->map(function ($class) {
+                // Gelernte Fertigkeiten des Helden, die dieser Klasse zugeordnet sind.
+                $classSkills = $this->skills->filter(
+                    fn ($s) => $s->perlColor !== null
+                            && $s->classes->contains('id', $class->id)
+                );
+
+                if ($classSkills->isEmpty()) {
+                    return null;
+                }
+
+                return (object) [
+                    'class' => $class,
+                    'perls' => $classSkills
+                        ->groupBy('perl_color_id')
+                        ->map(fn ($pg) => (object) [
+                            'color' => $pg->first()->perlColor,
+                            'count' => $pg->count(),
+                        ])
+                        ->sortBy('color.name')
+                        ->values(),
+                ];
+            })
+            ->filter()
+            ->sortBy('class.name')
+            ->values();
+    }
+
+    /**
      * Komma-separierte Klassen-Slugs (ersetzt GROUP_CONCAT aus view_heroT1).
      */
     public function getClassListAttribute(): string
     {
         return $this->classes->pluck('slug')->implode(', ');
+    }
+
+    /** HERO-24: Galerie-Bilder (max. 4, sortiert). */
+    public function galleryImages(): HasMany
+    {
+        return $this->hasMany(HeroGalleryImage::class)->orderBy('sort_order');
     }
 }

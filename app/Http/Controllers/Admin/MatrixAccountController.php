@@ -6,8 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Models\MatrixAccount;
 use App\Models\MatrixManagedRoom;
 use App\Models\Player;
+use App\Services\AuditLogger;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
@@ -25,12 +27,21 @@ class MatrixAccountController extends Controller
     {
         $account = $player->matrixAccount()->withTrashed()->first();
 
+        $rooms = MatrixManagedRoom::orderBy('roomname')->get();
+
+        // MTX-06: Neues Konto → default_allow-Räume vorselektieren.
+        if ($account) {
+            $joined = $account->rooms()->pluck('matrix_managed_rooms.roomid')->all();
+        } else {
+            $joined = $rooms->where('default_allow', true)->pluck('roomid')->all();
+        }
+
         return view('admin.matrix.edit', [
-            'player' => $player,
+            'player'  => $player,
             'account' => $account,
-            'rooms' => MatrixManagedRoom::orderBy('roomname')->get(),
-            'joined' => $account ? $account->rooms()->pluck('matrix_managed_rooms.roomid')->all() : [],
-            'mxid' => $account?->mxid ?? $player->deriveMatrixId(),
+            'rooms'   => $rooms,
+            'joined'  => $joined,
+            'mxid'    => $account?->mxid ?? $player->deriveMatrixId(),
         ]);
     }
 
@@ -47,18 +58,22 @@ class MatrixAccountController extends Controller
             'rooms.*' => ['exists:matrix_managed_rooms,roomid'],
         ]);
 
-        $account = $player->matrixAccount()->withTrashed()->first();
-        $active = $request->boolean('active');
+        $account   = $player->matrixAccount()->withTrashed()->first();
+        $active    = $request->boolean('active');
+        $isNew     = ! $account;
+        $wasActive = $account?->active;
+        $newRooms  = $request->input('rooms', []);
 
         // Ohne bestehendes Konto und ohne aktiven Zugang gibt es nichts zu tun.
-        if (! $account && ! $active) {
+        if ($isNew && ! $active) {
             return back()->with('status', 'Kein Matrix-Zugang vergeben.');
         }
 
-        DB::transaction(function () use ($player, $account, $active, $request) {
+        DB::transaction(function () use ($player, &$account, $active, $request, $newRooms) {
             if (! $account) {
                 // Neuanlage: mxid einmalig aus dem Namen ableiten.
-                $account = new MatrixAccount(['mxid' => $player->deriveMatrixId()]);
+                // uniqueMatrixId() sanitisiert + prüft Kollisionen (MTX-07).
+                $account = new MatrixAccount(['mxid' => $player->uniqueMatrixId()]);
                 $account->player_id = $player->id;
             }
 
@@ -72,8 +87,24 @@ class MatrixAccountController extends Controller
             $account->save();
 
             // Raum-Mitgliedschaften abgleichen.
-            $account->rooms()->sync($request->input('rooms', []));
+            // sync() löst keine Model-Events aus → Cache manuell invalidieren (MTX-08).
+            $account->rooms()->sync($newRooms);
+            Cache::forget(MatrixAccount::CORPORAL_CACHE_KEY);
         });
+
+        // Audit-Log (MTX-09): Neuanlage oder Aktualisierung protokollieren.
+        if ($isNew) {
+            AuditLogger::log('matrix.account.created', $account, [
+                'mxid'   => $account->mxid,
+                'active' => $active,
+                'rooms'  => $newRooms,
+            ]);
+        } else {
+            AuditLogger::log('matrix.account.updated', $account, [
+                'active' => ['von' => $wasActive, 'auf' => $active],
+                'rooms'  => $newRooms,
+            ]);
+        }
 
         return back()->with('status', "Matrix-Konto für {$player->full_name} gespeichert.");
     }
@@ -83,7 +114,13 @@ class MatrixAccountController extends Controller
      */
     public function destroy(Player $player): RedirectResponse
     {
-        $player->matrixAccount()->first()?->delete();
+        $account = $player->matrixAccount()->first();
+        $account?->delete();
+
+        // Audit-Log (MTX-09): Zugang-Entzug protokollieren.
+        if ($account) {
+            AuditLogger::log('matrix.account.revoked', $account);
+        }
 
         return back()->with('status', 'Matrix-Zugang wurde entzogen.');
     }

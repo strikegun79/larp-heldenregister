@@ -10,12 +10,14 @@
             </div>
 
             <div class="bg-white/70 border-2 border-[#5a3a22]/40 shadow sm:rounded-lg overflow-hidden">
+                <x-mobile.cards-or-table>
                 <table class="min-w-full divide-y divide-stone-200">
                     <thead class="bg-black/5">
                         <tr>
                             <th class="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase">Name</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase">Slug</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase">EP-Kosten</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase">Klassenband</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase">Helden</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase">Status</th>
                             <th class="px-6 py-3"></th>
@@ -24,11 +26,29 @@
                     <tbody class="divide-y divide-stone-200 text-stone-800">
                         @forelse ($classes as $class)
                             <tr class="{{ $class->disabled ? 'opacity-60' : '' }}">
-                                <td class="px-6 py-4">{{ $class->name }}</td>
-                                <td class="px-6 py-4 text-sm text-stone-500">{{ $class->slug }}</td>
-                                <td class="px-6 py-4">{{ $class->ep_cost }} EP</td>
-                                <td class="px-6 py-4">{{ $class->heroes_count }}</td>
-                                <td class="px-6 py-4">
+                                <td class="px-6 py-4" data-label="Name">{{ $class->name }}</td>
+                                <td class="px-6 py-4 text-sm text-stone-500" data-label="Slug">{{ $class->slug }}</td>
+                                <td class="px-6 py-4" data-label="EP-Kosten">{{ $class->ep_cost }} EP</td>
+                                <td class="px-6 py-4" data-label="Klassenband">
+                                    @php($ribbonUrl = $class->ribbonImageUrl())
+                                    <div class="flex items-center gap-2">
+                                        @if ($ribbonUrl)
+                                            <img src="{{ $ribbonUrl }}" alt="Band"
+                                                 class="h-10 w-auto object-cover rounded border border-stone-200"
+                                                 style="max-width:1.5rem" loading="lazy">
+                                        @elseif ($class->ribbon_color)
+                                            <span class="inline-block w-4 h-10 rounded"
+                                                  style="background:{{ $class->ribbon_color }}"></span>
+                                        @else
+                                            <span class="text-stone-400 text-xs">–</span>
+                                        @endif
+                                        @if ($class->ribbon_color)
+                                            <span class="text-xs text-stone-500 font-mono">{{ $class->ribbon_color }}</span>
+                                        @endif
+                                    </div>
+                                </td>
+                                <td class="px-6 py-4" data-label="Helden">{{ $class->heroes_count }}</td>
+                                <td class="px-6 py-4" data-label="Status">
                                     @if ($class->disabled)
                                         <span class="text-stone-500">deaktiviert</span>
                                     @else
@@ -36,7 +56,7 @@
                                     @endif
                                 </td>
                                 <td class="px-6 py-4 text-right">
-                                    <a href="{{ route('admin.hero-classes.edit', $class) }}" data-modal-url="{{ route('admin.hero-classes.edit', $class) }}" class="text-indigo-700 hover:underline">Bearbeiten</a>
+                                    <a href="{{ route('admin.hero-classes.edit', $class) }}" data-modal-url="{{ route('admin.hero-classes.edit', $class) }}" class="text-waldritter hover:underline">Bearbeiten</a>
                                 </td>
                             </tr>
                         @empty
@@ -44,6 +64,7 @@
                         @endforelse
                     </tbody>
                 </table>
+                </x-mobile.cards-or-table>
             </div>
 
             <br>

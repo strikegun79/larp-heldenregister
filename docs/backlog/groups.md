@@ -21,33 +21,41 @@ neues Datenmodell.
 - [x] 12 Tests (CRUD, Zugriffsschutz, AJAX-Formular, Cascade).
 **Abhängig von:** GRP-01.
 
-### GRP-03 · Mitglieder verwalten · ⏱ 3h · 🔲
+### GRP-03 · Mitglieder verwalten · ⏱ 3h · ✅
 **Beschreibung:** Helden/Spieler einer Gruppe zuordnen/entfernen, Rolle in der
 Gruppe (z. B. Anführer) optional.
 **Akzeptanzkriterien:**
-- [ ] Mitglieder hinzufügen/entfernen über Modal.
-- [ ] Optional Gruppenrolle (Anführer/Mitglied).
-- [ ] Tests.
+- [x] Mitglieder hinzufügen/entfernen über Modal.
+- [x] Optional Gruppenrolle (Anführer/Mitglied).
+- [x] Tests.
 **Abhängig von:** GRP-01.
 
-### GRP-04 · Gruppenansicht (Mitglieder, Helden) · ⏱ 3h · 🔲
+### GRP-04 · Gruppenansicht (Mitglieder, Helden) · ⏱ 3h · ✅
 **Beschreibung:** Detailseite einer Gruppe mit Mitgliedern und deren Helden.
 **Akzeptanzkriterien:**
-- [ ] Gruppen-Detail listet Mitglieder + Helden (verlinkt ins Helden-Modal).
-- [ ] Kennzahlen (Anzahl Mitglieder/Helden).
+- [x] Gruppen-Detail listet Mitglieder + Helden (verlinkt auf heroes.show).
+- [x] Kennzahlen (Anzahl Mitglieder), Spalten: Held, Spieler, Klasse(n), EP, Rolle, Beigetreten.
+- [x] Mobil als Karten (x-mobile.cards-or-table), Leerzustand mit CTA.
 
-### GRP-05 · Gruppe in Heldenansicht & öffentlicher Seite · ⏱ 2h · 🔲
+### GRP-05 · Gruppe in Heldenansicht & öffentlicher Seite · ⏱ 2h · ✅
 **Beschreibung:** Gruppenzugehörigkeit beim Helden anzeigen (auch öffentlich,
 ohne Realnamen).
 **Akzeptanzkriterien:**
-- [ ] Helden-Detail zeigt Gruppe(n).
-- [ ] Öffentliche Heldenseite zeigt Gruppennamen (keine Personendaten).
+- [x] Helden-Detail zeigt Gruppe(n) mit optionaler Rolle (mobil + Desktop).
+- [x] Öffentliche Heldenseite zeigt Gruppennamen (keine Personendaten).
+- [x] 5 Tests (Detail, Rolle, Leerzustand, öffentlich, kein Realname).
 **Abhängig von:** GRP-01, PUB-02.
 
-### GRP-06 · Gruppen-basierte Event-Buchung (optional) · ⏱ 4h · 🔲
+### GRP-06 · Gruppen-basierte Event-Buchung (optional) · ⏱ 4h · ✅
 **Beschreibung:** Mehrere Mitglieder einer Gruppe gesammelt zu einem Event anmelden.
 **Akzeptanzkriterien:**
-- [ ] Sammelanmeldung einer Gruppe (Auswahl der teilnehmenden Mitglieder).
-- [ ] Respektiert Kapazität/Warteliste je Einzelbuchung.
-- [ ] Tests.
+- [x] Sammelanmeldung einer Gruppe (Auswahl der teilnehmenden Mitglieder).
+- [x] Respektiert Kapazität/Warteliste je Einzelbuchung.
+- [x] Tests.
 **Abhängig von:** GRP-03, BOOK-02.
+
+> Umgesetzt: `GroupBookingController@create` + `@store`
+> (`GET/POST adventures/{adventure}/group-bookings`, `can:adventure.book`).
+> Formular-Partial `bookings/_create_group.blade.php` mit Checkbox-Auswahl
+> je Gruppen-Mitglied. Kapazität nach jeder Einzelbuchung neu geprüft.
+> Nicht-Admins sehen nur eigene Gruppen/Spieler (BOOK-10). 18 Tests.

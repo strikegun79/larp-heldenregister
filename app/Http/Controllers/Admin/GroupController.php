@@ -7,6 +7,7 @@ use App\Models\Group;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
 /**
@@ -22,9 +23,33 @@ class GroupController extends Controller
 
     public function index(): View
     {
-        $groups = Group::withCount('heroes')->orderBy('name')->get();
+        $groups = Group::withCount([
+            'heroes as heroes_count' => fn ($q) => $q->whereNull('died'),
+        ])
+        ->addSelect(DB::raw('(
+            SELECT COUNT(DISTINCT heroes.player_id)
+            FROM group_hero
+            JOIN heroes ON heroes.id = group_hero.hero_id
+            JOIN players ON players.id = heroes.player_id
+            WHERE group_hero.group_id = groups.id
+            AND heroes.died IS NULL
+            AND players.active = 1
+        ) as active_players_count'))
+        ->orderBy('name')
+        ->get();
 
         return view('admin.groups.index', compact('groups'));
+    }
+
+    /** GRP-04: Gruppendetail mit Mitgliedern und deren Helden. */
+    public function show(Group $group): View
+    {
+        $group->load(['heroes' => function ($q) {
+            $q->with(['classes', 'player', 'epTransactions'])
+              ->orderBy('character_name');
+        }]);
+
+        return view('admin.groups.show', compact('group'));
     }
 
     public function create(Request $request): View

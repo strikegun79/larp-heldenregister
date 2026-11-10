@@ -7,12 +7,9 @@
 
         <title>{{ config('app.name', 'Heldenregister') }}</title>
 
-        <link rel="icon" href="/favicon.ico">
+        <link rel="icon" href="{{ config('portal.favicon') }}">
 
-        <!-- Fonts -->
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Cinzel+Decorative:wght@700&family=Uncial+Antiqua&family=EB+Garamond:wght@400;500&display=swap" rel="stylesheet">
+        <!-- Fonts: lokal via Fontsource (kein Google CDN, DSGVO-konform) -->
 
         <!-- Scripts -->
         @vite(['resources/css/app.css', 'resources/js/app.js'])
@@ -26,6 +23,8 @@
                     <x-application-logo class="h-24 w-auto" />
                 </a>
             </div>
+
+            @stack('before-card')
 
             <div class="w-full sm:max-w-md mt-6 px-6 py-4 bg-white/70 border-2 border-[#5a3a22]/40 shadow-md overflow-hidden sm:rounded-lg">
                 {{ $slot }}

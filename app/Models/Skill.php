@@ -28,6 +28,12 @@ class Skill extends Model
         'perl_count' => 'integer',
     ];
 
+    /** SKILL-08: URL des Fertigkeits-Symbols; null wenn keins hochgeladen. */
+    public function getIconUrlAttribute(): ?string
+    {
+        return $this->icon ? '/storage/'.$this->icon : null;
+    }
+
     /**
      * Masterclass der Fertigkeit (Legacy: skills.masterclass).
      */
@@ -59,5 +65,32 @@ class Skill extends Model
     public function heroes(): BelongsToMany
     {
         return $this->belongsToMany(Hero::class)->withPivot('trained_at');
+    }
+
+    /**
+     * SKILL-10: Alle Voraussetzungen dieser Fertigkeit über alle Klassen hinweg.
+     * Enthält hero_class_id als Pivot. Für Zyklen-Prüfung und Admin-Übersicht.
+     */
+    public function prerequisites(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            Skill::class,
+            'skill_class_prerequisites',
+            'skill_id',
+            'required_skill_id'
+        )->withPivot('hero_class_id');
+    }
+
+    /**
+     * Fertigkeiten, für die diese Fertigkeit (in irgendeiner Klasse) Voraussetzung ist.
+     */
+    public function prerequisiteFor(): BelongsToMany
+    {
+        return $this->belongsToMany(
+            Skill::class,
+            'skill_class_prerequisites',
+            'required_skill_id',
+            'skill_id'
+        )->withPivot('hero_class_id');
     }
 }

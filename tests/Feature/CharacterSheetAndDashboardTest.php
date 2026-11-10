@@ -68,7 +68,7 @@ class CharacterSheetAndDashboardTest extends TestCase
         $this->actingAs($this->userWithRole(10)) // Admin
             ->get(route('dashboard'))
             ->assertOk()
-            ->assertSee('Kommende Events')
+            ->assertSee('Kommende Abenteuer')
             ->assertSee('Offene Anmeldungen');
     }
 

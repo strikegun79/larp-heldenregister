@@ -10,22 +10,13 @@ class TeamerSignup extends Model
 {
     use HasFactory;
 
-    /** Mögliche Teamer-Rollen, die der Projektleiter zuweisen kann. */
-    public const ROLES = [
-        'Spielleitung',
-        'Projektleiter',
-        'Teamer A',
-        'Teamer B',
-        'Teamer C',
-        'Bürokrat',
-    ];
-
     protected $fillable = [
         'adventure_id',
         'user_id',
-        'teamer_role',
+        'event_role_id',
         'allergien',
         'medikamente',
+        'health_data_consent_at',
         'kontakt_telefon',
         'agb',
         'leih_tunika',
@@ -39,6 +30,7 @@ class TeamerSignup extends Model
         'agb' => 'boolean',
         'leih_tunika' => 'boolean',
         'leih_waffe' => 'boolean',
+        'health_data_consent_at' => 'datetime',
         'approved_at' => 'datetime',
         'rejected_at' => 'datetime',
     ];
@@ -63,5 +55,10 @@ class TeamerSignup extends Model
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);
+    }
+
+    public function eventRole(): BelongsTo
+    {
+        return $this->belongsTo(EventRole::class);
     }
 }

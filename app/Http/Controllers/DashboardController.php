@@ -5,7 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\Adventure;
 use App\Models\Booking;
 use App\Models\EventStatus;
+use App\Models\Motd;
 use App\Models\Hero;
+use App\Models\NewsletterSubscription;
 use App\Models\Player;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -14,6 +16,7 @@ class DashboardController extends Controller
 {
     /**
      * Startseite. Für Admins zusätzlich Kennzahl-Karten (REP-06).
+     * Für alle Nutzer: nächstes Abenteuer + aktiver Held (UI-43).
      */
     public function index(Request $request): View
     {
@@ -21,8 +24,8 @@ class DashboardController extends Controller
 
         if ($request->user()->isAdmin()) {
             $metrics = [
-                'players' => Player::count(),
-                'heroes' => Hero::count(),
+                'players' => Player::where('active', true)->count(),
+                'heroes' => Hero::whereNull('died')->count(),
                 'upcoming_events' => Adventure::whereNotNull('start_at')
                     ->where('start_at', '>=', now())
                     ->where('event_status_id', '!=', EventStatus::CANCELLED)
@@ -31,6 +34,62 @@ class DashboardController extends Controller
             ];
         }
 
-        return view('dashboard', compact('metrics'));
+        $playerIds = $request->user()->players()->pluck('players.id');
+
+        // Bevorstehende Abenteuer, bei denen der User mindestens einen Spieler angemeldet hat
+        $upcomingBookedAdventures = $playerIds->isNotEmpty()
+            ? Adventure::whereNotNull('start_at')
+                ->where('start_at', '>=', now())
+                ->where('event_status_id', '!=', EventStatus::CANCELLED)
+                ->whereHas('bookings', fn ($q) => $q->whereIn('player_id', $playerIds)
+                    ->whereIn('status', ['bestaetigt', 'offen']))
+                ->with(['location', 'bookings' => fn ($q) => $q->whereIn('player_id', $playerIds)
+                    ->whereIn('status', ['bestaetigt', 'offen'])
+                    ->with(['player', 'role'])])
+                ->orderBy('start_at')
+                ->get()
+            : collect();
+
+        // Fallback: nächstes offenes Abenteuer (wenn keine eigenen Buchungen vorhanden)
+        $nextAdventure = $upcomingBookedAdventures->isEmpty()
+            ? Adventure::whereNotNull('start_at')
+                ->where('start_at', '>=', now())
+                ->where('event_status_id', '!=', EventStatus::CANCELLED)
+                ->orderBy('start_at')
+                ->with('location')
+                ->first()
+            : null;
+
+        // Plätze und Anmeldestatus für das Segment „Nächstes Abenteuer“ (einmal berechnet für mobil + Desktop).
+        $nextAdventureSlots = $nextAdventure ? [
+            'free' => $nextAdventure->freeSlots(),
+            'max' => (int) $nextAdventure->max_player,
+            'state' => $nextAdventure->registrationState(),
+        ] : null;
+
+        $activePlayers = $request->user()
+            ->players()
+            ->withPivot('self')
+            ->whereNotNull('active_hero_id')
+            ->with('activeHero.classes')
+            ->get();
+
+        $hasPlayers = $request->user()->players()->exists();
+
+        $profileComplete = $request->user()->hasCompleteAddress();
+
+        $hasBookings = $playerIds->isNotEmpty() && Booking::whereIn('player_id', $playerIds)->exists();
+
+        $showOnboarding = ! $profileComplete || ! $hasPlayers || ! $hasBookings;
+
+        // Banner ausblenden sobald ein Abo existiert – auch wenn noch nicht bestätigt
+        $showNewsletterHint = ! NewsletterSubscription::where('email', $request->user()->email)
+            ->whereNull('unsubscribed_at')
+            ->exists();
+
+        // Startseiten-Nachricht (nur wenn aktiv und im Zeitraum).
+        $motd = Motd::current();
+
+        return view('dashboard', compact('motd', 'metrics', 'nextAdventure', 'nextAdventureSlots', 'upcomingBookedAdventures', 'activePlayers', 'hasPlayers', 'profileComplete', 'hasBookings', 'showOnboarding', 'showNewsletterHint'));
     }
 }

@@ -75,6 +75,25 @@ E-Mail-Benachrichtigungen (Mailables/Notifications, via Queue).
 > `MAIL_PORT=1025` auf Mailpit zeigen; Registrierung/„Passwort vergessen"
 > auslösen und Betreff/Layout im Mailpit-UI (http://localhost:8025) prüfen.
 
+### NOTI-10 · Buchungsstatus-Benachrichtigungen an Teilnehmer · ⏱ 3h · ✅
+**Beschreibung:** Teilnehmer erhalten E-Mails bei Bestätigung, Ablehnung,
+Stornierung und Zahlungseingang ihrer Buchung.
+**Akzeptanzkriterien:**
+- [x] Mail bei Buchungsbestätigung (`approved_at` gesetzt): `BookingApproved`.
+- [x] Mail bei Ablehnung (Status `abgelehnt`): `BookingRejected`.
+- [x] Mail bei Stornierung der Buchung: `BookingCancelledParticipant`.
+- [x] Mail bei Zahlungseingang (`paid` true): `PaymentConfirmed`.
+- [x] Kein Versand beim Zurücknehmen (z. B. `approved_at` entfernen → kein Mail).
+- [x] Kein Versand wenn Spieler keine E-Mail-Adresse hat.
+- [x] Tests (8).
+
+> Umgesetzt: 4 neue Notification-Klassen (queued, mail-Channel, On-Demand via
+> `Notification::route('mail', $player->email)->notify(...)`). Ausgelöst in
+> `BookingController@approve`, `@reject`, `@destroy`, `@togglePaid`.
+> `BookingCancelledParticipant` ergänzt die bestehende `BookingCancelled`
+> (→ Projektleiter), da der Teilnehmer bisher nicht informiert wurde.
+> Tests: `BookingStatusNotificationTest` (8).
+
 ### NOTI-07 · In-App-Benachrichtigungen (optional) · ⏱ 4h · ✅
 **Beschreibung:** Datenbank-Notifications + Glocke in der Navigation.
 **Akzeptanzkriterien:**

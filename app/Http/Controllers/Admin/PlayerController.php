@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Player;
 use App\Models\User;
+use App\Services\AuditLogger;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -22,7 +23,9 @@ class PlayerController extends Controller
 
     public function index(Request $request): View
     {
-        $q = trim($request->string('q'));
+        $q          = trim($request->string('q'));
+        $hideAdults = $request->boolean('hide_adults');
+        $noHeroes   = $request->boolean('no_heroes');
         $sort = in_array($request->query('sort'), self::SORT_COLUMNS, true)
             ? $request->query('sort')
             : 'name';
@@ -30,13 +33,26 @@ class PlayerController extends Controller
 
         $query = Player::withTrashed()
             ->withCount('heroes')
-            ->with(['users', 'matrixAccount']);
+            ->with(['users', 'matrixAccount' => fn ($q) => $q->withCount('rooms')]);
 
         if ($q !== '') {
             $query->where(function ($builder) use ($q) {
                 $builder->where('name', 'like', "%{$q}%")
                     ->orWhere('lastname', 'like', "%{$q}%");
             });
+        }
+
+        // Nur Spieler unter 18 anzeigen (ohne Geburtsdatum werden eingeschlossen).
+        if ($hideAdults) {
+            $query->where(function ($b) {
+                $b->whereNull('dayofbirth')
+                  ->orWhereRaw('TIMESTAMPDIFF(YEAR, dayofbirth, CURDATE()) < 18');
+            });
+        }
+
+        // Nur Spieler ohne Helden anzeigen.
+        if ($noHeroes) {
+            $query->whereDoesntHave('heroes');
         }
 
         // heroes_count ist ein aggregiertes Alias → orderByRaw nötig.
@@ -48,7 +64,7 @@ class PlayerController extends Controller
 
         $players = $query->paginate(30)->withQueryString();
 
-        return view('admin.players.index', compact('players', 'q', 'sort', 'dir'));
+        return view('admin.players.index', compact('players', 'q', 'sort', 'dir', 'hideAdults', 'noHeroes'));
     }
 
     /**
@@ -77,6 +93,13 @@ class PlayerController extends Controller
             $player->users()->attach($data['user_id'], ['self' => false]);
         }
 
+        // M-3: Betreuer-Zuordnung protokollieren.
+        $caretaker = User::find($data['user_id']);
+        AuditLogger::log('player.caretaker_attached', $player, [
+            'caretaker_id' => $data['user_id'],
+            'caretaker' => $caretaker ? trim("{$caretaker->name} {$caretaker->lastname}") : $data['user_id'],
+        ]);
+
         return $this->respond($request, 'Betreuer zugeordnet.');
     }
 
@@ -86,6 +109,12 @@ class PlayerController extends Controller
     public function detachCaretaker(Request $request, Player $player, User $user): RedirectResponse|JsonResponse
     {
         $player->users()->detach($user->id);
+
+        // M-3: Betreuer-Entfernung protokollieren.
+        AuditLogger::log('player.caretaker_detached', $player, [
+            'caretaker_id' => $user->id,
+            'caretaker' => trim("{$user->name} {$user->lastname}"),
+        ]);
 
         return $this->respond($request, 'Betreuer entfernt.');
     }
@@ -131,6 +160,9 @@ class PlayerController extends Controller
 
         $player->update($data);
 
+        // M-3: Adressänderung durch Admin protokollieren.
+        AuditLogger::log('player.address_updated', $player);
+
         return $this->respond($request, 'Anschrift gespeichert.');
     }
 
@@ -155,6 +187,9 @@ class PlayerController extends Controller
             }
         }
 
+        // M-3: Spieler-Löschung protokollieren (vor delete, damit Label noch greift).
+        AuditLogger::log('player.deleted', $player);
+
         $player->delete();
 
         return redirect()->route('admin.players.index')
@@ -168,6 +203,9 @@ class PlayerController extends Controller
     {
         $player = Player::withTrashed()->findOrFail($id);
         $player->restore();
+
+        // M-3: Wiederherstellung protokollieren.
+        AuditLogger::log('player.restored', $player);
 
         return redirect()->route('admin.players.index')
             ->with('status', 'Spieler "'.$player->full_name.'" wurde wiederhergestellt.');

@@ -67,14 +67,14 @@ und ggf. EP-Korrektur.
 ### EP-05 · Perlenfarben-Lookup-CRUD · ⏱ 2h · ✅
 **Beschreibung:** `perl_colors` pflegbar machen (für Fertigkeits-Visualisierung).
 **Akzeptanzkriterien:**
-- [ ] Admin-CRUD für Perlenfarben (Code/Hex + Name).
-- [ ] Verwendung in Skill-Formular und Katalog.
+- [x] Admin-CRUD für Perlenfarben (Code/Hex + Name).
+- [x] Verwendung in Skill-Formular und Katalog.
 
 ### EP-06 · EP-Buchungsarten-Lookup-CRUD · ⏱ 2h · ✅
 **Beschreibung:** `ep_transaction_types` pflegbar (Beschreibung, is_credit).
 **Akzeptanzkriterien:**
-- [ ] Admin-CRUD; Schutz der system-genutzten IDs (10–70) vor Löschung.
-- [ ] Tests.
+- [x] Admin-CRUD; Schutz der system-genutzten IDs (10–70) vor Löschung.
+- [x] Tests.
 
 ### EP-07 · Perlen-Übersicht je Held (Bändchen-Liste) · ⏱ 3h · ✅
 **Beschreibung:** Aus gelernten Fertigkeiten die benötigten Perlen/Bändchen je
@@ -85,35 +85,49 @@ Farbe summieren (LARP-Repräsentation).
 
 ## Fertigkeiten-Baum (Vision: „Fertigkeiten-Baum pro Klasse")
 
-### SKILL-05 · Voraussetzungen-Datenmodell (Skill-Tree) · ⏱ 4h · 🔲
+### SKILL-05 · Voraussetzungen-Datenmodell (Skill-Tree) · ⏱ 4h · ✅
 **Beschreibung:** Fertigkeiten bauen aufeinander auf. Modellierung von
 Voraussetzungen (Skill → benötigt Skill(s) / Mindest-Level).
 **Akzeptanzkriterien:**
-- [ ] `skill_prerequisites` (skill_id, required_skill_id) oder Level-Schwelle.
-- [ ] Model-Relationen + Validierung (keine Zyklen).
-- [ ] Tests.
+- [x] `skill_prerequisites` (skill_id, required_skill_id) oder Level-Schwelle.
+- [x] Model-Relationen + Validierung (keine Zyklen).
+- [x] Tests.
 
-### SKILL-06 · Voraussetzungen beim Lernen prüfen · ⏱ 3h · 🔲
+> Umgesetzt: Migration `skill_prerequisites` (composite PK + FK cascadeOnDelete).
+> `Skill::prerequisites()` (BelongsToMany auf sich selbst) + `prerequisiteFor()`
+> (Inverse). Admin-Formular `_form.blade.php`: Checkbox-Liste aller anderen
+> Fertigkeiten, gruppiert nach Klasse. `SkillController`: `store`/`update` synct
+> Voraussetzungen; BFS-Zyklen-Prüfung in `hasCycle()` lehnt direkte und transitive
+> Kreisbezüge mit 422 ab. Tests: `SkillPrerequisiteTest` (9).
+
+### SKILL-06 · Voraussetzungen beim Lernen prüfen · ⏱ 3h · ✅
 **Beschreibung:** Eine Fertigkeit ist nur lernbar, wenn ihre Voraussetzungen
 beim Helden erfüllt sind.
 **Akzeptanzkriterien:**
-- [ ] Lern-Aktion (EP-03) lehnt Fertigkeiten ohne erfüllte Voraussetzungen ab.
-- [ ] UI zeigt gesperrte Fertigkeiten mit Begründung.
-- [ ] Tests (gesperrt/freigeschaltet).
+- [x] Lern-Aktion (EP-03) lehnt Fertigkeiten ohne erfüllte Voraussetzungen ab.
+- [x] UI zeigt gesperrte Fertigkeiten mit Begründung.
+- [x] Tests (gesperrt/freigeschaltet).
 **Abhängig von:** SKILL-05, EP-03.
 
-### SKILL-07 · Fertigkeiten-Baum-Visualisierung je Klasse · ⏱ 4h · 🔲
+### SKILL-07 · Fertigkeiten-Baum-Visualisierung je Klasse · ⏱ 4h · ✅
 **Beschreibung:** Grafische/strukturierte Darstellung des Skill-Trees pro Klasse
 (Level-Ebenen, Abhängigkeiten), inkl. „gelernt"-Markierung für einen Helden.
 **Akzeptanzkriterien:**
-- [ ] Baum-/Spalten-Ansicht je Klasse (nach Level/Abhängigkeit).
-- [ ] Für einen Helden: gelernt / lernbar / gesperrt farblich unterschieden.
-- [ ] Perlenfarbe je Knoten dargestellt.
+- [x] Baum-/Spalten-Ansicht je Klasse (nach Level/Abhängigkeit) — Toggle-Buttons „Baum"/„Stufen" im Fertigkeiten-Tab (Desktop + Mobile).
+- [x] Für einen Helden: gelernt (grün) / lernbar (amber) / gesperrt (grau+🔒) farblich unterschieden.
+- [x] Perlenfarbe je Knoten als farbiger Punkt dargestellt (classes.skills.perlColor eager-load).
+- [x] Partial `heroes/partials/_skill_columns.blade.php`; 6 Tests.
 **Abhängig von:** SKILL-05, SKILL-03.
 
 ### SKILL-08 · Fertigkeiten-Katalog mit Symbolen · ⏱ 3h · ✅
 **Beschreibung:** Übersichtsseite aller Fertigkeiten mit den passenden Symbolen ergänzen.
 **Akzeptanzkriterien:**
-- [] möglichkeit zum hochladen des Symbols für die Fertigkeit
-- [] nur png oder jpg
-- [] reduziere das Symbol beim hochladen auf 100x100 pixel
+- [x] möglichkeit zum hochladen des Symbols für die Fertigkeit
+- [x] nur png oder jpg
+- [x] reduziere das Symbol beim hochladen auf 100x100 pixel
+
+### SKILL-09 · Fertigkeiten-Katalog mit Heldenanzahl ✅
+**Beschreibung:** jede Fertigkeit hat eine Spalte mit der Anzahl der aktiven Helden die die Fertigkeit erworben haben
+**Akzeptanzkriterien:**
+- [x] nur aktive Helden, also keine verschollenden
+- [x] button daneben zum öffnen eines Modals zum anzeigen einer Liste der Helden/Spieler die die Fertigkeit erworben haben

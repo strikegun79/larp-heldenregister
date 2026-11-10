@@ -17,7 +17,7 @@
         <button type="button" class="ui button" onclick="clearSignaturePad()">Löschen</button>
         @if ($booking->signature)
             <form method="POST" action="{{ route('adventures.bookings.signature.destroy', [$adventure, $booking]) }}"
-                  data-refresh-modal class="inline" onsubmit="return confirm('Vorhandene Unterschrift entfernen?');">
+                  data-refresh-modal class="inline" data-confirm="Vorhandene Unterschrift entfernen?">
                 @csrf @method('DELETE')
                 <button type="submit" class="ui basic red button">Entfernen</button>
             </form>
@@ -30,6 +30,6 @@
 @if ($booking->signature)
     <div class="mt-3">
         <p class="text-sm text-stone-500">Aktuell hinterlegt:</p>
-        <img src="{{ $booking->signature }}" alt="Unterschrift" style="max-height:90px; border:1px solid #ccc; background:#fff">
+        <img src="{{ $booking->signature }}" alt="Unterschrift" style="max-height:90px; border:1px solid #ccc; background:#fff" loading="lazy">
     </div>
 @endif

@@ -89,3 +89,25 @@ Mobiltelefon
 „Wir benötigen diese Daten zur Durchführung der Veranstaltung, zur Kontaktaufnahme und für rechtlich erforderliche Einwilligungen.”
 - [x] Der Hinweis ist verständlich und nicht zu lang.
 - [x] Keine zusätzlichen Einwilligungs-Checkboxen, sofern nicht notwendig.
+
+### AUTH-13 Email-Benachrichtigungen toggeln im Profil · ✅
+**Beschreibung:** Email-Benachrichtigungen können im Profil eingestellt werden
+**Akzeptanzkriterien:**
+- [x] Jeden Benachrichtigungstyp soll nach den Rollen, die der Nutzer hat angezeigt werden.
+- [x] Die Benachrichtigungen sollen gruppiert angezeigt werden. Visuelle Trennung nach Rollen.
+- [x] Beeinflusst nicht die Benachrichtigungen im Portal für den Nutzer.
+
+> Umgesetzt: Neues Profil-Segment „E-Mail-Benachrichtigungen" gruppiert Toggles nach Rolle:
+> Teamer/Lehrmeister → `teamer_notifications`, Admin → `notify_new_user` (neue Spalte
+> via Migration `2026_07_01_082330_add_notify_new_user_to_users_table`).
+> `NewUserRegistered::via()` sendet Mail nur wenn `notify_new_user` true.
+> Portal-Benachrichtigungen (database-Channel) sind immer aktiv und unberührt.
+> Tests: `NotificationPreferencesTest` (5).
+
+### AUTH-14 Nutzer-Profil für Admin zugänglich machen · ✅
+**Beschreibung:** Admin kann Nutzer-Profil öffnen und änderungen vornehmen.
+**Akzeptanzkriterien:**
+- [x] Admin darf unter der Verwaltung auch das Nutzer-Profil öffnen und bearbeiten
+- [x] Das Profil öffnet man über einen Button in der Übersicht der Nutzer.
+- [x] Der Lösch-Button ist im Nutzer-Details-Modal (nicht in der Übersicht).
+- [x] Der Button in der Übersicht wurde zum Profil-Öffnen-Button umfunktioniert.

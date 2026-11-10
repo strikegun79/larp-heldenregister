@@ -4,6 +4,7 @@ namespace App\Notifications;
 
 use App\Models\User;
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Notifications\Notification;
 
@@ -11,18 +12,26 @@ use Illuminate\Notifications\Notification;
  * Benachrichtigung an die Admins, wenn sich ein neuer Benutzer registriert.
  * Ersetzt die Legacy-Smarty-Vorlage email_admin_new-user.tpl.
  */
-class NewUserRegistered extends Notification
+class NewUserRegistered extends Notification implements ShouldQueue
 {
     use Queueable;
 
     public function __construct(private readonly User $newUser) {}
 
     /**
+     * AUTH-13: Portal-Benachrichtigung (database) immer; E-Mail nur wenn notify_new_user = true.
+     *
      * @return array<int, string>
      */
     public function via(object $notifiable): array
     {
-        return ['mail', 'database'];
+        $channels = ['database'];
+
+        if ($notifiable->notify_new_user ?? true) {
+            $channels[] = 'mail';
+        }
+
+        return $channels;
     }
 
     /**

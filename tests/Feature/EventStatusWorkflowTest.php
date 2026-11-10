@@ -35,6 +35,7 @@ class EventStatusWorkflowTest extends TestCase
     {
         return [
             'name' => $adventure->name,
+            'kuerzel' => $adventure->kuerzel ?? 'JuFölarp',
             'start_at' => '2026-08-01 10:00',
             'end_at' => '2026-08-02 16:00',
             'event_status_id' => $statusId,

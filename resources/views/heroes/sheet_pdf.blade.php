@@ -29,9 +29,9 @@
         <tr><td class="k">EP-Saldo</td><td>{{ number_format($hero->ep_balance, 0, ',', '.') }} EP (erworben {{ number_format($hero->ep_total, 0, ',', '.') }}, ausgegeben {{ number_format($hero->ep_spent, 0, ',', '.') }})</td></tr>
     </table>
 
-    @if ($hero->description)
+    @if (filled($hero->description_plain))
         <h2>Steckbrief</h2>
-        <p>{{ $hero->description }}</p>
+        <div>{!! $hero->description_html !!}</div>
     @endif
 
     <h2>Fertigkeiten ({{ $hero->skills_count }})</h2>

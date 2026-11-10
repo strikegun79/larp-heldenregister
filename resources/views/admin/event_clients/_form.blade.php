@@ -11,6 +11,7 @@
         <input type="text" name="name" value="{{ old('name', $client->name) }}" required>
         <x-input-error :messages="$errors->get('name')" class="mt-2" />
     </div>
+
 </form>
 
 <div data-modal-actions hidden>

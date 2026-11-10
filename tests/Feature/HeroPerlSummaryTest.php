@@ -35,13 +35,17 @@ class HeroPerlSummaryTest extends TestCase
 
     private function skill(string $name, PerlColor $color): Skill
     {
-        return Skill::create([
+        $skill = Skill::create([
             'name' => $name,
             'level' => 1,
             'ep_costs' => 5,
             'hero_class_id' => $this->class->id,
             'perl_color_id' => $color->id,
         ]);
+        // skill_hero_class: Fertigkeit der Klasse zuordnen (Grundlage für perl_summary_by_class).
+        $skill->classes()->attach($this->class->id);
+
+        return $skill;
     }
 
     private function viewer(): User
@@ -108,6 +112,7 @@ class HeroPerlSummaryTest extends TestCase
     public function test_modal_shows_perl_summary_table(): void
     {
         $hero = Hero::factory()->create();
+        $hero->classes()->attach($this->class->id);
         $hero->skills()->attach($this->skill('Schwert', $this->red)->id, ['trained_at' => now()]);
         $hero->skills()->attach($this->skill('Schild', $this->red)->id, ['trained_at' => now()]);
 

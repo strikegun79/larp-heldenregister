@@ -75,6 +75,7 @@ class AdventureTest extends TestCase
     {
         $payload = [
             'name' => 'Tulderon-Zeltfreizeit',
+            'kuerzel' => 'JuFölarp',
             'start_at' => '2026-08-01 10:00',
             'end_at' => '2026-08-05 16:00',
             'event_status_id' => 30,
@@ -127,6 +128,7 @@ class AdventureTest extends TestCase
         $this->actingAs($admin)
             ->putJson(route('adventures.update', $adventure), [
                 'name' => 'Neuname',
+                'kuerzel' => 'JuFölarp',
                 'start_at' => '2026-08-01 10:00',
                 'end_at' => '2026-08-02 10:00',
                 'event_status_id' => 30,

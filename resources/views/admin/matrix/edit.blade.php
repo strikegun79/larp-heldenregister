@@ -20,14 +20,14 @@
 
                     <label class="flex items-center gap-2 text-stone-700">
                         <input type="checkbox" name="active" value="1"
-                               class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500"
+                               class="rounded border-gray-300 text-amber-600 shadow-sm focus:ring-amber-600"
                                @checked(old('active', $account?->active))>
                         Matrix-Zugang aktiv
                     </label>
 
                     <label class="flex items-center gap-2 text-stone-700">
                         <input type="checkbox" name="forbid_room_creation" value="1"
-                               class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500"
+                               class="rounded border-gray-300 text-amber-600 shadow-sm focus:ring-amber-600"
                                @checked(old('forbid_room_creation', $account?->forbid_room_creation ?? true))>
                         Raumerstellung verbieten
                     </label>
@@ -42,6 +42,11 @@
 
                     <div>
                         <span class="block font-medium text-stone-700 mb-2">Räume</span>
+                        @unless ($account)
+                            <p class="text-xs text-stone-400 mb-2">
+                                Vorauswahl: Räume mit "Standard: allow". Anpassung vor dem Speichern möglich.
+                            </p>
+                        @endunless
                         @if ($rooms->isEmpty())
                             <p class="text-sm text-stone-500">Keine verwalteten Räume vorhanden.</p>
                         @else
@@ -49,9 +54,15 @@
                                 @foreach ($rooms as $room)
                                     <label class="flex items-center gap-2 text-stone-700 text-sm">
                                         <input type="checkbox" name="rooms[]" value="{{ $room->roomid }}"
-                                               class="rounded border-gray-300 text-indigo-600 shadow-sm focus:ring-indigo-500"
+                                               class="rounded border-gray-300 text-amber-600 shadow-sm focus:ring-amber-600"
                                                @checked(in_array($room->roomid, old('rooms', $joined)))>
-                                        {{ $room->roomname }} <span class="text-stone-400">({{ $room->roomtype }})</span>
+                                        {{ $room->roomname }}
+                                        <span class="text-stone-400">({{ $room->roomtype }})</span>
+                                        @if ($room->default_allow)
+                                            <span class="ui green tiny label">Standard</span>
+                                        @elseif ($room->default_deny)
+                                            <span class="ui red tiny label">Gesperrt</span>
+                                        @endif
                                     </label>
                                 @endforeach
                             </div>
@@ -68,7 +79,7 @@
             @if ($account && ! $account->trashed())
                 <div class="bg-white/70 border-2 border-[#5a3a22]/40 shadow sm:rounded-lg p-6">
                     <form method="POST" action="{{ route('admin.players.matrix.destroy', $player) }}"
-                          onsubmit="return confirm('Matrix-Zugang wirklich entziehen?');">
+                          data-confirm="Matrix-Zugang wirklich entziehen?">
                         @csrf
                         @method('DELETE')
                         <x-danger-button>Matrix-Zugang entziehen</x-danger-button>

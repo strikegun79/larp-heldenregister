@@ -103,10 +103,11 @@ class HeroTest extends TestCase
             ->get(route('heroes.show', $hero), ['X-Requested-With' => 'XMLHttpRequest'])
             ->assertOk()
             ->assertSee('data-tab="overview"', false)
+            ->assertSee('data-tab="skills"', false)
             ->assertSee('data-tab="adventures"', false)
-            ->assertSee('data-tab="cls-1"', false)
             ->assertSee('data-tab="ep"', false)
-            ->assertSeeInOrder(['Übersicht', 'Abenteuer', 'Krieger', 'EP-Verlauf']);
+            ->assertSee('data-tab="manage"', false)
+            ->assertSeeInOrder(['Übersicht', 'Abenteuer', 'Krieger', 'EP-Verlauf', 'Verwalten']);
     }
 
     public function test_adventure_history_aggregates_type50_ep_with_adventures(): void
@@ -279,6 +280,19 @@ class HeroTest extends TestCase
             ->assertOk()
             ->assertSee('Heilerheld')
             ->assertDontSee('Krieger ohne Skill');
+    }
+
+    public function test_index_search_finds_heroes_by_siegel(): void
+    {
+        // HERO-25: Suche per Siegel (public_code)
+        $hero = Hero::factory()->create(['character_name' => 'Siegelritter', 'public_code' => 'AB2345']);
+        Hero::factory()->create(['character_name' => 'Anderer Held', 'public_code' => 'XY6789']);
+
+        $this->actingAs($this->userWithRole(20))
+            ->get(route('heroes.index', ['q' => 'AB2345']))
+            ->assertOk()
+            ->assertSee('Siegelritter')
+            ->assertDontSee('Anderer Held');
     }
 
     public function test_index_filter_by_class(): void

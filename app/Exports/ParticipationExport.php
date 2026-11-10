@@ -1,0 +1,345 @@
+<?php
+
+namespace App\Exports;
+
+use App\Models\Adventure;
+use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
+use PhpOffice\PhpSpreadsheet\Cell\DataType;
+use PhpOffice\PhpSpreadsheet\Spreadsheet;
+use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Style\Border;
+use PhpOffice\PhpSpreadsheet\Style\Fill;
+use PhpOffice\PhpSpreadsheet\Style\NumberFormat;
+use PhpOffice\PhpSpreadsheet\Writer\Xlsx;
+use Symfony\Component\HttpFoundation\StreamedResponse;
+
+class ParticipationExport
+{
+    // Spalten-Indizes (1-basiert)
+    private const COL_NAME        = 1;
+    private const COL_ROLE        = 2;
+    private const COL_LIST        = 3;
+    private const COL_STATUS      = 4;
+    private const COL_ERMAESS     = 5;
+    private const COL_BETRAG      = 6;
+    private const COL_PAID        = 7;
+    private const COL_ANWESEND    = 8;
+    private const COL_GUARDIAN    = 9;
+    private const COL_CONTACT     = 10;
+    private const COL_FOTO        = 11;
+    private const COL_VEGETARIER  = 12;
+    private const COL_LEIH_TUNIKA = 13;
+    private const COL_LEIH_WAFFE  = 14;
+    private const COL_NSC         = 15;
+    private const COL_ALLERGIEN   = 16;
+    private const COL_MEDIKAMENTE = 17;
+    private const COL_ERREICHBAR  = 18;
+
+    private const LAST_COL = self::COL_ERREICHBAR;
+
+    public function __construct(private readonly Adventure $adventure) {}
+
+    public function download(): StreamedResponse
+    {
+        $adventure = $this->adventure;
+        $adventure->load(['bookings.player.users', 'bookings.role', 'bookings.bookedBy', 'visits']);
+        $visitedIds = $adventure->visits->pluck('player_id');
+
+        $spreadsheet = new Spreadsheet;
+        $spreadsheet->getProperties()
+            ->setTitle('Belegungsreport ' . $adventure->name)
+            ->setCreator('Heldenregister')
+            ->setSubject($adventure->name);
+
+        // ── Blatt 1: Teilnehmerliste ──────────────────────────────────────────
+        $sheet = $spreadsheet->getActiveSheet();
+        $sheet->setTitle('Teilnehmer');
+
+        $this->buildParticipantSheet($sheet, $adventure, $visitedIds);
+
+        // ── Blatt 2: Kassenübersicht ──────────────────────────────────────────
+        $sheet2 = $spreadsheet->createSheet();
+        $sheet2->setTitle('Kassenübersicht');
+
+        $this->buildCashSheet($sheet2, $adventure);
+
+        $spreadsheet->setActiveSheetIndex(0);
+
+        $filename = 'belegung-' . $adventure->id . '-' . now()->format('Ymd') . '.xlsx';
+
+        return response()->streamDownload(function () use ($spreadsheet) {
+            $writer = new Xlsx($spreadsheet);
+            $writer->save('php://output');
+        }, $filename, [
+            'Content-Type' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'Cache-Control' => 'max-age=0',
+        ]);
+    }
+
+    private function buildParticipantSheet(
+        \PhpOffice\PhpSpreadsheet\Worksheet\Worksheet $sheet,
+        Adventure $adventure,
+        \Illuminate\Support\Collection $visitedIds,
+    ): void {
+        $lastColLetter = Coordinate::stringFromColumnIndex(self::LAST_COL);
+
+        // Titel
+        $sheet->mergeCells('A1:' . $lastColLetter . '1');
+        $sheet->setCellValue('A1', $adventure->name);
+        $sheet->getStyle('A1')->applyFromArray([
+            'font' => ['bold' => true, 'size' => 14],
+            'alignment' => ['horizontal' => Alignment::HORIZONTAL_LEFT],
+        ]);
+
+        $date = $adventure->start_at?->format('d.m.Y') ?? '—';
+        $sheet->mergeCells('A2:' . $lastColLetter . '2');
+        $sheet->setCellValue('A2', 'Datum: ' . $date . '   |   Teilnahmebeitrag: ' . number_format((float) $adventure->fee, 2, ',', '.') . ' €'
+            . ($adventure->fee_reduced !== null ? '   |   Ermäßigt: ' . number_format((float) $adventure->fee_reduced, 2, ',', '.') . ' €' : ''));
+        $sheet->getStyle('A2')->getFont()->setItalic(true)->setSize(10);
+
+        // Header-Zeile
+        $headerRow = 4;
+        $headerRange = 'A' . $headerRow . ':' . $lastColLetter . $headerRow;
+
+        $headers = [
+            self::COL_NAME        => 'Name',
+            self::COL_ROLE        => 'Rolle',
+            self::COL_LIST        => 'Liste',
+            self::COL_STATUS      => 'Status',
+            self::COL_ERMAESS     => 'Ermäßigung',
+            self::COL_BETRAG      => 'Betrag (€)',
+            self::COL_PAID        => 'Bezahlt',
+            self::COL_ANWESEND    => 'Anwesend',
+            self::COL_GUARDIAN    => 'Erziehungsberechtigte/r',
+            self::COL_CONTACT     => 'Kontaktnummer',
+            self::COL_FOTO        => 'Fotoerlaubnis',
+            self::COL_VEGETARIER  => 'Vegetarier',
+            self::COL_LEIH_TUNIKA => 'Leih-Tunika',
+            self::COL_LEIH_WAFFE  => 'Leih-Waffe',
+            self::COL_NSC         => 'NSC',
+            self::COL_ALLERGIEN   => 'Allergien',
+            self::COL_MEDIKAMENTE => 'Medikamente',
+            self::COL_ERREICHBAR  => 'Erreichbarkeit',
+        ];
+
+        foreach ($headers as $col => $label) {
+            $sheet->setCellValue(Coordinate::stringFromColumnIndex($col) . $headerRow, $label);
+        }
+
+        $sheet->getStyle($headerRange)->applyFromArray([
+            'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
+            'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '5a3a22']],
+            'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER, 'vertical' => Alignment::VERTICAL_CENTER],
+        ]);
+        $sheet->getRowDimension($headerRow)->setRowHeight(18);
+
+        // Datenzeilen
+        $row = $headerRow + 1;
+        foreach ($adventure->bookings as $b) {
+            $fee = ($b->ermaessigung && $adventure->fee_reduced !== null)
+                ? (float) $adventure->fee_reduced
+                : (float) $adventure->fee;
+
+            $guardian = $b->guardian();
+            $rowRange = 'A' . $row . ':' . $lastColLetter . $row;
+
+            $sheet->setCellValue(Coordinate::stringFromColumnIndex(self::COL_NAME)        . $row, $b->participant_name . ($b->is_guest ? ' (Gast)' : ''));
+            $sheet->setCellValue(Coordinate::stringFromColumnIndex(self::COL_ROLE)        . $row, $b->role?->description ?? '—');
+            $sheet->setCellValue(Coordinate::stringFromColumnIndex(self::COL_LIST)        . $row, $b->waitlisted ? 'Warteliste' : 'regulär');
+            $sheet->setCellValue(Coordinate::stringFromColumnIndex(self::COL_STATUS)      . $row, $b->status_label);
+            $sheet->setCellValue(Coordinate::stringFromColumnIndex(self::COL_ERMAESS)     . $row, $b->ermaessigung ? 'ja' : 'nein');
+            $sheet->setCellValue(Coordinate::stringFromColumnIndex(self::COL_BETRAG)      . $row, $fee);
+            $sheet->setCellValue(Coordinate::stringFromColumnIndex(self::COL_PAID)        . $row, $b->paid ? 'ja' : 'nein');
+            $sheet->setCellValue(Coordinate::stringFromColumnIndex(self::COL_ANWESEND)    . $row, $visitedIds->contains($b->player_id) ? 'ja' : 'nein');
+            $sheet->setCellValue(Coordinate::stringFromColumnIndex(self::COL_GUARDIAN)    . $row, $guardian ? trim($guardian->name . ' ' . $guardian->lastname) : '—');
+            $sheet->setCellValueExplicit(Coordinate::stringFromColumnIndex(self::COL_CONTACT)     . $row, (string) ($b->kontakt_telefon ?? '—'), DataType::TYPE_STRING);
+            $sheet->setCellValue(Coordinate::stringFromColumnIndex(self::COL_FOTO)        . $row, $b->fotoerlaubnis ? 'ja' : 'nein');
+            $sheet->setCellValue(Coordinate::stringFromColumnIndex(self::COL_VEGETARIER)  . $row, $b->vegetarier ? 'ja' : 'nein');
+            $sheet->setCellValue(Coordinate::stringFromColumnIndex(self::COL_LEIH_TUNIKA) . $row, $b->leih_tunika ? 'ja' : 'nein');
+            $sheet->setCellValue(Coordinate::stringFromColumnIndex(self::COL_LEIH_WAFFE)  . $row, $b->leih_waffe ? 'ja' : 'nein');
+            $sheet->setCellValue(Coordinate::stringFromColumnIndex(self::COL_NSC)         . $row, $b->nsc ? 'ja' : 'nein');
+            $sheet->setCellValueExplicit(Coordinate::stringFromColumnIndex(self::COL_ALLERGIEN)   . $row, (string) ($b->allergien ?? '—'), DataType::TYPE_STRING);
+            $sheet->setCellValueExplicit(Coordinate::stringFromColumnIndex(self::COL_MEDIKAMENTE) . $row, (string) ($b->medikamente ?? '—'), DataType::TYPE_STRING);
+            $sheet->setCellValueExplicit(Coordinate::stringFromColumnIndex(self::COL_ERREICHBAR)  . $row, (string) ($b->erreichbarkeit ?? '—'), DataType::TYPE_STRING);
+
+            // Betrag als Zahl formatieren
+            $sheet->getStyle(Coordinate::stringFromColumnIndex(self::COL_BETRAG) . $row)
+                ->getNumberFormat()->setFormatCode('#,##0.00 [$€-407]');
+
+            // Zebrastreifen
+            if ($row % 2 === 0) {
+                $sheet->getStyle($rowRange)->applyFromArray([
+                    'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => 'FDF6E3']],
+                ]);
+            }
+
+            // Warteliste grau
+            if ($b->waitlisted) {
+                $sheet->getStyle($rowRange)->getFont()->setColor(
+                    new \PhpOffice\PhpSpreadsheet\Style\Color('FF888888')
+                );
+            }
+
+            // Bezahlt grün markieren
+            if ($b->paid) {
+                $sheet->getStyle(Coordinate::stringFromColumnIndex(self::COL_PAID) . $row)->getFont()->setColor(
+                    new \PhpOffice\PhpSpreadsheet\Style\Color('FF1a7a1a')
+                );
+            }
+
+            $row++;
+        }
+
+        $lastDataRow = $row - 1;
+
+        // Rufnummer und Freitext als Text formatieren, damit Excel sie nicht als Zahl deutet
+        if ($lastDataRow > $headerRow) {
+            foreach ([self::COL_CONTACT, self::COL_ALLERGIEN, self::COL_MEDIKAMENTE, self::COL_ERREICHBAR] as $col) {
+                $letter = Coordinate::stringFromColumnIndex($col);
+                $sheet->getStyle($letter . ($headerRow + 1) . ':' . $letter . $lastDataRow)
+                    ->getNumberFormat()->setFormatCode(NumberFormat::FORMAT_TEXT);
+            }
+        }
+
+        // Rahmen um Datentabelle
+        if ($lastDataRow >= $headerRow) {
+            $tableRange = 'A' . $headerRow . ':' . $lastColLetter . $lastDataRow;
+            $sheet->getStyle($tableRange)->applyFromArray([
+                'borders' => [
+                    'allBorders' => ['borderStyle' => Border::BORDER_THIN, 'color' => ['rgb' => 'CCCCCC']],
+                    'outline'    => ['borderStyle' => Border::BORDER_MEDIUM, 'color' => ['rgb' => '5a3a22']],
+                ],
+            ]);
+        }
+
+        // Spaltenbreiten
+        $widths = [
+            self::COL_NAME        => 28,
+            self::COL_ROLE        => 14,
+            self::COL_LIST        => 12,
+            self::COL_STATUS      => 14,
+            self::COL_ERMAESS     => 13,
+            self::COL_BETRAG      => 13,
+            self::COL_PAID        => 10,
+            self::COL_ANWESEND    => 11,
+            self::COL_GUARDIAN    => 26,
+            self::COL_CONTACT     => 18,
+            self::COL_FOTO        => 14,
+            self::COL_VEGETARIER  => 12,
+            self::COL_LEIH_TUNIKA => 13,
+            self::COL_LEIH_WAFFE  => 12,
+            self::COL_NSC         => 8,
+            self::COL_ALLERGIEN   => 30,
+            self::COL_MEDIKAMENTE => 30,
+            self::COL_ERREICHBAR  => 30,
+        ];
+        foreach ($widths as $col => $width) {
+            $sheet->getColumnDimension(Coordinate::stringFromColumnIndex($col))->setWidth($width);
+        }
+
+        $sheet->freezePane('A' . ($headerRow + 1));
+        $sheet->setAutoFilter('A' . $headerRow . ':' . $lastColLetter . $headerRow);
+    }
+
+    private function buildCashSheet(
+        \PhpOffice\PhpSpreadsheet\Worksheet\Worksheet $sheet,
+        Adventure $adventure,
+    ): void {
+        $summary = $adventure->paymentSummary();
+        $payable = $adventure->bookings->where('waitlisted', false);
+
+        // Titel
+        $sheet->mergeCells('A1:C1');
+        $sheet->setCellValue('A1', 'Kassenübersicht – ' . $adventure->name);
+        $sheet->getStyle('A1')->applyFromArray([
+            'font' => ['bold' => true, 'size' => 13],
+        ]);
+
+        $sheet->setCellValue('A2', 'Stand: ' . now()->format('d.m.Y H:i'));
+        $sheet->getStyle('A2')->getFont()->setItalic(true)->setSize(9);
+
+        // Abschnitt: Beitragsübersicht
+        $row = 4;
+        $this->cashSectionHeader($sheet, $row, 'Beitragsübersicht');
+        $row++;
+
+        $this->cashRow($sheet, $row++, 'Regulärer Beitrag', number_format((float) $adventure->fee, 2, ',', '.') . ' €');
+        if ($adventure->fee_reduced !== null) {
+            $this->cashRow($sheet, $row++, 'Ermäßigter Beitrag', number_format((float) $adventure->fee_reduced, 2, ',', '.') . ' €');
+        }
+
+        $row++;
+
+        // Abschnitt: Teilnehmer
+        $this->cashSectionHeader($sheet, $row, 'Teilnehmer');
+        $row++;
+
+        $this->cashRow($sheet, $row++, 'Reguläre Plätze', $payable->count());
+        $this->cashRow($sheet, $row++, 'Warteliste', $adventure->bookings->where('waitlisted', true)->count());
+        if ($adventure->fee_reduced !== null) {
+            $this->cashRow($sheet, $row++, 'davon ermäßigt', $summary['erm_count']);
+            $this->cashRow($sheet, $row++, 'davon regulär', $summary['total_count'] - $summary['erm_count']);
+        }
+        $this->cashRow($sheet, $row++, 'Anwesend', $adventure->visits->count());
+
+        $row++;
+
+        // Abschnitt: Zahlungsstatus
+        $this->cashSectionHeader($sheet, $row, 'Zahlungsstatus');
+        $row++;
+
+        $this->cashRow($sheet, $row++, 'Bezahlt (Anzahl)', $summary['paid_count']);
+        $this->cashRow($sheet, $row++, 'Offen (Anzahl)', $summary['total_count'] - $summary['paid_count']);
+
+        $row++;
+
+        // Abschnitt: Beträge
+        $this->cashSectionHeader($sheet, $row, 'Beträge');
+        $row++;
+
+        $this->cashAmountRow($sheet, $row++, 'Eingegangen', $summary['paid_amount'], '1a7a1a');
+        $this->cashAmountRow($sheet, $row++, 'Noch offen', $summary['open_amount'], $summary['open_amount'] > 0 ? 'b45309' : '888888');
+        $this->cashAmountRow($sheet, $row++, 'Gesamt erwartet', $summary['total_amount'], '000000', true);
+
+        // Spaltenbreiten
+        $sheet->getColumnDimension('A')->setWidth(28);
+        $sheet->getColumnDimension('B')->setWidth(20);
+        $sheet->getColumnDimension('C')->setWidth(5);
+    }
+
+    private function cashSectionHeader(\PhpOffice\PhpSpreadsheet\Worksheet\Worksheet $sheet, int $row, string $label): void
+    {
+        $sheet->mergeCells('A' . $row . ':B' . $row);
+        $sheet->setCellValue('A' . $row, $label);
+        $sheet->getStyle('A' . $row . ':B' . $row)->applyFromArray([
+            'font' => ['bold' => true, 'color' => ['rgb' => 'FFFFFF']],
+            'fill' => ['fillType' => Fill::FILL_SOLID, 'startColor' => ['rgb' => '5a3a22']],
+        ]);
+        $sheet->getRowDimension($row)->setRowHeight(16);
+    }
+
+    private function cashRow(\PhpOffice\PhpSpreadsheet\Worksheet\Worksheet $sheet, int $row, string $label, mixed $value): void
+    {
+        $sheet->setCellValue('A' . $row, $label);
+        $sheet->setCellValue('B' . $row, $value);
+        $sheet->getStyle('A' . $row)->getFont()->setBold(false);
+        $sheet->getStyle('B' . $row)->getAlignment()->setHorizontal(Alignment::HORIZONTAL_LEFT);
+    }
+
+    private function cashAmountRow(
+        \PhpOffice\PhpSpreadsheet\Worksheet\Worksheet $sheet,
+        int $row,
+        string $label,
+        float $amount,
+        string $colorRgb,
+        bool $bold = false,
+    ): void {
+        $sheet->setCellValue('A' . $row, $label);
+        $sheet->setCellValue('B' . $row, $amount);
+        $sheet->getStyle('B' . $row)->getNumberFormat()->setFormatCode('#,##0.00 [$€-407]');
+        $sheet->getStyle('B' . $row)->getFont()->setColor(new \PhpOffice\PhpSpreadsheet\Style\Color('FF' . $colorRgb));
+        if ($bold) {
+            $sheet->getStyle('A' . $row . ':B' . $row)->getFont()->setBold(true);
+        }
+    }
+}

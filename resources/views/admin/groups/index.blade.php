@@ -13,28 +13,36 @@
             </div>
 
             <div class="bg-white/70 border-2 border-[#5a3a22]/40 shadow sm:rounded-lg overflow-hidden">
+                <x-mobile.cards-or-table>
                 <table class="min-w-full divide-y divide-stone-200">
                     <thead class="bg-black/5">
                         <tr>
                             <th class="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase">Name</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase">Beschreibung</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase">Helden</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase">Spieler</th>
                             <th class="px-6 py-3"></th>
                         </tr>
                     </thead>
                     <tbody class="divide-y divide-stone-200 text-stone-800">
                         @forelse ($groups as $group)
                             <tr>
-                                <td class="px-6 py-4 font-medium">{{ $group->name }}</td>
-                                <td class="px-6 py-4 text-stone-500">{{ Str::limit($group->description, 60) ?: '—' }}</td>
-                                <td class="px-6 py-4">{{ $group->heroes_count }}</td>
+                                <td class="px-6 py-4 font-medium" data-label="Name">{{ $group->name }}</td>
+                                <td class="px-6 py-4 text-stone-500" data-label="Beschreibung">{{ Str::limit($group->description, 60) ?: '—' }}</td>
+                                <td class="px-6 py-4" data-label="Helden">{{ $group->heroes_count }}</td>
+                                <td class="px-6 py-4" data-label="Spieler">{{ $group->active_players_count }}</td>
                                 <td class="px-6 py-4 text-right">
                                     <div class="flex items-center justify-end gap-3">
+                                        <a href="{{ route('admin.groups.show', $group) }}"
+                                           class="text-waldritter hover:underline">Details</a>
+                                        <a href="{{ route('admin.groups.members', $group) }}"
+                                           data-modal-url="{{ route('admin.groups.members', $group) }}"
+                                           class="text-waldritter hover:underline">Mitglieder</a>
                                         <a href="{{ route('admin.groups.edit', $group) }}"
                                            data-modal-url="{{ route('admin.groups.edit', $group) }}"
-                                           class="text-indigo-700 hover:underline">Bearbeiten</a>
+                                           class="text-waldritter hover:underline">Bearbeiten</a>
                                         <form method="POST" action="{{ route('admin.groups.destroy', $group) }}"
-                                              onsubmit="return confirm('Gruppe „{{ $group->name }}“ löschen?{{ $group->heroes_count ? ' '.$group->heroes_count.' Held(en) werden ausgetragen.' : '' }}');">
+                                              data-confirm="Gruppe „{{ $group->name }}” löschen?{{ $group->heroes_count ? ' '.$group->heroes_count.' Held(en) werden ausgetragen.' : '' }}">
                                             @csrf @method('DELETE')
                                             <button type="submit" class="text-red-600 hover:underline">Löschen</button>
                                         </form>
@@ -42,10 +50,11 @@
                                 </td>
                             </tr>
                         @empty
-                            <tr><td colspan="4" class="px-6 py-4 text-stone-500">Noch keine Gruppen.</td></tr>
+                            <tr><td colspan="5" class="px-6 py-4 text-stone-500">Noch keine Gruppen.</td></tr>
                         @endforelse
                     </tbody>
                 </table>
+                </x-mobile.cards-or-table>
             </div>
 
             <div class="mt-4">

@@ -4,16 +4,21 @@ use App\Http\Controllers\Admin;
 use App\Http\Controllers\AdventureController;
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\BookingController;
+use App\Http\Controllers\GroupBookingController;
 use App\Http\Controllers\EpTransactionController;
 use App\Http\Controllers\HeroClassController;
 use App\Http\Controllers\HeroController;
+use App\Http\Controllers\HeroGalleryController;
 use App\Http\Controllers\HeroSkillController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PlayerController;
 use App\Http\Controllers\ProfileController;
+use App\Http\Controllers\PublicHeroController;
 use App\Http\Controllers\SignatureController;
 use App\Http\Controllers\SkillController;
 use App\Http\Controllers\SkilltreeController;
+use App\Http\Controllers\NewsletterSubscriptionController;
+use App\Http\Controllers\SurveyController;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -31,8 +36,54 @@ Route::get('/', function () {
     return redirect()->route('dashboard');
 });
 
+// Dynamisches PWA-Manifest mit Portal-Konfiguration (config/portal.php).
+Route::get('/manifest.webmanifest', function () {
+    $data = [
+        'name'             => config('portal.name'),
+        'short_name'       => config('portal.short_name'),
+        'description'      => config('portal.description'),
+        'start_url'        => '/',
+        'display'          => 'standalone',
+        'orientation'      => 'portrait-primary',
+        'theme_color'      => config('portal.theme_color'),
+        'background_color' => config('portal.background_color'),
+        'lang'             => 'de',
+        'icons'            => config('portal.icons'),
+        'screenshots'      => [],
+        'categories'       => ['entertainment', 'games'],
+    ];
+    return response()->json($data)
+        ->header('Content-Type', 'application/manifest+json');
+})->name('manifest');
+
+// Datenschutzerklärung (DSGVO Art. 13) – öffentlich, ohne Auth.
+Route::get('/datenschutz', fn () => view('datenschutz'))->name('datenschutz');
+
+// Allgemeine Teilnahmebedingungen – öffentlich, ohne Auth.
+Route::get('/agb', fn () => view('agb'))->name('agb');
+
+// Newsletter Double-Opt-in-Bestätigung (öffentlich, kein Login nötig).
+Route::get('/newsletter/bestaetigen/{token}', [NewsletterSubscriptionController::class, 'confirm'])->name('newsletter.confirm');
+
+// PUB-02/03/06: Öffentliche Helden-Routen mit Rate-Limiting (30/min je IP).
+Route::middleware('throttle:public-hero')->group(function () {
+    // PUB-03: Suchformular + Weiterleitung (vor {code}-Route registriert).
+    Route::get('/h', [PublicHeroController::class, 'index'])->name('public.hero.search');
+    Route::get('/h/search', [PublicHeroController::class, 'search'])->name('public.hero.search.go');
+
+    // PUB-02: Öffentliches Helden-Profil.
+    Route::get('/h/{code}', [PublicHeroController::class, 'show'])->name('public.hero');
+});
+
 Route::get('/dashboard', [\App\Http\Controllers\DashboardController::class, 'index'])
     ->middleware(['auth', 'verified'])->name('dashboard');
+
+// Funktionsübersicht & Hilfe für Vorstand/Auftraggeber (INFO-01).
+Route::get('/info', fn () => view('info'))->middleware(['auth', 'verified'])->name('info');
+
+// Versionsverlauf aus CHANGELOG.md (nur für angemeldete Nutzer).
+Route::get('/versionsverlauf', \App\Http\Controllers\ChangelogController::class)
+    ->middleware(['auth', 'verified'])->name('changelog');
 
 // Alle Portal-Routen erfordern Login UND verifizierte E-Mail-Adresse (AUTH-07/AUTH-02).
 Route::middleware(['auth', 'verified'])->group(function () {
@@ -40,16 +91,29 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('notifications/{notification}/read', [NotificationController::class, 'read'])->name('notifications.read');
     Route::post('notifications/read-all', [NotificationController::class, 'readAll'])->name('notifications.read-all');
 
+    // Klickzähler für Links der Startseiten-Nachricht (MOTD).
+    Route::post('motd/{motd}/click', [\App\Http\Controllers\MotdClickController::class, 'store'])
+        ->middleware('throttle:30,1')->name('motd.click');
+
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
+    Route::get('/profile/export-data', [ProfileController::class, 'exportData'])->name('profile.export-data');
 
-    // Fertigkeiten-Katalog (SKILL-04).
+    // Newsletter-Opt-in/-out aus dem Profil heraus.
+    Route::post('/newsletter/abonnieren', [NewsletterSubscriptionController::class, 'subscribe'])->name('newsletter.subscribe');
+    Route::post('/newsletter/abbestellen', [NewsletterSubscriptionController::class, 'unsubscribe'])->name('newsletter.unsubscribe');
+
+    // UI-45: Datensparmodus manuell umschalten.
+    Route::post('/save-data/toggle', function (\Illuminate\Http\Request $request) {
+        $current = $request->session()->get('save_data', false);
+        $request->session()->put('save_data', ! $current);
+        return back();
+    })->name('save-data.toggle');
+
+    // Fertigkeiten-Katalog (SKILL-04) + aktive Helden-Modal (SKILL-09).
     Route::get('skills', [SkillController::class, 'index'])->name('skills.catalog');
-
-    // Eigenständige EP-Buchung (EP-02).
-    Route::get('ep-booking', [EpTransactionController::class, 'create'])->name('ep.create');
-    Route::post('ep-booking', [EpTransactionController::class, 'storeManual'])->name('ep.store-manual');
+    Route::get('skills/{skill}/heroes', [SkillController::class, 'heroes'])->name('skills.catalog.heroes');
 
     Route::resource('players', PlayerController::class);
     // Aktiven Helden eines Spielers setzen (HERO-07).
@@ -57,18 +121,34 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Avatar-Upload und -Löschen im Avatar-Tab (PLAY-11).
     Route::post('players/{player}/avatar', [PlayerController::class, 'uploadAvatar'])->name('players.avatar');
     Route::delete('players/{player}/avatar', [PlayerController::class, 'deleteAvatar'])->name('players.avatar.destroy');
+    // Gesundheitsdaten zum Vorausfüllen der Anmeldung (PLAY-15).
+    Route::get('players/{player}/health-prefill', [PlayerController::class, 'healthPrefill'])->name('players.health-prefill');
     Route::resource('heroes', HeroController::class);
     // Verschollen-Status umschalten (HERO-08).
     Route::patch('heroes/{hero}/missing', [HeroController::class, 'toggleMissing'])->name('heroes.missing');
+    // Willkommens-Mail an Eltern/Betreuer senden (nur Bürokrat/Admin).
+    Route::post('heroes/{hero}/welcome-mail', [HeroController::class, 'sendWelcomeMail'])
+        ->middleware('can:heldenregister.edit')
+        ->name('heroes.welcome-mail');
+    Route::patch('heroes/{hero}/visibility', [HeroController::class, 'toggleVisibility'])->name('heroes.visibility');
+    Route::patch('heroes/{hero}/searchable', [HeroController::class, 'toggleSearchable'])->name('heroes.searchable');
+    Route::get('heroes/{hero}/player-edit', [HeroController::class, 'playerEditForm'])->name('heroes.player-edit');
+    Route::get('heroes/{hero}/steckbrief', [HeroController::class, 'steckbrief'])->name('heroes.steckbrief');
+    Route::patch('heroes/{hero}/player-info', [HeroController::class, 'updatePlayerInfo'])->name('heroes.player-info');
     // EP-Buchung für einen Helden (HERO-12).
     Route::post('heroes/{hero}/ep', [EpTransactionController::class, 'store'])->name('heroes.ep.store');
     // EP-Konto-Auszug als CSV (REP-02).
     Route::get('heroes/{hero}/ep-export', [HeroController::class, 'epExport'])->name('heroes.ep.export');
     // Charakterbogen als PDF (REP-05).
     Route::get('heroes/{hero}/sheet-pdf', [HeroController::class, 'sheetPdf'])->name('heroes.sheet-pdf');
+    // Heldenausweis-PDF für Besitzer/Bürokrat (PUB-10).
+    Route::get('heroes/{hero}/ausweis', [HeroController::class, 'ausweisDownload'])->name('heroes.ausweis');
     // Helden-Foto Upload + Löschen (HERO-22).
     Route::post('heroes/{hero}/photo', [HeroController::class, 'uploadPhoto'])->name('heroes.photo');
     Route::delete('heroes/{hero}/photo', [HeroController::class, 'deletePhoto'])->name('heroes.photo.destroy');
+    // Galerie (HERO-24).
+    Route::post('heroes/{hero}/gallery', [HeroGalleryController::class, 'store'])->name('heroes.gallery.store');
+    Route::delete('heroes/{hero}/gallery/{image}', [HeroGalleryController::class, 'destroy'])->name('heroes.gallery.destroy');
     // Fertigkeit erlernen (HERO-14) / aberkennen (HERO-16).
     Route::post('heroes/{hero}/skills', [HeroSkillController::class, 'store'])->name('heroes.skills.store');
     Route::delete('heroes/{hero}/skills/{skill}', [HeroSkillController::class, 'destroy'])->name('heroes.skills.destroy');
@@ -88,15 +168,24 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::get('adventures/{adventure}/manage', [AdventureController::class, 'manage'])->name('adventures.manage');
     // Teilnehmerliste als PDF (ADV-17).
     Route::get('adventures/{adventure}/participants-pdf', [AdventureController::class, 'participantsPdf'])->name('adventures.participants-pdf');
-    // Teilnahme-/Belegungsreport als CSV (REP-03).
-    Route::get('adventures/{adventure}/participation-csv', [AdventureController::class, 'participationCsv'])->name('adventures.participation-csv');
+    // Teilnahme-/Belegungsreport als Excel (REP-03).
+    Route::get('adventures/{adventure}/participation-xlsx', [AdventureController::class, 'participationXlsx'])->name('adventures.participation-xlsx');
     // Event absagen (ADV-07).
     Route::patch('adventures/{adventure}/cancel', [AdventureController::class, 'cancel'])->name('adventures.cancel');
+    // Wartelistenmodus umschalten (ADV-WL).
+    Route::patch('adventures/{adventure}/toggle-waitlist-mode', [AdventureController::class, 'toggleWaitlistMode'])->name('adventures.toggle-waitlist-mode');
+    // Taskmanager-Einstellungen speichern (TASK-01).
+    Route::put('adventures/{adventure}/tasks', [AdventureController::class, 'saveTasks'])->name('adventures.tasks.save');
 
     // Anmeldungen zu einem Abenteuer.
     // Anmeldeformular als Modal-Unteransicht (ADV-15).
     Route::get('adventures/{adventure}/bookings/create', [BookingController::class, 'create'])
         ->name('adventures.bookings.create');
+    // Gruppen-Anmeldung (GRP-06).
+    Route::get('adventures/{adventure}/group-bookings/create', [GroupBookingController::class, 'create'])
+        ->name('adventures.group-bookings.create');
+    Route::post('adventures/{adventure}/group-bookings', [GroupBookingController::class, 'store'])
+        ->name('adventures.group-bookings.store');
     // Gast-Anmeldung (ADV-21).
     Route::get('adventures/{adventure}/bookings/create-guest', [BookingController::class, 'createGuest'])
         ->name('adventures.bookings.create-guest');
@@ -109,12 +198,16 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('adventures.bookings.edit');
     Route::put('adventures/{adventure}/bookings/{booking}', [BookingController::class, 'update'])
         ->name('adventures.bookings.update');
-    // Anmeldung bestätigen/freigeben – Toggle approved_at (BOOK-05).
-    Route::patch('adventures/{adventure}/bookings/{booking}/approval', [BookingController::class, 'approve'])
-        ->name('adventures.bookings.approval');
+    // Anmeldebestätigung erneut senden (BOOK-05).
+    Route::post('adventures/{adventure}/bookings/{booking}/resend-confirmation', [BookingController::class, 'resendConfirmation'])
+        ->name('adventures.bookings.resend-confirmation');
+    Route::patch('adventures/{adventure}/bookings/{booking}/confirm-teamer', [BookingController::class, 'confirmTeamer'])
+        ->name('adventures.bookings.confirm-teamer');
     // Anmeldung ablehnen – Toggle (ADV-18).
     Route::patch('adventures/{adventure}/bookings/{booking}/rejection', [BookingController::class, 'reject'])
         ->name('adventures.bookings.rejection');
+    Route::patch('adventures/{adventure}/bookings/{booking}/move-to-waitlist', [BookingController::class, 'moveToWaitlist'])
+        ->name('adventures.bookings.move-to-waitlist');
     // Unterschrift bei Teilnahme erfassen (ADV-17).
     Route::get('adventures/{adventure}/bookings/{booking}/signature', [SignatureController::class, 'edit'])
         ->name('adventures.bookings.signature.edit');
@@ -127,6 +220,17 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('adventures.bookings.payment');
     Route::delete('adventures/{adventure}/bookings/{booking}', [BookingController::class, 'destroy'])
         ->name('adventures.bookings.destroy');
+    Route::patch('adventures/{adventure}/bookings/{booking}/reinstate', [BookingController::class, 'reinstate'])
+        ->name('adventures.bookings.reinstate');
+    Route::post('adventures/{adventure}/bookings/{booking}/request-reinstate', [BookingController::class, 'requestReinstate'])
+        ->name('adventures.bookings.request-reinstate');
+    Route::get('adventures/{adventure}/bookings/{booking}/approve-reinstate', [BookingController::class, 'approveReinstate'])
+        ->name('adventures.bookings.approve-reinstate')->withoutMiddleware(['auth', 'verified']);
+    Route::get('adventures/{adventure}/bookings/{booking}/reject-reinstate', [BookingController::class, 'rejectReinstate'])
+        ->name('adventures.bookings.reject-reinstate')->withoutMiddleware(['auth', 'verified']);
+    // Fotoerlaubnis widerrufen/erteilen – Art. 7 DSGVO (N-2).
+    Route::patch('adventures/{adventure}/bookings/{booking}/fotoerlaubnis', [BookingController::class, 'toggleFotoerlaubnis'])
+        ->name('adventures.bookings.fotoerlaubnis');
 
     // Teilnahme/Check-in erfassen (BOOK-08).
     Route::put('adventures/{adventure}/attendance', [AttendanceController::class, 'update'])
@@ -140,10 +244,18 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::patch('adventures/{adventure}/bookings/{booking}/deregister', [AttendanceController::class, 'deregister'])
         ->name('adventures.bookings.deregister');
 
+    // Rollen- & DSGVO-Übersicht (für alle Teamer-Rollen sichtbar).
+    Route::prefix('admin')->name('admin.')->middleware('can:roles.view')->group(function () {
+        Route::get('roles', [Admin\RoleController::class, 'index'])->name('roles.index');
+    });
+
+    // Admin-Übersicht: alle Rollen mit mind. einem Verwaltungsbereich (NAV-01).
+    Route::prefix('admin')->name('admin.')->middleware('can:admin.panel')->group(function () {
+        Route::get('/', [Admin\AdminController::class, 'index'])->name('index');
+    });
+
     // Verwaltung (Portal-Administration, Berechtigung portal.manage).
     Route::prefix('admin')->name('admin.')->middleware('can:portal.manage')->group(function () {
-        Route::get('/', [Admin\AdminController::class, 'index'])->name('index');
-        Route::get('roles', [Admin\RoleController::class, 'index'])->name('roles.index');
         // Nutzerverwaltung erfordert zusätzlich users.manage.
         Route::middleware('can:users.manage')->group(function () {
             Route::get('users', [Admin\UserController::class, 'index'])->name('users.index');
@@ -151,6 +263,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
             Route::post('users', [Admin\UserController::class, 'store'])->name('users.store');
             Route::get('users/{user}/edit', [Admin\UserController::class, 'edit'])->name('users.edit');
             Route::put('users/{user}', [Admin\UserController::class, 'update'])->name('users.update');
+            Route::get('users/{user}/profile', [Admin\UserController::class, 'showProfile'])->name('users.profile');
+            Route::patch('users/{user}/profile', [Admin\UserController::class, 'updateProfile'])->name('users.profile.update');
+            Route::patch('users/{user}/password', [Admin\UserController::class, 'updatePassword'])->name('users.password.update');
+            Route::patch('users/{user}/notifications', [Admin\UserController::class, 'updateNotifications'])->name('users.notifications.update');
             Route::delete('users/{id}', [Admin\UserController::class, 'destroy'])->name('users.destroy');
             Route::patch('users/{id}/restore', [Admin\UserController::class, 'restore'])->name('users.restore');
         });
@@ -167,7 +283,35 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('players/{player}/caretakers', [Admin\PlayerController::class, 'attachCaretaker'])->name('players.caretakers.store');
         Route::delete('players/{player}/caretakers/{user}', [Admin\PlayerController::class, 'detachCaretaker'])->name('players.caretakers.destroy');
 
-        // Helden-Klassen-Lookup pflegen (HERO-05).
+        Route::get('audit-logs', [Admin\AuditLogController::class, 'index'])->name('audit-logs.index');
+
+        Route::get('settings', [Admin\SettingController::class, 'index'])->name('settings.index');
+        Route::put('settings', [Admin\SettingController::class, 'update'])->name('settings.update');
+
+        // Startseiten-Nachrichten (MOTD) mit Verlauf.
+        Route::resource('motd', Admin\MotdController::class)->except('show');
+        Route::post('motd/{motd}/activate', [Admin\MotdController::class, 'activate'])->name('motd.activate');
+        Route::post('motd/{motd}/deactivate', [Admin\MotdController::class, 'deactivate'])->name('motd.deactivate');
+        Route::post('motd/{motd}/duplicate', [Admin\MotdController::class, 'duplicate'])->name('motd.duplicate');
+
+        // Matrix-Konto-Provisionierung pro Spieler (corporal User-DB).
+        Route::get('players/{player}/matrix', [Admin\MatrixAccountController::class, 'edit'])->name('players.matrix.edit');
+        Route::put('players/{player}/matrix', [Admin\MatrixAccountController::class, 'update'])->name('players.matrix.update');
+        Route::delete('players/{player}/matrix', [Admin\MatrixAccountController::class, 'destroy'])->name('players.matrix.destroy');
+
+        // Matrix-Räume verwalten (MTX-05).
+        Route::resource('matrix/rooms', Admin\MatrixRoomController::class)
+            ->parameters(['rooms' => 'room'])
+            ->names('matrix.rooms');
+    });
+
+    // Veranstaltungs-Lookups (ROLE-10): portal.manage (Admin) ODER events.admin (Projektleitung).
+    Route::prefix('admin')->name('admin.')->middleware('can:events.admin-access')->group(function () {
+        // Taskmanager-Standardkonfiguration (TASK-01).
+        Route::get('task-manager', [Admin\TaskManagerController::class, 'index'])->name('task-manager.index');
+        Route::get('task-manager/{taskTypeDefinition}/edit', [Admin\TaskManagerController::class, 'edit'])->name('task-manager.edit');
+        Route::put('task-manager/{taskTypeDefinition}', [Admin\TaskManagerController::class, 'update'])->name('task-manager.update');
+
         // Veranstaltungsorte pflegen (ADV-08).
         Route::get('locations', [Admin\LocationController::class, 'index'])->name('locations.index');
         Route::get('locations/create', [Admin\LocationController::class, 'create'])->name('locations.create');
@@ -203,17 +347,19 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('event-statuses/{eventStatus}/edit', [Admin\EventStatusController::class, 'edit'])->name('event-statuses.edit');
         Route::put('event-statuses/{eventStatus}', [Admin\EventStatusController::class, 'update'])->name('event-statuses.update');
         Route::delete('event-statuses/{eventStatus}', [Admin\EventStatusController::class, 'destroy'])->name('event-statuses.destroy');
+    });
 
-        Route::get('audit-logs', [Admin\AuditLogController::class, 'index'])->name('audit-logs.index');
-
-        Route::get('settings', [Admin\SettingController::class, 'index'])->name('settings.index');
-        Route::put('settings', [Admin\SettingController::class, 'update'])->name('settings.update');
-
+    // Helden-Konfiguration (ROLE-10): portal.manage (Admin) ODER heroes.admin (Spielleiter).
+    Route::prefix('admin')->name('admin.')->middleware('can:heroes.admin-access')->group(function () {
+        // Helden-Klassen-Lookup pflegen (HERO-05).
         Route::get('hero-classes', [Admin\HeroClassController::class, 'index'])->name('hero-classes.index');
         Route::get('hero-classes/create', [Admin\HeroClassController::class, 'create'])->name('hero-classes.create');
         Route::post('hero-classes', [Admin\HeroClassController::class, 'store'])->name('hero-classes.store');
         Route::get('hero-classes/{heroClass}/edit', [Admin\HeroClassController::class, 'edit'])->name('hero-classes.edit');
         Route::put('hero-classes/{heroClass}', [Admin\HeroClassController::class, 'update'])->name('hero-classes.update');
+        // Klassenband-Bild hochladen / löschen (162×600 px).
+        Route::post('hero-classes/{heroClass}/ribbon', [Admin\HeroClassController::class, 'storeRibbon'])->name('hero-classes.ribbon.store');
+        Route::delete('hero-classes/{heroClass}/ribbon', [Admin\HeroClassController::class, 'destroyRibbon'])->name('hero-classes.ribbon.destroy');
 
         // Fertigkeiten-Verwaltung (SKILL-02 + SKILL-03).
         Route::get('skills', [Admin\SkillController::class, 'index'])->name('skills.index');
@@ -222,6 +368,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('skills/{skill}/edit', [Admin\SkillController::class, 'edit'])->name('skills.edit');
         Route::put('skills/{skill}', [Admin\SkillController::class, 'update'])->name('skills.update');
         Route::delete('skills/{skill}', [Admin\SkillController::class, 'destroy'])->name('skills.destroy');
+        // Fertigkeits-Symbol (SKILL-08).
+        Route::post('skills/{skill}/icon', [Admin\SkillIconController::class, 'store'])->name('skills.icon.store');
+        Route::delete('skills/{skill}/icon', [Admin\SkillIconController::class, 'destroy'])->name('skills.icon.destroy');
+        // Aktive Helden je Fertigkeit – Modal (SKILL-09).
+        Route::get('skills/{skill}/heroes', [Admin\SkillController::class, 'heroes'])->name('skills.heroes');
 
         // Perlenfarben pflegen (EP-05).
         Route::get('perl-colors', [Admin\PerlColorController::class, 'index'])->name('perl-colors.index');
@@ -238,11 +389,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('ep-transaction-types/{epTransactionType}/edit', [Admin\EpTransactionTypeController::class, 'edit'])->name('ep-transaction-types.edit');
         Route::put('ep-transaction-types/{epTransactionType}', [Admin\EpTransactionTypeController::class, 'update'])->name('ep-transaction-types.update');
         Route::delete('ep-transaction-types/{epTransactionType}', [Admin\EpTransactionTypeController::class, 'destroy'])->name('ep-transaction-types.destroy');
-
-        // Matrix-Konto-Provisionierung pro Spieler (corporal User-DB).
-        Route::get('players/{player}/matrix', [Admin\MatrixAccountController::class, 'edit'])->name('players.matrix.edit');
-        Route::put('players/{player}/matrix', [Admin\MatrixAccountController::class, 'update'])->name('players.matrix.update');
-        Route::delete('players/{player}/matrix', [Admin\MatrixAccountController::class, 'destroy'])->name('players.matrix.destroy');
     });
 
     // Teamer-Anmeldungen (ADV-27): Teamer/Lehrmeister melden sich zu Events an.
@@ -264,16 +410,91 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('adventures.teamer.approve');
     Route::patch('adventures/{adventure}/teamer-signup/{signup}/reject', [\App\Http\Controllers\TeamerSignupController::class, 'reject'])
         ->name('adventures.teamer.reject');
+    Route::post('adventures/{adventure}/teamer-signup/{signup}/resend-confirmation', [\App\Http\Controllers\TeamerSignupController::class, 'resendConfirmation'])
+        ->name('adventures.teamer.resend-confirmation');
 
-    // Gruppen-CRUD (GRP-02): eigene Berechtigung groups.manage (Admin, Bürokrat, Spielleiter).
+    // PUB-10: Heldenausweis-Generator (ROLE-10): heldenregister.edit (Bürokrat) ODER heroes.admin (Spielleiter).
+    Route::prefix('admin')->name('admin.')->middleware('can:id-cards.access')->group(function () {
+        Route::get('id-cards', [Admin\IdCardController::class, 'index'])->name('id-cards.index');
+        Route::post('id-cards/generate', [Admin\IdCardController::class, 'generate'])->name('id-cards.generate');
+        Route::get('id-cards/{hero}/reprint', [Admin\IdCardController::class, 'reprint'])->name('id-cards.reprint');
+        Route::delete('id-cards/{code}', [Admin\IdCardController::class, 'destroy'])->name('id-cards.destroy');
+    });
+
+    // Code einem Helden zuweisen (heldenregister.edit).
+    Route::patch('heroes/{hero}/assign-code', [Admin\IdCardController::class, 'assign'])
+        ->middleware('can:heldenregister.edit')
+        ->name('heroes.assign-code');
+
+    // Gruppen-CRUD (GRP-02) + Mitglieder (GRP-03): Berechtigung groups.manage.
     Route::prefix('admin')->name('admin.')->middleware('can:groups.manage')->group(function () {
         Route::get('groups', [Admin\GroupController::class, 'index'])->name('groups.index');
         Route::get('groups/create', [Admin\GroupController::class, 'create'])->name('groups.create');
         Route::post('groups', [Admin\GroupController::class, 'store'])->name('groups.store');
+        Route::get('groups/{group}', [Admin\GroupController::class, 'show'])->name('groups.show');
         Route::get('groups/{group}/edit', [Admin\GroupController::class, 'edit'])->name('groups.edit');
         Route::put('groups/{group}', [Admin\GroupController::class, 'update'])->name('groups.update');
         Route::delete('groups/{group}', [Admin\GroupController::class, 'destroy'])->name('groups.destroy');
+        // GRP-03: Mitglieder verwalten.
+        Route::get('groups/{group}/members', [Admin\GroupMemberController::class, 'index'])->name('groups.members');
+        Route::post('groups/{group}/members', [Admin\GroupMemberController::class, 'store'])->name('groups.members.store');
+        Route::delete('groups/{group}/members/{hero}', [Admin\GroupMemberController::class, 'destroy'])->name('groups.members.destroy');
     });
+});
+
+// Umfrage-System (SURV-01): Öffentliche Links ohne Login.
+Route::prefix('umfrage')->name('survey.')->group(function () {
+    Route::get('{token}', [SurveyController::class, 'start'])->name('start');
+    Route::get('{token}/formular', [SurveyController::class, 'show'])->name('show');
+    Route::post('{token}/formular', [SurveyController::class, 'submit'])->name('submit');
+    Route::get('{token}/danke', [SurveyController::class, 'danke'])->name('danke');
+});
+
+// Admin: Newsletter verwalten (newsletter.manage).
+Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified', 'can:newsletter.manage'])->group(function () {
+    Route::get('newsletter', [Admin\NewsletterController::class, 'index'])->name('newsletter.index');
+    Route::get('newsletter/erstellen', [Admin\NewsletterController::class, 'create'])->name('newsletter.create');
+    Route::post('newsletter', [Admin\NewsletterController::class, 'store'])->name('newsletter.store');
+    Route::get('newsletter/{newsletter}', [Admin\NewsletterController::class, 'show'])->name('newsletter.show');
+    Route::get('newsletter/{newsletter}/bearbeiten', [Admin\NewsletterController::class, 'edit'])->name('newsletter.edit');
+    Route::patch('newsletter/{newsletter}', [Admin\NewsletterController::class, 'update'])->name('newsletter.update');
+    Route::delete('newsletter/{newsletter}', [Admin\NewsletterController::class, 'destroy'])->name('newsletter.destroy');
+    Route::post('newsletter/{newsletter}/duplizieren', [Admin\NewsletterController::class, 'duplicate'])->name('newsletter.duplicate');
+    Route::post('newsletter/{newsletter}/versenden', [Admin\NewsletterController::class, 'send'])->name('newsletter.send');
+    Route::get('newsletter/abonnenten-anzahl', [Admin\NewsletterController::class, 'subscriberCount'])->name('newsletter.subscriber-count');
+    Route::post('newsletter/bild-hochladen', [Admin\NewsletterController::class, 'uploadImage'])->name('newsletter.upload-image');
+});
+
+// Admin: Umfragen verwalten (survey.view = einsehen, survey.admin = alles).
+Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified'])->group(function () {
+    Route::get('surveys', [Admin\SurveyAdminController::class, 'index'])->name('surveys.index');
+    Route::get('surveys/create', [Admin\SurveyAdminController::class, 'create'])->name('surveys.create');
+    Route::post('surveys', [Admin\SurveyAdminController::class, 'store'])->name('surveys.store');
+    Route::get('surveys/{survey}/results', [Admin\SurveyAdminController::class, 'results'])->name('surveys.results');
+    Route::post('surveys/{survey}/send', [Admin\SurveyAdminController::class, 'send'])->name('surveys.send');
+    Route::post('surveys/{survey}/import-bookings', [Admin\SurveyAdminController::class, 'importBookings'])->name('surveys.import-bookings');
+    Route::post('surveys/{survey}/links/{link}/send', [Admin\SurveyAdminController::class, 'sendLink'])->name('surveys.links.send');
+    Route::delete('surveys/{survey}/links/{link}', [Admin\SurveyAdminController::class, 'destroyLink'])->name('surveys.links.destroy');
+    Route::get('surveys/{survey}/links/{link}/response', [Admin\SurveyAdminController::class, 'showResponse'])->name('surveys.links.response');
+    Route::get('surveys/{survey}/export/pdf', [Admin\SurveyAdminController::class, 'exportPdf'])->name('surveys.export.pdf');
+    Route::patch('surveys/{survey}/close', [Admin\SurveyAdminController::class, 'close'])->name('surveys.close');
+
+    // Vorlagenverwaltung: nur survey.admin.
+    Route::resource('surveys/templates', Admin\SurveyTemplateController::class)
+        ->names('surveys.templates')
+        ->parameters(['templates' => 'template']);
+});
+
+// Verarbeitungsverzeichnis (DSGVO Art. 30): portal.manage (Bürokrat/Admin).
+Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified', 'can:portal.manage'])->group(function () {
+    Route::get('processing-activities', [Admin\ProcessingActivityController::class, 'index'])
+        ->name('processing-activities.index');
+});
+
+// Datenpannen-Protokoll (DSGVO Art. 33): nur data-breach.manage (Admin).
+Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified', 'can:data-breach.manage'])->group(function () {
+    Route::resource('data-breaches', Admin\DataBreachController::class)
+        ->parameters(['data-breaches' => 'dataBreach']);
 });
 
 require __DIR__.'/auth.php';

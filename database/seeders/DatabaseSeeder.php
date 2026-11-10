@@ -20,6 +20,7 @@ class DatabaseSeeder extends Seeder
             LocationSeeder::class,
             EventLookupSeeder::class,
             SettingsSeeder::class,
+            TaskTypeDefinitionSeeder::class,
         ]);
     }
 }

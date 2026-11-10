@@ -27,8 +27,10 @@ class Booking extends Model
         'nsc',
         'agb',
         'paid',
+        'ermaessigung',
         'allergien',
         'medikamente',
+        'health_data_consent_at',
         'erreichbarkeit',
         'kontakt_telefon',
         'signature',
@@ -36,14 +38,16 @@ class Booking extends Model
         'approved_at',
         'status',
         'absence_reason',
+        'reinstate_requested',
     ];
 
     /** Anmelde-Status (ADV-18) → Anzeige-Label. */
     public const STATUS_LABELS = [
-        'offen' => 'offen',
+        'offen'      => 'offen',
         'bestaetigt' => 'bestätigt',
-        'abgelehnt' => 'abgelehnt',
+        'abgelehnt'  => 'abgelehnt',
         'abgemeldet' => 'abgemeldet',
+        'storniert'  => 'storniert',
     ];
 
     /** Abwesenheitsgründe bei „abgemeldet". */
@@ -61,8 +65,13 @@ class Booking extends Model
         'nsc' => 'boolean',
         'agb' => 'boolean',
         'paid' => 'boolean',
+        'ermaessigung' => 'boolean',
         'waitlisted' => 'boolean',
+        'reinstate_requested' => 'boolean',
         'approved_at' => 'datetime',
+        'health_data_consent_at' => 'datetime',
+        // DSGVO Art. 9: Unterschrift = biometrisches Datum → AES-256 via APP_KEY
+        'signature' => 'encrypted',
     ];
 
     /** Gast-Anmeldung ohne hinterlegten Spieler (ADV-21). */
@@ -130,7 +139,11 @@ class Booking extends Model
      */
     public function guardian(): ?User
     {
-        return $this->bookedBy ?? $this->player?->users->first();
+        $bookedBy = $this->relationLoaded('bookedBy')
+            ? $this->bookedBy
+            : $this->bookedBy()->first();
+
+        return $bookedBy ?? $this->player?->users->first();
     }
 
     /**
@@ -163,8 +176,30 @@ class Booking extends Model
         return $this->guardian()?->city;
     }
 
+    /**
+     * Zu zahlender Beitrag: ermäßigter Preis wenn Checkbox gesetzt und Veranstaltung
+     * einen Ermäßigungspreis hat, sonst Standardpreis.
+     */
+    public function effectiveFee(): float
+    {
+        $adventure = $this->relationLoaded('adventure') ? $this->adventure : $this->adventure()->first();
+
+        if ($this->ermaessigung && $adventure?->fee_reduced !== null) {
+            return (float) $adventure->fee_reduced;
+        }
+
+        return (float) ($adventure?->fee ?? 0);
+    }
+
     public function isApproved(): bool
     {
         return $this->approved_at !== null;
+    }
+
+    public function auditLabel(): string
+    {
+        $adventure = $this->relationLoaded('adventure') ? $this->adventure : $this->adventure()->first();
+
+        return $this->participant_name.' @ '.($adventure?->name ?? 'Abenteuer#'.$this->adventure_id);
     }
 }

@@ -61,6 +61,10 @@ return [
             'options' => extension_loaded('pdo_mysql') ? array_filter([
                 PDO::MYSQL_ATTR_SSL_CA => env('MYSQL_ATTR_SSL_CA'),
             ]) : [],
+            // Verhindert Tabellen-Locks während des Backup-Dumps (InnoDB).
+            'dump' => [
+                'useSingleTransaction' => true,
+            ],
         ],
 
         // Legacy-Datenbank (Plain-PHP-Portal larp_buerokrat), nur lesend

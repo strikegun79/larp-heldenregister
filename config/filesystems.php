@@ -44,6 +44,12 @@ return [
             'throw' => false,
         ],
 
+        // Backup-Zielverzeichnis (außerhalb des Web-Roots; per BACKUP_DISK_PATH konfigurierbar).
+        'backup' => [
+            'driver' => 'local',
+            'root'   => env('BACKUP_DISK_PATH', storage_path('app/backups')),
+        ],
+
         's3' => [
             'driver' => 's3',
             'key' => env('AWS_ACCESS_KEY_ID'),

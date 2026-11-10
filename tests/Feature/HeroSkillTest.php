@@ -142,4 +142,52 @@ class HeroSkillTest extends TestCase
             ->deleteJson(route('heroes.skills.destroy', [$hero, $skill]))
             ->assertStatus(422);
     }
+
+    // --- SKILL-06: Voraussetzungen ---
+
+    public function test_cannot_learn_skill_with_unmet_prerequisites(): void
+    {
+        $hero = $this->heroWithEp(50);
+        $prereq = $this->skill(5);
+        $skill  = $this->skill(10);
+        $skill->prerequisites()->attach($prereq->id);
+
+        $this->actingAs($this->userWithRole(20))
+            ->postJson(route('heroes.skills.store', $hero), ['skill_id' => $skill->id])
+            ->assertStatus(422)
+            ->assertJsonFragment(['message' => "Voraussetzungen nicht erfüllt: {$prereq->name}."]);
+
+        $this->assertFalse($hero->skills()->whereKey($skill->id)->exists());
+    }
+
+    public function test_can_learn_skill_once_prerequisites_are_met(): void
+    {
+        $hero   = $this->heroWithEp(50);
+        $prereq = $this->skill(5);
+        $skill  = $this->skill(10);
+        $skill->prerequisites()->attach($prereq->id);
+
+        // Voraussetzung erfüllen
+        $hero->skills()->attach($prereq->id, ['trained_at' => now()]);
+        $hero->epTransactions()->create(['ep_transaction_type_id' => 20, 'ep_count' => 5]);
+
+        $this->actingAs($this->userWithRole(20))
+            ->postJson(route('heroes.skills.store', $hero), ['skill_id' => $skill->id])
+            ->assertOk()
+            ->assertJson(['refresh_modal' => true]);
+
+        $this->assertTrue($hero->skills()->whereKey($skill->id)->exists());
+    }
+
+    public function test_skill_without_prerequisites_is_always_learnable(): void
+    {
+        $hero  = $this->heroWithEp(20);
+        $skill = $this->skill(5); // keine Voraussetzungen
+
+        $this->actingAs($this->userWithRole(20))
+            ->postJson(route('heroes.skills.store', $hero), ['skill_id' => $skill->id])
+            ->assertOk();
+
+        $this->assertTrue($hero->skills()->whereKey($skill->id)->exists());
+    }
 }

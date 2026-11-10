@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Adventure;
 use App\Models\Booking;
+use App\Services\AuditLogger;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -52,7 +53,7 @@ class SignatureController extends Controller
         }
 
         $data = $request->validate([
-            'signature' => ['required', 'string', 'starts_with:data:image/png;base64,', 'max:2000000'],
+            'signature' => ['required', 'string', 'starts_with:data:image/png;base64,', 'max:200000'],
         ]);
 
         // Unterschrift = Check-in-Bestätigung (ADV-19): zugleich anwesend setzen.
@@ -71,13 +72,15 @@ class SignatureController extends Controller
     }
 
     /**
-     * Unterschrift entfernen.
+     * Unterschrift entfernen (DSGVO Art. 17 – biometrische Daten auf Anfrage löschen).
      */
     public function destroy(Request $request, Adventure $adventure, Booking $booking): JsonResponse|RedirectResponse
     {
         abort_unless($booking->adventure_id === $adventure->id, 404);
 
         $booking->update(['signature' => null]);
+
+        AuditLogger::log('booking.signature_deleted', $booking, ['adventure' => $adventure->name]);
 
         $message = 'Unterschrift entfernt.';
 

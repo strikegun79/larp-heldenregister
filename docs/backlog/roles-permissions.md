@@ -30,18 +30,20 @@ dass alle UI-Pfade (Events anlegen via `events.edit`) für sie funktionieren.
 - [x] Feature-Tests: Projektleitung kann Events anlegen/bearbeiten, buchen, Helden ansehen.
 - [x] Dashboard-/Nav-Sichtbarkeit für Projektleitung korrekt.
 
-### ROLE-06 · Permission-gestützte Sichtbarkeit für Profil/Spieler entscheiden · ⏱ 3h · 🔲
+### ROLE-06 · Permission-gestützte Sichtbarkeit für Profil/Spieler entscheiden · ⏱ 3h · ✅
 **Beschreibung:** `profile.view`/`player.view` sind aktuell nicht per Middleware
 erzwungen (Selbstbedienung). Entscheiden + ggf. konsistent gaten.
 **Akzeptanzkriterien:**
-- [ ] Entscheidung dokumentiert (bewusst ungegated vs. gegated).
-- [ ] Falls gegated: Middleware + Tests; neue Nutzer (Teilnehmer) behalten Zugriff.
+- [x] Entscheidung: **bewusst ungegated** — `players.index` liefert nur eigene Spieler via `$request->user()->players()`; `profile.edit` zeigt nur den eigenen Nutzer. Kein zusätzliches Gate nötig.
+- [x] `players.show` ist via `PlayerPolicy::view()` (Eigentümerprüfung) gesichert.
+- [x] Dokumentiert in `PlayerController::__construct()`.
 
-### ROLE-07 · Blade-Direktive/Helper für Mehrfach-Permission-Checks · ⏱ 2h · 🔲
+### ROLE-07 · Blade-Direktive/Helper für Mehrfach-Permission-Checks · ⏱ 2h · ✅
 **Beschreibung:** Wiederkehrende `@can('a') || @can('b')`-Muster kapseln.
 **Akzeptanzkriterien:**
-- [ ] `@canany`-Nutzung vereinheitlicht oder eigener Helper `@haspermission`.
-- [ ] `adventure.access`-Logik zentral, nicht dupliziert.
+- [x] `@canany` in `_bookings.blade.php` bereits korrekt genutzt; Aktionen-Spalte mit `$canAnyBookingAction` (PHP-Variable) für `canAny(['approve-bookings', 'manage-payments', 'adventure.modify', 'adventure.cancel'])` gecacht → Spalte wird für Nutzer ohne Rechte ausgeblendet.
+- [x] `adventure.access`-Gate zentralisiert in `AuthServiceProvider` (nicht dupliziert); Richtlinie für neue zusammengesetzte Gates dokumentiert.
+- [x] Kein Custom-`@haspermission`-Helper nötig — Laravel `@can` / `@canany` reicht.
 
 ### ROLE-08 · Rollenänderungen im Audit-Log erfassen · ⏱ 3h · ✅
 **Beschreibung:** Wer hat wem wann welche Rolle gegeben.

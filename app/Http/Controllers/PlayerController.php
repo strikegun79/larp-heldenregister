@@ -8,12 +8,15 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class PlayerController extends Controller
 {
     public function __construct()
     {
+        // ROLE-06: Kein player.view-Middleware nötig — index() liefert nur eigene
+        // Spieler ($request->user()->players()); show() nutzt PlayerPolicy::view().
         $this->middleware('auth');
     }
 
@@ -53,7 +56,7 @@ class PlayerController extends Controller
 
     public function store(Request $request): RedirectResponse|JsonResponse
     {
-        $data = $this->validatePlayer($request);
+        $data = $this->playerData($request);
 
         $player = Player::create($data);
         // Spieler dem Benutzer zuordnen (Legacy: user2player, self-Flag).
@@ -137,7 +140,16 @@ class PlayerController extends Controller
     public function show(Player $player, Request $request): View
     {
         $this->authorize('view', $player);
-        $player->load(['heroes.classes', 'heroes.epTransactions.type', 'visits.adventure']);
+        $player->load([
+            'heroes.classes',
+            'heroes.epTransactions.type',
+            'visits.adventure',
+            // N-2: aktive Buchungen für Fotoerlaubnis-Verwaltung.
+            'bookings' => fn ($q) => $q
+                ->with('adventure:id,name,start_at')
+                ->whereNotIn('status', ['abgemeldet', 'abgelehnt'])
+                ->latest(),
+        ]);
 
         if ($request->ajax()) {
             return view('players._detail', compact('player'));
@@ -166,7 +178,7 @@ class PlayerController extends Controller
     {
         $this->authorize('update', $player);
 
-        $player->update($this->validatePlayer($request));
+        $player->update($this->playerData($request, $player));
         $this->enforceSingleSelf($request->user(), $player, $request->boolean('self'));
 
         $message = 'Spieler wurde aktualisiert.';
@@ -187,8 +199,8 @@ class PlayerController extends Controller
     }
 
     /**
-     * Setzt den aktiven Helden des Spielers (Legacy: player.hero_active).
-     * Es kann nur ein aktiver Held je Spieler gesetzt sein (HERO-07).
+     * Setzt den aktuell gespielten Helden des Spielers (players.active_hero_id).
+     * heroes.active (Freigabe durch Bürokrat) wird hier nicht verändert.
      */
     public function setActiveHero(Request $request, Player $player): RedirectResponse|JsonResponse
     {
@@ -199,13 +211,7 @@ class PlayerController extends Controller
         // Der Held muss zu diesem Spieler gehören.
         abort_unless($player->heroes()->whereKey($data['hero_id'])->exists(), 422);
 
-        // Es kann nur einen aktiven Helden geben (HERO-21): alle anderen
-        // Helden des Spielers werden auf inaktiv gesetzt.
-        DB::transaction(function () use ($player, $data) {
-            $player->heroes()->update(['active' => false]);
-            $player->heroes()->whereKey($data['hero_id'])->update(['active' => true]);
-            $player->update(['active_hero_id' => $data['hero_id']]);
-        });
+        $player->update(['active_hero_id' => $data['hero_id']]);
 
         $message = 'Aktiver Held gesetzt.';
 
@@ -215,25 +221,68 @@ class PlayerController extends Controller
     }
 
     /**
+     * Gesundheitsdaten eines Spielers für die Anmeldevorausfüllung (PLAY-15).
+     * Nur eigene/betreute Spieler; keine Preisgabe an Dritte.
+     */
+    public function healthPrefill(Request $request, Player $player): \Illuminate\Http\JsonResponse
+    {
+        $this->authorize('view', $player);
+
+        return response()->json([
+            'allergien'   => $player->allergien,
+            'medikamente' => $player->medikamente,
+        ]);
+    }
+
+    /**
+     * Validierte Felder + Consent-Timestamp für store/update aufbereiten (H-1).
+     *
      * @return array<string, mixed>
      */
-    private function validatePlayer(Request $request): array
+    private function playerData(Request $request, ?Player $existing = null): array
     {
         $sameAsGuardian = filter_var($request->input('address_same_as_guardian', '1'), FILTER_VALIDATE_BOOLEAN);
 
-        return $request->validate([
+        $data = $request->validate([
             'name' => ['required', 'string', 'max:50'],
             'lastname' => ['required', 'string', 'max:50'],
             'email' => ['nullable', 'email', 'max:150'],
-            // Plausibles Geburtsdatum: nicht in der Zukunft, nicht vor 1900 (PLAY-07).
             'dayofbirth' => ['nullable', 'date', 'before_or_equal:today', 'after:1900-01-01'],
             'gender' => ['nullable', 'in:weiblich,männlich,divers'],
-            // Kinder-Anschrift (PLAY-14 / ORGA-01): nur Pflicht bei abweichender Anschrift.
             'address_same_as_guardian' => ['boolean'],
             'street' => [$sameAsGuardian ? 'nullable' : 'required', 'string', 'max:100'],
             'house_number' => [$sameAsGuardian ? 'nullable' : 'required', 'string', 'max:10'],
             'zip' => [$sameAsGuardian ? 'nullable' : 'required', 'string', 'max:10'],
             'city' => [$sameAsGuardian ? 'nullable' : 'required', 'string', 'max:100'],
+            // DSGVO Art. 9: Gesundheitsdaten – Einwilligung Pflicht wenn Felder befüllt (H-1).
+            'allergien' => ['nullable', 'string'],
+            'medikamente' => ['nullable', 'string'],
+            'health_data_consent' => [
+                Rule::requiredIf(fn () => filled($request->allergien) || filled($request->medikamente)),
+                'boolean',
+            ],
+            // DSGVO Art. 8: Elterliche Einwilligung – Pflicht wenn nicht eigener Spieler (H-5).
+            'parental_consent' => [
+                Rule::requiredIf(fn () => ! $request->boolean('self')),
+                'boolean',
+            ],
         ]);
+
+        // Gesundheitsdaten-Consent → Timestamp.
+        $hasHealthData = filled($data['allergien'] ?? null) || filled($data['medikamente'] ?? null);
+        $data['health_data_consent_at'] = ($hasHealthData && $request->boolean('health_data_consent'))
+            ? ($existing?->health_data_consent_at ?? now())
+            : null;
+        unset($data['health_data_consent']);
+
+        // Elterliche Einwilligung → Timestamp; bei eigenem Spieler nicht anwendbar.
+        $isSelf = $request->boolean('self');
+        $data['parental_consent_at'] = (! $isSelf && $request->boolean('parental_consent'))
+            ? ($existing?->parental_consent_at ?? now())
+            : null;
+        unset($data['parental_consent']);
+
+        return $data;
     }
 }
+

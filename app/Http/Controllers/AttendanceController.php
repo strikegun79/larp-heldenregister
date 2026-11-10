@@ -137,7 +137,7 @@ class AttendanceController extends Controller
     /**
      * Vergibt EP an den aktiven Helden aller Anwesenden (BOOK-09):
      * loot_ep_day × Eventtage, Typ 50 „Abenteuer bestritten", mit adventure_id.
-     * Idempotent (je Held & Abenteuer nur einmal); Anwesende ohne aktiven
+     * Idempotent (je Spieler & Abenteuer nur einmal); Anwesende ohne aktiven
      * Helden werden übersprungen.
      */
     public function awardEp(Request $request, Adventure $adventure): RedirectResponse|JsonResponse
@@ -154,22 +154,19 @@ class AttendanceController extends Controller
         $skipped = 0;
 
         DB::transaction(function () use ($adventure, $ep, &$awarded, &$skipped) {
+            // Idempotent je Spieler & Abenteuer – auch wenn der aktive Held inzwischen gewechselt wurde.
+            $awardedPlayers = $adventure->epAwardedPlayerIds()->flip();
+
             foreach ($adventure->visits as $visit) {
+                if ($awardedPlayers->has($visit->player_id)) {
+                    continue;
+                }
+
                 $hero = $visit->player?->activeHero;
 
                 if (! $hero) {
                     $skipped++;
 
-                    continue;
-                }
-
-                // Idempotent: je Held & Abenteuer höchstens eine Vergabe.
-                $alreadyAwarded = $hero->epTransactions()
-                    ->where('ep_transaction_type_id', Hero::ADVENTURE_EP_TYPE)
-                    ->where('adventure_id', $adventure->id)
-                    ->exists();
-
-                if ($alreadyAwarded) {
                     continue;
                 }
 
@@ -179,6 +176,7 @@ class AttendanceController extends Controller
                     'ep_count' => $ep,
                     'transacted_at' => $adventure->end_at ?? now(),
                 ]);
+                $awardedPlayers->put($visit->player_id, true);
                 $awarded++;
             }
         });

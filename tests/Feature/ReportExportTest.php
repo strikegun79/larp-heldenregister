@@ -13,7 +13,7 @@ use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 /**
- * REP-03/04: Belegungsreport je Event und Spielerübersicht als CSV.
+ * REP-03/04: Belegungsreport je Event als Excel und Spielerübersicht als CSV.
  */
 class ReportExportTest extends TestCase
 {
@@ -33,31 +33,33 @@ class ReportExportTest extends TestCase
         return $user;
     }
 
-    public function test_participation_csv_lists_bookings_and_totals(): void
+    public function test_participation_xlsx_lists_bookings(): void
     {
-        $adventure = Adventure::factory()->create();
+        $adventure = Adventure::factory()->create(['fee' => 20, 'fee_reduced' => 10]);
         $player = Player::factory()->create(['name' => 'Mira', 'lastname' => 'Tan']);
         Booking::factory()->for($adventure)->create(['player_id' => $player->id, 'paid' => true]);
         $adventure->visits()->create(['player_id' => $player->id]);
 
         $response = $this->actingAs($this->userWithRole(30)) // Projektleitung: events.edit
-            ->get(route('adventures.participation-csv', $adventure));
+            ->get(route('adventures.participation-xlsx', $adventure));
 
         $response->assertOk();
-        $this->assertStringContainsString('text/csv', $response->headers->get('content-type'));
-        $csv = $response->streamedContent();
-        $this->assertStringContainsString('Spieler;Rolle;Liste;Status;Beitrag;Anwesend', $csv);
-        $this->assertStringContainsString('Mira Tan', $csv);
-        $this->assertStringContainsString('Bezahlt;1', $csv);
-        $this->assertStringContainsString('Anwesend;1', $csv);
+        $this->assertStringContainsString(
+            'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            $response->headers->get('content-type')
+        );
+        $this->assertStringContainsString(
+            'belegung-' . $adventure->id . '-',
+            $response->headers->get('content-disposition')
+        );
     }
 
-    public function test_participation_csv_requires_events_edit(): void
+    public function test_participation_xlsx_requires_events_edit(): void
     {
         $adventure = Adventure::factory()->create();
 
         $this->actingAs($this->userWithRole(60)) // Event buchen: kein events.edit
-            ->get(route('adventures.participation-csv', $adventure))
+            ->get(route('adventures.participation-xlsx', $adventure))
             ->assertForbidden();
     }
 

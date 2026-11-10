@@ -25,6 +25,11 @@ class NotificationController extends Controller
 
         $url = $entry->data['url'] ?? null;
 
+        // Nur interne URLs erlauben – kein Open Redirect auf externe Seiten.
+        if ($url && ! str_starts_with($url, config('app.url'))) {
+            $url = null;
+        }
+
         return $url ? redirect($url) : back();
     }
 

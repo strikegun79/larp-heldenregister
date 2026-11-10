@@ -24,7 +24,11 @@ class SkillController extends Controller
 
         $heroClasses = HeroClass::where('disabled', false)
             ->with(['skills' => function ($q) {
-                $q->with('perlColor')->orderBy('level')->orderBy('name');
+                $q->with('perlColor')
+                    // SKILL-09: Anzahl aktiver Helden je Fertigkeit.
+                    ->withCount(['heroes as active_heroes_count' => fn ($h) => $h->whereNull('died')->where('active', true)])
+                    ->orderBy('level')
+                    ->orderBy('name');
             }])
             ->when($classId, fn ($q) => $q->where('id', $classId))
             ->orderBy('name')
@@ -34,5 +38,20 @@ class SkillController extends Controller
         $allClasses = HeroClass::where('disabled', false)->orderBy('name')->get();
 
         return view('skills.index', compact('heroClasses', 'allClasses', 'classId'));
+    }
+
+    /**
+     * SKILL-09: Modal – aktive Helden die diese Fertigkeit erworben haben.
+     */
+    public function heroes(Skill $skill): \Illuminate\View\View
+    {
+        $heroes = $skill->heroes()
+            ->with('player')
+            ->whereNull('died')
+            ->where('active', true)
+            ->orderBy('character_name')
+            ->get();
+
+        return view('admin.skills._heroes', compact('skill', 'heroes'));
     }
 }

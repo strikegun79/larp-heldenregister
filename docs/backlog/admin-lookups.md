@@ -25,13 +25,15 @@ EP-Arten, Matrix-Räume) bündelt.
 - [x] Karten/Links zu allen Lookup-Verwaltungen.
 - [x] Nur mit `portal.manage`.
 
-### ADM-05 · Generischer Lookup-CRUD-Baustein · ⏱ 4h · 🔲
+### ADM-05 · Generischer Lookup-CRUD-Baustein · ⏱ 4h · ✅
 **Beschreibung:** Wiederverwendbares Muster (Controller-Trait + Blade-Partial)
 für einfache Lookups, um ADV-08/09/10, EP-05/06, HERO-05 nicht zu duplizieren.
 **Akzeptanzkriterien:**
-- [ ] Gemeinsames Listen-/Formular-Partial + Basis-Controller.
-- [ ] Mind. ein Lookup darauf umgestellt (Proof).
-- [ ] Tests.
+- [x] Gemeinsames Listen-/Formular-Partial + Basis-Controller:
+  `App\Http\Controllers\Concerns\RespondsToLookup` (Trait) +
+  `x-admin.lookup-index` (Blade-Komponente).
+- [x] Mind. ein Lookup darauf umgestellt: `EventRoleController` + `event_roles/index.blade.php`.
+- [x] Tests: bestehende `EventRoleAdminTest` (6 Tests) sichern die Umstellung ab.
 
 ### ADM-06 · Nutzer im Admin anlegen/einladen · ⏱ 3h · ✅
 **Beschreibung:** Admin kann Nutzer manuell anlegen/einladen (statt nur
@@ -62,3 +64,10 @@ Matrix, EP-Buchungen).
 - [x] Editierbare Vereins-Settings (Vereinsname, Kontakt-E-Mail, Logo-Dateiname) im Admin.
 - [x] `Setting::get()` / `Setting::set()` als statische Helper; `SettingsSeeder` mit Defaults.
 - [x] Tests.
+
+### ADM-10 · Portal-Nutzer-Bearbeiten · ✅
+**Beschreibung:** bessere GUI Einstellungen für die Nutzer-Verwaltung
+**Akzeptanzkriterien:**
+- [x] Das öffnen eines Nutzer in der Nutzer-Verwaltung soll per klick auf die Zeile sich öffnen.
+- [x] Löschen soll als Symbol (Mülleimer) zu sehen sein.
+- [x] Ein Nutzer soll auch Wiederverwendbar sein. Also nur Soft-Deletes (bereits via `SoftDeletes` + restore-Route implementiert).

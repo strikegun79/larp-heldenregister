@@ -15,7 +15,7 @@
                     <p>{{ session('warning') }}</p>
                     @if (session('force_delete_id'))
                         <form method="POST" action="{{ route('admin.players.destroy', session('force_delete_id')) }}"
-                              class="mt-2" onsubmit="return confirm('Spieler trotzdem loeschen?');">
+                              class="mt-2" data-confirm="Spieler wirklich trotzdem löschen?">
                             @csrf @method('DELETE')
                             <input type="hidden" name="force" value="1">
                             <button type="submit" class="ui mini red button">Trotzdem löschen</button>
@@ -24,29 +24,92 @@
                 </div>
             @endif
 
-            {{-- Suche (PLAY-09) --}}
-            <form method="GET" action="{{ route('admin.players.index') }}" class="ui form mb-4">
-                <div class="flex items-center gap-3">
-                    <div class="ui action input">
-                        <input type="search" name="q" value="{{ $q }}" placeholder="Name / Nachname suchen…" style="min-width:220px">
-                        <button type="submit" class="ui icon button" aria-label="Suchen"><i class="search icon"></i></button>
+            {{-- Suche & Filter in Pergament-Box (A) --}}
+            <div class="bg-white/70 border-2 border-[#5a3a22]/40 shadow sm:rounded-lg p-4 mb-4">
+                <form method="GET" action="{{ route('admin.players.index') }}" class="ui form">
+                    {{-- Zeile 1: Suchfeld --}}
+                    <div class="flex items-center mb-3">
+                        <div class="ui action input w-full sm:w-auto">
+                            <input type="search" name="q" value="{{ $q }}" placeholder="Name / Nachname suchen…">
+                            <button type="submit" class="ui icon button" aria-label="Suchen"><i class="search icon"></i></button>
+                        </div>
                     </div>
-                    @if ($q !== '')
-                        <a href="{{ route('admin.players.index') }}" class="text-sm text-stone-500 hover:underline">Filter zurücksetzen</a>
-                    @endif
-                </div>
-            </form>
+
+                    {{-- Zeile 2: Schnellfilter und Zurücksetzen --}}
+                    <div class="flex flex-wrap items-center gap-4 mb-3">
+                        <label class="flex items-center gap-2 cursor-pointer text-sm select-none">
+                            <input type="checkbox" name="hide_adults" value="1" {{ $hideAdults ? 'checked' : '' }}
+                                   onchange="this.form.submit()">
+                            <span>Nur &lt; 18 Jahre</span>
+                        </label>
+                        <label class="flex items-center gap-2 cursor-pointer text-sm select-none">
+                            <input type="checkbox" name="no_heroes" value="1" {{ $noHeroes ? 'checked' : '' }}
+                                   onchange="this.form.submit()">
+                            <span>Nur ohne Helden</span>
+                        </label>
+
+                        @if ($q !== '' || $hideAdults || $noHeroes)
+                            <a href="{{ route('admin.players.index') }}" class="text-sm text-stone-500 hover:underline">Filter zurücksetzen</a>
+                        @endif
+                    </div>
+
+                    {{-- Legende innerhalb der Filter-Box --}}
+                    <div class="flex flex-wrap gap-4 text-xs text-stone-500 pt-2 border-t border-[#5a3a22]/20">
+                        <span class="flex items-center gap-1">
+                            <span class="inline-block w-3 h-3 rounded-sm bg-green-100 border border-green-400"></span>
+                            &lt; 18 Jahre, mit Held
+                        </span>
+                        <span class="flex items-center gap-1">
+                            <span class="inline-block w-3 h-3 rounded-sm bg-amber-100 border border-amber-400"></span>
+                            ≥ 18 Jahre
+                        </span>
+                        <span class="flex items-center gap-1">
+                            <span class="inline-block w-3 h-3 rounded-sm bg-red-100 border border-red-400"></span>
+                            &lt; 18 Jahre, kein Held
+                        </span>
+                    </div>
+                </form>
+            </div>
+
+            {{-- UX-131: Sortierung mobil – nur unter 640px sichtbar, da thead dort ausgeblendet ist. --}}
+            <div class="sm:hidden bg-white/70 border-2 border-[#5a3a22]/40 shadow rounded-lg p-3 mb-4">
+                <form method="GET" action="{{ route('admin.players.index') }}">
+                    <input type="hidden" name="q" value="{{ $q }}">
+                    @if ($hideAdults)<input type="hidden" name="hide_adults" value="1">@endif
+                    @if ($noHeroes)  <input type="hidden" name="no_heroes"   value="1">@endif
+                    <div class="flex items-center gap-2">
+                        <span class="text-xs text-stone-500 shrink-0">Sortieren:</span>
+                        <select name="sort" onchange="this.form.submit()"
+                                class="ui compact dropdown flex-1 text-sm"
+                                aria-label="Sortierspalte">
+                            <option value="name"         @selected($sort === 'name')>Name</option>
+                            <option value="lastname"     @selected($sort === 'lastname')>Nachname</option>
+                            <option value="dayofbirth"   @selected($sort === 'dayofbirth')>Alter</option>
+                            <option value="heroes_count" @selected($sort === 'heroes_count')>Helden</option>
+                        </select>
+                        <select name="dir" onchange="this.form.submit()"
+                                class="ui compact dropdown text-sm"
+                                aria-label="Sortierrichtung">
+                            <option value="asc"  @selected($dir === 'asc')>↑ aufst.</option>
+                            <option value="desc" @selected($dir === 'desc')>↓ abst.</option>
+                        </select>
+                    </div>
+                </form>
+            </div>
 
             <div class="bg-white/70 border-2 border-[#5a3a22]/40 shadow sm:rounded-lg overflow-hidden">
+                <x-mobile.cards-or-table>
                 <table class="min-w-full divide-y divide-stone-200">
-                    <thead class="bg-black/5">
+                    <thead class="bg-[#5a3a22]/10">
                         <tr>
                             @php
                                 /* Sortierspalten-Link-Helper (PLAY-09) */
                                 $sortUrl = fn(string $col) => route('admin.players.index', array_filter([
-                                    'q' => $q ?: null,
-                                    'sort' => $col,
-                                    'dir' => ($sort === $col && $dir === 'asc') ? 'desc' : 'asc',
+                                    'q'           => $q ?: null,
+                                    'hide_adults' => $hideAdults ? '1' : null,
+                                    'no_heroes'   => $noHeroes   ? '1' : null,
+                                    'sort'        => $col,
+                                    'dir'         => ($sort === $col && $dir === 'asc') ? 'desc' : 'asc',
                                 ]));
                                 $sortIcon = fn(string $col) => $sort === $col
                                     ? ($dir === 'asc' ? ' ↑' : ' ↓')
@@ -72,17 +135,31 @@
                     </thead>
                     <tbody class="divide-y divide-stone-200 text-stone-800">
                         @foreach ($players as $player)
-                            <tr class="{{ $player->trashed() ? 'opacity-50' : '' }}">
-                                <td class="px-6 py-4">{{ $player->full_name }}</td>
-                                <td class="px-6 py-4">{{ $player->age !== null ? $player->age.' J.' : '—' }}</td>
-                                <td class="px-6 py-4">{{ $player->gender ?? '—' }}</td>
-                                <td class="px-6 py-4">{{ $player->heroes_count }}</td>
-                                <td class="px-6 py-4 text-sm">{{ $player->users->pluck('name')->implode(', ') ?: '—' }}</td>
-                                <td class="px-6 py-4">{{ $player->trashed() ? 'gelöscht' : ($player->active ? 'aktiv' : 'inaktiv') }}</td>
-                                <td class="px-6 py-4 text-sm">
+                            @php
+                                $age = $player->age;
+                                /* Zeilenfarben: kräftigere Töne + farbiger Linksrand (C) */
+                                $rowClass = match(true) {
+                                    $player->trashed()                                             => 'opacity-50',
+                                    $age !== null && $age >= 18                                    => 'bg-amber-100 border-l-4 border-amber-400',
+                                    $age !== null && $age < 18 && $player->heroes_count === 0      => 'bg-red-100 border-l-4 border-red-400',
+                                    $age !== null && $age < 18                                     => 'bg-green-100 border-l-4 border-green-400',
+                                    default                                                        => '',
+                                };
+                            @endphp
+                            <tr class="{{ $rowClass }}">
+                                <td class="px-6 py-4" data-label="Name">{{ $player->full_name }}</td>
+                                <td class="px-6 py-4" data-label="Alter">{{ $player->age !== null ? $player->age.' J.' : '—' }}</td>
+                                <td class="px-6 py-4" data-label="Geschlecht">{{ $player->gender ?? '—' }}</td>
+                                <td class="px-6 py-4" data-label="Helden">{{ $player->heroes_count }}</td>
+                                <td class="px-6 py-4 text-sm" data-label="Betreut von">{{ $player->users->pluck('name')->implode(', ') ?: '—' }}</td>
+                                <td class="px-6 py-4" data-label="Status">{{ $player->trashed() ? 'gelöscht' : ($player->active ? 'aktiv' : 'inaktiv') }}</td>
+                                <td class="px-6 py-4 text-sm" data-label="Matrix">
                                     @if ($player->matrixAccount)
                                         <span class="{{ $player->matrixAccount->active ? 'text-green-700' : 'text-stone-500' }}">
                                             {{ $player->matrixAccount->active ? 'aktiv' : 'inaktiv' }}
+                                        </span>
+                                        <span class="text-stone-400 text-xs block">
+                                            {{ $player->matrixAccount->rooms_count }} {{ $player->matrixAccount->rooms_count === 1 ? 'Raum' : 'Räume' }}
                                         </span>
                                     @else
                                         <span class="text-stone-400">—</span>
@@ -99,19 +176,26 @@
                                                 </button>
                                             </form>
                                         @else
+                                            {{-- Aktions-Links als kleine Buttons (D) --}}
+                                            <a href="{{ route('players.show', $player) }}"
+                                               data-modal-url="{{ route('players.show', $player) }}"
+                                               class="ui mini basic button"
+                                               title="Spielerprofil anzeigen / bearbeiten">
+                                                <i class="user icon"></i> Profil
+                                            </a>
                                             <a href="{{ route('admin.players.edit', $player) }}"
                                                data-modal-url="{{ route('admin.players.edit', $player) }}"
-                                               class="text-indigo-700 hover:underline"
+                                               class="ui mini basic button"
                                                title="{{ $player->address_same_as_guardian ? 'Elternanschrift' : 'Abweichende Anschrift' }}">
                                                 Anschrift{{ $player->address_same_as_guardian ? '' : ' *' }}
                                             </a>
                                             <a href="{{ route('admin.players.caretakers', $player) }}"
                                                data-modal-url="{{ route('admin.players.caretakers', $player) }}"
-                                               class="text-indigo-700 hover:underline">Betreuer</a>
+                                               class="ui mini basic button">Betreuer</a>
                                             <a href="{{ route('admin.players.matrix.edit', $player) }}"
-                                               class="text-indigo-700 hover:underline">Matrix</a>
+                                               class="ui mini basic button">Matrix</a>
                                             <form method="POST" action="{{ route('admin.players.destroy', $player->id) }}"
-                                                  onsubmit="return confirm('Spieler loeschen?');">
+                                                  data-confirm="Spieler löschen?">
                                                 @csrf @method('DELETE')
                                                 <button type="submit" class="ui mini red icon button"
                                                         data-tooltip="Löschen" data-position="top center">
@@ -125,6 +209,7 @@
                         @endforeach
                     </tbody>
                 </table>
+                </x-mobile.cards-or-table>
             </div>
 
             <div class="mt-4">{{ $players->links() }}</div>

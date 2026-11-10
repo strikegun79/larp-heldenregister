@@ -1,8 +1,8 @@
 <section class="space-y-6">
     <header>
-        <h2 class="text-lg font-medium text-gray-900">Konto löschen</h2>
+        <h2 class="font-uncial text-lg text-waldritter">Konto löschen</h2>
 
-        <p class="mt-1 text-sm text-gray-600">
+        <p class="mt-1 text-sm text-stone-600">
             Sobald dein Konto gelöscht wird, werden alle Daten dauerhaft entfernt. Bitte sichere vorher alle wichtigen Daten.
         </p>
     </header>
@@ -17,11 +17,11 @@
             @csrf
             @method('delete')
 
-            <h2 class="text-lg font-medium text-gray-900">
-                Bist du sicher, dass du dein Konto löschen möchtest?
+            <h2 class="font-uncial text-lg text-waldritter">
+                Konto wirklich löschen?
             </h2>
 
-            <p class="mt-1 text-sm text-gray-600">
+            <p class="mt-1 text-sm text-stone-600">
                 Sobald dein Konto gelöscht wird, werden alle Daten dauerhaft entfernt. Bitte gib dein Passwort ein, um die Löschung zu bestätigen.
             </p>
 
