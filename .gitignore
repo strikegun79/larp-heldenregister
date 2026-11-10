@@ -22,4 +22,6 @@ yarn-error.log
 /.fleet
 /.idea
 /.vscode
-.claude/
+# Claude Code: Agent-Definitionen werden versioniert, lokale Einstellungen und Agent-Gedächtnis nicht
+/.claude/settings.local.json
+/.claude/agent-memory/
