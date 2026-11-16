@@ -1156,6 +1156,8 @@ function initBookingPlayerPrefill(container) {
 // ------------------------------------------------------------------
 function initBookingsTableSort(root) {
     const el     = (root instanceof $) ? root[0] : (root || document);
+    // Issue #10: Check-in-Liste wird an denselben Stellen initialisiert.
+    initCheckinTable(el);
     const tables = el.querySelectorAll ? el.querySelectorAll('[data-bookings-table]') : [];
     tables.forEach(function (table) {
         if (table.__sortInit) return;
@@ -1224,6 +1226,120 @@ function initBookingsTableSort(root) {
         }
 
         applySort('created', false);
+    });
+}
+
+// ------------------------------------------------------------------
+// Check-in-Liste (Issue #10): Suche ab dem 3. Zeichen + sortierbare Spalten.
+// Suchbegriff und Sortierung werden pro Abenteuer gemerkt, damit sie nach
+// Check-in/Auschecken (Reiter wird neu geladen) erhalten bleiben.
+// ------------------------------------------------------------------
+const checkinTableState = new Map();
+const CHECKIN_MIN_CHARS = 3;
+
+function initCheckinTable(root) {
+    const scope = root && root.querySelectorAll ? root : document;
+    const roots = Array.from(scope.querySelectorAll('[data-checkin-root]'));
+    if (scope.matches && scope.matches('[data-checkin-root]')) roots.push(scope);
+
+    roots.forEach(function (wrap) {
+        if (wrap.__checkinInit) return;
+        wrap.__checkinInit = true;
+
+        const table = wrap.querySelector('[data-checkin-table]');
+        const input = wrap.querySelector('[data-checkin-search]');
+        const count = wrap.querySelector('[data-checkin-count]');
+        if (!table) return;
+
+        const tbody    = table.querySelector('tbody');
+        const emptyRow = tbody.querySelector('[data-checkin-empty]');
+        const rows     = Array.from(tbody.querySelectorAll('tr[data-search]'));
+        const key      = wrap.dataset.stateKey || '';
+        const state    = Object.assign({ col: 'lastname', asc: true, query: '' }, checkinTableState.get(key));
+
+        const cellVal = (row, col) => (row.querySelector('[data-col="' + col + '"]') || {}).dataset?.sortVal ?? '';
+
+        function applyFilter() {
+            const q = state.query.trim().toLowerCase();
+            const active = q.length >= CHECKIN_MIN_CHARS;
+            let visible = 0;
+            rows.forEach(function (r) {
+                const hit = !active || r.dataset.search.includes(q);
+                // style.display statt hidden: Mobile-Karten setzen display per CSS
+                r.style.display = hit ? '' : 'none';
+                if (hit) visible++;
+            });
+            if (emptyRow) emptyRow.style.display = visible > 0 ? 'none' : '';
+            if (count) {
+                count.textContent = active
+                    ? visible + ' von ' + rows.length + ' Teilnehmern'
+                    : (q.length > 0 ? 'Noch ' + (CHECKIN_MIN_CHARS - q.length) + ' Zeichen …' : '');
+            }
+        }
+
+        function applySort() {
+            const th = table.querySelector('[data-sort-col="' + state.col + '"]');
+            const numeric = th?.dataset.sortType === 'num';
+            const sorted = rows.slice().sort(function (a, b) {
+                const av = cellVal(a, state.col), bv = cellVal(b, state.col);
+                let cmp = numeric
+                    ? (parseFloat(av) || 0) - (parseFloat(bv) || 0)
+                    : av.localeCompare(bv, 'de', { sensitivity: 'base' });
+                // Gleichstand: nach Nachname, dann Vorname
+                if (cmp === 0) {
+                    cmp = cellVal(a, 'lastname').localeCompare(cellVal(b, 'lastname'), 'de', { sensitivity: 'base' })
+                       || cellVal(a, 'firstname').localeCompare(cellVal(b, 'firstname'), 'de', { sensitivity: 'base' });
+                    return cmp;
+                }
+                return state.asc ? cmp : -cmp;
+            });
+            sorted.forEach(r => tbody.appendChild(r));
+            if (emptyRow) tbody.appendChild(emptyRow);
+
+            table.querySelectorAll('[data-sort-col]').forEach(function (h) {
+                const icon = h.querySelector('[data-sort-icon]');
+                const isActive = h.dataset.sortCol === state.col;
+                if (icon) {
+                    icon.className = isActive
+                        ? 'sort ' + (state.asc ? 'up' : 'down') + ' icon text-xs ml-0.5'
+                        : 'sort icon text-stone-300 text-xs ml-0.5';
+                }
+                if (isActive) h.setAttribute('aria-sort', state.asc ? 'ascending' : 'descending');
+                else h.removeAttribute('aria-sort');
+            });
+        }
+
+        function save() {
+            if (key) checkinTableState.set(key, { col: state.col, asc: state.asc, query: state.query });
+        }
+
+        function sortBy(col) {
+            state.asc = col === state.col ? !state.asc : true;
+            state.col = col;
+            applySort();
+            save();
+        }
+
+        table.querySelectorAll('[data-sort-col]').forEach(function (th) {
+            th.addEventListener('click', () => sortBy(th.dataset.sortCol));
+            th.addEventListener('keydown', function (e) {
+                if (e.key !== 'Enter' && e.key !== ' ') return;
+                e.preventDefault();
+                sortBy(th.dataset.sortCol);
+            });
+        });
+
+        if (input) {
+            input.value = state.query;
+            input.addEventListener('input', function () {
+                state.query = input.value;
+                applyFilter();
+                save();
+            });
+        }
+
+        applySort();
+        applyFilter();
     });
 }
 
