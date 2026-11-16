@@ -21,7 +21,7 @@ class LocationSeeder extends Seeder
         ];
 
         foreach ($locations as $location) {
-            Location::updateOrCreate(['id' => $location['id']], $location);
+            Location::firstOrCreate(['id' => $location['id']], $location);
         }
     }
 }

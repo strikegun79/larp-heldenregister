@@ -23,7 +23,7 @@ return [
     |--------------------------------------------------------------------------
     |
     | In den Umgebungen "local" und "production" sind migrate:fresh,
-    | migrate:refresh, migrate:reset und db:wipe gesperrt (siehe
+    | migrate:refresh, migrate:reset, migrate:rollback und db:wipe gesperrt (siehe
     | AppServiceProvider). Für einen bewussten Reset kurzzeitig auf true setzen.
     |
     */

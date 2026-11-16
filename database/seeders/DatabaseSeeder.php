@@ -8,7 +8,9 @@ use Illuminate\Database\Seeder;
 class DatabaseSeeder extends Seeder
 {
     /**
-     * Seed the application's database.
+     * Stammdaten einspielen. Alle Seeder arbeiten mit firstOrCreate: Sie legen nur
+     * fehlende Einträge an und überschreiben keine Änderungen aus der Administration.
+     * Geänderte Standardwerte für bestehende Datenbanken → per Migration ausrollen.
      */
     public function run(): void
     {

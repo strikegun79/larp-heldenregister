@@ -51,6 +51,7 @@ mysql -uroot -e "GRANT ALL ON heldenregister.* TO 'heldenregister'@'localhost';"
 
 php artisan migrate
 php artisan db:seed        # Stammdaten: Rollen, Klassen, EP-Typen, Orte, Task-Typen …
+                           # (ergänzt nur fehlende Einträge, überschreibt nichts)
 php artisan storage:link
 
 # 4. Dev-Server starten

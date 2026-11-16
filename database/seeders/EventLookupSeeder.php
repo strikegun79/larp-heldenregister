@@ -23,7 +23,7 @@ class EventLookupSeeder extends Seeder
             ['id' => 4, 'name' => 'Tulderon-Zeltfreizeit',  'description' => 'Jugendliverollenspiel ab 14 Jahren'],
         ];
         foreach ($categories as $row) {
-            EventCategory::updateOrCreate(['id' => $row['id']], $row);
+            EventCategory::firstOrCreate(['id' => $row['id']], $row);
         }
 
         $statuses = [
@@ -37,7 +37,7 @@ class EventLookupSeeder extends Seeder
             ['id' => 70, 'description' => 'abgesagt',              'color' => '#f2711c'],
         ];
         foreach ($statuses as $row) {
-            EventStatus::updateOrCreate(['id' => $row['id']], $row);
+            EventStatus::firstOrCreate(['id' => $row['id']], $row);
         }
 
         $clients = [
@@ -45,7 +45,7 @@ class EventLookupSeeder extends Seeder
             ['id' => 2, 'name' => 'Jugendförderung Landkreis Gießen'],
         ];
         foreach ($clients as $row) {
-            EventClient::updateOrCreate(['id' => $row['id']], $row);
+            EventClient::firstOrCreate(['id' => $row['id']], $row);
         }
 
         $roles = [
@@ -56,7 +56,7 @@ class EventLookupSeeder extends Seeder
             ['id' => 5, 'description' => 'Teamer C',       'for_participant' => false, 'for_teamer' => true],
         ];
         foreach ($roles as $row) {
-            EventRole::updateOrCreate(['id' => $row['id']], $row);
+            EventRole::firstOrCreate(['id' => $row['id']], $row);
         }
     }
 }

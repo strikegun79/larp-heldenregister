@@ -7,7 +7,8 @@ use Illuminate\Database\Seeder;
 
 /**
  * Befüllt task_type_definitions aus config/adventure_tasks.php.
- * updateOrCreate: bestehende Einstellungen werden nicht überschrieben.
+ * firstOrCreate: legt nur fehlende Task-Typen an, bestehende Einstellungen
+ * (z. B. deaktivierte Aufgaben oder geänderte Fristen) bleiben erhalten.
  */
 class TaskTypeDefinitionSeeder extends Seeder
 {
@@ -16,7 +17,7 @@ class TaskTypeDefinitionSeeder extends Seeder
         $tasks = config('adventure_tasks.tasks', []);
 
         foreach ($tasks as $type => $def) {
-            TaskTypeDefinition::updateOrCreate(
+            TaskTypeDefinition::firstOrCreate(
                 ['task_type' => $type],
                 [
                     'label'             => $def['label'],

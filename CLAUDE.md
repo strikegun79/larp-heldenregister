@@ -81,7 +81,9 @@ die beim Entwickeln und Testen erhalten bleiben müssen.
    gesperrt (`DB::prohibitDestructiveCommands` im `AppServiceProvider`).
    Die Sperre (`ALLOW_DESTRUCTIVE_DB_COMMANDS`) darf von Agenten nicht aufgehoben werden.
 2. Schemaänderungen nur über neue Migrationen mit `php artisan migrate`.
-   Rollbacks (`migrate:rollback`) nur nach Rückfrage.
+   Rollbacks (`migrate:rollback`) sind ebenfalls technisch gesperrt und nur nach Rückfrage erlaubt.
+   Seeder (`db:seed`) arbeiten mit `firstOrCreate` und dürfen jederzeit laufen; geänderte
+   Standardwerte für bestehende Datenbanken werden per Migration ausgerollt.
 3. Keine Testläufe gegen die Entwicklungsdatenbank. Tests mit `RefreshDatabase`
    laufen nur gegen eine Datenbank mit Endung `_test` (Schutz in `tests/TestCase.php`).
 4. Funktionen am echten Datenbestand nur in einer Transaktion mit anschließendem

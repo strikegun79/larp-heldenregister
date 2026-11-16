@@ -32,7 +32,7 @@ class PerlColorSeeder extends Seeder
         ];
 
         foreach ($colors as $color) {
-            PerlColor::updateOrCreate(['code' => $color['code']], $color);
+            PerlColor::firstOrCreate(['code' => $color['code']], $color);
         }
     }
 }
