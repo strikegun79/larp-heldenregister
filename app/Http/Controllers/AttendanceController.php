@@ -136,6 +136,57 @@ class AttendanceController extends Controller
     }
 
     /**
+     * Mehrfach-Abmeldung (Issue #11): mehrere Teilnehmer mit demselben Grund
+     * abmelden. Bereits Abgemeldete werden übersprungen.
+     */
+    public function bulkDeregister(Request $request, Adventure $adventure): RedirectResponse|JsonResponse
+    {
+        $data = $request->validate([
+            'booking_ids' => ['required', 'array', 'min:1'],
+            'booking_ids.*' => ['integer'],
+            'absence_reason' => ['required', Rule::in(array_keys(Booking::ABSENCE_REASONS))],
+        ]);
+
+        // Nur Anmeldungen dieses Events mit Spieler (wie in der Check-in-Liste).
+        $bookings = $adventure->bookings()
+            ->whereIn('id', $data['booking_ids'])
+            ->whereNotNull('player_id')
+            ->get();
+
+        if ($bookings->isEmpty()) {
+            $msg = 'Keine gültigen Teilnehmer ausgewählt.';
+
+            return $request->expectsJson()
+                ? response()->json(['message' => $msg], 422)
+                : back()->with('error', $msg);
+        }
+
+        $toDeregister = $bookings->where('status', '!=', 'abgemeldet');
+        $skipped = $bookings->count() - $toDeregister->count();
+
+        DB::transaction(function () use ($adventure, $toDeregister, $data) {
+            foreach ($toDeregister as $booking) {
+                $booking->update([
+                    'status' => 'abgemeldet',
+                    'absence_reason' => $data['absence_reason'],
+                    'approved_at' => null,
+                ]);
+            }
+            // Abgemeldete gelten nicht als anwesend.
+            $adventure->visits()->whereIn('player_id', $toDeregister->pluck('player_id'))->delete();
+        });
+
+        $message = $toDeregister->count().' Teilnehmer abgemeldet ('.Booking::ABSENCE_REASONS[$data['absence_reason']].').';
+        if ($skipped > 0) {
+            $message .= " {$skipped} bereits abgemeldet (übersprungen).";
+        }
+
+        return $request->expectsJson()
+            ? response()->json(['message' => $message, 'refresh_modal' => true])
+            : back()->with('status', $message);
+    }
+
+    /**
      * Abmeldung zurücknehmen: Status wieder „bestätigt“, Abmeldegrund entfernen.
      * Der Check-in wird nicht wiederhergestellt (bei Anwesenheit normal einchecken).
      * Keine Mail – das Abmelden ist ein interner Check-in-Vorgang.

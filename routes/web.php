@@ -254,6 +254,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('adventures.bookings.deregister');
     Route::patch('adventures/{adventure}/bookings/{booking}/deregister-undo', [AttendanceController::class, 'undoDeregister'])
         ->name('adventures.bookings.deregister-undo');
+    // Mehrfachaktionen im Check-in (Issue #11): mehrere Teilnehmer mit einer Unterschrift
+    // einchecken bzw. mit einem Grund abmelden.
+    Route::put('adventures/{adventure}/checkin/bulk', [SignatureController::class, 'bulkUpdate'])
+        ->name('adventures.checkin.bulk');
+    Route::patch('adventures/{adventure}/deregister/bulk', [AttendanceController::class, 'bulkDeregister'])
+        ->name('adventures.deregister.bulk');
 
     // Rollen- & DSGVO-Übersicht (für alle Teamer-Rollen sichtbar).
     Route::prefix('admin')->name('admin.')->middleware('can:roles.view')->group(function () {
