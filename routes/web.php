@@ -209,8 +209,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Anmeldebestätigung erneut senden (BOOK-05).
     Route::post('adventures/{adventure}/bookings/{booking}/resend-confirmation', [BookingController::class, 'resendConfirmation'])
         ->name('adventures.bookings.resend-confirmation');
-    Route::patch('adventures/{adventure}/bookings/{booking}/confirm-teamer', [BookingController::class, 'confirmTeamer'])
-        ->name('adventures.bookings.confirm-teamer');
+    // Offene Anmeldung bestätigen (Event-Einstellung „Anmeldungen bestätigen“), alle Rollen.
+    Route::patch('adventures/{adventure}/bookings/{booking}/confirm', [BookingController::class, 'confirm'])
+        ->name('adventures.bookings.confirm');
     // Anmeldung ablehnen – Toggle (ADV-18).
     Route::patch('adventures/{adventure}/bookings/{booking}/rejection', [BookingController::class, 'reject'])
         ->name('adventures.bookings.rejection');

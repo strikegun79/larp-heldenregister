@@ -66,22 +66,45 @@ class BookingStatusTest extends TestCase
         $this->actingAs($this->userWithRole(20))->patchJson($route)->assertOk();
         $this->assertSame('abgelehnt', $booking->fresh()->status);
 
-        // Erneut -> zurück auf offen.
+        // Erneut -> Ablehnung zurückgenommen: ohne „Anmeldungen bestätigen“ wieder bestätigt.
+        $this->actingAs($this->userWithRole(20))->patchJson($route)->assertOk();
+        $this->assertSame('bestaetigt', $booking->fresh()->status);
+    }
+
+    public function test_unreject_returns_to_offen_when_event_requires_confirmation(): void
+    {
+        $adventure = Adventure::factory()->create(['requires_confirmation' => true]);
+        $booking = $this->bookingFor($adventure);
+        $route = route('adventures.bookings.rejection', [$adventure, $booking]);
+
+        $this->actingAs($this->userWithRole(20))->patchJson($route)->assertOk();
         $this->actingAs($this->userWithRole(20))->patchJson($route)->assertOk();
         $this->assertSame('offen', $booking->fresh()->status);
     }
 
     public function test_confirm_sets_status_bestaetigt(): void
     {
-        $adventure = Adventure::factory()->create();
+        $adventure = Adventure::factory()->create(['requires_confirmation' => true]);
         $booking = $this->bookingFor($adventure);
+        $booking->update(['status' => 'offen', 'approved_at' => null]);
 
         $this->actingAs($this->userWithRole(20))
-            ->patchJson(route('adventures.bookings.approval', [$adventure, $booking]))
+            ->patchJson(route('adventures.bookings.confirm', [$adventure, $booking]))
             ->assertOk();
 
         $this->assertSame('bestaetigt', $booking->fresh()->status);
         $this->assertNotNull($booking->fresh()->approved_at);
+    }
+
+    public function test_confirm_rejects_non_open_booking(): void
+    {
+        $adventure = Adventure::factory()->create();
+        $booking = $this->bookingFor($adventure);
+        $booking->update(['status' => 'bestaetigt']);
+
+        $this->actingAs($this->userWithRole(20))
+            ->patchJson(route('adventures.bookings.confirm', [$adventure, $booking]))
+            ->assertStatus(422);
     }
 
     public function test_deregister_sets_status_with_reason_and_removes_checkin(): void

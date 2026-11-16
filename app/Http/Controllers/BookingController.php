@@ -12,23 +12,20 @@ use App\Models\User;
 use App\Notifications\BookingCancelled;
 use App\Notifications\BookingWaitlisted;
 use App\Notifications\BookingCancelledParticipant;
-use App\Notifications\BookingReceived;
 use App\Notifications\BookingMovedToWaitlist;
 use App\Notifications\BookingRejected;
 use App\Notifications\BookingReinstateRequested;
 use App\Notifications\BookingReinstateResult;
 use App\Notifications\FotoerlaubnisRevoked;
 use App\Notifications\PaymentConfirmed;
-use App\Notifications\TeamerBookingConfirmed;
-use App\Notifications\TeamerBookingReceived;
 use App\Notifications\WaitlistPromoted;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use App\Services\AuditLogger;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Validation\Rule;
@@ -46,7 +43,7 @@ class BookingController extends Controller
         $this->middleware('can:adventure.modify')->only(['edit', 'update']);
         // Anmeldebestätigung erneut senden (BOOK-05): Zugriff wird in der Methode geprüft.
         // Ablehnen (ADV-18) + Teamer bestätigen: Bürokrat/Projektleiter/Admin.
-        $this->middleware('can:approve-bookings')->only(['reject', 'confirmTeamer']);
+        $this->middleware('can:approve-bookings')->only(['reject', 'confirm']);
         // Auf Warteliste verschieben: gleiche Berechtigung wie die Wartelisten-Promotion
         // (vorher ungeschützt – jeder angemeldete Nutzer konnte fremde Buchungen verschieben).
         $this->middleware('can:approve-bookings')->only('moveToWaitlist');
@@ -199,8 +196,9 @@ class BookingController extends Controller
         // Admin-Anmeldung: immer regulärer Platz, auch bei vollem Event oder Altersverstoß.
         $overbooked   = $adminMode && ! $isTeamer && $adventure->isFull();
         $waitlisted   = ($isTeamer || $adminMode) ? false : ($adventure->shouldWaitlist() || $ageViolation);
-        // Admin-Anmeldung: Teamer ebenfalls sofort bestätigt.
-        $confirmed    = $adminMode || ! $isTeamer;
+        // Event-Einstellung „Anmeldungen bestätigen“: sonst sofort bestätigt (alle Rollen).
+        // Admin-Anmeldung: immer sofort bestätigt.
+        $confirmed    = $adminMode || ! $adventure->requires_confirmation;
         $caretaker    = $adminMode && ! empty($data['caretaker_user_id']) ? User::find($data['caretaker_user_id']) : null;
 
         $booking = $adventure->bookings()->create([
@@ -222,8 +220,7 @@ class BookingController extends Controller
             'kontakt_telefon' => $data['kontakt_telefon'],
             'ermaessigung' => $request->boolean('ermaessigung'),
             'waitlisted' => $waitlisted,
-            // Teamer-artige Buchungen warten auf manuelle Bestätigung durch den Projektleiter
-            // – außer bei der Admin-Anmeldung.
+            // Mit „Anmeldungen bestätigen“ bleibt die Anmeldung offen bis zur Bestätigung.
             'approved_at' => $confirmed ? now() : null,
             'status' => $confirmed ? 'bestaetigt' : 'offen',
         ]);
@@ -239,19 +236,12 @@ class BookingController extends Controller
             ? ($caretaker?->email ?: $player?->email)
             : ($player?->email ?: $request->user()->email);
         if ($recipientEmail) {
-            if ($isTeamer && $adminMode) {
-                Notification::route('mail', $recipientEmail)->notify(new TeamerBookingConfirmed($booking));
-            } elseif ($isTeamer) {
-                // NOTI-Teamer: Eingangsbestätigung ohne Bankdaten – Projektleiter bestätigt manuell.
-                Notification::route('mail', $recipientEmail)->notify(new TeamerBookingReceived($booking));
-            } else {
-                // NOTI-02b: Warteliste → kein Beitrag, kein QR-Code.
-                // NOTI-02:  Regulär  → Bestätigung mit Bankdaten.
-                $notification = $booking->waitlisted
-                    ? new BookingWaitlisted($booking, $ageViolation)
-                    : new BookingReceived($booking);
-                Notification::route('mail', $recipientEmail)->notify($notification);
-            }
+            // NOTI-02b: Warteliste → kein Beitrag, kein QR-Code.
+            // Sonst je nach Rolle/Status: bestätigt (mit Bankdaten) oder Eingang (Bestätigung folgt).
+            $notification = (! $isTeamer && $booking->waitlisted)
+                ? new BookingWaitlisted($booking, $ageViolation)
+                : $booking->confirmationNotification();
+            Notification::route('mail', $recipientEmail)->notify($notification);
         }
 
         // M-3: Admin-Buchung für fremden Spieler protokollieren.
@@ -278,9 +268,13 @@ class BookingController extends Controller
                 ? ' Bestätigung gesendet an '.$recipientEmail.'.'
                 : ' Keine Bestätigungsmail – weder Betreuer noch Spieler haben eine E-Mail-Adresse.';
         } elseif ($isTeamer) {
-            $message = 'Teamer-Anmeldung eingegangen – Bestätigung durch den Projektleiter steht aus.';
+            $message = $confirmed
+                ? 'Teamer-Anmeldung gespeichert und bestätigt.'
+                : 'Teamer-Anmeldung eingegangen – Bestätigung durch die Projektleitung steht aus.';
         } elseif (! $booking->waitlisted) {
-            $message = 'Anmeldung gespeichert.';
+            $message = $confirmed
+                ? 'Anmeldung gespeichert.'
+                : 'Anmeldung eingegangen – sie wird noch von der Projektleitung bestätigt. Die Zahlungsinformationen folgen mit der Bestätigung.';
         } elseif ($ageViolation) {
             $age = $player?->dayofbirth?->age;
             $message = "Anmeldung erfolgt – Spieler ({$age} Jahre) liegt außerhalb des Alterslimits ({$adventure->age_range_label}), daher auf der Warteliste zur manuellen Prüfung.";
@@ -347,13 +341,14 @@ class BookingController extends Controller
             'kontakt_telefon' => $data['kontakt_telefon'],
             'ermaessigung' => $request->boolean('ermaessigung'),
             'waitlisted' => $isTeamer ? false : $adventure->isFull(),
-            'approved_at' => $isTeamer ? null : now(),
-            'status' => $isTeamer ? 'offen' : 'bestaetigt',
+            // Event-Einstellung „Anmeldungen bestätigen“ (gilt für alle Rollen).
+            'approved_at' => $adventure->requires_confirmation ? null : now(),
+            'status' => $adventure->requires_confirmation ? 'offen' : 'bestaetigt',
         ]);
 
-        $message = $isTeamer
-            ? 'Gast-Teamer angemeldet – Bestätigung durch den Projektleiter steht aus.'
-            : 'Gast angemeldet.'.($adventure->isFull() ? ' (Warteliste – Event voll.)' : '');
+        $message = ($isTeamer ? 'Gast-Teamer angemeldet.' : 'Gast angemeldet.')
+            .(! $isTeamer && $adventure->isFull() ? ' (Warteliste – Event voll.)' : '')
+            .($adventure->requires_confirmation ? ' Die Anmeldung ist noch offen und muss bestätigt werden.' : '');
 
         return $request->expectsJson()
             ? response()->json(['message' => $message, 'refresh_modal' => true])
@@ -482,18 +477,20 @@ class BookingController extends Controller
         if ($booking->waitlisted) {
             // Von Warteliste auf regulären Platz hochstufen.
             $booking->update(['waitlisted' => false]);
-            Notification::route('mail', $recipientEmail)->notify(new BookingReceived($booking));
+            // Offene Anmeldung (Event mit „Anmeldungen bestätigen“): noch keine Bankdaten.
+            Notification::route('mail', $recipientEmail)->notify($booking->confirmationNotification());
             // M-3: Wartelisten-Promotion durch Admin protokollieren.
             AuditLogger::log('booking.waitlist_promoted', $booking, ['adventure' => $adventure->name]);
-            $message = ($booking->player?->full_name ?? 'Spieler').' von der Warteliste bestätigt. Bestätigungsmail gesendet an '.$recipientEmail.'.';
-        } elseif ($isTeamer) {
-            // Teamer-Buchung: Eingangsbestätigung (ohne Bankdaten) erneut senden.
-            Notification::route('mail', $recipientEmail)->notify(new TeamerBookingReceived($booking));
-            $message = 'Teamer-Eingangsbestätigung erneut gesendet an '.$recipientEmail.'.';
+            $message = ($booking->player?->full_name ?? 'Spieler').' von der Warteliste auf einen regulären Platz gesetzt.'
+                .($booking->status === 'offen' ? ' Die Anmeldung ist noch offen und muss bestätigt werden.' : '')
+                .' Mail gesendet an '.$recipientEmail.'.';
         } else {
-            // Reguläre Buchung: Bestätigungs-Mail nochmals senden.
-            Notification::route('mail', $recipientEmail)->notify(new BookingReceived($booking));
-            $message = 'Anmeldebestätigung erneut gesendet an '.$recipientEmail.'.';
+            // Mail passend zum Status erneut senden (bestätigt: mit Bankdaten, offen: Eingang).
+            Notification::route('mail', $recipientEmail)->notify($booking->confirmationNotification());
+            $message = ($booking->status === 'offen'
+                    ? ($isTeamer ? 'Teamer-Eingangsbestätigung' : 'Eingangsbestätigung')
+                    : ($isTeamer ? 'Teamer-Bestätigung' : 'Anmeldebestätigung'))
+                .' erneut gesendet an '.$recipientEmail.'.';
         }
 
         return $request->expectsJson()
@@ -502,42 +499,34 @@ class BookingController extends Controller
     }
 
     /**
-     * Teamer-Buchung bestätigen oder Bestätigung zurücknehmen (Toggle, Projektleiter/Admin).
+     * Offene Anmeldung bestätigen (Event-Einstellung „Anmeldungen bestätigen“), alle Rollen.
+     * Teilnehmer erhalten jetzt die Zahlungsinformationen, Teamer die Teamer-Bestätigung.
      */
-    public function confirmTeamer(Request $request, Adventure $adventure, Booking $booking): RedirectResponse|JsonResponse
+    public function confirm(Request $request, Adventure $adventure, Booking $booking): RedirectResponse|JsonResponse
     {
         abort_unless($booking->adventure_id === $adventure->id, 404);
 
-        $booking->loadMissing(['role', 'player.users']);
-
-        if (! ($booking->role?->is_teamer_like)) {
-            return $this->fail($request, 'Diese Aktion ist nur für Teamer-Buchungen verfügbar.');
+        if ($booking->status !== 'offen') {
+            return $this->fail($request, 'Nur offene Anmeldungen können bestätigt werden.');
         }
 
-        $confirm = $booking->status !== 'bestaetigt';
+        $booking->update(['status' => 'bestaetigt', 'approved_at' => now()]);
+        $booking->loadMissing(['role', 'player.users', 'bookedBy']);
 
-        $booking->update([
-            'status'      => $confirm ? 'bestaetigt' : 'offen',
-            'approved_at' => $confirm ? now() : null,
-        ]);
+        AuditLogger::log('booking.confirmed', $booking, ['adventure' => $adventure->name]);
 
-        AuditLogger::log(
-            $confirm ? 'booking.teamer_confirmed' : 'booking.teamer_confirmation_revoked',
-            $booking,
-            ['adventure' => $adventure->name]
-        );
+        $name = $booking->participant_name ?: 'Teilnehmer';
+        $isTeamer = (bool) $booking->role?->is_teamer_like;
+        $recipientEmail = $booking->is_guest ? null : $booking->notificationEmail();
 
-        $name = $booking->player?->full_name ?? 'Teamer';
-
-        if ($confirm) {
-            $recipientEmail = $booking->player?->email ?: $booking->player?->users()->first()?->email;
-            if ($recipientEmail) {
-                Notification::route('mail', $recipientEmail)->notify(new TeamerBookingConfirmed($booking));
-            }
-            $message = "{$name} wurde als Teamer bestätigt."
-                .($recipientEmail ? ' Bestätigungsmail gesendet an '.$recipientEmail.'.' : ' (Kein E-Mail-Empfänger gefunden.)');
+        // Warteliste: Zahlungsinformationen erst beim Nachrücken.
+        if ($recipientEmail && ($isTeamer || ! $booking->waitlisted)) {
+            Notification::route('mail', $recipientEmail)->notify($booking->confirmationNotification());
+            $message = "{$name} wurde bestätigt. Bestätigungsmail gesendet an {$recipientEmail}.";
+        } elseif ($booking->waitlisted) {
+            $message = "{$name} wurde bestätigt (steht noch auf der Warteliste – Zahlungsinformationen folgen beim Nachrücken).";
         } else {
-            $message = "Bestätigung für {$name} wurde zurückgenommen.";
+            $message = "{$name} wurde bestätigt. (Kein E-Mail-Empfänger gefunden.)";
         }
 
         return $request->expectsJson()
@@ -554,9 +543,11 @@ class BookingController extends Controller
         abort_unless($booking->adventure_id === $adventure->id, 404);
 
         $reject = $booking->status !== 'abgelehnt';
+        // Rücknahme: je nach Event-Einstellung „Anmeldungen bestätigen“ wieder offen oder bestätigt.
+        $restored = $adventure->requires_confirmation ? 'offen' : 'bestaetigt';
         $booking->update([
-            'status' => $reject ? 'abgelehnt' : 'offen',
-            'approved_at' => null,
+            'status' => $reject ? 'abgelehnt' : $restored,
+            'approved_at' => (! $reject && $restored === 'bestaetigt') ? now() : null,
         ]);
 
         // M-3: Ablehnung/Rücknahme protokollieren.
@@ -566,7 +557,21 @@ class BookingController extends Controller
             ['adventure' => $adventure->name]
         );
 
-        $message = $reject ? 'Anmeldung abgelehnt.' : 'Ablehnung zurückgenommen.';
+        $message = $reject
+            ? 'Anmeldung abgelehnt.'
+            : 'Ablehnung zurückgenommen – Status jetzt „'.Booking::STATUS_LABELS[$restored].'“.';
+
+        // Rücknahme: Familie/Teamer erfährt, dass die Ablehnung aufgehoben ist
+        // (bestätigt → Bestätigung, offen → Eingangsbestätigung; Warteliste: keine Zahlungsmail).
+        if (! $reject && ! $booking->is_guest) {
+            $booking->loadMissing(['role', 'player.users', 'bookedBy']);
+            $isTeamer = (bool) $booking->role?->is_teamer_like;
+            $recipientEmail = $booking->notificationEmail();
+            if ($recipientEmail && ($isTeamer || ! $booking->waitlisted)) {
+                Notification::route('mail', $recipientEmail)->notify($booking->confirmationNotification());
+                $message .= ' Mail gesendet an '.$recipientEmail.'.';
+            }
+        }
 
         // NOTI-10: Ablehnungs-Mail + Portal an den Spieler (nur beim Ablehnen, nicht beim Zurücknehmen).
         if ($reject && $booking->player?->notificationEnabled('notify_booking_rejected')) {

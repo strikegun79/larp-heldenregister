@@ -165,51 +165,52 @@
                         <td>
                             <div class="flex items-center justify-end gap-1 flex-wrap">
                                 @can('approve-bookings')
-                                    @unless ($booking->is_guest)
-                                        @if ($booking->status !== 'bestaetigt' && ! $booking->waitlisted)
-                                            {{-- Noch nicht bestätigt → Bestätigen-Button --}}
-                                            <form method="POST"
-                                                  action="{{ route('adventures.bookings.confirm-teamer', [$adventure, $booking]) }}"
-                                                  data-refresh-modal
-                                                  data-confirm="{{ $booking->player?->full_name ?? 'Teamer' }} als Teamer bestätigen?">
-                                                @csrf @method('PATCH')
-                                                <button type="submit"
-                                                        class="ui mini icon green button"
-                                                        data-tooltip="Als Teamer bestätigen"
-                                                        data-position="top center">
-                                                    <i class="check icon"></i>
-                                                    <span class="sm:hidden ml-1 text-xs">Bestät.</span>
-                                                </button>
-                                            </form>
-                                        @elseif ($booking->status === 'bestaetigt')
-                                            {{-- Bestätigung zurücknehmen --}}
-                                            <form method="POST"
-                                                  action="{{ route('adventures.bookings.confirm-teamer', [$adventure, $booking]) }}"
-                                                  data-refresh-modal
-                                                  data-confirm="Bestätigung für {{ $booking->player?->full_name ?? 'Teamer' }} zurücknehmen?">
-                                                @csrf @method('PATCH')
-                                                <button type="submit"
-                                                        class="ui mini icon button"
-                                                        data-tooltip="Bestätigung zurücknehmen"
-                                                        data-position="top center">
-                                                    <i class="undo icon"></i>
-                                                    <span class="sm:hidden ml-1 text-xs">Zurück</span>
-                                                </button>
-                                            </form>
-                                            {{-- Bestätigungsmail erneut senden --}}
-                                            <form method="POST"
-                                                  action="{{ route('adventures.bookings.resend-confirmation', [$adventure, $booking]) }}"
-                                                  data-refresh-modal>
-                                                @csrf
-                                                <button type="submit"
-                                                        class="ui mini icon button"
-                                                        data-tooltip="Bestätigungsmail erneut senden"
-                                                        data-position="top center">
-                                                    <i class="envelope icon"></i>
-                                                    <span class="sm:hidden ml-1 text-xs">Mail</span>
-                                                </button>
-                                            </form>
-                                        @endif
+                                    @if ($booking->status === 'offen')
+                                        {{-- Event mit „Anmeldungen bestätigen“: offene Anmeldung bestätigen --}}
+                                        <form method="POST"
+                                              action="{{ route('adventures.bookings.confirm', [$adventure, $booking]) }}"
+                                              data-refresh-modal
+                                              data-confirm="{{ $booking->participant_name }} als Teamer bestätigen?">
+                                            @csrf @method('PATCH')
+                                            <button type="submit"
+                                                    class="ui mini icon green button"
+                                                    data-tooltip="Bestätigen"
+                                                    data-position="top center">
+                                                <i class="check icon"></i>
+                                                <span class="sm:hidden ml-1 text-xs">Bestät.</span>
+                                            </button>
+                                        </form>
+                                    @endif
+                                    @if (in_array($booking->status, ['offen', 'bestaetigt', 'abgelehnt'], true))
+                                        {{-- Ablehnen bzw. Ablehnung zurücknehmen --}}
+                                        <form method="POST"
+                                              action="{{ route('adventures.bookings.rejection', [$adventure, $booking]) }}"
+                                              data-refresh-modal
+                                              data-confirm="{{ $booking->status === 'abgelehnt' ? 'Ablehnung für '.$booking->participant_name.' zurücknehmen?' : $booking->participant_name.' ablehnen? Die Person wird per E-Mail informiert.' }}">
+                                            @csrf @method('PATCH')
+                                            <button type="submit"
+                                                    class="ui mini icon button {{ $booking->status === 'abgelehnt' ? '' : 'orange' }}"
+                                                    data-tooltip="{{ $booking->status === 'abgelehnt' ? 'Ablehnung zurücknehmen' : 'Ablehnen' }}"
+                                                    data-position="top center">
+                                                <i class="{{ $booking->status === 'abgelehnt' ? 'undo' : 'ban' }} icon"></i>
+                                                <span class="sm:hidden ml-1 text-xs">{{ $booking->status === 'abgelehnt' ? 'Zurück' : 'Ablehnen' }}</span>
+                                            </button>
+                                        </form>
+                                    @endif
+                                    @unless ($booking->is_guest || in_array($booking->status, ['abgelehnt', 'storniert'], true))
+                                        {{-- Mail passend zum Status erneut senden --}}
+                                        <form method="POST"
+                                              action="{{ route('adventures.bookings.resend-confirmation', [$adventure, $booking]) }}"
+                                              data-refresh-modal>
+                                            @csrf
+                                            <button type="submit"
+                                                    class="ui mini icon button"
+                                                    data-tooltip="{{ $booking->status === 'offen' ? 'Eingangsbestätigung erneut senden' : 'Bestätigungsmail erneut senden' }}"
+                                                    data-position="top center">
+                                                <i class="envelope icon"></i>
+                                                <span class="sm:hidden ml-1 text-xs">Mail</span>
+                                            </button>
+                                        </form>
                                     @endunless
                                 @endcan
                                 @can('adventure.modify')

@@ -191,6 +191,34 @@ class Booking extends Model
         return (float) ($adventure?->fee ?? 0);
     }
 
+    /**
+     * Mail passend zu Rolle und Status (Event-Einstellung „Anmeldungen bestätigen“):
+     * Teamer: bestätigt → TeamerBookingConfirmed, offen → TeamerBookingReceived.
+     * Teilnehmer: bestätigt → BookingReceived (mit Bankdaten), offen → BookingPending (ohne).
+     * Wartelisten-Mails (BookingWaitlisted) bleiben Sache des Aufrufers.
+     */
+    public function confirmationNotification(): \Illuminate\Notifications\Notification
+    {
+        $isTeamer = (bool) $this->loadMissing('role')->role?->is_teamer_like;
+        $confirmed = $this->status === 'bestaetigt';
+
+        if ($isTeamer) {
+            return $confirmed
+                ? new \App\Notifications\TeamerBookingConfirmed($this)
+                : new \App\Notifications\TeamerBookingReceived($this);
+        }
+
+        return $confirmed
+            ? new \App\Notifications\BookingReceived($this)
+            : new \App\Notifications\BookingPending($this);
+    }
+
+    /** E-Mail-Empfänger: Spieler-E-Mail, sonst Erziehungsberechtigte/r (anmeldender Betreuer). */
+    public function notificationEmail(): ?string
+    {
+        return $this->player?->email ?: $this->guardian()?->email;
+    }
+
     public function isApproved(): bool
     {
         return $this->approved_at !== null;

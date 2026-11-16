@@ -110,6 +110,24 @@
         </div>
     </div>
 
+    {{-- Anmeldungen einzeln bestätigen: sonst sind Anmeldungen sofort bestätigt --}}
+    <div class="flex items-start gap-3 p-3 bg-amber-50 border border-amber-200 rounded-md">
+        <input type="hidden" name="requires_confirmation" value="0">
+        <input type="checkbox" id="requires_confirmation" name="requires_confirmation" value="1"
+               class="mt-0.5 rounded border-gray-300 text-amber-700 focus:ring-amber-600"
+               @checked(old('requires_confirmation', $adventure->requires_confirmation ?? false))>
+        <div>
+            <label for="requires_confirmation" class="font-medium text-amber-900 cursor-pointer">
+                Anmeldungen bestätigen
+            </label>
+            <p class="text-sm text-amber-700 mt-0.5">
+                Neue Anmeldungen bleiben „offen“, bis sie in der Verwaltung bestätigt werden.
+                Die Zahlungsinformationen gehen erst mit der Bestätigung raus.
+                Ohne Häkchen sind Anmeldungen sofort bestätigt.
+            </p>
+        </div>
+    </div>
+
     {{-- Spielleiter & Eventleiter (ADV-11): berechtigte Nutzer. --}}
     <div class="grid grid-cols-2 gap-4">
         <div>

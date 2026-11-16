@@ -172,6 +172,15 @@
     <div class="flex flex-col gap-2">
         @if (! $isCanceled)
             @can('approve-bookings')
+                @if ($booking->status === 'offen')
+                    {{-- Event mit „Anmeldungen bestätigen“ (oder Altdaten): offene Anmeldung bestätigen --}}
+                    <form method="POST" action="{{ route('adventures.bookings.confirm', [$adventure, $booking]) }}" data-inspector-form
+                          data-confirm="Anmeldung von {{ $name }} bestätigen?{{ $isTeamer || $booking->waitlisted ? '' : ' Die Zahlungsinformationen werden per E-Mail gesendet.' }}">
+                        @csrf @method('PATCH')
+                        <button type="submit" class="ui fluid small green button"><i class="check circle icon"></i> Anmeldung bestätigen</button>
+                    </form>
+                @endif
+
                 @unless ($booking->is_guest)
                     @if ($booking->waitlisted)
                         <form method="POST" action="{{ route('adventures.bookings.resend-confirmation', [$adventure, $booking]) }}" data-inspector-form
@@ -203,7 +212,7 @@
                 @can('approve-bookings')
                     <form method="POST" action="{{ route('adventures.bookings.resend-confirmation', [$adventure, $booking]) }}" data-inspector-form>
                         @csrf
-                        <button type="submit" class="ui fluid small button"><i class="envelope icon"></i> Anmeldebestätigung erneut senden</button>
+                        <button type="submit" class="ui fluid small button"><i class="envelope icon"></i> {{ $booking->status === 'offen' ? 'Eingangsbestätigung erneut senden' : 'Anmeldebestätigung erneut senden' }}</button>
                     </form>
                 @endcan
             @endunless
