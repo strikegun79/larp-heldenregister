@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Adventure;
 use App\Models\Booking;
 use App\Models\Hero;
+use App\Services\AuditLogger;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -128,6 +129,42 @@ class AttendanceController extends Controller
         });
 
         $message = 'Teilnehmer abgemeldet ('.$booking->absence_reason_label.').';
+
+        return $request->expectsJson()
+            ? response()->json(['message' => $message, 'refresh_modal' => true])
+            : back()->with('status', $message);
+    }
+
+    /**
+     * Abmeldung zurücknehmen: Status wieder „bestätigt“, Abmeldegrund entfernen.
+     * Der Check-in wird nicht wiederhergestellt (bei Anwesenheit normal einchecken).
+     * Keine Mail – das Abmelden ist ein interner Check-in-Vorgang.
+     */
+    public function undoDeregister(Request $request, Adventure $adventure, Booking $booking): RedirectResponse|JsonResponse
+    {
+        abort_unless($booking->adventure_id === $adventure->id, 404);
+
+        if ($booking->status !== 'abgemeldet') {
+            $msg = 'Diese Anmeldung ist nicht abgemeldet.';
+
+            return $request->expectsJson()
+                ? response()->json(['message' => $msg], 422)
+                : back()->with('error', $msg);
+        }
+
+        $reason = $booking->absence_reason_label;
+        $booking->update([
+            'status' => 'bestaetigt',
+            'absence_reason' => null,
+            'approved_at' => now(),
+        ]);
+
+        AuditLogger::log('booking.deregistration_revoked', $booking, array_filter([
+            'adventure' => $adventure->name,
+            'absence_reason' => $reason,
+        ]));
+
+        $message = 'Abmeldung von '.$booking->participant_name.' zurückgenommen – Status wieder „bestätigt“.';
 
         return $request->expectsJson()
             ? response()->json(['message' => $message, 'refresh_modal' => true])

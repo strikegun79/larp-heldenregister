@@ -50,13 +50,10 @@
                      class="relative overflow-hidden rounded-xl mb-6 sm:mb-8 border-2 border-[#5a3a22]/40"
                      style="background-image: url('/images/newsletter_banner.jpg'); background-size: cover; background-position: center; min-height: 120px;">
 
-                    {{-- Dunkles Overlay für Lesbarkeit des Texts über dem Panoramabild --}}
-                    <div class="absolute inset-0 bg-black/45 rounded-xl" aria-hidden="true"></div>
-
-                    {{-- Inhalt über dem Overlay --}}
+                    {{-- Inhalt direkt auf dem hellen Pergamentbild (kein dunkles Overlay, siehe Issue #12) --}}
                     <div class="relative z-10 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 p-4 sm:p-5">
-                        {{-- Textbereich mit leichtem Pergament-Panel für zusätzliche Lesbarkeit --}}
-                        <div class="flex-1 bg-black/20 rounded-lg px-4 py-2">
+                        {{-- Textbereich mit hellem Pergament-Panel: dunkelbraune Schrift auf hellem Grund --}}
+                        <div class="flex-1 bg-amber-50/85 border border-[#5a3a22]/20 rounded-lg px-4 py-2 shadow-sm">
                             <p class="text-sm text-[#5a3a22] leading-snug">
                                 <strong class="font-uncial text-[#5a3a22] text-base block mb-0.5">Kein Newsletter?</strong>
                                 Verpasse keine Neuigkeiten zu Abenteuern und Ankündigungen der Waldritter.
@@ -71,7 +68,7 @@
                                 </button>
                             </form>
                             <button type="button" @click="schliessen()"
-                                    class="ui small basic inverted button">
+                                    class="ui small button">
                                 Nein Danke
                             </button>
                         </div>

@@ -34,6 +34,7 @@ class Adventure extends Model
         'waitlist',
         'waitlist_mode',
         'is_hidden',
+        'requires_confirmation',
         'fee',
         'fee_reduced',
         'legacy_id',
@@ -52,6 +53,7 @@ class Adventure extends Model
         'waitlist' => 'integer',
         'waitlist_mode' => 'boolean',
         'is_hidden' => 'boolean',
+        'requires_confirmation' => 'boolean',
     ];
 
     /** Gibt die Altersbeschränkung als lesbaren String zurück, z. B. „8–17 Jahre". */

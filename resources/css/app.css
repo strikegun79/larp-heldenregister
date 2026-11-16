@@ -187,6 +187,34 @@ input:focus, select:focus, textarea:focus {
     border-top-width: 3px;
 }
 
+/* Reiter: inaktive Tabs als eigene Pergament-Laschen erkennbar und durch eine
+   kleine Lücke voneinander getrennt; der aktive Tab bleibt weiß und verbindet
+   sich mit dem Inhalt darunter. */
+.ui.tabular.menu {
+    gap: 4px;
+    border-bottom-color: rgba(90, 58, 34, .35);
+    /* Bei Platzmangel umbrechen statt scrollen (keine unnötige Scrollbar) */
+    flex-wrap: wrap;
+}
+.ui.tabular.menu .item:not(.active) {
+    background-color: rgba(228, 206, 165, .55);
+    border: 1px solid rgba(90, 58, 34, .25);
+    border-bottom: none;
+    border-radius: .5rem .5rem 0 0 !important;
+    color: #57534e;
+}
+.ui.tabular.menu .item:not(.active):hover {
+    background-color: rgba(241, 228, 199, .95);
+    color: var(--wr-ink);
+}
+.ui.tabular.menu .item:not(.active):focus-visible {
+    outline: 2px solid var(--wr-gold);
+    outline-offset: -2px;
+}
+.ui.tabular.menu .item.active {
+    border-radius: .5rem .5rem 0 0 !important;
+}
+
 /* --- Tabellenköpfe in Tinte ------------------------------------------- */
 .ui.table thead th { color: var(--wr-ink); }
 
@@ -479,4 +507,91 @@ footer {
     .wr-verwalten-grid {
         grid-template-columns: 1fr;
     }
+}
+
+/* ===========================================================================
+   Inspektor (Issue #9): Slide-In von rechts in der Event-Verwaltung.
+   Auf der Vollseite liegt das Panel unter dem Fomantic-Dimmer (z-index 1000),
+   damit Bestätigungsdialoge darüber erscheinen. Ist ein Modal offen, wird das
+   Panel per JS in den Dimmer verschoben und liegt dort über dem Modal.
+   =========================================================================== */
+.booking-inspector {
+    position: fixed;
+    top: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 990;
+    width: 420px;
+    max-width: 100vw;
+    display: flex;
+    flex-direction: column;
+    background-color: #fbf6ea;
+    border-left: 2px solid rgba(90, 58, 34, .4);
+    box-shadow: -8px 0 24px rgba(0, 0, 0, .25);
+    color: #292524;
+    transform: translateX(100%);
+    transition: transform .2s ease-out;
+}
+.booking-inspector[hidden] { display: none; }
+.booking-inspector.is-open { transform: translateX(0); }
+.ui.dimmer.modals > .booking-inspector { z-index: 1002; }
+/* Bestätigungsdialog muss über dem Inspektor liegen */
+.ui.dimmer.modals > #confirm-modal.ui.modal { z-index: 1003; }
+
+.booking-inspector__header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: .75rem;
+    padding: .9rem 1rem;
+    border-bottom: 1px solid rgba(90, 58, 34, .2);
+    background-color: #f3e8cf;
+}
+.booking-inspector__content {
+    flex: 1;
+    overflow-y: auto;
+    padding: 1rem;
+    text-align: left;
+}
+
+@media (max-width: 639px) {
+    .booking-inspector { width: 100vw; border-left: none; }
+}
+@media (prefers-reduced-motion: reduce) {
+    .booking-inspector { transition: none; }
+}
+
+/* Klickbare Teilnehmerzeilen in der Verwaltung */
+tr.booking-row-clickable { cursor: pointer; }
+tr.booking-row-clickable:hover > td { background-color: rgba(200, 150, 42, .10); }
+tr.booking-row-clickable:focus-visible { outline: 2px solid var(--wr-gold); outline-offset: -2px; }
+tr.booking-row-clickable.is-inspected > td { background-color: rgba(200, 150, 42, .20); }
+
+/* ===========================================================================
+   Verwaltungsbereich: Rahmen in Signalfarbe (Siegelrot), damit sofort erkennbar
+   ist, dass man sich in der Verwaltung befindet. Hintergründe, Pergament und
+   Schriften bleiben unverändert. Die Klasse wr-admin-area setzt das Layout auf
+   Verwaltungsrouten (<main>) bzw. heldenregister.js auf Verwaltungs-Modals.
+   =========================================================================== */
+:root {
+    --wr-admin-signal: #b4232a;   /* Siegelrot – zentral anpassbar */
+}
+/* Karten/Flächen mit dem Standard-Braunrahmen */
+.wr-admin-area .border-\[\#5a3a22\]\/30,
+.wr-admin-area .border-\[\#5a3a22\]\/40 {
+    border-color: var(--wr-admin-signal);
+}
+/* Verwaltungs-Modals: Signalrahmen rundherum */
+.ui.modal.wr-admin-area {
+    box-shadow: 0 0 0 3px var(--wr-admin-signal), 1px 3px 3px 0 rgba(0, 0, 0, .2), 1px 3px 15px 2px rgba(0, 0, 0, .2);
+}
+.ui.modal.wr-admin-area > .header {
+    border-bottom-color: var(--wr-admin-signal);
+}
+/* Inspektor (Issue #9) gehört immer zur Verwaltung */
+.booking-inspector { border-left-color: var(--wr-admin-signal); }
+/* Reiter im Verwaltungsbereich: aktiver Tab mit Signalfarbe oben */
+.wr-admin-area .ui.tabular.menu .item.active,
+.ui.modal.wr-admin-area .ui.tabular.menu .item.active {
+    border-top-color: var(--wr-admin-signal);
 }

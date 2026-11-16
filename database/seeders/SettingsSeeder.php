@@ -19,7 +19,7 @@ class SettingsSeeder extends Seeder
         ];
 
         foreach ($defaults as $key => $value) {
-            Setting::updateOrCreate(['key' => $key], ['value' => $value]);
+            Setting::firstOrCreate(['key' => $key], ['value' => $value]);
         }
     }
 }

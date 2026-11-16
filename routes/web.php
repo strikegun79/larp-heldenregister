@@ -193,6 +193,14 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('adventures.bookings.store-guest');
     Route::post('adventures/{adventure}/bookings', [BookingController::class, 'store'])
         ->name('adventures.bookings.store');
+    // Admin-Anmeldung (Issue #8): Betreuer/Gesundheitsdaten des gewählten Spielers.
+    Route::get('adventures/{adventure}/bookings/player-context/{player}', [BookingController::class, 'playerContext'])
+        ->name('adventures.bookings.player-context');
+
+    // Inspektor (Slide-In) in der Event-Verwaltung (Issue #9).
+    Route::get('adventures/{adventure}/bookings/{booking}/inspector', [BookingController::class, 'inspector'])
+        ->name('adventures.bookings.inspector');
+
     // Anmeldedetails nachträglich bearbeiten (BOOK-04).
     Route::get('adventures/{adventure}/bookings/{booking}/edit', [BookingController::class, 'edit'])
         ->name('adventures.bookings.edit');
@@ -201,8 +209,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Anmeldebestätigung erneut senden (BOOK-05).
     Route::post('adventures/{adventure}/bookings/{booking}/resend-confirmation', [BookingController::class, 'resendConfirmation'])
         ->name('adventures.bookings.resend-confirmation');
-    Route::patch('adventures/{adventure}/bookings/{booking}/confirm-teamer', [BookingController::class, 'confirmTeamer'])
-        ->name('adventures.bookings.confirm-teamer');
+    // Offene Anmeldung bestätigen (Event-Einstellung „Anmeldungen bestätigen“), alle Rollen.
+    Route::patch('adventures/{adventure}/bookings/{booking}/confirm', [BookingController::class, 'confirm'])
+        ->name('adventures.bookings.confirm');
     // Anmeldung ablehnen – Toggle (ADV-18).
     Route::patch('adventures/{adventure}/bookings/{booking}/rejection', [BookingController::class, 'reject'])
         ->name('adventures.bookings.rejection');
@@ -243,6 +252,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('adventures.bookings.checkin');
     Route::patch('adventures/{adventure}/bookings/{booking}/deregister', [AttendanceController::class, 'deregister'])
         ->name('adventures.bookings.deregister');
+    Route::patch('adventures/{adventure}/bookings/{booking}/deregister-undo', [AttendanceController::class, 'undoDeregister'])
+        ->name('adventures.bookings.deregister-undo');
 
     // Rollen- & DSGVO-Übersicht (für alle Teamer-Rollen sichtbar).
     Route::prefix('admin')->name('admin.')->middleware('can:roles.view')->group(function () {

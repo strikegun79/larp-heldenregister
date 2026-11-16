@@ -51,13 +51,25 @@ mysql -uroot -e "GRANT ALL ON heldenregister.* TO 'heldenregister'@'localhost';"
 
 php artisan migrate
 php artisan db:seed        # Stammdaten: Rollen, Klassen, EP-Typen, Orte, Task-Typen …
+                           # (ergänzt nur fehlende Einträge, überschreibt nichts)
 php artisan storage:link
 
 # 4. Dev-Server starten
 php artisan serve
 ```
 
-Erster Admin-Account: nach der Registrierung per Tinker die Rolle setzen:
+Erster Admin-Account (setzt voraus, dass `db:seed` gelaufen ist):
+
+```bash
+# Bestehenden Benutzer zum Admin machen
+php artisan user:make-admin deine@mail.de
+
+# Oder Admin direkt anlegen (Passwort wird verdeckt abgefragt)
+php artisan user:make-admin deine@mail.de --create --name=Vorname --lastname=Nachname
+```
+
+Der Befehl behält vorhandene Rollen, markiert die E-Mail als bestätigt und
+schreibt einen Audit-Log-Eintrag. Alternativ per Tinker:
 
 ```bash
 php artisan tinker

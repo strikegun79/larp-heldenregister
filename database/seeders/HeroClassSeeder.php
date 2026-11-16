@@ -21,7 +21,7 @@ class HeroClassSeeder extends Seeder
         ];
 
         foreach ($classes as $class) {
-            HeroClass::updateOrCreate(['id' => $class['id']], $class);
+            HeroClass::firstOrCreate(['id' => $class['id']], $class);
         }
     }
 }

@@ -33,6 +33,8 @@ php artisan key:generate
 php artisan migrate --force
 
 # 7. Datenbank-Seeder (Stammdaten / Standard-Settings)
+#    Seeder legen nur fehlende Einträge an (firstOrCreate) – Änderungen aus der
+#    Administration bleiben bei jedem Deployment erhalten.
 php artisan db:seed --class=SettingsSeeder
 php artisan db:seed --class=TaskTypeDefinitionSeeder   # Task-Typ-Standardkonfiguration
 # weitere Seeder nach Bedarf: --class=EventStatusSeeder usw.

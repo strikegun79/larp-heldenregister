@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Exports\ParticipationExport;
 use App\Models\Adventure;
 use App\Models\AdventureTask;
+use App\Models\Booking;
 use App\Models\EventCategory;
 use App\Models\EventClient;
 use App\Models\EventRole;
@@ -20,6 +21,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Notification;
@@ -198,8 +200,14 @@ class AdventureController extends Controller
             )->exists();
         }
 
+        // Reiter „Helden": aktive Helden der Teilnehmer mit Klassen (nur für Plotplanung).
+        $eventHeroes = Gate::allows('view-event-heroes')
+            ? $this->eventHeroes($adventure)
+            : collect();
+
         $data = [
             'adventure' => $adventure,
+            'eventHeroes' => $eventHeroes,
             'players' => $players,
             'roles' => EventRole::orderBy('id')->get(),
             'visibleBookings' => $visibleBookings,
@@ -214,6 +222,32 @@ class AdventureController extends Controller
         return $request->ajax()
             ? view('adventures._detail', $data)
             : view('adventures.show', $data);
+    }
+
+    /**
+     * Teilnehmer-Buchungen für den Reiter „Helden": nur offene/bestätigte
+     * Anmeldungen echter Spieler (keine Gäste, keine Warteliste, keine
+     * NSC-/Teamer-Rollen).
+     * Spieler mit aktivem Held alphabetisch nach Heldenname, Spieler ohne
+     * aktiven Held am Ende.
+     *
+     * @return Collection<int, Booking>
+     */
+    private function eventHeroes(Adventure $adventure): Collection
+    {
+        $adventure->loadMissing('bookings.player.activeHero.classes');
+
+        return $adventure->bookings
+            ->filter(fn (Booking $b) => in_array($b->status ?? 'offen', ['offen', 'bestaetigt'], true)
+                && ! $b->is_guest
+                && ! $b->waitlisted
+                && $b->player !== null
+                && ! ($b->role?->is_teamer_like))
+            ->sortBy(fn (Booking $b) => [
+                $b->player->activeHero ? 0 : 1,
+                mb_strtolower($b->player->activeHero?->character_name ?: $b->player->full_name),
+            ])
+            ->values();
     }
 
     /**
@@ -256,7 +290,11 @@ class AdventureController extends Controller
             'bookings.bookedBy',
             'bookings.role',
             'teamerSignups.user',
+            'visits',
         ]);
+
+        // Eingecheckte Spieler (Issue #7: Hinweis bei fehlender Unterschrift).
+        $visitedIds = $adventure->visits->pluck('player_id');
 
         // Deutsche Sortierung: ohne Groß-/Kleinschreibung, Umlaute korrekt; Gäste mit Gastnamen.
         $collator = new \Collator('de_DE');
@@ -290,7 +328,7 @@ class AdventureController extends Controller
         $female = $bookings->filter(fn ($b) => $b->player?->gender === 'weiblich')->count();
         $diverse = $bookings->filter(fn ($b) => $b->player?->gender === 'divers')->count();
 
-        $pdf = Pdf::loadView('adventures.participants_pdf', compact('adventure', 'bookings', 'nscBookings', 'waitlistPositions', 'male', 'female', 'diverse'))
+        $pdf = Pdf::loadView('adventures.participants_pdf', compact('adventure', 'bookings', 'nscBookings', 'waitlistPositions', 'visitedIds', 'male', 'female', 'diverse'))
             ->setPaper('a4', 'landscape');
 
         // Fußzeile jeder Seite: Titel links, „Seite X/Y" rechts.
@@ -565,10 +603,12 @@ class AdventureController extends Controller
             'fee' => ['required', 'numeric', 'min:0'],
             'fee_reduced' => ['nullable', 'numeric', 'min:0'],
             'is_hidden' => ['boolean'],
+            'requires_confirmation' => ['boolean'],
         ]);
 
         // Checkbox sendet keinen Wert wenn nicht angehakt → false setzen.
         $data['is_hidden'] = $request->boolean('is_hidden');
+        $data['requires_confirmation'] = $request->boolean('requires_confirmation');
 
         // Leeres Feld (NOT NULL mit Default 0) → Integer-Default setzen.
         $data['loot_ep_day'] = (int) ($data['loot_ep_day'] ?? 0);

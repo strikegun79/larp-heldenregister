@@ -7,9 +7,7 @@ use App\Models\EventRole;
 use App\Models\Group;
 use App\Models\Hero;
 use App\Models\Player;
-use App\Notifications\BookingReceived;
 use App\Notifications\BookingWaitlisted;
-use App\Notifications\TeamerBookingReceived;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -131,8 +129,9 @@ class GroupBookingController extends Controller
                 'agb' => true,
                 'kontakt_telefon' => $data['kontakt_telefon'],
                 'waitlisted' => $waitlisted,
-                'approved_at' => $isTeamer ? null : now(),
-                'status' => $isTeamer ? 'offen' : 'bestaetigt',
+                // Event-Einstellung „Anmeldungen bestätigen“ (gilt für alle Rollen).
+                'approved_at' => $adventure->requires_confirmation ? null : now(),
+                'status' => $adventure->requires_confirmation ? 'offen' : 'bestaetigt',
             ]);
 
             // Wartelisten-Modus nur bei Kapazitätsüberschreitung aktivieren, nicht bei Altersverletzung.
@@ -142,14 +141,11 @@ class GroupBookingController extends Controller
 
             $recipientEmail = $player?->email ?: $request->user()->email;
             if ($recipientEmail) {
-                if ($isTeamer) {
-                    Notification::route('mail', $recipientEmail)->notify(new TeamerBookingReceived($booking));
-                } else {
-                    $notification = $booking->waitlisted
-                        ? new BookingWaitlisted($booking, $ageViolation)
-                        : new BookingReceived($booking);
-                    Notification::route('mail', $recipientEmail)->notify($notification);
-                }
+                // Warteliste → keine Bankdaten; sonst je nach Rolle/Status (bestätigt bzw. Eingang).
+                $notification = (! $isTeamer && $booking->waitlisted)
+                    ? new BookingWaitlisted($booking, $ageViolation)
+                    : $booking->confirmationNotification();
+                Notification::route('mail', $recipientEmail)->notify($notification);
             }
 
             $created++;

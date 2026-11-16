@@ -24,7 +24,7 @@ class EpTransactionTypeSeeder extends Seeder
         ];
 
         foreach ($types as $type) {
-            EpTransactionType::updateOrCreate(['id' => $type['id']], $type);
+            EpTransactionType::firstOrCreate(['id' => $type['id']], $type);
         }
     }
 }

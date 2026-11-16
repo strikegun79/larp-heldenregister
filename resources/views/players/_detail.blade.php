@@ -109,7 +109,7 @@
 
 {{-- Desktop: Fomantic-Tabs (sm+) --}}
 <div class="hidden sm:block">
-    <div class="ui top attached tabular menu" style="overflow-x: auto; flex-wrap: nowrap;">
+    <div class="ui top attached tabular menu">
         <a class="item active" data-tab="p-allg" style="white-space: nowrap;">Allgemeines</a>
         <a class="item" data-tab="p-helden" style="white-space: nowrap;">Helden</a>
         <a class="item" data-tab="p-abenteuer" style="white-space: nowrap;">Abenteuer</a>

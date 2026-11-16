@@ -30,7 +30,7 @@
             @if ($motd->image_link)
                 <a href="{{ $motd->image_link }}" class="block cursor-pointer"
                    @if ($motd->image_link_external) target="_blank" rel="noopener" @endif>
-                    <img src="{{ $motd->image_url }}" alt="Banner – zum Link" class="w-full rounded mb-3" style="max-height: 320px; object-fit: cover;">
+                    <img src="{{ $motd->image_url }}" alt="Banner – zum Link" class="w-full rounded mb-3" style="max-height: 420px; object-fit: cover;">
                 </a>
             @else
                 <img src="{{ $motd->image_url }}" alt="" class="w-full rounded mb-3" style="max-height: 320px; object-fit: cover;">

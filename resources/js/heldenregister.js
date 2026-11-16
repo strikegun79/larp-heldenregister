@@ -61,6 +61,19 @@ window.appModalUrl  = null;
 window.appModal2Url = null;
 
 // ------------------------------------------------------------------
+// Verwaltungsbereich erkennen: Modals mit Verwaltungsinhalt bekommen die
+// Klasse wr-admin-area (Rahmen in Signalfarbe, siehe app.css).
+// ------------------------------------------------------------------
+function isAdminAreaUrl(url) {
+    let path;
+    try { path = new URL(url, window.location.href).pathname; } catch (e) { return false; }
+    return /^\/admin(\/|$)/.test(path)
+        || /^\/adventures-manage(\/|$)/.test(path)
+        || /^\/adventures\/create$/.test(path)
+        || /^\/adventures\/[^/]+\/(manage|edit)$/.test(path);
+}
+
+// ------------------------------------------------------------------
 // Haupt-Modal laden (AJAX-Partial -> #app-modal)
 // ------------------------------------------------------------------
 function loadModalContent(url, preserveTab) {
@@ -96,6 +109,8 @@ function loadModalContent(url, preserveTab) {
             $('#app-modal').toggleClass('modal-hero', $content.find('#skilltree').length > 0);
             // ADV-19: Verwaltungs-Modal (3 Tabs) auf feste Größe.
             $('#app-modal').toggleClass('modal-event', $content.find('[data-tab="checkin"]').length > 0);
+            // Verwaltungsinhalt kennzeichnen (Signalrahmen).
+            $('#app-modal').toggleClass('wr-admin-area', isAdminAreaUrl(url));
             // Alle Modale mit Tabs: fixe Höhe, damit kein Springen beim Tab-Wechsel.
             $('#app-modal').toggleClass('modal-has-tabs', $content.find('.menu .item[data-tab]').length > 0);
             // ADV-17: Unterschriften-Pad aktivieren, falls vorhanden.
@@ -195,6 +210,9 @@ function loadStackContent(url, preserveTab) {
                 $content.find('[data-tab="' + prevTab + '"]').addClass('active');
             }
             $('#app-modal-2').toggleClass('modal-hero', $content.find('#skilltree').length > 0);
+            // Verwaltung: gestapeltes Modal erbt die Kennzeichnung vom Verwaltungs-Modal darunter.
+            $('#app-modal-2').toggleClass('wr-admin-area',
+                isAdminAreaUrl(url) || $('#app-modal').hasClass('wr-admin-area'));
             // Alle Modale mit Tabs: fixe Höhe (gestapeltes Modal).
             $('#app-modal-2').toggleClass('modal-has-tabs', $content.find('.menu .item[data-tab]').length > 0);
             // UI-05: Fomantic-Datepicker im gestapelten Modal initialisieren.
@@ -473,7 +491,7 @@ function refreshManageTab() {
     const activeItem = document.querySelector('.ui.top.attached.tabular.menu .item.active[data-tab]');
     const activeTabName = activeItem ? activeItem.getAttribute('data-tab') : null;
 
-    fetch(window.location.href, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+    return fetch(window.location.href, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
         .then(r => r.text())
         .then(html => {
             const doc = new DOMParser().parseFromString(html, 'text/html');
@@ -589,6 +607,192 @@ document.addEventListener('submit', function (e) {
                 const errors = data.errors ? Object.values(data.errors).flat() : [];
                 showToast(errors.join('<br>') || data.message || 'Bitte prüfen.', 'error');
             } else {
+                showToast(data.message || 'Fehler.', 'error');
+            }
+        })
+        .catch(() => showToast('Netzwerkfehler.', 'error'))
+        .finally(() => submitBtn?.classList.remove('loading', 'disabled'));
+});
+
+// ------------------------------------------------------------------
+// Inspektor (Issue #9): Slide-In mit Anmeldedetails in der Event-Verwaltung.
+// Zeilenklick auf tr[data-inspector-url] öffnet das Panel; Formulare mit
+// data-inspector-form werden per AJAX abgeschickt, danach werden Inspektor
+// und Teilnehmerliste neu geladen.
+// ------------------------------------------------------------------
+let inspectorUrl = null;
+let inspectorCloseTimer = null;
+
+function inspectorEl() {
+    return document.getElementById('booking-inspector');
+}
+
+function inspectorIsOpen() {
+    const el = inspectorEl();
+    return !!el && !el.hidden;
+}
+
+// Ist ein Modal offen, muss das Panel im Fomantic-Dimmer liegen, sonst verdeckt
+// der Dimmer es. Auf der Vollseite bleibt es direkt im <body>.
+function placeInspector() {
+    const el = inspectorEl();
+    const dimmer = document.querySelector('.ui.dimmer.modals.active');
+    const target = dimmer || document.body;
+    if (el.parentElement !== target) target.appendChild(el);
+}
+
+function findInspectorRow(url) {
+    if (!url) return null;
+    return Array.from(document.querySelectorAll('tr[data-inspector-url]'))
+        .find(tr => tr.getAttribute('data-inspector-url') === url) || null;
+}
+
+function markInspectedRow(url) {
+    document.querySelectorAll('tr.is-inspected').forEach(tr => tr.classList.remove('is-inspected'));
+    findInspectorRow(url)?.classList.add('is-inspected');
+}
+
+function loadInspector(focusPanel) {
+    const content = document.getElementById('booking-inspector-content');
+    const title   = document.getElementById('booking-inspector-title');
+    const url     = inspectorUrl;
+    content.innerHTML = '<div class="ui active centered inline loader" style="display:block;margin:2rem auto"></div>';
+
+    return fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+        .then(r => { if (!r.ok) throw new Error(r.status); return r.text(); })
+        .then(html => {
+            if (url !== inspectorUrl) return; // inzwischen andere Zeile geöffnet
+            content.innerHTML = html;
+            const t = content.querySelector('[data-inspector-title]');
+            title.textContent = t ? t.textContent.trim() : 'Anmeldung';
+            t?.remove();
+            if (focusPanel) inspectorEl().querySelector('[data-inspector-close]')?.focus();
+        })
+        .catch(() => {
+            content.innerHTML = '<div class="ui error message">Konnte nicht geladen werden.</div>';
+        });
+}
+
+function openInspector(url) {
+    const el = inspectorEl();
+    if (!el) return;
+    clearTimeout(inspectorCloseTimer);
+    inspectorUrl = url;
+    markInspectedRow(url);
+    placeInspector();
+    el.hidden = false;
+    requestAnimationFrame(() => el.classList.add('is-open'));
+    loadInspector(true);
+}
+
+function closeInspector(restoreFocus) {
+    const el = inspectorEl();
+    if (!inspectorIsOpen()) return;
+    const row = findInspectorRow(inspectorUrl);
+    inspectorUrl = null;
+    markInspectedRow(null);
+    el.classList.remove('is-open');
+    inspectorCloseTimer = setTimeout(() => { el.hidden = true; }, 200);
+    // Fokus zurück auf die Zeile, von der aus der Inspektor geöffnet wurde.
+    if (restoreFocus !== false) row?.focus();
+}
+
+// Teilnehmerliste dahinter aktualisieren (Modal oder Vollseite).
+function refreshInspectorBackground() {
+    const inModal = window.appModalUrl && $('#app-modal').hasClass('active');
+    const done = inModal ? loadModalContent(window.appModalUrl, true) : refreshManageTab();
+    return Promise.resolve(done).then(() => {
+        markInspectedRow(inspectorUrl);
+        // loadModalContent setzt den Fokus ins Modal – zurück in den Inspektor holen.
+        requestAnimationFrame(() => {
+            if (inspectorIsOpen()) inspectorEl().querySelector('[data-inspector-close]')?.focus();
+        });
+    });
+}
+
+document.addEventListener('click', function (e) {
+    // Zeilenklick öffnet den Inspektor (Buttons/Links in der Zeile behalten ihre Funktion).
+    const row = e.target.closest('tr[data-inspector-url]');
+    if (row) {
+        if (e.target.closest('a, button, form, input, select, textarea, label')) return;
+        openInspector(row.getAttribute('data-inspector-url'));
+        return;
+    }
+
+    if (e.target.closest('[data-inspector-close]')) {
+        // „Bearbeiten“ öffnet zusätzlich das gestapelte Modal (eigener Handler).
+        closeInspector(!e.target.closest('[data-modal-stack]'));
+        return;
+    }
+
+    // Klick daneben schließt – außer in Dialogen/Toasts über dem Inspektor.
+    if (inspectorIsOpen()
+        && !inspectorEl().contains(e.target)
+        && !e.target.closest('#confirm-modal, #app-modal-2, #session-expired-modal, .ui.toast-container')) {
+        closeInspector(false);
+    }
+});
+
+// Enter/Leertaste auf einer fokussierten Zeile öffnet den Inspektor.
+document.addEventListener('keydown', function (e) {
+    if (e.key !== 'Enter' && e.key !== ' ') return;
+    const row = e.target.closest('tr[data-inspector-url]');
+    if (!row || e.target !== row) return;
+    e.preventDefault();
+    openInspector(row.getAttribute('data-inspector-url'));
+});
+
+// Esc schließt zuerst den Inspektor, nicht das Modal dahinter.
+window.addEventListener('keydown', function (e) {
+    if (e.key !== 'Escape' || !inspectorIsOpen()) return;
+    if ($('#confirm-modal').hasClass('active') || $('#app-modal-2').hasClass('active')) return;
+    e.preventDefault();
+    e.stopPropagation();
+    closeInspector();
+}, true);
+
+// Maus-Events im Inspektor nicht an den Fomantic-Dimmer weitergeben,
+// sonst schließt ein Klick ins Panel das Modal dahinter.
+['mousedown', 'mouseup'].forEach(type => {
+    inspectorEl()?.addEventListener(type, e => e.stopPropagation());
+});
+
+// Wird das Verwaltungs-Modal geschlossen, schließt auch der Inspektor.
+const appModalEl = document.getElementById('app-modal');
+if (appModalEl) {
+    new MutationObserver(() => {
+        if (!appModalEl.classList.contains('active') && inspectorIsOpen()
+            && inspectorEl().parentElement !== document.body) {
+            closeInspector(false);
+        }
+    }).observe(appModalEl, { attributes: true, attributeFilter: ['class'] });
+}
+
+// Aktionen im Inspektor per AJAX (data-confirm läuft vorher im Capture-Handler).
+document.addEventListener('submit', function (e) {
+    const form = e.target;
+    if (!form.hasAttribute('data-inspector-form')) return;
+    if (e.defaultPrevented) return;
+    e.preventDefault();
+
+    const submitBtn = e.submitter || form.querySelector('[type=submit]');
+    submitBtn?.classList.add('loading', 'disabled');
+
+    fetch(form.action, {
+        method: 'POST', // PATCH/DELETE via _method-Spoofing im FormData
+        headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' },
+        body: new FormData(form),
+    })
+        .then(async (resp) => {
+            const data = await resp.json().catch(() => ({}));
+            if (resp.ok) {
+                showToast(data.message || 'Gespeichert.', 'success');
+                refreshInspectorBackground();
+                if (inspectorIsOpen()) loadInspector(false);
+            } else if (resp.status === 422) {
+                const errors = data.errors ? Object.values(data.errors).flat() : [];
+                showToast(errors.join(' · ') || data.message || 'Bitte prüfen.', 'error');
+            } else if (resp.status !== 419) {
                 showToast(data.message || 'Fehler.', 'error');
             }
         })
@@ -770,6 +974,37 @@ document.getElementById('photo-crop-save-btn').addEventListener('click', functio
 });
 
 // ------------------------------------------------------------------
+// Getipptes Datum im deutschen Format in ein Date-Objekt umwandeln (Issue #13).
+// Erlaubt: 15.03.2012 · 15.3.2012 · 15/03/2012 · 15-03-2012 · 15032012
+// Mit Uhrzeit (withTime): zusätzlich „15.03.2012 18:30“ (ohne Uhrzeit → 00:00).
+// Das Jahr muss vierstellig sein; unmögliche Daten (31.02.) ergeben null.
+// ------------------------------------------------------------------
+function parseGermanDate(text, withTime) {
+    if (text instanceof Date) return text;
+
+    const s = String(text ?? '').trim();
+    if (!s) return null;
+
+    const m = s.match(/^(\d{1,2})[./-](\d{1,2})[./-](\d{4})(?:[\s,T]+(\d{1,2})[:.](\d{2}))?$/)
+           || s.match(/^(\d{2})(\d{2})(\d{4})(?:\s+(\d{1,2})[:.]?(\d{2}))?$/);
+    if (!m) return null;
+
+    const day = +m[1], month = +m[2], year = +m[3];
+    const hasTime = m[4] !== undefined;
+    if (hasTime && !withTime) return null;
+
+    const hour = hasTime ? +m[4] : 0;
+    const minute = hasTime ? +m[5] : 0;
+    if (hour > 23 || minute > 59) return null;
+
+    const d = new Date(year, month - 1, day, hour, minute);
+    // Überlauf erkennen (z. B. 31.02. → 03.03.) – dann ist das Datum ungültig.
+    if (d.getFullYear() !== year || d.getMonth() !== month - 1 || d.getDate() !== day) return null;
+
+    return d;
+}
+
+// ------------------------------------------------------------------
 // Fomantic Calendar (UI-05): x-date-picker-Komponenten initialisieren
 // ------------------------------------------------------------------
 function initFomanticCalendars($container) {
@@ -807,6 +1042,10 @@ function initFomanticCalendars($container) {
             formatter:    type === 'datetime'
                 ? { datetime: (d) => d ? fmtDatetime(d) : '', cellTime: 'HH:mm' }
                 : { date:     (d) => d ? fmtDate(d)     : '' },
+            // Tastatureingabe im deutschen Format (Issue #13)
+            parser: {
+                date: (text) => parseGermanDate(text, type === 'datetime'),
+            },
             onChange: function (date) {
                 if (!date) { $hidden.val(''); return; }
                 const iso = type === 'datetime'
@@ -906,6 +1145,12 @@ function initBookingPlayerPrefill(container) {
     const sel = root.querySelector('#booking-player-select');
     if (!sel) return;
 
+    // Issue #8: Admin-Anmeldung lädt zusätzlich die Betreuer des Spielers.
+    if (sel.dataset.contextUrl) {
+        sel.addEventListener('change', function () { loadBookingPlayerContext(root, sel); });
+        return;
+    }
+
     sel.addEventListener('change', function () {
         const playerId    = this.value;
         const urlTemplate = this.dataset.prefillUrl;
@@ -929,12 +1174,102 @@ function initBookingPlayerPrefill(container) {
 }
 
 // ------------------------------------------------------------------
+// Admin-Anmeldung (Issue #8): Betreuer des gewählten Spielers ins Auswahlfeld
+// laden; Notfallnummer vom Betreuer übernehmen; Allergien/Medikamente vorbefüllen.
+// ------------------------------------------------------------------
+function loadBookingPlayerContext(root, sel) {
+    const ctSelect = root.querySelector('#booking-caretaker-select');
+    const ctHint   = root.querySelector('#booking-caretaker-hint');
+    const phone    = root.querySelector('input[name="kontakt_telefon"]');
+    const defaultHint = 'Erhält die Anmeldebestätigung und erscheint als Kontakt in der Teilnehmerliste.';
+    if (!ctSelect) return;
+
+    // Optionen per DOM aufbauen (Namen/Telefon stammen aus Nutzerprofilen → kein innerHTML).
+    const makeOption = (value, text, phoneVal) => {
+        const o = document.createElement('option');
+        o.value = value;
+        o.textContent = text;
+        if (phoneVal !== undefined) o.dataset.phone = phoneVal;
+        return o;
+    };
+    const setOptions = (options, disabled) => {
+        ctSelect.replaceChildren(...options);
+        ctSelect.disabled = disabled;
+    };
+
+    // Telefonnummer nur überschreiben, wenn das Feld leer ist oder noch die
+    // automatisch übernommene Nummer enthält (manuelle Eingaben bleiben erhalten).
+    const applyPhone = (value) => {
+        if (!phone) return;
+        if (phone.value.trim() === '' || phone.dataset.autofilled === phone.value) {
+            phone.value = value || '';
+            phone.dataset.autofilled = phone.value;
+        }
+    };
+
+    // Spielerwechsel: automatisch übernommene Nummer des vorherigen Betreuers entfernen.
+    applyPhone('');
+
+    if (!sel.value) {
+        setOptions([makeOption('', '— zuerst Spieler wählen —')], true);
+        return;
+    }
+    setOptions([makeOption('', 'Lädt …')], true);
+
+    fetch(sel.dataset.contextUrl.replace('__ID__', sel.value), {
+        headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' },
+        credentials: 'same-origin',
+    })
+        .then(r => r.ok ? r.json() : Promise.reject(r.status))
+        .then(data => {
+            const caretakers = data.caretakers || [];
+            if (caretakers.length === 0) {
+                setOptions([makeOption('', '— kein Betreuer hinterlegt —')], true);
+                if (ctHint) {
+                    ctHint.textContent = data.player_email
+                        ? 'Kein Betreuer hinterlegt – die Bestätigung geht an die Spieler-E-Mail ' + data.player_email + '.'
+                        : 'Kein Betreuer und keine Spieler-E-Mail hinterlegt – es wird keine Bestätigung versendet.';
+                }
+                applyPhone('');
+            } else {
+                const opts = caretakers.map(c =>
+                    makeOption(String(c.id), c.name + (c.email ? ' · ' + c.email : ''), c.phone || ''));
+                if (caretakers.length > 1) opts.unshift(makeOption('', '— wählen —'));
+                setOptions(opts, false);
+                ctSelect.required = true;
+                if (ctHint) ctHint.textContent = defaultHint;
+                if (caretakers.length === 1) applyPhone(caretakers[0].phone);
+            }
+
+            const allergienTA   = root.querySelector('textarea[name="allergien"]');
+            const medikamenteTA = root.querySelector('textarea[name="medikamente"]');
+            if (allergienTA   && allergienTA.value.trim()   === '') allergienTA.value   = data.allergien   ?? '';
+            if (medikamenteTA && medikamenteTA.value.trim() === '') medikamenteTA.value = data.medikamente ?? '';
+            updateHealthConsent(root);
+        })
+        .catch(() => {
+            setOptions([makeOption('', 'Betreuer konnten nicht geladen werden')], true);
+        });
+
+    // Betreuerwechsel → dessen Telefonnummer übernehmen (nur einmal registrieren).
+    if (!ctSelect.__phoneInit) {
+        ctSelect.__phoneInit = true;
+        ctSelect.addEventListener('change', function () {
+            const opt = ctSelect.selectedOptions[0];
+            applyPhone(opt ? opt.dataset.phone : '');
+        });
+    }
+}
+
+// ------------------------------------------------------------------
 // UX-120: Anmeldungs-Tabelle sortierbar machen.
 // Wird nach jedem AJAX-Tab-Refresh und Modal-Load neu aufgerufen,
 // weil innerHTML alle Event-Listener und table.__sortInit verwirft.
 // ------------------------------------------------------------------
 function initBookingsTableSort(root) {
     const el     = (root instanceof $) ? root[0] : (root || document);
+    // Issue #10: Check-in-Liste wird an denselben Stellen initialisiert.
+    initCheckinTable(el);
     const tables = el.querySelectorAll ? el.querySelectorAll('[data-bookings-table]') : [];
     tables.forEach(function (table) {
         if (table.__sortInit) return;
@@ -1003,6 +1338,120 @@ function initBookingsTableSort(root) {
         }
 
         applySort('created', false);
+    });
+}
+
+// ------------------------------------------------------------------
+// Check-in-Liste (Issue #10): Suche ab dem 3. Zeichen + sortierbare Spalten.
+// Suchbegriff und Sortierung werden pro Abenteuer gemerkt, damit sie nach
+// Check-in/Auschecken (Reiter wird neu geladen) erhalten bleiben.
+// ------------------------------------------------------------------
+const checkinTableState = new Map();
+const CHECKIN_MIN_CHARS = 3;
+
+function initCheckinTable(root) {
+    const scope = root && root.querySelectorAll ? root : document;
+    const roots = Array.from(scope.querySelectorAll('[data-checkin-root]'));
+    if (scope.matches && scope.matches('[data-checkin-root]')) roots.push(scope);
+
+    roots.forEach(function (wrap) {
+        if (wrap.__checkinInit) return;
+        wrap.__checkinInit = true;
+
+        const table = wrap.querySelector('[data-checkin-table]');
+        const input = wrap.querySelector('[data-checkin-search]');
+        const count = wrap.querySelector('[data-checkin-count]');
+        if (!table) return;
+
+        const tbody    = table.querySelector('tbody');
+        const emptyRow = tbody.querySelector('[data-checkin-empty]');
+        const rows     = Array.from(tbody.querySelectorAll('tr[data-search]'));
+        const key      = wrap.dataset.stateKey || '';
+        const state    = Object.assign({ col: 'lastname', asc: true, query: '' }, checkinTableState.get(key));
+
+        const cellVal = (row, col) => (row.querySelector('[data-col="' + col + '"]') || {}).dataset?.sortVal ?? '';
+
+        function applyFilter() {
+            const q = state.query.trim().toLowerCase();
+            const active = q.length >= CHECKIN_MIN_CHARS;
+            let visible = 0;
+            rows.forEach(function (r) {
+                const hit = !active || r.dataset.search.includes(q);
+                // style.display statt hidden: Mobile-Karten setzen display per CSS
+                r.style.display = hit ? '' : 'none';
+                if (hit) visible++;
+            });
+            if (emptyRow) emptyRow.style.display = visible > 0 ? 'none' : '';
+            if (count) {
+                count.textContent = active
+                    ? visible + ' von ' + rows.length + ' Teilnehmern'
+                    : (q.length > 0 ? 'Noch ' + (CHECKIN_MIN_CHARS - q.length) + ' Zeichen …' : '');
+            }
+        }
+
+        function applySort() {
+            const th = table.querySelector('[data-sort-col="' + state.col + '"]');
+            const numeric = th?.dataset.sortType === 'num';
+            const sorted = rows.slice().sort(function (a, b) {
+                const av = cellVal(a, state.col), bv = cellVal(b, state.col);
+                let cmp = numeric
+                    ? (parseFloat(av) || 0) - (parseFloat(bv) || 0)
+                    : av.localeCompare(bv, 'de', { sensitivity: 'base' });
+                // Gleichstand: nach Nachname, dann Vorname
+                if (cmp === 0) {
+                    cmp = cellVal(a, 'lastname').localeCompare(cellVal(b, 'lastname'), 'de', { sensitivity: 'base' })
+                       || cellVal(a, 'firstname').localeCompare(cellVal(b, 'firstname'), 'de', { sensitivity: 'base' });
+                    return cmp;
+                }
+                return state.asc ? cmp : -cmp;
+            });
+            sorted.forEach(r => tbody.appendChild(r));
+            if (emptyRow) tbody.appendChild(emptyRow);
+
+            table.querySelectorAll('[data-sort-col]').forEach(function (h) {
+                const icon = h.querySelector('[data-sort-icon]');
+                const isActive = h.dataset.sortCol === state.col;
+                if (icon) {
+                    icon.className = isActive
+                        ? 'sort ' + (state.asc ? 'up' : 'down') + ' icon text-xs ml-0.5'
+                        : 'sort icon text-stone-300 text-xs ml-0.5';
+                }
+                if (isActive) h.setAttribute('aria-sort', state.asc ? 'ascending' : 'descending');
+                else h.removeAttribute('aria-sort');
+            });
+        }
+
+        function save() {
+            if (key) checkinTableState.set(key, { col: state.col, asc: state.asc, query: state.query });
+        }
+
+        function sortBy(col) {
+            state.asc = col === state.col ? !state.asc : true;
+            state.col = col;
+            applySort();
+            save();
+        }
+
+        table.querySelectorAll('[data-sort-col]').forEach(function (th) {
+            th.addEventListener('click', () => sortBy(th.dataset.sortCol));
+            th.addEventListener('keydown', function (e) {
+                if (e.key !== 'Enter' && e.key !== ' ') return;
+                e.preventDefault();
+                sortBy(th.dataset.sortCol);
+            });
+        });
+
+        if (input) {
+            input.value = state.query;
+            input.addEventListener('input', function () {
+                state.query = input.value;
+                applyFilter();
+                save();
+            });
+        }
+
+        applySort();
+        applyFilter();
     });
 }
 

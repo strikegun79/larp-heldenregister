@@ -19,9 +19,11 @@
         td.sig { height: 57px; }
         td.sig img { height: 57px; }
         .waitlist { font-size: 9px; font-style: italic; }
+        .no-sig { font-size: 10px; font-style: italic; color: #555; }
     </style>
 </head>
 <body>
+    @php($visitedIds ??= collect())
     <h1>Teilnehmerliste – {{ $adventure->name }}</h1>
 
     <table class="meta">
@@ -64,6 +66,9 @@
                     <td class="sig">
                         @if ($booking->signature)
                             <img src="{{ $booking->signature }}" alt="">
+                        @elseif ($booking->player_id && $visitedIds->contains($booking->player_id))
+                            {{-- Issue #7: eingecheckt, aber ohne Unterschrift --}}
+                            <span class="no-sig">keine Unterschrift - aber eingecheckt</span>
                         @endif
                     </td>
                 </tr>

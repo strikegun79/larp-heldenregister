@@ -6,9 +6,11 @@ use App\Mail\QueueJobFailedMail;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Cache\RateLimiting\Limit;
+use Illuminate\Database\Console\Migrations\RollbackCommand;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Notifications\Messages\MailMessage;
 use Illuminate\Queue\Events\JobFailed;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Queue;
 use Illuminate\Support\Facades\RateLimiter;
@@ -35,6 +37,16 @@ class AppServiceProvider extends ServiceProvider
         if (str_starts_with(config('app.url'), 'https://')) {
             URL::forceScheme('https');
         }
+
+        // Löschende DB-Befehle (migrate:fresh, migrate:refresh, migrate:reset, db:wipe,
+        // migrate:rollback) in Dev und Produktion sperren, damit bestehende Daten erhalten bleiben.
+        // Bewusster Reset nur mit ALLOW_DESTRUCTIVE_DB_COMMANDS=true in der .env.
+        $prohibitDestructive = $this->app->environment(['local', 'production'])
+            && ! config('database.allow_destructive_commands');
+
+        DB::prohibitDestructiveCommands($prohibitDestructive);
+        // migrate:rollback löscht Tabellen samt Inhalt, ist aber nicht in prohibitDestructiveCommands enthalten.
+        RollbackCommand::prohibit($prohibitDestructive);
 
         // Newsletter-Versand: maximal NEWSLETTER_EMAILS_PER_HOUR Mails pro Stunde.
         // Transaktionale Mails sind davon nicht betroffen.
