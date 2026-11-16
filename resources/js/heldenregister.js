@@ -770,6 +770,37 @@ document.getElementById('photo-crop-save-btn').addEventListener('click', functio
 });
 
 // ------------------------------------------------------------------
+// Getipptes Datum im deutschen Format in ein Date-Objekt umwandeln (Issue #13).
+// Erlaubt: 15.03.2012 · 15.3.2012 · 15/03/2012 · 15-03-2012 · 15032012
+// Mit Uhrzeit (withTime): zusätzlich „15.03.2012 18:30“ (ohne Uhrzeit → 00:00).
+// Das Jahr muss vierstellig sein; unmögliche Daten (31.02.) ergeben null.
+// ------------------------------------------------------------------
+function parseGermanDate(text, withTime) {
+    if (text instanceof Date) return text;
+
+    const s = String(text ?? '').trim();
+    if (!s) return null;
+
+    const m = s.match(/^(\d{1,2})[./-](\d{1,2})[./-](\d{4})(?:[\s,T]+(\d{1,2})[:.](\d{2}))?$/)
+           || s.match(/^(\d{2})(\d{2})(\d{4})(?:\s+(\d{1,2})[:.]?(\d{2}))?$/);
+    if (!m) return null;
+
+    const day = +m[1], month = +m[2], year = +m[3];
+    const hasTime = m[4] !== undefined;
+    if (hasTime && !withTime) return null;
+
+    const hour = hasTime ? +m[4] : 0;
+    const minute = hasTime ? +m[5] : 0;
+    if (hour > 23 || minute > 59) return null;
+
+    const d = new Date(year, month - 1, day, hour, minute);
+    // Überlauf erkennen (z. B. 31.02. → 03.03.) – dann ist das Datum ungültig.
+    if (d.getFullYear() !== year || d.getMonth() !== month - 1 || d.getDate() !== day) return null;
+
+    return d;
+}
+
+// ------------------------------------------------------------------
 // Fomantic Calendar (UI-05): x-date-picker-Komponenten initialisieren
 // ------------------------------------------------------------------
 function initFomanticCalendars($container) {
@@ -807,6 +838,10 @@ function initFomanticCalendars($container) {
             formatter:    type === 'datetime'
                 ? { datetime: (d) => d ? fmtDatetime(d) : '', cellTime: 'HH:mm' }
                 : { date:     (d) => d ? fmtDate(d)     : '' },
+            // Tastatureingabe im deutschen Format (Issue #13)
+            parser: {
+                date: (text) => parseGermanDate(text, type === 'datetime'),
+            },
             onChange: function (date) {
                 if (!date) { $hidden.val(''); return; }
                 const iso = type === 'datetime'
