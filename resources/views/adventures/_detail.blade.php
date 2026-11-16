@@ -10,6 +10,12 @@
         @include('adventures._bookings', ['bookings' => $visibleBookings, 'manage' => false])
     </x-mobile.accordion-section>
 
+    @can('view-event-heroes')
+        <x-mobile.accordion-section :title="'Helden (' . $eventHeroes->count() . ')'">
+            @include('adventures._heroes_tab')
+        </x-mobile.accordion-section>
+    @endcan
+
     @can('manage-attendance')
         <x-mobile.accordion-section :title="'Teamer (' . $teamerSignups->count() . ')'">
             @include('adventures._teamer_tab', ['teamerSignups' => $teamerSignups, 'myTeamerSignup' => $myTeamerSignup])
@@ -22,6 +28,9 @@
     <div class="ui top attached tabular menu">
         <a class="item active" data-tab="event">Abenteuer</a>
         <a class="item" data-tab="bookings">Anmeldungen</a>
+        @can('view-event-heroes')
+            <a class="item" data-tab="heroes">Helden ({{ $eventHeroes->count() }})</a>
+        @endcan
         @can('manage-attendance')
             <a class="item" data-tab="teamer">Teamer ({{ $teamerSignups->count() }})</a>
         @endcan
@@ -34,6 +43,12 @@
     <div class="ui bottom attached tab segment" data-tab="bookings">
         @include('adventures._bookings', ['bookings' => $visibleBookings, 'manage' => false])
     </div>
+
+    @can('view-event-heroes')
+        <div class="ui bottom attached tab segment" data-tab="heroes">
+            @include('adventures._heroes_tab')
+        </div>
+    @endcan
 
     @can('manage-attendance')
         <div class="ui bottom attached tab segment" data-tab="teamer">

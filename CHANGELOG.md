@@ -4,6 +4,11 @@ Alle wesentlichen Änderungen am Heldenregister werden hier festgehalten.
 Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1.1.0/),
 die Versionsnummern folgen [Semantic Versioning](https://semver.org/lang/de/).
 
+## [1.7.0] – 2026-11-13
+
+### Neu
+- **Helden im Abenteuer:** Neuer Reiter „Helden“ in der Abenteuer-Ansicht für Lehrmeister, Projektleitung, Spielleitung, Bürokraten und Admins. Zeigt die aktiven Helden aller angemeldeten Teilnehmenden mit ihren Klassen und der Klassenverteilung – als Hilfe für die Plotplanung. Ein Klick öffnet die Heldenseite.
+
 ## [1.6.0] – 2026-11-10
 
 ### Neu

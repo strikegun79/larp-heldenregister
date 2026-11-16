@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Exports\ParticipationExport;
 use App\Models\Adventure;
 use App\Models\AdventureTask;
+use App\Models\Booking;
 use App\Models\EventCategory;
 use App\Models\EventClient;
 use App\Models\EventRole;
@@ -20,6 +21,7 @@ use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Notification;
@@ -198,8 +200,14 @@ class AdventureController extends Controller
             )->exists();
         }
 
+        // Reiter „Helden": aktive Helden der Teilnehmer mit Klassen (nur für Plotplanung).
+        $eventHeroes = Gate::allows('view-event-heroes')
+            ? $this->eventHeroes($adventure)
+            : collect();
+
         $data = [
             'adventure' => $adventure,
+            'eventHeroes' => $eventHeroes,
             'players' => $players,
             'roles' => EventRole::orderBy('id')->get(),
             'visibleBookings' => $visibleBookings,
@@ -214,6 +222,32 @@ class AdventureController extends Controller
         return $request->ajax()
             ? view('adventures._detail', $data)
             : view('adventures.show', $data);
+    }
+
+    /**
+     * Teilnehmer-Buchungen für den Reiter „Helden": nur offene/bestätigte
+     * Anmeldungen echter Spieler (keine Gäste, keine Warteliste, keine
+     * NSC-/Teamer-Rollen).
+     * Spieler mit aktivem Held alphabetisch nach Heldenname, Spieler ohne
+     * aktiven Held am Ende.
+     *
+     * @return Collection<int, Booking>
+     */
+    private function eventHeroes(Adventure $adventure): Collection
+    {
+        $adventure->loadMissing('bookings.player.activeHero.classes');
+
+        return $adventure->bookings
+            ->filter(fn (Booking $b) => in_array($b->status ?? 'offen', ['offen', 'bestaetigt'], true)
+                && ! $b->is_guest
+                && ! $b->waitlisted
+                && $b->player !== null
+                && ! ($b->role?->is_teamer_like))
+            ->sortBy(fn (Booking $b) => [
+                $b->player->activeHero ? 0 : 1,
+                mb_strtolower($b->player->activeHero?->character_name ?: $b->player->full_name),
+            ])
+            ->values();
     }
 
     /**
