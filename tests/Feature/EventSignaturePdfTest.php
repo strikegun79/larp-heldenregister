@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Adventure;
 use App\Models\Booking;
+use App\Models\EventVisit;
 use App\Models\Player;
 use App\Models\User;
 use Database\Seeders\EventLookupSeeder;
@@ -131,5 +132,50 @@ class EventSignaturePdfTest extends TestCase
         $this->actingAs($this->userWithRole(40)) // Spielleiter: keine take-signatures
             ->get(route('adventures.participants-pdf', $adventure))
             ->assertForbidden();
+    }
+
+    /** Rendert die PDF-View mit den gegebenen Buchungen (Issue #7). */
+    private function renderPdfView(Adventure $adventure): string
+    {
+        $adventure->load(['location', 'category', 'teamerSignups', 'visits', 'bookings.role']);
+
+        return view('adventures.participants_pdf', [
+            'adventure' => $adventure,
+            'bookings' => $adventure->bookings,
+            'nscBookings' => collect(),
+            'waitlistPositions' => collect(),
+            'visitedIds' => $adventure->visits->pluck('player_id'),
+            'male' => 0, 'female' => 0, 'diverse' => 0,
+        ])->render();
+    }
+
+    public function test_pdf_shows_hint_when_checked_in_without_signature(): void
+    {
+        $adventure = Adventure::factory()->create();
+        $booking = $this->bookingFor($adventure);
+        EventVisit::create(['adventure_id' => $adventure->id, 'player_id' => $booking->player_id]);
+
+        $this->assertStringContainsString('keine Unterschrift - aber eingecheckt', $this->renderPdfView($adventure));
+    }
+
+    public function test_pdf_shows_signature_instead_of_hint_when_signed(): void
+    {
+        $adventure = Adventure::factory()->create();
+        $booking = $this->bookingFor($adventure);
+        $booking->update(['signature' => self::PNG]);
+        EventVisit::create(['adventure_id' => $adventure->id, 'player_id' => $booking->player_id]);
+
+        $html = $this->renderPdfView($adventure);
+
+        $this->assertStringContainsString(self::PNG, $html);
+        $this->assertStringNotContainsString('keine Unterschrift - aber eingecheckt', $html);
+    }
+
+    public function test_pdf_shows_no_hint_when_not_checked_in(): void
+    {
+        $adventure = Adventure::factory()->create();
+        $this->bookingFor($adventure);
+
+        $this->assertStringNotContainsString('keine Unterschrift - aber eingecheckt', $this->renderPdfView($adventure));
     }
 }

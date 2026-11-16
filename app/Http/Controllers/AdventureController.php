@@ -290,7 +290,11 @@ class AdventureController extends Controller
             'bookings.bookedBy',
             'bookings.role',
             'teamerSignups.user',
+            'visits',
         ]);
+
+        // Eingecheckte Spieler (Issue #7: Hinweis bei fehlender Unterschrift).
+        $visitedIds = $adventure->visits->pluck('player_id');
 
         // Deutsche Sortierung: ohne Groß-/Kleinschreibung, Umlaute korrekt; Gäste mit Gastnamen.
         $collator = new \Collator('de_DE');
@@ -324,7 +328,7 @@ class AdventureController extends Controller
         $female = $bookings->filter(fn ($b) => $b->player?->gender === 'weiblich')->count();
         $diverse = $bookings->filter(fn ($b) => $b->player?->gender === 'divers')->count();
 
-        $pdf = Pdf::loadView('adventures.participants_pdf', compact('adventure', 'bookings', 'nscBookings', 'waitlistPositions', 'male', 'female', 'diverse'))
+        $pdf = Pdf::loadView('adventures.participants_pdf', compact('adventure', 'bookings', 'nscBookings', 'waitlistPositions', 'visitedIds', 'male', 'female', 'diverse'))
             ->setPaper('a4', 'landscape');
 
         // Fußzeile jeder Seite: Titel links, „Seite X/Y" rechts.
