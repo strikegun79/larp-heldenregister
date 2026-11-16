@@ -19,6 +19,19 @@ return [
 
     /*
     |--------------------------------------------------------------------------
+    | Löschende Datenbank-Befehle erlauben
+    |--------------------------------------------------------------------------
+    |
+    | In den Umgebungen "local" und "production" sind migrate:fresh,
+    | migrate:refresh, migrate:reset und db:wipe gesperrt (siehe
+    | AppServiceProvider). Für einen bewussten Reset kurzzeitig auf true setzen.
+    |
+    */
+
+    'allow_destructive_commands' => (bool) env('ALLOW_DESTRUCTIVE_DB_COMMANDS', false),
+
+    /*
+    |--------------------------------------------------------------------------
     | Database Connections
     |--------------------------------------------------------------------------
     |

@@ -70,3 +70,23 @@ Dieses Projekt wird ausschließlich in der Entwicklungsumgebung bearbeitet.
 9. Besteht Unsicherheit darüber, ob ein Befehl Produktionsdaten oder Produktivdienste beeinflusst, darf der Befehl nicht ausgeführt werden.
 
 Diese Regeln gelten auch für alle Subagenten.
+
+### Entwicklungsdaten erhalten
+
+Die Entwicklungsdatenbank enthält manuell angelegte Benutzer, Spieler und Helden,
+die beim Entwickeln und Testen erhalten bleiben müssen.
+
+1. Keine löschenden Befehle: `migrate:fresh`, `migrate:refresh`, `migrate:reset`,
+   `db:wipe` und `migrate:legacy --fresh` sind verboten. Sie sind zusätzlich technisch
+   gesperrt (`DB::prohibitDestructiveCommands` im `AppServiceProvider`).
+   Die Sperre (`ALLOW_DESTRUCTIVE_DB_COMMANDS`) darf von Agenten nicht aufgehoben werden.
+2. Schemaänderungen nur über neue Migrationen mit `php artisan migrate`.
+   Rollbacks (`migrate:rollback`) nur nach Rückfrage.
+3. Keine Testläufe gegen die Entwicklungsdatenbank. Tests mit `RefreshDatabase`
+   laufen nur gegen eine Datenbank mit Endung `_test` (Schutz in `tests/TestCase.php`).
+4. Funktionen am echten Datenbestand nur in einer Transaktion mit anschließendem
+   Rollback prüfen (z. B. per `php artisan tinker`), sofern keine dauerhafte Änderung
+   freigegeben wurde.
+5. Vor riskanten Datenänderungen einen Snapshot anlegen:
+   `scripts/dev-db-snapshot.sh save <name>`; Wiederherstellung mit
+   `scripts/dev-db-snapshot.sh restore <name>` nur nach Rückfrage.
