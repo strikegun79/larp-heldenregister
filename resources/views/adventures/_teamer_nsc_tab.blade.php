@@ -141,7 +141,10 @@
 
                 {{-- NSC-Elternteil-Buchungen --}}
                 @foreach ($nscBookings as $booking)
-                    <tr>
+                    {{-- Zeilenklick öffnet den Inspektor mit allen Aktionen (wie bei den Teilnehmern) --}}
+                    <tr data-inspector-url="{{ route('adventures.bookings.inspector', [$adventure, $booking]) }}"
+                        tabindex="0" class="booking-row-clickable"
+                        aria-label="Details zur Anmeldung von {{ $booking->participant_name }} öffnen">
                         <td data-label="Spieler">
                             {{ $booking->is_guest
                                 ? $booking->guest_name.' '.$booking->guest_lastname.' (Gast)'
@@ -163,79 +166,19 @@
                             @endif
                         </td>
                         <td>
+                            {{-- Bestätigen, Ablehnen, Mail, Stornieren/Wiederherstellen liegen im Inspektor --}}
                             <div class="flex items-center justify-end gap-1 flex-wrap">
-                                @can('approve-bookings')
-                                    @if ($booking->status === 'offen')
-                                        {{-- Event mit „Anmeldungen bestätigen“: offene Anmeldung bestätigen --}}
-                                        <form method="POST"
-                                              action="{{ route('adventures.bookings.confirm', [$adventure, $booking]) }}"
-                                              data-refresh-modal
-                                              data-confirm="{{ $booking->participant_name }} als Teamer bestätigen?">
-                                            @csrf @method('PATCH')
-                                            <button type="submit"
-                                                    class="ui mini icon green button"
-                                                    data-tooltip="Bestätigen"
-                                                    data-position="top center">
-                                                <i class="check icon"></i>
-                                                <span class="sm:hidden ml-1 text-xs">Bestät.</span>
-                                            </button>
-                                        </form>
-                                    @endif
-                                    @if (in_array($booking->status, ['offen', 'bestaetigt', 'abgelehnt'], true))
-                                        {{-- Ablehnen bzw. Ablehnung zurücknehmen --}}
-                                        <form method="POST"
-                                              action="{{ route('adventures.bookings.rejection', [$adventure, $booking]) }}"
-                                              data-refresh-modal
-                                              data-confirm="{{ $booking->status === 'abgelehnt' ? 'Ablehnung für '.$booking->participant_name.' zurücknehmen?' : $booking->participant_name.' ablehnen? Die Person wird per E-Mail informiert.' }}">
-                                            @csrf @method('PATCH')
-                                            <button type="submit"
-                                                    class="ui mini icon button {{ $booking->status === 'abgelehnt' ? '' : 'orange' }}"
-                                                    data-tooltip="{{ $booking->status === 'abgelehnt' ? 'Ablehnung zurücknehmen' : 'Ablehnen' }}"
-                                                    data-position="top center">
-                                                <i class="{{ $booking->status === 'abgelehnt' ? 'undo' : 'ban' }} icon"></i>
-                                                <span class="sm:hidden ml-1 text-xs">{{ $booking->status === 'abgelehnt' ? 'Zurück' : 'Ablehnen' }}</span>
-                                            </button>
-                                        </form>
-                                    @endif
-                                    @unless ($booking->is_guest || in_array($booking->status, ['abgelehnt', 'storniert'], true))
-                                        {{-- Mail passend zum Status erneut senden --}}
-                                        <form method="POST"
-                                              action="{{ route('adventures.bookings.resend-confirmation', [$adventure, $booking]) }}"
-                                              data-refresh-modal>
-                                            @csrf
-                                            <button type="submit"
-                                                    class="ui mini icon button"
-                                                    data-tooltip="{{ $booking->status === 'offen' ? 'Eingangsbestätigung erneut senden' : 'Bestätigungsmail erneut senden' }}"
-                                                    data-position="top center">
-                                                <i class="envelope icon"></i>
-                                                <span class="sm:hidden ml-1 text-xs">Mail</span>
-                                            </button>
-                                        </form>
-                                    @endunless
-                                @endcan
-                                @can('adventure.modify')
-                                    <a href="{{ route('adventures.bookings.edit', [$adventure, $booking]) }}"
-                                       data-modal-stack="{{ route('adventures.bookings.edit', [$adventure, $booking]) }}"
-                                       class="ui mini icon button"
-                                       data-tooltip="Bearbeiten" data-position="top center">
-                                        <i class="edit icon"></i>
-                                        <span class="sm:hidden ml-1 text-xs">Bearb.</span>
-                                    </a>
-                                @endcan
-                                @can('adventure.cancel')
-                                    <form method="POST"
-                                          action="{{ route('adventures.bookings.destroy', [$adventure, $booking]) }}"
-                                          data-refresh-modal
-                                          data-confirm="Anmeldung stornieren?">
-                                        @csrf @method('DELETE')
-                                        <button type="submit"
-                                                class="ui mini icon button red"
-                                                data-tooltip="Stornieren" data-position="top center">
-                                            <i class="times icon"></i>
-                                            <span class="sm:hidden ml-1 text-xs">Storn.</span>
-                                        </button>
-                                    </form>
-                                @endcan
+                                @if ($booking->status !== 'storniert')
+                                    @can('adventure.modify')
+                                        <a href="{{ route('adventures.bookings.edit', [$adventure, $booking]) }}"
+                                           data-modal-stack="{{ route('adventures.bookings.edit', [$adventure, $booking]) }}"
+                                           class="ui mini icon button"
+                                           data-tooltip="Bearbeiten" data-position="top center">
+                                            <i class="edit icon"></i>
+                                            <span class="sm:hidden ml-1 text-xs">Bearb.</span>
+                                        </a>
+                                    @endcan
+                                @endif
                             </div>
                         </td>
                     </tr>

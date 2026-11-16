@@ -181,7 +181,8 @@
                     </form>
                 @endif
 
-                @unless ($booking->is_guest)
+                {{-- Warteliste nur für Teilnehmer (Teamer kommen nie auf die Warteliste) --}}
+                @unless ($booking->is_guest || $isTeamer)
                     @if ($booking->waitlisted)
                         <form method="POST" action="{{ route('adventures.bookings.resend-confirmation', [$adventure, $booking]) }}" data-inspector-form
                               data-confirm="{{ $name }} von der Warteliste auf einen regulären Platz hochstufen? Die Bestätigung wird per E-Mail gesendet.">
@@ -226,6 +227,16 @@
                     </form>
                 @endcan
             @endunless
+
+            @if ($booking->status === 'abgemeldet')
+                @can('manage-checkin')
+                    <form method="POST" action="{{ route('adventures.bookings.deregister-undo', [$adventure, $booking]) }}" data-inspector-form
+                          data-confirm="Abmeldung von {{ $name }} zurücknehmen? Der Status wird wieder „bestätigt“.">
+                        @csrf @method('PATCH')
+                        <button type="submit" class="ui fluid small button"><i class="undo icon"></i> Abmeldung zurücknehmen</button>
+                    </form>
+                @endcan
+            @endif
 
             @can('adventure.modify')
                 <a href="{{ route('adventures.bookings.edit', [$adventure, $booking]) }}"

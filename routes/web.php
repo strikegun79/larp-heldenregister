@@ -252,6 +252,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('adventures.bookings.checkin');
     Route::patch('adventures/{adventure}/bookings/{booking}/deregister', [AttendanceController::class, 'deregister'])
         ->name('adventures.bookings.deregister');
+    Route::patch('adventures/{adventure}/bookings/{booking}/deregister-undo', [AttendanceController::class, 'undoDeregister'])
+        ->name('adventures.bookings.deregister-undo');
 
     // Rollen- & DSGVO-Übersicht (für alle Teamer-Rollen sichtbar).
     Route::prefix('admin')->name('admin.')->middleware('can:roles.view')->group(function () {

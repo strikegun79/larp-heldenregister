@@ -147,9 +147,17 @@
                                                     data-name="{{ $booking->player?->full_name }}">Check-in</button>
                                         @endif
                                     @endif
-                                    <button type="button" class="ui mini button deregister-trigger"
-                                            data-url="{{ route('adventures.bookings.deregister', [$adventure, $booking]) }}"
-                                            data-name="{{ $booking->player?->full_name }}">Abmelden</button>
+                                    @if ($booking->status === 'abgemeldet')
+                                        <form method="POST" action="{{ route('adventures.bookings.deregister-undo', [$adventure, $booking]) }}" data-refresh-modal
+                                              data-confirm="Abmeldung von {{ $booking->player?->full_name }} zurücknehmen? Der Status wird wieder „bestätigt“.">
+                                            @csrf @method('PATCH')
+                                            <button type="submit" class="ui mini button"><i class="undo icon"></i> Abmeldung zurücknehmen</button>
+                                        </form>
+                                    @else
+                                        <button type="button" class="ui mini button deregister-trigger"
+                                                data-url="{{ route('adventures.bookings.deregister', [$adventure, $booking]) }}"
+                                                data-name="{{ $booking->player?->full_name }}">Abmelden</button>
+                                    @endif
                                 </div>
                             </td>
                         </tr>
