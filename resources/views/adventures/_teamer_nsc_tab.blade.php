@@ -21,7 +21,10 @@
 
                 {{-- Teamer-Anmeldungen (teamer_signups) --}}
                 @foreach ($teamerSignups as $signup)
-                    <tr>
+                    {{-- Zeilenklick öffnet den Inspektor mit allen Aktionen (wie bei den NSC-Eltern) --}}
+                    <tr data-inspector-url="{{ route('adventures.teamer.inspector', [$adventure, $signup]) }}"
+                        tabindex="0" class="booking-row-clickable"
+                        aria-label="Details zur Teamer-Anmeldung von {{ $signup->user->name }} {{ $signup->user->lastname }} öffnen">
                         <td data-label="Nutzer">{{ $signup->user->name }} {{ $signup->user->lastname }}</td>
                         <td data-label="Alter">—</td>
                         <td data-label="Rolle">
@@ -52,66 +55,9 @@
                             @endif
                         </td>
                         <td>
+                            {{-- Bestätigen, Ablehnen, Mail, Stornieren liegen im Inspektor --}}
                             <div class="flex items-center justify-end gap-1 flex-wrap">
                                 @can('events.edit')
-                                    @if ($signup->approved_at)
-                                        {{-- Bestätigung zurücknehmen --}}
-                                        <form method="POST"
-                                              action="{{ route('adventures.teamer.approve', [$adventure, $signup]) }}"
-                                              data-refresh-modal
-                                              data-confirm="Bestätigung für {{ $signup->user->name }} zurücknehmen?">
-                                            @csrf @method('PATCH')
-                                            <button type="submit"
-                                                    class="ui mini icon button"
-                                                    data-tooltip="Bestätigung zurücknehmen"
-                                                    data-position="top center">
-                                                <i class="undo icon"></i>
-                                                <span class="sm:hidden ml-1 text-xs">Zurück</span>
-                                            </button>
-                                        </form>
-                                        {{-- Bestätigungsmail erneut senden --}}
-                                        <form method="POST"
-                                              action="{{ route('adventures.teamer.resend-confirmation', [$adventure, $signup]) }}"
-                                              data-refresh-modal>
-                                            @csrf
-                                            <button type="submit"
-                                                    class="ui mini icon button"
-                                                    data-tooltip="Bestätigungsmail erneut senden"
-                                                    data-position="top center">
-                                                <i class="envelope icon"></i>
-                                                <span class="sm:hidden ml-1 text-xs">Mail</span>
-                                            </button>
-                                        </form>
-                                    @else
-                                        {{-- Noch nicht bestätigt → Bestätigen-Button --}}
-                                        <form method="POST"
-                                              action="{{ route('adventures.teamer.approve', [$adventure, $signup]) }}"
-                                              data-refresh-modal
-                                              data-confirm="Teamer-Anmeldung von {{ $signup->user->name }} bestätigen?">
-                                            @csrf @method('PATCH')
-                                            <button type="submit"
-                                                    class="ui mini icon green button"
-                                                    data-tooltip="Bestätigen"
-                                                    data-position="top center">
-                                                <i class="check icon"></i>
-                                                <span class="sm:hidden ml-1 text-xs">Bestät.</span>
-                                            </button>
-                                        </form>
-                                        {{-- Ablehnen-Toggle bleibt erhalten --}}
-                                        <form method="POST"
-                                              action="{{ route('adventures.teamer.reject', [$adventure, $signup]) }}"
-                                              data-refresh-modal
-                                              data-confirm="{{ $signup->rejected_at ? 'Ablehnung zurücknehmen?' : 'Teamer-Anmeldung ablehnen?' }}">
-                                            @csrf @method('PATCH')
-                                            <button type="submit"
-                                                    class="ui mini icon button {{ $signup->rejected_at ? '' : 'orange' }}"
-                                                    data-tooltip="{{ $signup->rejected_at ? 'Ablehnung zurücknehmen' : 'Ablehnen' }}"
-                                                    data-position="top center">
-                                                <i class="hand paper icon"></i>
-                                                <span class="sm:hidden ml-1 text-xs">{{ $signup->rejected_at ? 'Zurück' : 'Ablehnen' }}</span>
-                                            </button>
-                                        </form>
-                                    @endif
                                     <a href="{{ route('adventures.teamer.edit', [$adventure, $signup]) }}"
                                        data-modal-stack="{{ route('adventures.teamer.edit', [$adventure, $signup]) }}"
                                        class="ui mini icon button"
@@ -119,20 +65,6 @@
                                         <i class="edit icon"></i>
                                         <span class="sm:hidden ml-1 text-xs">Bearb.</span>
                                     </a>
-                                @endcan
-                                @can('adventure.cancel')
-                                    <form method="POST"
-                                          action="{{ route('adventures.teamer.destroy', [$adventure, $signup]) }}"
-                                          data-refresh-modal
-                                          data-confirm="Teamer-Anmeldung stornieren?">
-                                        @csrf @method('DELETE')
-                                        <button type="submit"
-                                                class="ui mini icon button red"
-                                                data-tooltip="Stornieren" data-position="top center">
-                                            <i class="times icon"></i>
-                                            <span class="sm:hidden ml-1 text-xs">Storn.</span>
-                                        </button>
-                                    </form>
                                 @endcan
                             </div>
                         </td>

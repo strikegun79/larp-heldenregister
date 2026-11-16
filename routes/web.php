@@ -423,6 +423,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('adventures.teamer.reject');
     Route::post('adventures/{adventure}/teamer-signup/{signup}/resend-confirmation', [\App\Http\Controllers\TeamerSignupController::class, 'resendConfirmation'])
         ->name('adventures.teamer.resend-confirmation');
+    // Inspektor (Slide-In) einer Teamer-Anmeldung in der Event-Verwaltung
+    Route::get('adventures/{adventure}/teamer-signup/{signup}/inspector', [\App\Http\Controllers\TeamerSignupController::class, 'inspector'])
+        ->name('adventures.teamer.inspector');
 
     // PUB-10: Heldenausweis-Generator (ROLE-10): heldenregister.edit (Bürokrat) ODER heroes.admin (Spielleiter).
     Route::prefix('admin')->name('admin.')->middleware('can:id-cards.access')->group(function () {

@@ -128,6 +128,20 @@ class TeamerSignupController extends Controller
             : back()->with('status', $msg);
     }
 
+    /**
+     * Inspektor (Slide-In) mit den Anmeldedaten und Status-Aktionen einer
+     * Teamer-Anmeldung in der Event-Verwaltung (wie bei den Buchungen, Issue #9).
+     */
+    public function inspector(Adventure $adventure, TeamerSignup $signup): View
+    {
+        abort_unless(request()->user()->can('events.edit'), 403);
+        abort_if($signup->adventure_id !== $adventure->id, 404);
+
+        $signup->load(['user', 'eventRole']);
+
+        return view('adventures._teamer_inspector', compact('adventure', 'signup'));
+    }
+
     /** Bearbeitungsformular einer Teamer-Anmeldung (Modal-Partial, ADV-29). */
     public function edit(Adventure $adventure, TeamerSignup $signup): View
     {

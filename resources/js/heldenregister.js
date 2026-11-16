@@ -787,6 +787,12 @@ document.addEventListener('submit', function (e) {
             const data = await resp.json().catch(() => ({}));
             if (resp.ok) {
                 showToast(data.message || 'Gespeichert.', 'success');
+                // Gelöschte Einträge (z. B. stornierte Teamer-Anmeldung): Inspektor schließen statt neu laden.
+                if (form.hasAttribute('data-inspector-close-on-success')) {
+                    closeInspector(false);
+                    refreshInspectorBackground();
+                    return;
+                }
                 refreshInspectorBackground();
                 if (inspectorIsOpen()) loadInspector(false);
             } else if (resp.status === 422) {
