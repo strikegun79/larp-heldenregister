@@ -45,6 +45,9 @@ class BookingController extends Controller
         // Anmeldebestätigung erneut senden (BOOK-05): Zugriff wird in der Methode geprüft.
         // Ablehnen (ADV-18) + Teamer bestätigen: Bürokrat/Projektleiter/Admin.
         $this->middleware('can:approve-bookings')->only(['reject', 'confirmTeamer']);
+        // Auf Warteliste verschieben: gleiche Berechtigung wie die Wartelisten-Promotion
+        // (vorher ungeschützt – jeder angemeldete Nutzer konnte fremde Buchungen verschieben).
+        $this->middleware('can:approve-bookings')->only('moveToWaitlist');
         // Bezahlt-Status pflegen (BOOK-06).
         $this->middleware('can:manage-payments')->only('togglePaid');
         // Inspektor in der Event-Verwaltung (Issue #9): gleiche Berechtigung wie die Verwaltungsansicht.
