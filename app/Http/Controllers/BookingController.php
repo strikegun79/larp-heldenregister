@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Adventure;
 use App\Models\Booking;
 use App\Models\EventRole;
+use App\Models\EventStatus;
 use App\Models\Player;
 use App\Models\Setting;
 use App\Models\User;
@@ -26,6 +27,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use App\Services\AuditLogger;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Notification;
 use Illuminate\Support\Facades\URL;
@@ -52,6 +54,8 @@ class BookingController extends Controller
         $this->middleware('can:manage-payments')->only('togglePaid');
         // Inspektor in der Event-Verwaltung (Issue #9): gleiche Berechtigung wie die Verwaltungsansicht.
         $this->middleware('can:events.edit')->only('inspector');
+        // Admin-Anmeldung (Issue #8): Betreuer + Gesundheitsdaten eines beliebigen Spielers laden.
+        $this->middleware('can:book-any-player')->only('playerContext');
     }
 
     /**
@@ -94,7 +98,28 @@ class BookingController extends Controller
                 ? EventRole::orderBy('id')->get()
                 : EventRole::forParticipant()->orderBy('id')->get(),
             'adminMode' => $adminMode,
-            'userPhone' => $request->user()->phone,
+            // Admin-Modus: Notfallnummer kommt vom gewählten Betreuer, nicht vom Admin (Issue #8).
+            'userPhone' => $adminMode ? null : $request->user()->phone,
+        ]);
+    }
+
+    /**
+     * Admin-Anmeldung (Issue #8): Betreuer des Spielers (für das Auswahlfeld und die
+     * Notfallnummer) sowie Allergien/Medikamente zum Vorbefüllen.
+     */
+    public function playerContext(Adventure $adventure, Player $player): JsonResponse
+    {
+        return response()->json([
+            'caretakers' => $player->users()->orderBy('lastname')->orderBy('name')->get()
+                ->map(fn (User $u) => [
+                    'id' => $u->id,
+                    'name' => trim("{$u->name} {$u->lastname}"),
+                    'email' => $u->email,
+                    'phone' => $u->phone,
+                ])->values(),
+            'player_email' => $player->email,
+            'allergien' => $player->allergien,
+            'medikamente' => $player->medikamente,
         ]);
     }
 
@@ -103,7 +128,20 @@ class BookingController extends Controller
      */
     public function store(Request $request, Adventure $adventure): RedirectResponse|JsonResponse
     {
+        // Admin-Anmeldung (Issue #8): Bürokrat/Projektleitung/Admin über das Admin-Formular.
+        // Ohne Status-Sperre (außer „abgesagt“), immer regulär + bestätigt, Betreuer statt Admin.
+        $adminMode = $request->boolean('admin_mode') && Gate::allows('book-any-player');
+
         $data = $request->validate([
+            'caretaker_user_id' => $adminMode
+                ? [
+                    // Pflicht, sofern der Spieler Betreuer hat; muss zu diesem Spieler gehören.
+                    Rule::requiredIf(fn () => DB::table('player_user')->where('player_id', $request->input('player_id'))->exists()),
+                    'nullable',
+                    'integer',
+                    Rule::exists('player_user', 'user_id')->where('player_id', $request->input('player_id')),
+                ]
+                : ['prohibited'],
             'player_id' => ['required', 'exists:players,id'],
             'event_role_id' => Gate::allows('book-any-player')
                 ? ['required', 'exists:event_roles,id']
@@ -141,7 +179,11 @@ class BookingController extends Controller
             return $this->fail($request, $msg);
         }
 
-        if (! $adventure->registrationOpen()) {
+        if ($adminMode) {
+            if ((int) $adventure->event_status_id === EventStatus::CANCELLED) {
+                return $this->fail($request, 'Dieses Abenteuer ist abgesagt – keine Anmeldungen mehr möglich.');
+            }
+        } elseif (! $adventure->registrationOpen()) {
             return $this->fail($request, 'Für dieses Abenteuer ist die Anmeldung nicht geöffnet.');
         }
 
@@ -154,12 +196,18 @@ class BookingController extends Controller
 
         $isTeamer     = EventRole::find($data['event_role_id'])?->is_teamer_like ?? false;
         $ageViolation = ! $isTeamer && $adventure->isOutsideAgeRange($player);
-        $waitlisted   = $isTeamer ? false : ($adventure->shouldWaitlist() || $ageViolation);
+        // Admin-Anmeldung: immer regulärer Platz, auch bei vollem Event oder Altersverstoß.
+        $overbooked   = $adminMode && ! $isTeamer && $adventure->isFull();
+        $waitlisted   = ($isTeamer || $adminMode) ? false : ($adventure->shouldWaitlist() || $ageViolation);
+        // Admin-Anmeldung: Teamer ebenfalls sofort bestätigt.
+        $confirmed    = $adminMode || ! $isTeamer;
+        $caretaker    = $adminMode && ! empty($data['caretaker_user_id']) ? User::find($data['caretaker_user_id']) : null;
 
         $booking = $adventure->bookings()->create([
             'player_id' => $data['player_id'],
             'hero_id' => $player?->active_hero_id,
-            'booked_by_user_id' => $request->user()->id,
+            // Admin-Anmeldung: gewählter Betreuer statt des Admins (Issue #8).
+            'booked_by_user_id' => $adminMode ? $caretaker?->id : $request->user()->id,
             'event_role_id' => $data['event_role_id'],
             'agb' => true,
             'fotoerlaubnis' => $request->boolean('fotoerlaubnis'),
@@ -174,9 +222,10 @@ class BookingController extends Controller
             'kontakt_telefon' => $data['kontakt_telefon'],
             'ermaessigung' => $request->boolean('ermaessigung'),
             'waitlisted' => $waitlisted,
-            // Teamer-artige Buchungen warten auf manuelle Bestätigung durch den Projektleiter.
-            'approved_at' => $isTeamer ? null : now(),
-            'status' => $isTeamer ? 'offen' : 'bestaetigt',
+            // Teamer-artige Buchungen warten auf manuelle Bestätigung durch den Projektleiter
+            // – außer bei der Admin-Anmeldung.
+            'approved_at' => $confirmed ? now() : null,
+            'status' => $confirmed ? 'bestaetigt' : 'offen',
         ]);
 
         // Wartelisten-Modus dauerhaft aktivieren, sobald die Kapazitätsgrenze erreicht ist.
@@ -185,9 +234,14 @@ class BookingController extends Controller
             $adventure->update(['waitlist_mode' => true]);
         }
 
-        $recipientEmail = $player?->email ?: $request->user()->email;
+        // Admin-Anmeldung: Bestätigung an den gewählten Betreuer, ersatzweise an die Spieler-E-Mail.
+        $recipientEmail = $adminMode
+            ? ($caretaker?->email ?: $player?->email)
+            : ($player?->email ?: $request->user()->email);
         if ($recipientEmail) {
-            if ($isTeamer) {
+            if ($isTeamer && $adminMode) {
+                Notification::route('mail', $recipientEmail)->notify(new TeamerBookingConfirmed($booking));
+            } elseif ($isTeamer) {
                 // NOTI-Teamer: Eingangsbestätigung ohne Bankdaten – Projektleiter bestätigt manuell.
                 Notification::route('mail', $recipientEmail)->notify(new TeamerBookingReceived($booking));
             } else {
@@ -202,14 +256,28 @@ class BookingController extends Controller
 
         // M-3: Admin-Buchung für fremden Spieler protokollieren.
         if (Gate::allows('book-any-player')) {
-            AuditLogger::log('booking.created', $booking, [
+            AuditLogger::log('booking.created', $booking, array_filter([
                 'adventure' => $adventure->name,
                 'waitlisted' => $booking->waitlisted,
                 'event_role_id' => $booking->event_role_id,
-            ]);
+                'admin_booking' => $adminMode ?: null,
+                'caretaker_user_id' => $caretaker?->id,
+                'overbooked' => $overbooked ?: null,
+            ], fn ($v) => $v !== null));
         }
 
-        if ($isTeamer) {
+        if ($adminMode) {
+            $message = ($player?->full_name ?? 'Spieler').' wurde angemeldet und bestätigt.';
+            if ($overbooked) {
+                $message .= ' Hinweis: Das Abenteuer ist damit überbelegt.';
+            }
+            if ($ageViolation) {
+                $message .= " Hinweis: Alter außerhalb des Limits ({$adventure->age_range_label}).";
+            }
+            $message .= $recipientEmail
+                ? ' Bestätigung gesendet an '.$recipientEmail.'.'
+                : ' Keine Bestätigungsmail – weder Betreuer noch Spieler haben eine E-Mail-Adresse.';
+        } elseif ($isTeamer) {
             $message = 'Teamer-Anmeldung eingegangen – Bestätigung durch den Projektleiter steht aus.';
         } elseif (! $booking->waitlisted) {
             $message = 'Anmeldung gespeichert.';

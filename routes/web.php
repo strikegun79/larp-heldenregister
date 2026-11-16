@@ -193,6 +193,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('adventures.bookings.store-guest');
     Route::post('adventures/{adventure}/bookings', [BookingController::class, 'store'])
         ->name('adventures.bookings.store');
+    // Admin-Anmeldung (Issue #8): Betreuer/Gesundheitsdaten des gewählten Spielers.
+    Route::get('adventures/{adventure}/bookings/player-context/{player}', [BookingController::class, 'playerContext'])
+        ->name('adventures.bookings.player-context');
+
     // Inspektor (Slide-In) in der Event-Verwaltung (Issue #9).
     Route::get('adventures/{adventure}/bookings/{booking}/inspector', [BookingController::class, 'inspector'])
         ->name('adventures.bookings.inspector');

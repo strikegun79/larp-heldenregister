@@ -1145,6 +1145,12 @@ function initBookingPlayerPrefill(container) {
     const sel = root.querySelector('#booking-player-select');
     if (!sel) return;
 
+    // Issue #8: Admin-Anmeldung lädt zusätzlich die Betreuer des Spielers.
+    if (sel.dataset.contextUrl) {
+        sel.addEventListener('change', function () { loadBookingPlayerContext(root, sel); });
+        return;
+    }
+
     sel.addEventListener('change', function () {
         const playerId    = this.value;
         const urlTemplate = this.dataset.prefillUrl;
@@ -1165,6 +1171,94 @@ function initBookingPlayerPrefill(container) {
             })
             .catch(() => {});
     });
+}
+
+// ------------------------------------------------------------------
+// Admin-Anmeldung (Issue #8): Betreuer des gewählten Spielers ins Auswahlfeld
+// laden; Notfallnummer vom Betreuer übernehmen; Allergien/Medikamente vorbefüllen.
+// ------------------------------------------------------------------
+function loadBookingPlayerContext(root, sel) {
+    const ctSelect = root.querySelector('#booking-caretaker-select');
+    const ctHint   = root.querySelector('#booking-caretaker-hint');
+    const phone    = root.querySelector('input[name="kontakt_telefon"]');
+    const defaultHint = 'Erhält die Anmeldebestätigung und erscheint als Kontakt in der Teilnehmerliste.';
+    if (!ctSelect) return;
+
+    // Optionen per DOM aufbauen (Namen/Telefon stammen aus Nutzerprofilen → kein innerHTML).
+    const makeOption = (value, text, phoneVal) => {
+        const o = document.createElement('option');
+        o.value = value;
+        o.textContent = text;
+        if (phoneVal !== undefined) o.dataset.phone = phoneVal;
+        return o;
+    };
+    const setOptions = (options, disabled) => {
+        ctSelect.replaceChildren(...options);
+        ctSelect.disabled = disabled;
+    };
+
+    // Telefonnummer nur überschreiben, wenn das Feld leer ist oder noch die
+    // automatisch übernommene Nummer enthält (manuelle Eingaben bleiben erhalten).
+    const applyPhone = (value) => {
+        if (!phone) return;
+        if (phone.value.trim() === '' || phone.dataset.autofilled === phone.value) {
+            phone.value = value || '';
+            phone.dataset.autofilled = phone.value;
+        }
+    };
+
+    // Spielerwechsel: automatisch übernommene Nummer des vorherigen Betreuers entfernen.
+    applyPhone('');
+
+    if (!sel.value) {
+        setOptions([makeOption('', '— zuerst Spieler wählen —')], true);
+        return;
+    }
+    setOptions([makeOption('', 'Lädt …')], true);
+
+    fetch(sel.dataset.contextUrl.replace('__ID__', sel.value), {
+        headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' },
+        credentials: 'same-origin',
+    })
+        .then(r => r.ok ? r.json() : Promise.reject(r.status))
+        .then(data => {
+            const caretakers = data.caretakers || [];
+            if (caretakers.length === 0) {
+                setOptions([makeOption('', '— kein Betreuer hinterlegt —')], true);
+                if (ctHint) {
+                    ctHint.textContent = data.player_email
+                        ? 'Kein Betreuer hinterlegt – die Bestätigung geht an die Spieler-E-Mail ' + data.player_email + '.'
+                        : 'Kein Betreuer und keine Spieler-E-Mail hinterlegt – es wird keine Bestätigung versendet.';
+                }
+                applyPhone('');
+            } else {
+                const opts = caretakers.map(c =>
+                    makeOption(String(c.id), c.name + (c.email ? ' · ' + c.email : ''), c.phone || ''));
+                if (caretakers.length > 1) opts.unshift(makeOption('', '— wählen —'));
+                setOptions(opts, false);
+                ctSelect.required = true;
+                if (ctHint) ctHint.textContent = defaultHint;
+                if (caretakers.length === 1) applyPhone(caretakers[0].phone);
+            }
+
+            const allergienTA   = root.querySelector('textarea[name="allergien"]');
+            const medikamenteTA = root.querySelector('textarea[name="medikamente"]');
+            if (allergienTA   && allergienTA.value.trim()   === '') allergienTA.value   = data.allergien   ?? '';
+            if (medikamenteTA && medikamenteTA.value.trim() === '') medikamenteTA.value = data.medikamente ?? '';
+            updateHealthConsent(root);
+        })
+        .catch(() => {
+            setOptions([makeOption('', 'Betreuer konnten nicht geladen werden')], true);
+        });
+
+    // Betreuerwechsel → dessen Telefonnummer übernehmen (nur einmal registrieren).
+    if (!ctSelect.__phoneInit) {
+        ctSelect.__phoneInit = true;
+        ctSelect.addEventListener('change', function () {
+            const opt = ctSelect.selectedOptions[0];
+            applyPhone(opt ? opt.dataset.phone : '');
+        });
+    }
 }
 
 // ------------------------------------------------------------------

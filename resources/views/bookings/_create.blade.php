@@ -56,12 +56,16 @@
     @if ($adminMode ?? false)
     <div class="ui tiny yellow message mb-3">
         <i class="shield alternate icon"></i>
-        <strong>Admin-Anmeldung:</strong> Alle Spieler sichtbar.
+        <strong>Admin-Anmeldung:</strong> Alle Spieler sichtbar. Die Anmeldung ist unabhängig vom Anmeldestatus möglich,
+        wird sofort bestätigt (auch bei vollem Abenteuer) und die Bestätigung geht an den gewählten Betreuer.
     </div>
     @endif
 
     <form id="booking-create-form" data-stack-close method="POST" action="{{ route('adventures.bookings.store', $adventure) }}" class="ui form">
         @csrf
+        @if ($adminMode ?? false)
+            <input type="hidden" name="admin_mode" value="1">
+        @endif
 
         <p class="text-xs text-stone-400 mb-3">Mit <span class="text-red-500">*</span> markierte Felder sind Pflichtfelder.</p>
 
@@ -69,7 +73,12 @@
             <div class="field required">
                 <label>Spieler</label>
                 <select name="player_id" id="booking-player-select" required
-                        data-prefill-url="{{ route('players.health-prefill', ['player' => '__ID__']) }}">
+                        @if ($adminMode ?? false)
+                            data-context-url="{{ route('adventures.bookings.player-context', [$adventure, '__ID__']) }}"
+                        @else
+                            data-prefill-url="{{ route('players.health-prefill', ['player' => '__ID__']) }}"
+                        @endif
+                        >
                     <option value="">— wählen —</option>
                     @foreach ($players as $player)
                         <option value="{{ $player->id }}">{{ $player->full_name }}</option>
@@ -85,6 +94,19 @@
                 </select>
             </div>
         </div>
+
+        @if ($adminMode ?? false)
+            {{-- Issue #8: Anmeldung im Namen eines Betreuers des Spielers (nicht des Admins) --}}
+            <div class="field required" id="booking-caretaker-field">
+                <label for="booking-caretaker-select">Betreuer / Erziehungsberechtigte</label>
+                <select name="caretaker_user_id" id="booking-caretaker-select" disabled>
+                    <option value="">— zuerst Spieler wählen —</option>
+                </select>
+                <small class="text-stone-500" id="booking-caretaker-hint">
+                    Erhält die Anmeldebestätigung und erscheint als Kontakt in der Teilnehmerliste.
+                </small>
+            </div>
+        @endif
 
         {{-- Der teilnehmende Held ist automatisch der aktive Held des Spielers
              (HERO-21); eine Auswahl ist nicht nötig – der Bürokrat legt den
@@ -173,7 +195,9 @@
             <input type="tel" name="kontakt_telefon" maxlength="100" required
                    value="{{ old('kontakt_telefon', $userPhone ?? '') }}"
                    placeholder="z. B. +49 123 456789">
-            @if ($userPhone)
+            @if ($adminMode ?? false)
+                <small class="text-stone-400" id="booking-phone-hint">Wird aus dem Profil des gewählten Betreuers übernommen, sofern hinterlegt.</small>
+            @elseif ($userPhone)
                 <small class="text-stone-400">Aus deinem Profil übernommen – du kannst die Nummer für dieses Event ändern.</small>
             @else
                 <small class="text-stone-400">Diese Nummer wird im Notfall kontaktiert.</small>
