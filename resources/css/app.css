@@ -187,6 +187,34 @@ input:focus, select:focus, textarea:focus {
     border-top-width: 3px;
 }
 
+/* Reiter: inaktive Tabs als eigene Pergament-Laschen erkennbar und durch eine
+   kleine Lücke voneinander getrennt; der aktive Tab bleibt weiß und verbindet
+   sich mit dem Inhalt darunter. */
+.ui.tabular.menu {
+    gap: 4px;
+    border-bottom-color: rgba(90, 58, 34, .35);
+    /* Bei Platzmangel umbrechen statt scrollen (keine unnötige Scrollbar) */
+    flex-wrap: wrap;
+}
+.ui.tabular.menu .item:not(.active) {
+    background-color: rgba(228, 206, 165, .55);
+    border: 1px solid rgba(90, 58, 34, .25);
+    border-bottom: none;
+    border-radius: .5rem .5rem 0 0 !important;
+    color: #57534e;
+}
+.ui.tabular.menu .item:not(.active):hover {
+    background-color: rgba(241, 228, 199, .95);
+    color: var(--wr-ink);
+}
+.ui.tabular.menu .item:not(.active):focus-visible {
+    outline: 2px solid var(--wr-gold);
+    outline-offset: -2px;
+}
+.ui.tabular.menu .item.active {
+    border-radius: .5rem .5rem 0 0 !important;
+}
+
 /* --- Tabellenköpfe in Tinte ------------------------------------------- */
 .ui.table thead th { color: var(--wr-ink); }
 
@@ -538,3 +566,32 @@ tr.booking-row-clickable { cursor: pointer; }
 tr.booking-row-clickable:hover > td { background-color: rgba(200, 150, 42, .10); }
 tr.booking-row-clickable:focus-visible { outline: 2px solid var(--wr-gold); outline-offset: -2px; }
 tr.booking-row-clickable.is-inspected > td { background-color: rgba(200, 150, 42, .20); }
+
+/* ===========================================================================
+   Verwaltungsbereich: Rahmen in Signalfarbe (Siegelrot), damit sofort erkennbar
+   ist, dass man sich in der Verwaltung befindet. Hintergründe, Pergament und
+   Schriften bleiben unverändert. Die Klasse wr-admin-area setzt das Layout auf
+   Verwaltungsrouten (<main>) bzw. heldenregister.js auf Verwaltungs-Modals.
+   =========================================================================== */
+:root {
+    --wr-admin-signal: #b4232a;   /* Siegelrot – zentral anpassbar */
+}
+/* Karten/Flächen mit dem Standard-Braunrahmen */
+.wr-admin-area .border-\[\#5a3a22\]\/30,
+.wr-admin-area .border-\[\#5a3a22\]\/40 {
+    border-color: var(--wr-admin-signal);
+}
+/* Verwaltungs-Modals: Signalrahmen rundherum */
+.ui.modal.wr-admin-area {
+    box-shadow: 0 0 0 3px var(--wr-admin-signal), 1px 3px 3px 0 rgba(0, 0, 0, .2), 1px 3px 15px 2px rgba(0, 0, 0, .2);
+}
+.ui.modal.wr-admin-area > .header {
+    border-bottom-color: var(--wr-admin-signal);
+}
+/* Inspektor (Issue #9) gehört immer zur Verwaltung */
+.booking-inspector { border-left-color: var(--wr-admin-signal); }
+/* Reiter im Verwaltungsbereich: aktiver Tab mit Signalfarbe oben */
+.wr-admin-area .ui.tabular.menu .item.active,
+.ui.modal.wr-admin-area .ui.tabular.menu .item.active {
+    border-top-color: var(--wr-admin-signal);
+}

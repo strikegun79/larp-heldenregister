@@ -61,6 +61,19 @@ window.appModalUrl  = null;
 window.appModal2Url = null;
 
 // ------------------------------------------------------------------
+// Verwaltungsbereich erkennen: Modals mit Verwaltungsinhalt bekommen die
+// Klasse wr-admin-area (Rahmen in Signalfarbe, siehe app.css).
+// ------------------------------------------------------------------
+function isAdminAreaUrl(url) {
+    let path;
+    try { path = new URL(url, window.location.href).pathname; } catch (e) { return false; }
+    return /^\/admin(\/|$)/.test(path)
+        || /^\/adventures-manage(\/|$)/.test(path)
+        || /^\/adventures\/create$/.test(path)
+        || /^\/adventures\/[^/]+\/(manage|edit)$/.test(path);
+}
+
+// ------------------------------------------------------------------
 // Haupt-Modal laden (AJAX-Partial -> #app-modal)
 // ------------------------------------------------------------------
 function loadModalContent(url, preserveTab) {
@@ -96,6 +109,8 @@ function loadModalContent(url, preserveTab) {
             $('#app-modal').toggleClass('modal-hero', $content.find('#skilltree').length > 0);
             // ADV-19: Verwaltungs-Modal (3 Tabs) auf feste Größe.
             $('#app-modal').toggleClass('modal-event', $content.find('[data-tab="checkin"]').length > 0);
+            // Verwaltungsinhalt kennzeichnen (Signalrahmen).
+            $('#app-modal').toggleClass('wr-admin-area', isAdminAreaUrl(url));
             // Alle Modale mit Tabs: fixe Höhe, damit kein Springen beim Tab-Wechsel.
             $('#app-modal').toggleClass('modal-has-tabs', $content.find('.menu .item[data-tab]').length > 0);
             // ADV-17: Unterschriften-Pad aktivieren, falls vorhanden.
@@ -195,6 +210,9 @@ function loadStackContent(url, preserveTab) {
                 $content.find('[data-tab="' + prevTab + '"]').addClass('active');
             }
             $('#app-modal-2').toggleClass('modal-hero', $content.find('#skilltree').length > 0);
+            // Verwaltung: gestapeltes Modal erbt die Kennzeichnung vom Verwaltungs-Modal darunter.
+            $('#app-modal-2').toggleClass('wr-admin-area',
+                isAdminAreaUrl(url) || $('#app-modal').hasClass('wr-admin-area'));
             // Alle Modale mit Tabs: fixe Höhe (gestapeltes Modal).
             $('#app-modal-2').toggleClass('modal-has-tabs', $content.find('.menu .item[data-tab]').length > 0);
             // UI-05: Fomantic-Datepicker im gestapelten Modal initialisieren.

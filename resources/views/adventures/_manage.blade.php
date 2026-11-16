@@ -168,7 +168,7 @@
 
 {{-- Desktop: Fomantic-Tabs (sm+) --}}
 <div class="hidden sm:block">
-    <div class="ui top attached tabular menu" style="overflow-x: auto; flex-wrap: nowrap;">
+    <div class="ui top attached tabular menu">
         <a class="item active" data-tab="data" style="white-space: nowrap;">Event-Daten</a>
         <a class="item" data-tab="bookings" style="white-space: nowrap;">{!! $bookingsTabLabel !!}</a>
         <a class="item" data-tab="teamer-nsc" style="white-space: nowrap;">Teamer/NSC ({{ $adventure->teamerSignups->count() + $nscBookings->count() }})</a>

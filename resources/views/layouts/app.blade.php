@@ -42,7 +42,11 @@
             @endif
 
             <!-- Page Content -->
-            <main class="flex-1 pb-16 sm:pb-0" id="page-main">
+            {{-- Verwaltungsbereich kennzeichnen: Rahmen in Signalfarbe (siehe app.css .wr-admin-area) --}}
+            <main @class([
+                      'flex-1 pb-16 sm:pb-0',
+                      'wr-admin-area' => request()->routeIs('admin.*', 'adventures.manage', 'adventures.manage-index', 'adventures.create', 'adventures.edit'),
+                  ]) id="page-main">
                 {{ $slot }}
             </main>
 
