@@ -193,6 +193,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('adventures.bookings.store-guest');
     Route::post('adventures/{adventure}/bookings', [BookingController::class, 'store'])
         ->name('adventures.bookings.store');
+    // Inspektor (Slide-In) in der Event-Verwaltung (Issue #9).
+    Route::get('adventures/{adventure}/bookings/{booking}/inspector', [BookingController::class, 'inspector'])
+        ->name('adventures.bookings.inspector');
+
     // Anmeldedetails nachträglich bearbeiten (BOOK-04).
     Route::get('adventures/{adventure}/bookings/{booking}/edit', [BookingController::class, 'edit'])
         ->name('adventures.bookings.edit');

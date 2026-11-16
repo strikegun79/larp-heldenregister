@@ -473,7 +473,7 @@ function refreshManageTab() {
     const activeItem = document.querySelector('.ui.top.attached.tabular.menu .item.active[data-tab]');
     const activeTabName = activeItem ? activeItem.getAttribute('data-tab') : null;
 
-    fetch(window.location.href, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+    return fetch(window.location.href, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
         .then(r => r.text())
         .then(html => {
             const doc = new DOMParser().parseFromString(html, 'text/html');
@@ -589,6 +589,192 @@ document.addEventListener('submit', function (e) {
                 const errors = data.errors ? Object.values(data.errors).flat() : [];
                 showToast(errors.join('<br>') || data.message || 'Bitte prüfen.', 'error');
             } else {
+                showToast(data.message || 'Fehler.', 'error');
+            }
+        })
+        .catch(() => showToast('Netzwerkfehler.', 'error'))
+        .finally(() => submitBtn?.classList.remove('loading', 'disabled'));
+});
+
+// ------------------------------------------------------------------
+// Inspektor (Issue #9): Slide-In mit Anmeldedetails in der Event-Verwaltung.
+// Zeilenklick auf tr[data-inspector-url] öffnet das Panel; Formulare mit
+// data-inspector-form werden per AJAX abgeschickt, danach werden Inspektor
+// und Teilnehmerliste neu geladen.
+// ------------------------------------------------------------------
+let inspectorUrl = null;
+let inspectorCloseTimer = null;
+
+function inspectorEl() {
+    return document.getElementById('booking-inspector');
+}
+
+function inspectorIsOpen() {
+    const el = inspectorEl();
+    return !!el && !el.hidden;
+}
+
+// Ist ein Modal offen, muss das Panel im Fomantic-Dimmer liegen, sonst verdeckt
+// der Dimmer es. Auf der Vollseite bleibt es direkt im <body>.
+function placeInspector() {
+    const el = inspectorEl();
+    const dimmer = document.querySelector('.ui.dimmer.modals.active');
+    const target = dimmer || document.body;
+    if (el.parentElement !== target) target.appendChild(el);
+}
+
+function findInspectorRow(url) {
+    if (!url) return null;
+    return Array.from(document.querySelectorAll('tr[data-inspector-url]'))
+        .find(tr => tr.getAttribute('data-inspector-url') === url) || null;
+}
+
+function markInspectedRow(url) {
+    document.querySelectorAll('tr.is-inspected').forEach(tr => tr.classList.remove('is-inspected'));
+    findInspectorRow(url)?.classList.add('is-inspected');
+}
+
+function loadInspector(focusPanel) {
+    const content = document.getElementById('booking-inspector-content');
+    const title   = document.getElementById('booking-inspector-title');
+    const url     = inspectorUrl;
+    content.innerHTML = '<div class="ui active centered inline loader" style="display:block;margin:2rem auto"></div>';
+
+    return fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+        .then(r => { if (!r.ok) throw new Error(r.status); return r.text(); })
+        .then(html => {
+            if (url !== inspectorUrl) return; // inzwischen andere Zeile geöffnet
+            content.innerHTML = html;
+            const t = content.querySelector('[data-inspector-title]');
+            title.textContent = t ? t.textContent.trim() : 'Anmeldung';
+            t?.remove();
+            if (focusPanel) inspectorEl().querySelector('[data-inspector-close]')?.focus();
+        })
+        .catch(() => {
+            content.innerHTML = '<div class="ui error message">Konnte nicht geladen werden.</div>';
+        });
+}
+
+function openInspector(url) {
+    const el = inspectorEl();
+    if (!el) return;
+    clearTimeout(inspectorCloseTimer);
+    inspectorUrl = url;
+    markInspectedRow(url);
+    placeInspector();
+    el.hidden = false;
+    requestAnimationFrame(() => el.classList.add('is-open'));
+    loadInspector(true);
+}
+
+function closeInspector(restoreFocus) {
+    const el = inspectorEl();
+    if (!inspectorIsOpen()) return;
+    const row = findInspectorRow(inspectorUrl);
+    inspectorUrl = null;
+    markInspectedRow(null);
+    el.classList.remove('is-open');
+    inspectorCloseTimer = setTimeout(() => { el.hidden = true; }, 200);
+    // Fokus zurück auf die Zeile, von der aus der Inspektor geöffnet wurde.
+    if (restoreFocus !== false) row?.focus();
+}
+
+// Teilnehmerliste dahinter aktualisieren (Modal oder Vollseite).
+function refreshInspectorBackground() {
+    const inModal = window.appModalUrl && $('#app-modal').hasClass('active');
+    const done = inModal ? loadModalContent(window.appModalUrl, true) : refreshManageTab();
+    return Promise.resolve(done).then(() => {
+        markInspectedRow(inspectorUrl);
+        // loadModalContent setzt den Fokus ins Modal – zurück in den Inspektor holen.
+        requestAnimationFrame(() => {
+            if (inspectorIsOpen()) inspectorEl().querySelector('[data-inspector-close]')?.focus();
+        });
+    });
+}
+
+document.addEventListener('click', function (e) {
+    // Zeilenklick öffnet den Inspektor (Buttons/Links in der Zeile behalten ihre Funktion).
+    const row = e.target.closest('tr[data-inspector-url]');
+    if (row) {
+        if (e.target.closest('a, button, form, input, select, textarea, label')) return;
+        openInspector(row.getAttribute('data-inspector-url'));
+        return;
+    }
+
+    if (e.target.closest('[data-inspector-close]')) {
+        // „Bearbeiten“ öffnet zusätzlich das gestapelte Modal (eigener Handler).
+        closeInspector(!e.target.closest('[data-modal-stack]'));
+        return;
+    }
+
+    // Klick daneben schließt – außer in Dialogen/Toasts über dem Inspektor.
+    if (inspectorIsOpen()
+        && !inspectorEl().contains(e.target)
+        && !e.target.closest('#confirm-modal, #app-modal-2, #session-expired-modal, .ui.toast-container')) {
+        closeInspector(false);
+    }
+});
+
+// Enter/Leertaste auf einer fokussierten Zeile öffnet den Inspektor.
+document.addEventListener('keydown', function (e) {
+    if (e.key !== 'Enter' && e.key !== ' ') return;
+    const row = e.target.closest('tr[data-inspector-url]');
+    if (!row || e.target !== row) return;
+    e.preventDefault();
+    openInspector(row.getAttribute('data-inspector-url'));
+});
+
+// Esc schließt zuerst den Inspektor, nicht das Modal dahinter.
+window.addEventListener('keydown', function (e) {
+    if (e.key !== 'Escape' || !inspectorIsOpen()) return;
+    if ($('#confirm-modal').hasClass('active') || $('#app-modal-2').hasClass('active')) return;
+    e.preventDefault();
+    e.stopPropagation();
+    closeInspector();
+}, true);
+
+// Maus-Events im Inspektor nicht an den Fomantic-Dimmer weitergeben,
+// sonst schließt ein Klick ins Panel das Modal dahinter.
+['mousedown', 'mouseup'].forEach(type => {
+    inspectorEl()?.addEventListener(type, e => e.stopPropagation());
+});
+
+// Wird das Verwaltungs-Modal geschlossen, schließt auch der Inspektor.
+const appModalEl = document.getElementById('app-modal');
+if (appModalEl) {
+    new MutationObserver(() => {
+        if (!appModalEl.classList.contains('active') && inspectorIsOpen()
+            && inspectorEl().parentElement !== document.body) {
+            closeInspector(false);
+        }
+    }).observe(appModalEl, { attributes: true, attributeFilter: ['class'] });
+}
+
+// Aktionen im Inspektor per AJAX (data-confirm läuft vorher im Capture-Handler).
+document.addEventListener('submit', function (e) {
+    const form = e.target;
+    if (!form.hasAttribute('data-inspector-form')) return;
+    if (e.defaultPrevented) return;
+    e.preventDefault();
+
+    const submitBtn = e.submitter || form.querySelector('[type=submit]');
+    submitBtn?.classList.add('loading', 'disabled');
+
+    fetch(form.action, {
+        method: 'POST', // PATCH/DELETE via _method-Spoofing im FormData
+        headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' },
+        body: new FormData(form),
+    })
+        .then(async (resp) => {
+            const data = await resp.json().catch(() => ({}));
+            if (resp.ok) {
+                showToast(data.message || 'Gespeichert.', 'success');
+                refreshInspectorBackground();
+                if (inspectorIsOpen()) loadInspector(false);
+            } else if (resp.status === 422) {
+                const errors = data.errors ? Object.values(data.errors).flat() : [];
+                showToast(errors.join(' · ') || data.message || 'Bitte prüfen.', 'error');
+            } else if (resp.status !== 419) {
                 showToast(data.message || 'Fehler.', 'error');
             }
         })

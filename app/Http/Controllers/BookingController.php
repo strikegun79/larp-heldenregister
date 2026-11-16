@@ -47,6 +47,24 @@ class BookingController extends Controller
         $this->middleware('can:approve-bookings')->only(['reject', 'confirmTeamer']);
         // Bezahlt-Status pflegen (BOOK-06).
         $this->middleware('can:manage-payments')->only('togglePaid');
+        // Inspektor in der Event-Verwaltung (Issue #9): gleiche Berechtigung wie die Verwaltungsansicht.
+        $this->middleware('can:events.edit')->only('inspector');
+    }
+
+    /**
+     * Inspektor (Slide-In) mit allen wesentlichen Anmeldedaten und den
+     * Status-Aktionen einer Anmeldung in der Event-Verwaltung (Issue #9).
+     */
+    public function inspector(Adventure $adventure, Booking $booking): View
+    {
+        abort_unless($booking->adventure_id === $adventure->id, 404);
+
+        $booking->load(['player.users', 'bookedBy', 'role']);
+
+        return view('bookings._inspector', [
+            'adventure' => $adventure,
+            'booking' => $booking,
+        ]);
     }
 
     /**

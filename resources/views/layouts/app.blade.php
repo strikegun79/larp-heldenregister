@@ -97,6 +97,20 @@
             <div class="actions" id="app-modal-actions"></div>
         </div>
 
+        <!-- Inspektor (Issue #9): Slide-In von rechts mit Anmeldedetails und Aktionen.
+             Inhalt wird per AJAX aus [data-inspector-url] geladen. Ist ein Modal offen,
+             wird das Panel in den Fomantic-Dimmer verschoben (heldenregister.js). -->
+        <aside id="booking-inspector" class="booking-inspector" hidden
+               role="dialog" aria-modal="false" aria-labelledby="booking-inspector-title">
+            <div class="booking-inspector__header">
+                <h2 id="booking-inspector-title" class="font-uncial text-lg text-waldritter m-0 truncate">Anmeldung</h2>
+                <button type="button" class="ui mini icon basic button" data-inspector-close aria-label="Inspektor schließen">
+                    <i class="close icon"></i>
+                </button>
+            </div>
+            <div id="booking-inspector-content" class="booking-inspector__content"></div>
+        </aside>
+
         <!-- Gestapeltes Modal (ADV-22): öffnet über #app-modal (z. B. Anmeldung,
              Gast-Anmeldung, Anmeldung bearbeiten). Schließ-Icon oben rechts (UI-25)
              ist immer erreichbar, unabhängig von der Scroll-Position des Inhalts. -->
