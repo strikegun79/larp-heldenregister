@@ -11,6 +11,7 @@ use App\Models\TeamerSignup;
 use App\Models\User;
 use Database\Seeders\EventLookupSeeder;
 use Database\Seeders\RoleSeeder;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 /**
@@ -18,6 +19,8 @@ use Tests\TestCase;
  */
 class AdventureDeleteTest extends TestCase
 {
+    use RefreshDatabase;
+
     protected function setUp(): void
     {
         parent::setUp();

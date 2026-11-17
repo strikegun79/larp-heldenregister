@@ -4,6 +4,7 @@ namespace Tests\Feature\Api;
 
 use App\Models\Hero;
 use App\Models\Player;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 /**
@@ -11,6 +12,8 @@ use Tests\TestCase;
  */
 class HeroApiTest extends TestCase
 {
+    use RefreshDatabase;
+
     // ----------------------------------------------------------------
     // Kein Auth erforderlich
     // ----------------------------------------------------------------

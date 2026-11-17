@@ -7,6 +7,7 @@ use App\Models\EventStatus;
 use App\Models\User;
 use Database\Seeders\EventLookupSeeder;
 use Database\Seeders\RoleSeeder;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 /**
@@ -14,6 +15,8 @@ use Tests\TestCase;
  */
 class AdventureApiTest extends TestCase
 {
+    use RefreshDatabase;
+
     protected function setUp(): void
     {
         parent::setUp();
