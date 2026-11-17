@@ -16,6 +16,7 @@
                         <tr>
                             <th class="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase">Name</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase">Events</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase">Anforderungen bei Anmeldung</th>
                             <th class="px-6 py-3"></th>
                         </tr>
                     </thead>
@@ -24,6 +25,38 @@
                             <tr>
                                 <td class="px-6 py-4" data-label="Name">{{ $client->name }}</td>
                                 <td class="px-6 py-4" data-label="Events">{{ $client->adventures_count }}</td>
+                                {{-- Zusätzliche Pflicht-Bestätigungen, z. B. Einverständniserklärungen (Issue #14) --}}
+                                <td class="px-6 py-4" data-label="Anforderungen">
+                                    <ul class="space-y-1">
+                                        @foreach ($client->requirements as $requirement)
+                                            <li class="flex flex-wrap items-center gap-2 {{ $requirement->active ? '' : 'text-stone-400' }}">
+                                                @if ($requirement->pdf_path)
+                                                    <a href="{{ route('requirements.pdf', $requirement) }}" target="_blank" rel="noopener"
+                                                       title="PDF öffnen" aria-label="PDF zu {{ $requirement->title }} öffnen">
+                                                        <i class="file pdf outline icon"></i>
+                                                    </a>
+                                                @endif
+                                                <span>{{ $requirement->title }}</span>
+                                                @unless ($requirement->active)
+                                                    <span class="ui mini label">inaktiv</span>
+                                                @endunless
+                                                <a href="{{ route('admin.event-client-requirements.edit', $requirement) }}"
+                                                   data-modal-url="{{ route('admin.event-client-requirements.edit', $requirement) }}"
+                                                   class="text-waldritter hover:underline text-sm">Bearbeiten</a>
+                                                <form method="POST" action="{{ route('admin.event-client-requirements.destroy', $requirement) }}"
+                                                      data-confirm="Anforderung „{{ $requirement->title }}” löschen? Wurde ihr bereits zugestimmt, wird sie nur deaktiviert.">
+                                                    @csrf @method('DELETE')
+                                                    <button type="submit" class="text-red-600 hover:underline text-sm">Löschen</button>
+                                                </form>
+                                            </li>
+                                        @endforeach
+                                    </ul>
+                                    <a href="{{ route('admin.event-clients.requirements.create', $client) }}"
+                                       data-modal-url="{{ route('admin.event-clients.requirements.create', $client) }}"
+                                       class="text-waldritter hover:underline text-sm">
+                                        <i class="plus icon"></i>Anforderung hinzufügen
+                                    </a>
+                                </td>
                                 <td class="px-6 py-4 text-right">
                                     <div class="flex items-center justify-end gap-3">
                                         <a href="{{ route('admin.event-clients.edit', $client) }}" data-modal-url="{{ route('admin.event-clients.edit', $client) }}" class="text-waldritter hover:underline">Bearbeiten</a>
@@ -38,7 +71,7 @@
                                 </td>
                             </tr>
                         @empty
-                            <tr><td colspan="3" class="px-6 py-4 text-stone-500">Noch keine Auftraggeber.</td></tr>
+                            <tr><td colspan="4" class="px-6 py-4 text-stone-500">Noch keine Auftraggeber.</td></tr>
                         @endforelse
                     </tbody>
                 </table>

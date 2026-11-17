@@ -17,7 +17,7 @@ class EventClientController extends Controller
 {
     public function index(): View
     {
-        $clients = EventClient::withCount('adventures')->orderBy('name')->get();
+        $clients = EventClient::withCount('adventures')->with('requirements')->orderBy('name')->get();
 
         return view('admin.event_clients.index', compact('clients'));
     }

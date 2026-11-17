@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 
 class Booking extends Model
 {
@@ -124,6 +125,23 @@ class Booking extends Model
     public function role(): BelongsTo
     {
         return $this->belongsTo(EventRole::class, 'event_role_id');
+    }
+
+    /** Zugestimmte Anforderungen des Auftraggebers (Issue #14). */
+    public function requirementConsents(): BelongsToMany
+    {
+        return $this->belongsToMany(EventClientRequirement::class, 'booking_requirement_consents')
+            ->withPivot('accepted_at')
+            ->withTimestamps();
+    }
+
+    /** Zustimmung zu den übergebenen Anforderungen protokollieren (Issue #14). */
+    public function recordRequirementConsents(iterable $requirements): void
+    {
+        $now = now();
+        $this->requirementConsents()->syncWithoutDetaching(
+            collect($requirements)->mapWithKeys(fn ($r) => [$r->id => ['accepted_at' => $now]])->all()
+        );
     }
 
     /** Erziehungsberechtigte Person, die die Anmeldung vorgenommen hat (ORGA-01). */

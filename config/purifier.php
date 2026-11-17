@@ -54,6 +54,15 @@ return [
             'URI.AllowedSchemes'       => ['http' => true, 'https' => true, 'mailto' => true],
             'Attr.AllowedFrameTargets' => ['_blank'],
         ],
+        // Anforderungen der Auftraggeber (Issue #14): formatierter Text wie in der Papier-Vorlage
+        'requirement' => [
+            'HTML.Doctype'             => 'HTML 4.01 Transitional',
+            'HTML.Allowed'             => 'p[style],br,strong,b,em,i,u,s,ul,ol,li[style],span[style],a[href|title|target]',
+            'CSS.AllowedProperties'    => 'color,background-color,font-size,font-weight,font-style,text-decoration,text-align',
+            'AutoFormat.RemoveEmpty'   => true,
+            'URI.AllowedSchemes'       => ['http' => true, 'https' => true, 'mailto' => true],
+            'Attr.AllowedFrameTargets' => ['_blank'],
+        ],
         'test'    => [
             'Attr.EnableID' => 'true',
         ],

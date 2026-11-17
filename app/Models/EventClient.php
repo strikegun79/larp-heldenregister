@@ -19,4 +19,10 @@ class EventClient extends Model
     {
         return $this->hasMany(Adventure::class);
     }
+
+    /** Zusätzliche Anforderungen bei der Anmeldung (Issue #14). */
+    public function requirements(): HasMany
+    {
+        return $this->hasMany(EventClientRequirement::class)->ordered();
+    }
 }

@@ -293,7 +293,10 @@ function sendModalAction(url, method, fields, $modal, btn) {
     const fd = new FormData();
     fd.append('_token', document.querySelector('meta[name=csrf-token]').content);
     fd.append('_method', method);
-    Object.entries(fields).forEach(([k, v]) => fd.append(k, v));
+    Object.entries(fields).forEach(([k, v]) => {
+        if (Array.isArray(v)) v.forEach(x => fd.append(k + '[]', x));
+        else fd.append(k, v);
+    });
     fetch(url, {
         method: 'POST',
         headers: { 'X-Requested-With': 'XMLHttpRequest', 'Accept': 'application/json' },
@@ -320,38 +323,73 @@ function sendModalAction(url, method, fields, $modal, btn) {
 
 // --- Check-in (Unterschrift) -------------------------------------
 let checkinUrl = null;
-document.addEventListener('click', function (e) {
-    const t = e.target.closest('.checkin-trigger');
-    if (!t) return;
-    e.preventDefault();
-    checkinUrl = t.getAttribute('data-url');
-    document.getElementById('signature-modal-name').textContent = t.getAttribute('data-name') || '';
+let checkinIds = null; // Mehrfach-Check-in (Issue #11): Booking-IDs, sonst null
+
+function openSignatureModal(url, label, ids) {
+    checkinUrl = url;
+    checkinIds = ids;
+    document.getElementById('signature-modal-name').textContent = label;
     $('#signature-modal').modal({
         allowMultiple: true, autofocus: false,
         onVisible: () => { initSignaturePad('signature-pad'); clearSignaturePad('signature-pad'); },
     }).modal('show');
+}
+
+document.addEventListener('click', function (e) {
+    const t = e.target.closest('.checkin-trigger');
+    if (!t) return;
+    e.preventDefault();
+    openSignatureModal(t.getAttribute('data-url'), t.getAttribute('data-name') || '', null);
 });
 document.getElementById('signature-modal-save').addEventListener('click', function () {
     if (!checkinUrl) return;
-    const data = document.getElementById('signature-pad').toDataURL('image/png');
-    sendModalAction(checkinUrl, 'PUT', { signature: data }, $('#signature-modal'), this);
+    const fields = { signature: document.getElementById('signature-pad').toDataURL('image/png') };
+    if (checkinIds) fields.booking_ids = checkinIds;
+    sendModalAction(checkinUrl, 'PUT', fields, $('#signature-modal'), this);
 });
 
 // --- Abmeldung mit Grund ----------------------------------------
 let deregisterUrl = null;
+let deregisterIds = null; // Mehrfach-Abmeldung (Issue #11): Booking-IDs, sonst null
+
+function openDeregisterModal(url, label, ids) {
+    deregisterUrl = url;
+    deregisterIds = ids;
+    document.getElementById('deregister-modal-name').textContent = label;
+    document.getElementById('deregister-reason').value = '';
+    $('#deregister-modal').modal({ allowMultiple: true, autofocus: false }).modal('show');
+}
+
 document.addEventListener('click', function (e) {
     const t = e.target.closest('.deregister-trigger');
     if (!t) return;
     e.preventDefault();
-    deregisterUrl = t.getAttribute('data-url');
-    document.getElementById('deregister-modal-name').textContent = t.getAttribute('data-name') || '';
-    document.getElementById('deregister-reason').value = '';
-    $('#deregister-modal').modal({ allowMultiple: true, autofocus: false }).modal('show');
+    openDeregisterModal(t.getAttribute('data-url'), t.getAttribute('data-name') || '', null);
 });
 document.getElementById('deregister-modal-save').addEventListener('click', function () {
     const reason = document.getElementById('deregister-reason').value;
     if (!deregisterUrl || !reason) { showToast('Bitte einen Grund wählen.', 'error'); return; }
-    sendModalAction(deregisterUrl, 'PATCH', { absence_reason: reason }, $('#deregister-modal'), this);
+    const fields = { absence_reason: reason };
+    if (deregisterIds) fields.booking_ids = deregisterIds;
+    sendModalAction(deregisterUrl, 'PATCH', fields, $('#deregister-modal'), this);
+});
+
+// --- Mehrfachaktionen im Check-in (Issue #11) --------------------
+document.addEventListener('click', function (e) {
+    const btn = e.target.closest('[data-checkin-bulk-action]');
+    if (!btn) return;
+    e.preventDefault();
+    const wrap = btn.closest('[data-checkin-root]');
+    const selected = Array.from(wrap.querySelectorAll('input[data-checkin-select]:checked'));
+    if (selected.length === 0) return;
+
+    const ids   = selected.map(cb => cb.value);
+    const label = selected.length + ' Teilnehmer: ' + selected.map(cb => cb.dataset.name).join(', ');
+    if (btn.dataset.checkinBulkAction === 'checkin') {
+        openSignatureModal(btn.dataset.url, label, ids);
+    } else {
+        openDeregisterModal(btn.dataset.url, label, ids);
+    }
 });
 
 // --- Storno-Rücknahme anfragen (BOOK-09) -------------------------
@@ -368,6 +406,25 @@ document.getElementById('reinstate-request-send').addEventListener('click', func
     const msg = document.getElementById('reinstate-request-message').value.trim();
     if (!reinstateRequestUrl || !msg) { showToast('Bitte eine Nachricht eingeben.', 'error'); return; }
     sendModalAction(reinstateRequestUrl, 'POST', { message: msg }, $('#reinstate-request-modal'), this);
+});
+
+// ------------------------------------------------------------------
+// Anforderung des Auftraggebers (Issue #14): Popup mit Beschreibung und
+// optionalem PDF-Download über dem Anmeldeformular.
+// ------------------------------------------------------------------
+document.addEventListener('click', function (e) {
+    const trigger = e.target.closest('[data-requirement-modal]');
+    if (!trigger) return;
+    e.preventDefault();
+    document.getElementById('requirement-modal-header').textContent = trigger.dataset.title || '';
+    // Bereinigtes HTML aus dem <template> der Anforderung übernehmen.
+    const tpl = document.getElementById(trigger.dataset.requirementModal);
+    const desc = document.getElementById('requirement-modal-description');
+    desc.replaceChildren(tpl ? tpl.content.cloneNode(true) : document.createTextNode(''));
+    const download = document.getElementById('requirement-modal-download');
+    download.href = trigger.dataset.download || '#';
+    download.style.display = trigger.dataset.download ? '' : 'none';
+    $('#requirement-modal').modal({ allowMultiple: true, autofocus: false }).modal('show');
 });
 
 // ------------------------------------------------------------------
@@ -787,6 +844,12 @@ document.addEventListener('submit', function (e) {
             const data = await resp.json().catch(() => ({}));
             if (resp.ok) {
                 showToast(data.message || 'Gespeichert.', 'success');
+                // Gelöschte Einträge (z. B. stornierte Teamer-Anmeldung): Inspektor schließen statt neu laden.
+                if (form.hasAttribute('data-inspector-close-on-success')) {
+                    closeInspector(false);
+                    refreshInspectorBackground();
+                    return;
+                }
                 refreshInspectorBackground();
                 if (inspectorIsOpen()) loadInspector(false);
             } else if (resp.status === 422) {
@@ -1382,6 +1445,12 @@ function initCheckinTable(root) {
                 if (hit) visible++;
             });
             if (emptyRow) emptyRow.style.display = visible > 0 ? 'none' : '';
+            // Ausgeblendete Zeilen abwählen – Mehrfachaktionen nie auf unsichtbare Einträge.
+            rows.forEach(function (r) {
+                const cb = r.querySelector('input[data-checkin-select]');
+                if (cb && r.style.display === 'none') cb.checked = false;
+            });
+            updateSelection();
             if (count) {
                 count.textContent = active
                     ? visible + ' von ' + rows.length + ' Teilnehmern'
@@ -1449,6 +1518,24 @@ function initCheckinTable(root) {
                 save();
             });
         }
+
+        // --- Mehrfachauswahl (Issue #11) ---
+        function updateSelection() {
+            const checked = tbody.querySelectorAll('input[data-checkin-select]:checked').length;
+            if (bulkBar) bulkBar.hidden = checked === 0;
+            if (bulkCount) bulkCount.textContent = checked === 1 ? '1 Teilnehmer ausgewählt' : checked + ' Teilnehmer ausgewählt';
+        }
+
+        const bulkBar   = wrap.querySelector('[data-checkin-bulkbar]');
+        const bulkCount = wrap.querySelector('[data-checkin-bulk-count]');
+
+        tbody.addEventListener('change', function (e) {
+            if (e.target.matches('input[data-checkin-select]')) updateSelection();
+        });
+        wrap.querySelector('[data-checkin-bulk-clear]')?.addEventListener('click', function () {
+            rows.forEach(r => { const cb = r.querySelector('input[data-checkin-select]'); if (cb) cb.checked = false; });
+            updateSelection();
+        });
 
         applySort();
         applyFilter();

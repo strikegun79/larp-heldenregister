@@ -67,6 +67,8 @@
         <x-mobile.cards-or-table>
             <table class="ui very basic compact table w-full" data-checkin-table>
                 <thead><tr>
+                    {{-- Issue #11: Spalte für die Mehrfachauswahl --}}
+                    <th class="collapsing"><span class="sr-only">Auswahl</span></th>
                     <th data-sort-col="lastname" data-sort-type="text" class="cursor-pointer select-none" tabindex="0" aria-sort="ascending">Nachname {!! $sortIcon !!}</th>
                     <th data-sort-col="firstname" data-sort-type="text" class="cursor-pointer select-none" tabindex="0">Vorname {!! $sortIcon !!}</th>
                     <th>Held</th>
@@ -100,6 +102,12 @@
                             $searchText = mb_strtolower(implode(' ', array_unique(array_filter($searchParts))));
                         @endphp
                         <tr data-search="{{ $searchText }}">
+                            <td data-label="Auswahl" class="collapsing">
+                                <input type="checkbox" data-checkin-select value="{{ $booking->id }}"
+                                       data-name="{{ $booking->player?->full_name }}"
+                                       aria-label="{{ $booking->player?->full_name }} auswählen"
+                                       class="rounded border-gray-300 cursor-pointer">
+                            </td>
                             <td data-label="Nachname" data-col="lastname" data-sort-val="{{ $booking->player?->lastname }}" class="font-medium">{{ $booking->player?->lastname }}</td>
                             <td data-label="Vorname" data-col="firstname" data-sort-val="{{ $booking->player?->name }}" class="font-medium">{{ $booking->player?->name }}</td>
                             <td data-label="Held">{{ $heroLabel ?: '—' }}</td>
@@ -163,11 +171,34 @@
                         </tr>
                     @endforeach
                     <tr data-checkin-empty style="display:none">
-                        <td colspan="7" class="text-stone-500">Keine Treffer für diese Suche.</td>
+                        <td colspan="8" class="text-stone-500">Keine Treffer für diese Suche.</td>
                     </tr>
                 </tbody>
             </table>
         </x-mobile.cards-or-table>
+
+        {{-- Issue #11: Sticky-Leiste mit Mehrfachaktionen, erscheint bei mindestens einer Auswahl --}}
+        {{-- hidden liegt auf dem Wrapper: die Klasse „flex“ würde das hidden-Attribut überschreiben --}}
+        <div data-checkin-bulkbar hidden role="region" aria-label="Mehrfachaktionen" class="sticky bottom-0 z-10 mt-2">
+        <div class="flex flex-wrap items-center gap-2 rounded-md border border-amber-300 bg-amber-50 px-3 py-2 shadow-md">
+            <span data-checkin-bulk-count class="text-sm font-semibold" aria-live="polite"></span>
+            <div class="flex flex-wrap items-center gap-2 sm:ml-auto">
+                @if ($adventure->checkinAllowed())
+                    @can('take-signatures')
+                        <button type="button" class="ui small primary button" data-checkin-bulk-action="checkin"
+                                data-url="{{ route('adventures.checkin.bulk', $adventure) }}">
+                            <i class="signature icon"></i> Check-in
+                        </button>
+                    @endcan
+                @endif
+                <button type="button" class="ui small button" data-checkin-bulk-action="deregister"
+                        data-url="{{ route('adventures.deregister.bulk', $adventure) }}">
+                    <i class="user times icon"></i> Abmelden
+                </button>
+                <button type="button" class="ui small basic button" data-checkin-bulk-clear>Auswahl aufheben</button>
+            </div>
+        </div>
+        </div>
     @endif
     </div>
 @endcan

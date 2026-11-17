@@ -4,6 +4,27 @@ Alle wesentlichen Änderungen am Heldenregister werden hier festgehalten.
 Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1.1.0/),
 die Versionsnummern folgen [Semantic Versioning](https://semver.org/lang/de/).
 
+## [1.8.0] – 2026-11-17
+
+### Neu
+- **Einverständniserklärungen je Auftraggeber:** In der Verwaltung lassen sich für einen Auftraggeber zusätzliche Erklärungen hinterlegen, z. B. die Einverständniserklärung der Jugendförderung Gießen. Der Text ist formatierbar, eine PDF kann optional angehängt werden. Bei der Anmeldung zu Events dieses Auftraggebers muss jede Erklärung wie die Teilnahmebedingungen bestätigt werden. Der Text öffnet sich per Klick im Fenster, die PDF lässt sich über das PDF-Symbol herunterladen. Die Zustimmung wird mit Zeitpunkt gespeichert und im Inspektor angezeigt.
+- **Inspektor in der Event-Verwaltung:** Ein Klick auf eine Anmeldung öffnet rechts alle wichtigen Daten und die Status-Aktionen (Warteliste, Ablehnen, Stornieren, Bestätigung erneut senden). Gilt auch für Teamer- und NSC-Anmeldungen und ist per Tastatur bedienbar.
+- **Anmeldungen bestätigen:** Neue Event-Einstellung. Ist sie aktiv, bleiben Anmeldungen „offen“, bis die Projektleitung sie bestätigt. Die Eingangsmail enthält dann noch keine Bankdaten, die Zahlungsinformationen folgen mit der Bestätigung.
+- **Mehrfach-Check-in:** Mehrere Teilnehmende auswählen und mit einer einzigen Unterschrift einchecken oder gemeinsam abmelden.
+- **Check-in-Liste:** Durchsuchbar (Name, Held, Erziehungsberechtigte) und nach Spalten sortierbar.
+- **Abmeldung zurücknehmen** im Check-in und im Inspektor.
+
+### Geändert
+- **Admin-Anmeldung:** Unabhängig vom Anmeldestatus möglich (außer bei abgesagten Abenteuern), immer bestätigt. Die Anmeldung erfolgt im Namen eines auswählbaren Betreuers, der auch die Bestätigungsmail erhält.
+- **Verwaltungsbereich:** Karten und Fenster der Verwaltung sind mit einem roten Rahmen gekennzeichnet, die Reiter wurden überarbeitet.
+
+### Behoben
+- **Datumsfelder** lassen sich wieder per Tastatur eingeben (z. B. 15.03.2012).
+- **Newsletter-Banner** auf der Startseite ist besser lesbar.
+
+### Sicherheit
+- „Auf Warteliste verschieben“ ist nur noch mit passender Berechtigung möglich.
+
 ## [1.7.0] – 2026-11-13
 
 ### Neu

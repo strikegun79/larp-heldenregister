@@ -80,7 +80,10 @@ class GroupBookingController extends Controller
             'event_role_id' => ['required', Rule::in(EventRole::forParticipant()->pluck('id'))],
             'agb' => ['accepted'],
             'kontakt_telefon' => ['required', 'string', 'max:100'],
-        ]);
+            // Zusätzliche Anforderungen des Auftraggebers sind Pflicht (Issue #14).
+        ] + $adventure->requirementRules(), $adventure->requirementMessages());
+
+        $requirements = $adventure->activeRequirements();
 
         if (! $adventure->registrationOpen()) {
             return $this->fail($request, 'Für dieses Abenteuer ist die Anmeldung nicht geöffnet.');
@@ -133,6 +136,8 @@ class GroupBookingController extends Controller
                 'approved_at' => $adventure->requires_confirmation ? null : now(),
                 'status' => $adventure->requires_confirmation ? 'offen' : 'bestaetigt',
             ]);
+
+            $booking->recordRequirementConsents($requirements);
 
             // Wartelisten-Modus nur bei Kapazitätsüberschreitung aktivieren, nicht bei Altersverletzung.
             if ($booking->waitlisted && ! $ageViolation && ! $adventure->waitlist_mode) {

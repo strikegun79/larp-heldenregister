@@ -72,6 +72,71 @@ class SignatureController extends Controller
     }
 
     /**
+     * Mehrfach-Check-in (Issue #11): eine Unterschrift (z. B. eines Elternteils)
+     * für mehrere Anmeldungen. Bereits Eingecheckte werden übersprungen, damit
+     * ihre vorhandene Unterschrift nicht überschrieben wird.
+     */
+    public function bulkUpdate(Request $request, Adventure $adventure): JsonResponse|RedirectResponse
+    {
+        if (! $adventure->checkinAllowed()) {
+            $message = 'Check-in ist erst ab Status „Anmeldung geschlossen" möglich.';
+
+            return $request->expectsJson()
+                ? response()->json(['message' => $message], 422)
+                : back()->with('error', $message);
+        }
+
+        $data = $request->validate([
+            'booking_ids' => ['required', 'array', 'min:1'],
+            'booking_ids.*' => ['integer'],
+            'signature' => ['required', 'string', 'starts_with:data:image/png;base64,', 'max:200000'],
+        ]);
+
+        // Nur Anmeldungen dieses Events mit Spieler (Gäste haben keinen Check-in).
+        $bookings = $adventure->bookings()
+            ->whereIn('id', $data['booking_ids'])
+            ->whereNotNull('player_id')
+            ->get();
+
+        if ($bookings->isEmpty()) {
+            $message = 'Keine gültigen Teilnehmer ausgewählt.';
+
+            return $request->expectsJson()
+                ? response()->json(['message' => $message], 422)
+                : back()->with('error', $message);
+        }
+
+        $checkedIn = 0;
+        $skipped = 0;
+
+        DB::transaction(function () use ($adventure, $bookings, $data, &$checkedIn, &$skipped) {
+            $present = $adventure->visits()->pluck('player_id')->flip();
+
+            foreach ($bookings as $booking) {
+                if ($present->has($booking->player_id)) {
+                    $skipped++;
+
+                    continue;
+                }
+
+                $booking->update(['signature' => $data['signature']]);
+                $adventure->visits()->create(['player_id' => $booking->player_id]);
+                $present->put($booking->player_id, true);
+                $checkedIn++;
+            }
+        });
+
+        $message = "{$checkedIn} Teilnehmer eingecheckt.";
+        if ($skipped > 0) {
+            $message .= " {$skipped} bereits anwesend (übersprungen).";
+        }
+
+        return $request->expectsJson()
+            ? response()->json(['message' => $message, 'refresh_modal' => true])
+            : back()->with('status', $message);
+    }
+
+    /**
      * Unterschrift entfernen (DSGVO Art. 17 – biometrische Daten auf Anfrage löschen).
      */
     public function destroy(Request $request, Adventure $adventure, Booking $booking): JsonResponse|RedirectResponse
