@@ -128,15 +128,16 @@ class TeamerNscTabTest extends TestCase
 
         $this->actingAs($this->admin())
             ->put(route('adventures.teamer.update', [$adventure, $signup]), [
-                'teamer_role' => 'Teamer A',
+                'event_role_id' => 3, // Teamer A
                 'kontakt_telefon' => '012 345 678',
                 'allergien' => 'Nüsse',
+                'health_data_consent' => '1',
             ])
             ->assertSessionDoesntHaveErrors();
 
         $this->assertDatabaseHas('teamer_signups', [
             'id' => $signup->id,
-            'teamer_role' => 'Teamer A',
+            'event_role_id' => 3, // Teamer A
             'allergien' => 'Nüsse',
         ]);
     }
@@ -148,7 +149,7 @@ class TeamerNscTabTest extends TestCase
 
         $this->actingAs($this->userWithRole(50))
             ->put(route('adventures.teamer.update', [$adventure, $signup]), [
-                'teamer_role' => 'Teamer A',
+                'event_role_id' => 3, // Teamer A
             ])
             ->assertForbidden();
     }
@@ -179,8 +180,8 @@ class TeamerNscTabTest extends TestCase
 
         // Manage-Modal zeigt beide Buchungen insgesamt, aber getrennt
         $response->assertOk();
-        // Tab-Beschriftung: Anmeldungen (1) — ohne NSC
-        $response->assertSee('Anmeldungen (1)');
+        // Tab-Beschriftung: Anmeldungen (aktiv/Warteliste/storniert) — ohne NSC
+        $response->assertSee('Anmeldungen (<span class="text-green-700">1</span>/', false);
         // Teamer/NSC (0+1)
         $response->assertSee('Teamer/NSC (1)');
     }

@@ -164,11 +164,11 @@ class TeamerSignupTest extends TestCase
 
         $this->actingAs($this->admin())
             ->patch(route('adventures.teamer.update-role', [$adventure, $signup]), [
-                'teamer_role' => 'Teamer A',
+                'event_role_id' => 3, // Teamer A
             ])
             ->assertSessionDoesntHaveErrors();
 
-        $this->assertDatabaseHas('teamer_signups', ['id' => $signup->id, 'teamer_role' => 'Teamer A']);
+        $this->assertDatabaseHas('teamer_signups', ['id' => $signup->id, 'event_role_id' => 3]);
     }
 
     public function test_teamer_cannot_assign_role(): void
@@ -182,7 +182,7 @@ class TeamerSignupTest extends TestCase
 
         $this->actingAs($teamer)
             ->patch(route('adventures.teamer.update-role', [$adventure, $signup]), [
-                'teamer_role' => 'Teamer A',
+                'event_role_id' => 3, // Teamer A
             ])
             ->assertForbidden();
     }
@@ -194,8 +194,8 @@ class TeamerSignupTest extends TestCase
 
         $this->actingAs($this->admin())
             ->patch(route('adventures.teamer.update-role', [$adventure, $signup]), [
-                'teamer_role' => 'Ungültige Rolle',
+                'event_role_id' => 1, // Spieler – keine Teamer-Rolle
             ])
-            ->assertSessionHasErrors('teamer_role');
+            ->assertSessionHasErrors('event_role_id');
     }
 }
