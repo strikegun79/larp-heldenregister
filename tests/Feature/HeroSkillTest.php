@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Hero;
+use App\Models\HeroClass;
 use App\Models\Skill;
 use App\Models\User;
 use Database\Seeders\EpTransactionTypeSeeder;
@@ -31,6 +32,12 @@ class HeroSkillTest extends TestCase
     private function skill(int $cost = 5): Skill
     {
         return Skill::create(['name' => 'Probe-Fertigkeit', 'ep_costs' => $cost, 'perl_count' => 0]);
+    }
+
+    /** Klasse für klassenspezifische Voraussetzungen (SKILL-10). */
+    private function heroClass(): HeroClass
+    {
+        return HeroClass::firstOrCreate(['id' => 990], ['name' => 'Testklasse', 'slug' => 'test-990', 'ep_cost' => 0]);
     }
 
     /** Held mit einer EP-Gutschrift (Typ 10) ausstatten. */
@@ -145,19 +152,23 @@ class HeroSkillTest extends TestCase
 
     // --- SKILL-06: Voraussetzungen ---
 
-    public function test_cannot_learn_skill_with_unmet_prerequisites(): void
+    /**
+     * Bürokraten dürfen gesperrte Fertigkeiten als Sonderfall zuteilen; die
+     * Warnung erfolgt im Frontend (siehe Commit 6e1f744).
+     */
+    public function test_registrar_can_assign_skill_with_unmet_prerequisites_as_exception(): void
     {
         $hero = $this->heroWithEp(50);
         $prereq = $this->skill(5);
         $skill = $this->skill(10);
-        $skill->prerequisites()->attach($prereq->id);
+        $skill->prerequisites()->attach($prereq->id, ['hero_class_id' => $this->heroClass()->id]);
 
         $this->actingAs($this->userWithRole(20))
             ->postJson(route('heroes.skills.store', $hero), ['skill_id' => $skill->id])
-            ->assertStatus(422)
-            ->assertJsonFragment(['message' => "Voraussetzungen nicht erfüllt: {$prereq->name}."]);
+            ->assertOk();
 
-        $this->assertFalse($hero->skills()->whereKey($skill->id)->exists());
+        $this->assertTrue($hero->skills()->whereKey($skill->id)->exists());
+        $this->assertFalse($hero->skills()->whereKey($prereq->id)->exists());
     }
 
     public function test_can_learn_skill_once_prerequisites_are_met(): void
@@ -165,7 +176,7 @@ class HeroSkillTest extends TestCase
         $hero = $this->heroWithEp(50);
         $prereq = $this->skill(5);
         $skill = $this->skill(10);
-        $skill->prerequisites()->attach($prereq->id);
+        $skill->prerequisites()->attach($prereq->id, ['hero_class_id' => $this->heroClass()->id]);
 
         // Voraussetzung erfüllen
         $hero->skills()->attach($prereq->id, ['trained_at' => now()]);

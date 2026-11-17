@@ -69,7 +69,7 @@ class HeroSkillTreeTest extends TestCase
         $class = HeroClass::create(['id' => 997, 'name' => 'Testklasse3', 'slug' => 'test-997', 'ep_cost' => 0]);
         $prereq = Skill::create(['name' => 'Voraussetzung', 'ep_costs' => 2, 'level' => 1, 'perl_count' => 0]);
         $dependent = Skill::create(['name' => 'Gesperrter Skill', 'ep_costs' => 5, 'level' => 2, 'perl_count' => 0]);
-        $dependent->prerequisites()->attach($prereq->id);
+        $dependent->prerequisites()->attach($prereq->id, ['hero_class_id' => $class->id]);
         $class->skills()->attach([$prereq->id, $dependent->id]);
         $hero = Hero::factory()->create();
         $hero->classes()->attach($class->id);
@@ -108,8 +108,8 @@ class HeroSkillTreeTest extends TestCase
         $learnedIds = collect();
 
         $rendered = $this->blade(
-            "@include('heroes.partials._skill_columns', ['class' => \$class, 'learnedIds' => \$learnedIds])",
-            ['class' => $class, 'learnedIds' => $learnedIds]
+            "@include('heroes.partials._skill_columns', ['class' => \$class, 'learnedIds' => \$learnedIds, 'prereqMap' => \$prereqMap])",
+            ['class' => $class, 'learnedIds' => $learnedIds, 'prereqMap' => collect()]
         );
 
         $rendered->assertSee('Stufe 1');
