@@ -93,7 +93,7 @@ class EventLayoutTest extends TestCase
 
         // Die Unteransicht selbst liefert das Anmeldeformular (Bucher mit eigenem Spieler).
         $booker = $this->userWithRole(60);
-        $booker->players()->attach(\App\Models\Player::factory()->create()->id, ['self' => true]);
+        $booker->players()->attach(Player::factory()->create()->id, ['self' => true]);
         $this->actingAs($booker)
             ->get(route('adventures.bookings.create', $adventure))
             ->assertOk()

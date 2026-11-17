@@ -12,10 +12,10 @@ return new class extends Migration
     public function up(): void
     {
         DB::table('users')->update([
-            'notify_booking_approved'  => true,
-            'notify_booking_rejected'  => true,
+            'notify_booking_approved' => true,
+            'notify_booking_rejected' => true,
             'notify_waitlist_promoted' => true,
-            'notify_event_cancelled'   => true,
+            'notify_event_cancelled' => true,
         ]);
     }
 

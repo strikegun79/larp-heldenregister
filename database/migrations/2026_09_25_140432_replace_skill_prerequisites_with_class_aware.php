@@ -23,12 +23,12 @@ return new class extends Migration
         });
 
         // Bestehende globale Voraussetzungen für jede Klassen-Zuordnung der Fertigkeit kopieren.
-        DB::statement("
+        DB::statement('
             INSERT IGNORE INTO skill_class_prerequisites (skill_id, hero_class_id, required_skill_id)
             SELECT sp.skill_id, shc.hero_class_id, sp.required_skill_id
             FROM skill_prerequisites sp
             JOIN skill_hero_class shc ON shc.skill_id = sp.skill_id
-        ");
+        ');
 
         Schema::dropIfExists('skill_prerequisites');
     }
@@ -44,10 +44,10 @@ return new class extends Migration
         });
 
         // Daten zurückkopieren (dedupliziert, Klassen-Kontext geht verloren).
-        DB::statement("
+        DB::statement('
             INSERT IGNORE INTO skill_prerequisites (skill_id, required_skill_id)
             SELECT DISTINCT skill_id, required_skill_id FROM skill_class_prerequisites
-        ");
+        ');
 
         Schema::dropIfExists('skill_class_prerequisites');
     }

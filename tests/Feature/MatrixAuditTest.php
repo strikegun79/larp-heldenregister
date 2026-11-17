@@ -26,18 +26,19 @@ class MatrixAuditTest extends TestCase
     {
         $admin = User::factory()->create();
         $admin->roles()->attach(10);
+
         return $admin;
     }
 
     public function test_konto_anlage_schreibt_audit_log(): void
     {
         $player = Player::factory()->create(['name' => 'Max', 'lastname' => 'Muster']);
-        $room   = MatrixManagedRoom::create(['roomid' => '!x:waldritter.de', 'roomname' => 'Test', 'roomtype' => 'Raum']);
+        $room = MatrixManagedRoom::create(['roomid' => '!x:waldritter.de', 'roomname' => 'Test', 'roomtype' => 'Raum']);
 
         $this->actingAs($this->admin())
             ->put(route('admin.players.matrix.update', $player), [
                 'active' => '1',
-                'rooms'  => ['!x:waldritter.de'],
+                'rooms' => ['!x:waldritter.de'],
             ])->assertRedirect();
 
         $log = AuditLog::where('action', 'matrix.account.created')->first();
@@ -50,11 +51,11 @@ class MatrixAuditTest extends TestCase
 
     public function test_konto_aktualisierung_schreibt_audit_log(): void
     {
-        $player  = Player::factory()->create(['name' => 'Max', 'lastname' => 'Muster']);
+        $player = Player::factory()->create(['name' => 'Max', 'lastname' => 'Muster']);
         $account = MatrixAccount::create([
-            'mxid'      => '@max.muster:waldritter.de',
+            'mxid' => '@max.muster:waldritter.de',
             'player_id' => $player->id,
-            'active'    => true,
+            'active' => true,
         ]);
 
         $this->actingAs($this->admin())
@@ -72,9 +73,9 @@ class MatrixAuditTest extends TestCase
     {
         $player = Player::factory()->create(['name' => 'Max', 'lastname' => 'Muster']);
         MatrixAccount::create([
-            'mxid'      => '@max.muster:waldritter.de',
+            'mxid' => '@max.muster:waldritter.de',
             'player_id' => $player->id,
-            'active'    => true,
+            'active' => true,
         ]);
 
         $this->actingAs($this->admin())
@@ -103,12 +104,12 @@ class MatrixAuditTest extends TestCase
     public function test_spielerliste_zeigt_raumzahl(): void
     {
         $player = Player::factory()->create(['name' => 'Max', 'lastname' => 'Muster']);
-        $room1  = MatrixManagedRoom::create(['roomid' => '!a:waldritter.de', 'roomname' => 'A', 'roomtype' => 'Raum']);
-        $room2  = MatrixManagedRoom::create(['roomid' => '!b:waldritter.de', 'roomname' => 'B', 'roomtype' => 'Raum']);
+        $room1 = MatrixManagedRoom::create(['roomid' => '!a:waldritter.de', 'roomname' => 'A', 'roomtype' => 'Raum']);
+        $room2 = MatrixManagedRoom::create(['roomid' => '!b:waldritter.de', 'roomname' => 'B', 'roomtype' => 'Raum']);
         $account = MatrixAccount::create([
-            'mxid'      => '@max.muster:waldritter.de',
+            'mxid' => '@max.muster:waldritter.de',
             'player_id' => $player->id,
-            'active'    => true,
+            'active' => true,
         ]);
         $account->rooms()->attach(['!a:waldritter.de', '!b:waldritter.de']);
 
@@ -122,11 +123,11 @@ class MatrixAuditTest extends TestCase
     public function test_spielerliste_zeigt_einen_raum_singular(): void
     {
         $player = Player::factory()->create(['name' => 'Lena', 'lastname' => 'Lenz']);
-        $room   = MatrixManagedRoom::create(['roomid' => '!c:waldritter.de', 'roomname' => 'C', 'roomtype' => 'Raum']);
+        $room = MatrixManagedRoom::create(['roomid' => '!c:waldritter.de', 'roomname' => 'C', 'roomtype' => 'Raum']);
         $account = MatrixAccount::create([
-            'mxid'      => '@lena.lenz:waldritter.de',
+            'mxid' => '@lena.lenz:waldritter.de',
             'player_id' => $player->id,
-            'active'    => true,
+            'active' => true,
         ]);
         $account->rooms()->attach('!c:waldritter.de');
 

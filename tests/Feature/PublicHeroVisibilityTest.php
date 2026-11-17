@@ -47,7 +47,7 @@ class PublicHeroVisibilityTest extends TestCase
         $hero = Hero::factory()->create(['public_visible' => true]);
 
         $this->actingAs($user)
-             ->patch(route('heroes.visibility', $hero));
+            ->patch(route('heroes.visibility', $hero));
 
         $this->assertFalse($hero->fresh()->public_visible);
     }
@@ -59,7 +59,7 @@ class PublicHeroVisibilityTest extends TestCase
         $hero = Hero::factory()->create(['public_visible' => false]);
 
         $this->actingAs($user)
-             ->patch(route('heroes.visibility', $hero));
+            ->patch(route('heroes.visibility', $hero));
 
         $this->assertTrue($hero->fresh()->public_visible);
     }
@@ -69,7 +69,7 @@ class PublicHeroVisibilityTest extends TestCase
         $hero = Hero::factory()->create(['public_visible' => true]);
 
         $this->patch(route('heroes.visibility', $hero))
-             ->assertRedirect(route('login'));
+            ->assertRedirect(route('login'));
 
         $this->assertTrue($hero->fresh()->public_visible);
     }
@@ -81,7 +81,7 @@ class PublicHeroVisibilityTest extends TestCase
         $hero = Hero::factory()->create(['public_visible' => true]);
 
         $this->actingAs($user)->patch(route('heroes.update', $hero), [
-            'player_id'      => $hero->player_id,
+            'player_id' => $hero->player_id,
             'character_name' => $hero->character_name,
             'public_visible' => '0',
         ]);

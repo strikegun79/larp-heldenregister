@@ -24,6 +24,7 @@ class PaymentConfirmed extends Notification implements ShouldQueue
     {
         $channels = $notifiable instanceof User ? ['database'] : [];
         $channels[] = 'mail';
+
         return $channels;
     }
 
@@ -43,11 +44,12 @@ class PaymentConfirmed extends Notification implements ShouldQueue
     public function toArray(object $notifiable): array
     {
         $booking = $this->booking->loadMissing(['adventure']);
+
         return [
-            'adventure_id'   => $booking->adventure?->id,
+            'adventure_id' => $booking->adventure?->id,
             'adventure_name' => $booking->adventure?->name,
-            'message'        => 'Deine Zahlung für „'.$booking->adventure?->name.'" ist eingegangen.',
-            'url'            => route('dashboard'),
+            'message' => 'Deine Zahlung für „'.$booking->adventure?->name.'" ist eingegangen.',
+            'url' => route('dashboard'),
         ];
     }
 }

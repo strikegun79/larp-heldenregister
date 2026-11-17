@@ -10,6 +10,7 @@ use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Testing\TestResponse;
 use Tests\TestCase;
 
 class MatrixPolicyCachingTest extends TestCase
@@ -21,8 +22,8 @@ class MatrixPolicyCachingTest extends TestCase
         parent::setUp();
         $this->seed(RoleSeeder::class);
         config([
-            'matrix.domain'           => 'waldritter.de',
-            'matrix.corporal_token'   => 'test-token',
+            'matrix.domain' => 'waldritter.de',
+            'matrix.corporal_token' => 'test-token',
             'matrix.corporal_cache_ttl' => 60,
         ]);
         Cache::forget(MatrixAccount::CORPORAL_CACHE_KEY);
@@ -32,10 +33,11 @@ class MatrixPolicyCachingTest extends TestCase
     {
         $admin = User::factory()->create();
         $admin->roles()->attach(10);
+
         return $admin;
     }
 
-    private function getPolicy(): \Illuminate\Testing\TestResponse
+    private function getPolicy(): TestResponse
     {
         return $this->getJson('/api/matrix/corporal/policy', ['Authorization' => 'Bearer test-token']);
     }
@@ -75,7 +77,7 @@ class MatrixPolicyCachingTest extends TestCase
     public function test_cache_wird_nach_konto_loeschung_invalidiert(): void
     {
         $player = Player::factory()->create(['name' => 'Max', 'lastname' => 'Muster']);
-        $admin  = $this->admin();
+        $admin = $this->admin();
 
         $this->actingAs($admin)
             ->put(route('admin.players.matrix.update', $player), ['active' => '1']);
@@ -121,8 +123,8 @@ class MatrixPolicyCachingTest extends TestCase
     public function test_cache_wird_nach_raumaenderung_invalidiert(): void
     {
         $player = Player::factory()->create(['name' => 'Max', 'lastname' => 'Muster']);
-        $room   = MatrixManagedRoom::create(['roomid' => '!test:waldritter.de', 'roomname' => 'Test', 'roomtype' => 'Raum']);
-        $admin  = $this->admin();
+        $room = MatrixManagedRoom::create(['roomid' => '!test:waldritter.de', 'roomname' => 'Test', 'roomtype' => 'Raum']);
+        $admin = $this->admin();
 
         $this->actingAs($admin)
             ->put(route('admin.players.matrix.update', $player), ['active' => '1']);
@@ -135,7 +137,7 @@ class MatrixPolicyCachingTest extends TestCase
         // Raumzuordnung hinzufügen
         $this->actingAs($admin)->put(route('admin.players.matrix.update', $player), [
             'active' => '1',
-            'rooms'  => ['!test:waldritter.de'],
+            'rooms' => ['!test:waldritter.de'],
         ])->assertRedirect();
 
         // Policy muss aktualisierte Räume zeigen

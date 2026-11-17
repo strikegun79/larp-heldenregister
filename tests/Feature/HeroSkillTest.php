@@ -149,7 +149,7 @@ class HeroSkillTest extends TestCase
     {
         $hero = $this->heroWithEp(50);
         $prereq = $this->skill(5);
-        $skill  = $this->skill(10);
+        $skill = $this->skill(10);
         $skill->prerequisites()->attach($prereq->id);
 
         $this->actingAs($this->userWithRole(20))
@@ -162,9 +162,9 @@ class HeroSkillTest extends TestCase
 
     public function test_can_learn_skill_once_prerequisites_are_met(): void
     {
-        $hero   = $this->heroWithEp(50);
+        $hero = $this->heroWithEp(50);
         $prereq = $this->skill(5);
-        $skill  = $this->skill(10);
+        $skill = $this->skill(10);
         $skill->prerequisites()->attach($prereq->id);
 
         // Voraussetzung erfüllen
@@ -181,7 +181,7 @@ class HeroSkillTest extends TestCase
 
     public function test_skill_without_prerequisites_is_always_learnable(): void
     {
-        $hero  = $this->heroWithEp(20);
+        $hero = $this->heroWithEp(20);
         $skill = $this->skill(5); // keine Voraussetzungen
 
         $this->actingAs($this->userWithRole(20))

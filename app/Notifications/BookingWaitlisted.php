@@ -35,7 +35,7 @@ class BookingWaitlisted extends Notification implements ShouldQueue
         return (new MailMessage)
             ->subject('Warteliste: '.$booking->adventure?->name)
             ->markdown('emails.booking_waitlisted', [
-                'booking'      => $booking,
+                'booking' => $booking,
                 'ageViolation' => $this->ageViolation,
                 'dashboardUrl' => route('dashboard'),
             ]);

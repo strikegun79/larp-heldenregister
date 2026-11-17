@@ -31,6 +31,7 @@ class BookingCancelled extends Notification implements ShouldQueue
         if ($notifiable->notify_cancellation_report ?? true) {
             $channels[] = 'mail';
         }
+
         return $channels;
     }
 

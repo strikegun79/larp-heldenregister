@@ -5,7 +5,6 @@ namespace App\Console\Commands;
 use App\Models\AuditLog;
 use App\Models\Booking;
 use App\Models\Player;
-use App\Models\SurveyResponse;
 use App\Models\TeamerSignup;
 use App\Models\User;
 use Illuminate\Console\Command;
@@ -105,15 +104,15 @@ class DsgvoPrune extends Command
 
         if (! $dryRun && $count > 0) {
             $query->update([
-                'player_id'          => null,
-                'hero_id'            => null,
-                'booked_by_user_id'  => null,
-                'guest_name'         => null,
-                'guest_lastname'     => null,
-                'guest_age'          => null,
-                'guest_place'        => null,
-                'erreichbarkeit'     => null,
-                'kontakt_telefon'    => null,
+                'player_id' => null,
+                'hero_id' => null,
+                'booked_by_user_id' => null,
+                'guest_name' => null,
+                'guest_lastname' => null,
+                'guest_age' => null,
+                'guest_place' => null,
+                'erreichbarkeit' => null,
+                'kontakt_telefon' => null,
             ]);
         }
     }

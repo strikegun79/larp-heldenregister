@@ -6,6 +6,7 @@ use App\Models\User;
 use Illuminate\Auth\Notifications\ResetPassword;
 use Illuminate\Auth\Notifications\VerifyEmail;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Mail\Markdown;
 use Illuminate\Support\Facades\Notification;
 use Tests\TestCase;
 
@@ -53,7 +54,7 @@ class BrandedMailTest extends TestCase
         $mail = (new VerifyEmail)->toMail($user);
 
         // Volle HTML-Ausgabe über den Markdown-Renderer (registriert mail::-Komponenten).
-        $html = (string) app(\Illuminate\Mail\Markdown::class)->render('notifications::email', $mail->data());
+        $html = (string) app(Markdown::class)->render('notifications::email', $mail->data());
 
         $this->assertStringContainsString('Waldritter-Gießen e.V.', $html); // Header/Footer-Branding
         $this->assertStringContainsString('E-Mail-Adresse bestätigen', $html);

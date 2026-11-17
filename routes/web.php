@@ -4,13 +4,17 @@ use App\Http\Controllers\Admin;
 use App\Http\Controllers\AdventureController;
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\BookingController;
-use App\Http\Controllers\GroupBookingController;
+use App\Http\Controllers\ChangelogController;
+use App\Http\Controllers\DashboardController;
 use App\Http\Controllers\EpTransactionController;
 use App\Http\Controllers\EventClientRequirementPdfController;
+use App\Http\Controllers\GroupBookingController;
 use App\Http\Controllers\HeroClassController;
 use App\Http\Controllers\HeroController;
 use App\Http\Controllers\HeroGalleryController;
 use App\Http\Controllers\HeroSkillController;
+use App\Http\Controllers\MotdClickController;
+use App\Http\Controllers\NewsletterSubscriptionController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PlayerController;
 use App\Http\Controllers\ProfileController;
@@ -18,8 +22,9 @@ use App\Http\Controllers\PublicHeroController;
 use App\Http\Controllers\SignatureController;
 use App\Http\Controllers\SkillController;
 use App\Http\Controllers\SkilltreeController;
-use App\Http\Controllers\NewsletterSubscriptionController;
 use App\Http\Controllers\SurveyController;
+use App\Http\Controllers\TeamerSignupController;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
 /*
@@ -40,19 +45,20 @@ Route::get('/', function () {
 // Dynamisches PWA-Manifest mit Portal-Konfiguration (config/portal.php).
 Route::get('/manifest.webmanifest', function () {
     $data = [
-        'name'             => config('portal.name'),
-        'short_name'       => config('portal.short_name'),
-        'description'      => config('portal.description'),
-        'start_url'        => '/',
-        'display'          => 'standalone',
-        'orientation'      => 'portrait-primary',
-        'theme_color'      => config('portal.theme_color'),
+        'name' => config('portal.name'),
+        'short_name' => config('portal.short_name'),
+        'description' => config('portal.description'),
+        'start_url' => '/',
+        'display' => 'standalone',
+        'orientation' => 'portrait-primary',
+        'theme_color' => config('portal.theme_color'),
         'background_color' => config('portal.background_color'),
-        'lang'             => 'de',
-        'icons'            => config('portal.icons'),
-        'screenshots'      => [],
-        'categories'       => ['entertainment', 'games'],
+        'lang' => 'de',
+        'icons' => config('portal.icons'),
+        'screenshots' => [],
+        'categories' => ['entertainment', 'games'],
     ];
+
     return response()->json($data)
         ->header('Content-Type', 'application/manifest+json');
 })->name('manifest');
@@ -76,14 +82,14 @@ Route::middleware('throttle:public-hero')->group(function () {
     Route::get('/h/{code}', [PublicHeroController::class, 'show'])->name('public.hero');
 });
 
-Route::get('/dashboard', [\App\Http\Controllers\DashboardController::class, 'index'])
+Route::get('/dashboard', [DashboardController::class, 'index'])
     ->middleware(['auth', 'verified'])->name('dashboard');
 
 // Funktionsübersicht & Hilfe für Vorstand/Auftraggeber (INFO-01).
 Route::get('/info', fn () => view('info'))->middleware(['auth', 'verified'])->name('info');
 
 // Versionsverlauf aus CHANGELOG.md (nur für angemeldete Nutzer).
-Route::get('/versionsverlauf', \App\Http\Controllers\ChangelogController::class)
+Route::get('/versionsverlauf', ChangelogController::class)
     ->middleware(['auth', 'verified'])->name('changelog');
 
 // Alle Portal-Routen erfordern Login UND verifizierte E-Mail-Adresse (AUTH-07/AUTH-02).
@@ -93,7 +99,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('notifications/read-all', [NotificationController::class, 'readAll'])->name('notifications.read-all');
 
     // Klickzähler für Links der Startseiten-Nachricht (MOTD).
-    Route::post('motd/{motd}/click', [\App\Http\Controllers\MotdClickController::class, 'store'])
+    Route::post('motd/{motd}/click', [MotdClickController::class, 'store'])
         ->middleware('throttle:30,1')->name('motd.click');
 
     Route::get('/profile', [ProfileController::class, 'edit'])->name('profile.edit');
@@ -106,9 +112,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::post('/newsletter/abbestellen', [NewsletterSubscriptionController::class, 'unsubscribe'])->name('newsletter.unsubscribe');
 
     // UI-45: Datensparmodus manuell umschalten.
-    Route::post('/save-data/toggle', function (\Illuminate\Http\Request $request) {
+    Route::post('/save-data/toggle', function (Request $request) {
         $current = $request->session()->get('save_data', false);
         $request->session()->put('save_data', ! $current);
+
         return back();
     })->name('save-data.toggle');
 
@@ -420,28 +427,28 @@ Route::middleware(['auth', 'verified'])->group(function () {
     });
 
     // Teamer-Anmeldungen (ADV-27): Teamer/Lehrmeister melden sich zu Events an.
-    Route::get('adventures/{adventure}/teamer-signup', [\App\Http\Controllers\TeamerSignupController::class, 'create'])
+    Route::get('adventures/{adventure}/teamer-signup', [TeamerSignupController::class, 'create'])
         ->name('adventures.teamer.create');
-    Route::post('adventures/{adventure}/teamer-signup', [\App\Http\Controllers\TeamerSignupController::class, 'store'])
+    Route::post('adventures/{adventure}/teamer-signup', [TeamerSignupController::class, 'store'])
         ->name('adventures.teamer.store');
-    Route::delete('adventures/{adventure}/teamer-signup/{signup}', [\App\Http\Controllers\TeamerSignupController::class, 'destroy'])
+    Route::delete('adventures/{adventure}/teamer-signup/{signup}', [TeamerSignupController::class, 'destroy'])
         ->name('adventures.teamer.destroy');
-    Route::patch('adventures/{adventure}/teamer-signup/{signup}/role', [\App\Http\Controllers\TeamerSignupController::class, 'updateRole'])
+    Route::patch('adventures/{adventure}/teamer-signup/{signup}/role', [TeamerSignupController::class, 'updateRole'])
         ->name('adventures.teamer.update-role');
-    Route::post('adventures/{adventure}/teamer-invite', [\App\Http\Controllers\TeamerSignupController::class, 'invite'])
+    Route::post('adventures/{adventure}/teamer-invite', [TeamerSignupController::class, 'invite'])
         ->name('adventures.teamer.invite');
-    Route::get('adventures/{adventure}/teamer-signup/{signup}/edit', [\App\Http\Controllers\TeamerSignupController::class, 'edit'])
+    Route::get('adventures/{adventure}/teamer-signup/{signup}/edit', [TeamerSignupController::class, 'edit'])
         ->name('adventures.teamer.edit');
-    Route::put('adventures/{adventure}/teamer-signup/{signup}', [\App\Http\Controllers\TeamerSignupController::class, 'update'])
+    Route::put('adventures/{adventure}/teamer-signup/{signup}', [TeamerSignupController::class, 'update'])
         ->name('adventures.teamer.update');
-    Route::patch('adventures/{adventure}/teamer-signup/{signup}/approve', [\App\Http\Controllers\TeamerSignupController::class, 'approve'])
+    Route::patch('adventures/{adventure}/teamer-signup/{signup}/approve', [TeamerSignupController::class, 'approve'])
         ->name('adventures.teamer.approve');
-    Route::patch('adventures/{adventure}/teamer-signup/{signup}/reject', [\App\Http\Controllers\TeamerSignupController::class, 'reject'])
+    Route::patch('adventures/{adventure}/teamer-signup/{signup}/reject', [TeamerSignupController::class, 'reject'])
         ->name('adventures.teamer.reject');
-    Route::post('adventures/{adventure}/teamer-signup/{signup}/resend-confirmation', [\App\Http\Controllers\TeamerSignupController::class, 'resendConfirmation'])
+    Route::post('adventures/{adventure}/teamer-signup/{signup}/resend-confirmation', [TeamerSignupController::class, 'resendConfirmation'])
         ->name('adventures.teamer.resend-confirmation');
     // Inspektor (Slide-In) einer Teamer-Anmeldung in der Event-Verwaltung
-    Route::get('adventures/{adventure}/teamer-signup/{signup}/inspector', [\App\Http\Controllers\TeamerSignupController::class, 'inspector'])
+    Route::get('adventures/{adventure}/teamer-signup/{signup}/inspector', [TeamerSignupController::class, 'inspector'])
         ->name('adventures.teamer.inspector');
 
     // PUB-10: Heldenausweis-Generator (ROLE-10): heldenregister.edit (Bürokrat) ODER heroes.admin (Spielleiter).

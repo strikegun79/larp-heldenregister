@@ -24,31 +24,32 @@ class HeroGroupDisplayTest extends TestCase
     {
         $user = User::factory()->create();
         $user->roles()->attach(10); // Admin
+
         return $user;
     }
 
     public function test_helden_detail_zeigt_gruppen(): void
     {
-        $hero  = Hero::factory()->create();
+        $hero = Hero::factory()->create();
         $group = Group::factory()->create(['name' => 'Waldwächter']);
         $hero->groups()->attach($group);
 
         $this->actingAs($this->adminUser())
-             ->get(route('heroes.show', $hero))
-             ->assertOk()
-             ->assertSee('Waldwächter');
+            ->get(route('heroes.show', $hero))
+            ->assertOk()
+            ->assertSee('Waldwächter');
     }
 
     public function test_helden_detail_zeigt_gruppenrolle(): void
     {
-        $hero  = Hero::factory()->create();
+        $hero = Hero::factory()->create();
         $group = Group::factory()->create(['name' => 'Ritter']);
         $hero->groups()->attach($group, ['role' => 'Anführer']);
 
         $this->actingAs($this->adminUser())
-             ->get(route('heroes.show', $hero))
-             ->assertOk()
-             ->assertSee('Anführer');
+            ->get(route('heroes.show', $hero))
+            ->assertOk()
+            ->assertSee('Anführer');
     }
 
     public function test_helden_detail_ohne_gruppe_zeigt_kein_gruppen_feld(): void
@@ -56,31 +57,31 @@ class HeroGroupDisplayTest extends TestCase
         $hero = Hero::factory()->create();
 
         $this->actingAs($this->adminUser())
-             ->get(route('heroes.show', $hero))
-             ->assertOk()
-             ->assertDontSee('Gruppen');
+            ->get(route('heroes.show', $hero))
+            ->assertOk()
+            ->assertDontSee('Gruppen');
     }
 
     public function test_öffentliches_profil_zeigt_gruppen(): void
     {
-        $hero  = Hero::factory()->create(['public_code' => 'GRPPUB', 'public_visible' => true]);
+        $hero = Hero::factory()->create(['public_code' => 'GRPPUB', 'public_visible' => true]);
         $group = Group::factory()->create(['name' => 'Silberklingen']);
         $hero->groups()->attach($group);
 
         $this->get(route('public.hero', 'GRPPUB'))
-             ->assertOk()
-             ->assertSee('Silberklingen');
+            ->assertOk()
+            ->assertSee('Silberklingen');
     }
 
     public function test_öffentliches_profil_zeigt_keinen_spieler_realname(): void
     {
-        $hero  = Hero::factory()->create(['public_code' => 'GRPPN2', 'public_visible' => true]);
+        $hero = Hero::factory()->create(['public_code' => 'GRPPN2', 'public_visible' => true]);
         $group = Group::factory()->create(['name' => 'TestGruppe']);
         $hero->groups()->attach($group);
 
         $this->get(route('public.hero', 'GRPPN2'))
-             ->assertOk()
-             ->assertSee('TestGruppe')
-             ->assertDontSee($hero->player?->full_name ?? 'niemand');
+            ->assertOk()
+            ->assertSee('TestGruppe')
+            ->assertDontSee($hero->player?->full_name ?? 'niemand');
     }
 }

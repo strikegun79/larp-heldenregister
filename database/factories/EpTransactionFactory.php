@@ -2,21 +2,22 @@
 
 namespace Database\Factories;
 
+use App\Models\EpTransaction;
 use App\Models\Hero;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\EpTransaction>
+ * @extends Factory<EpTransaction>
  */
 class EpTransactionFactory extends Factory
 {
     public function definition(): array
     {
         return [
-            'hero_id'                 => Hero::factory(),
-            'ep_transaction_type_id'  => 60, // "Allgemein" (Gutschrift)
-            'ep_count'                => fake()->randomFloat(0, 1, 10),
-            'transacted_at'           => fake()->dateTimeBetween('-2 years', 'now'),
+            'hero_id' => Hero::factory(),
+            'ep_transaction_type_id' => 60, // "Allgemein" (Gutschrift)
+            'ep_count' => fake()->randomFloat(0, 1, 10),
+            'transacted_at' => fake()->dateTimeBetween('-2 years', 'now'),
         ];
     }
 
@@ -43,7 +44,7 @@ class EpTransactionFactory extends Factory
     {
         return $this->state(fn () => [
             'ep_transaction_type_id' => 10,
-            'ep_count'               => 5,
+            'ep_count' => 5,
         ]);
     }
 }

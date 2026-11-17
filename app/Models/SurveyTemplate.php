@@ -21,11 +21,11 @@ class SurveyTemplate extends Model
     ];
 
     public const TARGET_GROUPS = [
-        'all'               => 'Alle Gruppen',
+        'all' => 'Alle Gruppen',
         'participant_child' => 'Teilnehmer (Kinder 8–12)',
-        'participant_teen'  => 'Teilnehmer (Jugendliche 13–17)',
-        'teamer'            => 'Teamer',
-        'parent'            => 'Eltern / Erziehungsberechtigte',
+        'participant_teen' => 'Teilnehmer (Jugendliche 13–17)',
+        'teamer' => 'Teamer',
+        'parent' => 'Eltern / Erziehungsberechtigte',
     ];
 
     /** Zielgruppen, die den Wizard (eine Frage pro Schritt) erhalten. */

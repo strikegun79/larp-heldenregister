@@ -10,24 +10,23 @@ use App\Models\Player;
 use App\Models\Setting;
 use App\Models\User;
 use App\Notifications\BookingCancelled;
-use App\Notifications\BookingWaitlisted;
 use App\Notifications\BookingCancelledParticipant;
 use App\Notifications\BookingMovedToWaitlist;
-use App\Notifications\BookingRejected;
 use App\Notifications\BookingReinstateRequested;
 use App\Notifications\BookingReinstateResult;
+use App\Notifications\BookingRejected;
+use App\Notifications\BookingWaitlisted;
 use App\Notifications\FotoerlaubnisRevoked;
 use App\Notifications\PaymentConfirmed;
 use App\Notifications\WaitlistPromoted;
+use App\Services\AuditLogger;
 use Illuminate\Contracts\View\View;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use App\Services\AuditLogger;
-use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Notification;
-use Illuminate\Support\Facades\URL;
 use Illuminate\Validation\Rule;
 
 class BookingController extends Controller
@@ -90,8 +89,8 @@ class BookingController extends Controller
 
         return view('bookings._create', [
             'adventure' => $adventure,
-            'players'   => $players,
-            'roles'     => $adminMode
+            'players' => $players,
+            'roles' => $adminMode
                 ? EventRole::orderBy('id')->get()
                 : EventRole::forParticipant()->orderBy('id')->get(),
             'adminMode' => $adminMode,
@@ -192,15 +191,15 @@ class BookingController extends Controller
         // Der teilnehmende Held ist automatisch der aktive Held des Spielers (HERO-21).
         $player = Player::find($data['player_id']);
 
-        $isTeamer     = EventRole::find($data['event_role_id'])?->is_teamer_like ?? false;
+        $isTeamer = EventRole::find($data['event_role_id'])?->is_teamer_like ?? false;
         $ageViolation = ! $isTeamer && $adventure->isOutsideAgeRange($player);
         // Admin-Anmeldung: immer regulärer Platz, auch bei vollem Event oder Altersverstoß.
-        $overbooked   = $adminMode && ! $isTeamer && $adventure->isFull();
-        $waitlisted   = ($isTeamer || $adminMode) ? false : ($adventure->shouldWaitlist() || $ageViolation);
+        $overbooked = $adminMode && ! $isTeamer && $adventure->isFull();
+        $waitlisted = ($isTeamer || $adminMode) ? false : ($adventure->shouldWaitlist() || $ageViolation);
         // Event-Einstellung „Anmeldungen bestätigen“: sonst sofort bestätigt (alle Rollen).
         // Admin-Anmeldung: immer sofort bestätigt.
-        $confirmed    = $adminMode || ! $adventure->requires_confirmation;
-        $caretaker    = $adminMode && ! empty($data['caretaker_user_id']) ? User::find($data['caretaker_user_id']) : null;
+        $confirmed = $adminMode || ! $adventure->requires_confirmation;
+        $caretaker = $adminMode && ! empty($data['caretaker_user_id']) ? User::find($data['caretaker_user_id']) : null;
 
         $booking = $adventure->bookings()->create([
             'player_id' => $data['player_id'],
@@ -603,6 +602,7 @@ class BookingController extends Controller
 
         if ($booking->waitlisted) {
             $msg = 'Buchung ist bereits auf der Warteliste.';
+
             return $request->expectsJson()
                 ? response()->json(['message' => $msg], 422)
                 : back()->with('error', $msg);
@@ -615,7 +615,7 @@ class BookingController extends Controller
 
         // E-Mail an Spieler-User oder Betreuer
         $booking->loadMissing(['player.users']);
-        $user  = $booking->player?->users()->first();
+        $user = $booking->player?->users()->first();
         $email = $booking->player?->email;
 
         if ($user) {
@@ -683,13 +683,14 @@ class BookingController extends Controller
         // Bereits stornierte Anmeldungen können nicht erneut storniert werden.
         if ($booking->status === 'storniert') {
             $msg = 'Diese Anmeldung ist bereits storniert.';
+
             return $request->expectsJson()
                 ? response()->json(['message' => $msg], 422)
                 : back()->with('error', $msg);
         }
 
         $participant = $booking->participant_name;
-        $cancelUser  = $booking->player?->users()->first();
+        $cancelUser = $booking->player?->users()->first();
         $cancelEmail = $booking->player?->email;
         $notifyCancel = $booking->player?->notificationEnabled('notify_booking_cancelled') ?? false;
 
@@ -777,6 +778,7 @@ class BookingController extends Controller
 
         if ($booking->status !== 'storniert') {
             $msg = 'Diese Anmeldung ist nicht storniert.';
+
             return $request->expectsJson()
                 ? response()->json(['message' => $msg], 422)
                 : back()->with('error', $msg);
@@ -869,6 +871,7 @@ class BookingController extends Controller
 
         if ($booking->status !== 'storniert') {
             $msg = 'Diese Anmeldung ist nicht storniert.';
+
             return $request->expectsJson()
                 ? response()->json(['message' => $msg], 422)
                 : back()->with('error', $msg);
@@ -878,8 +881,8 @@ class BookingController extends Controller
             'message' => ['required', 'string', 'max:1000'],
         ]);
 
-        $participant     = $booking->participant_name;
-        $requesterName   = trim(($request->user()->name ?? '').' '.($request->user()->lastname ?? '')) ?: 'Unbekannt';
+        $participant = $booking->participant_name;
+        $requesterName = trim(($request->user()->name ?? '').' '.($request->user()->lastname ?? '')) ?: 'Unbekannt';
 
         // Nur den Projektleiter der Veranstaltung benachrichtigen.
         $adventure->loadMissing('eventleader');
@@ -901,6 +904,7 @@ class BookingController extends Controller
         AuditLogger::log('booking.reinstate_requested', $booking, ['adventure' => $adventure->name]);
 
         $msg = 'Deine Anfrage wurde an die Projektleitung gesendet.';
+
         return $request->expectsJson()
             ? response()->json(['message' => $msg])
             : back()->with('status', $msg);
@@ -923,7 +927,7 @@ class BookingController extends Controller
         AuditLogger::log('booking.reinstated', $booking, ['adventure' => $adventure->name]);
 
         // Nutzer über Genehmigung informieren.
-        $cancelUser  = $booking->player?->users()->first();
+        $cancelUser = $booking->player?->users()->first();
         $cancelEmail = $booking->player?->email;
         if ($cancelUser) {
             $cancelUser->notify(new BookingReinstateResult($adventure, $booking->participant_name, true));
@@ -948,7 +952,7 @@ class BookingController extends Controller
         AuditLogger::log('booking.reinstate_rejected', $booking, ['adventure' => $adventure->name]);
 
         // Nutzer über Ablehnung informieren.
-        $cancelUser  = $booking->player?->users()->first();
+        $cancelUser = $booking->player?->users()->first();
         $cancelEmail = $booking->player?->email;
         if ($cancelUser) {
             $cancelUser->notify(new BookingReinstateResult($adventure, $booking->participant_name, false));

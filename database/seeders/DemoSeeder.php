@@ -12,6 +12,7 @@ use App\Models\Role;
 use App\Models\Skill;
 use App\Models\User;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
 /**
@@ -44,44 +45,44 @@ class DemoSeeder extends Seeder
             EventLookupSeeder::class,
         ]);
 
-        $adminRole    = Role::where('slug', 'admin')->first();
-        $teamerRole   = Role::where('slug', 'teamer')->first();
+        $adminRole = Role::where('slug', 'admin')->first();
+        $teamerRole = Role::where('slug', 'teamer')->first();
         $registrarRole = Role::where('slug', 'registrar')->first();
 
         // 1. Admin
         $admin = User::factory()->create([
-            'name'     => 'Anna',
+            'name' => 'Anna',
             'lastname' => 'Admin',
-            'email'    => 'admin@waldritter.de',
+            'email' => 'admin@waldritter.de',
         ]);
         $admin->roles()->sync([$adminRole->id]);
 
         // 2. Bürokrat
         $registrar = User::factory()->create([
-            'name'     => 'Bernd',
+            'name' => 'Bernd',
             'lastname' => 'Bürokrat',
-            'email'    => 'burokrat@waldritter.de',
+            'email' => 'burokrat@waldritter.de',
         ]);
         $registrar->roles()->sync([$registrarRole->id]);
 
         // 3. Teamer
         $teamer1 = User::factory()->create([
-            'name'     => 'Tim',
+            'name' => 'Tim',
             'lastname' => 'Teamer',
-            'email'    => 'teamer1@waldritter.de',
+            'email' => 'teamer1@waldritter.de',
         ]);
         $teamer1->roles()->sync([$teamerRole->id]);
 
         $teamer2 = User::factory()->create([
-            'name'     => 'Sandra',
+            'name' => 'Sandra',
             'lastname' => 'Spielleiterin',
-            'email'    => 'teamer2@waldritter.de',
+            'email' => 'teamer2@waldritter.de',
         ]);
         $teamer2->roles()->sync([$teamerRole->id]);
 
         // 4. Spieler und Helden anlegen
         $heroClasses = HeroClass::all()->keyBy('slug');
-        $skills      = Skill::all();
+        $skills = Skill::all();
 
         // 3 Minderjährige Spieler → gehören zum Admin
         $minors = Player::factory()->minor()->count(3)->create();
@@ -103,31 +104,31 @@ class DemoSeeder extends Seeder
 
         // 5. Vergangenes Abenteuer (abgeschlossen)
         $past = Adventure::factory()->create([
-            'name'              => 'Das Geheimnis des alten Turms',
-            'start_at'          => now()->subMonths(2)->setTime(10, 0),
-            'end_at'            => now()->subMonths(2)->setTime(17, 0),
-            'event_status_id'   => 60, // Abgeschlossen
+            'name' => 'Das Geheimnis des alten Turms',
+            'start_at' => now()->subMonths(2)->setTime(10, 0),
+            'end_at' => now()->subMonths(2)->setTime(17, 0),
+            'event_status_id' => 60, // Abgeschlossen
             'event_category_id' => 2,  // Samstagsspiel
-            'loot_ep_day'       => 3,
-            'max_player'        => 20,
-            'fee'               => 10,
+            'loot_ep_day' => 3,
+            'max_player' => 20,
+            'fee' => 10,
         ]);
 
         foreach ($allPlayers->take(4) as $player) {
             $booking = Booking::factory()->create([
                 'adventure_id' => $past->id,
-                'player_id'    => $player->id,
-                'hero_id'      => $player->heroes->first()?->id,
+                'player_id' => $player->id,
+                'hero_id' => $player->heroes->first()?->id,
                 'event_role_id' => 1,
-                'status'       => 'bestaetigt',
+                'status' => 'bestaetigt',
             ]);
 
             // EP-Buchung für das Abenteuer
             if ($hero = $player->heroes->first()) {
                 EpTransaction::factory()->adventure()->create([
-                    'hero_id'       => $hero->id,
-                    'adventure_id'  => $past->id,
-                    'ep_count'      => $past->loot_ep_day,
+                    'hero_id' => $hero->id,
+                    'adventure_id' => $past->id,
+                    'ep_count' => $past->loot_ep_day,
                     'transacted_at' => $past->end_at,
                 ]);
             }
@@ -135,14 +136,14 @@ class DemoSeeder extends Seeder
 
         // 6. Kommendes Abenteuer (Anmeldung offen)
         Adventure::factory()->create([
-            'name'              => 'Die Waldritter und der Nebelwald',
-            'start_at'          => now()->addMonths(1)->setTime(10, 0),
-            'end_at'            => now()->addMonths(1)->setTime(17, 0),
-            'event_status_id'   => 30, // Anmeldung offen
+            'name' => 'Die Waldritter und der Nebelwald',
+            'start_at' => now()->addMonths(1)->setTime(10, 0),
+            'end_at' => now()->addMonths(1)->setTime(17, 0),
+            'event_status_id' => 30, // Anmeldung offen
             'event_category_id' => 2,
-            'loot_ep_day'       => 4,
-            'max_player'        => 15,
-            'fee'               => 10,
+            'loot_ep_day' => 4,
+            'max_player' => 15,
+            'fee' => 10,
         ]);
 
         $this->command->info('Demo-Datensatz angelegt.');
@@ -161,15 +162,15 @@ class DemoSeeder extends Seeder
 
     private function createHeroForPlayer(
         Player $player,
-        \Illuminate\Support\Collection $heroClasses,
-        \Illuminate\Support\Collection $skills
+        Collection $heroClasses,
+        Collection $skills
     ): Hero {
         $hero = Hero::factory()->create(['player_id' => $player->id]);
 
         // Klasse zuweisen
         $class = $heroClasses->random();
         DB::table('hero_hero_class')->insert([
-            'hero_id'       => $hero->id,
+            'hero_id' => $hero->id,
             'hero_class_id' => $class->id,
         ]);
 
@@ -180,14 +181,14 @@ class DemoSeeder extends Seeder
         $classSkills = $skills->where('hero_class_id', $class->id)->take(3);
         foreach ($classSkills as $skill) {
             DB::table('hero_skill')->insertOrIgnore([
-                'hero_id'     => $hero->id,
-                'skill_id'    => $skill->id,
-                'trained_at'  => now()->subMonths(rand(1, 12)),
+                'hero_id' => $hero->id,
+                'skill_id' => $skill->id,
+                'trained_at' => now()->subMonths(rand(1, 12)),
             ]);
 
             EpTransaction::factory()->debit(20)->create([
-                'hero_id'   => $hero->id,
-                'ep_count'  => $skill->ep_costs ?: 1,
+                'hero_id' => $hero->id,
+                'ep_count' => $skill->ep_costs ?: 1,
             ]);
         }
 

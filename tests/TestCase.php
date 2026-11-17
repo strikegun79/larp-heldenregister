@@ -17,7 +17,7 @@ abstract class TestCase extends BaseTestCase
     protected function setUpTraits()
     {
         $connection = config('database.default');
-        $database   = (string) config("database.connections.{$connection}.database");
+        $database = (string) config("database.connections.{$connection}.database");
 
         $isSqliteMemory = $database === ':memory:';
 

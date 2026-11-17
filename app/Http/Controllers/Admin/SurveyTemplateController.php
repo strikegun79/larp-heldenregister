@@ -34,7 +34,7 @@ class SurveyTemplateController extends Controller
     public function create(): View
     {
         return view('admin.surveys.templates.edit', [
-            'template'  => new SurveyTemplate,
+            'template' => new SurveyTemplate,
             'questions' => collect(),
         ]);
     }
@@ -42,22 +42,22 @@ class SurveyTemplateController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $data = $request->validate([
-            'name'         => ['required', 'string', 'max:255'],
-            'description'  => ['nullable', 'string', 'max:1000'],
-            'target_group' => ['required', 'in:' . implode(',', array_keys(SurveyTemplate::TARGET_GROUPS))],
-            'active'       => ['boolean'],
-            'questions'                  => ['array'],
-            'questions.*.question_text'  => ['required', 'string', 'max:1000'],
-            'questions.*.type'           => ['required', 'in:rating,text,yes_no'],
-            'questions.*.required'       => ['boolean'],
+            'name' => ['required', 'string', 'max:255'],
+            'description' => ['nullable', 'string', 'max:1000'],
+            'target_group' => ['required', 'in:'.implode(',', array_keys(SurveyTemplate::TARGET_GROUPS))],
+            'active' => ['boolean'],
+            'questions' => ['array'],
+            'questions.*.question_text' => ['required', 'string', 'max:1000'],
+            'questions.*.type' => ['required', 'in:rating,text,yes_no'],
+            'questions.*.required' => ['boolean'],
         ]);
 
         $template = SurveyTemplate::create([
-            'name'         => $data['name'],
-            'description'  => $data['description'] ?? null,
+            'name' => $data['name'],
+            'description' => $data['description'] ?? null,
             'target_group' => $data['target_group'],
-            'active'       => $data['active'] ?? true,
-            'created_by'   => auth()->id(),
+            'active' => $data['active'] ?? true,
+            'created_by' => auth()->id(),
         ]);
 
         $this->syncQuestions($template, $data['questions'] ?? []);
@@ -71,7 +71,7 @@ class SurveyTemplateController extends Controller
         $template->load('questions');
 
         return view('admin.surveys.templates.edit', [
-            'template'  => $template,
+            'template' => $template,
             'questions' => $template->questions,
         ]);
     }
@@ -79,21 +79,21 @@ class SurveyTemplateController extends Controller
     public function update(Request $request, SurveyTemplate $template): RedirectResponse
     {
         $data = $request->validate([
-            'name'         => ['required', 'string', 'max:255'],
-            'description'  => ['nullable', 'string', 'max:1000'],
-            'target_group' => ['required', 'in:' . implode(',', array_keys(SurveyTemplate::TARGET_GROUPS))],
-            'active'       => ['boolean'],
-            'questions'                  => ['array'],
-            'questions.*.question_text'  => ['required', 'string', 'max:1000'],
-            'questions.*.type'           => ['required', 'in:rating,text,yes_no'],
-            'questions.*.required'       => ['boolean'],
+            'name' => ['required', 'string', 'max:255'],
+            'description' => ['nullable', 'string', 'max:1000'],
+            'target_group' => ['required', 'in:'.implode(',', array_keys(SurveyTemplate::TARGET_GROUPS))],
+            'active' => ['boolean'],
+            'questions' => ['array'],
+            'questions.*.question_text' => ['required', 'string', 'max:1000'],
+            'questions.*.type' => ['required', 'in:rating,text,yes_no'],
+            'questions.*.required' => ['boolean'],
         ]);
 
         $template->update([
-            'name'         => $data['name'],
-            'description'  => $data['description'] ?? null,
+            'name' => $data['name'],
+            'description' => $data['description'] ?? null,
             'target_group' => $data['target_group'],
-            'active'       => $data['active'] ?? true,
+            'active' => $data['active'] ?? true,
         ]);
 
         $this->syncQuestions($template, $data['questions'] ?? []);
@@ -122,10 +122,10 @@ class SurveyTemplateController extends Controller
         foreach ($questions as $index => $q) {
             SurveyTemplateQuestion::create([
                 'survey_template_id' => $template->id,
-                'question_text'      => $q['question_text'],
-                'type'               => $q['type'],
-                'sort_order'         => $index,
-                'required'           => (bool) ($q['required'] ?? false),
+                'question_text' => $q['question_text'],
+                'type' => $q['type'],
+                'sort_order' => $index,
+                'required' => (bool) ($q['required'] ?? false),
             ]);
         }
     }

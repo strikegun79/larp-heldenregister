@@ -3,11 +3,12 @@
 namespace Database\Factories;
 
 use App\Models\Adventure;
+use App\Models\Booking;
 use App\Models\Player;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Booking>
+ * @extends Factory<Booking>
  */
 class BookingFactory extends Factory
 {

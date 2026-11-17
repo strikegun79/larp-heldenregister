@@ -10,6 +10,7 @@ use Spatie\Backup\Notifications\Notifications\UnhealthyBackupWasFoundNotificatio
 use Spatie\Backup\Tasks\Cleanup\Strategies\DefaultStrategy;
 use Spatie\Backup\Tasks\Monitor\HealthChecks\MaximumAgeInDays;
 use Spatie\Backup\Tasks\Monitor\HealthChecks\MaximumStorageInMegabytes;
+use Spatie\DbDumper\Compressors\GzipCompressor;
 
 return [
 
@@ -39,7 +40,7 @@ return [
         ],
 
         // Gzip-Komprimierung des SQL-Dumps vor dem Einpacken in ZIP.
-        'database_dump_compressor' => \Spatie\DbDumper\Compressors\GzipCompressor::class,
+        'database_dump_compressor' => GzipCompressor::class,
         'database_dump_file_timestamp_format' => null,
         'database_dump_filename_base' => 'database',
         'database_dump_file_extension' => '',
@@ -69,12 +70,12 @@ return [
     // Alle Klassen müssen als Key vorhanden sein (leeres Array = kein Versand).
     'notifications' => [
         'notifications' => [
-            BackupHasFailedNotification::class         => ['mail'],
+            BackupHasFailedNotification::class => ['mail'],
             UnhealthyBackupWasFoundNotification::class => ['mail'],
-            CleanupHasFailedNotification::class        => ['mail'],
-            BackupWasSuccessfulNotification::class     => [],
-            HealthyBackupWasFoundNotification::class   => [],
-            CleanupWasSuccessfulNotification::class    => [],
+            CleanupHasFailedNotification::class => ['mail'],
+            BackupWasSuccessfulNotification::class => [],
+            HealthyBackupWasFoundNotification::class => [],
+            CleanupWasSuccessfulNotification::class => [],
         ],
 
         'notifiable' => Notifiable::class,
@@ -84,11 +85,11 @@ return [
 
             'from' => [
                 'address' => env('MAIL_FROM_ADDRESS', 'heldenregister@example.de'),
-                'name'    => env('MAIL_FROM_NAME', 'Heldenregister'),
+                'name' => env('MAIL_FROM_NAME', 'Heldenregister'),
             ],
         ],
 
-        'slack'   => ['webhook_url' => '', 'channel' => null, 'username' => null, 'icon' => null],
+        'slack' => ['webhook_url' => '', 'channel' => null, 'username' => null, 'icon' => null],
         'discord' => ['webhook_url' => '', 'username' => '', 'avatar_url' => ''],
         'webhook' => ['url' => ''],
     ],
@@ -97,10 +98,10 @@ return [
 
     'monitor_backups' => [
         [
-            'name'  => env('APP_NAME', 'Heldenregister'),
+            'name' => env('APP_NAME', 'Heldenregister'),
             'disks' => ['backup'],
             'health_checks' => [
-                MaximumAgeInDays::class          => 2,
+                MaximumAgeInDays::class => 2,
                 MaximumStorageInMegabytes::class => 2000,
             ],
         ],
@@ -110,16 +111,16 @@ return [
         'strategy' => DefaultStrategy::class,
 
         'default_strategy' => [
-            'keep_all_backups_for_days'                         => 7,
-            'keep_daily_backups_for_days'                       => 30,
-            'keep_weekly_backups_for_weeks'                     => 8,
-            'keep_monthly_backups_for_months'                   => 6,
-            'keep_yearly_backups_for_years'                     => 2,
+            'keep_all_backups_for_days' => 7,
+            'keep_daily_backups_for_days' => 30,
+            'keep_weekly_backups_for_weeks' => 8,
+            'keep_monthly_backups_for_months' => 6,
+            'keep_yearly_backups_for_years' => 2,
             'delete_oldest_backups_when_using_more_megabytes_than' => 2000,
         ],
 
-        'tries'        => 1,
-        'retry_delay'  => 0,
+        'tries' => 1,
+        'retry_delay' => 0,
     ],
 
 ];

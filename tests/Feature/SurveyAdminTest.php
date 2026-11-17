@@ -63,10 +63,10 @@ class SurveyAdminTest extends TestCase
     private function template(string $targetGroup = 'teamer'): SurveyTemplate
     {
         return SurveyTemplate::create([
-            'name'         => 'Testvorlage',
+            'name' => 'Testvorlage',
             'target_group' => $targetGroup,
-            'active'       => true,
-            'created_by'   => $this->creator->id,
+            'active' => true,
+            'created_by' => $this->creator->id,
         ]);
     }
 
@@ -74,10 +74,10 @@ class SurveyAdminTest extends TestCase
     {
         return SurveyTemplateQuestion::create([
             'survey_template_id' => $template->id,
-            'question_text'      => 'Wie war das Event?',
-            'type'               => $type,
-            'sort_order'         => 0,
-            'required'           => true,
+            'question_text' => 'Wie war das Event?',
+            'type' => $type,
+            'sort_order' => 0,
+            'required' => true,
         ]);
     }
 
@@ -86,21 +86,21 @@ class SurveyAdminTest extends TestCase
         $adventure = Adventure::factory()->create();
 
         return Survey::create([
-            'adventure_id'       => $adventure->id,
+            'adventure_id' => $adventure->id,
             'survey_template_id' => $template->id,
-            'title'              => 'Test-Umfrage',
-            'status'             => $status,
-            'created_by'         => $this->creator->id,
+            'title' => 'Test-Umfrage',
+            'status' => $status,
+            'created_by' => $this->creator->id,
         ]);
     }
 
     private function link(Survey $survey, array $attrs = []): SurveyLink
     {
         return SurveyLink::create(array_merge([
-            'survey_id'   => $survey->id,
+            'survey_id' => $survey->id,
             'target_type' => 'teamer',
-            'name'        => 'Testteilnehmer',
-            'email'       => 'teilnehmer@example.test',
+            'name' => 'Testteilnehmer',
+            'email' => 'teilnehmer@example.test',
         ], $attrs));
     }
 
@@ -142,19 +142,19 @@ class SurveyAdminTest extends TestCase
 
     public function test_store_legt_umfrage_als_entwurf_an(): void
     {
-        $tmpl      = $this->template();
+        $tmpl = $this->template();
         $adventure = Adventure::factory()->create();
 
         $this->actingAs($this->admin())
             ->post(route('admin.surveys.store'), [
-                'adventure_id'       => $adventure->id,
+                'adventure_id' => $adventure->id,
                 'survey_template_id' => $tmpl->id,
-                'title'              => 'Sommerlager-Feedback',
+                'title' => 'Sommerlager-Feedback',
             ])
             ->assertRedirect(route('admin.surveys.index'));
 
         $this->assertDatabaseHas('surveys', [
-            'title'  => 'Sommerlager-Feedback',
+            'title' => 'Sommerlager-Feedback',
             'status' => 'draft',
         ]);
     }
@@ -165,7 +165,7 @@ class SurveyAdminTest extends TestCase
 
     public function test_projektleitung_kann_ergebnisse_einsehen(): void
     {
-        $tmpl   = $this->template();
+        $tmpl = $this->template();
         $survey = $this->survey($tmpl);
 
         $this->actingAs($this->projektleitung())
@@ -175,7 +175,7 @@ class SurveyAdminTest extends TestCase
 
     public function test_ohne_berechtigung_ist_ergebnisse_verboten(): void
     {
-        $tmpl   = $this->template();
+        $tmpl = $this->template();
         $survey = $this->survey($tmpl);
 
         $this->actingAs($this->ohneRecht())
@@ -185,13 +185,13 @@ class SurveyAdminTest extends TestCase
 
     public function test_show_response_zeigt_einzelantwort(): void
     {
-        $tmpl   = $this->template();
+        $tmpl = $this->template();
         $survey = $this->survey($tmpl);
-        $link   = $this->link($survey, ['completed_at' => now()]);
+        $link = $this->link($survey, ['completed_at' => now()]);
 
         SurveyResponse::create([
             'survey_link_id' => $link->id,
-            'submitted_at'   => now(),
+            'submitted_at' => now(),
         ]);
 
         $this->actingAs($this->admin())
@@ -206,17 +206,17 @@ class SurveyAdminTest extends TestCase
     public function test_send_erstellt_links_und_queued_einladungsmails(): void
     {
         Mail::fake();
-        $tmpl   = $this->template();
+        $tmpl = $this->template();
         $survey = $this->survey($tmpl, 'draft');
 
         $this->actingAs($this->admin())
             ->post(route('admin.surveys.send', $survey), [
                 'recipients' => [
                     [
-                        'name'        => 'Anna Waldläuferin',
-                        'email'       => 'anna@example.test',
+                        'name' => 'Anna Waldläuferin',
+                        'email' => 'anna@example.test',
                         'target_type' => 'teamer',
-                        'player_id'   => null,
+                        'player_id' => null,
                     ],
                 ],
             ])
@@ -232,7 +232,7 @@ class SurveyAdminTest extends TestCase
     public function test_send_auf_geschlossener_umfrage_gibt_fehler(): void
     {
         Mail::fake();
-        $tmpl   = $this->template();
+        $tmpl = $this->template();
         $survey = $this->survey($tmpl, 'closed');
 
         $this->actingAs($this->admin())
@@ -254,9 +254,9 @@ class SurveyAdminTest extends TestCase
     public function test_send_link_queued_einladungsmail_und_setzt_sent_at(): void
     {
         Mail::fake();
-        $tmpl   = $this->template();
+        $tmpl = $this->template();
         $survey = $this->survey($tmpl);
-        $link   = $this->link($survey);
+        $link = $this->link($survey);
 
         $this->actingAs($this->admin())
             ->post(route('admin.surveys.links.send', [$survey, $link]))
@@ -270,9 +270,9 @@ class SurveyAdminTest extends TestCase
     public function test_send_link_bei_abgeschlossenem_link_gibt_fehler(): void
     {
         Mail::fake();
-        $tmpl   = $this->template();
+        $tmpl = $this->template();
         $survey = $this->survey($tmpl);
-        $link   = $this->link($survey, ['completed_at' => now()]);
+        $link = $this->link($survey, ['completed_at' => now()]);
 
         $this->actingAs($this->admin())
             ->post(route('admin.surveys.links.send', [$survey, $link]))
@@ -287,9 +287,9 @@ class SurveyAdminTest extends TestCase
 
     public function test_destroy_link_loescht_nicht_beantworteten_link(): void
     {
-        $tmpl   = $this->template();
+        $tmpl = $this->template();
         $survey = $this->survey($tmpl);
-        $link   = $this->link($survey);
+        $link = $this->link($survey);
 
         $this->actingAs($this->admin())
             ->delete(route('admin.surveys.links.destroy', [$survey, $link]))
@@ -301,9 +301,9 @@ class SurveyAdminTest extends TestCase
 
     public function test_destroy_link_bei_beantwortetem_link_gibt_fehler(): void
     {
-        $tmpl   = $this->template();
+        $tmpl = $this->template();
         $survey = $this->survey($tmpl);
-        $link   = $this->link($survey, ['completed_at' => now()]);
+        $link = $this->link($survey, ['completed_at' => now()]);
 
         $this->actingAs($this->admin())
             ->delete(route('admin.surveys.links.destroy', [$survey, $link]))
@@ -318,7 +318,7 @@ class SurveyAdminTest extends TestCase
 
     public function test_close_setzt_status_auf_closed(): void
     {
-        $tmpl   = $this->template();
+        $tmpl = $this->template();
         $survey = $this->survey($tmpl);
 
         $this->actingAs($this->admin())

@@ -18,6 +18,7 @@ class SurveyTemplateSeeder extends Seeder
         // Seeder ist idempotent – bei erneutem Aufruf nichts doppelt anlegen
         if (SurveyTemplate::count() > 0) {
             $this->command->info('Survey-Vorlagen bereits vorhanden, übersprungen.');
+
             return;
         }
 
@@ -29,10 +30,10 @@ class SurveyTemplateSeeder extends Seeder
             // Teilnehmer – Kinder (8–12), Schildskala (5-stufig)
             // ----------------------------------------------------------------
             [
-                'name'         => 'Teilnehmer-Feedback (Kinder)',
-                'description'  => 'Für Spieler im Alter von 8–12 Jahren. Verwendet die Schildskala (5 Stufen).',
+                'name' => 'Teilnehmer-Feedback (Kinder)',
+                'description' => 'Für Spieler im Alter von 8–12 Jahren. Verwendet die Schildskala (5 Stufen).',
                 'target_group' => 'participant_child',
-                'questions'    => [
+                'questions' => [
                     ['question_text' => 'Wie hat dir das Abenteuer gefallen?',                                 'type' => 'rating', 'required' => true],
                     ['question_text' => 'Was hat dir am meisten Spaß gemacht?',                                'type' => 'text',   'required' => false],
                     ['question_text' => 'Was fandst du nicht so toll?',                                        'type' => 'text',   'required' => false],
@@ -48,10 +49,10 @@ class SurveyTemplateSeeder extends Seeder
             // Teilnehmer – Jugendliche (13–17), 1–10 Zahlen-Buttons
             // ----------------------------------------------------------------
             [
-                'name'         => 'Teilnehmer-Feedback (Jugendliche)',
-                'description'  => 'Für Spieler im Alter von 13–17 Jahren. Verwendet 1–10 Zahlen-Buttons.',
+                'name' => 'Teilnehmer-Feedback (Jugendliche)',
+                'description' => 'Für Spieler im Alter von 13–17 Jahren. Verwendet 1–10 Zahlen-Buttons.',
                 'target_group' => 'participant_teen',
-                'questions'    => [
+                'questions' => [
                     ['question_text' => 'Wie hat dir das Abenteuer insgesamt gefallen? (1 = gar nicht, 10 = super)',        'type' => 'rating', 'required' => true],
                     ['question_text' => 'Was war dein persönliches Highlight?',                                              'type' => 'text',   'required' => false],
                     ['question_text' => 'Was sollten wir beim nächsten Mal verbessern?',                                     'type' => 'text',   'required' => false],
@@ -67,10 +68,10 @@ class SurveyTemplateSeeder extends Seeder
             // Teamer
             // ----------------------------------------------------------------
             [
-                'name'         => 'Teamer-Feedback',
-                'description'  => 'Für Teamer und Mitarbeiter. Verwendet 1–10 Zahlen-Buttons auf einer Scroll-Seite.',
+                'name' => 'Teamer-Feedback',
+                'description' => 'Für Teamer und Mitarbeiter. Verwendet 1–10 Zahlen-Buttons auf einer Scroll-Seite.',
                 'target_group' => 'teamer',
-                'questions'    => [
+                'questions' => [
                     ['question_text' => 'Wie bewertest du die Organisation der Veranstaltung? (1–10)',          'type' => 'rating', 'required' => true],
                     ['question_text' => 'Wie zufrieden warst du mit der Unterstützung durch die Leitung? (1–10)', 'type' => 'rating', 'required' => true],
                     ['question_text' => 'Wie war die Kommunikation im Team? (1–10)',                             'type' => 'rating', 'required' => false],
@@ -86,10 +87,10 @@ class SurveyTemplateSeeder extends Seeder
             // Eltern / Erziehungsberechtigte
             // ----------------------------------------------------------------
             [
-                'name'         => 'Eltern-Feedback',
-                'description'  => 'Für Eltern/Erziehungsberechtigte. Scroll-Seite mit 1–10 Zahlen-Buttons.',
+                'name' => 'Eltern-Feedback',
+                'description' => 'Für Eltern/Erziehungsberechtigte. Scroll-Seite mit 1–10 Zahlen-Buttons.',
                 'target_group' => 'parent',
-                'questions'    => [
+                'questions' => [
                     ['question_text' => 'War Ihr Kind mit der Veranstaltung zufrieden? (1 = gar nicht, 10 = sehr)',      'type' => 'rating', 'required' => true],
                     ['question_text' => 'Fühlte sich Ihr Kind sicher und gut betreut? (1 = nein, 10 = absolut)',          'type' => 'rating', 'required' => true],
                     ['question_text' => 'Wie bewerten Sie die Kommunikation mit den Veranstaltern? (1–10)',                'type' => 'rating', 'required' => false],
@@ -108,17 +109,17 @@ class SurveyTemplateSeeder extends Seeder
 
             $template = SurveyTemplate::create([
                 ...$templateData,
-                'active'     => true,
+                'active' => true,
                 'created_by' => $adminId,
             ]);
 
             foreach ($questionData as $index => $q) {
                 SurveyTemplateQuestion::create([
                     'survey_template_id' => $template->id,
-                    'question_text'      => $q['question_text'],
-                    'type'               => $q['type'],
-                    'sort_order'         => $index,
-                    'required'           => $q['required'],
+                    'question_text' => $q['question_text'],
+                    'type' => $q['type'],
+                    'sort_order' => $index,
+                    'required' => $q['required'],
                 ]);
             }
 

@@ -22,6 +22,7 @@ class TeamerApproved extends Notification implements ShouldQueue
         if ($notifiable->teamer_notifications ?? true) {
             $channels[] = 'mail';
         }
+
         return $channels;
     }
 
@@ -32,12 +33,12 @@ class TeamerApproved extends Notification implements ShouldQueue
         return (new MailMessage)
             ->subject('Teamer-Anmeldung bestätigt: '.$signup->adventure?->name)
             ->markdown('emails.teamer_booking_confirmed', [
-                'playerName'    => trim($notifiable->name.' '.($notifiable->lastname ?? '')),
+                'playerName' => trim($notifiable->name.' '.($notifiable->lastname ?? '')),
                 'adventureName' => $signup->adventure?->name ?? '—',
-                'roleName'      => $signup->eventRole?->description ?? 'Teamer',
-                'startDate'     => optional($signup->adventure?->start_at)->format('d.m.Y'),
-                'endDate'       => optional($signup->adventure?->end_at)->format('d.m.Y'),
-                'dashboardUrl'  => route('dashboard'),
+                'roleName' => $signup->eventRole?->description ?? 'Teamer',
+                'startDate' => optional($signup->adventure?->start_at)->format('d.m.Y'),
+                'endDate' => optional($signup->adventure?->end_at)->format('d.m.Y'),
+                'dashboardUrl' => route('dashboard'),
             ]);
     }
 
@@ -47,11 +48,11 @@ class TeamerApproved extends Notification implements ShouldQueue
         $signup = $this->signup;
 
         return [
-            'adventure_id'   => $signup->adventure_id,
+            'adventure_id' => $signup->adventure_id,
             'adventure_name' => $signup->adventure?->name,
-            'start_at'       => optional($signup->adventure?->start_at)->toDateString(),
-            'message'        => 'Deine Teamer-Anmeldung für „'.($signup->adventure?->name ?? '—').'" wurde bestätigt.',
-            'url'            => route('adventures.show', $signup->adventure_id),
+            'start_at' => optional($signup->adventure?->start_at)->toDateString(),
+            'message' => 'Deine Teamer-Anmeldung für „'.($signup->adventure?->name ?? '—').'" wurde bestätigt.',
+            'url' => route('adventures.show', $signup->adventure_id),
         ];
     }
 }

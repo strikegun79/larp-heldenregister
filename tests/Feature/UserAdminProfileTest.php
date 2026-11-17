@@ -32,7 +32,7 @@ class UserAdminProfileTest extends TestCase
 
     public function test_admin_can_view_user_profile(): void
     {
-        $admin  = $this->admin();
+        $admin = $this->admin();
         $target = User::factory()->create(['name' => 'Aragon', 'email' => 'aragon@example.com']);
 
         $this->actingAs($admin)
@@ -43,14 +43,14 @@ class UserAdminProfileTest extends TestCase
 
     public function test_admin_can_update_user_profile(): void
     {
-        $admin  = $this->admin();
+        $admin = $this->admin();
         $target = User::factory()->create();
 
         $this->actingAs($admin)
             ->patch(route('admin.users.profile.update', $target), [
-                'name'     => 'Legolas',
+                'name' => 'Legolas',
                 'lastname' => 'Waldelf',
-                'email'    => 'legolas@example.com',
+                'email' => 'legolas@example.com',
             ])
             ->assertRedirect(route('admin.users.profile', $target));
 
@@ -61,12 +61,12 @@ class UserAdminProfileTest extends TestCase
 
     public function test_profile_update_resets_email_verification_on_email_change(): void
     {
-        $admin  = $this->admin();
+        $admin = $this->admin();
         $target = User::factory()->create(['email_verified_at' => now()]);
 
         $this->actingAs($admin)
             ->patch(route('admin.users.profile.update', $target), [
-                'name'  => $target->name,
+                'name' => $target->name,
                 'email' => 'new@example.com',
             ]);
 
@@ -75,13 +75,13 @@ class UserAdminProfileTest extends TestCase
 
     public function test_profile_update_rejects_duplicate_email(): void
     {
-        $admin    = $this->admin();
+        $admin = $this->admin();
         $existing = User::factory()->create(['email' => 'taken@example.com']);
-        $target   = User::factory()->create();
+        $target = User::factory()->create();
 
         $this->actingAs($admin)
             ->patch(route('admin.users.profile.update', $target), [
-                'name'  => 'Test',
+                'name' => 'Test',
                 'email' => 'taken@example.com',
             ])
             ->assertSessionHasErrors('email');
@@ -89,12 +89,12 @@ class UserAdminProfileTest extends TestCase
 
     public function test_admin_can_change_user_password(): void
     {
-        $admin  = $this->admin();
+        $admin = $this->admin();
         $target = User::factory()->create();
 
         $this->actingAs($admin)
             ->patch(route('admin.users.password.update', $target), [
-                'password'              => 'NeuesPasswort123!',
+                'password' => 'NeuesPasswort123!',
                 'password_confirmation' => 'NeuesPasswort123!',
             ])
             ->assertRedirect(route('admin.users.profile', $target));
@@ -104,12 +104,12 @@ class UserAdminProfileTest extends TestCase
 
     public function test_password_change_requires_confirmation(): void
     {
-        $admin  = $this->admin();
+        $admin = $this->admin();
         $target = User::factory()->create();
 
         $this->actingAs($admin)
             ->patch(route('admin.users.password.update', $target), [
-                'password'              => 'NeuesPasswort123!',
+                'password' => 'NeuesPasswort123!',
                 'password_confirmation' => 'FalschesPasswort!',
             ])
             ->assertSessionHasErrors('password');
@@ -117,7 +117,7 @@ class UserAdminProfileTest extends TestCase
 
     public function test_admin_can_update_notification_preferences(): void
     {
-        $admin  = $this->admin();
+        $admin = $this->admin();
         $target = User::factory()->create(['teamer_notifications' => false]);
 
         $this->actingAs($admin)
@@ -131,7 +131,7 @@ class UserAdminProfileTest extends TestCase
 
     public function test_required_notifications_cannot_be_disabled_by_admin(): void
     {
-        $admin  = $this->admin();
+        $admin = $this->admin();
         $target = User::factory()->create();
 
         // Pflichtbenachrichtigungen auch dann true, wenn Admin sie nicht sendet.
@@ -148,7 +148,7 @@ class UserAdminProfileTest extends TestCase
 
     public function test_admin_can_restore_a_soft_deleted_user(): void
     {
-        $admin  = $this->admin();
+        $admin = $this->admin();
         $target = User::factory()->create();
         $target->delete();
 
@@ -176,7 +176,7 @@ class UserAdminProfileTest extends TestCase
 
         $this->actingAs(User::factory()->create())
             ->patch(route('admin.users.profile.update', $target), [
-                'name'  => 'Hacker',
+                'name' => 'Hacker',
                 'email' => 'hacker@example.com',
             ])
             ->assertForbidden();
@@ -188,7 +188,7 @@ class UserAdminProfileTest extends TestCase
 
         $this->actingAs(User::factory()->create())
             ->patch(route('admin.users.password.update', $target), [
-                'password'              => 'NeuesPasswort123!',
+                'password' => 'NeuesPasswort123!',
                 'password_confirmation' => 'NeuesPasswort123!',
             ])
             ->assertForbidden();

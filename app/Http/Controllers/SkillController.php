@@ -43,7 +43,7 @@ class SkillController extends Controller
     /**
      * SKILL-09: Modal – aktive Helden die diese Fertigkeit erworben haben.
      */
-    public function heroes(Skill $skill): \Illuminate\View\View
+    public function heroes(Skill $skill): View
     {
         $heroes = $skill->heroes()
             ->with('player')

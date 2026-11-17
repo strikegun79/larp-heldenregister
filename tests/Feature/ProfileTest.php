@@ -6,6 +6,7 @@ use App\Models\Hero;
 use App\Models\Player;
 use App\Models\Role;
 use App\Models\User;
+use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -152,7 +153,7 @@ class ProfileTest extends TestCase
 
     public function test_profile_page_shows_assigned_roles(): void
     {
-        $this->seed(\Database\Seeders\RoleSeeder::class);
+        $this->seed(RoleSeeder::class);
         $user = User::factory()->create();
         $user->roles()->attach(Role::where('slug', 'participant')->first());
 

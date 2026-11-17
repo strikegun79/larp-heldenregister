@@ -26,9 +26,9 @@ class SendNewsletterJob implements ShouldQueue
     public function failed(Throwable $e): void
     {
         Log::error('Newsletter-Versand fehlgeschlagen', [
-            'newsletter_id'    => $this->newsletter->id,
+            'newsletter_id' => $this->newsletter->id,
             'newsletter_title' => $this->newsletter->title,
-            'exception'        => $e->getMessage(),
+            'exception' => $e->getMessage(),
         ]);
     }
 
@@ -44,7 +44,7 @@ class SendNewsletterJob implements ShouldQueue
             ->chunkById(100, function ($subscribers) {
                 foreach ($subscribers as $subscription) {
                     $send = NewsletterSend::create([
-                        'newsletter_id'   => $this->newsletter->id,
+                        'newsletter_id' => $this->newsletter->id,
                         'subscription_id' => $subscription->id,
                     ]);
 

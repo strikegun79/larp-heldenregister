@@ -22,7 +22,7 @@ class SurveyTemplateQuestion extends Model
 
     public const TYPES = [
         'rating' => 'Bewertung (1–10)',
-        'text'   => 'Freitext',
+        'text' => 'Freitext',
         'yes_no' => 'Ja / Nein',
     ];
 

@@ -17,7 +17,7 @@ return new class extends Migration
         // Teamer-Rollen (IDs 3, 4, 5) korrekt setzen
         DB::table('event_roles')->whereIn('id', [3, 4, 5])->update([
             'for_participant' => false,
-            'for_teamer'      => true,
+            'for_teamer' => true,
         ]);
     }
 

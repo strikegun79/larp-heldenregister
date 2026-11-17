@@ -27,6 +27,7 @@ class BookingCancelledParticipant extends Notification implements ShouldQueue
     {
         $channels = $notifiable instanceof User ? ['database'] : [];
         $channels[] = 'mail';
+
         return $channels;
     }
 
@@ -45,10 +46,10 @@ class BookingCancelledParticipant extends Notification implements ShouldQueue
     public function toArray(object $notifiable): array
     {
         return [
-            'adventure_id'   => $this->adventure->id,
+            'adventure_id' => $this->adventure->id,
             'adventure_name' => $this->adventure->name,
-            'message'        => 'Anmeldung von '.$this->participantName.' für „'.$this->adventure->name.'" wurde storniert.',
-            'url'            => route('dashboard'),
+            'message' => 'Anmeldung von '.$this->participantName.' für „'.$this->adventure->name.'" wurde storniert.',
+            'url' => route('dashboard'),
         ];
     }
 }

@@ -23,21 +23,21 @@ class DataBreachLog extends Model
     ];
 
     protected $casts = [
-        'discovered_at'            => 'datetime',
-        'reported_at'              => 'datetime',
+        'discovered_at' => 'datetime',
+        'reported_at' => 'datetime',
         'affected_data_categories' => 'array',
-        'reportable'               => 'boolean',
-        'reported_to_authority'    => 'boolean',
+        'reportable' => 'boolean',
+        'reported_to_authority' => 'boolean',
     ];
 
     public static array $dataCategoryLabels = [
-        'kontaktdaten'   => 'Kontaktdaten (Name, Adresse, E-Mail, Telefon)',
-        'gesundheit'     => 'Gesundheitsdaten (Allergien, Medikamente)',
-        'biometrisch'    => 'Biometrische Daten (Unterschriften)',
-        'zugangsdaten'   => 'Zugangsdaten (Passwörter, Tokens)',
-        'finanzdaten'    => 'Finanzdaten (Zahlungsstatus, Ermäßigung)',
-        'minderjährige'  => 'Daten Minderjähriger',
-        'sonstige'       => 'Sonstige personenbezogene Daten',
+        'kontaktdaten' => 'Kontaktdaten (Name, Adresse, E-Mail, Telefon)',
+        'gesundheit' => 'Gesundheitsdaten (Allergien, Medikamente)',
+        'biometrisch' => 'Biometrische Daten (Unterschriften)',
+        'zugangsdaten' => 'Zugangsdaten (Passwörter, Tokens)',
+        'finanzdaten' => 'Finanzdaten (Zahlungsstatus, Ermäßigung)',
+        'minderjährige' => 'Daten Minderjähriger',
+        'sonstige' => 'Sonstige personenbezogene Daten',
     ];
 
     /** Meldepflicht besteht und Frist von 72 h seit Entdeckung läuft noch. */

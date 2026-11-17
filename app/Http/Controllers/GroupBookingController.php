@@ -107,6 +107,7 @@ class GroupBookingController extends Controller
             if (! Gate::allows('book-any-player')
                 && ! $request->user()->players()->where('players.id', $playerId)->exists()) {
                 $skipped[] = "Spieler #{$playerId}: keine Berechtigung";
+
                 continue;
             }
 
@@ -114,15 +115,16 @@ class GroupBookingController extends Controller
             if ($adventure->bookings()->where('player_id', $playerId)->exists()) {
                 $player = Player::find($playerId);
                 $skipped[] = ($player?->full_name ?? "Spieler #{$playerId}").' ist bereits angemeldet';
+
                 continue;
             }
 
-            $player       = Player::find($playerId);
-            $freshAdv     = $adventure->fresh();
-            $isTeamer     = EventRole::find($data['event_role_id'])?->is_teamer_like ?? false;
+            $player = Player::find($playerId);
+            $freshAdv = $adventure->fresh();
+            $isTeamer = EventRole::find($data['event_role_id'])?->is_teamer_like ?? false;
             $ageViolation = ! $isTeamer && $freshAdv->isOutsideAgeRange($player);
             // Teamer nie auf Warteliste; Kapazität nach jeder Buchung neu prüfen.
-            $waitlisted   = $isTeamer ? false : ($freshAdv->shouldWaitlist() || $ageViolation);
+            $waitlisted = $isTeamer ? false : ($freshAdv->shouldWaitlist() || $ageViolation);
 
             $booking = $adventure->bookings()->create([
                 'player_id' => $playerId,

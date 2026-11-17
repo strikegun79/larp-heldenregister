@@ -18,17 +18,17 @@ class Motd extends Model
     public const VARIANTS = [
         // Neutral: Optik der Standard-Segmente (beige Hintergrund, brauner Rahmen)
         'neutral' => ['class' => 'motd-neutral', 'label' => 'Neutral (braun/beige)'],
-        'info'    => ['class' => 'info',         'label' => 'Info (blau)'],
+        'info' => ['class' => 'info',         'label' => 'Info (blau)'],
         'warning' => ['class' => 'warning',      'label' => 'Hinweis (gelb)'],
         'success' => ['class' => 'positive',     'label' => 'Erfolg (grün)'],
-        'error'   => ['class' => 'negative',     'label' => 'Warnung (rot)'],
+        'error' => ['class' => 'negative',     'label' => 'Warnung (rot)'],
     ];
 
     /** Status → Anzeige-Label und Farbe in der Verwaltungsliste. */
     public const STATUS_LABELS = [
-        'active'   => ['label' => 'aktiv',      'color' => 'text-green-700'],
-        'planned'  => ['label' => 'geplant',    'color' => 'text-amber-600'],
-        'expired'  => ['label' => 'abgelaufen', 'color' => 'text-stone-500'],
+        'active' => ['label' => 'aktiv',      'color' => 'text-green-700'],
+        'planned' => ['label' => 'geplant',    'color' => 'text-amber-600'],
+        'expired' => ['label' => 'abgelaufen', 'color' => 'text-stone-500'],
         'inactive' => ['label' => 'inaktiv',    'color' => 'text-stone-500'],
     ];
 
@@ -48,10 +48,10 @@ class Motd extends Model
     ];
 
     protected $casts = [
-        'dismissible'        => 'boolean',
-        'is_active'          => 'boolean',
-        'start_at'           => 'datetime',
-        'end_at'             => 'datetime',
+        'dismissible' => 'boolean',
+        'is_active' => 'boolean',
+        'start_at' => 'datetime',
+        'end_at' => 'datetime',
         'content_updated_at' => 'datetime',
     ];
 
@@ -80,7 +80,7 @@ class Motd extends Model
         $urls = $this->image_link ? [$this->image_link] : [];
 
         if (filled($this->html)) {
-            $dom = new \DOMDocument();
+            $dom = new \DOMDocument;
             libxml_use_internal_errors(true);
             $dom->loadHTML('<?xml encoding="UTF-8"><div>'.$this->html.'</div>');
             libxml_clear_errors();

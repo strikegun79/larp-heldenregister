@@ -12,12 +12,12 @@ use Illuminate\View\View;
 class NewsletterSubscriptionController extends Controller
 {
     private const CONSENT_TEXT = 'Ich möchte den Newsletter der Waldritter Gießen per E-Mail erhalten. '
-        . 'Meine E-Mail-Adresse wird ausschließlich für den Versand des Newsletters genutzt und nicht '
-        . 'an Dritte weitergegeben. Die Einwilligung kann jederzeit widerrufen werden.';
+        .'Meine E-Mail-Adresse wird ausschließlich für den Versand des Newsletters genutzt und nicht '
+        .'an Dritte weitergegeben. Die Einwilligung kann jederzeit widerrufen werden.';
 
     public function subscribe(Request $request): RedirectResponse
     {
-        $user  = $request->user();
+        $user = $request->user();
         $email = $user->email;
 
         $subscription = NewsletterSubscription::where('email', $email)->first();
@@ -29,16 +29,16 @@ class NewsletterSubscriptionController extends Controller
 
             // Erneut anmelden (abgemeldet oder noch nicht bestätigt)
             $subscription->update([
-                'user_id'          => $user->id,
-                'unsubscribed_at'  => null,
-                'confirmed_at'     => null,
-                'consent_text'     => self::CONSENT_TEXT,
-                'consented_at'     => now(),
+                'user_id' => $user->id,
+                'unsubscribed_at' => null,
+                'confirmed_at' => null,
+                'consent_text' => self::CONSENT_TEXT,
+                'consented_at' => now(),
             ]);
         } else {
             $subscription = NewsletterSubscription::create([
-                'user_id'      => $user->id,
-                'email'        => $email,
+                'user_id' => $user->id,
+                'email' => $email,
                 'consent_text' => self::CONSENT_TEXT,
                 'consented_at' => now(),
             ]);

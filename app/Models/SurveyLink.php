@@ -22,9 +22,9 @@ class SurveyLink extends Model
     ];
 
     protected $casts = [
-        'expires_at'   => 'datetime',
+        'expires_at' => 'datetime',
         'completed_at' => 'datetime',
-        'sent_at'      => 'datetime',
+        'sent_at' => 'datetime',
     ];
 
     protected static function booted(): void

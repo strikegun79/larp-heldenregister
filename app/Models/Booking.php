@@ -2,10 +2,15 @@
 
 namespace App\Models;
 
+use App\Notifications\BookingPending;
+use App\Notifications\BookingReceived;
+use App\Notifications\TeamerBookingConfirmed;
+use App\Notifications\TeamerBookingReceived;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Notifications\Notification;
 
 class Booking extends Model
 {
@@ -44,11 +49,11 @@ class Booking extends Model
 
     /** Anmelde-Status (ADV-18) → Anzeige-Label. */
     public const STATUS_LABELS = [
-        'offen'      => 'offen',
+        'offen' => 'offen',
         'bestaetigt' => 'bestätigt',
-        'abgelehnt'  => 'abgelehnt',
+        'abgelehnt' => 'abgelehnt',
         'abgemeldet' => 'abgemeldet',
-        'storniert'  => 'storniert',
+        'storniert' => 'storniert',
     ];
 
     /** Abwesenheitsgründe bei „abgemeldet". */
@@ -215,20 +220,20 @@ class Booking extends Model
      * Teilnehmer: bestätigt → BookingReceived (mit Bankdaten), offen → BookingPending (ohne).
      * Wartelisten-Mails (BookingWaitlisted) bleiben Sache des Aufrufers.
      */
-    public function confirmationNotification(): \Illuminate\Notifications\Notification
+    public function confirmationNotification(): Notification
     {
         $isTeamer = (bool) $this->loadMissing('role')->role?->is_teamer_like;
         $confirmed = $this->status === 'bestaetigt';
 
         if ($isTeamer) {
             return $confirmed
-                ? new \App\Notifications\TeamerBookingConfirmed($this)
-                : new \App\Notifications\TeamerBookingReceived($this);
+                ? new TeamerBookingConfirmed($this)
+                : new TeamerBookingReceived($this);
         }
 
         return $confirmed
-            ? new \App\Notifications\BookingReceived($this)
-            : new \App\Notifications\BookingPending($this);
+            ? new BookingReceived($this)
+            : new BookingPending($this);
     }
 
     /** E-Mail-Empfänger: Spieler-E-Mail, sonst Erziehungsberechtigte/r (anmeldender Betreuer). */

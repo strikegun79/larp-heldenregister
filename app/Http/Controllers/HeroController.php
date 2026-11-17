@@ -7,11 +7,20 @@ use App\Models\EpTransactionType;
 use App\Models\Hero;
 use App\Models\HeroClass;
 use App\Models\Player;
+use App\Notifications\HeroWelcome;
+use App\Support\AvatarStorage;
+use Barryvdh\DomPDF\Facade\Pdf;
+use Endroid\QrCode\QrCode;
+use Endroid\QrCode\Writer\PngWriter;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Notification;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\View\View;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class HeroController extends Controller
@@ -107,9 +116,9 @@ class HeroController extends Controller
         ]);
 
         if ($hero->image) {
-            \Illuminate\Support\Facades\Storage::disk('public')->delete($hero->image);
+            Storage::disk('public')->delete($hero->image);
         }
-        $hero->update(['image' => \App\Support\AvatarStorage::storeSquare($request->file('image'), 'heroes')]);
+        $hero->update(['image' => AvatarStorage::storeSquare($request->file('image'), 'heroes')]);
 
         $message = 'Helden-Foto aktualisiert.';
 
@@ -126,7 +135,7 @@ class HeroController extends Controller
         $this->authorizePhotoAccess($request, $hero);
 
         if ($hero->image) {
-            \Illuminate\Support\Facades\Storage::disk('public')->delete($hero->image);
+            Storage::disk('public')->delete($hero->image);
             $hero->update(['image' => null]);
         }
 
@@ -147,7 +156,7 @@ class HeroController extends Controller
             return;
         }
 
-        $isOwner = $hero->player_id && \Illuminate\Support\Facades\DB::table('player_user')
+        $isOwner = $hero->player_id && DB::table('player_user')
             ->where('player_id', $hero->player_id)
             ->where('user_id', $request->user()->id)
             ->exists();
@@ -159,11 +168,11 @@ class HeroController extends Controller
      * Charakterbogen eines Helden als PDF (REP-05): Stammdaten, Klassen,
      * Fertigkeiten und EP im Vereins-Layout.
      */
-    public function sheetPdf(Hero $hero): \Symfony\Component\HttpFoundation\Response
+    public function sheetPdf(Hero $hero): Response
     {
         $hero->load(['player', 'classes', 'skills', 'epTransactions.type']);
 
-        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('heroes.sheet_pdf', ['hero' => $hero]);
+        $pdf = Pdf::loadView('heroes.sheet_pdf', ['hero' => $hero]);
 
         return $pdf->stream('charakterbogen-'.$hero->id.'.pdf');
     }
@@ -172,42 +181,45 @@ class HeroController extends Controller
      * PUB-10: Heldenausweis-PDF für den Besitzer des Helden (oder Bürokrat/Admin).
      * Gleiche Ausgabe wie Admin\IdCardController::reprint().
      */
-    public function ausweisDownload(Request $request, Hero $hero): \Symfony\Component\HttpFoundation\Response
+    public function ausweisDownload(Request $request, Hero $hero): Response
     {
         $this->authorizePhotoAccess($request, $hero);
         abort_unless((bool) $hero->public_code, 404);
 
-        $url      = route('public.hero', $hero->public_code);
-        $qr       = new \Endroid\QrCode\QrCode($url, size: 400);
-        $writer   = new \Endroid\QrCode\Writer\PngWriter();
-        $qrUri    = 'data:image/png;base64,'.base64_encode($writer->write($qr)->getString());
+        $url = route('public.hero', $hero->public_code);
+        $qr = new QrCode($url, size: 400);
+        $writer = new PngWriter;
+        $qrUri = 'data:image/png;base64,'.base64_encode($writer->write($qr)->getString());
 
         $backPath = resource_path('images/template_helden_ausweis_rueckseite.png');
-        $backUri  = null;
+        $backUri = null;
         if (file_exists($backPath) && function_exists('imagecreatefrompng')) {
             $img = @imagecreatefrompng($backPath);
             if ($img !== false) {
                 $rotated = imagerotate($img, 180, 0);
-                ob_start(); imagepng($rotated); $data = ob_get_clean();
-                imagedestroy($img); imagedestroy($rotated);
+                ob_start();
+                imagepng($rotated);
+                $data = ob_get_clean();
+                imagedestroy($img);
+                imagedestroy($rotated);
                 $backUri = 'data:image/png;base64,'.base64_encode($data);
             }
         }
 
-        $pdf = \Barryvdh\DomPDF\Facade\Pdf::loadView('admin.id-cards.card-pdf', [
+        $pdf = Pdf::loadView('admin.id-cards.card-pdf', [
             'cards' => [[
-                'code'           => $hero->public_code,
+                'code' => $hero->public_code,
                 'character_name' => $hero->character_name,
                 // Name-Feld: Charaktername, sonst Spielername.
-                'name'           => $hero->character_name ?: $hero->player?->full_name,
-                'classes'        => $hero->classes->pluck('name')->all(),
-                'url'            => $url,
-                'qr'             => $qrUri,
+                'name' => $hero->character_name ?: $hero->player?->full_name,
+                'classes' => $hero->classes->pluck('name')->all(),
+                'url' => $url,
+                'qr' => $qrUri,
             ]],
             'backTemplateUri' => $backUri,
         ])->setPaper('a4', 'landscape')
-          ->setOption('dpi', 150)
-          ->setOption('isFontSubsettingEnabled', true);
+            ->setOption('dpi', 150)
+            ->setOption('isFontSubsettingEnabled', true);
 
         return $pdf->stream('ausweis-'.$hero->public_code.'.pdf');
     }
@@ -416,6 +428,7 @@ class HeroController extends Controller
 
         if (! $player) {
             $msg = 'Diesem Helden ist kein Spieler zugeordnet – keine Mail gesendet.';
+
             return $request->expectsJson()
                 ? response()->json(['message' => $msg], 422)
                 : back()->with('error', $msg);
@@ -428,13 +441,14 @@ class HeroController extends Controller
 
         if (! $email) {
             $msg = 'Kein E-Mail-Empfänger für diesen Spieler gefunden.';
+
             return $request->expectsJson()
                 ? response()->json(['message' => $msg], 422)
                 : back()->with('error', $msg);
         }
 
-        \Illuminate\Support\Facades\Notification::route('mail', $email)
-            ->notify(new \App\Notifications\HeroWelcome($hero));
+        Notification::route('mail', $email)
+            ->notify(new HeroWelcome($hero));
 
         $msg = "Willkommens-Mail für {$hero->character_name} gesendet an {$email}.";
 
@@ -446,7 +460,7 @@ class HeroController extends Controller
     /**
      * Formular für Spieler-selbst-editierbare Felder (Charaktername, Heimatort, Steckbrief).
      */
-    public function playerEditForm(Request $request, Hero $hero): \Illuminate\View\View
+    public function playerEditForm(Request $request, Hero $hero): View
     {
         abort_unless($this->isHeroOwnerOrEditor($request, $hero), 403);
 
@@ -470,14 +484,14 @@ class HeroController extends Controller
     /**
      * Speichert Spieler-selbst-editierbare Felder: Charaktername, Heimatort, Steckbrief.
      */
-    public function updatePlayerInfo(Request $request, Hero $hero): \Illuminate\Http\JsonResponse
+    public function updatePlayerInfo(Request $request, Hero $hero): JsonResponse
     {
         abort_unless($this->isHeroOwnerOrEditor($request, $hero), 403);
 
         $data = $request->validate([
             'character_name' => ['nullable', 'string', 'max:150'],
-            'homeplace'      => ['nullable', 'string', 'max:150'],
-            'description'    => $this->descriptionRules(),
+            'homeplace' => ['nullable', 'string', 'max:150'],
+            'description' => $this->descriptionRules(),
         ]);
 
         if (array_key_exists('description', $data)) {
@@ -497,7 +511,7 @@ class HeroController extends Controller
         }
 
         return $hero->player_id !== null
-            && \Illuminate\Support\Facades\DB::table('player_user')
+            && DB::table('player_user')
                 ->where('player_id', $hero->player_id)
                 ->where('user_id', $request->user()->id)
                 ->exists();
@@ -529,14 +543,14 @@ class HeroController extends Controller
             'homeplace' => ['nullable', 'string', 'max:150'],
             'description' => $this->descriptionRules(),
             'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:4096'],
-            'active'         => ['boolean'],
+            'active' => ['boolean'],
             'public_visible' => ['boolean'],
-            'classes'        => ['array'],
-            'classes.*'      => ['exists:hero_classes,id'],
+            'classes' => ['array'],
+            'classes.*' => ['exists:hero_classes,id'],
         ]);
 
         // Checkboxen liefern nichts, wenn nicht gesetzt.
-        $validated['active']         = $request->boolean('active');
+        $validated['active'] = $request->boolean('active');
         $validated['public_visible'] = $request->boolean('public_visible');
 
         // Steckbrief-HTML aus dem Editor bereinigen.
@@ -576,7 +590,7 @@ class HeroController extends Controller
     {
         if ($request->hasFile('image')) {
             if ($hero->image) {
-                \Illuminate\Support\Facades\Storage::disk('public')->delete($hero->image);
+                Storage::disk('public')->delete($hero->image);
             }
             $hero->update(['image' => $request->file('image')->store('heroes', 'public')]);
         }
@@ -587,7 +601,7 @@ class HeroController extends Controller
      * Rückgabe: Collection, Key = "{hero_class_id}_{skill_id}"
      *           Wert = Collection von Objekten mit req_id und req_name.
      */
-    private function buildPrereqMap(Hero $hero): \Illuminate\Support\Collection
+    private function buildPrereqMap(Hero $hero): Collection
     {
         $classIds = $hero->classes->pluck('id');
         $skillIds = $hero->classes->flatMap(fn ($c) => $c->skills->pluck('id'));

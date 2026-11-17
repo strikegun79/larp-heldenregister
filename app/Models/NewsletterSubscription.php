@@ -20,8 +20,8 @@ class NewsletterSubscription extends Model
     ];
 
     protected $casts = [
-        'confirmed_at'    => 'datetime',
-        'consented_at'    => 'datetime',
+        'confirmed_at' => 'datetime',
+        'consented_at' => 'datetime',
         'unsubscribed_at' => 'datetime',
     ];
 

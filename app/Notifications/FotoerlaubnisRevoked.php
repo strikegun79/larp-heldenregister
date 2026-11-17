@@ -31,7 +31,7 @@ class FotoerlaubnisRevoked extends Notification implements ShouldQueue
     public function toMail(object $notifiable): MailMessage
     {
         $participant = $this->booking->participant_name;
-        $event       = $this->adventure->name;
+        $event = $this->adventure->name;
 
         return (new MailMessage)
             ->subject("Fotoerlaubnis widerrufen: {$participant} – {$event}")

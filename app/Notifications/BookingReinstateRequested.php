@@ -35,11 +35,11 @@ class BookingReinstateRequested extends Notification implements ShouldQueue
     {
         $approveUrl = URL::signedRoute('adventures.bookings.approve-reinstate', [
             'adventure' => $this->adventure->id,
-            'booking'   => $this->booking->id,
+            'booking' => $this->booking->id,
         ]);
         $rejectUrl = URL::signedRoute('adventures.bookings.reject-reinstate', [
             'adventure' => $this->adventure->id,
-            'booking'   => $this->booking->id,
+            'booking' => $this->booking->id,
         ]);
         $manageUrl = route('adventures.manage', $this->adventure->id);
 

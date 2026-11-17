@@ -31,7 +31,7 @@ class TeamerBookingReceived extends Notification implements ShouldQueue
         return (new MailMessage)
             ->subject('Teamer-Anmeldung eingegangen: '.$booking->adventure?->name)
             ->markdown('emails.teamer_booking_received', [
-                'booking'      => $booking,
+                'booking' => $booking,
                 'dashboardUrl' => route('dashboard'),
             ]);
     }

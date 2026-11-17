@@ -26,10 +26,10 @@ class PublicQrCodeTest extends TestCase
         $hero = Hero::factory()->create(['public_code' => 'QRTEST', 'public_visible' => true]);
 
         $this->actingAs($user)
-             ->get(route('heroes.show', $hero))
-             ->assertOk()
-             ->assertSee('data-qr-url', false)
-             ->assertSee(route('public.hero', 'QRTEST'), false);
+            ->get(route('heroes.show', $hero))
+            ->assertOk()
+            ->assertSee('data-qr-url', false)
+            ->assertSee(route('public.hero', 'QRTEST'), false);
     }
 
     public function test_kein_qr_canvas_bei_verstekctem_held(): void
@@ -39,9 +39,9 @@ class PublicQrCodeTest extends TestCase
         $hero = Hero::factory()->create(['public_code' => 'QRHIDE', 'public_visible' => false]);
 
         $this->actingAs($user)
-             ->get(route('heroes.show', $hero))
-             ->assertOk()
-             ->assertDontSee('data-qr-url', false);
+            ->get(route('heroes.show', $hero))
+            ->assertOk()
+            ->assertDontSee('data-qr-url', false);
     }
 
     public function test_öffentliches_profil_zeigt_link_kopieren_button(): void
@@ -49,8 +49,8 @@ class PublicQrCodeTest extends TestCase
         $hero = Hero::factory()->create(['public_code' => 'QRPUB1', 'public_visible' => true]);
 
         $this->get(route('public.hero', 'QRPUB1'))
-             ->assertOk()
-             ->assertSee('Link kopieren');
+            ->assertOk()
+            ->assertSee('Link kopieren');
     }
 
     public function test_öffentliches_profil_zeigt_helden_code_als_text(): void
@@ -58,8 +58,8 @@ class PublicQrCodeTest extends TestCase
         $hero = Hero::factory()->create(['public_code' => 'QRPUB2', 'public_visible' => true]);
 
         $this->get(route('public.hero', 'QRPUB2'))
-             ->assertOk()
-             ->assertSee('QRPUB2');
+            ->assertOk()
+            ->assertSee('QRPUB2');
     }
 
     public function test_öffentliche_profil_url_im_detail_sichtbar(): void
@@ -69,8 +69,8 @@ class PublicQrCodeTest extends TestCase
         $hero = Hero::factory()->create(['public_code' => 'QRURL5', 'public_visible' => true]);
 
         $this->actingAs($user)
-             ->get(route('heroes.show', $hero))
-             ->assertOk()
-             ->assertSee(route('public.hero', 'QRURL5'), false);
+            ->get(route('heroes.show', $hero))
+            ->assertOk()
+            ->assertSee(route('public.hero', 'QRURL5'), false);
     }
 }

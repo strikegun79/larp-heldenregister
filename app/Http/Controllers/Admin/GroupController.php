@@ -26,7 +26,7 @@ class GroupController extends Controller
         $groups = Group::withCount([
             'heroes as heroes_count' => fn ($q) => $q->whereNull('died'),
         ])
-        ->addSelect(DB::raw('(
+            ->addSelect(DB::raw('(
             SELECT COUNT(DISTINCT heroes.player_id)
             FROM group_hero
             JOIN heroes ON heroes.id = group_hero.hero_id
@@ -35,8 +35,8 @@ class GroupController extends Controller
             AND heroes.died IS NULL
             AND players.active = 1
         ) as active_players_count'))
-        ->orderBy('name')
-        ->get();
+            ->orderBy('name')
+            ->get();
 
         return view('admin.groups.index', compact('groups'));
     }
@@ -46,7 +46,7 @@ class GroupController extends Controller
     {
         $group->load(['heroes' => function ($q) {
             $q->with(['classes', 'player', 'epTransactions'])
-              ->orderBy('character_name');
+                ->orderBy('character_name');
         }]);
 
         return view('admin.groups.show', compact('group'));

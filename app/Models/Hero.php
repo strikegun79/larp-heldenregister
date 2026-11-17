@@ -48,7 +48,7 @@ class Hero extends Model
     {
         do {
             $code = '';
-            $len  = strlen(self::CODE_ALPHABET);
+            $len = strlen(self::CODE_ALPHABET);
             for ($i = 0; $i < 6; $i++) {
                 $code .= self::CODE_ALPHABET[random_int(0, $len - 1)];
             }
@@ -76,10 +76,10 @@ class Hero extends Model
     ];
 
     protected $casts = [
-        'born'              => 'date',
-        'died'              => 'date',
-        'active'            => 'boolean',
-        'public_visible'    => 'boolean',
+        'born' => 'date',
+        'died' => 'date',
+        'active' => 'boolean',
+        'public_visible' => 'boolean',
         'public_searchable' => 'boolean',
     ];
 
@@ -206,7 +206,7 @@ class Hero extends Model
      * Abenteuerhistorie: EP-Buchungen vom Typ „Abenteuer bestritten", die mit
      * einem Abenteuer verknüpft sind – chronologisch (neueste zuerst).
      */
-    public function getAdventureHistoryAttribute(): \Illuminate\Support\Collection
+    public function getAdventureHistoryAttribute(): Collection
     {
         return $this->epTransactions
             ->where('ep_transaction_type_id', self::ADVENTURE_EP_TYPE)

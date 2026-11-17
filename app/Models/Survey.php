@@ -19,12 +19,12 @@ class Survey extends Model
     ];
 
     protected $casts = [
-        'sent_at'   => 'datetime',
+        'sent_at' => 'datetime',
         'closes_at' => 'datetime',
     ];
 
     public const STATUSES = [
-        'draft'  => 'Entwurf',
+        'draft' => 'Entwurf',
         'active' => 'Aktiv',
         'closed' => 'Geschlossen',
     ];

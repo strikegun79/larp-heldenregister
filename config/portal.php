@@ -9,17 +9,17 @@ return [
     | Name und Beschreibung des Portals – erscheinen in Titel, Footer, Mails
     | und der PWA-Manifest-Datei.
     */
-    'name'             => env('PORTAL_NAME', 'Heldenregister'),
-    'short_name'       => env('PORTAL_SHORT_NAME', 'Heldenregister'),
-    'description'      => env('PORTAL_DESCRIPTION', 'LARP-Charakterverwaltung für Waldritter Gießen e.V.'),
-    'larp_type'        => env('PORTAL_LARP_TYPE', 'Kinder- und Jugend-LARP'),
+    'name' => env('PORTAL_NAME', 'Heldenregister'),
+    'short_name' => env('PORTAL_SHORT_NAME', 'Heldenregister'),
+    'description' => env('PORTAL_DESCRIPTION', 'LARP-Charakterverwaltung für Waldritter Gießen e.V.'),
+    'larp_type' => env('PORTAL_LARP_TYPE', 'Kinder- und Jugend-LARP'),
 
     /*
     |--------------------------------------------------------------------------
     | Organisation
     |--------------------------------------------------------------------------
     */
-    'organization'       => env('PORTAL_ORGANIZATION', 'Waldritter-Gießen e.V.'),
+    'organization' => env('PORTAL_ORGANIZATION', 'Waldritter-Gießen e.V.'),
     'organization_short' => env('PORTAL_ORGANIZATION_SHORT', 'Waldritter'),
 
     /*
@@ -31,8 +31,8 @@ return [
     | apple_touch_icon: absoluter Pfad ab public/
     | icons: PWA-Icons für manifest.webmanifest
     */
-    'logo'             => env('PORTAL_LOGO', 'Waldritter-Logo2_mit_Untertitel.png'),
-    'favicon'          => env('PORTAL_FAVICON', '/favicon.ico'),
+    'logo' => env('PORTAL_LOGO', 'Waldritter-Logo2_mit_Untertitel.png'),
+    'favicon' => env('PORTAL_FAVICON', '/favicon.ico'),
     'apple_touch_icon' => env('PORTAL_APPLE_TOUCH_ICON', '/icons/apple-touch-icon.png'),
 
     'icons' => [
@@ -49,9 +49,9 @@ return [
     | contact_email: direkte E-Mail des Ansprechpartners
     | email:         allgemeine Portal-/Vereins-E-Mail
     */
-    'contact_name'  => env('PORTAL_CONTACT_NAME', ''),
+    'contact_name' => env('PORTAL_CONTACT_NAME', ''),
     'contact_email' => env('PORTAL_CONTACT_EMAIL', ''),
-    'email'         => env('PORTAL_EMAIL', ''),
+    'email' => env('PORTAL_EMAIL', ''),
 
     /*
     |--------------------------------------------------------------------------
@@ -59,7 +59,7 @@ return [
     |--------------------------------------------------------------------------
     | Werden in <meta name="theme-color"> und manifest.webmanifest verwendet.
     */
-    'theme_color'      => env('PORTAL_THEME_COLOR', '#5a3a22'),
+    'theme_color' => env('PORTAL_THEME_COLOR', '#5a3a22'),
     'background_color' => env('PORTAL_BACKGROUND_COLOR', '#e4cea5'),
 
     /*

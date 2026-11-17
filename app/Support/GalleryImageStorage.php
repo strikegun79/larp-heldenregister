@@ -13,14 +13,15 @@ use Illuminate\Support\Str;
 class GalleryImageStorage
 {
     private const MAX_W = 1200;
+
     private const MAX_H = 900;
 
     public static function store(UploadedFile $file, string $dir): string
     {
         $src = match ($file->getMimeType()) {
-            'image/png'  => imagecreatefrompng($file->getRealPath()),
+            'image/png' => imagecreatefrompng($file->getRealPath()),
             'image/webp' => imagecreatefromwebp($file->getRealPath()),
-            default      => imagecreatefromjpeg($file->getRealPath()),
+            default => imagecreatefromjpeg($file->getRealPath()),
         };
 
         $srcW = imagesx($src);
@@ -28,8 +29,8 @@ class GalleryImageStorage
 
         // Skalierung berechnen: in MAX_W × MAX_H-Box einpassen.
         $scale = min(self::MAX_W / $srcW, self::MAX_H / $srcH, 1.0);
-        $dstW  = (int) round($srcW * $scale);
-        $dstH  = (int) round($srcH * $scale);
+        $dstW = (int) round($srcW * $scale);
+        $dstH = (int) round($srcH * $scale);
 
         $dst = imagecreatetruecolor($dstW, $dstH);
         imagecopyresampled($dst, $src, 0, 0, 0, 0, $dstW, $dstH, $srcW, $srcH);

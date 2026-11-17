@@ -2,8 +2,10 @@
 
 namespace App\Providers;
 
+use App\Models\Player;
 use App\Models\Role;
 use App\Models\User;
+use App\Policies\PlayerPolicy;
 use Illuminate\Foundation\Support\Providers\AuthServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Gate;
 
@@ -15,7 +17,7 @@ class AuthServiceProvider extends ServiceProvider
      * @var array<class-string, class-string>
      */
     protected $policies = [
-        \App\Models\Player::class => \App\Policies\PlayerPolicy::class,
+        Player::class => PlayerPolicy::class,
     ];
 
     /**
@@ -73,16 +75,13 @@ class AuthServiceProvider extends ServiceProvider
         Gate::define('manage-checkin', fn (User $user) => $user->hasAnyRole('project_lead', 'registrar'));
 
         // Veranstaltungs-Lookups: Portal-Admin ODER Projektleitung (ROLE-10).
-        Gate::define('events.admin-access', fn (User $user) =>
-            $user->hasPermission('portal.manage') || $user->hasPermission('events.admin'));
+        Gate::define('events.admin-access', fn (User $user) => $user->hasPermission('portal.manage') || $user->hasPermission('events.admin'));
 
         // Helden-Konfiguration: Portal-Admin ODER Spielleiter (ROLE-10).
-        Gate::define('heroes.admin-access', fn (User $user) =>
-            $user->hasPermission('portal.manage') || $user->hasPermission('heroes.admin'));
+        Gate::define('heroes.admin-access', fn (User $user) => $user->hasPermission('portal.manage') || $user->hasPermission('heroes.admin'));
 
         // Heldenausweise: heldenregister.edit (Bürokrat) ODER heroes.admin (Spielleiter).
-        Gate::define('id-cards.access', fn (User $user) =>
-            $user->hasPermission('heldenregister.edit') || $user->hasPermission('heroes.admin'));
+        Gate::define('id-cards.access', fn (User $user) => $user->hasPermission('heldenregister.edit') || $user->hasPermission('heroes.admin'));
 
         // Admin-Übersichtsseite zugänglich für alle Rollen mit mind. einem Verwaltungsbereich.
         Gate::define('admin.panel', fn (User $user) => collect([

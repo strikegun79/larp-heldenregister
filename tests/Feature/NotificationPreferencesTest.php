@@ -70,10 +70,10 @@ class NotificationPreferencesTest extends TestCase
         $admin->roles()->attach(10);
 
         $this->actingAs($admin)->patch(route('profile.update'), [
-            'name'           => $admin->name,
-            'lastname'       => $admin->lastname,
-            'email'          => $admin->email,
-            'phone'          => $admin->phone ?? '0000',
+            'name' => $admin->name,
+            'lastname' => $admin->lastname,
+            'email' => $admin->email,
+            'phone' => $admin->phone ?? '0000',
             'notify_new_user' => '0',
         ]);
 
@@ -86,10 +86,10 @@ class NotificationPreferencesTest extends TestCase
         $teamer->roles()->attach(30); // Teamer
 
         $this->actingAs($teamer)->patch(route('profile.update'), [
-            'name'                 => $teamer->name,
-            'lastname'             => $teamer->lastname,
-            'email'                => $teamer->email,
-            'phone'                => $teamer->phone ?? '0000',
+            'name' => $teamer->name,
+            'lastname' => $teamer->lastname,
+            'email' => $teamer->email,
+            'phone' => $teamer->phone ?? '0000',
             'teamer_notifications' => '0',
         ]);
 

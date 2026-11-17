@@ -19,9 +19,9 @@ class NewsletterSend extends Model
     ];
 
     protected $casts = [
-        'sent_at'    => 'datetime',
-        'opened_at'  => 'datetime',
-        'failed_at'  => 'datetime',
+        'sent_at' => 'datetime',
+        'opened_at' => 'datetime',
+        'failed_at' => 'datetime',
     ];
 
     protected static function booted(): void

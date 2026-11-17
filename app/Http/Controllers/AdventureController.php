@@ -25,6 +25,7 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Cookie;
 use Illuminate\Support\Facades\Gate;
 use Illuminate\Support\Facades\Notification;
+use Illuminate\Validation\ValidationException;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -85,23 +86,23 @@ class AdventureController extends Controller
 
             return view('adventures.index', [
                 'adventures' => null,
-                'grouped'    => $grouped,
-                'q'          => $q,
-                'sort'       => $sort,
+                'grouped' => $grouped,
+                'q' => $q,
+                'sort' => $sort,
             ]);
         }
 
         $adventures = $base
-            ->when($sort === 'asc',  fn ($query) => $query->orderBy('start_at'))
+            ->when($sort === 'asc', fn ($query) => $query->orderBy('start_at'))
             ->when($sort === 'desc', fn ($query) => $query->orderByDesc('start_at'))
             ->paginate(20)
             ->withQueryString();
 
         return view('adventures.index', [
             'adventures' => $adventures,
-            'grouped'    => null,
-            'q'          => $q,
-            'sort'       => $sort,
+            'grouped' => null,
+            'q' => $q,
+            'sort' => $sort,
         ]);
     }
 
@@ -186,14 +187,14 @@ class AdventureController extends Controller
         $myTeamerSignup = $teamerSignups->firstWhere('user_id', $request->user()->id);
 
         $profileComplete = $request->user()->hasCompleteAddress();
-        $userHasPlayers  = $request->user()->players()->exists();
+        $userHasPlayers = $request->user()->players()->exists();
 
         if (Gate::allows('book-any-player')) {
             $userHasBookableGroups = true;
         } else {
             $bookedPlayerIds = $adventure->bookings()->pluck('player_id')->toArray();
-            $userPlayerIds   = $request->user()->players()->pluck('players.id');
-            $userHeroIds     = Hero::whereIn('player_id', $userPlayerIds)->pluck('id');
+            $userPlayerIds = $request->user()->players()->pluck('players.id');
+            $userHeroIds = Hero::whereIn('player_id', $userPlayerIds)->pluck('id');
             $userHasBookableGroups = Group::whereHas('heroes', fn ($q) => $q
                 ->whereIn('heroes.id', $userHeroIds)
                 ->whereNotIn('player_id', $bookedPlayerIds)
@@ -213,8 +214,8 @@ class AdventureController extends Controller
             'visibleBookings' => $visibleBookings,
             'teamerSignups' => $teamerSignups,
             'myTeamerSignup' => $myTeamerSignup,
-            'profileComplete'       => $profileComplete,
-            'userHasPlayers'        => $userHasPlayers,
+            'profileComplete' => $profileComplete,
+            'userHasPlayers' => $userHasPlayers,
             'userHasBookableGroups' => $userHasBookableGroups,
         ];
 
@@ -259,14 +260,14 @@ class AdventureController extends Controller
     {
         $adventure->load(['bookings.player.users', 'bookings.player.activeHero.classes', 'bookings.bookedBy', 'bookings.role', 'visits', 'status', 'teamerSignups.user']);
 
-        $nscBookings  = $adventure->bookings->filter(fn ($b) => $b->role?->is_teamer_like)->sortByDesc('created_at')->values();
+        $nscBookings = $adventure->bookings->filter(fn ($b) => $b->role?->is_teamer_like)->sortByDesc('created_at')->values();
         $mainBookings = $adventure->bookings->filter(fn ($b) => ! $b->role?->is_teamer_like)->sortByDesc('created_at')->values();
 
         $data = array_merge($this->formData($adventure), [
-            'nscBookings'     => $nscBookings,
-            'mainBookings'    => $mainBookings,
+            'nscBookings' => $nscBookings,
+            'mainBookings' => $mainBookings,
             'deletionBlocker' => $adventure->deletionBlocker(),
-            'tasks'           => $adventure->tasks,
+            'tasks' => $adventure->tasks,
         ]);
 
         // ARCH-002: AJAX → Partial für Modal, Direktaufruf → Vollseite.
@@ -432,7 +433,7 @@ class AdventureController extends Controller
             $message = 'Wartelistenmodus aktiviert. Neue Anmeldungen kommen auf die Warteliste.';
         } elseif (count($promoted) > 0) {
             $names = implode(', ', $promoted);
-            $message = 'Wartelistenmodus deaktiviert. Nachgerückt: ' . $names . '.';
+            $message = 'Wartelistenmodus deaktiviert. Nachgerückt: '.$names.'.';
         } else {
             $message = 'Wartelistenmodus deaktiviert. Neue Anmeldungen füllen freie Plätze.';
         }
@@ -492,7 +493,7 @@ class AdventureController extends Controller
     public function saveTasks(Request $request, Adventure $adventure): RedirectResponse|JsonResponse
     {
         $knownTypes = array_keys(config('adventure_tasks.tasks', []));
-        $input      = $request->input('tasks', []);
+        $input = $request->input('tasks', []);
 
         foreach ($knownTypes as $type) {
             $row = $input[$type] ?? [];
@@ -515,7 +516,7 @@ class AdventureController extends Controller
                 ->first();
 
             $configChanged = $existing && (
-                $existing->trigger_days      !== $days
+                $existing->trigger_days !== $days
                 || $existing->trigger_reference !== $reference
                 || $existing->trigger_direction !== $direction
             );
@@ -523,12 +524,12 @@ class AdventureController extends Controller
             AdventureTask::updateOrCreate(
                 ['adventure_id' => $adventure->id, 'task_type' => $type],
                 [
-                    'is_active'         => $isActive,
-                    'trigger_days'      => $days,
+                    'is_active' => $isActive,
+                    'trigger_days' => $days,
                     'trigger_reference' => $reference,
                     'trigger_direction' => $direction,
-                    'executed_at'       => ($configChanged && $isActive) ? null : ($existing?->executed_at),
-                    'result'            => ($configChanged && $isActive) ? null : ($existing?->result),
+                    'executed_at' => ($configChanged && $isActive) ? null : ($existing?->executed_at),
+                    'result' => ($configChanged && $isActive) ? null : ($existing?->result),
                 ]
             );
         }
@@ -597,8 +598,8 @@ class AdventureController extends Controller
             'event_client_id' => ['required', 'exists:event_clients,id'],
             'event_category_id' => ['required', 'exists:event_categories,id'],
             'max_player' => ['required', 'integer', 'min:1'],
-            'min_age'    => ['nullable', 'integer', 'min:0', 'max:99'],
-            'max_age'    => ['nullable', 'integer', 'min:0', 'max:99'],
+            'min_age' => ['nullable', 'integer', 'min:0', 'max:99'],
+            'max_age' => ['nullable', 'integer', 'min:0', 'max:99'],
             'waitlist' => ['nullable', 'integer', 'min:0'],
             'fee' => ['required', 'numeric', 'min:0'],
             'fee_reduced' => ['nullable', 'numeric', 'min:0'],
@@ -615,7 +616,7 @@ class AdventureController extends Controller
 
         // Altersbereich: min muss kleiner als max sein wenn beide gesetzt
         if (isset($data['min_age'], $data['max_age']) && $data['min_age'] >= $data['max_age']) {
-            throw \Illuminate\Validation\ValidationException::withMessages([
+            throw ValidationException::withMessages([
                 'min_age' => ['Das Mindestalter muss kleiner als das Höchstalter sein.'],
             ]);
         }

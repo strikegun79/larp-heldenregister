@@ -4,7 +4,6 @@ namespace Tests\Feature;
 
 use App\Models\Adventure;
 use App\Models\Booking;
-use App\Models\EventRole;
 use App\Models\Player;
 use App\Models\User;
 use App\Notifications\BookingApproved;
@@ -42,15 +41,15 @@ class BookingStatusNotificationTest extends TestCase
 
     private function bookingWithEmail(): array
     {
-        $player    = Player::factory()->create(['email' => 'teilnehmer@example.test']);
+        $player = Player::factory()->create(['email' => 'teilnehmer@example.test']);
         $adventure = Adventure::factory()->create(['max_player' => 5]);
-        $booking   = Booking::factory()->create([
+        $booking = Booking::factory()->create([
             'adventure_id' => $adventure->id,
-            'player_id'    => $player->id,
-            'status'       => 'offen',
-            'approved_at'  => null,
-            'paid'         => false,
-            'waitlisted'   => false,
+            'player_id' => $player->id,
+            'status' => 'offen',
+            'approved_at' => null,
+            'paid' => false,
+            'waitlisted' => false,
         ]);
 
         return [$adventure, $booking, $player];
@@ -139,12 +138,12 @@ class BookingStatusNotificationTest extends TestCase
     public function test_keine_mail_wenn_spieler_keine_email_hat(): void
     {
         Notification::fake();
-        $player    = Player::factory()->create(['email' => null]);
+        $player = Player::factory()->create(['email' => null]);
         $adventure = Adventure::factory()->create(['max_player' => 5]);
-        $booking   = Booking::factory()->create([
+        $booking = Booking::factory()->create([
             'adventure_id' => $adventure->id,
-            'player_id'    => $player->id,
-            'status'       => 'offen',
+            'player_id' => $player->id,
+            'status' => 'offen',
         ]);
 
         $this->actingAs($this->registrar())

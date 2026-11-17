@@ -23,10 +23,10 @@ class ProfileController extends Controller
         $nlSub = NewsletterSubscription::where('email', $user->email)->first();
 
         return view('profile.edit', [
-            'user'                  => $user,
+            'user' => $user,
             'newsletterSubscription' => $nlSub,
-            'nlActive'              => $nlSub !== null && $nlSub->isActive(),
-            'nlPending'             => $nlSub !== null && ! $nlSub->isConfirmed() && $nlSub->unsubscribed_at === null,
+            'nlActive' => $nlSub !== null && $nlSub->isActive(),
+            'nlPending' => $nlSub !== null && ! $nlSub->isConfirmed() && $nlSub->unsubscribed_at === null,
         ]);
     }
 
@@ -86,53 +86,53 @@ class ProfileController extends Controller
         $nlSub = NewsletterSubscription::where('email', $user->email)->first();
 
         $data = [
-            'export_erstellt_am'  => now()->toIso8601String(),
+            'export_erstellt_am' => now()->toIso8601String(),
             'konto' => [
-                'vorname'              => $user->name,
-                'nachname'             => $user->lastname,
-                'email'                => $user->email,
-                'telefon'              => $user->phone,
-                'strasse'              => $user->street,
-                'hausnummer'           => $user->house_number,
-                'plz'                  => $user->zip,
-                'ort'                  => $user->city,
-                'registriert_am'       => $user->created_at?->toIso8601String(),
-                'zuletzt_eingeloggt'   => $user->lastlogin_at?->toIso8601String(),
+                'vorname' => $user->name,
+                'nachname' => $user->lastname,
+                'email' => $user->email,
+                'telefon' => $user->phone,
+                'strasse' => $user->street,
+                'hausnummer' => $user->house_number,
+                'plz' => $user->zip,
+                'ort' => $user->city,
+                'registriert_am' => $user->created_at?->toIso8601String(),
+                'zuletzt_eingeloggt' => $user->lastlogin_at?->toIso8601String(),
                 'newsletter_abonniert' => $nlSub?->isActive() ?? false,
             ],
             'spieler' => $user->players->map(fn ($player) => [
-                'vorname'      => $player->name,
-                'nachname'     => $player->lastname,
+                'vorname' => $player->name,
+                'nachname' => $player->lastname,
                 'geburtsdatum' => $player->dayofbirth?->toDateString(),
-                'geschlecht'   => $player->gender,
-                'strasse'      => $player->address_same_as_guardian ? null : $player->street,
-                'hausnummer'   => $player->address_same_as_guardian ? null : $player->house_number,
-                'plz'          => $player->address_same_as_guardian ? null : $player->zip,
-                'ort'          => $player->address_same_as_guardian ? null : $player->city,
+                'geschlecht' => $player->gender,
+                'strasse' => $player->address_same_as_guardian ? null : $player->street,
+                'hausnummer' => $player->address_same_as_guardian ? null : $player->house_number,
+                'plz' => $player->address_same_as_guardian ? null : $player->zip,
+                'ort' => $player->address_same_as_guardian ? null : $player->city,
                 'matrix_konto' => $player->matrixAccount?->mxid,
-                'helden'       => $player->heroes->map(fn ($hero) => [
+                'helden' => $player->heroes->map(fn ($hero) => [
                     'charaktername' => $hero->character_name,
-                    'klassen'       => $hero->classes->pluck('name'),
-                    'ep_gesamt'     => $hero->ep_total,
-                    'ep_guthaben'   => $hero->ep_balance,
-                    'ep_verlauf'    => $hero->epTransactions->map(fn ($tx) => [
-                        'art'        => $tx->type?->description,
-                        'ep'         => $tx->ep_count,
+                    'klassen' => $hero->classes->pluck('name'),
+                    'ep_gesamt' => $hero->ep_total,
+                    'ep_guthaben' => $hero->ep_balance,
+                    'ep_verlauf' => $hero->epTransactions->map(fn ($tx) => [
+                        'art' => $tx->type?->description,
+                        'ep' => $tx->ep_count,
                         'gutschrift' => (bool) $tx->type?->is_credit,
-                        'datum'      => $tx->transacted_at?->toDateString(),
+                        'datum' => $tx->transacted_at?->toDateString(),
                     ]),
-                    'erstellt_am'   => $hero->created_at?->toIso8601String(),
+                    'erstellt_am' => $hero->created_at?->toIso8601String(),
                 ]),
                 'anmeldungen' => $player->bookings->map(fn ($b) => [
-                    'abenteuer'      => $b->adventure?->name,
-                    'datum'          => $b->adventure?->start_at?->toDateString(),
-                    'rolle'          => $b->role?->description,
-                    'status'         => $b->status,
-                    'warteliste'     => (bool) $b->waitlisted,
-                    'fotoerlaubnis'  => (bool) $b->fotoerlaubnis,
-                    'allergien'      => $b->allergien,
-                    'medikamente'    => $b->medikamente,
-                    'angemeldet_am'  => $b->created_at?->toIso8601String(),
+                    'abenteuer' => $b->adventure?->name,
+                    'datum' => $b->adventure?->start_at?->toDateString(),
+                    'rolle' => $b->role?->description,
+                    'status' => $b->status,
+                    'warteliste' => (bool) $b->waitlisted,
+                    'fotoerlaubnis' => (bool) $b->fotoerlaubnis,
+                    'allergien' => $b->allergien,
+                    'medikamente' => $b->medikamente,
+                    'angemeldet_am' => $b->created_at?->toIso8601String(),
                 ]),
             ]),
         ];
@@ -141,7 +141,7 @@ class ProfileController extends Controller
         $json = json_encode($data, JSON_PRETTY_PRINT | JSON_UNESCAPED_UNICODE);
 
         return response($json, 200, [
-            'Content-Type'        => 'application/json; charset=utf-8',
+            'Content-Type' => 'application/json; charset=utf-8',
             'Content-Disposition' => "attachment; filename=\"{$filename}\"",
         ]);
     }

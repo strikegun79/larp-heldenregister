@@ -49,7 +49,7 @@ class ReportExportTest extends TestCase
             $response->headers->get('content-type')
         );
         $this->assertStringContainsString(
-            'belegung-' . $adventure->id . '-',
+            'belegung-'.$adventure->id.'-',
             $response->headers->get('content-disposition')
         );
     }

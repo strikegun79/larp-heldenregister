@@ -37,7 +37,7 @@ class GroupMemberController extends Controller
     {
         $data = $request->validate([
             'hero_id' => ['required', 'exists:heroes,id'],
-            'role'    => ['nullable', 'string', 'in:Anführer,Mitglied'],
+            'role' => ['nullable', 'string', 'in:Anführer,Mitglied'],
         ]);
 
         if ($group->heroes()->whereKey($data['hero_id'])->exists()) {
@@ -45,7 +45,7 @@ class GroupMemberController extends Controller
         }
 
         $group->heroes()->attach($data['hero_id'], [
-            'role'      => $data['role'] ?? null,
+            'role' => $data['role'] ?? null,
             'joined_at' => now(),
         ]);
 

@@ -27,6 +27,7 @@ class BookingApproved extends Notification implements ShouldQueue
     {
         $channels = $notifiable instanceof User ? ['database'] : [];
         $channels[] = 'mail';
+
         return $channels;
     }
 
@@ -34,20 +35,20 @@ class BookingApproved extends Notification implements ShouldQueue
     {
         $booking = $this->booking->loadMissing(['adventure', 'player', 'role']);
 
-        $fee     = $booking->effectiveFee();
-        $date    = optional($booking->adventure?->start_at)->format('d.m.Y') ?? '—';
-        $player  = $booking->player?->full_name ?? '';
+        $fee = $booking->effectiveFee();
+        $date = optional($booking->adventure?->start_at)->format('d.m.Y') ?? '—';
+        $player = $booking->player?->full_name ?? '';
 
-        $bankData        = null;
+        $bankData = null;
         $verwendungszweck = null;
-        $qrCid           = null;
-        $qrPart          = null;
+        $qrCid = null;
+        $qrPart = null;
 
         if ($fee > 0) {
-            $iban  = Setting::get('bank_iban');
+            $iban = Setting::get('bank_iban');
             $owner = Setting::get('bank_account_owner');
-            $bic   = Setting::get('bank_bic');
-            $bank  = Setting::get('bank_name');
+            $bic = Setting::get('bank_bic');
+            $bank = Setting::get('bank_name');
 
             if ($iban) {
                 $kuerzel = $booking->adventure?->kuerzel;
@@ -58,7 +59,7 @@ class BookingApproved extends Notification implements ShouldQueue
                     $qrPng = BookingReceived::buildEpcQrPng($bic, $owner, $iban, $fee, $verwendungszweck);
                     if ($qrPng) {
                         $qrPart = (new DataPart($qrPng, 'girocode.png', 'image/png'))->asInline();
-                        $qrCid  = 'cid:'.$qrPart->getContentId();
+                        $qrCid = 'cid:'.$qrPart->getContentId();
                     }
                 }
             }
@@ -67,13 +68,13 @@ class BookingApproved extends Notification implements ShouldQueue
         $mail = (new MailMessage)
             ->subject('Anmeldung bestätigt: '.$booking->adventure?->name)
             ->markdown('emails.booking_approved', [
-                'booking'          => $booking,
-                'fee'              => $fee,
-                'date'             => $date,
-                'bankData'         => $bankData,
+                'booking' => $booking,
+                'fee' => $fee,
+                'date' => $date,
+                'bankData' => $bankData,
                 'verwendungszweck' => $verwendungszweck,
-                'qrCid'            => $qrCid,
-                'dashboardUrl'     => route('dashboard'),
+                'qrCid' => $qrCid,
+                'dashboardUrl' => route('dashboard'),
             ]);
 
         if ($qrPart) {
@@ -89,11 +90,12 @@ class BookingApproved extends Notification implements ShouldQueue
     public function toArray(object $notifiable): array
     {
         $booking = $this->booking->loadMissing(['adventure']);
+
         return [
-            'adventure_id'   => $booking->adventure?->id,
+            'adventure_id' => $booking->adventure?->id,
             'adventure_name' => $booking->adventure?->name,
-            'message'        => 'Deine Anmeldung für „'.$booking->adventure?->name.'" wurde bestätigt.',
-            'url'            => route('dashboard'),
+            'message' => 'Deine Anmeldung für „'.$booking->adventure?->name.'" wurde bestätigt.',
+            'url' => route('dashboard'),
         ];
     }
 }

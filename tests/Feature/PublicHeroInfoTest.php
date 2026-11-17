@@ -38,33 +38,33 @@ class PublicHeroInfoTest extends TestCase
     public function test_initialien_wenn_kein_charaktername(): void
     {
         $player = Player::factory()->create(['name' => 'Franziska', 'lastname' => 'Winkler']);
-        $hero   = Hero::factory()->create([
-            'player_id'      => $player->id,
+        $hero = Hero::factory()->create([
+            'player_id' => $player->id,
             'character_name' => 'Platzhalter', // Observer braucht einen Wert
-            'public_code'    => 'INITLS',
+            'public_code' => 'INITLS',
         ]);
         // Direktes DB-Update umgeht Observer und setzt null
         Hero::whereKey($hero->id)->update(['character_name' => null]);
 
         $this->get(route('public.hero', 'INITLS'))
-             ->assertOk()
-             ->assertSee('FW')
-             ->assertSee('noch namenlos');
+            ->assertOk()
+            ->assertSee('FW')
+            ->assertSee('noch namenlos');
     }
 
     public function test_charaktername_hat_vorrang_vor_initialien(): void
     {
         $player = Player::factory()->create(['name' => 'Karl', 'lastname' => 'Bauer']);
         Hero::factory()->create([
-            'player_id'      => $player->id,
+            'player_id' => $player->id,
             'character_name' => 'Thorvald Eisenfaust',
-            'public_code'    => 'THORVD',
+            'public_code' => 'THORVD',
         ]);
 
         $this->get(route('public.hero', 'THORVD'))
-             ->assertOk()
-             ->assertSee('Thorvald Eisenfaust')
-             ->assertDontSee('noch namenlos');
+            ->assertOk()
+            ->assertSee('Thorvald Eisenfaust')
+            ->assertDontSee('noch namenlos');
     }
 
     // ── Erblickungsdatum ────────────────────────────────────────────────────────
@@ -74,9 +74,9 @@ class PublicHeroInfoTest extends TestCase
         $this->hero(['born' => '2019-03-08', 'public_code' => 'BORNDT']);
 
         $this->get(route('public.hero', 'BORNDT'))
-             ->assertOk()
-             ->assertSee('März')
-             ->assertSee('2019');
+            ->assertOk()
+            ->assertSee('März')
+            ->assertSee('2019');
     }
 
     public function test_erblickungsdatum_unbekannt_wenn_leer(): void
@@ -84,8 +84,8 @@ class PublicHeroInfoTest extends TestCase
         $this->hero(['born' => null, 'public_code' => 'NOBORN']);
 
         $this->get(route('public.hero', 'NOBORN'))
-             ->assertOk()
-             ->assertSee('Unbekannt');
+            ->assertOk()
+            ->assertSee('Unbekannt');
     }
 
     // ── Verfügbare EP ───────────────────────────────────────────────────────────
@@ -95,8 +95,8 @@ class PublicHeroInfoTest extends TestCase
         $this->hero(['public_code' => 'EPTEST']);
 
         $this->get(route('public.hero', 'EPTEST'))
-             ->assertOk()
-             ->assertSee('Verfügbare EP');
+            ->assertOk()
+            ->assertSee('Verfügbare EP');
     }
 
     public function test_ep_saldo_wird_berechnet_angezeigt(): void
@@ -105,15 +105,15 @@ class PublicHeroInfoTest extends TestCase
         // Typ 10 = Initiale EP (is_credit = true)
         $type = EpTransactionType::where('id', 10)->first();
         EpTransaction::create([
-            'hero_id'                => $hero->id,
+            'hero_id' => $hero->id,
             'ep_transaction_type_id' => $type->id,
-            'ep_count'               => 30,
-            'transacted_at'          => now(),
+            'ep_count' => 30,
+            'transacted_at' => now(),
         ]);
 
         $this->get(route('public.hero', 'EPSLD'))
-             ->assertOk()
-             ->assertSee('30');
+            ->assertOk()
+            ->assertSee('30');
     }
 
     // ── Leere Felder zeigen ─────────────────────────────────────────────────────
@@ -123,9 +123,9 @@ class PublicHeroInfoTest extends TestCase
         $this->hero(['description' => null, 'public_code' => 'NODESC']);
 
         $this->get(route('public.hero', 'NODESC'))
-             ->assertOk()
-             ->assertSee('Steckbrief')
-             ->assertSee('Noch keine Eintragungen');
+            ->assertOk()
+            ->assertSee('Steckbrief')
+            ->assertSee('Noch keine Eintragungen');
     }
 
     public function test_steckbrief_inhalt_wird_angezeigt(): void
@@ -133,8 +133,8 @@ class PublicHeroInfoTest extends TestCase
         $this->hero(['description' => 'Ein mutiger Waldläufer.', 'public_code' => 'WDESC']);
 
         $this->get(route('public.hero', 'WDESC'))
-             ->assertOk()
-             ->assertSee('Ein mutiger Waldläufer.');
+            ->assertOk()
+            ->assertSee('Ein mutiger Waldläufer.');
     }
 
     public function test_gruppen_abschnitt_immer_sichtbar(): void
@@ -142,9 +142,9 @@ class PublicHeroInfoTest extends TestCase
         $this->hero(['public_code' => 'NOGRP']);
 
         $this->get(route('public.hero', 'NOGRP'))
-             ->assertOk()
-             ->assertSee('Gruppen')
-             ->assertSee('Noch keine Eintragungen');
+            ->assertOk()
+            ->assertSee('Gruppen')
+            ->assertSee('Noch keine Eintragungen');
     }
 
     public function test_baendchen_abschnitt_immer_sichtbar(): void
@@ -152,9 +152,9 @@ class PublicHeroInfoTest extends TestCase
         $this->hero(['public_code' => 'NOPERL']);
 
         $this->get(route('public.hero', 'NOPERL'))
-             ->assertOk()
-             ->assertSee('Bändchen')
-             ->assertSee('Noch keine Eintragungen');
+            ->assertOk()
+            ->assertSee('Bändchen')
+            ->assertSee('Noch keine Eintragungen');
     }
 
     // ── Fertigkeitsbäume ────────────────────────────────────────────────────────
@@ -164,70 +164,70 @@ class PublicHeroInfoTest extends TestCase
         $this->hero(['public_code' => 'NOSKLL']);
 
         $this->get(route('public.hero', 'NOSKLL'))
-             ->assertOk()
-             ->assertSee('Fertigkeiten')
-             ->assertSee('Noch keine Eintragungen');
+            ->assertOk()
+            ->assertSee('Fertigkeiten')
+            ->assertSee('Noch keine Eintragungen');
     }
 
     public function test_fertigkeiten_nach_klasse_gruppiert(): void
     {
         $player = Player::factory()->create();
-        $hero   = Hero::factory()->create(['player_id' => $player->id, 'public_code' => 'SKLTST']);
+        $hero = Hero::factory()->create(['player_id' => $player->id, 'public_code' => 'SKLTST']);
 
         $skill = Skill::create([
-            'name'          => 'Spurenlesen',
+            'name' => 'Spurenlesen',
             'hero_class_id' => $this->class->id,
-            'level'         => 1,
-            'ep_costs'      => 5,
+            'level' => 1,
+            'ep_costs' => 5,
         ]);
         $this->class->skills()->syncWithoutDetaching([$skill->id]);
         $hero->classes()->attach($this->class);
         $hero->skills()->attach($skill);
 
         $this->get(route('public.hero', 'SKLTST'))
-             ->assertOk()
-             ->assertSee('Waldläufer')
-             ->assertSee('Spurenlesen')
-             ->assertSee('gelernt');
+            ->assertOk()
+            ->assertSee('Waldläufer')
+            ->assertSee('Spurenlesen')
+            ->assertSee('gelernt');
     }
 
     public function test_nicht_erlernte_fertigkeiten_werden_angezeigt(): void
     {
         $player = Player::factory()->create();
-        $hero   = Hero::factory()->create(['player_id' => $player->id, 'public_code' => 'GREYSK']);
+        $hero = Hero::factory()->create(['player_id' => $player->id, 'public_code' => 'GREYSK']);
 
         $learned = Skill::create(['name' => 'Schwertkunst',  'hero_class_id' => $this->class->id, 'level' => 1, 'ep_costs' => 5]);
-        $locked  = Skill::create(['name' => 'Meisterklinge', 'hero_class_id' => $this->class->id, 'level' => 2, 'ep_costs' => 10]);
+        $locked = Skill::create(['name' => 'Meisterklinge', 'hero_class_id' => $this->class->id, 'level' => 2, 'ep_costs' => 10]);
         $this->class->skills()->syncWithoutDetaching([$learned->id, $locked->id]);
         $hero->classes()->attach($this->class);
         $hero->skills()->attach($learned);
 
         $this->get(route('public.hero', 'GREYSK'))
-             ->assertOk()
-             ->assertSee('Schwertkunst')
-             ->assertSee('Meisterklinge')
-             ->assertSee('gelernt');
+            ->assertOk()
+            ->assertSee('Schwertkunst')
+            ->assertSee('Meisterklinge')
+            ->assertSee('gelernt');
     }
 
     public function test_perlenfarbe_im_baum_sichtbar(): void
     {
         $player = Player::factory()->create();
-        $hero   = Hero::factory()->create(['player_id' => $player->id, 'public_code' => 'PRLCLR']);
+        $hero = Hero::factory()->create(['player_id' => $player->id, 'public_code' => 'PRLCLR']);
 
         $color = PerlColor::create(['code' => '#0055aa', 'name' => 'Blau']);
         $skill = Skill::create([
-            'name'          => 'Feuerball',
+            'name' => 'Feuerball',
             'hero_class_id' => $this->class->id,
             'perl_color_id' => $color->id,
-            'level'         => 1,
-            'ep_costs'      => 8,
+            'level' => 1,
+            'ep_costs' => 8,
         ]);
         $this->class->skills()->syncWithoutDetaching([$skill->id]);
         $hero->classes()->attach($this->class);
         $hero->skills()->attach($skill);
 
         $this->get(route('public.hero', 'PRLCLR'))
-             ->assertOk()
-             ->assertSee('#0055aa', false);
+            ->assertOk()
+            ->assertSee('#0055aa', false);
     }
 }

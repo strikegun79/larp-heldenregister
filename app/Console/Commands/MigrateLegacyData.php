@@ -256,7 +256,7 @@ class MigrateLegacyData extends Command
 
             // class_id kann Slug ('warrior') oder numerische Legacy-ID sein.
             if (is_numeric($row->class_id)) {
-                $slug    = $legacyIdToSlug[$row->class_id] ?? null;
+                $slug = $legacyIdToSlug[$row->class_id] ?? null;
                 $classId = $slug ? ($classBySlug[$slug] ?? null) : null;
             } else {
                 $classId = $classBySlug[$row->class_id] ?? null;
@@ -265,6 +265,7 @@ class MigrateLegacyData extends Command
             if ($classId === null) {
                 $this->warn("hero2classes: class_id='{$row->class_id}' für hero_id={$row->hero_id} nicht auflösbar – übersprungen.");
                 $skipped++;
+
                 continue;
             }
 

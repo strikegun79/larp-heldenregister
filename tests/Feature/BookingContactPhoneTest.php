@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Adventure;
 use App\Models\Booking;
 use App\Models\EventRole;
+use App\Models\EventStatus;
 use App\Models\Player;
 use App\Models\User;
 use Database\Seeders\EventLookupSeeder;
@@ -37,7 +38,7 @@ class BookingContactPhoneTest extends TestCase
     private function openAdventure(): Adventure
     {
         return Adventure::factory()->create([
-            'event_status_id' => \App\Models\EventStatus::REGISTRATION_OPEN,
+            'event_status_id' => EventStatus::REGISTRATION_OPEN,
             'max_player' => 30,
         ]);
     }

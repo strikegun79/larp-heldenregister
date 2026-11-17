@@ -14,7 +14,7 @@ class MotdLinkClick extends Model
     protected $fillable = ['motd_id', 'url', 'url_hash', 'clicks', 'last_clicked_at'];
 
     protected $casts = [
-        'clicks'          => 'integer',
+        'clicks' => 'integer',
         'last_clicked_at' => 'datetime',
     ];
 

@@ -23,7 +23,7 @@ class EventRole extends Model
 
     protected $casts = [
         'for_participant' => 'boolean',
-        'for_teamer'      => 'boolean',
+        'for_teamer' => 'boolean',
     ];
 
     public function scopeForParticipant(Builder $query): Builder

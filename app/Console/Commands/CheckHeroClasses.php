@@ -22,7 +22,7 @@ class CheckHeroClasses extends Command
         $this->line(str_repeat('─', 60));
 
         // Lookup-Maps aufbauen
-        $classBySlug     = DB::table('hero_classes')->pluck('id', 'slug');     // slug → laravel id
+        $classBySlug = DB::table('hero_classes')->pluck('id', 'slug');     // slug → laravel id
         $classByLegacyId = DB::connection('legacy')
             ->table('type_classes')
             ->pluck('idname', 'id');                                           // legacy numeric id → slug
@@ -33,9 +33,9 @@ class CheckHeroClasses extends Command
         $rows = DB::connection('legacy')->table('hero2classes')->get();
         $total = $rows->count();
 
-        $okSlug    = [];
+        $okSlug = [];
         $okNumeric = [];
-        $missing   = [];   // hero_id nicht im Mapping
+        $missing = [];   // hero_id nicht im Mapping
         $unresolvable = []; // class_id weder slug noch numeric
 
         foreach ($rows as $row) {
@@ -111,7 +111,7 @@ class CheckHeroClasses extends Command
         }
 
         $this->newLine();
-        $this->warn(count($unresolvable) . ' Einträge konnten nicht aufgelöst werden. Vor Go-Live bereinigen!');
+        $this->warn(count($unresolvable).' Einträge konnten nicht aufgelöst werden. Vor Go-Live bereinigen!');
 
         return Command::FAILURE;
     }
@@ -122,6 +122,6 @@ class CheckHeroClasses extends Command
             return '—';
         }
 
-        return round($count / $total * 100, 1) . '%';
+        return round($count / $total * 100, 1).'%';
     }
 }
