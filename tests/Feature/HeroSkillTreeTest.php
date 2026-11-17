@@ -27,6 +27,7 @@ class HeroSkillTreeTest extends TestCase
     {
         $user = User::factory()->create();
         $user->roles()->attach(10); // Admin
+
         return $user;
     }
 
@@ -36,13 +37,13 @@ class HeroSkillTreeTest extends TestCase
         $class = HeroClass::create(['id' => 999, 'name' => 'Testklasse', 'slug' => 'test-999', 'ep_cost' => 0]);
         $skill = Skill::create(['name' => 'Feuerball', 'ep_costs' => 5, 'level' => 1, 'perl_count' => 0]);
         $class->skills()->attach($skill->id);
-        $hero  = Hero::factory()->create();
+        $hero = Hero::factory()->create();
         $hero->classes()->attach($class->id);
 
         $this->actingAs($admin)
-             ->get(route('heroes.show', $hero))
-             ->assertOk()
-             ->assertSee('Feuerball');
+            ->get(route('heroes.show', $hero))
+            ->assertOk()
+            ->assertSee('Feuerball');
     }
 
     public function test_gelernte_fertigkeit_ist_als_gelernt_markiert(): void
@@ -51,23 +52,23 @@ class HeroSkillTreeTest extends TestCase
         $class = HeroClass::create(['id' => 998, 'name' => 'Testklasse2', 'slug' => 'test-998', 'ep_cost' => 0]);
         $skill = Skill::create(['name' => 'Heilung', 'ep_costs' => 3, 'level' => 1, 'perl_count' => 0]);
         $class->skills()->attach($skill->id);
-        $hero  = Hero::factory()->create();
+        $hero = Hero::factory()->create();
         $hero->classes()->attach($class->id);
         $hero->skills()->attach($skill->id);
 
         // In der Baum-Ansicht (existierend) erscheint das ✓-Zeichen in der skill-list.
         $this->actingAs($admin)
-             ->get(route('heroes.show', $hero))
-             ->assertOk()
-             ->assertSee('data-skill-learned="1"', false);
+            ->get(route('heroes.show', $hero))
+            ->assertOk()
+            ->assertSee('data-skill-learned="1"', false);
     }
 
     public function test_gesperrte_fertigkeit_hat_locked_attribute(): void
     {
-        $admin      = $this->admin();
-        $class      = HeroClass::create(['id' => 997, 'name' => 'Testklasse3', 'slug' => 'test-997', 'ep_cost' => 0]);
-        $prereq     = Skill::create(['name' => 'Voraussetzung', 'ep_costs' => 2, 'level' => 1, 'perl_count' => 0]);
-        $dependent  = Skill::create(['name' => 'Gesperrter Skill', 'ep_costs' => 5, 'level' => 2, 'perl_count' => 0]);
+        $admin = $this->admin();
+        $class = HeroClass::create(['id' => 997, 'name' => 'Testklasse3', 'slug' => 'test-997', 'ep_cost' => 0]);
+        $prereq = Skill::create(['name' => 'Voraussetzung', 'ep_costs' => 2, 'level' => 1, 'perl_count' => 0]);
+        $dependent = Skill::create(['name' => 'Gesperrter Skill', 'ep_costs' => 5, 'level' => 2, 'perl_count' => 0]);
         $dependent->prerequisites()->attach($prereq->id);
         $class->skills()->attach([$prereq->id, $dependent->id]);
         $hero = Hero::factory()->create();
@@ -75,9 +76,9 @@ class HeroSkillTreeTest extends TestCase
         // Prereq NICHT gelernt → dependent muss gesperrt sein
 
         $this->actingAs($admin)
-             ->get(route('heroes.show', $hero))
-             ->assertOk()
-             ->assertSee('data-skill-locked="1"', false);
+            ->get(route('heroes.show', $hero))
+            ->assertOk()
+            ->assertSee('data-skill-locked="1"', false);
     }
 
     public function test_skill_mit_perlfarbe_zeigt_farbcode(): void
@@ -87,18 +88,18 @@ class HeroSkillTreeTest extends TestCase
         $class = HeroClass::create(['id' => 996, 'name' => 'Testklasse4', 'slug' => 'test-996', 'ep_cost' => 0]);
         $skill = Skill::create(['name' => 'Rubinzauber', 'ep_costs' => 4, 'level' => 1, 'perl_count' => 1, 'perl_color_id' => $color->id]);
         $class->skills()->attach($skill->id);
-        $hero  = Hero::factory()->create();
+        $hero = Hero::factory()->create();
         $hero->classes()->attach($class->id);
 
         $this->actingAs($admin)
-             ->get(route('heroes.show', $hero))
-             ->assertOk()
-             ->assertSee('#cc0000', false);
+            ->get(route('heroes.show', $hero))
+            ->assertOk()
+            ->assertSee('#cc0000', false);
     }
 
     public function test_skill_columns_partial_gruppiert_nach_level(): void
     {
-        $class  = HeroClass::create(['id' => 995, 'name' => 'Testklasse5', 'slug' => 'test-995', 'ep_cost' => 0]);
+        $class = HeroClass::create(['id' => 995, 'name' => 'Testklasse5', 'slug' => 'test-995', 'ep_cost' => 0]);
         $skill1 = Skill::create(['name' => 'Skill Stufe 1', 'ep_costs' => 2, 'level' => 1, 'perl_count' => 0]);
         $skill2 = Skill::create(['name' => 'Skill Stufe 2', 'ep_costs' => 4, 'level' => 2, 'perl_count' => 0]);
         $class->skills()->attach([$skill1->id, $skill2->id]);
@@ -123,13 +124,13 @@ class HeroSkillTreeTest extends TestCase
         $class = HeroClass::create(['id' => 994, 'name' => 'Testklasse6', 'slug' => 'test-994', 'ep_cost' => 0]);
         $skill = Skill::create(['name' => 'Testskill', 'ep_costs' => 1, 'level' => 1, 'perl_count' => 0]);
         $class->skills()->attach($skill->id);
-        $hero  = Hero::factory()->create();
+        $hero = Hero::factory()->create();
         $hero->classes()->attach($class->id);
 
         $this->actingAs($admin)
-             ->get(route('heroes.show', $hero))
-             ->assertOk()
-             ->assertSee('Stufen')
-             ->assertSee('Baum');
+            ->get(route('heroes.show', $hero))
+            ->assertOk()
+            ->assertSee('Stufen')
+            ->assertSee('Baum');
     }
 }

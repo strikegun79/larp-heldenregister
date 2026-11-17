@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Storage;
 
@@ -137,7 +138,7 @@ class Player extends Model
     /**
      * Das Matrix-Konto dieses Spielers (Legacy: matrix_account.player_id).
      */
-    public function matrixAccount(): \Illuminate\Database\Eloquent\Relations\HasOne
+    public function matrixAccount(): HasOne
     {
         return $this->hasOne(MatrixAccount::class);
     }
@@ -154,18 +155,18 @@ class Player extends Model
         }
 
         $this->forceFill([
-            'name'                  => 'Gelöscht',
-            'lastname'              => null,
-            'email'                 => null,
-            'dayofbirth'            => null,
-            'gender'                => null,
-            'image'                 => null,
-            'street'                => null,
-            'house_number'          => null,
-            'zip'                   => null,
-            'city'                  => null,
-            'allergien'             => null,
-            'medikamente'           => null,
+            'name' => 'Gelöscht',
+            'lastname' => null,
+            'email' => null,
+            'dayofbirth' => null,
+            'gender' => null,
+            'image' => null,
+            'street' => null,
+            'house_number' => null,
+            'zip' => null,
+            'city' => null,
+            'allergien' => null,
+            'medikamente' => null,
             'address_same_as_guardian' => false,
         ])->save();
 
@@ -180,9 +181,9 @@ class Player extends Model
     public function deriveMatrixId(): string
     {
         $domain = config('matrix.domain');
-        $local  = self::sanitizeMxidLocalpart($this->name)
-                . '.'
-                . self::sanitizeMxidLocalpart($this->lastname);
+        $local = self::sanitizeMxidLocalpart($this->name)
+                .'.'
+                .self::sanitizeMxidLocalpart($this->lastname);
 
         return '@'.$local.':'.$domain;
     }
@@ -195,16 +196,16 @@ class Player extends Model
     public function uniqueMatrixId(): string
     {
         $domain = config('matrix.domain');
-        $base   = self::sanitizeMxidLocalpart($this->name)
-                . '.'
-                . self::sanitizeMxidLocalpart($this->lastname);
+        $base = self::sanitizeMxidLocalpart($this->name)
+                .'.'
+                .self::sanitizeMxidLocalpart($this->lastname);
 
         $candidate = '@'.$base.':'.$domain;
         $i = 2;
 
         while (MatrixAccount::where('mxid', $candidate)
-                ->where('player_id', '!=', $this->id)
-                ->exists()) {
+            ->where('player_id', '!=', $this->id)
+            ->exists()) {
             $candidate = '@'.$base.$i.':'.$domain;
             $i++;
         }

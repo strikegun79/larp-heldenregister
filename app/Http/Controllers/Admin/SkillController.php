@@ -111,7 +111,7 @@ class SkillController extends Controller
     /**
      * SKILL-09: Modal-Inhalt – aktive Helden, die diese Fertigkeit erworben haben.
      */
-    public function heroes(Skill $skill): \Illuminate\View\View
+    public function heroes(Skill $skill): View
     {
         $heroes = $skill->heroes()
             ->with('player', 'classes')
@@ -144,11 +144,11 @@ class SkillController extends Controller
         }
 
         return [
-            'skill'                       => $skill,
-            'heroClasses'                 => HeroClass::where('disabled', false)->orderBy('name')->get(),
-            'perlColors'                  => PerlColor::orderBy('name')->get(),
-            'assigned'                    => $skill->exists ? $skill->classes->pluck('id')->all() : [],
-            'allSkills'                   => $allSkills,
+            'skill' => $skill,
+            'heroClasses' => HeroClass::where('disabled', false)->orderBy('name')->get(),
+            'perlColors' => PerlColor::orderBy('name')->get(),
+            'assigned' => $skill->exists ? $skill->classes->pluck('id')->all() : [],
+            'allSkills' => $allSkills,
             'assignedPrerequisitesByClass' => $assignedPrerequisitesByClass,
         ];
     }
@@ -164,8 +164,8 @@ class SkillController extends Controller
         foreach ($request->input('prereqs', []) as $classId => $skillIds) {
             foreach (array_filter(array_map('intval', (array) $skillIds)) as $reqId) {
                 DB::table('skill_class_prerequisites')->insertOrIgnore([
-                    'skill_id'          => $skill->id,
-                    'hero_class_id'     => (int) $classId,
+                    'skill_id' => $skill->id,
+                    'hero_class_id' => (int) $classId,
                     'required_skill_id' => $reqId,
                 ]);
             }
@@ -179,7 +179,7 @@ class SkillController extends Controller
     private function hasCycle(int $skillId, array $prerequisiteIds): bool
     {
         $visited = [];
-        $queue   = array_values(array_unique($prerequisiteIds));
+        $queue = array_values(array_unique($prerequisiteIds));
 
         while ($current = array_shift($queue)) {
             if ($current === $skillId) {

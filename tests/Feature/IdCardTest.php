@@ -25,6 +25,7 @@ class IdCardTest extends TestCase
     {
         $user = User::factory()->create();
         $user->roles()->attach(10); // Admin
+
         return $user;
     }
 
@@ -32,6 +33,7 @@ class IdCardTest extends TestCase
     {
         $user = User::factory()->create();
         $user->roles()->attach(20); // Bürokrat / registrar
+
         return $user;
     }
 
@@ -39,12 +41,14 @@ class IdCardTest extends TestCase
     {
         $user = User::factory()->create();
         $user->roles()->attach(70); // Teilnehmer
+
         return $user;
     }
 
     private function heroWithCode(string $code = 'ABCDEF'): Hero
     {
         $player = Player::factory()->create();
+
         return Hero::factory()->create(['player_id' => $player->id, 'public_code' => $code]);
     }
 
@@ -54,6 +58,7 @@ class IdCardTest extends TestCase
         $hero = Hero::factory()->create(['player_id' => $player->id]);
         // creating-Hook generiert immer einen Code; direkt per Query nullen.
         Hero::whereKey($hero->id)->update(['public_code' => null]);
+
         return $hero->fresh();
     }
 
@@ -141,7 +146,7 @@ class IdCardTest extends TestCase
             ->patch(route('heroes.assign-code', $hero), ['code' => 'HJKMNP']);
 
         $this->assertDatabaseHas('id_card_codes', [
-            'code'    => 'HJKMNP',
+            'code' => 'HJKMNP',
             'hero_id' => $hero->id,
         ]);
         $entry = IdCardCode::where('code', 'HJKMNP')->first();
@@ -282,7 +287,7 @@ class IdCardTest extends TestCase
     public function test_destroy_verweigert_zugewiesenes_siegel(): void
     {
         $admin = $this->adminUser();
-        $hero  = $this->heroWithCode('NODLT3');
+        $hero = $this->heroWithCode('NODLT3');
         IdCardCode::create(['code' => 'NODLT3', 'hero_id' => $hero->id, 'created_by' => $admin->id]);
 
         $this->actingAs($admin)

@@ -73,15 +73,15 @@ class HeroPublicCodeTest extends TestCase
     public function test_code_erscheint_in_helden_detailansicht(): void
     {
         $player = Player::factory()->create();
-        $user   = User::factory()->create();
+        $user = User::factory()->create();
         $user->roles()->attach(10); // Admin
-        $hero   = Hero::factory()->create(['player_id' => $player->id]);
+        $hero = Hero::factory()->create(['player_id' => $player->id]);
 
         $response = $this->actingAs($user)
             ->get(route('heroes.show', $hero));
 
         $response->assertOk()
-                 ->assertSee($hero->public_code);
+            ->assertSee($hero->public_code);
     }
 
     public function test_backfill_command_setzt_codes_fuer_bestehende_helden(): void

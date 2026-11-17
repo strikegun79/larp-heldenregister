@@ -27,7 +27,7 @@ class MatrixRoomController extends Controller
     public function create(): View
     {
         return view('admin.matrix.rooms._form', [
-            'room'   => new MatrixManagedRoom(),
+            'room' => new MatrixManagedRoom,
             'action' => route('admin.matrix.rooms.store'),
             'method' => 'POST',
         ]);
@@ -36,11 +36,11 @@ class MatrixRoomController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $data = $request->validate([
-            'roomid'        => ['required', 'string', 'max:120', 'unique:matrix_managed_rooms,roomid'],
-            'roomname'      => ['required', 'string', 'max:50'],
-            'roomtype'      => ['required', 'in:Raum,Space'],
+            'roomid' => ['required', 'string', 'max:120', 'unique:matrix_managed_rooms,roomid'],
+            'roomname' => ['required', 'string', 'max:50'],
+            'roomtype' => ['required', 'in:Raum,Space'],
             'default_allow' => ['boolean'],
-            'default_deny'  => ['boolean'],
+            'default_deny' => ['boolean'],
         ]);
 
         MatrixManagedRoom::create($data);
@@ -52,7 +52,7 @@ class MatrixRoomController extends Controller
     public function edit(MatrixManagedRoom $room): View
     {
         return view('admin.matrix.rooms._form', [
-            'room'   => $room,
+            'room' => $room,
             'action' => route('admin.matrix.rooms.update', $room),
             'method' => 'PUT',
         ]);
@@ -61,10 +61,10 @@ class MatrixRoomController extends Controller
     public function update(Request $request, MatrixManagedRoom $room): RedirectResponse
     {
         $data = $request->validate([
-            'roomname'      => ['required', 'string', 'max:50'],
-            'roomtype'      => ['required', 'in:Raum,Space'],
+            'roomname' => ['required', 'string', 'max:50'],
+            'roomtype' => ['required', 'in:Raum,Space'],
             'default_allow' => ['boolean'],
-            'default_deny'  => ['boolean'],
+            'default_deny' => ['boolean'],
         ]);
 
         $room->update($data);

@@ -35,22 +35,22 @@ class BookingReceived extends Notification implements ShouldQueue
     {
         $booking = $this->booking->loadMissing(['adventure', 'player', 'role']);
 
-        $fee             = $booking->effectiveFee();
-        $bankData        = null;
+        $fee = $booking->effectiveFee();
+        $bankData = null;
         $verwendungszweck = null;
-        $qrCid           = null;
-        $qrPart          = null;
+        $qrCid = null;
+        $qrPart = null;
 
         if ($fee > 0) {
-            $iban  = Setting::get('bank_iban');
+            $iban = Setting::get('bank_iban');
             $owner = Setting::get('bank_account_owner');
-            $bic   = Setting::get('bank_bic');
-            $bank  = Setting::get('bank_name');
+            $bic = Setting::get('bank_bic');
+            $bank = Setting::get('bank_name');
 
             if ($iban) {
                 $kuerzel = $booking->adventure?->kuerzel;
-                $date    = optional($booking->adventure?->start_at)->format('d.m.Y') ?? '—';
-                $player  = $booking->player?->full_name ?? '';
+                $date = optional($booking->adventure?->start_at)->format('d.m.Y') ?? '—';
+                $player = $booking->player?->full_name ?? '';
                 $verwendungszweck = trim(($kuerzel ? $kuerzel.' ' : '').$date.' '.$player);
 
                 $bankData = compact('iban', 'owner', 'bic', 'bank');
@@ -60,7 +60,7 @@ class BookingReceived extends Notification implements ShouldQueue
                     if ($qrPng) {
                         // CID vor dem Template-Render bestimmen; Part via withSymfonyMessage anhängen.
                         $qrPart = (new DataPart($qrPng, 'girocode.png', 'image/png'))->asInline();
-                        $qrCid  = 'cid:'.$qrPart->getContentId();
+                        $qrCid = 'cid:'.$qrPart->getContentId();
                     }
                 }
             }
@@ -69,12 +69,12 @@ class BookingReceived extends Notification implements ShouldQueue
         $mail = (new MailMessage)
             ->subject('Anmeldung eingegangen: '.$booking->adventure?->name)
             ->markdown('emails.booking_received', [
-                'booking'          => $booking,
-                'fee'              => $fee,
-                'bankData'         => $bankData,
+                'booking' => $booking,
+                'fee' => $fee,
+                'bankData' => $bankData,
                 'verwendungszweck' => $verwendungszweck,
-                'qrCid'            => $qrCid,
-                'dashboardUrl'     => route('dashboard'),
+                'qrCid' => $qrCid,
+                'dashboardUrl' => route('dashboard'),
             ]);
 
         if ($qrPart) {
@@ -94,7 +94,7 @@ class BookingReceived extends Notification implements ShouldQueue
         string $bic,
         string $owner,
         string $iban,
-        float  $amount,
+        float $amount,
         string $verwendungszweck,
     ): ?string {
         $epcContent = implode("\n", [
@@ -119,7 +119,8 @@ class BookingReceived extends Notification implements ShouldQueue
                 size: 220,
                 margin: 6,
             );
-            return (new PngWriter())->write($qrCode)->getString();
+
+            return (new PngWriter)->write($qrCode)->getString();
         } catch (\Throwable) {
             return null;
         }
@@ -130,10 +131,11 @@ class BookingReceived extends Notification implements ShouldQueue
         string $bic,
         string $owner,
         string $iban,
-        float  $amount,
+        float $amount,
         string $verwendungszweck,
     ): ?string {
         $png = self::buildEpcQrPng($bic, $owner, $iban, $amount, $verwendungszweck);
+
         return $png ? 'data:image/png;base64,'.base64_encode($png) : null;
     }
 }

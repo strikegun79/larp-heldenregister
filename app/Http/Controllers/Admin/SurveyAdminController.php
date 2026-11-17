@@ -6,13 +6,10 @@ use App\Http\Controllers\Controller;
 use App\Mail\SurveyInvitationMail;
 use App\Models\Adventure;
 use App\Models\Booking;
-use App\Models\EventRole;
+use App\Models\Survey;
 use App\Models\SurveyAnswer;
 use App\Models\SurveyLink;
-use App\Models\SurveyResponse;
 use App\Models\SurveyTemplate;
-use App\Models\SurveyTemplateQuestion;
-use App\Models\Survey;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -54,7 +51,7 @@ class SurveyAdminController extends Controller
         $this->authorize('survey.admin');
 
         $adventures = Adventure::orderByDesc('start_at')->get();
-        $templates  = SurveyTemplate::where('active', true)->orderBy('name')->get();
+        $templates = SurveyTemplate::where('active', true)->orderBy('name')->get();
 
         return view('admin.surveys.create', compact('adventures', 'templates'));
     }
@@ -65,15 +62,15 @@ class SurveyAdminController extends Controller
         $this->authorize('survey.admin');
 
         $data = $request->validate([
-            'adventure_id'       => ['required', 'exists:adventures,id'],
+            'adventure_id' => ['required', 'exists:adventures,id'],
             'survey_template_id' => ['required', 'exists:survey_templates,id'],
-            'title'              => ['required', 'string', 'max:255'],
-            'closes_at'          => ['nullable', 'date', 'after:today'],
+            'title' => ['required', 'string', 'max:255'],
+            'closes_at' => ['nullable', 'date', 'after:today'],
         ]);
 
         Survey::create([
             ...$data,
-            'status'     => 'draft',
+            'status' => 'draft',
             'created_by' => auth()->id(),
         ]);
 
@@ -102,7 +99,7 @@ class SurveyAdminController extends Controller
             ->get();
 
         $imported = 0;
-        $skipped  = 0;
+        $skipped = 0;
 
         // Bereits vorhandene E-Mails für diese Umfrage laden
         $existingEmails = $survey->links()->pluck('email')->map('strtolower')->toArray();
@@ -121,17 +118,18 @@ class SurveyAdminController extends Controller
 
             if (in_array(strtolower($email), $existingEmails, true)) {
                 $skipped++;
+
                 continue;
             }
 
             // target_type am Link ist immer der aufgelöste Typ (Wizard-Entscheidung läuft pro Link)
             SurveyLink::create([
-                'survey_id'   => $survey->id,
+                'survey_id' => $survey->id,
                 'target_type' => $resolvedType,
-                'player_id'   => $booking->player_id,
-                'name'        => $name,
-                'email'       => $email,
-                'expires_at'  => $survey->closes_at,
+                'player_id' => $booking->player_id,
+                'name' => $name,
+                'email' => $email,
+                'expires_at' => $survey->closes_at,
             ]);
 
             $existingEmails[] = strtolower($email);
@@ -198,23 +196,23 @@ class SurveyAdminController extends Controller
         }
 
         $data = $request->validate([
-            'recipients'                  => ['required', 'array', 'min:1'],
-            'recipients.*.name'           => ['required', 'string', 'max:255'],
-            'recipients.*.email'          => ['required', 'email'],
-            'recipients.*.target_type'    => ['required', 'in:participant_child,participant_teen,teamer,parent'],
-            'recipients.*.player_id'      => ['nullable', 'exists:players,id'],
+            'recipients' => ['required', 'array', 'min:1'],
+            'recipients.*.name' => ['required', 'string', 'max:255'],
+            'recipients.*.email' => ['required', 'email'],
+            'recipients.*.target_type' => ['required', 'in:participant_child,participant_teen,teamer,parent'],
+            'recipients.*.player_id' => ['nullable', 'exists:players,id'],
         ]);
 
         $sent = 0;
         foreach ($data['recipients'] as $recipient) {
             $link = SurveyLink::create([
-                'survey_id'   => $survey->id,
+                'survey_id' => $survey->id,
                 'target_type' => $recipient['target_type'],
-                'player_id'   => $recipient['player_id'] ?? null,
-                'name'        => $recipient['name'],
-                'email'       => $recipient['email'],
-                'expires_at'  => $survey->closes_at,
-                'sent_at'     => now(),
+                'player_id' => $recipient['player_id'] ?? null,
+                'name' => $recipient['name'],
+                'email' => $recipient['email'],
+                'expires_at' => $survey->closes_at,
+                'sent_at' => now(),
             ]);
 
             Mail::to($recipient['email'])->queue(new SurveyInvitationMail($link));
@@ -234,7 +232,7 @@ class SurveyAdminController extends Controller
         $survey->load(['template.questions', 'adventure']);
 
         $questions = $survey->template->questions;
-        $stats     = [];
+        $stats = [];
 
         foreach ($questions as $question) {
             $answers = SurveyAnswer::where('survey_template_question_id', $question->id)
@@ -244,20 +242,20 @@ class SurveyAdminController extends Controller
             $stat = ['question' => $question, 'count' => $answers->count()];
 
             if ($question->type === 'rating') {
-                $stat['average']      = $answers->avg('rating_answer');
+                $stat['average'] = $answers->avg('rating_answer');
                 $stat['distribution'] = $answers->groupBy('rating_answer')->map->count()->sortKeys();
             } elseif ($question->type === 'text') {
                 $stat['texts'] = $answers->pluck('text_answer')->filter()->values();
             } elseif ($question->type === 'yes_no') {
                 $stat['yes_count'] = $answers->where('yes_no_answer', true)->count();
-                $stat['no_count']  = $answers->where('yes_no_answer', false)->count();
+                $stat['no_count'] = $answers->where('yes_no_answer', false)->count();
             }
 
             $stats[] = $stat;
         }
 
         $completedCount = $survey->completedCount();
-        $totalCount     = $survey->totalCount();
+        $totalCount = $survey->totalCount();
 
         // Einladungsliste mit Response-Status
         $links = $survey->links()
@@ -297,7 +295,7 @@ class SurveyAdminController extends Controller
             ->setPaper('a4', 'portrait')
             ->setOption('defaultFont', 'DejaVu Sans');
 
-        $filename = 'umfrage-' . str($survey->title)->slug() . '-' . now()->format('Y-m-d') . '.pdf';
+        $filename = 'umfrage-'.str($survey->title)->slug().'-'.now()->format('Y-m-d').'.pdf';
 
         return $pdf->download($filename);
     }
@@ -321,26 +319,26 @@ class SurveyAdminController extends Controller
     private function resolveRecipient(Booking $booking, string $targetGroup): array
     {
         $isTeamer = $booking->role?->for_teamer ?? false;
-        $age      = $booking->participant_age;   // getParticipantAgeAttribute()
+        $age = $booking->participant_age;   // getParticipantAgeAttribute()
 
         $resolvedType = match (true) {
-            $isTeamer                  => 'teamer',
-            $age !== null && $age < 13  => 'participant_child',
+            $isTeamer => 'teamer',
+            $age !== null && $age < 13 => 'participant_child',
             $age !== null && $age <= 17 => 'participant_teen',
-            $age === null               => $targetGroup, // Kein Geburtsdatum → Typ aus Vorlage übernehmen
-            default                    => 'teamer',      // 18+ Spieler ohne Teamer-Rolle → Erwachsenen-Form (Scroll)
+            $age === null => $targetGroup, // Kein Geburtsdatum → Typ aus Vorlage übernehmen
+            default => 'teamer',      // 18+ Spieler ohne Teamer-Rolle → Erwachsenen-Form (Scroll)
         };
 
         // participant_name (getParticipantNameAttribute()), kann '—' zurückgeben
         $rawName = $booking->participant_name;
-        $name    = filled($rawName) && $rawName !== '—' ? $rawName : null;
+        $name = filled($rawName) && $rawName !== '—' ? $rawName : null;
 
         $email = null;
 
         if ($targetGroup === 'parent') {
             $guardian = $booking->guardian();
-            $email    = $guardian?->email;
-            $name     = filled($guardian?->name) ? $guardian->name : ($name . ' (Erziehungsberechtigte/r)');
+            $email = $guardian?->email;
+            $name = filled($guardian?->name) ? $guardian->name : ($name.' (Erziehungsberechtigte/r)');
             $resolvedType = 'parent';
         } else {
             // filled() statt ??, damit leere Strings '' nicht als gültig gelten

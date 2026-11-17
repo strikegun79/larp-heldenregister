@@ -35,7 +35,7 @@ class SkillIconTest extends TestCase
     public function test_registrar_kann_symbol_hochladen(): void
     {
         $skill = Skill::factory()->create(['icon' => null]);
-        $file  = UploadedFile::fake()->image('symbol.png', 200, 200);
+        $file = UploadedFile::fake()->image('symbol.png', 200, 200);
 
         $response = $this->actingAs($this->admin())
             ->postJson(route('admin.skills.icon.store', $skill), ['icon' => $file]);
@@ -52,7 +52,7 @@ class SkillIconTest extends TestCase
     {
         Storage::disk('public')->put('skills/icons/old.jpg', 'dummy');
         $skill = Skill::factory()->create(['icon' => 'skills/icons/old.jpg']);
-        $file  = UploadedFile::fake()->image('neu.jpg', 100, 100);
+        $file = UploadedFile::fake()->image('neu.jpg', 100, 100);
 
         $this->actingAs($this->admin())
             ->postJson(route('admin.skills.icon.store', $skill), ['icon' => $file])
@@ -81,7 +81,7 @@ class SkillIconTest extends TestCase
     public function test_ungueltige_datei_wird_abgelehnt(): void
     {
         $skill = Skill::factory()->create(['icon' => null]);
-        $file  = UploadedFile::fake()->create('dokument.pdf', 100, 'application/pdf');
+        $file = UploadedFile::fake()->create('dokument.pdf', 100, 'application/pdf');
 
         $this->actingAs($this->admin())
             ->postJson(route('admin.skills.icon.store', $skill), ['icon' => $file])
@@ -91,7 +91,7 @@ class SkillIconTest extends TestCase
     public function test_unauthenticated_user_wird_abgewiesen(): void
     {
         $skill = Skill::factory()->create();
-        $file  = UploadedFile::fake()->image('symbol.png');
+        $file = UploadedFile::fake()->image('symbol.png');
 
         $this->postJson(route('admin.skills.icon.store', $skill), ['icon' => $file])
             ->assertUnauthorized();

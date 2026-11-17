@@ -37,11 +37,11 @@ class MatrixAccountController extends Controller
         }
 
         return view('admin.matrix.edit', [
-            'player'  => $player,
+            'player' => $player,
             'account' => $account,
-            'rooms'   => $rooms,
-            'joined'  => $joined,
-            'mxid'    => $account?->mxid ?? $player->deriveMatrixId(),
+            'rooms' => $rooms,
+            'joined' => $joined,
+            'mxid' => $account?->mxid ?? $player->deriveMatrixId(),
         ]);
     }
 
@@ -58,11 +58,11 @@ class MatrixAccountController extends Controller
             'rooms.*' => ['exists:matrix_managed_rooms,roomid'],
         ]);
 
-        $account   = $player->matrixAccount()->withTrashed()->first();
-        $active    = $request->boolean('active');
-        $isNew     = ! $account;
+        $account = $player->matrixAccount()->withTrashed()->first();
+        $active = $request->boolean('active');
+        $isNew = ! $account;
         $wasActive = $account?->active;
-        $newRooms  = $request->input('rooms', []);
+        $newRooms = $request->input('rooms', []);
 
         // Ohne bestehendes Konto und ohne aktiven Zugang gibt es nichts zu tun.
         if ($isNew && ! $active) {
@@ -95,14 +95,14 @@ class MatrixAccountController extends Controller
         // Audit-Log (MTX-09): Neuanlage oder Aktualisierung protokollieren.
         if ($isNew) {
             AuditLogger::log('matrix.account.created', $account, [
-                'mxid'   => $account->mxid,
+                'mxid' => $account->mxid,
                 'active' => $active,
-                'rooms'  => $newRooms,
+                'rooms' => $newRooms,
             ]);
         } else {
             AuditLogger::log('matrix.account.updated', $account, [
                 'active' => ['von' => $wasActive, 'auf' => $active],
-                'rooms'  => $newRooms,
+                'rooms' => $newRooms,
             ]);
         }
 

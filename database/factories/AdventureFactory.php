@@ -2,11 +2,12 @@
 
 namespace Database\Factories;
 
+use App\Models\Adventure;
 use App\Models\EventStatus;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\Adventure>
+ * @extends Factory<Adventure>
  */
 class AdventureFactory extends Factory
 {

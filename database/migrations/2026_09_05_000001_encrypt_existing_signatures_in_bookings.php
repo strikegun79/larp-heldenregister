@@ -36,7 +36,7 @@ return new class extends Migration
                     DB::table('bookings')
                         ->where('id', $row->id)
                         ->update(['signature' => $plain]);
-                } catch (\Exception) {
+                } catch (Exception) {
                     // Bereits Klartext – überspringen
                 }
             });

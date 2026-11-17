@@ -8,7 +8,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Collection;
-use App\Models\EventRole;
 
 class Adventure extends Model
 {
@@ -48,8 +47,8 @@ class Adventure extends Model
         'fee_reduced' => 'decimal:2',
         'loot_ep_day' => 'integer',
         'max_player' => 'integer',
-        'min_age'    => 'integer',
-        'max_age'    => 'integer',
+        'min_age' => 'integer',
+        'max_age' => 'integer',
         'waitlist' => 'integer',
         'waitlist_mode' => 'boolean',
         'is_hidden' => 'boolean',
@@ -68,6 +67,7 @@ class Adventure extends Model
         if ($this->max_age) {
             return "bis {$this->max_age} Jahren";
         }
+
         return '—';
     }
 
@@ -260,12 +260,12 @@ class Adventure extends Model
         }
 
         return [
-            'paid_count'   => $payable->where('paid', true)->count(),
-            'total_count'  => $payable->count(),
-            'paid_amount'  => $paidAmount,
-            'open_amount'  => $openAmount,
+            'paid_count' => $payable->where('paid', true)->count(),
+            'total_count' => $payable->count(),
+            'paid_amount' => $paidAmount,
+            'open_amount' => $openAmount,
             'total_amount' => $paidAmount + $openAmount,
-            'erm_count'    => $payable->where('ermaessigung', true)->count(),
+            'erm_count' => $payable->where('ermaessigung', true)->count(),
         ];
     }
 

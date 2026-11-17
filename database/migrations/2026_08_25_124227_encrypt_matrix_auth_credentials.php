@@ -44,7 +44,7 @@ return new class extends Migration
                     DB::table('matrix_accounts')
                         ->where('mxid', $account->mxid)
                         ->update(['auth_credential' => $plain]);
-                } catch (\Exception) {
+                } catch (Exception) {
                     // War schon Klartext oder ungültig – unverändert lassen.
                 }
             });

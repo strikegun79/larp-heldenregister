@@ -69,16 +69,16 @@ class IdCardController extends Controller
 
         $cardData = array_map(fn ($code) => [
             'code' => $code,
-            'url'  => route('public.hero', $code),
-            'qr'   => $this->qrDataUri(route('public.hero', $code)),
+            'url' => route('public.hero', $code),
+            'qr' => $this->qrDataUri(route('public.hero', $code)),
         ], array_keys($codes));
 
         $pdf = Pdf::loadView('admin.id-cards.card-pdf', [
-            'cards'           => $cardData,
+            'cards' => $cardData,
             'backTemplateUri' => $this->backTemplateDataUri(),
         ])->setPaper('a4', 'landscape')
-          ->setOption('dpi', 150)
-          ->setOption('isFontSubsettingEnabled', true);
+            ->setOption('dpi', 150)
+            ->setOption('isFontSubsettingEnabled', true);
 
         return $pdf->stream('heldenausweise-'.date('Ymd').'.pdf');
     }
@@ -91,21 +91,21 @@ class IdCardController extends Controller
         abort_unless((bool) $hero->public_code, 404);
 
         $cardData = [[
-            'code'           => $hero->public_code,
+            'code' => $hero->public_code,
             'character_name' => $hero->character_name,
             // Name-Feld: Charaktername, sonst Spielername.
-            'name'           => $hero->character_name ?: $hero->player?->full_name,
-            'classes'        => $hero->classes->pluck('name')->all(),
-            'url'            => route('public.hero', $hero->public_code),
-            'qr'             => $this->qrDataUri(route('public.hero', $hero->public_code)),
+            'name' => $hero->character_name ?: $hero->player?->full_name,
+            'classes' => $hero->classes->pluck('name')->all(),
+            'url' => route('public.hero', $hero->public_code),
+            'qr' => $this->qrDataUri(route('public.hero', $hero->public_code)),
         ]];
 
         $pdf = Pdf::loadView('admin.id-cards.card-pdf', [
-            'cards'           => $cardData,
+            'cards' => $cardData,
             'backTemplateUri' => $this->backTemplateDataUri(),
         ])->setPaper('a4', 'landscape')
-          ->setOption('dpi', 150)
-          ->setOption('isFontSubsettingEnabled', true);
+            ->setOption('dpi', 150)
+            ->setOption('isFontSubsettingEnabled', true);
 
         return $pdf->stream('ausweis-'.$hero->id.'.pdf');
     }
@@ -173,20 +173,22 @@ class IdCardController extends Controller
 
     private function randomCode(): string
     {
-        $len  = strlen(self::CODE_ALPHABET);
+        $len = strlen(self::CODE_ALPHABET);
         $code = '';
         for ($i = 0; $i < 6; $i++) {
             $code .= self::CODE_ALPHABET[random_int(0, $len - 1)];
         }
+
         return $code;
     }
 
     /** QR-Code als base64-PNG-Data-URI für DOMPDF (400 px für gute Druckqualität). */
     private function qrDataUri(string $url): string
     {
-        $qr     = new QrCode($url, size: 400);
-        $writer = new PngWriter();
+        $qr = new QrCode($url, size: 400);
+        $writer = new PngWriter;
         $result = $writer->write($qr);
+
         return 'data:image/png;base64,'.base64_encode($result->getString());
     }
 
@@ -211,6 +213,7 @@ class IdCardController extends Controller
         $data = ob_get_clean();
         imagedestroy($img);
         imagedestroy($rotated);
+
         return 'data:image/png;base64,'.base64_encode($data);
     }
 }

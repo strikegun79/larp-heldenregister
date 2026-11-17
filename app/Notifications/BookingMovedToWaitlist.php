@@ -24,6 +24,7 @@ class BookingMovedToWaitlist extends Notification implements ShouldQueue
     {
         $channels = $notifiable instanceof User ? ['database'] : [];
         $channels[] = 'mail';
+
         return $channels;
     }
 
@@ -44,11 +45,12 @@ class BookingMovedToWaitlist extends Notification implements ShouldQueue
     public function toArray(object $notifiable): array
     {
         $booking = $this->booking->loadMissing(['adventure']);
+
         return [
-            'adventure_id'   => $booking->adventure?->id,
+            'adventure_id' => $booking->adventure?->id,
             'adventure_name' => $booking->adventure?->name,
-            'message'        => 'Deine Anmeldung für „'.$booking->adventure?->name.'" wurde auf die Warteliste verschoben.',
-            'url'            => route('dashboard'),
+            'message' => 'Deine Anmeldung für „'.$booking->adventure?->name.'" wurde auf die Warteliste verschoben.',
+            'url' => route('dashboard'),
         ];
     }
 }

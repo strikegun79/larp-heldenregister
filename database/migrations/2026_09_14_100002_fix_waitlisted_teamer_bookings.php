@@ -14,8 +14,8 @@ return new class extends Migration
             ->whereIn('event_role_id', $teamerIds)
             ->where('waitlisted', true)
             ->update([
-                'waitlisted'  => false,
-                'status'      => 'offen',
+                'waitlisted' => false,
+                'status' => 'offen',
                 'approved_at' => null,
             ]);
     }

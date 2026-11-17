@@ -4,7 +4,6 @@ namespace Tests\Feature;
 
 use App\Models\Hero;
 use App\Models\HeroGalleryImage;
-use App\Models\Player;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -73,8 +72,8 @@ class HeroGalleryTest extends TestCase
         $hero = Hero::factory()->create();
         Storage::disk('public')->put('heroes/gallery/test.jpg', 'dummy');
         $image = HeroGalleryImage::create([
-            'hero_id'    => $hero->id,
-            'path'       => 'heroes/gallery/test.jpg',
+            'hero_id' => $hero->id,
+            'path' => 'heroes/gallery/test.jpg',
             'sort_order' => 1,
         ]);
 
@@ -94,8 +93,8 @@ class HeroGalleryTest extends TestCase
         $hero1 = Hero::factory()->create();
         $hero2 = Hero::factory()->create();
         $image = HeroGalleryImage::create([
-            'hero_id'    => $hero2->id,
-            'path'       => 'heroes/gallery/fremdes.jpg',
+            'hero_id' => $hero2->id,
+            'path' => 'heroes/gallery/fremdes.jpg',
             'sort_order' => 1,
         ]);
 
@@ -120,8 +119,8 @@ class HeroGalleryTest extends TestCase
         $user = $this->registrar();
         $hero = Hero::factory()->create();
         HeroGalleryImage::create([
-            'hero_id'    => $hero->id,
-            'path'       => 'heroes/gallery/bild.jpg',
+            'hero_id' => $hero->id,
+            'path' => 'heroes/gallery/bild.jpg',
             'sort_order' => 1,
         ]);
 

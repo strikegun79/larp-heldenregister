@@ -10,7 +10,8 @@ use Illuminate\Console\Command;
  */
 class GenerateHeroCodes extends Command
 {
-    protected $signature   = 'heroes:generate-codes {--dry-run : Nur anzeigen, nichts speichern}';
+    protected $signature = 'heroes:generate-codes {--dry-run : Nur anzeigen, nichts speichern}';
+
     protected $description = 'Helden ohne öffentlichen Code mit einem 6-stelligen Code versehen (PUB-01)';
 
     public function handle(): int
@@ -19,6 +20,7 @@ class GenerateHeroCodes extends Command
 
         if ($heroes->isEmpty()) {
             $this->info('Alle Helden haben bereits einen Code.');
+
             return self::SUCCESS;
         }
 

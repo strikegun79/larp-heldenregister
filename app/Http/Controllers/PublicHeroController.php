@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Hero;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 use Illuminate\View\View;
 
@@ -54,7 +55,7 @@ class PublicHeroController extends Controller
 
         return view('public.search', [
             'results' => $results,
-            'input'   => $query,
+            'input' => $query,
         ]);
     }
 
@@ -72,7 +73,7 @@ class PublicHeroController extends Controller
             ])
             ->firstOrFail();
 
-        $learnedIds  = $hero->skills->pluck('id');
+        $learnedIds = $hero->skills->pluck('id');
         $perlSummary = $hero->perlSummary;
 
         // SKILL-10: Voraussetzungen klassenspezifisch laden.
@@ -85,7 +86,7 @@ class PublicHeroController extends Controller
      * SKILL-10: Voraussetzungs-Map aufbauen.
      * Key = "{hero_class_id}_{skill_id}", Wert = Collection mit req_id + req_name.
      */
-    private function buildPrereqMap(Hero $hero): \Illuminate\Support\Collection
+    private function buildPrereqMap(Hero $hero): Collection
     {
         $classIds = $hero->classes->pluck('id');
         $skillIds = $hero->classes->flatMap(fn ($c) => $c->skills->pluck('id'));

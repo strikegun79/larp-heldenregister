@@ -32,7 +32,7 @@ class DataBreachController extends Controller
     public function create(): View
     {
         return view('admin.data-breaches.create', [
-            'log'        => new DataBreachLog(),
+            'log' => new DataBreachLog,
             'categories' => DataBreachLog::$dataCategoryLabels,
         ]);
     }
@@ -53,7 +53,7 @@ class DataBreachController extends Controller
         $dataBreach->load('createdBy');
 
         return view('admin.data-breaches.show', [
-            'log'        => $dataBreach,
+            'log' => $dataBreach,
             'categories' => DataBreachLog::$dataCategoryLabels,
         ]);
     }
@@ -61,7 +61,7 @@ class DataBreachController extends Controller
     public function edit(DataBreachLog $dataBreach): View
     {
         return view('admin.data-breaches.edit', [
-            'log'        => $dataBreach,
+            'log' => $dataBreach,
             'categories' => DataBreachLog::$dataCategoryLabels,
         ]);
     }
@@ -77,18 +77,18 @@ class DataBreachController extends Controller
     private function validated(Request $request): array
     {
         return $request->validate([
-            'discovered_at'            => ['required', 'date'],
-            'description'              => ['required', 'string', 'max:5000'],
+            'discovered_at' => ['required', 'date'],
+            'description' => ['required', 'string', 'max:5000'],
             'affected_data_categories' => ['required', 'array', 'min:1'],
-            'affected_data_categories.*' => ['string', 'in:' . implode(',', array_keys(DataBreachLog::$dataCategoryLabels))],
-            'affected_persons_count'   => ['nullable', 'integer', 'min:0'],
-            'likely_consequences'      => ['nullable', 'string', 'max:3000'],
-            'measures_taken'           => ['required', 'string', 'max:5000'],
-            'reportable'               => ['boolean'],
-            'reported_to_authority'    => ['boolean'],
-            'reported_at'              => ['nullable', 'date', 'required_if:reported_to_authority,true'],
-            'authority_reference'      => ['nullable', 'string', 'max:255'],
-            'internal_notes'           => ['nullable', 'string', 'max:3000'],
+            'affected_data_categories.*' => ['string', 'in:'.implode(',', array_keys(DataBreachLog::$dataCategoryLabels))],
+            'affected_persons_count' => ['nullable', 'integer', 'min:0'],
+            'likely_consequences' => ['nullable', 'string', 'max:3000'],
+            'measures_taken' => ['required', 'string', 'max:5000'],
+            'reportable' => ['boolean'],
+            'reported_to_authority' => ['boolean'],
+            'reported_at' => ['nullable', 'date', 'required_if:reported_to_authority,true'],
+            'authority_reference' => ['nullable', 'string', 'max:255'],
+            'internal_notes' => ['nullable', 'string', 'max:3000'],
         ]);
     }
 }

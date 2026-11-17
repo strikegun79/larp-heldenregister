@@ -22,6 +22,7 @@ class TeamerRejected extends Notification implements ShouldQueue
         if ($notifiable->teamer_notifications ?? true) {
             $channels[] = 'mail';
         }
+
         return $channels;
     }
 
@@ -42,11 +43,11 @@ class TeamerRejected extends Notification implements ShouldQueue
     public function toArray(object $notifiable): array
     {
         return [
-            'adventure_id'   => $this->adventure->id,
+            'adventure_id' => $this->adventure->id,
             'adventure_name' => $this->adventure->name,
-            'start_at'       => optional($this->adventure->start_at)->toDateString(),
-            'message'        => 'Deine Teamer-Anmeldung für „'.$this->adventure->name.'" wurde abgelehnt.',
-            'url'            => route('adventures.show', $this->adventure),
+            'start_at' => optional($this->adventure->start_at)->toDateString(),
+            'message' => 'Deine Teamer-Anmeldung für „'.$this->adventure->name.'" wurde abgelehnt.',
+            'url' => route('adventures.show', $this->adventure),
         ];
     }
 }

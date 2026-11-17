@@ -11,16 +11,19 @@ use Illuminate\Queue\Events\JobFailed;
 class QueueJobFailedMail extends Mailable
 {
     public string $jobName;
+
     public string $queueName;
+
     public string $exceptionMessage;
+
     public string $failedAt;
 
     public function __construct(JobFailed $event)
     {
-        $this->jobName          = $event->job->getName();
-        $this->queueName        = $event->job->getQueue();
+        $this->jobName = $event->job->getName();
+        $this->queueName = $event->job->getQueue();
         $this->exceptionMessage = $event->exception->getMessage();
-        $this->failedAt         = now()->format('d.m.Y H:i:s');
+        $this->failedAt = now()->format('d.m.Y H:i:s');
     }
 
     public function envelope(): Envelope

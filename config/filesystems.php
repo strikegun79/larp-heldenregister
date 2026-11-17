@@ -47,7 +47,7 @@ return [
         // Backup-Zielverzeichnis (außerhalb des Web-Roots; per BACKUP_DISK_PATH konfigurierbar).
         'backup' => [
             'driver' => 'local',
-            'root'   => env('BACKUP_DISK_PATH', storage_path('app/backups')),
+            'root' => env('BACKUP_DISK_PATH', storage_path('app/backups')),
         ],
 
         's3' => [

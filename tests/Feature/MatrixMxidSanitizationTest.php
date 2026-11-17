@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\MatrixAccount;
 use App\Models\Player;
+use App\Models\User;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -118,7 +119,7 @@ class MatrixMxidSanitizationTest extends TestCase
     {
         config(['matrix.corporal_token' => 'test-token']);
 
-        $admin = \App\Models\User::factory()->create();
+        $admin = User::factory()->create();
         $admin->roles()->attach(10);
 
         $player = Player::factory()->create(['name' => 'Björn', 'lastname' => 'Müller']);
@@ -134,7 +135,7 @@ class MatrixMxidSanitizationTest extends TestCase
     {
         config(['matrix.corporal_token' => 'test-token']);
 
-        $admin = \App\Models\User::factory()->create();
+        $admin = User::factory()->create();
         $admin->roles()->attach(10);
 
         $player = Player::factory()->create(['name' => 'Mia Lenja', 'lastname' => 'von Muster']);

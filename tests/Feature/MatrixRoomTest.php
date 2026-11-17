@@ -27,17 +27,18 @@ class MatrixRoomTest extends TestCase
     {
         $user = User::factory()->create();
         $user->roles()->attach(10); // admin
+
         return $user;
     }
 
     private function room(array $attrs = []): MatrixManagedRoom
     {
         return MatrixManagedRoom::create(array_merge([
-            'roomid'        => '!test123:waldritter-giessen.de',
-            'roomname'      => 'Waldritter Allgemein',
-            'roomtype'      => 'Raum',
+            'roomid' => '!test123:waldritter-giessen.de',
+            'roomname' => 'Waldritter Allgemein',
+            'roomtype' => 'Raum',
             'default_allow' => false,
-            'default_deny'  => false,
+            'default_deny' => false,
         ], $attrs));
     }
 
@@ -75,19 +76,19 @@ class MatrixRoomTest extends TestCase
     {
         $this->actingAs($this->admin())
             ->post(route('admin.matrix.rooms.store'), [
-                'roomid'        => '!neu:waldritter-giessen.de',
-                'roomname'      => 'Testkanal',
-                'roomtype'      => 'Raum',
+                'roomid' => '!neu:waldritter-giessen.de',
+                'roomname' => 'Testkanal',
+                'roomtype' => 'Raum',
                 'default_allow' => '1',
             ])
             ->assertRedirect(route('admin.matrix.rooms.index'));
 
         $this->assertDatabaseHas('matrix_managed_rooms', [
-            'roomid'        => '!neu:waldritter-giessen.de',
-            'roomname'      => 'Testkanal',
-            'roomtype'      => 'Raum',
+            'roomid' => '!neu:waldritter-giessen.de',
+            'roomname' => 'Testkanal',
+            'roomtype' => 'Raum',
             'default_allow' => true,
-            'default_deny'  => false,
+            'default_deny' => false,
         ]);
     }
 
@@ -97,7 +98,7 @@ class MatrixRoomTest extends TestCase
 
         $this->actingAs($this->admin())
             ->post(route('admin.matrix.rooms.store'), [
-                'roomid'   => '!doppelt:waldritter-giessen.de',
+                'roomid' => '!doppelt:waldritter-giessen.de',
                 'roomname' => 'Duplikat',
                 'roomtype' => 'Raum',
             ])
@@ -108,14 +109,14 @@ class MatrixRoomTest extends TestCase
     {
         $this->actingAs($this->admin())
             ->post(route('admin.matrix.rooms.store'), [
-                'roomid'   => '!space:waldritter-giessen.de',
+                'roomid' => '!space:waldritter-giessen.de',
                 'roomname' => 'Waldritter Space',
                 'roomtype' => 'Space',
             ])
             ->assertRedirect(route('admin.matrix.rooms.index'));
 
         $this->assertDatabaseHas('matrix_managed_rooms', [
-            'roomid'   => '!space:waldritter-giessen.de',
+            'roomid' => '!space:waldritter-giessen.de',
             'roomtype' => 'Space',
         ]);
     }
@@ -124,7 +125,7 @@ class MatrixRoomTest extends TestCase
     {
         $this->actingAs($this->admin())
             ->post(route('admin.matrix.rooms.store'), [
-                'roomid'   => '!x:waldritter-giessen.de',
+                'roomid' => '!x:waldritter-giessen.de',
                 'roomname' => 'Test',
                 'roomtype' => 'Ungültig',
             ])
@@ -139,16 +140,16 @@ class MatrixRoomTest extends TestCase
 
         $this->actingAs($this->admin())
             ->put(route('admin.matrix.rooms.update', $room), [
-                'roomname'     => 'Umbenannt',
-                'roomtype'     => 'Space',
+                'roomname' => 'Umbenannt',
+                'roomtype' => 'Space',
                 'default_deny' => '1',
             ])
             ->assertRedirect(route('admin.matrix.rooms.index'));
 
         $this->assertDatabaseHas('matrix_managed_rooms', [
-            'roomid'       => $room->roomid,
-            'roomname'     => 'Umbenannt',
-            'roomtype'     => 'Space',
+            'roomid' => $room->roomid,
+            'roomname' => 'Umbenannt',
+            'roomtype' => 'Space',
             'default_deny' => true,
         ]);
     }
@@ -160,7 +161,7 @@ class MatrixRoomTest extends TestCase
         // roomid wird im Update-Request ignoriert (nicht validiert)
         $this->actingAs($this->admin())
             ->put(route('admin.matrix.rooms.update', $room), [
-                'roomid'   => '!geaendert:waldritter-giessen.de',
+                'roomid' => '!geaendert:waldritter-giessen.de',
                 'roomname' => 'Test',
                 'roomtype' => 'Raum',
             ])
@@ -185,12 +186,12 @@ class MatrixRoomTest extends TestCase
 
     public function test_raum_mit_mitgliedern_kann_nicht_gelöscht_werden(): void
     {
-        $room   = $this->room();
+        $room = $this->room();
         $player = Player::factory()->create();
         $account = MatrixAccount::create([
-            'mxid'       => '@test.user:waldritter-giessen.de',
-            'player_id'  => $player->id,
-            'active'     => true,
+            'mxid' => '@test.user:waldritter-giessen.de',
+            'player_id' => $player->id,
+            'active' => true,
             'forbid_room_creation' => true,
             'forbid_encrypted_room_creation' => true,
         ]);

@@ -14,8 +14,8 @@ class HeroGalleryImageFactory extends Factory
     public function definition(): array
     {
         return [
-            'hero_id'    => Hero::factory(),
-            'path'       => 'heroes/gallery/'.Str::uuid().'.jpg',
+            'hero_id' => Hero::factory(),
+            'path' => 'heroes/gallery/'.Str::uuid().'.jpg',
             'sort_order' => $this->faker->numberBetween(0, 10),
         ];
     }

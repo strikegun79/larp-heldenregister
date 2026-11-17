@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Hero;
 use Illuminate\Cache\RateLimiting\Limit;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\RateLimiter;
 use Tests\TestCase;
 
@@ -18,15 +19,15 @@ class PublicRateLimitTest extends TestCase
         $hero = Hero::factory()->create(['public_code' => 'RLTEST']);
 
         $this->get(route('public.hero', 'RLTEST'))
-             ->assertOk()
-             ->assertHeader('X-RateLimit-Limit');
+            ->assertOk()
+            ->assertHeader('X-RateLimit-Limit');
     }
 
     public function test_suchseite_liefert_rate_limit_header(): void
     {
         $this->get(route('public.hero.search'))
-             ->assertOk()
-             ->assertHeader('X-RateLimit-Limit');
+            ->assertOk()
+            ->assertHeader('X-RateLimit-Limit');
     }
 
     public function test_zu_viele_anfragen_an_profil_liefern_429(): void
@@ -60,7 +61,7 @@ class PublicRateLimitTest extends TestCase
     protected function tearDown(): void
     {
         // Limiter nach jedem Test zurücksetzen, damit andere Tests nicht beeinflusst werden.
-        RateLimiter::for('public-hero', function (\Illuminate\Http\Request $request) {
+        RateLimiter::for('public-hero', function (Request $request) {
             return Limit::perMinute(30)->by($request->ip());
         });
 

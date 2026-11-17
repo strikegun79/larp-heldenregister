@@ -31,7 +31,7 @@ class BookingPending extends Notification implements ShouldQueue
         return (new MailMessage)
             ->subject('Anmeldung eingegangen – Bestätigung folgt: '.$booking->adventure?->name)
             ->markdown('emails.booking_pending', [
-                'booking'      => $booking,
+                'booking' => $booking,
                 'dashboardUrl' => route('dashboard'),
             ]);
     }

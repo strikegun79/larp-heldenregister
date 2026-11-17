@@ -1,4 +1,5 @@
 <?php
+
 /**
  * Ok, glad you are here
  * first we get a config instance, and set the settings
@@ -17,61 +18,61 @@
  */
 
 return [
-    'encoding'           => 'UTF-8',
-    'finalize'           => true,
-    'ignoreNonStrings'   => false,
-    'cachePath'          => storage_path('app/purifier'),
-    'cacheFileMode'      => 0755,
-    'settings'      => [
+    'encoding' => 'UTF-8',
+    'finalize' => true,
+    'ignoreNonStrings' => false,
+    'cachePath' => storage_path('app/purifier'),
+    'cacheFileMode' => 0755,
+    'settings' => [
         'default' => [
-            'HTML.Doctype'             => 'HTML 4.01 Transitional',
-            'HTML.Allowed'             => 'div,b,strong,i,em,u,a[href|title],ul,ol,li,p[style],br,span[style],img[width|height|alt|src]',
-            'CSS.AllowedProperties'    => 'font,font-size,font-weight,font-style,font-family,text-decoration,padding-left,color,background-color,text-align',
+            'HTML.Doctype' => 'HTML 4.01 Transitional',
+            'HTML.Allowed' => 'div,b,strong,i,em,u,a[href|title],ul,ol,li,p[style],br,span[style],img[width|height|alt|src]',
+            'CSS.AllowedProperties' => 'font,font-size,font-weight,font-style,font-family,text-decoration,padding-left,color,background-color,text-align',
             'AutoFormat.AutoParagraph' => true,
-            'AutoFormat.RemoveEmpty'   => true,
+            'AutoFormat.RemoveEmpty' => true,
         ],
         // Newsletter: erlaubt Formatierungen des WYSIWYG-Editors, blockiert gefährliche Tags/Attribute
         'newsletter' => [
-            'HTML.Doctype'             => 'HTML 4.01 Transitional',
-            'HTML.Allowed'             => 'h2,h3,p[style],br,strong,em,u,s,ul,ol,li,a[href|title|target],img[src|alt|width|height|style],blockquote,span[style],table[style],thead,tbody,tr,th[style|colspan|rowspan],td[style|colspan|rowspan]',
-            'CSS.AllowedProperties'    => 'color,background-color,text-align,font-size,font-weight,font-style,text-decoration,border,border-color,border-style,border-width,padding,padding-top,padding-right,padding-bottom,padding-left,width,height',
-            'AutoFormat.RemoveEmpty'   => true,
-            'URI.AllowedSchemes'       => ['http' => true, 'https' => true, 'mailto' => true],
+            'HTML.Doctype' => 'HTML 4.01 Transitional',
+            'HTML.Allowed' => 'h2,h3,p[style],br,strong,em,u,s,ul,ol,li,a[href|title|target],img[src|alt|width|height|style],blockquote,span[style],table[style],thead,tbody,tr,th[style|colspan|rowspan],td[style|colspan|rowspan]',
+            'CSS.AllowedProperties' => 'color,background-color,text-align,font-size,font-weight,font-style,text-decoration,border,border-color,border-style,border-width,padding,padding-top,padding-right,padding-bottom,padding-left,width,height',
+            'AutoFormat.RemoveEmpty' => true,
+            'URI.AllowedSchemes' => ['http' => true, 'https' => true, 'mailto' => true],
         ],
         // Helden-Steckbrief: nur Textformatierung (Farbe, Stil, Größe), keine Links/Bilder
         'steckbrief' => [
-            'HTML.Doctype'             => 'HTML 4.01 Transitional',
-            'HTML.Allowed'             => 'p[style],br,strong,b,em,i,u,s,ul,ol,li[style],span[style]',
-            'CSS.AllowedProperties'    => 'color,background-color,font-size,font-weight,font-style,text-decoration,text-align',
-            'AutoFormat.RemoveEmpty'   => true,
+            'HTML.Doctype' => 'HTML 4.01 Transitional',
+            'HTML.Allowed' => 'p[style],br,strong,b,em,i,u,s,ul,ol,li[style],span[style]',
+            'CSS.AllowedProperties' => 'color,background-color,font-size,font-weight,font-style,text-decoration,text-align',
+            'AutoFormat.RemoveEmpty' => true,
         ],
         // Startseiten-Nachricht (MOTD): Textformatierung und Links, keine Bilder (eigener Upload)
         'motd' => [
-            'HTML.Doctype'             => 'HTML 4.01 Transitional',
-            'HTML.Allowed'             => 'p[style],br,strong,b,em,i,u,s,ul,ol,li[style],span[style],a[href|title|target]',
-            'CSS.AllowedProperties'    => 'color,background-color,font-size,font-weight,font-style,text-decoration,text-align',
-            'AutoFormat.RemoveEmpty'   => true,
-            'URI.AllowedSchemes'       => ['http' => true, 'https' => true, 'mailto' => true],
+            'HTML.Doctype' => 'HTML 4.01 Transitional',
+            'HTML.Allowed' => 'p[style],br,strong,b,em,i,u,s,ul,ol,li[style],span[style],a[href|title|target]',
+            'CSS.AllowedProperties' => 'color,background-color,font-size,font-weight,font-style,text-decoration,text-align',
+            'AutoFormat.RemoveEmpty' => true,
+            'URI.AllowedSchemes' => ['http' => true, 'https' => true, 'mailto' => true],
             'Attr.AllowedFrameTargets' => ['_blank'],
         ],
         // Anforderungen der Auftraggeber (Issue #14): formatierter Text wie in der Papier-Vorlage
         'requirement' => [
-            'HTML.Doctype'             => 'HTML 4.01 Transitional',
-            'HTML.Allowed'             => 'p[style],br,strong,b,em,i,u,s,ul,ol,li[style],span[style],a[href|title|target]',
-            'CSS.AllowedProperties'    => 'color,background-color,font-size,font-weight,font-style,text-decoration,text-align',
-            'AutoFormat.RemoveEmpty'   => true,
-            'URI.AllowedSchemes'       => ['http' => true, 'https' => true, 'mailto' => true],
+            'HTML.Doctype' => 'HTML 4.01 Transitional',
+            'HTML.Allowed' => 'p[style],br,strong,b,em,i,u,s,ul,ol,li[style],span[style],a[href|title|target]',
+            'CSS.AllowedProperties' => 'color,background-color,font-size,font-weight,font-style,text-decoration,text-align',
+            'AutoFormat.RemoveEmpty' => true,
+            'URI.AllowedSchemes' => ['http' => true, 'https' => true, 'mailto' => true],
             'Attr.AllowedFrameTargets' => ['_blank'],
         ],
-        'test'    => [
+        'test' => [
             'Attr.EnableID' => 'true',
         ],
-        "youtube" => [
-            "HTML.SafeIframe"      => 'true',
-            "URI.SafeIframeRegexp" => "%^(http://|https://|//)(www.youtube.com/embed/|player.vimeo.com/video/)%",
+        'youtube' => [
+            'HTML.SafeIframe' => 'true',
+            'URI.SafeIframeRegexp' => '%^(http://|https://|//)(www.youtube.com/embed/|player.vimeo.com/video/)%',
         ],
         'custom_definition' => [
-            'id'  => 'html5-definitions',
+            'id' => 'html5-definitions',
             'rev' => 1,
             'debug' => false,
             'elements' => [
@@ -82,39 +83,39 @@ return [
                 ['aside',   'Block', 'Flow', 'Common'],
                 ['header',  'Block', 'Flow', 'Common'],
                 ['footer',  'Block', 'Flow', 'Common'],
-				
-				// Content model actually excludes several tags, not modelled here
+
+                // Content model actually excludes several tags, not modelled here
                 ['address', 'Block', 'Flow', 'Common'],
                 ['hgroup', 'Block', 'Required: h1 | h2 | h3 | h4 | h5 | h6', 'Common'],
-				
-				// http://developers.whatwg.org/grouping-content.html
+
+                // http://developers.whatwg.org/grouping-content.html
                 ['figure', 'Block', 'Optional: (figcaption, Flow) | (Flow, figcaption) | Flow', 'Common'],
                 ['figcaption', 'Inline', 'Flow', 'Common'],
-				
-				// http://developers.whatwg.org/the-video-element.html#the-video-element
+
+                // http://developers.whatwg.org/the-video-element.html#the-video-element
                 ['video', 'Block', 'Optional: (source, Flow) | (Flow, source) | Flow', 'Common', [
                     'src' => 'URI',
-					'type' => 'Text',
-					'width' => 'Length',
-					'height' => 'Length',
-					'poster' => 'URI',
-					'preload' => 'Enum#auto,metadata,none',
-					'controls' => 'Bool',
+                    'type' => 'Text',
+                    'width' => 'Length',
+                    'height' => 'Length',
+                    'poster' => 'URI',
+                    'preload' => 'Enum#auto,metadata,none',
+                    'controls' => 'Bool',
                 ]],
                 ['source', 'Block', 'Flow', 'Common', [
-					'src' => 'URI',
-					'type' => 'Text',
+                    'src' => 'URI',
+                    'type' => 'Text',
                 ]],
 
-				// http://developers.whatwg.org/text-level-semantics.html
+                // http://developers.whatwg.org/text-level-semantics.html
                 ['s',    'Inline', 'Inline', 'Common'],
                 ['var',  'Inline', 'Inline', 'Common'],
                 ['sub',  'Inline', 'Inline', 'Common'],
                 ['sup',  'Inline', 'Inline', 'Common'],
                 ['mark', 'Inline', 'Inline', 'Common'],
                 ['wbr',  'Inline', 'Empty', 'Core'],
-				
-				// http://developers.whatwg.org/edits.html
+
+                // http://developers.whatwg.org/edits.html
                 ['ins', 'Block', 'Flow', 'Common', ['cite' => 'URI', 'datetime' => 'CDATA']],
                 ['del', 'Block', 'Flow', 'Common', ['cite' => 'URI', 'datetime' => 'CDATA']],
             ],

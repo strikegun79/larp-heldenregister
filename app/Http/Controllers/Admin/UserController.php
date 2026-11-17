@@ -12,6 +12,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Str;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 /**
@@ -33,8 +34,8 @@ class UserController extends Controller
             ->when($q !== '', function ($query) use ($q) {
                 $query->where(function ($b) use ($q) {
                     $b->where('name', 'like', "%{$q}%")
-                      ->orWhere('lastname', 'like', "%{$q}%")
-                      ->orWhere('email', 'like', "%{$q}%");
+                        ->orWhere('lastname', 'like', "%{$q}%")
+                        ->orWhere('email', 'like', "%{$q}%");
                 });
             })
             ->orderBy('name')
@@ -112,14 +113,14 @@ class UserController extends Controller
     public function updateProfile(Request $request, User $user): RedirectResponse
     {
         $data = $request->validate([
-            'name'         => ['required', 'string', 'max:255'],
-            'lastname'     => ['nullable', 'string', 'max:255'],
-            'email'        => ['required', 'string', 'lowercase', 'email', 'max:255', \Illuminate\Validation\Rule::unique('users', 'email')->ignore($user->id)],
-            'phone'        => ['nullable', 'string', 'max:50'],
-            'street'       => ['nullable', 'string', 'max:100'],
+            'name' => ['required', 'string', 'max:255'],
+            'lastname' => ['nullable', 'string', 'max:255'],
+            'email' => ['required', 'string', 'lowercase', 'email', 'max:255', Rule::unique('users', 'email')->ignore($user->id)],
+            'phone' => ['nullable', 'string', 'max:50'],
+            'street' => ['nullable', 'string', 'max:100'],
             'house_number' => ['nullable', 'string', 'max:10'],
-            'zip'          => ['nullable', 'string', 'max:10'],
-            'city'         => ['nullable', 'string', 'max:100'],
+            'zip' => ['nullable', 'string', 'max:10'],
+            'city' => ['nullable', 'string', 'max:100'],
         ]);
 
         $user->fill($data);

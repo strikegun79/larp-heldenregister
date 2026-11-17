@@ -49,19 +49,19 @@ class NewsletterAdminTest extends TestCase
     private function entwurf(array $attrs = []): Newsletter
     {
         return Newsletter::create(array_merge([
-            'title'    => 'Test-Newsletter',
+            'title' => 'Test-Newsletter',
             'body_html' => '<p>Inhalt</p>',
-            'status'   => Newsletter::STATUS_DRAFT,
+            'status' => Newsletter::STATUS_DRAFT,
         ], $attrs));
     }
 
     private function versendet(array $attrs = []): Newsletter
     {
         return Newsletter::create(array_merge([
-            'title'    => 'Versendeter Newsletter',
+            'title' => 'Versendeter Newsletter',
             'body_html' => '<p>Inhalt</p>',
-            'status'   => Newsletter::STATUS_SENT,
-            'sent_at'  => now(),
+            'status' => Newsletter::STATUS_SENT,
+            'sent_at' => now(),
         ], $attrs));
     }
 
@@ -111,7 +111,7 @@ class NewsletterAdminTest extends TestCase
     public function test_create_zeigt_formular_mit_abonnenten_anzahl(): void
     {
         NewsletterSubscription::create([
-            'email'        => 'a@example.test',
+            'email' => 'a@example.test',
             'confirmed_at' => now(),
             'consented_at' => now(),
             'consent_text' => 'Test',
@@ -127,13 +127,13 @@ class NewsletterAdminTest extends TestCase
     {
         $this->actingAs($this->admin())
             ->post(route('admin.newsletter.store'), [
-                'title'    => 'Herbstlager Einladung',
+                'title' => 'Herbstlager Einladung',
                 'body_html' => '<p>Hallo!</p>',
             ])
             ->assertRedirect();
 
         $this->assertDatabaseHas('newsletters', [
-            'title'  => 'Herbstlager Einladung',
+            'title' => 'Herbstlager Einladung',
             'status' => Newsletter::STATUS_DRAFT,
         ]);
     }
@@ -181,7 +181,7 @@ class NewsletterAdminTest extends TestCase
 
         $this->actingAs($this->admin())
             ->patch(route('admin.newsletter.update', $newsletter), [
-                'title'    => 'Neu',
+                'title' => 'Neu',
                 'body_html' => '<p>Neuer Inhalt</p>',
             ])
             ->assertRedirect(route('admin.newsletter.edit', $newsletter));
@@ -195,7 +195,7 @@ class NewsletterAdminTest extends TestCase
 
         $this->actingAs($this->admin())
             ->patchJson(route('admin.newsletter.update', $newsletter), [
-                'title'    => 'Auto-Save Titel',
+                'title' => 'Auto-Save Titel',
                 'body_html' => '<p>Inhalt</p>',
             ])
             ->assertOk()
@@ -208,7 +208,7 @@ class NewsletterAdminTest extends TestCase
 
         $this->actingAs($this->admin())
             ->patch(route('admin.newsletter.update', $newsletter), [
-                'title'    => 'Hack',
+                'title' => 'Hack',
                 'body_html' => '<p>x</p>',
             ])
             ->assertForbidden();
@@ -253,7 +253,7 @@ class NewsletterAdminTest extends TestCase
             ->assertRedirect();
 
         $this->assertDatabaseHas('newsletters', [
-            'title'  => 'Kopie: Original',
+            'title' => 'Kopie: Original',
             'status' => Newsletter::STATUS_DRAFT,
         ]);
     }

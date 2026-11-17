@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\Notifiable;
+use Illuminate\Support\Str;
 use Laravel\Sanctum\HasApiTokens;
 
 class User extends Authenticatable implements MustVerifyEmail
@@ -63,16 +64,16 @@ class User extends Authenticatable implements MustVerifyEmail
      * @var array<string, mixed>
      */
     protected $attributes = [
-        'teamer_notifications'       => true,
-        'notify_new_user'            => true,
-        'notify_booking_received'    => true,
-        'notify_booking_approved'    => true,
-        'notify_booking_rejected'    => true,
-        'notify_booking_cancelled'   => true,
-        'notify_payment_confirmed'   => true,
-        'notify_waitlist_promoted'   => true,
-        'notify_event_cancelled'     => true,
-        'notify_event_reminder'      => true,
+        'teamer_notifications' => true,
+        'notify_new_user' => true,
+        'notify_booking_received' => true,
+        'notify_booking_approved' => true,
+        'notify_booking_rejected' => true,
+        'notify_booking_cancelled' => true,
+        'notify_payment_confirmed' => true,
+        'notify_waitlist_promoted' => true,
+        'notify_event_cancelled' => true,
+        'notify_event_reminder' => true,
         'notify_cancellation_report' => true,
     ];
 
@@ -86,16 +87,16 @@ class User extends Authenticatable implements MustVerifyEmail
         'lastlogin_at' => 'datetime',
         'activated' => 'boolean',
         'needs_password_reset' => 'boolean',
-        'teamer_notifications'      => 'boolean',
-        'notify_new_user'           => 'boolean',
-        'notify_booking_received'   => 'boolean',
-        'notify_booking_approved'   => 'boolean',
-        'notify_booking_rejected'   => 'boolean',
-        'notify_booking_cancelled'  => 'boolean',
-        'notify_payment_confirmed'  => 'boolean',
-        'notify_waitlist_promoted'  => 'boolean',
-        'notify_event_cancelled'    => 'boolean',
-        'notify_event_reminder'     => 'boolean',
+        'teamer_notifications' => 'boolean',
+        'notify_new_user' => 'boolean',
+        'notify_booking_received' => 'boolean',
+        'notify_booking_approved' => 'boolean',
+        'notify_booking_rejected' => 'boolean',
+        'notify_booking_cancelled' => 'boolean',
+        'notify_payment_confirmed' => 'boolean',
+        'notify_waitlist_promoted' => 'boolean',
+        'notify_event_cancelled' => 'boolean',
+        'notify_event_reminder' => 'boolean',
         'notify_cancellation_report' => 'boolean',
         'password' => 'hashed',
     ];
@@ -194,16 +195,16 @@ class User extends Authenticatable implements MustVerifyEmail
         $this->notifications()->delete();
 
         $this->forceFill([
-            'name'              => 'Gelöscht',
-            'lastname'          => null,
-            'email'             => 'deleted+'.$this->id.'@deleted.invalid',
-            'phone'             => null,
-            'street'            => null,
-            'house_number'      => null,
-            'zip'               => null,
-            'city'              => null,
-            'password'          => \Illuminate\Support\Str::random(64),
-            'remember_token'    => null,
+            'name' => 'Gelöscht',
+            'lastname' => null,
+            'email' => 'deleted+'.$this->id.'@deleted.invalid',
+            'phone' => null,
+            'street' => null,
+            'house_number' => null,
+            'zip' => null,
+            'city' => null,
+            'password' => Str::random(64),
+            'remember_token' => null,
             'email_verified_at' => null,
         ])->save();
 

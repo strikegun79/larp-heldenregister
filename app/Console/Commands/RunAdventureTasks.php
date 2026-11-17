@@ -4,7 +4,7 @@ namespace App\Console\Commands;
 
 use App\Models\AdventureTask;
 use App\Models\EventStatus;
-use App\Models\Booking;
+use App\Models\Survey;
 use App\Notifications\EventReminder;
 use App\Notifications\WaitlistPromoted;
 use Illuminate\Console\Command;
@@ -30,13 +30,14 @@ class RunAdventureTasks extends Command
             ->with('adventure')
             ->get();
 
-        $due   = 0;
-        $done  = 0;
-        $skip  = 0;
+        $due = 0;
+        $done = 0;
+        $skip = 0;
 
         foreach ($tasks as $task) {
             if (! $task->isDue()) {
                 $skip++;
+
                 continue;
             }
 
@@ -51,7 +52,7 @@ class RunAdventureTasks extends Command
 
             $task->update([
                 'executed_at' => now(),
-                'result'      => $result,
+                'result' => $result,
             ]);
 
             $this->info("    ✓ {$result}");
@@ -71,17 +72,17 @@ class RunAdventureTasks extends Command
     private function runTask(AdventureTask $task): string
     {
         return match ($task->task_type) {
-            'open_registration'     => $this->runStatusTransition($task, EventStatus::REGISTRATION_OPEN),
-            'close_registration'    => $this->runStatusTransition($task, EventStatus::REGISTRATION_CLOSED),
-            'complete_event'        => $this->runStatusTransition($task, EventStatus::COMPLETED),
-            'disable_waitlist'      => $this->runDisableWaitlist($task),
-            'send_reminder'         => $this->runSendReminder($task),
-            'notify_ep_entry'       => $this->runNotifyEpEntry($task),
-            'send_survey'           => $this->runSendSurvey($task),
+            'open_registration' => $this->runStatusTransition($task, EventStatus::REGISTRATION_OPEN),
+            'close_registration' => $this->runStatusTransition($task, EventStatus::REGISTRATION_CLOSED),
+            'complete_event' => $this->runStatusTransition($task, EventStatus::COMPLETED),
+            'disable_waitlist' => $this->runDisableWaitlist($task),
+            'send_reminder' => $this->runSendReminder($task),
+            'notify_ep_entry' => $this->runNotifyEpEntry($task),
+            'send_survey' => $this->runSendSurvey($task),
             'send_participants_pdf' => $this->runSendParticipantsPdf($task),
-            'promote_waitlist'      => $this->runPromoteWaitlist($task),
-            'archive_bookings'      => $this->runArchiveBookings($task),
-            default                 => "Unbekannter Task-Typ: {$task->task_type}",
+            'promote_waitlist' => $this->runPromoteWaitlist($task),
+            'archive_bookings' => $this->runArchiveBookings($task),
+            default => "Unbekannter Task-Typ: {$task->task_type}",
         };
     }
 
@@ -146,7 +147,7 @@ class RunAdventureTasks extends Command
         $adventure->update(['waitlist_mode' => false]);
 
         if (count($promoted) > 0) {
-            return 'Wartelistenmodus deaktiviert. Nachgerückt: ' . implode(', ', $promoted) . '.';
+            return 'Wartelistenmodus deaktiviert. Nachgerückt: '.implode(', ', $promoted).'.';
         }
 
         return 'Wartelistenmodus deaktiviert. Keine Nachrücker.';
@@ -192,9 +193,9 @@ class RunAdventureTasks extends Command
 
         Mail::raw(
             "Hallo {$gamemaster->name},\n\n"
-            . "das Event \"{$adventure->name}\" ist beendet.\n"
-            . "Bitte denke daran, die Erfahrungspunkte für die Teilnehmer einzutragen.\n\n"
-            . 'Vielen Dank!',
+            ."das Event \"{$adventure->name}\" ist beendet.\n"
+            ."Bitte denke daran, die Erfahrungspunkte für die Teilnehmer einzutragen.\n\n"
+            .'Vielen Dank!',
             function ($message) use ($gamemaster, $adventure) {
                 $message->to($gamemaster->email)
                     ->subject("[Heldenregister] EP-Vergabe: {$adventure->name}");
@@ -210,7 +211,7 @@ class RunAdventureTasks extends Command
         // und versendet werden. Dieser Task loggt nur eine Erinnerung.
         $adventure = $task->adventure;
 
-        $survey = \App\Models\Survey::where('adventure_id', $adventure->id)->first();
+        $survey = Survey::where('adventure_id', $adventure->id)->first();
 
         if (! $survey) {
             return 'Keine Umfrage für dieses Event hinterlegt. Bitte unter Admin → Umfragen anlegen.';
@@ -232,9 +233,9 @@ class RunAdventureTasks extends Command
 
         Mail::raw(
             "Hallo {$eventleader->name},\n\n"
-            . "das Event \"{$adventure->name}\" beginnt bald.\n"
-            . "Die Teilnehmerliste kann hier abgerufen werden:\n{$pdfUrl}\n\n"
-            . '(Login erforderlich)',
+            ."das Event \"{$adventure->name}\" beginnt bald.\n"
+            ."Die Teilnehmerliste kann hier abgerufen werden:\n{$pdfUrl}\n\n"
+            .'(Login erforderlich)',
             function ($message) use ($eventleader, $adventure) {
                 $message->to($eventleader->email)
                     ->subject("[Heldenregister] Teilnehmerliste: {$adventure->name}");
@@ -279,7 +280,7 @@ class RunAdventureTasks extends Command
             return 'Keine Nachrücker (Warteliste leer oder Event voll).';
         }
 
-        return count($promoted) . ' Nachrücker: ' . implode(', ', $promoted) . '.';
+        return count($promoted).' Nachrücker: '.implode(', ', $promoted).'.';
     }
 
     private function runArchiveBookings(AdventureTask $task): string

@@ -31,12 +31,12 @@ class TeamerBookingConfirmed extends Notification implements ShouldQueue
         return (new MailMessage)
             ->subject('Teamer-Anmeldung bestätigt: '.$booking->adventure?->name)
             ->markdown('emails.teamer_booking_confirmed', [
-                'playerName'    => $booking->player?->full_name ?: 'Abenteurer',
+                'playerName' => $booking->player?->full_name ?: 'Abenteurer',
                 'adventureName' => $booking->adventure?->name ?? '—',
-                'roleName'      => $booking->role?->description ?? 'Teamer',
-                'startDate'     => optional($booking->adventure?->start_at)->format('d.m.Y'),
-                'endDate'       => optional($booking->adventure?->end_at)->format('d.m.Y'),
-                'dashboardUrl'  => route('dashboard'),
+                'roleName' => $booking->role?->description ?? 'Teamer',
+                'startDate' => optional($booking->adventure?->start_at)->format('d.m.Y'),
+                'endDate' => optional($booking->adventure?->end_at)->format('d.m.Y'),
+                'dashboardUrl' => route('dashboard'),
             ]);
     }
 }

@@ -18,7 +18,7 @@ class TaskManagerController extends Controller
     public function index(): View
     {
         $definitions = TaskTypeDefinition::orderedByConfig();
-        $categories  = config('adventure_tasks.categories', []);
+        $categories = config('adventure_tasks.categories', []);
 
         return view('admin.task-manager.index', compact('definitions', 'categories'));
     }
@@ -35,12 +35,12 @@ class TaskManagerController extends Controller
     public function update(Request $request, TaskTypeDefinition $taskTypeDefinition): RedirectResponse|JsonResponse
     {
         $data = $request->validate([
-            'label'             => ['required', 'string', 'max:100'],
-            'description'       => ['nullable', 'string', 'max:500'],
-            'default_days'      => ['required', 'integer', 'min:0', 'max:999'],
+            'label' => ['required', 'string', 'max:100'],
+            'description' => ['nullable', 'string', 'max:500'],
+            'default_days' => ['required', 'integer', 'min:0', 'max:999'],
             'default_reference' => ['required', 'in:start_at,end_at'],
             'default_direction' => ['required', 'in:before,after'],
-            'is_enabled'        => ['boolean'],
+            'is_enabled' => ['boolean'],
         ]);
 
         $data['is_enabled'] = $request->boolean('is_enabled');

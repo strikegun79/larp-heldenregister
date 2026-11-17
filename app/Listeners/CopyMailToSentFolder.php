@@ -15,9 +15,9 @@ class CopyMailToSentFolder
 {
     public function handle(MessageSent $event): void
     {
-        $host       = config('mail.mailers.smtp.host');
-        $username   = config('mail.mailers.smtp.username');
-        $password   = config('mail.mailers.smtp.password');
+        $host = config('mail.mailers.smtp.host');
+        $username = config('mail.mailers.smtp.username');
+        $password = config('mail.mailers.smtp.password');
         $sentFolder = env('IMAP_SENT_FOLDER', 'INBOX.Sent');
 
         if (! $host || ! $username || ! $password) {
@@ -34,7 +34,7 @@ class CopyMailToSentFolder
         if ($mailbox === false) {
             Log::warning('CopyMailToSentFolder: IMAP-Verbindung fehlgeschlagen', [
                 'error' => imap_last_error(),
-                'host'  => $host,
+                'host' => $host,
             ]);
 
             return;

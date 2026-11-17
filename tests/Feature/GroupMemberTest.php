@@ -40,7 +40,7 @@ class GroupMemberTest extends TestCase
     public function test_admin_can_add_hero_to_group(): void
     {
         $group = Group::factory()->create();
-        $hero  = Hero::factory()->create();
+        $hero = Hero::factory()->create();
 
         $this->actingAs($this->userWithRole(10))
             ->postJson(route('admin.groups.members.store', $group), ['hero_id' => $hero->id])
@@ -53,26 +53,26 @@ class GroupMemberTest extends TestCase
     public function test_admin_can_add_hero_with_role(): void
     {
         $group = Group::factory()->create();
-        $hero  = Hero::factory()->create();
+        $hero = Hero::factory()->create();
 
         $this->actingAs($this->userWithRole(10))
             ->postJson(route('admin.groups.members.store', $group), [
                 'hero_id' => $hero->id,
-                'role'    => 'Anführer',
+                'role' => 'Anführer',
             ])
             ->assertOk();
 
         $this->assertDatabaseHas('group_hero', [
             'group_id' => $group->id,
-            'hero_id'  => $hero->id,
-            'role'     => 'Anführer',
+            'hero_id' => $hero->id,
+            'role' => 'Anführer',
         ]);
     }
 
     public function test_cannot_add_hero_twice(): void
     {
         $group = Group::factory()->create();
-        $hero  = Hero::factory()->create();
+        $hero = Hero::factory()->create();
         $group->heroes()->attach($hero->id, ['joined_at' => now()]);
 
         $this->actingAs($this->userWithRole(10))
@@ -85,7 +85,7 @@ class GroupMemberTest extends TestCase
     public function test_admin_can_remove_hero_from_group(): void
     {
         $group = Group::factory()->create();
-        $hero  = Hero::factory()->create();
+        $hero = Hero::factory()->create();
         $group->heroes()->attach($hero->id, ['joined_at' => now()]);
 
         $this->actingAs($this->userWithRole(10))
@@ -99,7 +99,7 @@ class GroupMemberTest extends TestCase
     public function test_cannot_remove_hero_not_in_group(): void
     {
         $group = Group::factory()->create();
-        $hero  = Hero::factory()->create();
+        $hero = Hero::factory()->create();
 
         $this->actingAs($this->userWithRole(10))
             ->deleteJson(route('admin.groups.members.destroy', [$group, $hero]))
@@ -109,7 +109,7 @@ class GroupMemberTest extends TestCase
     public function test_unauthorized_user_cannot_manage_members(): void
     {
         $group = Group::factory()->create();
-        $hero  = Hero::factory()->create();
+        $hero = Hero::factory()->create();
 
         // Teamer (50) hat kein groups.manage
         $this->actingAs($this->userWithRole(50))

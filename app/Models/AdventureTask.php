@@ -20,9 +20,9 @@ class AdventureTask extends Model
     ];
 
     protected $casts = [
-        'is_active'    => 'boolean',
+        'is_active' => 'boolean',
         'trigger_days' => 'integer',
-        'executed_at'  => 'datetime',
+        'executed_at' => 'datetime',
     ];
 
     public function adventure(): BelongsTo

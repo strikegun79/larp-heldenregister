@@ -38,16 +38,16 @@ class NewsletterSendTest extends TestCase
     private function entwurf(): Newsletter
     {
         return Newsletter::create([
-            'title'    => 'Test-Versand',
+            'title' => 'Test-Versand',
             'body_html' => '<p>Hallo Welt</p>',
-            'status'   => Newsletter::STATUS_DRAFT,
+            'status' => Newsletter::STATUS_DRAFT,
         ]);
     }
 
     private function aktivesAbo(string $email = 'empf@example.test'): NewsletterSubscription
     {
         return NewsletterSubscription::create([
-            'email'        => $email,
+            'email' => $email,
             'confirmed_at' => now(),
             'consented_at' => now(),
             'consent_text' => 'Test',
@@ -85,10 +85,10 @@ class NewsletterSendTest extends TestCase
     public function test_versenden_auf_bereits_versendetem_newsletter_ist_verboten(): void
     {
         $newsletter = Newsletter::create([
-            'title'    => 'Schon versendet',
+            'title' => 'Schon versendet',
             'body_html' => '<p>x</p>',
-            'status'   => Newsletter::STATUS_SENT,
-            'sent_at'  => now(),
+            'status' => Newsletter::STATUS_SENT,
+            'sent_at' => now(),
         ]);
 
         $this->actingAs($this->admin())
@@ -128,7 +128,7 @@ class NewsletterSendTest extends TestCase
 
         // Status muss sofort auf 'sent' stehen (nicht erst nach Job-Verarbeitung)
         $this->assertDatabaseHas('newsletters', [
-            'id'     => $newsletter->id,
+            'id' => $newsletter->id,
             'status' => Newsletter::STATUS_SENT,
         ]);
 
@@ -158,7 +158,7 @@ class NewsletterSendTest extends TestCase
 
         // Unbestätigt (confirmed_at = null)
         NewsletterSubscription::create([
-            'email'        => 'unbestaetigt@example.test',
+            'email' => 'unbestaetigt@example.test',
             'confirmed_at' => null,
             'consented_at' => now(),
             'consent_text' => 'Test',
@@ -175,10 +175,10 @@ class NewsletterSendTest extends TestCase
         $newsletter = $this->entwurf();
 
         NewsletterSubscription::create([
-            'email'           => 'abgemeldet@example.test',
-            'confirmed_at'    => now()->subDay(),
-            'consented_at'    => now()->subDay(),
-            'consent_text'    => 'Test',
+            'email' => 'abgemeldet@example.test',
+            'confirmed_at' => now()->subDay(),
+            'consented_at' => now()->subDay(),
+            'consent_text' => 'Test',
             'unsubscribed_at' => now()->subHour(),
         ]);
 
@@ -195,7 +195,7 @@ class NewsletterSendTest extends TestCase
 
         // Simuliere bereits vorhandene Send-Einträge (erster Versand war erfolgreich)
         NewsletterSend::create([
-            'newsletter_id'   => $newsletter->id,
+            'newsletter_id' => $newsletter->id,
             'subscription_id' => $abo->id,
         ]);
 

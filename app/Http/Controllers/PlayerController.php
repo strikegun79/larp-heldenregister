@@ -4,10 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Models\Player;
 use App\Models\User;
+use App\Support\AvatarStorage;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
@@ -93,9 +95,9 @@ class PlayerController extends Controller
     {
         if ($request->hasFile('image')) {
             if ($player->image) {
-                \Illuminate\Support\Facades\Storage::disk('public')->delete($player->image);
+                Storage::disk('public')->delete($player->image);
             }
-            $player->update(['image' => \App\Support\AvatarStorage::storeSquare($request->file('image'), 'players')]);
+            $player->update(['image' => AvatarStorage::storeSquare($request->file('image'), 'players')]);
         }
     }
 
@@ -105,7 +107,7 @@ class PlayerController extends Controller
         $this->authorize('update', $player);
 
         if ($player->image) {
-            \Illuminate\Support\Facades\Storage::disk('public')->delete($player->image);
+            Storage::disk('public')->delete($player->image);
             $player->update(['image' => null]);
         }
 
@@ -224,12 +226,12 @@ class PlayerController extends Controller
      * Gesundheitsdaten eines Spielers für die Anmeldevorausfüllung (PLAY-15).
      * Nur eigene/betreute Spieler; keine Preisgabe an Dritte.
      */
-    public function healthPrefill(Request $request, Player $player): \Illuminate\Http\JsonResponse
+    public function healthPrefill(Request $request, Player $player): JsonResponse
     {
         $this->authorize('view', $player);
 
         return response()->json([
-            'allergien'   => $player->allergien,
+            'allergien' => $player->allergien,
             'medikamente' => $player->medikamente,
         ]);
     }
@@ -285,4 +287,3 @@ class PlayerController extends Controller
         return $data;
     }
 }
-

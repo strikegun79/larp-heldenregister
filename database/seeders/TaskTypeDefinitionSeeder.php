@@ -20,12 +20,12 @@ class TaskTypeDefinitionSeeder extends Seeder
             TaskTypeDefinition::firstOrCreate(
                 ['task_type' => $type],
                 [
-                    'label'             => $def['label'],
-                    'description'       => $def['description'] ?? null,
-                    'default_days'      => $def['default_days'],
+                    'label' => $def['label'],
+                    'description' => $def['description'] ?? null,
+                    'default_days' => $def['default_days'],
                     'default_reference' => $def['default_reference'],
                     'default_direction' => $def['default_direction'],
-                    'is_enabled'        => true,
+                    'is_enabled' => true,
                 ]
             );
         }

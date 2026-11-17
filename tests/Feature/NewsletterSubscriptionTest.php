@@ -43,7 +43,7 @@ class NewsletterSubscriptionTest extends TestCase
             ->assertSessionHas('newsletter_status', 'confirmation_sent');
 
         $this->assertDatabaseHas('newsletter_subscriptions', [
-            'email'        => $user->email,
+            'email' => $user->email,
             'confirmed_at' => null,
         ]);
 
@@ -56,8 +56,8 @@ class NewsletterSubscriptionTest extends TestCase
         $user = $this->user();
 
         NewsletterSubscription::create([
-            'user_id'      => $user->id,
-            'email'        => $user->email,
+            'user_id' => $user->id,
+            'email' => $user->email,
             'confirmed_at' => now(),
             'consented_at' => now(),
             'consent_text' => 'Test',
@@ -77,11 +77,11 @@ class NewsletterSubscriptionTest extends TestCase
         $user = $this->user();
 
         NewsletterSubscription::create([
-            'user_id'         => $user->id,
-            'email'           => $user->email,
-            'confirmed_at'    => now()->subDay(),
-            'consented_at'    => now()->subDay(),
-            'consent_text'    => 'Alt',
+            'user_id' => $user->id,
+            'email' => $user->email,
+            'confirmed_at' => now()->subDay(),
+            'consented_at' => now()->subDay(),
+            'consent_text' => 'Alt',
             'unsubscribed_at' => now()->subHour(),
         ]);
 
@@ -90,9 +90,9 @@ class NewsletterSubscriptionTest extends TestCase
             ->assertSessionHas('newsletter_status', 'confirmation_sent');
 
         $this->assertDatabaseHas('newsletter_subscriptions', [
-            'email'           => $user->email,
+            'email' => $user->email,
             'unsubscribed_at' => null,
-            'confirmed_at'    => null,
+            'confirmed_at' => null,
         ]);
 
         Mail::assertQueued(NewsletterConfirmationMail::class);
@@ -104,8 +104,8 @@ class NewsletterSubscriptionTest extends TestCase
         $user = $this->user();
 
         NewsletterSubscription::create([
-            'user_id'      => $user->id,
-            'email'        => $user->email,
+            'user_id' => $user->id,
+            'email' => $user->email,
             'confirmed_at' => null,
             'consented_at' => now()->subMinutes(5),
             'consent_text' => 'Alt',
@@ -127,8 +127,8 @@ class NewsletterSubscriptionTest extends TestCase
         $user = $this->user();
 
         NewsletterSubscription::create([
-            'user_id'      => $user->id,
-            'email'        => $user->email,
+            'user_id' => $user->id,
+            'email' => $user->email,
             'confirmed_at' => now(),
             'consented_at' => now(),
             'consent_text' => 'Test',
@@ -140,7 +140,7 @@ class NewsletterSubscriptionTest extends TestCase
             ->assertSessionHas('newsletter_status', 'unsubscribed');
 
         $this->assertDatabaseMissing('newsletter_subscriptions', [
-            'email'           => $user->email,
+            'email' => $user->email,
             'unsubscribed_at' => null,
         ]);
     }
@@ -160,7 +160,7 @@ class NewsletterSubscriptionTest extends TestCase
     public function test_confirm_mit_gueltigem_token_bestaetigt_abo(): void
     {
         $sub = NewsletterSubscription::create([
-            'email'        => 'sub@example.test',
+            'email' => 'sub@example.test',
             'confirmed_at' => null,
             'consented_at' => now(),
             'consent_text' => 'Test',
@@ -183,10 +183,10 @@ class NewsletterSubscriptionTest extends TestCase
     public function test_confirm_bei_abgemeldetem_abo_zeigt_fehlerseite(): void
     {
         $sub = NewsletterSubscription::create([
-            'email'           => 'sub@example.test',
-            'confirmed_at'    => now()->subDay(),
-            'consented_at'    => now()->subDay(),
-            'consent_text'    => 'Test',
+            'email' => 'sub@example.test',
+            'confirmed_at' => now()->subDay(),
+            'consented_at' => now()->subDay(),
+            'consent_text' => 'Test',
             'unsubscribed_at' => now()->subHour(),
         ]);
 
@@ -199,7 +199,7 @@ class NewsletterSubscriptionTest extends TestCase
     {
         $confirmedAt = now()->subDay();
         $sub = NewsletterSubscription::create([
-            'email'        => 'sub@example.test',
+            'email' => 'sub@example.test',
             'confirmed_at' => $confirmedAt,
             'consented_at' => $confirmedAt,
             'consent_text' => 'Test',
@@ -233,8 +233,8 @@ class NewsletterSubscriptionTest extends TestCase
         $user = $this->user();
 
         NewsletterSubscription::create([
-            'user_id'      => $user->id,
-            'email'        => $user->email,
+            'user_id' => $user->id,
+            'email' => $user->email,
             'confirmed_at' => now(),
             'consented_at' => now(),
             'consent_text' => 'Test',
@@ -250,8 +250,8 @@ class NewsletterSubscriptionTest extends TestCase
         $user = $this->user();
 
         NewsletterSubscription::create([
-            'user_id'      => $user->id,
-            'email'        => $user->email,
+            'user_id' => $user->id,
+            'email' => $user->email,
             'confirmed_at' => null,
             'consented_at' => now(),
             'consent_text' => 'Test',

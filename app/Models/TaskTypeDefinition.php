@@ -4,12 +4,15 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Collection;
 
 class TaskTypeDefinition extends Model
 {
     protected $primaryKey = 'task_type';
-    public $incrementing  = false;
-    protected $keyType    = 'string';
+
+    public $incrementing = false;
+
+    protected $keyType = 'string';
 
     protected $fillable = [
         'task_type',
@@ -23,7 +26,7 @@ class TaskTypeDefinition extends Model
 
     protected $casts = [
         'default_days' => 'integer',
-        'is_enabled'   => 'boolean',
+        'is_enabled' => 'boolean',
     ];
 
     public function adventureTasks(): HasMany
@@ -44,10 +47,10 @@ class TaskTypeDefinition extends Model
     }
 
     /** Sortiert nach der Reihenfolge in config/adventure_tasks.php. */
-    public static function orderedByConfig(): \Illuminate\Support\Collection
+    public static function orderedByConfig(): Collection
     {
         $order = array_keys(config('adventure_tasks.tasks', []));
-        $all   = static::all()->keyBy('task_type');
+        $all = static::all()->keyBy('task_type');
 
         return collect($order)
             ->map(fn ($type) => $all->get($type))

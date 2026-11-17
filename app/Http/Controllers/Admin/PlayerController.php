@@ -9,6 +9,7 @@ use App\Services\AuditLogger;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\View\View;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
@@ -23,9 +24,9 @@ class PlayerController extends Controller
 
     public function index(Request $request): View
     {
-        $q          = trim($request->string('q'));
+        $q = trim($request->string('q'));
         $hideAdults = $request->boolean('hide_adults');
-        $noHeroes   = $request->boolean('no_heroes');
+        $noHeroes = $request->boolean('no_heroes');
         $sort = in_array($request->query('sort'), self::SORT_COLUMNS, true)
             ? $request->query('sort')
             : 'name';
@@ -46,7 +47,7 @@ class PlayerController extends Controller
         if ($hideAdults) {
             $query->where(function ($b) {
                 $b->whereNull('dayofbirth')
-                  ->orWhereRaw('TIMESTAMPDIFF(YEAR, dayofbirth, CURDATE()) < 18');
+                    ->orWhereRaw('TIMESTAMPDIFF(YEAR, dayofbirth, CURDATE()) < 18');
             });
         }
 
@@ -145,7 +146,7 @@ class PlayerController extends Controller
         // Adressfelder nur Pflicht wenn abweichende Anschrift gewählt.
         $sameAsGuardian = (bool) ($data['address_same_as_guardian'] ?? true);
         if (! $sameAsGuardian) {
-            $validator = \Illuminate\Support\Facades\Validator::make($data, [
+            $validator = Validator::make($data, [
                 'street' => ['required', 'string', 'max:100'],
                 'house_number' => ['required', 'string', 'max:10'],
                 'zip' => ['required', 'string', 'max:10'],

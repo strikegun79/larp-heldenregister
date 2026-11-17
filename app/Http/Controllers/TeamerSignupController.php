@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Models\Adventure;
-use App\Models\EventRole;
 use App\Models\Role;
 use App\Models\TeamerSignup;
 use App\Models\User;
@@ -241,6 +240,7 @@ class TeamerSignupController extends Controller
 
         if (! $signup->approved_at) {
             $msg = 'Die Teamer-Anmeldung ist noch nicht bestätigt.';
+
             return $request->expectsJson()
                 ? response()->json(['message' => $msg], 422)
                 : back()->with('error', $msg);
@@ -249,6 +249,7 @@ class TeamerSignupController extends Controller
         $signup->user->notify(new TeamerApproved($signup));
 
         $msg = 'Bestätigungsmail erneut gesendet.';
+
         return $request->expectsJson()
             ? response()->json(['message' => $msg, 'refresh_modal' => true])
             : back()->with('status', $msg);

@@ -32,14 +32,14 @@ class DataBreachAdminTest extends TestCase
     private function validPayload(array $overrides = []): array
     {
         return array_merge([
-            'discovered_at'            => '2026-01-15',
-            'description'              => 'Unbefugter Zugriff auf Nutzerdaten.',
+            'discovered_at' => '2026-01-15',
+            'description' => 'Unbefugter Zugriff auf Nutzerdaten.',
             'affected_data_categories' => ['kontaktdaten'],
-            'affected_persons_count'   => 5,
-            'likely_consequences'      => 'Identitätsdiebstahl möglich.',
-            'measures_taken'           => 'Passwörter zurückgesetzt, Betroffene informiert.',
-            'reportable'               => false,
-            'reported_to_authority'    => false,
+            'affected_persons_count' => 5,
+            'likely_consequences' => 'Identitätsdiebstahl möglich.',
+            'measures_taken' => 'Passwörter zurückgesetzt, Betroffene informiert.',
+            'reportable' => false,
+            'reported_to_authority' => false,
         ], $overrides);
     }
 
@@ -73,7 +73,7 @@ class DataBreachAdminTest extends TestCase
             ->assertRedirect(route('admin.data-breaches.index'));
 
         $this->assertDatabaseHas('data_breach_logs', [
-            'description'        => 'Unbefugter Zugriff auf Nutzerdaten.',
+            'description' => 'Unbefugter Zugriff auf Nutzerdaten.',
             'created_by_user_id' => $admin->id,
         ]);
     }
@@ -117,7 +117,7 @@ class DataBreachAdminTest extends TestCase
     {
         $payload = $this->validPayload([
             'reported_to_authority' => true,
-            'reported_at'           => '',
+            'reported_at' => '',
         ]);
 
         $this->actingAs($this->admin())
@@ -162,13 +162,13 @@ class DataBreachAdminTest extends TestCase
 
         $this->actingAs($admin)
             ->put(route('admin.data-breaches.update', $log), $this->validPayload([
-                'description'   => 'Aktualisierte Beschreibung.',
+                'description' => 'Aktualisierte Beschreibung.',
                 'measures_taken' => 'Neue Maßnahmen eingeleitet.',
             ]))
             ->assertRedirect(route('admin.data-breaches.show', $log));
 
         $this->assertDatabaseHas('data_breach_logs', [
-            'id'          => $log->id,
+            'id' => $log->id,
             'description' => 'Aktualisierte Beschreibung.',
         ]);
     }

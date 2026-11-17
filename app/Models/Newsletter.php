@@ -11,9 +11,11 @@ class Newsletter extends Model
 {
     use SoftDeletes;
 
-    public const STATUS_DRAFT     = 'draft';
+    public const STATUS_DRAFT = 'draft';
+
     public const STATUS_SCHEDULED = 'scheduled';
-    public const STATUS_SENT      = 'sent';
+
+    public const STATUS_SENT = 'sent';
 
     protected $fillable = [
         'title',
@@ -26,7 +28,7 @@ class Newsletter extends Model
 
     protected $casts = [
         'scheduled_at' => 'datetime',
-        'sent_at'      => 'datetime',
+        'sent_at' => 'datetime',
     ];
 
     public function sender(): BelongsTo
@@ -42,10 +44,10 @@ class Newsletter extends Model
     /** Gibt [Fomantic-UI-Farbe, Label] für den Status-Badge zurück. */
     public function statusBadge(): array
     {
-        return match($this->status) {
-            self::STATUS_SENT      => ['grey',   'Versendet'],
+        return match ($this->status) {
+            self::STATUS_SENT => ['grey',   'Versendet'],
             self::STATUS_SCHEDULED => ['blue',   'Geplant'],
-            default                => ['yellow', 'Entwurf'],
+            default => ['yellow', 'Entwurf'],
         };
     }
 

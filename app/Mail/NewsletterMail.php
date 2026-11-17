@@ -38,7 +38,7 @@ class NewsletterMail extends Mailable implements ShouldQueue
     public function envelope(): Envelope
     {
         return new Envelope(
-            subject: config('app.name') . ' – ' . $this->newsletter->title,
+            subject: config('app.name').' – '.$this->newsletter->title,
         );
     }
 
@@ -47,7 +47,7 @@ class NewsletterMail extends Mailable implements ShouldQueue
         return new Content(
             markdown: 'emails.newsletter',
             with: [
-                'bodyHtml'       => $this->absoluteUrls($this->newsletter->body_html),
+                'bodyHtml' => $this->absoluteUrls($this->newsletter->body_html),
                 'unsubscribeUrl' => $this->send->unsubscribe_url,
             ],
         );

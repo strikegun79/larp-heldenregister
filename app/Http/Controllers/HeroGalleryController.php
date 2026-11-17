@@ -8,6 +8,7 @@ use App\Support\GalleryImageStorage;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 
 /**
@@ -40,7 +41,7 @@ class HeroGalleryController extends Controller
         $path = GalleryImageStorage::store($request->file('image'), 'heroes/gallery');
 
         $hero->galleryImages()->create([
-            'path'       => $path,
+            'path' => $path,
             'sort_order' => $hero->galleryImages()->max('sort_order') + 1,
         ]);
 
@@ -76,7 +77,7 @@ class HeroGalleryController extends Controller
             return;
         }
 
-        $isGuardian = $hero->player_id && \Illuminate\Support\Facades\DB::table('player_user')
+        $isGuardian = $hero->player_id && DB::table('player_user')
             ->where('player_id', $hero->player_id)
             ->where('user_id', $request->user()->id)
             ->exists();

@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Jobs\SendNewsletterJob;
 use App\Models\Newsletter;
 use App\Models\NewsletterSubscription;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
@@ -21,8 +22,8 @@ class NewsletterController extends Controller
 
     public function index(): View
     {
-        $newsletters       = Newsletter::withCount('sends')->latest()->paginate(20);
-        $subscriptions     = NewsletterSubscription::whereNotNull('confirmed_at')
+        $newsletters = Newsletter::withCount('sends')->latest()->paginate(20);
+        $subscriptions = NewsletterSubscription::whereNotNull('confirmed_at')
             ->whereNull('unsubscribed_at')
             ->with('user')
             ->orderBy('confirmed_at', 'desc')
@@ -44,14 +45,14 @@ class NewsletterController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $validated = $request->validate([
-            'title'    => ['required', 'string', 'max:255'],
+            'title' => ['required', 'string', 'max:255'],
             'body_html' => ['required', 'string'],
         ]);
 
         $newsletter = Newsletter::create([
-            'title'          => $validated['title'],
-            'body_html'      => Purifier::clean($validated['body_html'], 'newsletter'),
-            'status'         => Newsletter::STATUS_DRAFT,
+            'title' => $validated['title'],
+            'body_html' => Purifier::clean($validated['body_html'], 'newsletter'),
+            'status' => Newsletter::STATUS_DRAFT,
             'sender_user_id' => $request->user()->id,
         ]);
 
@@ -77,17 +78,17 @@ class NewsletterController extends Controller
         return view('admin.newsletter.edit', compact('newsletter', 'activeSubscribers'));
     }
 
-    public function update(Request $request, Newsletter $newsletter): RedirectResponse|\Illuminate\Http\JsonResponse
+    public function update(Request $request, Newsletter $newsletter): RedirectResponse|JsonResponse
     {
         abort_if($newsletter->isSent(), 403);
 
         $validated = $request->validate([
-            'title'    => ['required', 'string', 'max:255'],
+            'title' => ['required', 'string', 'max:255'],
             'body_html' => ['required', 'string'],
         ]);
 
         $newsletter->update([
-            'title'     => $validated['title'],
+            'title' => $validated['title'],
             'body_html' => Purifier::clean($validated['body_html'], 'newsletter'),
         ]);
 
@@ -126,7 +127,7 @@ class NewsletterController extends Controller
         }
 
         $newsletter->update([
-            'status'  => Newsletter::STATUS_SENT,
+            'status' => Newsletter::STATUS_SENT,
             'sent_at' => now(),
         ]);
 
@@ -137,7 +138,7 @@ class NewsletterController extends Controller
     }
 
     /** Bild-Upload für den Newsletter-Editor – gibt die öffentliche URL zurück. */
-    public function uploadImage(Request $request): \Illuminate\Http\JsonResponse
+    public function uploadImage(Request $request): JsonResponse
     {
         $request->validate([
             'image' => ['required', 'image', 'max:4096', 'mimes:jpeg,png,gif,webp'],
@@ -151,7 +152,7 @@ class NewsletterController extends Controller
     }
 
     /** JSON: aktuelle Abonnenten-Anzahl für den Editor-Zähler auf der Create-Seite. */
-    public function subscriberCount(): \Illuminate\Http\JsonResponse
+    public function subscriberCount(): JsonResponse
     {
         return response()->json([
             'count' => NewsletterSubscription::whereNotNull('confirmed_at')
@@ -164,9 +165,9 @@ class NewsletterController extends Controller
     public function duplicate(Newsletter $newsletter): RedirectResponse
     {
         $copy = Newsletter::create([
-            'title'          => 'Kopie: ' . $newsletter->title,
-            'body_html'      => $newsletter->body_html,
-            'status'         => Newsletter::STATUS_DRAFT,
+            'title' => 'Kopie: '.$newsletter->title,
+            'body_html' => $newsletter->body_html,
+            'status' => Newsletter::STATUS_DRAFT,
             'sender_user_id' => request()->user()->id,
         ]);
 

@@ -4,7 +4,6 @@ namespace Tests\Feature;
 
 use App\Models\Hero;
 use App\Models\Player;
-use App\Models\Skill;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
@@ -24,26 +23,26 @@ class PublicHeroProfileTest extends TestCase
     {
         $hero = Hero::factory()->create([
             'character_name' => 'Aldric der Kühne',
-            'public_code'    => 'ALDRIC',
+            'public_code' => 'ALDRIC',
         ]);
 
         $this->get(route('public.hero', 'ALDRIC'))
-             ->assertOk()
-             ->assertSee('Aldric der Kühne');
+            ->assertOk()
+            ->assertSee('Aldric der Kühne');
     }
 
     public function test_spieler_realname_wird_nicht_angezeigt(): void
     {
         $player = Player::factory()->create(['name' => 'Max', 'lastname' => 'Mustermann']);
-        $hero   = Hero::factory()->create([
-            'player_id'   => $player->id,
+        $hero = Hero::factory()->create([
+            'player_id' => $player->id,
             'public_code' => 'NONAME',
         ]);
 
         $this->get(route('public.hero', 'NONAME'))
-             ->assertOk()
-             ->assertDontSee('Max')
-             ->assertDontSee('Mustermann');
+            ->assertOk()
+            ->assertDontSee('Max')
+            ->assertDontSee('Mustermann');
     }
 
     public function test_unbekannter_code_liefert_404(): void
@@ -61,13 +60,13 @@ class PublicHeroProfileTest extends TestCase
     public function test_heimatort_wird_angezeigt(): void
     {
         $hero = Hero::factory()->create([
-            'homeplace'   => 'Waldheim',
+            'homeplace' => 'Waldheim',
             'public_code' => 'WALDHM',
         ]);
 
         $this->get(route('public.hero', 'WALDHM'))
-             ->assertOk()
-             ->assertSee('Waldheim');
+            ->assertOk()
+            ->assertSee('Waldheim');
     }
 
     public function test_public_code_wird_auf_seite_angezeigt(): void
@@ -75,20 +74,20 @@ class PublicHeroProfileTest extends TestCase
         $hero = Hero::factory()->create(['public_code' => 'SHOWME']);
 
         $this->get(route('public.hero', 'SHOWME'))
-             ->assertOk()
-             ->assertSee('SHOWME');
+            ->assertOk()
+            ->assertSee('SHOWME');
     }
 
     public function test_kein_geburtsdatum_sichtbar(): void
     {
         $hero = Hero::factory()->create([
-            'born'        => '2010-05-15',
+            'born' => '2010-05-15',
             'public_code' => 'NOBORN',
         ]);
 
         $this->get(route('public.hero', 'NOBORN'))
-             ->assertOk()
-             ->assertDontSee('15.05.2010')
-             ->assertDontSee('2010-05-15');
+            ->assertOk()
+            ->assertDontSee('15.05.2010')
+            ->assertDontSee('2010-05-15');
     }
 }

@@ -121,10 +121,10 @@ class HeroClassController extends Controller
     private function validateClass(Request $request, ?HeroClass $class = null): array
     {
         $data = $request->validate([
-            'name'         => ['required', 'string', 'max:50'],
-            'slug'         => ['required', 'string', 'max:50', Rule::unique('hero_classes', 'slug')->ignore($class?->id)],
-            'disabled'     => ['boolean'],
-            'ep_cost'      => ['required', 'integer', 'min:0'],
+            'name' => ['required', 'string', 'max:50'],
+            'slug' => ['required', 'string', 'max:50', Rule::unique('hero_classes', 'slug')->ignore($class?->id)],
+            'disabled' => ['boolean'],
+            'ep_cost' => ['required', 'integer', 'min:0'],
             'ribbon_color' => ['nullable', 'string', 'regex:/^#[0-9a-fA-F]{6}$/'],
         ]);
         $data['disabled'] = $request->boolean('disabled');

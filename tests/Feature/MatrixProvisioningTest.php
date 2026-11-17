@@ -103,7 +103,7 @@ class MatrixProvisioningTest extends TestCase
     {
         $player = Player::factory()->create();
         MatrixManagedRoom::create(['roomid' => '!allow:wr.de', 'roomname' => 'Standard',  'roomtype' => 'Raum', 'default_allow' => true]);
-        MatrixManagedRoom::create(['roomid' => '!deny:wr.de',  'roomname' => 'Gesperrt',  'roomtype' => 'Raum', 'default_deny'  => true]);
+        MatrixManagedRoom::create(['roomid' => '!deny:wr.de',  'roomname' => 'Gesperrt',  'roomtype' => 'Raum', 'default_deny' => true]);
         MatrixManagedRoom::create(['roomid' => '!none:wr.de',  'roomname' => 'Kein Flag', 'roomtype' => 'Raum']);
 
         $response = $this->actingAs($this->admin())
@@ -119,14 +119,14 @@ class MatrixProvisioningTest extends TestCase
 
     public function test_bestehendes_konto_behält_seine_räume_statt_defaults(): void
     {
-        $player  = Player::factory()->create(['name' => 'Max', 'lastname' => 'Muster']);
+        $player = Player::factory()->create(['name' => 'Max', 'lastname' => 'Muster']);
         $default = MatrixManagedRoom::create(['roomid' => '!allow:wr.de', 'roomname' => 'Standard', 'roomtype' => 'Raum', 'default_allow' => true]);
-        $custom  = MatrixManagedRoom::create(['roomid' => '!custom:wr.de', 'roomname' => 'Speziell', 'roomtype' => 'Raum']);
+        $custom = MatrixManagedRoom::create(['roomid' => '!custom:wr.de', 'roomname' => 'Speziell', 'roomtype' => 'Raum']);
 
         $account = MatrixAccount::create([
-            'mxid'       => '@max.muster:waldritter-giessen.de',
-            'player_id'  => $player->id,
-            'active'     => true,
+            'mxid' => '@max.muster:waldritter-giessen.de',
+            'player_id' => $player->id,
+            'active' => true,
             'forbid_room_creation' => true,
             'forbid_encrypted_room_creation' => true,
         ]);
@@ -143,15 +143,15 @@ class MatrixProvisioningTest extends TestCase
 
     public function test_neues_konto_speichert_nur_abgeschickte_räume(): void
     {
-        $player  = Player::factory()->create(['name' => 'Lena', 'lastname' => 'Lenz']);
+        $player = Player::factory()->create(['name' => 'Lena', 'lastname' => 'Lenz']);
         $default = MatrixManagedRoom::create(['roomid' => '!allow:wr.de', 'roomname' => 'Standard', 'roomtype' => 'Raum', 'default_allow' => true]);
-        $other   = MatrixManagedRoom::create(['roomid' => '!other:wr.de', 'roomname' => 'Anderer',  'roomtype' => 'Raum']);
+        $other = MatrixManagedRoom::create(['roomid' => '!other:wr.de', 'roomname' => 'Anderer',  'roomtype' => 'Raum']);
 
         // Admin aktiviert Konto und schickt NUR den non-default Raum ab
         // (hat default_allow-Raum bewusst abgehakt)
         $this->actingAs($this->admin())->put(route('admin.players.matrix.update', $player), [
             'active' => '1',
-            'rooms'  => ['!other:wr.de'],
+            'rooms' => ['!other:wr.de'],
         ])->assertRedirect();
 
         $account = $player->fresh()->matrixAccount;

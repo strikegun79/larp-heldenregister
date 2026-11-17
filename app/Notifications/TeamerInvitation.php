@@ -25,6 +25,7 @@ class TeamerInvitation extends Notification implements ShouldQueue
         if ($notifiable->teamer_notifications ?? true) {
             $channels[] = 'mail';
         }
+
         return $channels;
     }
 

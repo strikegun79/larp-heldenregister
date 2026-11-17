@@ -33,22 +33,22 @@ class WaitlistPromoted extends Notification implements ShouldQueue
     {
         $booking = $this->booking->loadMissing(['adventure', 'player', 'role']);
 
-        $fee             = $booking->effectiveFee();
-        $bankData        = null;
+        $fee = $booking->effectiveFee();
+        $bankData = null;
         $verwendungszweck = null;
-        $qrCid           = null;
-        $qrPart          = null;
+        $qrCid = null;
+        $qrPart = null;
 
         if ($fee > 0) {
-            $iban  = Setting::get('bank_iban');
+            $iban = Setting::get('bank_iban');
             $owner = Setting::get('bank_account_owner');
-            $bic   = Setting::get('bank_bic');
-            $bank  = Setting::get('bank_name');
+            $bic = Setting::get('bank_bic');
+            $bank = Setting::get('bank_name');
 
             if ($iban) {
                 $kuerzel = $booking->adventure?->kuerzel;
-                $date    = optional($booking->adventure?->start_at)->format('d.m.Y') ?? '—';
-                $player  = $booking->player?->full_name ?? '';
+                $date = optional($booking->adventure?->start_at)->format('d.m.Y') ?? '—';
+                $player = $booking->player?->full_name ?? '';
                 $verwendungszweck = trim(($kuerzel ? $kuerzel.' ' : '').$date.' '.$player);
                 $bankData = compact('iban', 'owner', 'bic', 'bank');
 
@@ -56,7 +56,7 @@ class WaitlistPromoted extends Notification implements ShouldQueue
                     $qrPng = BookingReceived::buildEpcQrPng($bic, $owner, $iban, $fee, $verwendungszweck);
                     if ($qrPng) {
                         $qrPart = (new DataPart($qrPng, 'girocode.png', 'image/png'))->asInline();
-                        $qrCid  = 'cid:'.$qrPart->getContentId();
+                        $qrCid = 'cid:'.$qrPart->getContentId();
                     }
                 }
             }
@@ -65,12 +65,12 @@ class WaitlistPromoted extends Notification implements ShouldQueue
         $mail = (new MailMessage)
             ->subject('Nachgerückt: '.$booking->adventure?->name)
             ->markdown('emails.waitlist_promoted', [
-                'booking'          => $booking,
-                'fee'              => $fee,
-                'bankData'         => $bankData,
+                'booking' => $booking,
+                'fee' => $fee,
+                'bankData' => $bankData,
                 'verwendungszweck' => $verwendungszweck,
-                'qrCid'            => $qrCid,
-                'dashboardUrl'     => route('dashboard'),
+                'qrCid' => $qrCid,
+                'dashboardUrl' => route('dashboard'),
             ]);
 
         if ($qrPart) {

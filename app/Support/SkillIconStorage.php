@@ -16,16 +16,16 @@ class SkillIconStorage
     public static function store(UploadedFile $file, string $dir): string
     {
         $src = match ($file->getMimeType()) {
-            'image/png'  => imagecreatefrompng($file->getRealPath()),
+            'image/png' => imagecreatefrompng($file->getRealPath()),
             'image/webp' => imagecreatefromwebp($file->getRealPath()),
-            default      => imagecreatefromjpeg($file->getRealPath()),
+            default => imagecreatefromjpeg($file->getRealPath()),
         };
 
-        $w    = imagesx($src);
-        $h    = imagesy($src);
+        $w = imagesx($src);
+        $h = imagesy($src);
         $side = min($w, $h);
-        $sx   = (int) (($w - $side) / 2);
-        $sy   = (int) (($h - $side) / 2);
+        $sx = (int) (($w - $side) / 2);
+        $sy = (int) (($h - $side) / 2);
 
         $dst = imagecreatetruecolor(self::SIZE, self::SIZE);
         imagecopyresampled($dst, $src, 0, 0, $sx, $sy, self::SIZE, self::SIZE, $side, $side);

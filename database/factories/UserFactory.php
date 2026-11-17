@@ -2,12 +2,14 @@
 
 namespace Database\Factories;
 
+use App\Models\Role;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Str;
 
 /**
- * @extends \Illuminate\Database\Eloquent\Factories\Factory<\App\Models\User>
+ * @extends Factory<User>
  */
 class UserFactory extends Factory
 {
@@ -38,16 +40,16 @@ class UserFactory extends Factory
             'city' => fake()->city(),
             // Benachrichtigungs-Defaults explizit setzen, damit make()-Instanzen
             // und DB-gespeicherte Nutzer identisches Verhalten zeigen.
-            'teamer_notifications'       => true,
-            'notify_new_user'            => true,
-            'notify_booking_received'    => true,
-            'notify_booking_approved'    => true,
-            'notify_booking_rejected'    => true,
-            'notify_booking_cancelled'   => true,
-            'notify_payment_confirmed'   => true,
-            'notify_waitlist_promoted'   => true,
-            'notify_event_cancelled'     => true,
-            'notify_event_reminder'      => true,
+            'teamer_notifications' => true,
+            'notify_new_user' => true,
+            'notify_booking_received' => true,
+            'notify_booking_approved' => true,
+            'notify_booking_rejected' => true,
+            'notify_booking_cancelled' => true,
+            'notify_payment_confirmed' => true,
+            'notify_waitlist_promoted' => true,
+            'notify_event_cancelled' => true,
+            'notify_event_reminder' => true,
             'notify_cancellation_report' => true,
         ];
     }
@@ -77,8 +79,8 @@ class UserFactory extends Factory
      */
     public function admin(): static
     {
-        return $this->afterCreating(function (\App\Models\User $user) {
-            $role = \App\Models\Role::where('slug', 'admin')->first();
+        return $this->afterCreating(function (User $user) {
+            $role = Role::where('slug', 'admin')->first();
             if ($role) {
                 $user->roles()->syncWithoutDetaching([$role->id]);
             }
@@ -90,8 +92,8 @@ class UserFactory extends Factory
      */
     public function teamer(): static
     {
-        return $this->afterCreating(function (\App\Models\User $user) {
-            $role = \App\Models\Role::where('slug', 'teamer')->first();
+        return $this->afterCreating(function (User $user) {
+            $role = Role::where('slug', 'teamer')->first();
             if ($role) {
                 $user->roles()->syncWithoutDetaching([$role->id]);
             }
@@ -104,8 +106,8 @@ class UserFactory extends Factory
      */
     public function withRole(string $slug): static
     {
-        return $this->afterCreating(function (\App\Models\User $user) use ($slug) {
-            $role = \App\Models\Role::where('slug', $slug)->first();
+        return $this->afterCreating(function (User $user) use ($slug) {
+            $role = Role::where('slug', $slug)->first();
             if ($role) {
                 $user->roles()->syncWithoutDetaching([$role->id]);
             }

@@ -30,8 +30,8 @@ class SurveyInvitationMail extends Mailable implements ShouldQueue
         return new Content(
             markdown: 'emails.survey-invitation',
             with: [
-                'link'      => $this->link,
-                'survey'    => $this->link->survey,
+                'link' => $this->link,
+                'survey' => $this->link->survey,
                 'adventure' => $this->link->survey->adventure,
                 'surveyUrl' => $this->link->url,
             ],

@@ -47,10 +47,10 @@ class SurveyTemplateTest extends TestCase
     private function template(string $targetGroup = 'teamer'): SurveyTemplate
     {
         return SurveyTemplate::create([
-            'name'         => 'Teamer-Vorlage',
+            'name' => 'Teamer-Vorlage',
             'target_group' => $targetGroup,
-            'active'       => true,
-            'created_by'   => $this->creator->id,
+            'active' => true,
+            'created_by' => $this->creator->id,
         ]);
     }
 
@@ -80,10 +80,10 @@ class SurveyTemplateTest extends TestCase
     {
         $this->actingAs($this->admin())
             ->post(route('admin.surveys.templates.store'), [
-                'name'         => 'Kinder-Fragebogen',
+                'name' => 'Kinder-Fragebogen',
                 'target_group' => 'participant_child',
-                'active'       => true,
-                'questions'    => [
+                'active' => true,
+                'questions' => [
                     ['question_text' => 'Hat dir das Event Spaß gemacht?', 'type' => 'yes_no',  'required' => true],
                     ['question_text' => 'Was hat dir besonders gut gefallen?', 'type' => 'text', 'required' => false],
                 ],
@@ -98,7 +98,7 @@ class SurveyTemplateTest extends TestCase
     {
         $this->actingAs($this->admin())
             ->post(route('admin.surveys.templates.store'), [
-                'name'         => '',
+                'name' => '',
                 'target_group' => 'ungueltig',
             ])
             ->assertSessionHasErrors(['name', 'target_group']);
@@ -113,18 +113,18 @@ class SurveyTemplateTest extends TestCase
         $template = $this->template();
         SurveyTemplateQuestion::create([
             'survey_template_id' => $template->id,
-            'question_text'      => 'Alte Frage',
-            'type'               => 'text',
-            'sort_order'         => 0,
-            'required'           => false,
+            'question_text' => 'Alte Frage',
+            'type' => 'text',
+            'sort_order' => 0,
+            'required' => false,
         ]);
 
         $this->actingAs($this->admin())
             ->put(route('admin.surveys.templates.update', $template), [
-                'name'         => 'Aktualisierte Vorlage',
+                'name' => 'Aktualisierte Vorlage',
                 'target_group' => 'teamer',
-                'active'       => true,
-                'questions'    => [
+                'active' => true,
+                'questions' => [
                     ['question_text' => 'Neue Frage', 'type' => 'rating', 'required' => true],
                 ],
             ])
@@ -152,15 +152,15 @@ class SurveyTemplateTest extends TestCase
 
     public function test_destroy_verhindert_loeschung_bei_vorhandenen_umfragen(): void
     {
-        $template  = $this->template();
+        $template = $this->template();
         $adventure = Adventure::factory()->create();
 
         Survey::create([
-            'adventure_id'       => $adventure->id,
+            'adventure_id' => $adventure->id,
             'survey_template_id' => $template->id,
-            'title'              => 'Aktive Umfrage',
-            'status'             => 'active',
-            'created_by'         => $this->creator->id,
+            'title' => 'Aktive Umfrage',
+            'status' => 'active',
+            'created_by' => $this->creator->id,
         ]);
 
         $this->actingAs($this->admin())

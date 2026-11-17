@@ -71,9 +71,9 @@ class SurveyController extends Controller
 
             $rules[$key] = match ($question->type) {
                 'rating' => [$requiredRule, 'integer', 'min:1', 'max:10'],
-                'text'   => [$requiredRule, 'string', 'max:2000'],
+                'text' => [$requiredRule, 'string', 'max:2000'],
                 'yes_no' => [$requiredRule, 'in:1,0'],
-                default  => [$requiredRule],
+                default => [$requiredRule],
             };
         }
 
@@ -81,8 +81,8 @@ class SurveyController extends Controller
 
         $response = SurveyResponse::create([
             'survey_link_id' => $link->id,
-            'submitted_at'   => now(),
-            'ip_address'     => $request->ip(),
+            'submitted_at' => now(),
+            'ip_address' => $request->ip(),
         ]);
 
         foreach ($questions as $question) {
@@ -96,9 +96,9 @@ class SurveyController extends Controller
 
             match ($question->type) {
                 'rating' => $answer['rating_answer'] = (int) $raw,
-                'text'   => $answer['text_answer'] = $raw,
+                'text' => $answer['text_answer'] = $raw,
                 'yes_no' => $answer['yes_no_answer'] = (bool) $raw,
-                default  => null,
+                default => null,
             };
 
             SurveyAnswer::create($answer);
