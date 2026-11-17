@@ -37,24 +37,34 @@ class BookingApprovalTest extends TestCase
 
         return Booking::factory()->for($adventure)->create([
             'player_id' => $player->id,
+            'status' => 'offen',
             'approved_at' => null,
         ]);
     }
 
-    public function test_registrar_confirms_and_unconfirms_booking(): void
+    public function test_registrar_confirms_open_booking(): void
     {
         $booking = $this->booking();
-        $route = route('adventures.bookings.approval', [$booking->adventure_id, $booking]);
 
         $this->actingAs($this->userWithRole(20)) // Bürokrat
-            ->patchJson($route)
+            ->patchJson(route('adventures.bookings.confirm', [$booking->adventure_id, $booking]))
             ->assertOk()
             ->assertJson(['refresh_modal' => true]);
-        $this->assertNotNull($booking->fresh()->approved_at);
 
-        // Erneuter Aufruf nimmt die Bestätigung wieder zurück.
-        $this->actingAs($this->userWithRole(20))->patchJson($route)->assertOk();
-        $this->assertNull($booking->fresh()->approved_at);
+        $booking->refresh();
+        $this->assertSame('bestaetigt', $booking->status);
+        $this->assertNotNull($booking->approved_at);
+    }
+
+    public function test_already_confirmed_booking_cannot_be_confirmed_again(): void
+    {
+        $booking = $this->booking();
+        $booking->update(['status' => 'bestaetigt', 'approved_at' => now()->subDay()]);
+
+        // Kein Toggle mehr: Rücknahme läuft über die Ablehnung.
+        $this->actingAs($this->userWithRole(20))
+            ->patchJson(route('adventures.bookings.confirm', [$booking->adventure_id, $booking]))
+            ->assertStatus(422);
     }
 
     public function test_admin_can_confirm_booking(): void
@@ -62,7 +72,7 @@ class BookingApprovalTest extends TestCase
         $booking = $this->booking();
 
         $this->actingAs($this->userWithRole(10))
-            ->patchJson(route('adventures.bookings.approval', [$booking->adventure_id, $booking]))
+            ->patchJson(route('adventures.bookings.confirm', [$booking->adventure_id, $booking]))
             ->assertOk();
 
         $this->assertNotNull($booking->fresh()->approved_at);
@@ -74,7 +84,7 @@ class BookingApprovalTest extends TestCase
 
         // Spielleiter hat adventure.modify, aber nicht approve-bookings.
         $this->actingAs($this->userWithRole(40))
-            ->patchJson(route('adventures.bookings.approval', [$booking->adventure_id, $booking]))
+            ->patchJson(route('adventures.bookings.confirm', [$booking->adventure_id, $booking]))
             ->assertForbidden();
 
         $this->assertNull($booking->fresh()->approved_at);
@@ -86,7 +96,7 @@ class BookingApprovalTest extends TestCase
         $otherAdventure = Adventure::factory()->create();
 
         $this->actingAs($this->userWithRole(20))
-            ->patchJson(route('adventures.bookings.approval', [$otherAdventure, $booking]))
+            ->patchJson(route('adventures.bookings.confirm', [$otherAdventure, $booking]))
             ->assertNotFound();
     }
 }
