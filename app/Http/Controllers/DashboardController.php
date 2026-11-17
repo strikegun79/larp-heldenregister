@@ -71,7 +71,8 @@ class DashboardController extends Controller
             ->players()
             ->withPivot('self')
             ->whereNotNull('active_hero_id')
-            ->with('activeHero.classes')
+            // EP-Buchungen für ep_balance mitladen (sonst Lazy-Loading-Fehler).
+            ->with(['activeHero.classes', 'activeHero.epTransactions'])
             ->get();
 
         $hasPlayers = $request->user()->players()->exists();
