@@ -113,6 +113,9 @@
             </div>
         </div>
 
+        {{-- Zusätzliche Pflicht-Bestätigungen des Auftraggebers (Issue #14) --}}
+        @include('bookings._requirements', ['idPrefix' => 'grp_req'])
+
         <div class="mt-4">
             <button type="submit" class="ui primary button">
                 <i class="users icon"></i>

@@ -6,6 +6,7 @@ use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\GroupBookingController;
 use App\Http\Controllers\EpTransactionController;
+use App\Http\Controllers\EventClientRequirementPdfController;
 use App\Http\Controllers\HeroClassController;
 use App\Http\Controllers\HeroController;
 use App\Http\Controllers\HeroGalleryController;
@@ -176,6 +177,10 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::patch('adventures/{adventure}/toggle-waitlist-mode', [AdventureController::class, 'toggleWaitlistMode'])->name('adventures.toggle-waitlist-mode');
     // Taskmanager-Einstellungen speichern (TASK-01).
     Route::put('adventures/{adventure}/tasks', [AdventureController::class, 'saveTasks'])->name('adventures.tasks.save');
+
+    // PDF einer Auftraggeber-Anforderung herunterladen (Issue #14), nur für eingeloggte Nutzer.
+    Route::get('requirements/{requirement}/pdf', [EventClientRequirementPdfController::class, 'show'])
+        ->name('requirements.pdf');
 
     // Anmeldungen zu einem Abenteuer.
     // Anmeldeformular als Modal-Unteransicht (ADV-15).
@@ -359,6 +364,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('event-clients/{eventClient}/edit', [Admin\EventClientController::class, 'edit'])->name('event-clients.edit');
         Route::put('event-clients/{eventClient}', [Admin\EventClientController::class, 'update'])->name('event-clients.update');
         Route::delete('event-clients/{eventClient}', [Admin\EventClientController::class, 'destroy'])->name('event-clients.destroy');
+        // Zusätzliche Anforderungen je Auftraggeber, z. B. Einverständniserklärungen (Issue #14).
+        Route::get('event-clients/{eventClient}/requirements/create', [Admin\EventClientRequirementController::class, 'create'])->name('event-clients.requirements.create');
+        Route::post('event-clients/{eventClient}/requirements', [Admin\EventClientRequirementController::class, 'store'])->name('event-clients.requirements.store');
+        Route::get('event-client-requirements/{requirement}/edit', [Admin\EventClientRequirementController::class, 'edit'])->name('event-client-requirements.edit');
+        Route::put('event-client-requirements/{requirement}', [Admin\EventClientRequirementController::class, 'update'])->name('event-client-requirements.update');
+        Route::delete('event-client-requirements/{requirement}', [Admin\EventClientRequirementController::class, 'destroy'])->name('event-client-requirements.destroy');
 
         Route::get('event-statuses', [Admin\EventStatusController::class, 'index'])->name('event-statuses.index');
         Route::get('event-statuses/{eventStatus}/edit', [Admin\EventStatusController::class, 'edit'])->name('event-statuses.edit');

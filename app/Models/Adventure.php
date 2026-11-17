@@ -91,6 +91,40 @@ class Adventure extends Model
         return $this->belongsTo(EventClient::class, 'event_client_id');
     }
 
+    /**
+     * Aktive Anforderungen des Auftraggebers, die bei der Anmeldung
+     * bestätigt werden müssen (Issue #14).
+     *
+     * @return Collection<int, EventClientRequirement>
+     */
+    public function activeRequirements(): Collection
+    {
+        if (! $this->event_client_id) {
+            return collect();
+        }
+
+        return EventClientRequirement::where('event_client_id', $this->event_client_id)
+            ->active()
+            ->ordered()
+            ->get();
+    }
+
+    /** Validierungsregeln für die Pflicht-Checkboxen der Anforderungen (Issue #14). */
+    public function requirementRules(): array
+    {
+        return $this->activeRequirements()
+            ->mapWithKeys(fn ($r) => ["requirements.{$r->id}" => ['accepted']])
+            ->all();
+    }
+
+    /** Verständliche Fehlermeldungen für nicht bestätigte Anforderungen (Issue #14). */
+    public function requirementMessages(): array
+    {
+        return $this->activeRequirements()
+            ->mapWithKeys(fn ($r) => ["requirements.{$r->id}.accepted" => "Bitte bestätige: {$r->title}."])
+            ->all();
+    }
+
     public function gamemaster(): BelongsTo
     {
         return $this->belongsTo(User::class, 'gamemaster_id');

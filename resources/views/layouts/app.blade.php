@@ -243,6 +243,25 @@
             </div>
         </div>
 
+        <!-- Anforderung des Auftraggebers mit PDF-Download (Issue #14) -->
+        <div class="ui modal" id="requirement-modal"
+             role="dialog" aria-modal="true" aria-labelledby="requirement-modal-header">
+            <div class="header" id="requirement-modal-header"></div>
+            <div class="scrolling content">
+                {{-- Formatierte Beschreibung aus dem <template> der Anforderung --}}
+                <div id="requirement-modal-description" class="wr-steckbrief text-stone-800 break-words"></div>
+                <p class="text-stone-600 text-sm mt-4 border-t border-stone-200 pt-3">
+                    Bitte lies den Text vollständig. Mit dem Häkchen im Anmeldeformular bestätigst du ihn verbindlich.
+                </p>
+            </div>
+            <div class="actions">
+                <a href="#" id="requirement-modal-download" class="ui primary button" target="_blank" rel="noopener" download>
+                    <i class="download icon"></i> PDF herunterladen
+                </a>
+                <button type="button" class="ui deny button"><i class="times icon"></i> Schließen</button>
+            </div>
+        </div>
+
         <!-- Sitzung abgelaufen (SEC-01) -->
         <div class="ui small modal" id="session-expired-modal"
              role="alertdialog" aria-modal="true" aria-labelledby="session-expired-modal-header">

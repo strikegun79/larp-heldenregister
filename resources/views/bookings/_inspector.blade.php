@@ -147,6 +147,19 @@
     </dl>
 </section>
 
+{{-- Zustimmungen zu Anforderungen des Auftraggebers (Issue #14) --}}
+@if ($booking->requirementConsents->isNotEmpty())
+    <section class="mb-5" aria-labelledby="insp-einverstaendnis">
+        <h3 id="insp-einverstaendnis" class="font-uncial text-waldritter text-base mb-2">Einverständnis</h3>
+        <dl class="grid grid-cols-[auto,1fr] gap-x-4 gap-y-1 text-sm">
+            @foreach ($booking->requirementConsents as $requirement)
+                <dt class="text-stone-500">{{ $requirement->title }}</dt>
+                <dd>zugestimmt am {{ \Illuminate\Support\Carbon::parse($requirement->pivot->accepted_at)->format('d.m.Y H:i') }}</dd>
+            @endforeach
+        </dl>
+    </section>
+@endif
+
 {{-- Gesundheitsdaten (Art. 9 DSGVO): nur mit derselben Berechtigung wie im Bearbeiten-Formular --}}
 @can('adventure.modify')
     @if ($booking->allergien || $booking->medikamente)

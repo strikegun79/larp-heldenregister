@@ -63,7 +63,7 @@ class BookingController extends Controller
     {
         abort_unless($booking->adventure_id === $adventure->id, 404);
 
-        $booking->load(['player.users', 'bookedBy', 'role']);
+        $booking->load(['player.users', 'bookedBy', 'role', 'requirementConsents']);
 
         return view('bookings._inspector', [
             'adventure' => $adventure,
@@ -159,7 +159,8 @@ class BookingController extends Controller
             'erreichbarkeit' => ['nullable', 'string'],
             'kontakt_telefon' => ['required', 'string', 'max:100'],
             'ermaessigung' => ['boolean'],
-        ]);
+            // Zusätzliche Anforderungen des Auftraggebers sind Pflicht (Issue #14).
+        ] + $adventure->requirementRules(), $adventure->requirementMessages());
 
         // Ohne book-any-player nur eigene/betreute Spieler buchen (BOOK-10).
         if (! Gate::allows('book-any-player')
@@ -224,6 +225,8 @@ class BookingController extends Controller
             'approved_at' => $confirmed ? now() : null,
             'status' => $confirmed ? 'bestaetigt' : 'offen',
         ]);
+
+        $booking->recordRequirementConsents($adventure->activeRequirements());
 
         // Wartelisten-Modus dauerhaft aktivieren, sobald die Kapazitätsgrenze erreicht ist.
         // Altersverletzungen sind Ausnahmen und aktivieren den Modus nicht.
@@ -317,7 +320,8 @@ class BookingController extends Controller
             'erreichbarkeit' => ['nullable', 'string'],
             'kontakt_telefon' => ['required', 'string', 'max:100'],
             'ermaessigung' => ['boolean'],
-        ]);
+            // Zusätzliche Anforderungen des Auftraggebers sind Pflicht (Issue #14).
+        ] + $adventure->requirementRules(), $adventure->requirementMessages());
 
         if (! $adventure->registrationOpen() && ! Gate::allows('book-any-player')) {
             return $this->fail($request, 'Für dieses Abenteuer ist die Anmeldung nicht geöffnet.');
@@ -325,7 +329,7 @@ class BookingController extends Controller
 
         $isTeamer = EventRole::find($data['event_role_id'])?->is_teamer_like ?? false;
 
-        $adventure->bookings()->create([
+        $booking = $adventure->bookings()->create([
             'player_id' => null,
             'booked_by_user_id' => $request->user()->id,
             'guest_name' => $data['guest_name'],
@@ -345,6 +349,8 @@ class BookingController extends Controller
             'approved_at' => $adventure->requires_confirmation ? null : now(),
             'status' => $adventure->requires_confirmation ? 'offen' : 'bestaetigt',
         ]);
+
+        $booking->recordRequirementConsents($adventure->activeRequirements());
 
         $message = ($isTeamer ? 'Gast-Teamer angemeldet.' : 'Gast angemeldet.')
             .(! $isTeamer && $adventure->isFull() ? ' (Warteliste – Event voll.)' : '')

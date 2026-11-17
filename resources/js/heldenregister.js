@@ -409,6 +409,25 @@ document.getElementById('reinstate-request-send').addEventListener('click', func
 });
 
 // ------------------------------------------------------------------
+// Anforderung des Auftraggebers (Issue #14): Popup mit Beschreibung und
+// optionalem PDF-Download über dem Anmeldeformular.
+// ------------------------------------------------------------------
+document.addEventListener('click', function (e) {
+    const trigger = e.target.closest('[data-requirement-modal]');
+    if (!trigger) return;
+    e.preventDefault();
+    document.getElementById('requirement-modal-header').textContent = trigger.dataset.title || '';
+    // Bereinigtes HTML aus dem <template> der Anforderung übernehmen.
+    const tpl = document.getElementById(trigger.dataset.requirementModal);
+    const desc = document.getElementById('requirement-modal-description');
+    desc.replaceChildren(tpl ? tpl.content.cloneNode(true) : document.createTextNode(''));
+    const download = document.getElementById('requirement-modal-download');
+    download.href = trigger.dataset.download || '#';
+    download.style.display = trigger.dataset.download ? '' : 'none';
+    $('#requirement-modal').modal({ allowMultiple: true, autofocus: false }).modal('show');
+});
+
+// ------------------------------------------------------------------
 // Bestätigungs-Modal (UI-17): Capture-Phase Submit-Handler für
 // data-confirm. Läuft vor dem AJAX-Bubble-Handler.
 // ------------------------------------------------------------------

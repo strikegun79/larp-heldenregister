@@ -146,6 +146,9 @@
                 <span>Ich stimme den <a href="{{ route('agb') }}" target="_blank" class="text-waldritter underline">Teilnahmebedingungen</a> zu.</span>
             </label>
         </div>
+
+        {{-- Zusätzliche Pflicht-Bestätigungen des Auftraggebers (Issue #14) --}}
+        @include('bookings._requirements', ['idPrefix' => 'guest_req'])
     </form>
 
     <div data-modal-actions hidden>
