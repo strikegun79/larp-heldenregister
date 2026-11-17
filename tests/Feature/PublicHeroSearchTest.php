@@ -32,26 +32,26 @@ class PublicHeroSearchTest extends TestCase
             ->assertRedirect(route('public.hero', 'ABCDEF'));
     }
 
-    public function test_zu_kurzer_code_zeigt_fehlermeldung(): void
+    public function test_zu_kurze_eingabe_zeigt_fehlermeldung(): void
     {
-        $this->get(route('public.hero.search.go', ['code' => 'AB']))
+        $this->get(route('public.hero.search.go', ['code' => 'A']))
             ->assertOk()
-            ->assertSee('gültigen 6-stelligen');
+            ->assertSee('mindestens 2 Zeichen');
     }
 
-    public function test_leerer_code_zeigt_fehlermeldung(): void
+    public function test_leere_eingabe_zeigt_fehlermeldung(): void
     {
         $this->get(route('public.hero.search.go', ['code' => '']))
             ->assertOk()
-            ->assertSee('gültigen 6-stelligen');
+            ->assertSee('mindestens 2 Zeichen');
     }
 
-    public function test_ungültige_zeichen_zeigen_fehlermeldung(): void
+    public function test_ungueltige_siegelzeichen_fuehren_zur_namenssuche(): void
     {
-        // 0, O, 1, I, L sind verboten
+        // 0, O, 1, I, L sind im Siegel verboten → keine Weiterleitung, sondern Namenssuche (PUB-08).
         $this->get(route('public.hero.search.go', ['code' => '000000']))
             ->assertOk()
-            ->assertSee('gültigen 6-stelligen');
+            ->assertViewHas('results', fn ($results) => $results->isEmpty());
     }
 
     public function test_eingabe_bleibt_bei_fehler_erhalten(): void

@@ -60,8 +60,9 @@ class BookingPlayerScopeTest extends TestCase
 
         $adventure = Adventure::factory()->create(['max_player' => 5]);
 
+        // Alle Spieler nur in der Admin-Anmeldung (Issue #8).
         $response = $this->actingAs($registrar)
-            ->get(route('adventures.bookings.create', $adventure))
+            ->get(route('adventures.bookings.create', [$adventure, 'all_players' => 1]))
             ->assertOk();
 
         $response->assertSee('value="'.$a->id.'"', false);

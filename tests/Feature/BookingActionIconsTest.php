@@ -63,7 +63,8 @@ class BookingActionIconsTest extends TestCase
             ->deleteJson(route('adventures.bookings.destroy', [$adventure, $booking]))
             ->assertOk();
 
-        $this->assertDatabaseMissing('bookings', ['id' => $booking->id]);
+        // Stornieren löscht nicht, sondern setzt den Status (Nachweis bleibt erhalten).
+        $this->assertDatabaseHas('bookings', ['id' => $booking->id, 'status' => 'storniert']);
     }
 
     public function test_event_booking_user_cannot_cancel_foreign_booking(): void
@@ -90,14 +91,24 @@ class BookingActionIconsTest extends TestCase
         $registrar = User::factory()->create();
         $registrar->roles()->attach(20); // Bürokrat: approve + pay + modify + cancel
         $adventure = Adventure::factory()->create();
-        Booking::factory()->for($adventure)->create(['player_id' => Player::factory()->create()->id]);
+        $booking = Booking::factory()->for($adventure)->create([
+            'player_id' => Player::factory()->create()->id,
+            'status' => 'offen',
+        ]);
 
-        $response = $this->detail($registrar, $adventure)->assertOk();
-
-        $response->assertSee('data-tooltip="Bestätigen"', false);
-        $response->assertSee('data-tooltip="Ablehnen"', false);
+        // Liste in der Verwaltung: Bezahlt/offen und Bearbeiten als Icon-Buttons.
+        $response = $this->actingAs($registrar)
+            ->get(route('adventures.manage', $adventure), ['X-Requested-With' => 'XMLHttpRequest'])
+            ->assertOk();
         $response->assertSee('data-tooltip="Als bezahlt markieren"', false);
         $response->assertSee('data-tooltip="Bearbeiten"', false);
         $response->assertSee('coins icon', false);
+
+        // Bestätigen und Ablehnen liegen im Inspektor (Issue #9).
+        $this->actingAs($registrar)
+            ->get(route('adventures.bookings.inspector', [$adventure, $booking]))
+            ->assertOk()
+            ->assertSee(route('adventures.bookings.confirm', [$adventure, $booking]), false)
+            ->assertSee(route('adventures.bookings.rejection', [$adventure, $booking]), false);
     }
 }

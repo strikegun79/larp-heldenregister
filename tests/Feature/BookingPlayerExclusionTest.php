@@ -63,8 +63,9 @@ class BookingPlayerExclusionTest extends TestCase
         $adventure = Adventure::factory()->create(['max_player' => 5]);
         Booking::factory()->for($adventure)->create(['player_id' => $booked->id]);
 
+        // Alle Spieler nur in der Admin-Anmeldung (Issue #8).
         $this->actingAs($registrar)
-            ->get(route('adventures.bookings.create', $adventure))
+            ->get(route('adventures.bookings.create', [$adventure, 'all_players' => 1]))
             ->assertOk()
             ->assertSee('NochFrei')
             ->assertDontSee('SchonDa');

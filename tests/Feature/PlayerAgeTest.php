@@ -82,8 +82,9 @@ class PlayerAgeTest extends TestCase
         $player = Player::factory()->create(['dayofbirth' => now()->subYears(13)->toDateString()]);
         Booking::factory()->for($adventure)->create(['player_id' => $player->id]);
 
-        $this->actingAs($this->userWithRole(20)) // Bürokrat: view-all-bookings
-            ->get(route('adventures.show', $adventure), ['X-Requested-With' => 'XMLHttpRequest'])
+        // Vollständige Liste nur in der Verwaltung.
+        $this->actingAs($this->userWithRole(20)) // Bürokrat: events.edit
+            ->get(route('adventures.manage', $adventure), ['X-Requested-With' => 'XMLHttpRequest'])
             ->assertOk()
             ->assertSee('Alter')
             ->assertSee('>13<', false);
