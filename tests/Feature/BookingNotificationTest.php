@@ -57,20 +57,25 @@ class BookingNotificationTest extends TestCase
         );
     }
 
-    public function test_no_confirmation_when_player_has_no_email(): void
+    /** Ohne Spieler-E-Mail geht die Bestätigung an den Betreuer (vgl. 747a216). */
+    public function test_confirmation_goes_to_guardian_when_player_has_no_email(): void
     {
         Notification::fake();
         $player = Player::factory()->create(['email' => null]);
         $adventure = Adventure::factory()->create(['max_player' => 5]);
+        $booker = $this->bookerWith($player);
 
-        $this->actingAs($this->bookerWith($player))
+        $this->actingAs($booker)
             ->postJson(route('adventures.bookings.store', $adventure), [
                 'player_id' => $player->id,
                 'event_role_id' => 1,
                 'agb' => '1', 'kontakt_telefon' => '+49 123 456789',
             ])->assertOk();
 
-        Notification::assertNothingSent();
+        Notification::assertSentOnDemand(
+            BookingReceived::class,
+            fn ($notification, $channels, $notifiable) => $notifiable->routes['mail'] === $booker->email
+        );
     }
 
     public function test_promoted_player_is_notified(): void

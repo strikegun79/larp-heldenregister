@@ -60,6 +60,7 @@ class PlayerAgeTest extends TestCase
         $this->actingAs($user)
             ->post(route('players.store'), [
                 'name' => 'Klein', 'lastname' => 'Held', 'dayofbirth' => now()->subYears(10)->toDateString(),
+                'parental_consent' => '1', // DSGVO Art. 8
             ])
             ->assertRedirect();
 

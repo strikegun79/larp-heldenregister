@@ -60,7 +60,8 @@ class AuditLogTest extends TestCase
 
         $this->assertNotNull($log);
         $this->assertSame('Kurt', $log->subject_label);
-        $this->assertSame($subject->id, $log->subject_id);
+        // subject_id ist VARCHAR (auch nicht-numerische Schlüssel, Migration 2026_06_29_125315).
+        $this->assertSame((string) $subject->id, $log->subject_id);
         $this->assertSame(User::class, $log->subject_type);
         $this->assertSame(false, $log->changes['activated']['auf']);
     }

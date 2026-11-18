@@ -52,7 +52,8 @@ class BookingWaitlistPromotionTest extends TestCase
             ->deleteJson(route('adventures.bookings.destroy', [$adventure, $regular]))
             ->assertOk();
 
-        $this->assertDatabaseMissing('bookings', ['id' => $regular->id]);
+        // Stornieren setzt den Status, der Datensatz bleibt erhalten.
+        $this->assertDatabaseHas('bookings', ['id' => $regular->id, 'status' => 'storniert']);
         $this->assertFalse($first->fresh()->waitlisted);  // nachgerückt
         $this->assertTrue($second->fresh()->waitlisted);   // bleibt auf der Warteliste
     }
@@ -88,7 +89,7 @@ class BookingWaitlistPromotionTest extends TestCase
             ->assertOk()
             ->assertJsonMissing(['message' => null]);
 
-        $this->assertDatabaseMissing('bookings', ['id' => $regular->id]);
-        $this->assertDatabaseCount('bookings', 0);
+        $this->assertDatabaseHas('bookings', ['id' => $regular->id, 'status' => 'storniert']);
+        $this->assertDatabaseCount('bookings', 1);
     }
 }
