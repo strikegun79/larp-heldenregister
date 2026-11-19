@@ -133,7 +133,9 @@ jobs:
       - name: .env anlegen
         run: |
           cp .env.example .env
-          sed -i 's|APP_ENV=production|APP_ENV=local|' .env
+          # testing statt local: Die Sperre für löschende DB-Befehle (AppServiceProvider) gilt nur
+          # für local/production. Dusk braucht migrate:fresh/rollback (DatabaseMigrations) auf der Wegwerf-DB.
+          sed -i 's|APP_ENV=production|APP_ENV=testing|' .env
           sed -i 's|APP_DEBUG=false|APP_DEBUG=true|' .env
           sed -i 's|APP_URL=.*|APP_URL=http://localhost:8000|' .env
           sed -i 's|DB_HOST=.*|DB_HOST=127.0.0.1|' .env

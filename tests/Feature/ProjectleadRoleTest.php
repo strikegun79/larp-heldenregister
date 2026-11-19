@@ -109,8 +109,9 @@ class ProjectleadRoleTest extends TestCase
 
     public function test_projektleitung_kann_portal_nicht_verwalten(): void
     {
+        // Die Verwaltungs-Übersicht ist offen (NAV-01), die Portal-Verwaltung nicht.
         $this->actingAs($this->projektleitung())
-            ->get(route('admin.index'))
+            ->get(route('admin.settings.index'))
             ->assertForbidden();
     }
 

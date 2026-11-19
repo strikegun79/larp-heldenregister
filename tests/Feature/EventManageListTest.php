@@ -41,11 +41,16 @@ class EventManageListTest extends TestCase
             ->assertOk();
 
         $response->assertSee('Burgsturm');
-        $response->assertSee('/ 8');                                  // Belegung
+        $response->assertSee('title="Maximalplätze">8</span>', false); // Belegung
         $response->assertSee('Anmeldung offen');                      // Status-Badge
         $response->assertSee(route('adventures.manage', $adventure), false); // Verwalten
-        $response->assertSee(route('adventures.cancel', $adventure), false); // Absagen
         $response->assertSee('Neues Abenteuer');                      // anlegen
+
+        // Absagen liegt im Verwaltungs-Modal („Gefahrenzone“).
+        $this->actingAs($this->userWithRole(30))
+            ->get(route('adventures.manage', $adventure), ['X-Requested-With' => 'XMLHttpRequest'])
+            ->assertOk()
+            ->assertSee(route('adventures.cancel', $adventure), false);
     }
 
     public function test_cancelled_event_has_no_cancel_action(): void
@@ -53,7 +58,7 @@ class EventManageListTest extends TestCase
         $adventure = Adventure::factory()->create(['event_status_id' => 70]); // abgesagt
 
         $this->actingAs($this->userWithRole(30))
-            ->get(route('adventures.manage-index'))
+            ->get(route('adventures.manage', $adventure), ['X-Requested-With' => 'XMLHttpRequest'])
             ->assertOk()
             ->assertDontSee(route('adventures.cancel', $adventure), false);
     }

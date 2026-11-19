@@ -57,24 +57,29 @@ class PermissionMatrixTest extends TestCase
             'Bürokrat' => [20, [
                 'profile.view', 'player.view', 'heldenregister.view', 'heldenregister.edit',
                 'adventure.book', 'adventure.modify', 'adventure.cancel', 'events.view', 'events.edit',
-                'groups.manage',
+                'groups.manage', 'roles.view',
             ]],
+            // ROLE-10, SURV-01, NL-01: Verwaltungsbereiche der Projektleitung.
             'Projektleitung' => [30, [
                 'profile.view', 'player.view', 'heldenregister.view',
                 'adventure.book', 'adventure.modify', 'adventure.cancel', 'events.view', 'events.edit',
+                'events.admin', 'survey.admin', 'survey.view', 'roles.view', 'newsletter.manage',
             ]],
             'Spielleiter' => [40, [
                 'profile.view', 'player.view', 'heldenregister.view',
                 'adventure.book', 'adventure.modify', 'adventure.cancel', 'events.view',
-                'groups.manage',
+                'groups.manage', 'heroes.admin', 'roles.view',
             ]],
+            // roles.view: Rollen- & DSGVO-Übersicht für alle Teamer-Rollen.
             'Lehrmeister' => [45, [
                 'profile.view', 'player.view', 'heldenregister.view',
                 'adventure.book', 'adventure.modify', 'adventure.cancel', 'events.view',
+                'roles.view',
             ]],
             'Teamer' => [50, [
                 'profile.view', 'player.view',
                 'adventure.book', 'adventure.modify', 'adventure.cancel', 'events.view',
+                'roles.view',
             ]],
             'Event buchen' => [60, [
                 'profile.view', 'player.view',

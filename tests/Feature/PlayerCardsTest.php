@@ -84,6 +84,7 @@ class PlayerCardsTest extends TestCase
         $this->actingAs($user)
             ->post(route('players.store'), [
                 'name' => 'Lea', 'lastname' => 'Berg',
+                'parental_consent' => '1', // DSGVO Art. 8
             ])
             ->assertRedirect();
 

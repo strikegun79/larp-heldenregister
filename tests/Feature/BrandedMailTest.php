@@ -50,21 +50,25 @@ class BrandedMailTest extends TestCase
 
     public function test_verify_mail_renders_with_branded_layout(): void
     {
+        // Vereinsname kommt aus der Umgebung (.env) – im Test fest setzen, damit CI und lokal gleich laufen.
+        config(['portal.organization' => 'Testverein Branding e.V.']);
         $user = User::factory()->create(['email_verified_at' => null]);
         $mail = (new VerifyEmail)->toMail($user);
 
         // Volle HTML-Ausgabe über den Markdown-Renderer (registriert mail::-Komponenten).
         $html = (string) app(Markdown::class)->render('notifications::email', $mail->data());
 
-        $this->assertStringContainsString('Waldritter-Gießen e.V.', $html); // Header/Footer-Branding
+        $this->assertStringContainsString('Testverein Branding e.V.', $html); // Footer-Branding
         $this->assertStringContainsString('E-Mail-Adresse bestätigen', $html);
         $this->assertStringContainsString('Viele Grüße', $html);
     }
 
     public function test_footer_view_is_branded(): void
     {
+        config(['portal.organization' => 'Testverein Branding e.V.']);
+
         $html = view('vendor.mail.html.footer', ['slot' => ''])->render();
 
-        $this->assertStringContainsString('Waldritter-Gießen e.V.', $html);
+        $this->assertStringContainsString('Testverein Branding e.V.', $html);
     }
 }

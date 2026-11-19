@@ -58,10 +58,12 @@ class EventManageModalTest extends TestCase
         $response->assertSee('data-tab="data"', false);
         $response->assertSee('data-tab="bookings"', false);
         $response->assertSee('data-tab="checkin"', false);
-        // Tab 1 enthält den Editor (Name-Feld) und KEINE Selbst-Anmeldung.
+        // Tab 1 enthält den Editor (Name-Feld) und KEINE Selbst-Anmeldung –
+        // nur die Admin-Anmeldung (all_players, Issue #8).
         $response->assertSee('name="function_email"', false);
         $response->assertSee(route('adventures.update', $adventure), false);
-        $response->assertDontSee(route('adventures.bookings.create', $adventure), false);
+        $response->assertDontSee('"'.route('adventures.bookings.create', $adventure).'"', false);
+        $response->assertSee(route('adventures.bookings.create', $adventure).'?all_players=1', false);
     }
 
     public function test_manage_modal_requires_events_edit(): void

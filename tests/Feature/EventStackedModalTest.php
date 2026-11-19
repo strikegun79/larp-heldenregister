@@ -82,8 +82,9 @@ class EventStackedModalTest extends TestCase
         $adventure = Adventure::factory()->create();
         $booking = Booking::factory()->for($adventure)->create(['player_id' => Player::factory()->create()->id]);
 
+        // Buchungsliste mit Bearbeiten-Button in der Verwaltung.
         $this->actingAs($this->registrar())
-            ->get(route('adventures.show', $adventure), ['X-Requested-With' => 'XMLHttpRequest'])
+            ->get(route('adventures.manage', $adventure), ['X-Requested-With' => 'XMLHttpRequest'])
             ->assertOk()
             ->assertSee('data-modal-stack="'.route('adventures.bookings.edit', [$adventure, $booking]).'"', false);
     }

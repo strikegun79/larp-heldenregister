@@ -88,8 +88,9 @@ class EventGuestBookingTest extends TestCase
             'booked_by_user_id' => User::factory()->create()->id,
         ]);
 
+        // Vollständige Liste nur in der Verwaltung (Detailansicht zeigt eigene Anmeldungen).
         $this->actingAs($this->userWithViewAll())
-            ->get(route('adventures.show', $adventure), ['X-Requested-With' => 'XMLHttpRequest'])
+            ->get(route('adventures.manage', $adventure), ['X-Requested-With' => 'XMLHttpRequest'])
             ->assertOk()
             ->assertSee('Gerd Gast')
             ->assertSee('Gast');
@@ -117,7 +118,8 @@ class EventGuestBookingTest extends TestCase
         $projectLead = User::factory()->create();
         $projectLead->roles()->attach(30); // Projektleitung
 
-        $adventure = Adventure::factory()->create();
+        // ADV-21: Nur die Projektleitung des Events wird informiert.
+        $adventure = Adventure::factory()->create(['eventleader_id' => $projectLead->id]);
         $booking = Booking::factory()->for($adventure)->create([
             'player_id' => Player::factory()->create()->id,
             'paid' => true, // auch bezahlte dürfen storniert werden
@@ -127,7 +129,8 @@ class EventGuestBookingTest extends TestCase
             ->deleteJson(route('adventures.bookings.destroy', [$adventure, $booking]))
             ->assertOk();
 
-        $this->assertDatabaseMissing('bookings', ['id' => $booking->id]);
+        // Stornieren löscht nicht, sondern setzt den Status (Nachweis bleibt erhalten).
+        $this->assertDatabaseHas('bookings', ['id' => $booking->id, 'status' => 'storniert']);
         Notification::assertSentTo($projectLead, BookingCancelled::class);
     }
 

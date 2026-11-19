@@ -19,7 +19,7 @@ class TeamerSignupFactory extends Factory
         return [
             'adventure_id' => Adventure::factory(),
             'user_id' => User::factory(),
-            'teamer_role' => null,
+            'event_role_id' => null,
             'agb' => true,
         ];
     }

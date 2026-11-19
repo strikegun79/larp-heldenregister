@@ -104,9 +104,10 @@ class ModalAjaxTest extends DuskTestCase
             'email' => 'nodelete@waldritter.de', 'activated' => true,
         ]);
 
-        $this->browse(function (Browser $browser) use ($admin) {
+        $this->browse(function (Browser $browser) use ($admin, $target) {
             $browser->loginAs($admin)
-                ->visit('/admin/users')
+                // Der Löschen-Button sitzt auf der Profilseite des Benutzers (nicht mehr in der Liste)
+                ->visit("/admin/users/{$target->id}/profile")
                 ->assertSee('NichtLoeschen')
                 // Löschen-Button klicken (hat data-confirm auf dem übergeordneten <form>)
                 ->click("form[data-confirm*='NichtLoeschen'] [type=submit]")
@@ -116,8 +117,10 @@ class ModalAjaxTest extends DuskTestCase
                 // "Abbrechen" klicken — kein Submit
                 ->click('#confirm-modal .deny.button')
                 ->waitUntilMissing('#confirm-modal.active', 5)
-                // Benutzer muss noch in der Liste sichtbar sein
-                ->assertSee('NichtLoeschen');
+                // Seite bleibt stehen, Benutzer ist nicht gelöscht
+                ->assertSee('Konto löschen');
         });
+
+        $this->assertNotSoftDeleted($target);
     }
 }

@@ -69,7 +69,12 @@ class ProfileTest extends TestCase
         $this->assertSame('+49 123 456789', $user->phone);
     }
 
-    public function test_phone_is_required(): void
+    /**
+     * Nachname und Telefon sind im Profil optional (seit ff32b69), damit z. B.
+     * übernommene Konten ohne diese Angaben ihre Benachrichtigungen speichern können.
+     * Bei der Registrierung bleibt der Nachname Pflicht.
+     */
+    public function test_phone_is_optional(): void
     {
         $user = User::factory()->create(['phone' => '123']);
 
@@ -80,10 +85,12 @@ class ProfileTest extends TestCase
                 'email' => $user->email,
                 'phone' => '',
             ])
-            ->assertSessionHasErrors('phone');
+            ->assertSessionHasNoErrors();
+
+        $this->assertNull($user->fresh()->phone);
     }
 
-    public function test_lastname_is_required(): void
+    public function test_lastname_is_optional(): void
     {
         $user = User::factory()->create();
 
@@ -94,7 +101,7 @@ class ProfileTest extends TestCase
                 'email' => $user->email,
                 'phone' => $user->phone,
             ])
-            ->assertSessionHasErrors('lastname');
+            ->assertSessionHasNoErrors();
     }
 
     public function test_phone_max_length_is_validated(): void

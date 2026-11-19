@@ -6,8 +6,8 @@ use App\Models\Adventure;
 use App\Models\Booking;
 use App\Models\Player;
 use App\Models\User;
-use App\Notifications\BookingApproved;
 use App\Notifications\BookingCancelledParticipant;
+use App\Notifications\BookingReceived;
 use App\Notifications\BookingRejected;
 use App\Notifications\PaymentConfirmed;
 use Database\Seeders\EventLookupSeeder;
@@ -61,19 +61,23 @@ class BookingStatusNotificationTest extends TestCase
         [$adventure, $booking] = $this->bookingWithEmail();
 
         $this->actingAs($this->registrar())
-            ->patchJson(route('adventures.bookings.approval', [$adventure, $booking]));
+            ->patchJson(route('adventures.bookings.confirm', [$adventure, $booking]))
+            ->assertOk();
 
-        Notification::assertSentOnDemand(BookingApproved::class);
+        // Bestätigung mit Zahlungsinformationen.
+        Notification::assertSentOnDemand(BookingReceived::class);
     }
 
-    public function test_keine_mail_beim_zuruecknehmen_der_bestaetigung(): void
+    /** Bestätigen ist kein Toggle mehr: bereits bestätigte Anmeldung → keine erneute Mail. */
+    public function test_keine_mail_bei_bereits_bestaetigter_anmeldung(): void
     {
         Notification::fake();
         [$adventure, $booking] = $this->bookingWithEmail();
         $booking->update(['approved_at' => now(), 'status' => 'bestaetigt']);
 
         $this->actingAs($this->registrar())
-            ->patchJson(route('adventures.bookings.approval', [$adventure, $booking]));
+            ->patchJson(route('adventures.bookings.confirm', [$adventure, $booking]))
+            ->assertStatus(422);
 
         Notification::assertNothingSent();
     }
@@ -89,16 +93,20 @@ class BookingStatusNotificationTest extends TestCase
         Notification::assertSentOnDemand(BookingRejected::class);
     }
 
-    public function test_keine_mail_beim_zuruecknehmen_der_ablehnung(): void
+    /** Rücknahme der Ablehnung: Familie erhält die Bestätigung, keine Ablehnungs-Mail (vgl. 747a216). */
+    public function test_zuruecknehmen_der_ablehnung_sendet_bestaetigung(): void
     {
         Notification::fake();
         [$adventure, $booking] = $this->bookingWithEmail();
         $booking->update(['status' => 'abgelehnt']);
 
         $this->actingAs($this->registrar())
-            ->patchJson(route('adventures.bookings.rejection', [$adventure, $booking]));
+            ->patchJson(route('adventures.bookings.rejection', [$adventure, $booking]))
+            ->assertOk();
 
-        Notification::assertNothingSent();
+        $this->assertSame('bestaetigt', $booking->fresh()->status);
+        Notification::assertSentOnDemand(BookingReceived::class);
+        Notification::assertNotSentTo($booking->player, BookingRejected::class);
     }
 
     public function test_stornierung_wird_an_teilnehmer_gesendet(): void
@@ -147,7 +155,7 @@ class BookingStatusNotificationTest extends TestCase
         ]);
 
         $this->actingAs($this->registrar())
-            ->patchJson(route('adventures.bookings.approval', [$adventure, $booking]));
+            ->patchJson(route('adventures.bookings.confirm', [$adventure, $booking]));
 
         Notification::assertNothingSent();
     }

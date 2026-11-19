@@ -66,7 +66,10 @@ class PlayerTest extends TestCase
             ->assertSee('data-modal-title', false);
 
         $this->actingAs($user)
-            ->putJson(route('players.update', $player), ['name' => 'Neu', 'lastname' => 'Name'])
+            ->putJson(route('players.update', $player), [
+                'name' => 'Neu', 'lastname' => 'Name',
+                'parental_consent' => '1', // DSGVO Art. 8: Pflicht bei nicht-eigenen Spielern
+            ])
             ->assertOk()
             ->assertJson(['reload' => true]);
 
@@ -94,9 +97,10 @@ class PlayerTest extends TestCase
         $this->assertEquals($second->id, $player->fresh()->active_hero_id);
     }
 
-    public function test_setting_active_hero_marks_only_that_hero_active(): void
+    public function test_setting_active_hero_does_not_change_release_flag(): void
     {
-        // HERO-21: aktiv setzen aktiviert genau diesen Helden, alle anderen werden inaktiv.
+        // Aktiver Held wird nur über players.active_hero_id gesteuert; heroes.active ist
+        // die Bürokraten-Freigabe und bleibt unverändert (vgl. 445edec).
         $user = User::factory()->create();
         $player = Player::factory()->create();
         $user->players()->attach($player->id, ['self' => true]);
@@ -107,9 +111,9 @@ class PlayerTest extends TestCase
             ->patchJson(route('players.active-hero', $player), ['hero_id' => $second->id])
             ->assertOk();
 
-        $this->assertFalse($first->fresh()->active);
-        $this->assertTrue($second->fresh()->active);
         $this->assertEquals($second->id, $player->fresh()->active_hero_id);
+        $this->assertTrue($first->fresh()->active);
+        $this->assertTrue($second->fresh()->active);
     }
 
     public function test_cannot_set_a_hero_of_another_player_as_active(): void
