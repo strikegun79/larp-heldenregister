@@ -1,0 +1,33 @@
+/* Waldritter UI — Vorschlag, bestehende Regeln schrittweise migrieren */
+:root {
+  --wr-forest: #284D38;
+  --wr-forest-hover: #1D3B2A;
+  --wr-moss: #587749;
+  --wr-parchment: #F4E8CC;
+  --wr-parchment-deep: #E7D5AE;
+  --wr-paper: #FFF9EC;
+  --wr-ink: #35281E;
+  --wr-ink-muted: #665343;
+  --wr-gold: #B58A3A;
+  --wr-leather: #765039;
+  --wr-danger: #A4483B;
+  --wr-border: #C8B68E;
+  --wr-focus: #245F93;
+  --wr-radius-card: 14px;
+  --wr-radius-control: 9px;
+  --wr-shadow-card: 0 4px 16px rgba(53,40,30,.13);
+  --wr-font-body: 'EB Garamond', Georgia, serif;
+  --wr-font-heading: 'Cinzel Decorative', Georgia, serif;
+  --wr-class-warrior: #B44343;
+  --wr-class-mage: #D5A523;
+  --wr-class-ranger: #3F8156;
+  --wr-class-healer: #386BA1;
+  --wr-class-alchemist: #C77330;
+}
+/* Vor Nutzung der Klassennamen die Zuordnung aus bestehenden Daten prüfen. */
+.wr-surface { background: var(--wr-paper); color: var(--wr-ink); border: 1px solid var(--wr-border); border-radius: var(--wr-radius-card); box-shadow: var(--wr-shadow-card); }
+.wr-button-primary { background: var(--wr-forest); color: #fff; border: 2px solid var(--wr-forest); border-radius: var(--wr-radius-control); padding: .75rem 1.15rem; min-height: 44px; font-weight: 700; }
+.wr-button-primary:hover { background: var(--wr-forest-hover); }
+.wr-button-secondary { background: var(--wr-paper); color: var(--wr-ink); border: 2px solid var(--wr-leather); border-radius: var(--wr-radius-control); padding: .75rem 1.15rem; min-height: 44px; }
+.wr-button-primary:focus-visible, .wr-button-secondary:focus-visible, .wr-interactive:focus-visible { outline: 3px solid var(--wr-focus); outline-offset: 3px; }
+@media (prefers-reduced-motion: reduce) { .wr-interactive, .wr-button-primary, .wr-button-secondary { animation: none !important; transition: none !important; } }
