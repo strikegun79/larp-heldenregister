@@ -21,7 +21,7 @@
                         } elseif ($booking->status === 'bestaetigt') {
                             [$pillClass, $icon, $statusText] = ['wr-pill--success', 'check circle', 'bestätigt'];
                         } else {
-                            [$pillClass, $icon, $statusText] = ['wr-pill--pending', 'clock outline', 'wartet auf Bestätigung'];
+                            [$pillClass, $icon, $statusText] = ['wr-pill--pending', 'clock', 'wartet auf Bestätigung'];
                         }
                     @endphp
                     <li class="wr-participant">
