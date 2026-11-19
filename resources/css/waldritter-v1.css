@@ -59,7 +59,7 @@
     font-weight: 700;
     letter-spacing: .15em;
     text-transform: uppercase;
-    color: #70562c;
+    color: #5f4823; /* mind. 4,5:1 auch auf der Papiertextur */
 }
 
 .wr-heading {
@@ -73,7 +73,7 @@
 
 .wr-intro {
     font-size: 1.05rem;
-    color: var(--wr-ink-muted);
+    color: #5a4636; /* etwas dunkler als ink-muted wegen der Papiertextur */
     max-width: 42rem;
     margin: 0;
 }
@@ -258,7 +258,7 @@
     position: relative;
     display: flex;
     align-items: flex-end;
-    min-height: 19rem;
+    min-height: 15rem;
     padding: 1.25rem;
     border: 3px solid var(--wr-gold);
     border-radius: 15px;
@@ -281,13 +281,14 @@
     object-fit: cover;
 }
 
-/* Dunkler Verlauf hinter dem Text (mobil: von unten) */
+/* Dunkler Verlauf hinter dem Text. Mobil füllt der Text fast das ganze Banner,
+   deshalb überall mind. 0,86 Deckkraft (Kontrast auch über hellem Himmel). */
 .wr-quest::after {
     content: '';
     position: absolute;
     inset: 0;
     z-index: -1;
-    background: linear-gradient(0deg, rgba(27, 61, 43, .97) 10%, rgba(27, 61, 43, .82) 55%, rgba(27, 61, 43, .15) 100%);
+    background: linear-gradient(0deg, rgba(27, 61, 43, .96) 0%, rgba(27, 61, 43, .86) 100%);
 }
 
 .wr-quest__content {
@@ -351,6 +352,44 @@
     .wr-card__media {
         height: 8rem;
     }
+
+    /* Kompakte Navigationskacheln: zweispaltig, kleines Bild, ohne Fließtext */
+    .wr-card--compact .wr-card__media {
+        height: 4.5rem;
+    }
+
+    .wr-card--compact .wr-card__body {
+        padding: .6rem .7rem .75rem;
+        gap: .15rem;
+    }
+
+    .wr-card--compact .wr-card__title {
+        font-size: 1rem;
+        overflow-wrap: anywhere;
+    }
+
+    .wr-card--compact .wr-card__text,
+    .wr-card--compact .wr-tag {
+        display: none;
+    }
+
+    .wr-card--compact .wr-card__hint {
+        font-size: .75rem;
+    }
+
+    /* Fokussierte Elemente nicht hinter der fixierten Bottom-Navigation (h-16) verstecken */
+    html {
+        scroll-padding-bottom: 5rem;
+    }
+}
+
+/* Zusatzhinweis in Karten (z. B. „auf der Waldritter-Website“) */
+.wr-card__hint {
+    display: inline-flex;
+    align-items: center;
+    gap: .25rem;
+    font-size: .85rem;
+    color: var(--wr-ink-muted);
 }
 
 /* --- Kennzahl-Kachel (Verwaltung) ---------------------------------------- */
@@ -396,11 +435,9 @@
 .wr-pill--danger { background-color: #f3dad5; color: #7a2e24; }
 .wr-pill--info { background-color: #dce6f0; color: #1f4a73; }
 
-/* Zusatzsymbole in Pills: Farbe nur ergänzend (Titel + Screenreader-Text vorhanden) */
-.wr-pill .icon { margin: 0; }
-.wr-pill__icon--teamer { color: var(--wr-focus); }
-.wr-pill__icon--paid { color: #2f6b2a; }
-.wr-pill__icon--unpaid { color: #8a5a00; }
+/* Symbole in Pills: Farbe nur ergänzend, der Status steht immer als Text daneben */
+.wr-pill .icon { margin: 0; height: auto; }
+.wr-pill--small { font-size: .78rem; padding: .1rem .5rem; }
 
 /* --- Fortschrittsbalken -------------------------------------------------- */
 .wr-progress {
@@ -444,6 +481,28 @@
 .wr-class--heiler { --wr-class-color: var(--wr-class-healer); }
 .wr-class--alchemist { --wr-class-color: var(--wr-class-alchemist); }
 
+/* --- Teilnehmerliste in Anmeldekarten ------------------------------------ */
+.wr-participants {
+    display: flex;
+    flex-direction: column;
+    gap: .5rem;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.wr-participant {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: .3rem .4rem;
+}
+
+.wr-participant__name {
+    font-weight: 700;
+    overflow-wrap: anywhere;
+}
+
 /* --- Onboarding-Schritte ------------------------------------------------- */
 .wr-step__marker {
     display: flex;
@@ -460,6 +519,24 @@
 
 .wr-step__marker--done {
     background-color: var(--wr-moss);
+}
+
+/* Noch nicht dran: helle Plakette statt Abblenden (Text bleibt voll lesbar) */
+.wr-step__marker--later {
+    background-color: var(--wr-parchment);
+    border: 2px solid var(--wr-leather);
+    color: var(--wr-ink);
+}
+
+.wr-step__later {
+    display: inline-block;
+    margin-left: .35rem;
+    padding: 0 .45rem;
+    border-radius: 999px;
+    background-color: var(--wr-parchment);
+    font-size: .78rem;
+    font-weight: 600;
+    color: var(--wr-ink);
 }
 
 /* --- Bewegung reduzieren ------------------------------------------------- */

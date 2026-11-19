@@ -6,7 +6,13 @@
              key: '{{ $motd->dismiss_key }}',
              sichtbar: true,
              init() { try { this.sichtbar = !localStorage.getItem(this.key); } catch (e) {} },
-             schliessen() { try { localStorage.setItem(this.key, '1'); } catch (e) {} this.sichtbar = false; this.$dispatch('motd-dismissed'); },
+             schliessen() {
+                 try { localStorage.setItem(this.key, '1'); } catch (e) {}
+                 this.sichtbar = false;
+                 this.$dispatch('motd-dismissed');
+                 {{-- Fokus nicht verlieren: zurück zur Begrüßung (Ziel mit tabindex=-1 im Dashboard) --}}
+                 this.$nextTick(() => document.getElementById('dashboard-heading')?.focus());
+             },
              @endif
              zaehlen(e) {
                  const link = e.target.closest('a[href]');
@@ -23,8 +29,11 @@
          style="display:block;@if ($motd->variant === 'neutral') background: rgb(255 255 255 / 0.6); border: 2px solid rgb(90 58 34 / 0.3); box-shadow: none; color: #292524; border-radius: .5rem;@endif"
          role="status">
         @if ($motd->dismissible)
-            <i class="close icon" @click="schliessen()" role="button" tabindex="0"
-               @keydown.enter="schliessen()" aria-label="Nachricht schließen"></i>
+            {{-- Echter Button: Enter/Leertaste funktionieren, Klickfläche 44 × 44 px --}}
+            <button type="button" @click="schliessen()" aria-label="Nachricht schließen"
+                    class="wr-interactive absolute top-1 right-1 inline-flex items-center justify-center w-11 h-11 rounded-full bg-transparent border-0 cursor-pointer opacity-70 hover:opacity-100">
+                <i class="close icon m-0" aria-hidden="true"></i>
+            </button>
         @endif
         @if ($motd->image_url)
             @if ($motd->image_link)

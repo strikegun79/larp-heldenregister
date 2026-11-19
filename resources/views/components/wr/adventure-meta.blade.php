@@ -12,7 +12,7 @@
     @if ($adventure->location)
         <div class="flex items-center gap-1.5 min-w-0">
             <dt><i class="map marker alternate icon" aria-hidden="true"></i><span class="sr-only">Ort</span></dt>
-            <dd class="truncate">{{ $adventure->location->titel }}</dd>
+            <dd class="[overflow-wrap:anywhere]">{{ $adventure->location->titel }}</dd>
         </div>
     @endif
     <div class="flex items-center gap-1.5">
