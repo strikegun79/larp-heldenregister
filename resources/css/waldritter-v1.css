@@ -1,0 +1,444 @@
+/* ===========================================================================
+   Waldritter-Designsystem v1 – „Die lebendige Waldritter-Chronik“
+   Quelle: docs/design/waldritter-v1/ (DESIGN-SYSTEM.md, design-tokens.css)
+
+   Pilotphase: Die Komponentenklassen (wr-*) wirken nur dort, wo sie
+   ausdrücklich verwendet werden. Bestehende Fomantic-Regeln (.ui.*) und die
+   Legacy-Tokens in app.css bleiben unverändert.
+
+   Token-Konflikt: --wr-ink und --wr-gold existieren bereits mit anderen Werten
+   (app.css). Die neuen Zielwerte gelten deshalb nur innerhalb von .wr-v1.
+   Eine globale Umstellung erfolgt später in einem eigenen Schritt.
+   =========================================================================== */
+
+/* --- Neue Tokens ohne Namenskonflikt (global verfügbar, aber ungenutzt) --- */
+:root {
+    --wr-forest: #284d38;
+    --wr-forest-hover: #1d3b2a;
+    --wr-moss: #587749;
+    --wr-parchment: #f4e8cc;
+    --wr-parchment-deep: #e7d5ae;
+    --wr-paper: #fff9ec;
+    --wr-ink-muted: #665343;
+    --wr-leather: #765039;
+    --wr-danger: #a4483b;
+    --wr-border: #c8b68e;
+    --wr-focus: #245f93;
+
+    --wr-radius-card: 14px;
+    --wr-radius-control: 9px;
+    --wr-shadow-card: 0 4px 16px rgba(53, 40, 30, .13);
+    --wr-shadow-card-hover: 0 8px 24px rgba(53, 40, 30, .18);
+
+    --wr-font-body: 'EB Garamond', Georgia, serif;
+    --wr-font-heading: 'Cinzel Decorative', Georgia, serif;
+
+    /* Klassenfarben (Vorschlag aus dem Designsystem). Nie allein zur
+       Kennzeichnung verwenden – immer zusammen mit Klassenname/-banner. */
+    --wr-class-warrior: #b44343;
+    --wr-class-mage: #d5a523;
+    --wr-class-ranger: #3f8156;
+    --wr-class-healer: #386ba1;
+    --wr-class-alchemist: #c77330;
+}
+
+/* --- Pilot-Bereich: neue Zielwerte für kollidierende Token-Namen --------- */
+.wr-v1 {
+    --wr-ink: #35281e;
+    --wr-gold: #b58a3a;
+    color: var(--wr-ink);
+    font-family: var(--wr-font-body);
+    line-height: 1.5;
+}
+
+/* --- Typografie ---------------------------------------------------------- */
+.wr-eyebrow {
+    display: block;
+    font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    font-size: .75rem;
+    font-weight: 700;
+    letter-spacing: .15em;
+    text-transform: uppercase;
+    color: #70562c;
+}
+
+.wr-heading {
+    font-family: var(--wr-font-heading);
+    font-weight: 700;
+    font-size: clamp(1.5rem, 1.1rem + 2vw, 2.4rem);
+    line-height: 1.2;
+    color: var(--wr-ink);
+    margin: .35rem 0 .5rem;
+}
+
+.wr-intro {
+    font-size: 1.05rem;
+    color: var(--wr-ink-muted);
+    max-width: 42rem;
+    margin: 0;
+}
+
+.wr-section-heading {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: .25rem 1rem;
+    margin: 2rem 0 .9rem;
+}
+
+.wr-section-heading__title {
+    font-family: var(--wr-font-heading);
+    font-weight: 700;
+    font-size: clamp(1.15rem, 1rem + .8vw, 1.5rem);
+    line-height: 1.25;
+    color: var(--wr-ink);
+    margin: 0;
+}
+
+.wr-section-heading__aside {
+    font-size: .9rem;
+    color: var(--wr-ink-muted);
+}
+
+/* --- Fokus (einheitlich, gut sichtbar) ----------------------------------- */
+.wr-interactive:focus-visible,
+.wr-btn:focus-visible,
+.wr-card--link:focus-visible {
+    outline: 3px solid var(--wr-focus);
+    outline-offset: 3px;
+}
+
+/* --- Buttons ------------------------------------------------------------- */
+.wr-btn {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: .45rem;
+    min-height: 44px;
+    padding: .6rem 1.15rem;
+    border: 2px solid transparent;
+    border-radius: var(--wr-radius-control);
+    font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    font-size: .95rem;
+    font-weight: 700;
+    line-height: 1.2;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background-color .15s ease, border-color .15s ease, color .15s ease;
+}
+
+.wr-btn--primary {
+    background-color: var(--wr-forest);
+    border-color: var(--wr-forest);
+    color: #fff;
+}
+
+.wr-btn--primary:hover {
+    background-color: var(--wr-forest-hover);
+    border-color: var(--wr-forest-hover);
+    color: #fff;
+}
+
+.wr-btn--secondary {
+    background-color: var(--wr-paper);
+    border-color: var(--wr-leather);
+    color: var(--wr-ink);
+}
+
+.wr-btn--secondary:hover {
+    background-color: var(--wr-parchment);
+    color: var(--wr-ink);
+}
+
+/* Heller Button auf dunklem Banner (dunkle Schrift, hoher Kontrast) */
+.wr-btn--on-dark {
+    background-color: #f1d48b;
+    border-color: #f1d48b;
+    color: var(--wr-ink);
+}
+
+.wr-btn--on-dark:hover {
+    background-color: #fff3d1;
+    border-color: #fff3d1;
+    color: var(--wr-ink);
+}
+
+.wr-btn--on-dark:focus-visible {
+    outline-color: #fff;
+}
+
+.wr-btn--small {
+    min-height: 44px;
+    padding: .45rem .9rem;
+    font-size: .875rem;
+}
+
+/* --- Karten -------------------------------------------------------------- */
+.wr-card {
+    display: flex;
+    flex-direction: column;
+    background-color: var(--wr-paper);
+    color: var(--wr-ink);
+    border: 1px solid var(--wr-border);
+    border-radius: var(--wr-radius-card);
+    box-shadow: var(--wr-shadow-card);
+    overflow: hidden;
+}
+
+/* Komplett verlinkte Karte: nur wenn das Ziel eindeutig ist */
+.wr-card--link {
+    text-decoration: none;
+    transition: box-shadow .15s ease, transform .15s ease;
+}
+
+.wr-card--link:hover {
+    color: var(--wr-ink);
+    box-shadow: var(--wr-shadow-card-hover);
+    transform: translateY(-2px);
+}
+
+.wr-card__media {
+    position: relative;
+    height: 10rem;
+    overflow: hidden;
+    background-color: var(--wr-parchment-deep);
+}
+
+.wr-card__media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+.wr-card__body {
+    display: flex;
+    flex: 1;
+    flex-direction: column;
+    gap: .35rem;
+    padding: 1rem 1.1rem 1.15rem;
+}
+
+.wr-card__title {
+    font-family: var(--wr-font-heading);
+    font-weight: 700;
+    font-size: 1.2rem;
+    line-height: 1.25;
+    color: var(--wr-ink);
+    margin: 0;
+}
+
+.wr-card__text {
+    font-size: .95rem;
+    color: var(--wr-ink-muted);
+    margin: 0;
+}
+
+/* Button-/Aktionszeile am Kartenende */
+.wr-card__actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem;
+    margin-top: auto;
+    padding-top: .6rem;
+}
+
+/* Kategoriezeile über dem Kartentitel */
+.wr-tag {
+    font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    font-size: .72rem;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: #44602f;
+}
+
+/* --- Quest-Banner (nächstes Abenteuer) ----------------------------------- */
+.wr-quest {
+    position: relative;
+    display: flex;
+    align-items: flex-end;
+    min-height: 19rem;
+    padding: 1.25rem;
+    border: 3px solid var(--wr-gold);
+    border-radius: 15px;
+    background-color: var(--wr-forest);
+    color: #fff;
+    box-shadow: 0 10px 22px rgba(56, 38, 20, .18);
+    overflow: hidden;
+    isolation: isolate;
+}
+
+.wr-quest__media {
+    position: absolute;
+    inset: 0;
+    z-index: -2;
+}
+
+.wr-quest__media img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+}
+
+/* Dunkler Verlauf hinter dem Text (mobil: von unten) */
+.wr-quest::after {
+    content: '';
+    position: absolute;
+    inset: 0;
+    z-index: -1;
+    background: linear-gradient(0deg, rgba(27, 61, 43, .97) 10%, rgba(27, 61, 43, .82) 55%, rgba(27, 61, 43, .15) 100%);
+}
+
+.wr-quest__content {
+    max-width: 34rem;
+}
+
+.wr-quest__eyebrow {
+    color: #f1d48b;
+}
+
+.wr-quest__title {
+    font-family: var(--wr-font-heading);
+    font-weight: 700;
+    font-size: clamp(1.35rem, 1.1rem + 1.4vw, 2rem);
+    line-height: 1.2;
+    color: #fff;
+    margin: .4rem 0 .6rem;
+}
+
+.wr-quest__text {
+    font-size: 1.02rem;
+    line-height: 1.5;
+    color: #f7f1e3;
+    margin: 0 0 1rem;
+}
+
+@media (min-width: 640px) {
+    .wr-quest {
+        align-items: center;
+        min-height: 16rem;
+        padding: 1.75rem 2rem;
+    }
+
+    .wr-quest::after {
+        background: linear-gradient(100deg, rgba(25, 51, 35, .96) 0%, rgba(25, 51, 35, .9) 45%, rgba(25, 51, 35, .2) 100%);
+    }
+}
+
+/* --- Kennzahl-Kachel (Verwaltung) ---------------------------------------- */
+.wr-stat {
+    display: flex;
+    flex-direction: column;
+    gap: .15rem;
+    padding: 1rem 1.1rem;
+    background-color: var(--wr-paper);
+    border: 1px solid var(--wr-border);
+    border-radius: var(--wr-radius-card);
+}
+
+.wr-stat__value {
+    font-size: 1.9rem;
+    font-weight: 700;
+    line-height: 1.1;
+    color: var(--wr-forest);
+}
+
+.wr-stat__label {
+    font-size: .9rem;
+    color: var(--wr-ink-muted);
+}
+
+/* --- Status-Pills (immer Symbol + Text, nie nur Farbe) ------------------- */
+.wr-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: .3rem;
+    padding: .2rem .6rem;
+    border-radius: 999px;
+    font-size: .85rem;
+    font-weight: 600;
+    line-height: 1.3;
+    background-color: var(--wr-parchment);
+    color: var(--wr-ink);
+}
+
+.wr-pill--success { background-color: #e3ebdb; color: #2f4a26; }
+.wr-pill--pending { background-color: #f6e7c4; color: #6b4a12; }
+.wr-pill--waitlist { background-color: #ece4d6; color: #4f4234; }
+.wr-pill--danger { background-color: #f3dad5; color: #7a2e24; }
+.wr-pill--info { background-color: #dce6f0; color: #1f4a73; }
+
+/* --- Fortschrittsbalken -------------------------------------------------- */
+.wr-progress {
+    height: .55rem;
+    border-radius: 999px;
+    background-color: var(--wr-parchment-deep);
+    overflow: hidden;
+}
+
+.wr-progress__bar {
+    display: block;
+    height: 100%;
+    border-radius: 999px;
+    background-color: var(--wr-moss);
+}
+
+/* --- Klassenkennzeichnung (Banner + Name, Farbe nur als Akzent) ---------- */
+.wr-class-badge {
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+    padding: .15rem .55rem .15rem .25rem;
+    border: 1px solid var(--wr-border);
+    border-left: 4px solid var(--wr-class-color, var(--wr-leather));
+    border-radius: 7px;
+    background-color: var(--wr-paper);
+    font-size: .85rem;
+    font-weight: 600;
+    color: var(--wr-ink);
+}
+
+.wr-class-badge img {
+    width: 1.4rem;
+    height: 1.4rem;
+    object-fit: contain;
+}
+
+.wr-class--krieger { --wr-class-color: var(--wr-class-warrior); }
+.wr-class--magier { --wr-class-color: var(--wr-class-mage); }
+.wr-class--waldlaeufer { --wr-class-color: var(--wr-class-ranger); }
+.wr-class--heiler { --wr-class-color: var(--wr-class-healer); }
+.wr-class--alchemist { --wr-class-color: var(--wr-class-alchemist); }
+
+/* --- Onboarding-Schritte ------------------------------------------------- */
+.wr-step__marker {
+    display: flex;
+    flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
+    width: 2.25rem;
+    height: 2.25rem;
+    border-radius: 999px;
+    font-weight: 700;
+    background-color: var(--wr-leather);
+    color: #fff;
+}
+
+.wr-step__marker--done {
+    background-color: var(--wr-moss);
+}
+
+/* --- Bewegung reduzieren ------------------------------------------------- */
+@media (prefers-reduced-motion: reduce) {
+    .wr-btn,
+    .wr-card--link,
+    .wr-interactive {
+        transition: none !important;
+        animation: none !important;
+    }
+
+    .wr-card--link:hover {
+        transform: none;
+    }
+}

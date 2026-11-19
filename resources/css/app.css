@@ -5,6 +5,9 @@
 @import '@fontsource/uncial-antiqua/400.css';
 @import '@fontsource/medievalsharp/400.css';
 
+/* Waldritter-Designsystem v1 (Pilot, nur wr-*-Klassen; siehe docs/design/waldritter-v1/) */
+@import './waldritter-v1.css';
+
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
