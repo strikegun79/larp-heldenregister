@@ -307,6 +307,11 @@
     margin: .4rem 0 .6rem;
 }
 
+.wr-quest__meta {
+    color: #f7f1e3;
+    margin: 0 0 .75rem;
+}
+
 .wr-quest__text {
     font-size: 1.02rem;
     line-height: 1.5;
@@ -323,6 +328,28 @@
 
     .wr-quest::after {
         background: linear-gradient(100deg, rgba(25, 51, 35, .96) 0%, rgba(25, 51, 35, .9) 45%, rgba(25, 51, 35, .2) 100%);
+    }
+}
+
+/* Heller Untergrund für Statusangaben (z. B. auf dem dunklen Quest-Banner).
+   Die Tailwind-Klassen im Partial bleiben bestehen (Tests prüfen darauf);
+   hier wird nur der zu schwache Kontrast von amber-600 angehoben. */
+.wr-status-chip {
+    display: inline-block;
+    padding: .4rem .75rem;
+    border-radius: var(--wr-radius-control);
+    background-color: var(--wr-paper);
+    color: var(--wr-ink);
+}
+
+.wr-status-chip .text-amber-600 {
+    color: #8a5a00;
+}
+
+/* Kartenbilder auf Smartphones etwas flacher */
+@media (max-width: 639px) {
+    .wr-card__media {
+        height: 8rem;
     }
 }
 
