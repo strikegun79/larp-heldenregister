@@ -71,3 +71,16 @@ Matrix, EP-Buchungen).
 - [x] Das öffnen eines Nutzer in der Nutzer-Verwaltung soll per klick auf die Zeile sich öffnen.
 - [x] Löschen soll als Symbol (Mülleimer) zu sehen sein.
 - [x] Ein Nutzer soll auch Wiederverwendbar sein. Also nur Soft-Deletes (bereits via `SoftDeletes` + restore-Route implementiert).
+
+### ADM-11 · [P2] Alt-Text für Bilder der Startseiten-Nachricht (MOTD) · ⏱ 2h · 🔲
+**Beschreibung:** Bilder der Startseiten-Nachricht haben keinen frei wählbaren
+Alternativtext. Verlinkte Bilder heißen pauschal „Banner – zum Link“, nicht
+verlinkte sind leer. Inhaltstragende Banner (z. B. mit Datum oder Ort im Bild)
+sind für Screenreader-Nutzer so nicht verständlich (WCAG 1.1.1).
+Quelle: Prüfung des Dashboard-Piloten (19.11.2026).
+**Akzeptanzkriterien:**
+- [ ] Neue Migration: Spalte `image_alt` (nullable, max. 255) in `motds`.
+- [ ] Eingabefeld im MOTD-Formular mit Hinweis („Was steht auf dem Bild?“), Validierung.
+- [ ] `dashboard/_motd.blade.php` nutzt `image_alt`; leer = dekorativ (`alt=""`).
+- [ ] Test für Speichern und Ausgabe.
+**Betroffene Seiten/Routen:** `motds`-Migration, `Motd`-Model, Admin-MOTD-Formular, `dashboard/_motd.blade.php`

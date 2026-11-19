@@ -111,3 +111,27 @@ Mobiltelefon
 - [x] Das Profil öffnet man über einen Button in der Übersicht der Nutzer.
 - [x] Der Lösch-Button ist im Nutzer-Details-Modal (nicht in der Übersicht).
 - [x] Der Button in der Übersicht wurde zum Profil-Öffnen-Button umfunktioniert.
+
+### AUTH-15 · [P1] Newsletter-Abo nur durch volljährige Kontoinhaber · ⏱ 3h · 🔲
+**Beschreibung:** Bei der Registrierung wird das Alter nicht abgefragt. Ein Kind
+kann sich selbst ein Konto anlegen und über das Dashboard den Newsletter
+abonnieren. Für eine wirksame Einwilligung braucht es bei Kindern unter 16 die
+Zustimmung der Eltern (Art. 8 DSGVO).
+Quelle: Prüfung des Dashboard-Piloten (19.11.2026), zur Bewertung durch den
+`privacy-reviewer`.
+**Akzeptanzkriterien:**
+- [ ] Entscheidung dokumentiert: Altersabfrage bei der Registrierung oder Bestätigung „Ich bin mindestens 16 Jahre alt / erziehungsberechtigt“ beim Abo.
+- [ ] Newsletter-Banner und Abo-Route berücksichtigen die Entscheidung.
+- [ ] Tests angepasst (`NewsletterSubscriptionTest`).
+**Betroffene Seiten/Routen:** Registrierung, `dashboard.blade.php` (Newsletter-Banner), Newsletter-Controller
+
+### AUTH-16 · [P2] Gespeicherten Newsletter-Einwilligungstext anzeigen · ⏱ 2h · 🔲
+**Beschreibung:** Beim Abo werden `consent_text` und `consented_at` gespeichert,
+der Nutzer bekommt den Text aber nie zu sehen. Eine Einwilligung muss informiert
+erfolgen, und der Nutzer sollte später nachsehen können, wozu er eingewilligt hat.
+Quelle: Prüfung des Dashboard-Piloten (19.11.2026).
+**Akzeptanzkriterien:**
+- [ ] Einwilligungstext steht sichtbar am Abo-Button (bzw. ist dort aufklappbar).
+- [ ] Im Profil: Abo-Status, Datum der Einwilligung, gespeicherter Text und Abmelden.
+- [ ] Test: angezeigter Text entspricht dem gespeicherten `consent_text`.
+**Betroffene Seiten/Routen:** `dashboard.blade.php` (Newsletter-Banner), Profil, `NewsletterSubscription`
