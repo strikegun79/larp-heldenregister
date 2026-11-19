@@ -44,11 +44,30 @@
 
             {{-- Onboarding-Fortschrittsbox: solange nicht alle drei Aufgaben erledigt sind --}}
             @if ($showOnboarding)
+                {{-- „Ausblenden“ wird pro Konto im Browser gemerkt (geteilte Geräte von Eltern und Kindern). --}}
                 <section aria-labelledby="onboarding-heading"
-                         x-data="{ elternOffen: false }"
+                         x-data="{
+                             elternOffen: false,
+                             key: 'onboarding_dismissed_{{ Auth::id() }}',
+                             sichtbar: true,
+                             init() { try { this.sichtbar = !localStorage.getItem(this.key); } catch (e) {} },
+                             ausblenden() {
+                                 try { localStorage.setItem(this.key, '1'); } catch (e) {}
+                                 this.sichtbar = false;
+                                 this.$nextTick(() => document.getElementById('dashboard-heading')?.focus());
+                             }
+                         }"
+                         x-show="sichtbar" x-cloak
                          class="wr-card p-4 sm:p-6 mb-6 sm:mb-8">
 
-                    <h2 id="onboarding-heading" class="wr-section-heading__title mb-1">Deine ersten Schritte</h2>
+                    <div class="flex items-start justify-between gap-3 mb-1">
+                        <h2 id="onboarding-heading" class="wr-section-heading__title">Deine ersten Schritte</h2>
+                        <button type="button" @click="ausblenden()"
+                                class="wr-btn wr-btn--secondary wr-btn--small shrink-0">
+                            <i class="eye slash icon m-0" aria-hidden="true"></i>
+                            Ausblenden
+                        </button>
+                    </div>
                     <p class="wr-card__text mb-5">
                         Herzlich willkommen bei den Waldrittern! Erledige diese drei Aufgaben, um loszulegen.
                     </p>
@@ -113,13 +132,41 @@
             {{-- Abenteuer: eigene Anmeldungen oder – falls keine – das nächste Abenteuer (UI-43) --}}
             @can('adventure.access')
                 @if ($upcomingBookedAdventures->isNotEmpty())
+                    @php
+                        // Das nächste gebuchte Abenteuer wird zum Quest-Banner mit Countdown, weitere bleiben Karten.
+                        $naechstesGebucht = $upcomingBookedAdventures->first();
+                        $tageBis = (int) now()->startOfDay()->diffInDays($naechstesGebucht->start_at->copy()->startOfDay());
+                        $countdown = match (true) {
+                            $tageBis <= 0 => 'Heute geht es los!',
+                            $tageBis === 1 => 'Morgen geht es los!',
+                            default => 'Noch ' . $tageBis . ' Tage bis zum Abenteuer!',
+                        };
+                    @endphp
                     <section aria-labelledby="bookings-heading">
                         <x-wr.section-heading title="Meine Anmeldungen" id="bookings-heading" class="mt-0" />
-                        <div class="space-y-3">
-                            @foreach ($upcomingBookedAdventures as $adventure)
-                                <x-wr.booking-card :adventure="$adventure" />
-                            @endforeach
-                        </div>
+
+                        <x-wr.quest-banner :title="$naechstesGebucht->name"
+                                           :eyebrow="$countdown"
+                                           heading-id="booked-adventure-heading"
+                                           heading-level="h3">
+                            <x-wr.adventure-meta :adventure="$naechstesGebucht" class="wr-quest__meta" />
+                            <x-wr.booking-participants :adventure="$naechstesGebucht" class="mb-4" />
+                            <div>
+                                <a href="{{ route('adventures.show', $naechstesGebucht) }}" class="wr-btn wr-btn--on-dark">
+                                    Details ansehen
+                                    <i class="arrow right icon" aria-hidden="true"></i>
+                                </a>
+                            </div>
+                        </x-wr.quest-banner>
+
+                        @if ($upcomingBookedAdventures->count() > 1)
+                            <h3 class="font-semibold text-base mt-5 mb-2">Weitere Anmeldungen</h3>
+                            <div class="space-y-3">
+                                @foreach ($upcomingBookedAdventures->skip(1) as $adventure)
+                                    <x-wr.booking-card :adventure="$adventure" />
+                                @endforeach
+                            </div>
+                        @endif
                     </section>
                 @elseif ($nextAdventure)
                     <x-wr.quest-banner :title="$nextAdventure->name"
