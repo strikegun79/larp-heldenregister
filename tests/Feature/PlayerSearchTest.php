@@ -89,14 +89,15 @@ class PlayerSearchTest extends TestCase
 
     public function test_admin_list_search_by_lastname(): void
     {
-        Player::factory()->create(['name' => 'Ida', 'lastname' => 'Fels']);
-        Player::factory()->create(['name' => 'Karl', 'lastname' => 'Bach']);
+        // Kunstnamen, damit Zufallsdaten (z. B. Name des Admins) nicht kollidieren.
+        Player::factory()->create(['name' => 'Idaxq', 'lastname' => 'Fels']);
+        Player::factory()->create(['name' => 'Karlzq', 'lastname' => 'Bach']);
 
         $this->actingAs($this->userWithRole(10))
             ->get(route('admin.players.index', ['q' => 'fels']))
             ->assertOk()
-            ->assertSee('Ida')
-            ->assertDontSee('Karl');
+            ->assertSee('Idaxq')
+            ->assertDontSee('Karlzq');
     }
 
     public function test_admin_list_sort_by_lastname_asc(): void
