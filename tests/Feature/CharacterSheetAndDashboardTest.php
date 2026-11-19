@@ -69,7 +69,7 @@ class CharacterSheetAndDashboardTest extends TestCase
             ->get(route('dashboard'))
             ->assertOk()
             ->assertSee('Kommende Abenteuer')
-            ->assertSee('Offene Anmeldungen');
+            ->assertSee('Unbestätigte Anmeldungen');
     }
 
     public function test_non_admin_dashboard_has_no_metrics(): void
@@ -77,6 +77,6 @@ class CharacterSheetAndDashboardTest extends TestCase
         $this->actingAs($this->userWithRole(20)) // Bürokrat: kein Admin
             ->get(route('dashboard'))
             ->assertOk()
-            ->assertDontSee('Offene Anmeldungen');
+            ->assertDontSee('Unbestätigte Anmeldungen');
     }
 }

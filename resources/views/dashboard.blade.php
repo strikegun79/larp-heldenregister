@@ -279,7 +279,7 @@
                         <x-wr.stat-tile label="Spieler" :value="$metrics['players']" icon="users" />
                         <x-wr.stat-tile label="Helden" :value="$metrics['heroes']" icon="chess knight" />
                         <x-wr.stat-tile label="Kommende Abenteuer" :value="$metrics['upcoming_events']" icon="calendar alternate" />
-                        <x-wr.stat-tile label="Offene Anmeldungen" :value="$metrics['open_bookings']" icon="clipboard list" />
+                        <x-wr.stat-tile label="Unbestätigte Anmeldungen" :value="$metrics['open_bookings']" icon="clipboard list" />
                     </div>
                 </section>
             @endif
