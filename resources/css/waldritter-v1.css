@@ -369,6 +369,12 @@
 .wr-pill--danger { background-color: #f3dad5; color: #7a2e24; }
 .wr-pill--info { background-color: #dce6f0; color: #1f4a73; }
 
+/* Zusatzsymbole in Pills: Farbe nur ergänzend (Titel + Screenreader-Text vorhanden) */
+.wr-pill .icon { margin: 0; }
+.wr-pill__icon--teamer { color: var(--wr-focus); }
+.wr-pill__icon--paid { color: #2f6b2a; }
+.wr-pill__icon--unpaid { color: #8a5a00; }
+
 /* --- Fortschrittsbalken -------------------------------------------------- */
 .wr-progress {
     height: .55rem;
