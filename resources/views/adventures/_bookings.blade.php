@@ -58,18 +58,19 @@
                 <td data-label="Rolle">{{ $booking->role?->description }}</td>
                 <td data-label="Liste">{{ $booking->waitlisted ? 'Warteliste' : 'regulär' }}</td>
                 <td data-label="Status" @if ($manage) data-col="status" data-sort-val="{{ $booking->waitlisted ? 0 : ($booking->status === 'bestaetigt' ? 2 : ($booking->status === 'abgemeldet' ? 3 : ($booking->status === 'abgelehnt' ? 4 : ($booking->status === 'storniert' ? 5 : 1)))) }}" @endif>
+                    {{-- Status als Pill mit Text und Symbol (nicht nur Farbe) --}}
                     @if ($booking->waitlisted)
-                        <span class="text-amber-600">⏳ Warteliste</span>
+                        <span class="wr-pill wr-pill--small wr-pill--waitlist"><i class="hourglass half icon" aria-hidden="true"></i>Warteliste</span>
                     @elseif ($booking->status === 'bestaetigt')
-                        <span class="text-green-700">✓ bestätigt</span>
+                        <span class="wr-pill wr-pill--small wr-pill--success"><i class="check circle icon" aria-hidden="true"></i>bestätigt</span>
                     @elseif ($booking->status === 'abgelehnt')
-                        <span class="text-red-600">abgelehnt</span>
+                        <span class="wr-pill wr-pill--small wr-pill--danger"><i class="times circle icon" aria-hidden="true"></i>abgelehnt</span>
                     @elseif ($booking->status === 'abgemeldet')
-                        <span class="text-orange-600">abgemeldet{{ $booking->absence_reason_label ? ' ('.$booking->absence_reason_label.')' : '' }}</span>
+                        <span class="wr-pill wr-pill--small wr-pill--waitlist"><i class="sign out alternate icon" aria-hidden="true"></i>abgemeldet{{ $booking->absence_reason_label ? ' ('.$booking->absence_reason_label.')' : '' }}</span>
                     @elseif ($booking->status === 'storniert')
-                        <span class="text-stone-400 line-through">storniert</span>
+                        <span class="wr-pill wr-pill--small wr-pill--danger"><i class="ban icon" aria-hidden="true"></i>storniert</span>
                     @else
-                        <span class="text-stone-500">offen</span>
+                        <span class="wr-pill wr-pill--small wr-pill--pending"><i class="clock icon" aria-hidden="true"></i>offen</span>
                     @endif
                 </td>
                 <td data-label="Beitrag" @if ($manage) data-col="paid" data-sort-val="{{ $booking->paid ? 1 : 0 }}" @endif>
@@ -85,9 +86,9 @@
                             @endif
                         @endif
                         @if ($booking->paid)
-                            <span class="text-green-700">✓ bezahlt</span>
+                            <span class="wr-pill wr-pill--small wr-pill--success"><i class="check icon" aria-hidden="true"></i>bezahlt</span>
                         @else
-                            <span class="text-stone-500">offen</span>
+                            <span class="wr-pill wr-pill--small wr-pill--pending"><i class="euro sign icon" aria-hidden="true"></i>offen</span>
                         @endif
                     @endif
                 </td>
@@ -106,8 +107,9 @@
                                               data-confirm="{{ $booking->paid ? 'Beitrag als offen markieren?' : 'Beitrag als bezahlt markieren?' }}">
                                             @csrf @method('PATCH')
                                             <button type="submit" class="ui mini icon button {{ $booking->paid ? '' : 'yellow' }}"
+                                                    aria-label="{{ $booking->paid ? 'Beitrag von '.$booking->participant_name.' als offen markieren' : 'Beitrag von '.$booking->participant_name.' als bezahlt markieren' }}"
                                                     data-tooltip="{{ $booking->paid ? 'Als offen markieren' : 'Als bezahlt markieren' }}" data-position="top right">
-                                                <i class="coins icon"></i>
+                                                <i class="coins icon" aria-hidden="true"></i>
                                                 <span class="sm:hidden ml-1 text-xs">{{ $booking->paid ? 'Offen' : 'Bezahlt' }}</span>
                                             </button>
                                         </form>
@@ -120,8 +122,9 @@
                                 <form method="POST" action="{{ route('adventures.bookings.resend-confirmation', [$adventure, $booking]) }}" data-refresh-modal>
                                     @csrf
                                     <button type="submit" class="ui mini icon button"
+                                            aria-label="Anmeldebestätigung für {{ $booking->participant_name }} erneut senden"
                                             data-tooltip="Anmeldebestätigung erneut senden" data-position="top right">
-                                        <i class="envelope icon"></i>
+                                        <i class="envelope icon" aria-hidden="true"></i>
                                         <span class="sm:hidden ml-1 text-xs">Mail</span>
                                     </button>
                                 </form>
@@ -132,8 +135,9 @@
                                 @can('adventure.modify')
                                     <a href="{{ route('adventures.bookings.edit', [$adventure, $booking]) }}"
                                        data-modal-stack="{{ route('adventures.bookings.edit', [$adventure, $booking]) }}"
-                                       class="ui mini icon button" data-tooltip="Bearbeiten" data-position="top right">
-                                        <i class="edit icon"></i>
+                                       class="ui mini icon button" aria-label="Anmeldung von {{ $booking->participant_name }} bearbeiten"
+                                       data-tooltip="Bearbeiten" data-position="top right">
+                                        <i class="edit icon" aria-hidden="true"></i>
                                         <span class="sm:hidden ml-1 text-xs">Bearb.</span>
                                     </a>
                                 @endcan
@@ -142,8 +146,9 @@
                                         <form method="POST" action="{{ route('adventures.bookings.destroy', [$adventure, $booking]) }}"
                                               data-refresh-modal data-confirm="Anmeldung wirklich stornieren? Diese Aktion kann nur der Projektleiter rückgängig machen.">
                                             @csrf @method('DELETE')
-                                            <button type="submit" class="ui mini icon button red" data-tooltip="Stornieren" data-position="top right">
-                                                <i class="times icon"></i>
+                                            <button type="submit" class="ui mini icon button red" aria-label="Anmeldung von {{ $booking->participant_name }} stornieren"
+                                                    data-tooltip="Stornieren" data-position="top right">
+                                                <i class="times icon" aria-hidden="true"></i>
                                                 <span class="sm:hidden ml-1 text-xs">Storn.</span>
                                             </button>
                                         </form>
@@ -158,7 +163,7 @@
                                             <button type="button" disabled
                                                     class="ui mini icon button disabled"
                                                     style="pointer-events:none;">
-                                                <i class="undo icon"></i>
+                                                <i class="undo icon" aria-hidden="true"></i>
                                                 <span class="sm:hidden ml-1 text-xs">Anfragen</span>
                                             </button>
                                         </span>
@@ -168,7 +173,7 @@
                                                 data-url="{{ route('adventures.bookings.request-reinstate', [$adventure, $booking]) }}"
                                                 data-tooltip="Rücknahme der Stornierung anfragen"
                                                 data-position="top right">
-                                            <i class="undo icon"></i>
+                                            <i class="undo icon" aria-hidden="true"></i>
                                             <span class="sm:hidden ml-1 text-xs">Anfragen</span>
                                         </button>
                                     @endif

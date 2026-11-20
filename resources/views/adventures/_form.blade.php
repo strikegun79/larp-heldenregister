@@ -2,9 +2,10 @@
 @php
     $selectClass = 'mt-1 block w-full border-gray-300 focus:border-amber-600 focus:ring-amber-600 rounded-md shadow-sm';
 @endphp
-<div class="space-y-6">
-    <div class="grid grid-cols-3 gap-4">
-        <div class="col-span-2">
+{{-- Eventformular (Waldritter v1): wr-form greift innerhalb von .wr-v1 (Felder 44 px, Fokus); auf dem Handy einspaltig --}}
+<div class="wr-form space-y-6">
+    <div class="grid gap-4 sm:grid-cols-3">
+        <div class="sm:col-span-2">
             <x-input-label for="name" value="Name" />
             <x-text-input id="name" name="name" type="text" class="mt-1 block w-full"
                           :value="old('name', $adventure->name)" required />
@@ -40,7 +41,7 @@
         <x-input-error :messages="$errors->get('location_id')" class="mt-2" />
     </div>
 
-    <div class="grid grid-cols-2 gap-4">
+    <div class="grid gap-4 sm:grid-cols-2">
         <div>
             <x-input-label for="start_at" value="Beginn" />
             <x-date-picker name="start_at" type="datetime"
@@ -57,7 +58,7 @@
         </div>
     </div>
 
-    <div class="grid grid-cols-3 gap-4">
+    <div class="grid gap-4 sm:grid-cols-3">
         <div>
             <x-input-label for="event_status_id" value="Status" />
             {{-- Geführter Workflow (ADV-05): nur erlaubte Folgestatus anbieten. --}}
@@ -146,7 +147,7 @@
     </div>
 
     {{-- Spielleiter & Eventleiter (ADV-11): berechtigte Nutzer. --}}
-    <div class="grid grid-cols-2 gap-4">
+    <div class="grid gap-4 sm:grid-cols-2">
         <div>
             <x-input-label for="gamemaster_id" value="Spielleiter" />
             <select id="gamemaster_id" name="gamemaster_id" class="{{ $selectClass }}">
