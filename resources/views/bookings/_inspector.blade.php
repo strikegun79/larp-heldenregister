@@ -12,41 +12,44 @@
 
 <div data-inspector-title hidden>{{ $name }}</div>
 
-{{-- Kopf: Status auf einen Blick --}}
-<div class="flex flex-wrap items-center gap-2 mb-4">
+{{-- Waldritter v1: eigener Wrapper (Inspektor lädt per AJAX) --}}
+<div class="wr-v1">
+
+{{-- Kopf: Status auf einen Blick (Pills mit Text und Symbol) --}}
+<div class="flex flex-wrap items-center gap-1.5 mb-4">
     @if ($booking->waitlisted)
-        <span class="ui small yellow label">⏳ Warteliste</span>
+        <span class="wr-pill wr-pill--waitlist"><i class="hourglass half icon" aria-hidden="true"></i>Warteliste</span>
     @else
-        <span class="ui small basic label">regulär</span>
+        <span class="wr-pill"><i class="list icon" aria-hidden="true"></i>regulär</span>
     @endif
 
     @switch($booking->status)
         @case('bestaetigt')
-            <span class="ui small green label">✓ bestätigt</span>
+            <span class="wr-pill wr-pill--success"><i class="check circle icon" aria-hidden="true"></i>bestätigt</span>
             @break
         @case('abgelehnt')
-            <span class="ui small red label">abgelehnt</span>
+            <span class="wr-pill wr-pill--danger"><i class="times circle icon" aria-hidden="true"></i>abgelehnt</span>
             @break
         @case('abgemeldet')
-            <span class="ui small orange label">abgemeldet{{ $booking->absence_reason_label ? ' ('.$booking->absence_reason_label.')' : '' }}</span>
+            <span class="wr-pill wr-pill--waitlist"><i class="sign out alternate icon" aria-hidden="true"></i>abgemeldet{{ $booking->absence_reason_label ? ' ('.$booking->absence_reason_label.')' : '' }}</span>
             @break
         @case('storniert')
-            <span class="ui small grey label">storniert</span>
+            <span class="wr-pill wr-pill--danger"><i class="ban icon" aria-hidden="true"></i>storniert</span>
             @break
         @default
-            <span class="ui small label">offen</span>
+            <span class="wr-pill wr-pill--pending"><i class="clock icon" aria-hidden="true"></i>offen</span>
     @endswitch
 
     @if ($booking->is_guest)
-        <span class="ui small label">Gast</span>
+        <span class="wr-pill wr-pill--info">Gast</span>
     @endif
 </div>
 
 {{-- Anmeldung --}}
 <section class="mb-5" aria-labelledby="insp-anmeldung">
-    <h3 id="insp-anmeldung" class="font-uncial text-waldritter text-base mb-2">Anmeldung</h3>
+    <h3 id="insp-anmeldung" class="wr-section-heading__title text-base mb-2">Anmeldung</h3>
     <dl class="grid grid-cols-[auto,1fr] gap-x-4 gap-y-1 text-sm">
-        <dt class="text-stone-500">Alter</dt>
+        <dt class="text-wr-ink-muted font-semibold">Alter</dt>
         <dd>
             {{ $booking->participant_age ?? '—' }}
             @if ($player?->dayofbirth)
@@ -54,10 +57,10 @@
             @endif
         </dd>
 
-        <dt class="text-stone-500">Rolle</dt>
+        <dt class="text-wr-ink-muted font-semibold">Rolle</dt>
         <dd>{{ $booking->role?->description ?? '—' }}</dd>
 
-        <dt class="text-stone-500">Angemeldet</dt>
+        <dt class="text-wr-ink-muted font-semibold">Angemeldet</dt>
         <dd>
             {{ $booking->created_at->format('d.m.Y H:i') }}
             @if ($booking->bookedBy)
@@ -66,25 +69,25 @@
         </dd>
 
         @unless ($isTeamer)
-            <dt class="text-stone-500">Beitrag</dt>
+            <dt class="text-wr-ink-muted font-semibold">Beitrag</dt>
             <dd>
                 @if ($adventure->fee > 0)
                     {{ number_format($booking->effectiveFee(), 2, ',', '.') }} €
                     @if ($booking->ermaessigung && $adventure->fee_reduced !== null)
-                        <span class="ui mini label">ermäßigt</span>
+                        <span class="wr-pill wr-pill--small">ermäßigt</span>
                     @endif
                     ·
                 @endif
                 @if ($booking->paid)
-                    <span class="text-green-700">✓ bezahlt</span>
+                    <span class="wr-pill wr-pill--small wr-pill--success"><i class="check icon" aria-hidden="true"></i>bezahlt</span>
                 @else
-                    <span class="text-stone-500">offen</span>
+                    <span class="wr-pill wr-pill--small wr-pill--pending"><i class="euro sign icon" aria-hidden="true"></i>offen</span>
                 @endif
             </dd>
         @endunless
 
         @if ($booking->is_guest && $booking->guest_place)
-            <dt class="text-stone-500">Ort</dt>
+            <dt class="text-wr-ink-muted font-semibold">Ort</dt>
             <dd>{{ $booking->guest_place }}</dd>
         @endif
     </dl>
@@ -93,38 +96,38 @@
 {{-- Kontakt --}}
 @unless ($booking->is_guest)
     <section class="mb-5" aria-labelledby="insp-kontakt">
-        <h3 id="insp-kontakt" class="font-uncial text-waldritter text-base mb-2">Kontakt</h3>
+        <h3 id="insp-kontakt" class="wr-section-heading__title text-base mb-2">Kontakt</h3>
         <dl class="grid grid-cols-[auto,1fr] gap-x-4 gap-y-1 text-sm">
             @if ($guardian)
-                <dt class="text-stone-500">Erziehungsber.</dt>
+                <dt class="text-wr-ink-muted font-semibold">Erziehungsber.</dt>
                 <dd>{{ $guardian->name }} {{ $guardian->lastname }}</dd>
 
                 @if ($guardian->email)
-                    <dt class="text-stone-500">E-Mail</dt>
-                    <dd class="break-all"><a href="mailto:{{ $guardian->email }}" class="text-waldritter underline">{{ $guardian->email }}</a></dd>
+                    <dt class="text-wr-ink-muted font-semibold">E-Mail</dt>
+                    <dd class="break-all"><a href="mailto:{{ $guardian->email }}" class="wr-interactive text-wr-forest underline">{{ $guardian->email }}</a></dd>
                 @endif
 
                 @if ($guardian->phone)
-                    <dt class="text-stone-500">Telefon</dt>
-                    <dd><a href="tel:{{ $guardian->phone }}" class="text-waldritter underline">{{ $guardian->phone }}</a></dd>
+                    <dt class="text-wr-ink-muted font-semibold">Telefon</dt>
+                    <dd><a href="tel:{{ $guardian->phone }}" class="wr-interactive text-wr-forest underline">{{ $guardian->phone }}</a></dd>
                 @endif
             @endif
 
             @if ($booking->kontakt_telefon)
-                <dt class="text-stone-500">Notfall-Tel.</dt>
-                <dd><a href="tel:{{ $booking->kontakt_telefon }}" class="text-waldritter underline">{{ $booking->kontakt_telefon }}</a></dd>
+                <dt class="text-wr-ink-muted font-semibold">Notfall-Tel.</dt>
+                <dd><a href="tel:{{ $booking->kontakt_telefon }}" class="wr-interactive text-wr-forest underline">{{ $booking->kontakt_telefon }}</a></dd>
             @endif
 
             @if ($booking->erreichbarkeit)
-                <dt class="text-stone-500">Erreichbarkeit</dt>
+                <dt class="text-wr-ink-muted font-semibold">Erreichbarkeit</dt>
                 <dd class="whitespace-pre-line">{{ $booking->erreichbarkeit }}</dd>
             @endif
 
-            <dt class="text-stone-500">Anschrift</dt>
+            <dt class="text-wr-ink-muted font-semibold">Anschrift</dt>
             <dd>
                 @if (! $booking->usesGuardianAddress() && $player?->street)
                     {{ $player->street }} {{ $player->house_number }}, {{ $player->zip }} {{ $player->city }}
-                    <span class="text-amber-700">(Kind, abweichend)</span>
+                    <span class="font-semibold">(Kind, abweichend)</span>
                 @elseif ($guardian?->street)
                     {{ $guardian->street }} {{ $guardian->house_number }}, {{ $guardian->zip }} {{ $guardian->city }}
                 @else
@@ -137,23 +140,23 @@
 
 {{-- Optionen --}}
 <section class="mb-5" aria-labelledby="insp-optionen">
-    <h3 id="insp-optionen" class="font-uncial text-waldritter text-base mb-2">Optionen</h3>
+    <h3 id="insp-optionen" class="wr-section-heading__title text-base mb-2">Optionen</h3>
     <dl class="grid grid-cols-[auto,1fr] gap-x-4 gap-y-1 text-sm">
-        <dt class="text-stone-500">Fotoerlaubnis</dt><dd>{{ $yesNo($booking->fotoerlaubnis) }}</dd>
-        <dt class="text-stone-500">Vegetarisch</dt><dd>{{ $yesNo($booking->vegetarier) }}</dd>
-        <dt class="text-stone-500">Leih-Tunika</dt><dd>{{ $yesNo($booking->leih_tunika) }}</dd>
-        <dt class="text-stone-500">Leih-Waffe</dt><dd>{{ $yesNo($booking->leih_waffe) }}</dd>
-        <dt class="text-stone-500">NSC</dt><dd>{{ $yesNo($booking->nsc) }}</dd>
+        <dt class="text-wr-ink-muted font-semibold">Fotoerlaubnis</dt><dd>{{ $yesNo($booking->fotoerlaubnis) }}</dd>
+        <dt class="text-wr-ink-muted font-semibold">Vegetarisch</dt><dd>{{ $yesNo($booking->vegetarier) }}</dd>
+        <dt class="text-wr-ink-muted font-semibold">Leih-Tunika</dt><dd>{{ $yesNo($booking->leih_tunika) }}</dd>
+        <dt class="text-wr-ink-muted font-semibold">Leih-Waffe</dt><dd>{{ $yesNo($booking->leih_waffe) }}</dd>
+        <dt class="text-wr-ink-muted font-semibold">NSC</dt><dd>{{ $yesNo($booking->nsc) }}</dd>
     </dl>
 </section>
 
 {{-- Zustimmungen zu Anforderungen des Auftraggebers (Issue #14) --}}
 @if ($booking->requirementConsents->isNotEmpty())
     <section class="mb-5" aria-labelledby="insp-einverstaendnis">
-        <h3 id="insp-einverstaendnis" class="font-uncial text-waldritter text-base mb-2">Einverständnis</h3>
+        <h3 id="insp-einverstaendnis" class="wr-section-heading__title text-base mb-2">Einverständnis</h3>
         <dl class="grid grid-cols-[auto,1fr] gap-x-4 gap-y-1 text-sm">
             @foreach ($booking->requirementConsents as $requirement)
-                <dt class="text-stone-500">{{ $requirement->title }}</dt>
+                <dt class="text-wr-ink-muted font-semibold">{{ $requirement->title }}</dt>
                 <dd>zugestimmt am {{ \Illuminate\Support\Carbon::parse($requirement->pivot->accepted_at)->format('d.m.Y H:i') }}</dd>
             @endforeach
         </dl>
@@ -164,14 +167,14 @@
 @can('adventure.modify')
     @if ($booking->allergien || $booking->medikamente)
         <section class="mb-5" aria-labelledby="insp-gesundheit">
-            <h3 id="insp-gesundheit" class="font-uncial text-waldritter text-base mb-2">Gesundheit</h3>
+            <h3 id="insp-gesundheit" class="wr-section-heading__title text-base mb-2">Gesundheit</h3>
             <dl class="grid grid-cols-[auto,1fr] gap-x-4 gap-y-1 text-sm">
                 @if ($booking->allergien)
-                    <dt class="text-stone-500">Allergien</dt>
+                    <dt class="text-wr-ink-muted font-semibold">Allergien</dt>
                     <dd class="whitespace-pre-line">{{ $booking->allergien }}</dd>
                 @endif
                 @if ($booking->medikamente)
-                    <dt class="text-stone-500">Medikamente</dt>
+                    <dt class="text-wr-ink-muted font-semibold">Medikamente</dt>
                     <dd class="whitespace-pre-line">{{ $booking->medikamente }}</dd>
                 @endif
             </dl>
@@ -180,8 +183,8 @@
 @endcan
 
 {{-- Aktionen: Status ändern über die vorhandenen Aktionen (Mails + Audit-Log wie bisher) --}}
-<section aria-labelledby="insp-aktionen" class="border-t border-stone-200 pt-4">
-    <h3 id="insp-aktionen" class="font-uncial text-waldritter text-base mb-3">Aktionen</h3>
+<section aria-labelledby="insp-aktionen" class="border-t border-wr-border pt-4">
+    <h3 id="insp-aktionen" class="wr-section-heading__title text-base mb-3">Aktionen</h3>
     <div class="flex flex-col gap-2">
         @if (! $isCanceled)
             @can('approve-bookings')
@@ -277,3 +280,4 @@
         @endif
     </div>
 </section>
+</div>
