@@ -128,6 +128,23 @@
         </div>
     </div>
 
+    {{-- Vegetarisches Essen nur abfragen, wenn es Verpflegung gibt (Standard: aus) --}}
+    <div class="flex items-start gap-3 p-3 bg-amber-50 border border-amber-200 rounded-md">
+        <input type="hidden" name="asks_vegetarian" value="0">
+        <input type="checkbox" id="asks_vegetarian" name="asks_vegetarian" value="1"
+               class="mt-0.5 rounded border-gray-300 text-amber-700 focus:ring-amber-600"
+               @checked(old('asks_vegetarian', $adventure->asks_vegetarian ?? false))>
+        <div>
+            <label for="asks_vegetarian" class="font-medium text-amber-900 cursor-pointer">
+                Nach vegetarischem Essen fragen
+            </label>
+            <p class="text-sm text-amber-700 mt-0.5">
+                Zeigt im Anmeldeformular das Kästchen „Vegetarisches Essen“. Bei eintägigen
+                Veranstaltungen ohne Verpflegung ausgeschaltet lassen.
+            </p>
+        </div>
+    </div>
+
     {{-- Spielleiter & Eventleiter (ADV-11): berechtigte Nutzer. --}}
     <div class="grid grid-cols-2 gap-4">
         <div>

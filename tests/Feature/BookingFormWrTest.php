@@ -100,7 +100,7 @@ class BookingFormWrTest extends TestCase
     {
         $admin = User::factory()->create();
         $admin->roles()->attach(10);
-        $adventure = Adventure::factory()->create();
+        $adventure = Adventure::factory()->create(['asks_vegetarian' => true]);
         $booking = Booking::factory()->for($adventure)->create([
             'player_id' => Player::factory()->create()->id,
             'vegetarier' => true,

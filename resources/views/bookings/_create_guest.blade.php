@@ -68,9 +68,33 @@
         <fieldset class="wr-fieldset">
             <legend>Gut zu wissen <span class="font-normal text-sm">(optional)</span></legend>
             <div class="grid gap-2 sm:grid-cols-2 mb-3">
+                @if ($adventure->asks_vegetarian)
+                    {{-- Nur wenn das Event danach fragt (Event-Einstellung „Nach vegetarischem Essen fragen“) --}}
+                    <label class="wr-check">
+                        <input type="checkbox" name="vegetarier" value="1">
+                        <span class="wr-check__text"><span class="wr-check__title">Vegetarisches Essen</span></span>
+                    </label>
+                @endif
                 <label class="wr-check">
-                    <input type="checkbox" name="vegetarier" value="1">
-                    <span class="wr-check__text"><span class="wr-check__title">Vegetarisches Essen</span></span>
+                    <input type="checkbox" name="leih_tunika" value="1">
+                    <span class="wr-check__text">
+                        <span class="wr-check__title">Leih-Tunika</span>
+                        <span class="wr-check__hint">Eine Tunika wird für die Veranstaltung ausgeliehen.</span>
+                    </span>
+                </label>
+                <label class="wr-check">
+                    <input type="checkbox" name="leih_waffe" value="1">
+                    <span class="wr-check__text">
+                        <span class="wr-check__title">Leih-Waffe</span>
+                        <span class="wr-check__hint">Eine Waffe wird für die Veranstaltung ausgeliehen.</span>
+                    </span>
+                </label>
+                <label class="wr-check">
+                    <input type="checkbox" name="nsc" value="1">
+                    <span class="wr-check__text">
+                        <span class="wr-check__title">NSC (Nichtspielercharakter)</span>
+                        <span class="wr-check__hint">Übernimmt eine Nebenrolle in der Geschichte, statt mit einem eigenen Helden zu spielen.</span>
+                    </span>
                 </label>
                 <label class="wr-check">
                     <input type="checkbox" name="fotoerlaubnis" value="1">

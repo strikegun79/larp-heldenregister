@@ -95,10 +95,13 @@
         <fieldset class="wr-fieldset">
             <legend>Gut zu wissen <span class="font-normal text-sm">(optional)</span></legend>
             <div class="grid gap-2 sm:grid-cols-2 mb-3">
-                <label class="wr-check">
-                    <input type="checkbox" name="vegetarier" value="1">
-                    <span class="wr-check__text"><span class="wr-check__title">Vegetarisches Essen</span></span>
-                </label>
+                @if ($adventure->asks_vegetarian)
+                    {{-- Nur wenn das Event danach fragt (Event-Einstellung „Nach vegetarischem Essen fragen“) --}}
+                    <label class="wr-check">
+                        <input type="checkbox" name="vegetarier" value="1">
+                        <span class="wr-check__text"><span class="wr-check__title">Vegetarisches Essen</span></span>
+                    </label>
+                @endif
                 <label class="wr-check">
                     <input type="checkbox" name="leih_tunika" value="1">
                     <span class="wr-check__text">

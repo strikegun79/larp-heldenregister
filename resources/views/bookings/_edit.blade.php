@@ -27,10 +27,15 @@
     <fieldset class="wr-fieldset">
         <legend>Gut zu wissen <span class="font-normal text-sm">(optional)</span></legend>
         <div class="grid gap-2 sm:grid-cols-2 mb-3">
-            <label class="wr-check">
-                <input type="checkbox" name="vegetarier" value="1" @checked($booking->vegetarier)>
-                <span class="wr-check__text"><span class="wr-check__title">Vegetarisches Essen</span></span>
-            </label>
+            @if ($adventure->asks_vegetarian)
+                <label class="wr-check">
+                    <input type="checkbox" name="vegetarier" value="1" @checked($booking->vegetarier)>
+                    <span class="wr-check__text"><span class="wr-check__title">Vegetarisches Essen</span></span>
+                </label>
+            @else
+                {{-- Abfrage abgeschaltet: bisherigen Wert unverändert mitsenden (geht nicht verloren) --}}
+                <input type="hidden" name="vegetarier" value="{{ $booking->vegetarier ? 1 : 0 }}">
+            @endif
             <label class="wr-check">
                 <input type="checkbox" name="leih_tunika" value="1" @checked($booking->leih_tunika)>
                 <span class="wr-check__text">

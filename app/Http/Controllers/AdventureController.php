@@ -613,11 +613,13 @@ class AdventureController extends Controller
             'fee_reduced' => ['nullable', 'numeric', 'min:0'],
             'is_hidden' => ['boolean'],
             'requires_confirmation' => ['boolean'],
+            'asks_vegetarian' => ['boolean'],
         ]);
 
         // Checkbox sendet keinen Wert wenn nicht angehakt → false setzen.
         $data['is_hidden'] = $request->boolean('is_hidden');
         $data['requires_confirmation'] = $request->boolean('requires_confirmation');
+        $data['asks_vegetarian'] = $request->boolean('asks_vegetarian');
 
         // Leeres Feld (NOT NULL mit Default 0) → Integer-Default setzen.
         $data['loot_ep_day'] = (int) ($data['loot_ep_day'] ?? 0);
