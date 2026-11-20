@@ -1,4 +1,12 @@
+{{-- Abenteuer-Detail (Waldritter v1). Wird als Vollseite (show) und im globalen Modal geladen;
+     deshalb eigener .wr-v1-Wrapper. Tab-/Akkordeon-Mechanik und data-tab-Werte bleiben erhalten. --}}
+<div class="wr-v1">
 <span data-modal-title hidden>{{ $adventure->name }}</span>
+
+<x-wr.booking-blocked-notice :adventure="$adventure" :profile-complete="$profileComplete"
+                             :user-has-players="$userHasPlayers" class="mb-4" />
+
+@php($bookingsTitle = 'Deine Anmeldungen (' . $visibleBookings->count() . ')')
 
 {{-- ARCH-003 Pilot: Mobile Accordion (< sm) — Akkordeon statt Tabs auf kleinen Bildschirmen --}}
 <div class="sm:hidden space-y-2">
@@ -6,8 +14,8 @@
         @include('adventures._event_info')
     </x-mobile.accordion-section>
 
-    <x-mobile.accordion-section :title="'Anmeldungen (' . $visibleBookings->count() . ')'">
-        @include('adventures._bookings', ['bookings' => $visibleBookings, 'manage' => false])
+    <x-mobile.accordion-section :title="$bookingsTitle" :open="$visibleBookings->isNotEmpty()">
+        @include('adventures._own_bookings')
     </x-mobile.accordion-section>
 
     @can('view-event-heroes')
@@ -27,7 +35,7 @@
 <div class="hidden sm:block">
     <div class="ui top attached tabular menu">
         <a class="item active" data-tab="event">Abenteuer</a>
-        <a class="item" data-tab="bookings">Anmeldungen</a>
+        <a class="item" data-tab="bookings">{{ $bookingsTitle }}</a>
         @can('view-event-heroes')
             <a class="item" data-tab="heroes">Helden ({{ $eventHeroes->count() }})</a>
         @endcan
@@ -41,7 +49,7 @@
     </div>
 
     <div class="ui bottom attached tab segment" data-tab="bookings">
-        @include('adventures._bookings', ['bookings' => $visibleBookings, 'manage' => false])
+        @include('adventures._own_bookings')
     </div>
 
     @can('view-event-heroes')
@@ -57,42 +65,30 @@
     @endcan
 </div>
 
+{{-- Aktionen für den Modal-Fuß (werden beim Laden dorthin verschoben). Der Sperrgrund
+     steht sichtbar im Hinweis oben; der Button ist dann deaktiviert. --}}
 <div data-modal-actions hidden>
     @can('adventure.book')
         @if ($adventure->registrationOpen())
-            @php
-                $bookBlockedReason = null;
-                if (! $profileComplete && ! $userHasPlayers) {
-                    $bookBlockedReason = 'Bitte vervollständige zuerst dein Profil und lege einen Spieler an.';
-                } elseif (! $profileComplete) {
-                    $bookBlockedReason = 'Bitte vervollständige zuerst dein Profil, bevor du dich anmelden kannst.';
-                } elseif (! $userHasPlayers) {
-                    $bookBlockedReason = 'Du benötigst zunächst einen Spieler, um dich anmelden zu können.';
-                }
-            @endphp
-            @if ($bookBlockedReason)
-                <span data-tooltip="{{ $bookBlockedReason }}" data-position="top left" data-inverted="">
-                    <button type="button" class="ui primary button disabled" disabled>Anmelden</button>
-                </span>
+            @if (! $profileComplete || ! $userHasPlayers)
+                <button type="button" class="wr-btn wr-btn--primary" disabled>Anmelden</button>
             @else
                 <button type="button"
                         data-modal-stack="{{ route('adventures.bookings.create', $adventure) }}"
-                        class="ui primary button">Anmelden</button>
+                        class="wr-btn wr-btn--primary">Anmelden</button>
             @endif
             <button type="button"
                     data-modal-stack="{{ route('adventures.bookings.create-guest', $adventure) }}"
-                    class="ui button"
-                    data-tooltip="Anmelden für einmalige Teilnehmer"
-                    data-position="top left"
-                    data-inverted="">Gast anmelden</button>
+                    class="wr-btn wr-btn--secondary">Gast anmelden <span class="font-normal">(einmalig)</span></button>
         @endif
     @endcan
     @if (auth()->user()->hasAnyRole('teamer', 'lehrmeister') && $myTeamerSignup === null)
         <button type="button"
                 data-modal-stack="{{ route('adventures.teamer.create', $adventure) }}"
-                class="ui teal button">Teamer-Anmeldung</button>
+                class="wr-btn wr-btn--secondary"><i class="shield alternate icon m-0" aria-hidden="true"></i> Teamer-Anmeldung</button>
     @endif
     @can('events.edit')
-        <a href="{{ route('adventures.manage', $adventure) }}" class="ui button">Verwalten</a>
+        <a href="{{ route('adventures.manage', $adventure) }}" class="wr-btn wr-btn--secondary">Verwalten</a>
     @endcan
+</div>
 </div>
