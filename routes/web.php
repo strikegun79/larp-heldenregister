@@ -308,6 +308,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('players/{player}/edit', [Admin\PlayerController::class, 'edit'])->name('players.edit');
         Route::put('players/{player}', [Admin\PlayerController::class, 'update'])->name('players.update');
         // Betreuer je Spieler verwalten (PLAY-06).
+        Route::get('players/{player}/inspector', [Admin\PlayerController::class, 'inspector'])->name('players.inspector');
         Route::get('players/{player}/caretakers', [Admin\PlayerController::class, 'caretakers'])->name('players.caretakers');
         Route::post('players/{player}/caretakers', [Admin\PlayerController::class, 'attachCaretaker'])->name('players.caretakers.store');
         Route::delete('players/{player}/caretakers/{user}', [Admin\PlayerController::class, 'detachCaretaker'])->name('players.caretakers.destroy');

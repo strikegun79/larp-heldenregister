@@ -2,7 +2,9 @@
     <x-slot name="header">
         <div class="flex items-center justify-between">
             <h2 class="font-uncial text-2xl text-waldritter leading-tight">Alle Spieler</h2>
-            <a href="{{ route('admin.players.export') }}" class="ui small button" target="_blank" rel="noopener">Export (CSV)</a>
+            <a href="{{ route('admin.players.export') }}" class="wr-btn wr-btn--secondary wr-btn--small" target="_blank" rel="noopener">
+                <i class="download icon m-0" aria-hidden="true"></i> Export (CSV)
+            </a>
         </div>
     </x-slot>
 
@@ -29,8 +31,9 @@
                 <form method="GET" action="{{ route('admin.players.index') }}" class="ui form">
                     {{-- Zeile 1: Suchfeld --}}
                     <div class="flex items-center mb-3">
+                        <label for="admin-players-q" class="sr-only">Spieler suchen</label>
                         <div class="ui action input w-full sm:w-auto">
-                            <input type="search" name="q" value="{{ $q }}" placeholder="Name / Nachname suchen…">
+                            <input type="search" id="admin-players-q" name="q" value="{{ $q }}" placeholder="Name / Nachname suchen…">
                             <button type="submit" class="ui icon button" aria-label="Suchen"><i class="search icon"></i></button>
                         </div>
                     </div>
@@ -53,7 +56,8 @@
                         @endif
                     </div>
 
-                    {{-- Legende innerhalb der Filter-Box --}}
+                    {{-- Legende innerhalb der Filter-Box (Farben ergänzend, Kennzeichnung steht auch als Text am Namen) --}}
+                    <p class="text-xs text-wr-ink-muted m-0 mb-2">Zeile anklicken (oder Enter), um Anschrift, Betreuer, Matrix und Löschen im Seitenpanel zu öffnen.</p>
                     <div class="flex flex-wrap gap-4 text-xs text-stone-500 pt-2 border-t border-[#5a3a22]/20">
                         <span class="flex items-center gap-1">
                             <span class="inline-block w-3 h-3 rounded-sm bg-green-100 border border-green-400"></span>
@@ -146,8 +150,21 @@
                                     default                                                        => '',
                                 };
                             @endphp
-                            <tr class="{{ $rowClass }}">
-                                <td class="px-6 py-4" data-label="Name">{{ $player->full_name }}</td>
+                            {{-- Zeilenklick / Enter öffnet den Inspektor (Anschrift, Betreuer, Matrix, Löschen) --}}
+                            <tr class="{{ $rowClass }}"
+                                @unless ($player->trashed())
+                                    data-inspector-url="{{ route('admin.players.inspector', $player) }}" tabindex="0"
+                                    aria-label="Details zu {{ $player->full_name }} öffnen"
+                                @endunless>
+                                <td class="px-6 py-4" data-label="Name">
+                                    <span class="font-semibold">{{ $player->full_name }}</span>
+                                    {{-- Kennzeichnung zusätzlich als Text (nicht nur Zeilenfarbe) --}}
+                                    @if (! $player->trashed() && $age !== null && $age >= 18)
+                                        <span class="wr-pill wr-pill--small wr-pill--pending ml-1">volljährig</span>
+                                    @elseif (! $player->trashed() && $age !== null && $player->heroes_count === 0)
+                                        <span class="wr-pill wr-pill--small wr-pill--danger ml-1">kein Held</span>
+                                    @endif
+                                </td>
                                 <td class="px-6 py-4" data-label="Alter">{{ $player->age !== null ? $player->age.' J.' : '—' }}</td>
                                 <td class="px-6 py-4" data-label="Geschlecht">{{ $player->gender ?? '—' }}</td>
                                 <td class="px-6 py-4" data-label="Helden">{{ $player->heroes_count }}</td>
@@ -170,38 +187,19 @@
                                         @if ($player->trashed())
                                             <form method="POST" action="{{ route('admin.players.restore', $player->id) }}">
                                                 @csrf @method('PATCH')
-                                                <button type="submit" class="ui mini green button"
-                                                        data-tooltip="Wiederherstellen" data-position="top center">
-                                                    <i class="undo icon"></i> Wiederherstellen
+                                                <button type="submit" class="wr-btn wr-btn--secondary wr-btn--small"
+                                                        aria-label="{{ $player->full_name }} wiederherstellen">
+                                                    <i class="undo icon m-0" aria-hidden="true"></i> Wiederherstellen
                                                 </button>
                                             </form>
                                         @else
-                                            {{-- Aktions-Links als kleine Buttons (D) --}}
+                                            {{-- Profil bleibt als Modal; Anschrift, Betreuer, Matrix und Löschen im Inspektor --}}
                                             <a href="{{ route('players.show', $player) }}"
                                                data-modal-url="{{ route('players.show', $player) }}"
-                                               class="ui mini basic button"
-                                               title="Spielerprofil anzeigen / bearbeiten">
-                                                <i class="user icon"></i> Profil
+                                               class="wr-btn wr-btn--secondary wr-btn--small"
+                                               aria-label="Spielerprofil von {{ $player->full_name }} öffnen">
+                                                <i class="user icon m-0" aria-hidden="true"></i> Profil
                                             </a>
-                                            <a href="{{ route('admin.players.edit', $player) }}"
-                                               data-modal-url="{{ route('admin.players.edit', $player) }}"
-                                               class="ui mini basic button"
-                                               title="{{ $player->address_same_as_guardian ? 'Elternanschrift' : 'Abweichende Anschrift' }}">
-                                                Anschrift{{ $player->address_same_as_guardian ? '' : ' *' }}
-                                            </a>
-                                            <a href="{{ route('admin.players.caretakers', $player) }}"
-                                               data-modal-url="{{ route('admin.players.caretakers', $player) }}"
-                                               class="ui mini basic button">Betreuer</a>
-                                            <a href="{{ route('admin.players.matrix.edit', $player) }}"
-                                               class="ui mini basic button">Matrix</a>
-                                            <form method="POST" action="{{ route('admin.players.destroy', $player->id) }}"
-                                                  data-confirm="Spieler löschen?">
-                                                @csrf @method('DELETE')
-                                                <button type="submit" class="ui mini red icon button"
-                                                        data-tooltip="Löschen" data-position="top center">
-                                                    <i class="trash icon"></i>
-                                                </button>
-                                            </form>
                                         @endif
                                     </div>
                                 </td>
@@ -214,8 +212,8 @@
 
             <div class="mt-4">{{ $players->links() }}</div>
             <br>
-            <a href="{{ route('admin.index') }}">
-                <x-primary-button>Zurück zur Verwaltung</x-primary-button>
+            <a href="{{ route('admin.index') }}" class="wr-btn wr-btn--secondary">
+                <i class="arrow left icon m-0" aria-hidden="true"></i> Zurück zur Verwaltung
             </a>
         </div>
     </div>

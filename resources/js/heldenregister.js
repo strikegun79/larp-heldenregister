@@ -466,7 +466,7 @@ document.addEventListener('submit', function (e) {
 // Seiteninhalt (nur <main>) per AJAX neu laden (kein Seiten-Reload)
 // ------------------------------------------------------------------
 function refreshPageContent() {
-    fetch(window.location.href, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+    return fetch(window.location.href, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
         .then(r => r.text())
         .then(html => {
             const doc    = new DOMParser().parseFromString(html, 'text/html');
@@ -719,15 +719,42 @@ function loadInspector(focusPanel) {
         .then(r => { if (!r.ok) throw new Error(r.status); return r.text(); })
         .then(html => {
             if (url !== inspectorUrl) return; // inzwischen andere Zeile geöffnet
-            content.innerHTML = html;
-            const t = content.querySelector('[data-inspector-title]');
-            title.textContent = t ? t.textContent.trim() : 'Anmeldung';
+            // jQuery .html() führt Inline-Skripte der geladenen Ansicht aus (wie im Modal).
+            $(content).html(html);
+            // Titel: eigener Inspektor-Titel oder – bei Modal-Ansichten – der Modal-Titel.
+            const t = content.querySelector('[data-inspector-title]') || content.querySelector('[data-modal-title]');
+            title.textContent = t ? t.textContent.trim() : 'Details';
             t?.remove();
+            adaptModalViewForInspector(content);
             if (focusPanel) inspectorEl().querySelector('[data-inspector-close]')?.focus();
         })
         .catch(() => {
             content.innerHTML = '<div class="ui error message">Konnte nicht geladen werden.</div>';
         });
+}
+
+// Für das Modal gebaute Ansichten (z. B. Admin-Bearbeiten-Formulare) im Inspektor nutzbar machen:
+// Modal-Aktionen sichtbar unten anzeigen, Formulare per AJAX im Inspektor speichern,
+// Fomantic-Elemente initialisieren. Eigene Inspektor-Ansichten bleiben unverändert.
+function adaptModalViewForInspector(content) {
+    const actions = content.querySelector('[data-modal-actions]');
+    if (actions) {
+        const bar = document.createElement('div');
+        bar.className = 'wr-inspector-actions';
+        bar.innerHTML = actions.innerHTML;
+        actions.remove();
+        content.appendChild(bar);
+    }
+    content.querySelectorAll('form').forEach(form => {
+        if (form.hasAttribute('data-inspector-form')) return;
+        form.removeAttribute('data-refresh-modal');
+        form.removeAttribute('data-reload');
+        form.setAttribute('data-inspector-form', '');
+    });
+    const $c = $(content);
+    $c.find('.ui.dropdown').dropdown();
+    $c.find('.ui.checkbox').checkbox();
+    initFomanticCalendars($c);
 }
 
 function openInspector(url) {
@@ -757,7 +784,9 @@ function closeInspector(restoreFocus) {
 // Teilnehmerliste dahinter aktualisieren (Modal oder Vollseite).
 function refreshInspectorBackground() {
     const inModal = window.appModalUrl && $('#app-modal').hasClass('active');
-    const done = inModal ? loadModalContent(window.appModalUrl, true) : refreshManageTab();
+    // Vollseite mit Reitern (Abenteuer-Verwaltung): nur den aktiven Reiter; sonst (Admin-Listen) den Seiteninhalt.
+    const hasTabs = !! document.querySelector('.ui.top.attached.tabular.menu .item[data-tab]');
+    const done = inModal ? loadModalContent(window.appModalUrl, true) : (hasTabs ? refreshManageTab() : refreshPageContent());
     return Promise.resolve(done).then(() => {
         markInspectedRow(inspectorUrl);
         // loadModalContent setzt den Fokus ins Modal – zurück in den Inspektor holen.

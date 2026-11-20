@@ -7,6 +7,7 @@ use App\Models\MatrixAccount;
 use App\Models\MatrixManagedRoom;
 use App\Models\Player;
 use App\Services\AuditLogger;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Cache;
@@ -48,7 +49,7 @@ class MatrixAccountController extends Controller
     /**
      * Matrix-Konto anlegen/aktualisieren und Raum-Mitgliedschaften setzen.
      */
-    public function update(Request $request, Player $player): RedirectResponse
+    public function update(Request $request, Player $player): RedirectResponse|JsonResponse
     {
         $data = $request->validate([
             'active' => ['boolean'],
@@ -66,7 +67,7 @@ class MatrixAccountController extends Controller
 
         // Ohne bestehendes Konto und ohne aktiven Zugang gibt es nichts zu tun.
         if ($isNew && ! $active) {
-            return back()->with('status', 'Kein Matrix-Zugang vergeben.');
+            return $this->respond($request, 'Kein Matrix-Zugang vergeben.');
         }
 
         DB::transaction(function () use ($player, &$account, $active, $request, $newRooms) {
@@ -106,13 +107,13 @@ class MatrixAccountController extends Controller
             ]);
         }
 
-        return back()->with('status', "Matrix-Konto für {$player->full_name} gespeichert.");
+        return $this->respond($request, "Matrix-Konto für {$player->full_name} gespeichert.");
     }
 
     /**
      * Matrix-Zugang entziehen (soft-delete -> fällt aus der corporal-Policy).
      */
-    public function destroy(Player $player): RedirectResponse
+    public function destroy(Request $request, Player $player): RedirectResponse|JsonResponse
     {
         $account = $player->matrixAccount()->first();
         $account?->delete();
@@ -122,6 +123,14 @@ class MatrixAccountController extends Controller
             AuditLogger::log('matrix.account.revoked', $account);
         }
 
-        return back()->with('status', 'Matrix-Zugang wurde entzogen.');
+        return $this->respond($request, 'Matrix-Zugang wurde entzogen.');
+    }
+
+    /** AJAX (Inspektor): JSON-Meldung; sonst wie bisher zurück mit Statusmeldung. */
+    private function respond(Request $request, string $message): RedirectResponse|JsonResponse
+    {
+        return $request->expectsJson()
+            ? response()->json(['message' => $message])
+            : back()->with('status', $message);
     }
 }

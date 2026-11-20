@@ -116,12 +116,13 @@
         <aside id="booking-inspector" class="booking-inspector" hidden
                role="dialog" aria-modal="false" aria-labelledby="booking-inspector-title">
             <div class="booking-inspector__header">
-                <h2 id="booking-inspector-title" class="font-uncial text-lg text-waldritter m-0 truncate">Anmeldung</h2>
-                <button type="button" class="ui mini icon basic button" data-inspector-close aria-label="Inspektor schließen">
-                    <i class="close icon"></i>
+                <h2 id="booking-inspector-title" class="wr-inspector-title m-0 truncate">Details</h2>
+                <button type="button" class="wr-btn wr-btn--secondary wr-btn--small !px-3" data-inspector-close aria-label="Inspektor schließen">
+                    <i class="close icon m-0" aria-hidden="true"></i>
                 </button>
             </div>
-            <div id="booking-inspector-content" class="booking-inspector__content"></div>
+            {{-- wr-v1: Formulare und Inhalte im Inspektor im Waldritter-Stil --}}
+            <div id="booking-inspector-content" class="booking-inspector__content wr-v1"></div>
         </aside>
 
         <!-- Gestapeltes Modal (ADV-22): öffnet über #app-modal (z. B. Anmeldung,

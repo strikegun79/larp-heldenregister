@@ -1350,6 +1350,66 @@
 .wr-admin-area .text-amber-900,
 .wr-admin-area .text-amber-800 { color: #5f4823; }
 
+/* --- Inspektor (Seitenpanel) ---------------------------------------------- */
+.booking-inspector {
+    background-color: var(--wr-paper);
+}
+
+.booking-inspector__header {
+    background-color: var(--wr-parchment);
+    border-bottom-color: var(--wr-border);
+}
+
+.wr-inspector-title {
+    font-family: var(--wr-font-heading);
+    font-size: 1.15rem;
+    font-weight: 700;
+    color: var(--wr-ink);
+}
+
+/* Buttons aus Modal-Ansichten, im Inspektor sichtbar unten */
+.wr-inspector-actions {
+    position: sticky;
+    bottom: -1rem;
+    display: flex;
+    flex-wrap: wrap;
+    gap: .5rem;
+    margin: 1.25rem -1rem -1rem;
+    padding: .75rem 1rem;
+    border-top: 1px solid var(--wr-border);
+    background-color: var(--wr-parchment);
+}
+
+/* Formulare im schmalen Panel einspaltig */
+.booking-inspector .ui.form .two.fields,
+.booking-inspector .ui.form .three.fields {
+    flex-direction: column;
+}
+
+.booking-inspector .ui.form .fields > .field {
+    width: 100% !important;
+}
+
+/* Zeilen, die den Inspektor öffnen (Admin-Listen) */
+tr[data-inspector-url] { cursor: pointer; }
+tr[data-inspector-url]:focus-visible { outline: 3px solid var(--wr-focus); outline-offset: -3px; }
+tr[data-inspector-url].is-inspected > td { background-color: #f6e7c4 !important; }
+
+/* Gefahrenbereich am Ende von Bearbeiten-Ansichten (Löschen) */
+.wr-danger-zone {
+    margin-top: 1.5rem;
+    padding: 1rem;
+    border: 1px solid var(--wr-danger);
+    border-radius: var(--wr-radius-card);
+    background-color: #fdf3f1;
+}
+
+.wr-danger-zone__title {
+    margin: 0 0 .35rem;
+    font-weight: 700;
+    color: var(--wr-danger);
+}
+
 /* --- Teilnehmerliste in Anmeldekarten ------------------------------------ */
 .wr-participants {
     display: flex;
