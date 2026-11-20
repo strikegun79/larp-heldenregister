@@ -86,7 +86,7 @@ class Hero extends Model
     /** Öffentliche URL des Helden-Fotos; Standardbild wenn keins hochgeladen (HERO-22). */
     public function getImageUrlAttribute(): string
     {
-        return $this->image ? '/storage/'.$this->image : '/images/heroes_db.jpg';
+        return $this->image ? '/storage/'.$this->image : '/images/heroes_db_v2.png';
     }
 
     /**

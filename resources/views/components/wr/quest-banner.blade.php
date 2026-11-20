@@ -3,7 +3,7 @@
 @props([
     'title',
     'eyebrow' => null,
-    'image' => '/images/abenteuer_v2.jpg',
+    'image' => '/images/abenteuer_v3.jpg',
     'headingId' => null,
     'headingLevel' => 'h2',
 ])

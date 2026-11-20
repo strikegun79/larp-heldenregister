@@ -216,12 +216,12 @@
                                tag="Persönlich" title="Dein Profil" text="Kontaktdaten und Einstellungen" />
 
                     @can('heldenregister.view')
-                        <x-wr.card compact :href="route('heroes.index')" image="/images/heroes_db.jpg"
+                        <x-wr.card compact :href="route('heroes.index')" image="/images/heroes_db_v2.png"
                                    tag="Helden" title="Heldenverwaltung" text="Auflistung aller Helden" />
                     @endcan
 
                     @can('adventure.access')
-                        <x-wr.card compact :href="route('adventures.index')" image="/images/abenteuer_v2.jpg"
+                        <x-wr.card compact :href="route('adventures.index')" image="/images/abenteuer_v3.jpg"
                                    tag="Veranstaltungen" title="Abenteuer" text="Entdecke Abenteuer und melde dich an" />
                     @endcan
 
