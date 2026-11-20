@@ -720,6 +720,45 @@
     outline-offset: -3px;
 }
 
+/* --- Schatzkiste: verfügbare Erfahrungspunkte im Heldenbuch -------------- */
+.wr-treasure {
+    display: flex;
+    flex-direction: column;
+    gap: .15rem;
+    padding: .9rem 1.1rem;
+    border: 2px solid var(--wr-gold);
+    border-radius: var(--wr-radius-card);
+    background: linear-gradient(135deg, #fbf0d6 0%, var(--wr-paper) 100%);
+}
+
+.wr-treasure__label {
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+    font-size: .85rem;
+    font-weight: 700;
+    color: #5f4823;
+}
+
+.wr-treasure__value {
+    font-family: var(--wr-font-heading);
+    font-size: clamp(1.6rem, 1.2rem + 1.5vw, 2.2rem);
+    font-weight: 700;
+    line-height: 1.15;
+    color: var(--wr-forest);
+}
+
+.wr-treasure__sub {
+    font-size: .9rem;
+    color: var(--wr-ink-muted);
+}
+
+/* Verstecktes Datei-Feld: Tastaturfokus am zugehörigen Label zeigen */
+.wr-file-input:focus-visible + label {
+    outline: 3px solid var(--wr-focus);
+    outline-offset: 3px;
+}
+
 /* --- Teilnehmerliste in Anmeldekarten ------------------------------------ */
 .wr-participants {
     display: flex;
