@@ -3,7 +3,9 @@
      Die umgebende Ansicht stellt den .wr-v1-Wrapper bereit. Feldnamen und IDs bleiben unverändert
      (Validierung im PlayerController, Gesundheits-Einwilligung per Skript). --}}
 @php
-    $isSelf = old('self', ($self ?? false) ? '1' : null);
+    // Bearbeiten: $self kommt vom Controller (true/false) → immer vorausgewählt.
+    // Anlegen: kein $self → bewusst keine Vorauswahl.
+    $isSelf = old('self', isset($self) ? ($self ? '1' : '0') : null);
     $selfChosen = $isSelf !== null && $isSelf !== '';
     $selfOn = in_array((string) $isSelf, ['1', 'true', 'on'], true);
 @endphp

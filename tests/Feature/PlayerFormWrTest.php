@@ -97,4 +97,21 @@ class PlayerFormWrTest extends TestCase
 
         $this->assertMatchesRegularExpression('/id="self_yes"[^>]*checked/s', $html);
     }
+
+    public function test_edit_form_preselects_child_and_shows_parental_consent(): void
+    {
+        $user = $this->user();
+        $player = Player::factory()->create();
+        $user->players()->attach($player->id, ['self' => false]);
+
+        $html = $this->actingAs($user)
+            ->get(route('players.edit', $player), ['X-Requested-With' => 'XMLHttpRequest'])
+            ->assertOk()
+            ->getContent();
+
+        $this->assertMatchesRegularExpression('/id="self_no"[^>]*checked/s', $html);
+        $this->assertDoesNotMatchRegularExpression('/id="self_yes"[^>]*checked/s', $html);
+        // Einwilligungsblock ist sichtbar (nicht „hidden“).
+        $this->assertMatchesRegularExpression('/id="parental-consent-block" class="wr-fieldset\s*"/', $html);
+    }
 }
