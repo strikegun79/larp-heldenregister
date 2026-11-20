@@ -87,6 +87,7 @@ verändert wurden. Ausnahmen mit Wirkung über das Dashboard hinaus: siehe
 | `x-wr.adventure-date` | Terminformat mit Wochentag, Uhrzeit und Ende (von `adventure-meta` und Faktenlisten genutzt) |
 | `x-wr.own-booking` | Eigene Anmeldung im Abenteuer-Detail mit Aktionen als Text-Buttons |
 | `x-wr.booking-blocked-notice` | Sichtbarer Grund, warum „Anmelden“ gesperrt ist (Profil/Spieler fehlt) |
+| `x-wr.player-card` | Spielerkarte: Papyrus-Textur im Kopf, Alter, Abenteuer, aktiver Held |
 
 ## Vorher / Nachher
 
@@ -224,6 +225,38 @@ verändert wurden. Ausnahmen mit Wirkung über das Dashboard hinaus: siehe
   sind echte Buttons. Farben, Zustände und `data-skill-*`-Attribute unverändert.
 - Reiter „Verwalten“ nur im neuen Rahmen, Inhalt folgt mit den Verwaltungsansichten.
 
+### Spielerseiten (`/players` und Spieler-Detail)
+
+| Commit | Inhalt |
+|---|---|
+| `7e3b8dd` | P1: Spielerliste, Komponente `player-card` |
+| `c36bd5b` | P2: Spieler-Detail mit Teilansichten `players/partials/*` |
+| `87156d1` | Bild `wewantyou_v2.jpg` für „Neuer Spieler“ |
+
+- Papyrus-Hintergrund (`player_background.png`) nur noch als Textur im Kartenkopf.
+- Karte zeigt Alter, „X Abenteuer erlebt“ und den aktiven Helden; „Erstellt“/„Geschlecht“ nur im Detail.
+- Avatar-Upload unter dem Avatar in „Allgemeines“ (auch auf dem Handy); Reiter „Avatar“ entfallen.
+- Aktiver Held wählbar über eigenen Button, getrennt vom Link ins Heldenbuch.
+- Reiter „Buchungen“ heißt „Fotoerlaubnis“ (`data-tab="p-buchungen"` unverändert).
+
+### Formulare
+
+| Commit | Inhalt |
+|---|---|
+| `6d7fbc4` | F1: Formularregeln in `.wr-v1`, Abenteuer-Anmeldung in Abschnitten |
+| `1103ed3`, `9cbcf1c` | F2: Spielerformular mit „Wen legst du an?“ oben; Vorauswahl beim Bearbeiten |
+| `c40068b` | F3: Gast, Gruppe, Anmeldung bearbeiten; gemeinsame Kurzinfo `bookings/_summary` |
+| `38f71d0` | Event-Einstellung „Nach vegetarischem Essen fragen“; Gast mit Leih-Tunika, Leih-Waffe, NSC |
+
+- Formularregeln greifen für Fomantic-`ui form` und Breeze-Felder innerhalb von `.wr-v1`
+  (Felder 44 px, Fokus `#245F93`, `wr-fieldset`, `wr-check` mit großer Klickfläche).
+- Feldnamen, IDs und `.field`-Struktur bleiben, weil `heldenregister.js` darauf zugreift.
+- NSC heißt korrekt „Nichtspielercharakter“; Fotoerlaubnis mit Hinweis auf den Widerruf im Spielerprofil.
+- Spielerformular: Auswahl „Mich selbst / Mein Kind“ (Feld `self` = 1/0); Einwilligung Art. 8 nur bei „Mein Kind“.
+- Neue Spalte `adventures.asks_vegetarian` (Standard aus, bestehende Events per Migration auf an).
+  Snapshot vorher: `storage/backups/larp_heldenregister_dev_vor-asks-vegetarian.sql.gz`.
+- **Bitte inhaltlich prüfen:** Formulierungen zu Leih-Tunika/Leih-Waffe und zur Fotoerlaubnis sind neutral gehalten.
+
 ### Gemeinsame Regeln aus diesen Seiten
 
 - Status, Zustände und Beträge immer als Text mit Symbol, nie nur Farbe oder Tooltip.
@@ -232,6 +265,8 @@ verändert wurden. Ausnahmen mit Wirkung über das Dashboard hinaus: siehe
 - Fomantic-Reiter/Akkordeon werden nur innerhalb von `.wr-v1` umgestaltet; Mechanik und `data-tab` bleiben.
 - Fomantic-Checkboxen: Label ohne `for`-Attribut (sonst doppeltes Umschalten).
 - Versteckte Datei-Felder: `sr-only wr-file-input` vor dem Label, damit der Tastaturfokus sichtbar ist.
+- Nach Uploads per Zuschnitt-Dialog: Callback lädt offenes Modal neu, sonst die Seite (`window.location.reload()`).
+- Dateien, die auch im Modal laden: Inline-Skripte sofort ausführen, nicht auf `DOMContentLoaded` warten.
 
 ### Entwicklungsumgebung
 
