@@ -6,9 +6,8 @@
    ausdrücklich verwendet werden. Bestehende Fomantic-Regeln (.ui.*) und die
    Legacy-Tokens in app.css bleiben unverändert.
 
-   Token-Konflikt: --wr-ink und --wr-gold existieren bereits mit anderen Werten
-   (app.css). Die neuen Zielwerte gelten deshalb nur innerhalb von .wr-v1.
-   Eine globale Umstellung erfolgt später in einem eigenen Schritt.
+   Token: --wr-ink (#35281e) und --wr-gold (#b58a3a) sind in app.css global
+   auf die Zielwerte umgestellt (G2); hier stehen nur die übrigen Tokens.
    =========================================================================== */
 
 /* --- Neue Tokens ohne Namenskonflikt (global verfügbar, aber ungenutzt) --- */
@@ -42,10 +41,10 @@
     --wr-class-alchemist: #c77330;
 }
 
-/* --- Pilot-Bereich: neue Zielwerte für kollidierende Token-Namen --------- */
+/* --- Waldritter-Bereich: Schrift und Grundfarbe ------------------------------
+   --wr-ink und --wr-gold gelten seit der globalen Umstellung (G2) in app.css für
+   alle Seiten mit den Zielwerten; die Sonderregel hier ist entfallen. */
 .wr-v1 {
-    --wr-ink: #35281e;
-    --wr-gold: #b58a3a;
     color: var(--wr-ink);
     font-family: var(--wr-font-body);
     line-height: 1.5;

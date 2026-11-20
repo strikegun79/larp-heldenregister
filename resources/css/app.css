@@ -69,9 +69,10 @@
    gegen Fomantic/Utility-Konflikte.
    =========================================================================== */
 :root {
-    --wr-ink: #5a3a22;       /* Tinte/Braun */
-    --wr-gold: #c8962a;      /* Gold-Akzent */
-    --wr-gold-light: #e0b552;
+    /* Waldritter-Designsystem v1: Zielwerte gelten jetzt global (vorher nur in .wr-v1). */
+    --wr-ink: #35281e;       /* Tinte (Designsystem v1, vorher #5a3a22) */
+    --wr-gold: #b58a3a;      /* Gold-Akzent (Designsystem v1, vorher #c8962a) */
+    --wr-gold-light: #d4ae5c;
     --wr-green: #6f8f3a;     /* freundliches Grün */
     --wr-red: #b4513a;       /* warmes Rot */
 }
@@ -101,40 +102,52 @@ a.group:hover {
     transform: translateY(-3px) rotate(-.4deg);
 }
 
-/* --- Buttons: rund, warm, mit kleinem „Pop" beim Hover ------------------- */
+/* --- Buttons (Designsystem v1): Rundung 9 px, ruhiger Hover ohne Vergrößern,
+       Primär in Waldgrün mit weißer Schrift (kein Gold als Button-Basis) ---- */
 .ui.button {
-    border-radius: 999px;
-    font-family: 'EB Garamond', serif;
-    font-weight: 600;
-    letter-spacing: .2px;
-    box-shadow: 0 2px 0 rgba(0, 0, 0, .12);
-    transition: transform .12s ease, filter .12s ease, box-shadow .12s ease;
+    border-radius: 9px;
+    font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    font-weight: 700;
+    letter-spacing: 0;
+    box-shadow: 0 1px 0 rgba(0, 0, 0, .10);
+    transition: background-color .15s ease, filter .15s ease, box-shadow .15s ease;
 }
-.ui.button:hover { transform: translateY(-1px) scale(1.02); filter: brightness(1.05); }
-.ui.button:active { transform: translateY(0) scale(.99); }
-.ui.primary.button {
-    background: linear-gradient(180deg, var(--wr-gold-light), var(--wr-gold));
-    color: #3a2410;
+.ui.button:hover { filter: brightness(1.04); }
+.ui.primary.button,
+.ui.primary.button:focus {
+    background: var(--wr-forest);
+    color: #fff;
 }
-.ui.primary.button:hover { background: linear-gradient(180deg, #ecc267, var(--wr-gold)); }
+.ui.primary.button:hover,
+.ui.primary.button:active { background: var(--wr-forest-hover); color: #fff; }
 .ui.red.button { background: linear-gradient(180deg, #cd6650, var(--wr-red)); }
 .ui.green.button { background: linear-gradient(180deg, #88a851, var(--wr-green)); }
 .ui.basic.button { box-shadow: 0 0 0 1px rgba(90, 58, 34, .35) inset; color: var(--wr-ink) !important; }
 
-/* Breeze-Primary-Button (Tailwind) ans warme Theme angleichen */
+/* Breeze-Primary-Button (Tailwind) ans Designsystem angleichen: Waldgrün */
 .bg-gray-800 {
-    background: linear-gradient(180deg, var(--wr-gold-light), var(--wr-gold)) !important;
-    color: #3a2410 !important;
-    border-radius: 999px !important;
+    background: var(--wr-forest) !important;
+    color: #fff !important;
+    border-radius: 9px !important;
 }
 .bg-gray-800:hover { filter: brightness(1.05); }
 
 /* --- Links wärmer (Gold beim Hover) ------------------------------------- */
 a.text-indigo-600, a.text-indigo-700 { color: var(--wr-ink); }
 a.text-indigo-600:hover, a.text-indigo-700:hover,
-a.text-waldritter:hover { color: var(--wr-gold); }
+a.text-waldritter:hover { color: var(--wr-forest); }
 
-/* --- Eingabefelder: runder, goldener Fokusring -------------------------- */
+/* --- Fokus (Designsystem v1): einheitlich #245F93, gut sichtbar ------------ */
+a:focus-visible,
+button:focus-visible,
+[role="button"]:focus-visible,
+[tabindex]:not([tabindex="-1"]):focus-visible,
+.ui.button:focus-visible {
+    outline: 3px solid var(--wr-focus);
+    outline-offset: 2px;
+}
+
+/* --- Eingabefelder: runde Ecken, Fokus in #245F93 (Designsystem v1) -------- */
 .ui.form input, .ui.form select, .ui.form textarea,
 input[type="text"], input[type="email"], input[type="number"],
 input[type="date"], input[type="datetime-local"], select, textarea {
@@ -142,8 +155,8 @@ input[type="date"], input[type="datetime-local"], select, textarea {
 }
 .ui.form input:focus, .ui.form select:focus, .ui.form textarea:focus,
 input:focus, select:focus, textarea:focus {
-    border-color: var(--wr-gold) !important;
-    box-shadow: 0 0 0 3px rgba(200, 150, 42, .25) !important;
+    border-color: var(--wr-focus) !important;
+    box-shadow: 0 0 0 3px rgba(36, 95, 147, .25) !important;
 }
 
 /* --- Modal: runde Ecken, Pergament-Kopf in Uncial ---------------------- */
@@ -211,8 +224,8 @@ input:focus, select:focus, textarea:focus {
     color: var(--wr-ink);
 }
 .ui.tabular.menu .item:not(.active):focus-visible {
-    outline: 2px solid var(--wr-gold);
-    outline-offset: -2px;
+    outline: 3px solid var(--wr-focus);
+    outline-offset: -3px;
 }
 .ui.tabular.menu .item.active {
     border-radius: .5rem .5rem 0 0 !important;
@@ -235,7 +248,7 @@ footer {
    Diese Regeln greifen nur wenn .loading und .disabled gleichzeitig aktiv sind. */
 .ui.primary.button.loading,
 .ui.primary.button.loading.disabled {
-    background: linear-gradient(180deg, var(--wr-gold-light), var(--wr-gold)) !important;
+    background: var(--wr-forest) !important;
     opacity: 0.88 !important;
 }
 .ui.red.button.loading,
@@ -248,13 +261,12 @@ footer {
     background: linear-gradient(180deg, #88a851, var(--wr-green)) !important;
     opacity: 0.88 !important;
 }
-/* Spinner auf dem Gold-Hintergrund: dunkel statt weiß (Primary-Button hat
-   dunkle Schrift, also muss auch der Spinner dunkel sein). */
+/* Spinner auf dem Waldgrün-Hintergrund: hell (Primary-Button hat weiße Schrift). */
 .ui.primary.button.loading::before {
-    border-color: rgba(58, 36, 16, 0.15) !important;
+    border-color: rgba(255, 255, 255, 0.25) !important;
 }
 .ui.primary.button.loading::after {
-    color: rgba(58, 36, 16, 0.85) !important;
+    color: #fff !important;
 }
 
 /* Loading-Zustand: Spinner für Mini-Buttons verkleinern.
@@ -492,8 +504,8 @@ footer {
     text-align: center;
 }
 .siegel-input:focus {
-    border-color: var(--wr-gold) !important;
-    box-shadow: 0 0 0 3px rgba(200, 150, 42, .30) !important;
+    border-color: var(--wr-focus) !important;
+    box-shadow: 0 0 0 3px rgba(36, 95, 147, .25) !important;
 }
 .siegel-input::placeholder { color: #c4a882; letter-spacing: .2em; }
 
@@ -567,7 +579,7 @@ footer {
 /* Klickbare Teilnehmerzeilen in der Verwaltung */
 tr.booking-row-clickable { cursor: pointer; }
 tr.booking-row-clickable:hover > td { background-color: rgba(200, 150, 42, .10); }
-tr.booking-row-clickable:focus-visible { outline: 2px solid var(--wr-gold); outline-offset: -2px; }
+tr.booking-row-clickable:focus-visible { outline: 3px solid var(--wr-focus); outline-offset: -3px; }
 tr.booking-row-clickable.is-inspected > td { background-color: rgba(200, 150, 42, .20); }
 
 /* ===========================================================================
