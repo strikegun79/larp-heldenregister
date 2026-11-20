@@ -960,6 +960,17 @@
     box-shadow: none;
 }
 
+/* Datumsfeld (x-date-picker): Platz für das Kalendersymbol links */
+.wr-v1 .wr-form .ui.calendar input[type="text"] {
+    padding-left: 2.25rem;
+}
+
+/* Fehlermeldungen unter Feldern (x-input-error) */
+.wr-v1 .wr-form ul.text-red-600 {
+    color: var(--wr-danger);
+    font-weight: 600;
+}
+
 /* Pflichtfeld-Sternchen in Fehlerrot des Designsystems */
 .wr-v1 .ui.form .required.field > label::after,
 .wr-v1 .ui.form .required.fields > .field > label::after {

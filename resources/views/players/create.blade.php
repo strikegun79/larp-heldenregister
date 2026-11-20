@@ -1,18 +1,22 @@
 <x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-uncial text-2xl text-waldritter leading-tight">Neuer Spieler</h2>
-    </x-slot>
-
-    <div class="py-12">
-        <div class="max-w-2xl mx-auto sm:px-6 lg:px-8">
-            <div class="bg-white/70 border-2 border-[#5a3a22]/40 shadow sm:rounded-lg p-6">
-                <form method="POST" action="{{ route('players.store') }}" enctype="multipart/form-data">
-                    @include('players._form')
-                    <div class="mt-6">
-                        <x-primary-button>Speichern</x-primary-button>
-                    </div>
-                </form>
+    {{-- Waldritter-Designsystem v1 --}}
+    <div class="wr-v1 py-6 sm:py-8">
+        <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="mb-5">
+                <a href="{{ route('players.index') }}"
+                   class="wr-interactive inline-flex items-center gap-1 min-h-[44px] text-sm font-semibold text-wr-forest">
+                    <i class="arrow left icon m-0" aria-hidden="true"></i> Zurück zu deinen Spielern
+                </a>
+                <span class="wr-eyebrow">Familie und Spieler</span>
+                <h1 class="wr-heading">Neuer Spieler</h1>
             </div>
+
+            <form method="POST" action="{{ route('players.store') }}" enctype="multipart/form-data">
+                @include('players._form')
+                <div class="mt-6">
+                    <button type="submit" class="wr-btn wr-btn--primary">Speichern</button>
+                </div>
+            </form>
         </div>
     </div>
 </x-app-layout>
