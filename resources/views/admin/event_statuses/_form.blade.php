@@ -22,6 +22,12 @@
     </div>
 </form>
 
+{{-- Löschen nur im Inspektor (?inspector=1), Rückfrage und Sperrgrund wie in der bisherigen Liste --}}
+@php($usedBy = $status->adventures()->count())
+<x-admin.inspector-delete :action="route('admin.event-statuses.destroy', $status)"
+    title="Status löschen" :confirm="'Status „'.$status->description.'“ löschen?'"
+    :blocked="$usedBy ? 'Nicht löschbar: '.$usedBy.' Abenteuer haben diesen Status.' : null" />
+
 <div data-modal-actions hidden>
     <button type="submit" form="status-form" class="ui primary button">Speichern</button>
 </div>

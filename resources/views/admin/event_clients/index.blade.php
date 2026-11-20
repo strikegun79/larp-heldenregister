@@ -22,7 +22,9 @@
                     </thead>
                     <tbody class="divide-y divide-stone-200 text-stone-800">
                         @forelse ($clients as $client)
-                            <tr>
+                            <tr
+                                data-inspector-url="{{ route('admin.event-clients.edit', $client) }}?inspector=1" tabindex="0"
+                                aria-label="{{ $client->name }} bearbeiten">
                                 <td class="px-6 py-4" data-label="Name">{{ $client->name }}</td>
                                 <td class="px-6 py-4" data-label="Events">{{ $client->adventures_count }}</td>
                                 {{-- Zusätzliche Pflicht-Bestätigungen, z. B. Einverständniserklärungen (Issue #14) --}}
@@ -58,16 +60,8 @@
                                     </a>
                                 </td>
                                 <td class="px-6 py-4 text-right">
-                                    <div class="flex items-center justify-end gap-3">
-                                        <a href="{{ route('admin.event-clients.edit', $client) }}" data-modal-url="{{ route('admin.event-clients.edit', $client) }}" class="text-waldritter hover:underline">Bearbeiten</a>
-                                        @if (! $client->adventures_count)
-                                            <form method="POST" action="{{ route('admin.event-clients.destroy', $client) }}"
-                                                  data-confirm="Auftraggeber „{{ $client->name }}” löschen?">
-                                                @csrf @method('DELETE')
-                                                <button type="submit" class="text-red-600 hover:underline">Löschen</button>
-                                            </form>
-                                        @endif
-                                    </div>
+                                    {{-- Bearbeiten und Löschen im Inspektor (Zeilenklick / Enter) --}}
+                                    <i class="chevron right icon text-wr-ink-muted m-0" aria-hidden="true"></i>
                                 </td>
                             </tr>
                         @empty

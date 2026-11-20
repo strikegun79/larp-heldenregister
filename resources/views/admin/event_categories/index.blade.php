@@ -22,19 +22,15 @@
                     </thead>
                     <tbody class="divide-y divide-stone-200 text-stone-800">
                         @forelse ($categories as $category)
-                            <tr>
+                            <tr
+                                data-inspector-url="{{ route('admin.event-categories.edit', $category) }}?inspector=1" tabindex="0"
+                                aria-label="{{ $category->name }} bearbeiten">
                                 <td class="px-6 py-4" data-label="Name">{{ $category->name }}</td>
                                 <td class="px-6 py-4" data-label="Beschreibung">{{ $category->description ?: '—' }}</td>
                                 <td class="px-6 py-4" data-label="Events">{{ $category->adventures_count }}</td>
                                 <td class="px-6 py-4 text-right">
-                                    <div class="flex items-center justify-end gap-3">
-                                        <a href="{{ route('admin.event-categories.edit', $category) }}" data-modal-url="{{ route('admin.event-categories.edit', $category) }}" class="text-waldritter hover:underline">Bearbeiten</a>
-                                        <form method="POST" action="{{ route('admin.event-categories.destroy', $category) }}"
-                                              data-confirm="Kategorie „{{ $category->name }}” löschen?">
-                                            @csrf @method('DELETE')
-                                            <button type="submit" class="text-red-600 hover:underline">Löschen</button>
-                                        </form>
-                                    </div>
+                                    {{-- Bearbeiten und Löschen im Inspektor (Zeilenklick / Enter) --}}
+                                    <i class="chevron right icon text-wr-ink-muted m-0" aria-hidden="true"></i>
                                 </td>
                             </tr>
                         @empty

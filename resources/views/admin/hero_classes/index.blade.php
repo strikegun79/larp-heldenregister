@@ -25,7 +25,9 @@
                     </thead>
                     <tbody class="divide-y divide-stone-200 text-stone-800">
                         @forelse ($classes as $class)
-                            <tr class="{{ $class->disabled ? 'opacity-60' : '' }}">
+                            {{-- Kein Abblenden mehr: der Status steht als Text in der Status-Spalte --}}
+                            <tr data-inspector-url="{{ route('admin.hero-classes.edit', $class) }}?inspector=1" tabindex="0"
+                                aria-label="{{ $class->name }} bearbeiten">
                                 <td class="px-6 py-4" data-label="Name">{{ $class->name }}</td>
                                 <td class="px-6 py-4 text-sm text-stone-500" data-label="Slug">{{ $class->slug }}</td>
                                 <td class="px-6 py-4" data-label="EP-Kosten">{{ $class->ep_cost }} EP</td>
@@ -56,7 +58,8 @@
                                     @endif
                                 </td>
                                 <td class="px-6 py-4 text-right">
-                                    <a href="{{ route('admin.hero-classes.edit', $class) }}" data-modal-url="{{ route('admin.hero-classes.edit', $class) }}" class="text-waldritter hover:underline">Bearbeiten</a>
+                                    {{-- Bearbeiten und Löschen im Inspektor (Zeilenklick / Enter) --}}
+                                    <i class="chevron right icon text-wr-ink-muted m-0" aria-hidden="true"></i>
                                 </td>
                             </tr>
                         @empty

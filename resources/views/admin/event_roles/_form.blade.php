@@ -29,6 +29,14 @@
     </div>
 </form>
 
+{{-- Löschen nur im Inspektor (?inspector=1), Rückfrage und Sperrgrund wie in der bisherigen Liste --}}
+@if ($role->exists)
+    @php($usedBy = $role->bookings()->count())
+    <x-admin.inspector-delete :action="route('admin.event-roles.destroy', $role)"
+        title="Rolle löschen" :confirm="'Rolle „'.$role->description.'“ löschen?'"
+        :blocked="$usedBy ? 'Nicht löschbar: '.$usedBy.' Anmeldung(en) nutzen diese Rolle.' : null" />
+@endif
+
 <div data-modal-actions hidden>
     <button type="submit" form="role-form" class="ui primary button">Speichern</button>
 </div>

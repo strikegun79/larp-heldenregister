@@ -36,7 +36,9 @@
                                 </thead>
                                 <tbody class="divide-y divide-stone-200 text-stone-800">
                                     @foreach ($catDefs as $def)
-                                        <tr class="{{ $def->is_enabled ? '' : 'opacity-50' }}">
+                                        {{-- Kein Abblenden mehr: aktiv/inaktiv steht als Text in der eigenen Spalte --}}
+                                        <tr data-inspector-url="{{ route('admin.task-manager.edit', $def) }}?inspector=1" tabindex="0"
+                                            aria-label="{{ $def->label }} bearbeiten">
                                             <td class="px-4 py-3" data-label="Aufgabe">
                                                 <div class="flex items-center gap-2">
                                                     <i class="{{ $def->getIcon() }} icon text-stone-400"></i>
@@ -59,11 +61,8 @@
                                                 @endif
                                             </td>
                                             <td class="px-4 py-3 text-right">
-                                                <a href="{{ route('admin.task-manager.edit', $def) }}"
-                                                   data-modal-url="{{ route('admin.task-manager.edit', $def) }}"
-                                                   class="text-waldritter hover:underline text-sm">
-                                                    Bearbeiten
-                                                </a>
+                                                {{-- Bearbeiten im Inspektor (Zeilenklick / Enter) --}}
+                                                <i class="chevron right icon text-wr-ink-muted m-0" aria-hidden="true"></i>
                                             </td>
                                         </tr>
                                     @endforeach

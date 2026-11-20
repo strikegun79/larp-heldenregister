@@ -44,6 +44,14 @@
     </div>
 </form>
 
+{{-- Löschen nur im Inspektor (?inspector=1), Rückfrage und Sperrgrund wie in der bisherigen Liste --}}
+@if ($location->exists)
+    @php($usedBy = $location->adventures()->count())
+    <x-admin.inspector-delete :action="route('admin.locations.destroy', $location)"
+        title="Ort löschen" :confirm="'Ort „'.$location->titel.'“ löschen?'.($usedBy ? ' '.$usedBy.' Abenteuer verlieren den Ort.' : '')"
+        :hint="$usedBy ? $usedBy.' Abenteuer verlieren beim Löschen den Ort.' : null" />
+@endif
+
 <div data-modal-actions hidden>
     <button type="submit" form="location-form" class="ui primary button">Speichern</button>
 </div>
