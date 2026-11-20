@@ -42,7 +42,7 @@ class PlayerCardsTest extends TestCase
 
         // Neuer-Spieler-Karte
         $response->assertSee('Neuen Spieler erstellen');
-        $response->assertSee('/images/wewantyou_poster4.jpg', false);
+        $response->assertSee('/images/wewantyou_v2.jpg', false);
         $response->assertSee('data-modal-url="'.route('players.create').'"', false);
 
         // Papyrus-Hintergrund gehört auf die Spielerkarten (Korrektur PLAY-11).

@@ -38,8 +38,8 @@
                     <a href="{{ route('players.create') }}" data-modal-url="{{ route('players.create') }}"
                        class="wr-card wr-card--link wr-card--placeholder flex-1">
                         <div class="wr-card__media save-data-hide">
-                            <img src="/images/wewantyou_poster4.jpg" alt="" aria-hidden="true"
-                                 loading="lazy" width="400" height="176">
+                            <img src="/images/wewantyou_v2.jpg" alt="" aria-hidden="true"
+                                 loading="lazy" width="428" height="175">
                         </div>
                         <div class="wr-card__body">
                             <h2 class="wr-card__title"><i class="plus circle icon" aria-hidden="true"></i> Neuer Spieler</h2>
