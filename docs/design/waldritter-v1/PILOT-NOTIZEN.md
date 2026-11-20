@@ -2,6 +2,8 @@
 
 Stand: 20.11.2026 · Branch `develop`
 
+> Ab Abschnitt „Weitere umgestellte Seiten“ dokumentiert diese Datei auch die Seiten nach dem Pilot.
+
 ## Ergebnis
 
 Das Dashboard (`/dashboard`) ist als erste Seite auf das Designsystem
@@ -80,6 +82,11 @@ verändert wurden. Ausnahmen mit Wirkung über das Dashboard hinaus: siehe
 | `x-wr.class-badge` | Klassenbanner + Name, Klassenfarbe als Akzent |
 | `x-wr.step` | Onboarding-Schritt; `later-hint` statt Abblenden |
 | `x-wr.stat-tile` | Kennzahl (Verwaltung) |
+| `x-wr.adventure-card` | Abenteuerkarte für Listen (echter Link, ab 640 px Modal) inkl. „Deine Anmeldungen“ |
+| `x-wr.adventure-status` | Anmeldestatus als Pill (Text + Symbol), optional freie Plätze |
+| `x-wr.adventure-date` | Terminformat mit Wochentag, Uhrzeit und Ende (von `adventure-meta` und Faktenlisten genutzt) |
+| `x-wr.own-booking` | Eigene Anmeldung im Abenteuer-Detail mit Aktionen als Text-Buttons |
+| `x-wr.booking-blocked-notice` | Sichtbarer Grund, warum „Anmelden“ gesperrt ist (Profil/Spieler fehlt) |
 
 ## Vorher / Nachher
 
@@ -158,16 +165,78 @@ verändert wurden. Ausnahmen mit Wirkung über das Dashboard hinaus: siehe
    haben das Dashboard grüne und alle anderen Seiten goldene Primärbuttons.
 4. **Tests unabhängiger von CSS-Klassen machen** (`DashboardNextAdventureTest`, `MotdTest`), damit
    `_adventure_status` und `_motd` vollständig auf Tokens umgestellt werden können.
-5. **Bildgrößen:** `abenteuer_v3.jpg` (350 KB) und `heroes_db_v2.jpg` (315 KB) haben
-   1254 × 1254 px; mit ca. 600 px Breite wären sie unter 100 KB.
+5. **Bildgröße:** `abenteuer_v3.jpg` (350 KB, 1254 × 1254 px) ließe sich auf ca. 600 px verkleinern
+   (`heroes_db_v2.jpg` ist erledigt: 600 px, 91 KB).
 6. **Klassenfarben in der Datenbank:** `hero_classes.ribbon_color` ist überall leer. Die
    Designfarben gelten bisher nur per CSS. Ob sie in die Datenbank übernommen werden sollen,
    ist noch nicht entschieden.
 7. **Heldenarchiv-Kachel** aus der Designvorlage: Dafür gibt es noch keine Funktion bzw. Route.
-8. **Begriff „Anmeldung offen“** in Abenteuerliste und Verwaltung beim Umbau dieser Seiten
-   an „Anmeldung möglich“ angleichen.
+8. **Begriff „Anmeldung offen“** (Datenbank-Status) erscheint noch in den Gruppenüberschriften der
+   Abenteuerliste, im Block „Organisation“ des Abenteuer-Details und in der Verwaltung; die Pills
+   sagen bereits „Anmeldung möglich“. Ggf. Status-Bezeichnung in der Datenbank angleichen.
 9. **Onboarding wieder einblenden:** Einmal ausgeblendet, erscheint es erst nach dem Löschen
    der Browserdaten wieder. Bei Bedarf einen Link im Profil ergänzen.
+10. **Reiter „Verwalten“ im Heldenbuch** und die Verwaltung des Abenteuers (`manage`, `_bookings`)
+    mit den Verwaltungsansichten umstellen.
+11. **Modal-Breite:** Falls die Reiterleiste im Heldenbuch-Modal umbricht, Modal-Breite anpassen.
+
+## Weitere umgestellte Seiten
+
+### Abenteuerliste (`/adventures`)
+
+| Commit | Inhalt |
+|---|---|
+| `41e4faf` | Komponenten `adventure-card`, `adventure-status`; CSS Werkzeugleiste, Umschalter, Kartenraster |
+| `a3a19e3` | Umbau Liste und Leerzustand, `AdventureListTest` |
+| `c5c0840` | Eigene Anmeldungen an der Karte (Controller lädt nur Buchungen eigener Spieler) |
+
+- Eine Kartenausgabe statt Mobil-Karten plus Desktop-Tabelle (vorher vier fast gleiche Blöcke).
+- Ansicht („Nach Status“, „Nächstes zuerst“, „Letztes zuerst“) als Links mit `aria-current` statt Fomantic-Dropdown.
+- Platzangabe/Warteliste nur bei offener Anmeldung (vorher auch bei abgeschlossenen/abgesagten Abenteuern).
+- Vereinfachung: Wartende bei freien Plätzen (Wartelistenmodus) werden in der Liste nicht berücksichtigt; die Detailseite ist maßgeblich.
+- `max_player = 0` gilt in der Buchungslogik als „voll“; dann keine Platzangabe (nicht „unbegrenzt“).
+
+### Abenteuer-Detail (Seite und Modal)
+
+| Commit | Inhalt |
+|---|---|
+| `0c22cf5` | Komponenten `own-booking`, `booking-blocked-notice`; CSS Reiter, Akkordeon, Faktenliste, Hinweis, Button-Zustände |
+| `eb08b94` | Umbau `show`, `_detail`, `_event_info`, neue Teilansicht `_own_bookings`, `AdventureDetailTest` |
+
+- `_detail` hat einen eigenen `.wr-v1`-Wrapper, damit auch das globale Modal im neuen Design erscheint.
+- „Das Wichtigste“ (Termin, Ort mit Karte, Beitrag/kostenlos, Alter, Plätze, Anmeldung) vor „Organisation“.
+- Eigene Anmeldungen als Karten mit Text-Buttons; **`_bookings` (Verwaltung) unverändert**.
+- Sperrgrund für „Anmelden“ als sichtbarer Hinweis statt Tooltip.
+
+### Heldenbuch (`/heroes/{id}` und Modal)
+
+| Commit | Inhalt |
+|---|---|
+| `c9d52e2` | H1: Seitenkopf, Übersicht (`heroes/partials/_overview`), Schatzkiste, öffentliches Profil |
+| `9ecbbff` | H2: Fertigkeiten (`_skills`, `_skill_columns`) mit zugänglichen Zuständen |
+| `42ef96e` | Breitere Seite, kompaktere Reiter (eine Zeile auch mit Zählern) |
+| `2fea8ac` | H3: Abenteuer, EP-Verlauf, Galerie (`_adventures`, `_ep`, `_gallery`) |
+
+- `_detail.blade.php` von 1046 auf 277 Zeilen: Jeder Bereich ist nur noch einmal geschrieben und wird
+  für Akkordeon (Handy) und Reiter (Desktop) eingebunden. `$ctx` (`m`/`d`) hält IDs eindeutig.
+- „Foto ändern“ jetzt auch auf dem Handy; Galerie-Löschen fragt überall nach.
+- Fertigkeiten: Marker mit zugänglichem Namen, Schloss-Symbol für „gesperrt“, Legende; alle Lern-Auslöser
+  sind echte Buttons. Farben, Zustände und `data-skill-*`-Attribute unverändert.
+- Reiter „Verwalten“ nur im neuen Rahmen, Inhalt folgt mit den Verwaltungsansichten.
+
+### Gemeinsame Regeln aus diesen Seiten
+
+- Status, Zustände und Beträge immer als Text mit Symbol, nie nur Farbe oder Tooltip.
+- Symbole immer gefüllt (keine Fomantic-`outline`-Varianten).
+- Ansichten, die auch im Modal laden, bekommen einen eigenen `.wr-v1`-Wrapper.
+- Fomantic-Reiter/Akkordeon werden nur innerhalb von `.wr-v1` umgestaltet; Mechanik und `data-tab` bleiben.
+- Fomantic-Checkboxen: Label ohne `for`-Attribut (sonst doppeltes Umschalten).
+- Versteckte Datei-Felder: `sr-only wr-file-input` vor dem Label, damit der Tastaturfokus sichtbar ist.
+
+### Entwicklungsumgebung
+
+- `public/storage` fehlte (404 für hochgeladene Bilder); mit `php artisan storage:link` angelegt (nicht versioniert).
+- Bilder: `abenteuer_v3.jpg`, `heroes_db_v2.jpg` (600 px) ersetzen die alten Motive bzw. das Helden-Ersatzbild.
 
 ## Nächste Seiten (Reihenfolge laut Designsystem)
 
