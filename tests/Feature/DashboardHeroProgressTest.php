@@ -62,6 +62,23 @@ class DashboardHeroProgressTest extends TestCase
             ->assertSee('1 Abenteuer erlebt');
     }
 
+    public function test_several_heroes_do_not_lazy_load_skills(): void
+    {
+        // Lazy-Loading-Schutz greift erst ab mehreren geladenen Modellen.
+        $user = $this->user();
+        foreach (['Held Eins', 'Held Zwei'] as $name) {
+            $player = $this->playerWithHero($name);
+            $user->players()->attach($player->id, ['self' => false]);
+            $player->activeHero->skills()->attach(Skill::factory()->create()->id, ['trained_at' => now()]);
+        }
+
+        $this->actingAs($user)->get(route('dashboard'))
+            ->assertOk()
+            ->assertSee('Held Eins')
+            ->assertSee('Held Zwei')
+            ->assertSee('1 Fertigkeit');
+    }
+
     public function test_placeholder_for_own_player_without_hero(): void
     {
         $user = $this->user();
