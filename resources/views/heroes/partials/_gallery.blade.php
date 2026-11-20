@@ -24,8 +24,13 @@
     @if ($canEditPhoto)
         @for ($i = $count; $i < 4; $i++)
             <div>
+                {{-- Nach dem Speichern: offenes Modal neu laden, auf der Vollseite die Seite (sonst bleibt die Galerie alt) --}}
                 <input type="file" accept="image/*" id="gallery-upload-{{ $ctx }}-{{ $i }}" class="sr-only wr-file-input"
-                       onchange="openPhotoCropper(this.files[0], '{{ route('heroes.gallery.store', $hero) }}', null, { aspectRatio: NaN })">
+                       onchange="var f = this.files[0]; this.value = ''; if (f) openPhotoCropper(f, '{{ route('heroes.gallery.store', $hero) }}', function () {
+                           if (window.appModal2Url) loadStackContent(window.appModal2Url, true);
+                           else if (window.appModalUrl) loadModalContent(window.appModalUrl, true);
+                           else window.location.reload();
+                       }, { aspectRatio: NaN })">
                 <label for="gallery-upload-{{ $ctx }}-{{ $i }}"
                        class="flex flex-col items-center justify-center h-28 sm:h-36 border-2 border-dashed border-wr-border rounded-lg cursor-pointer
                               hover:border-wr-leather hover:bg-wr-parchment transition text-wr-ink-muted text-sm select-none">
