@@ -600,6 +600,126 @@
     vertical-align: middle;
 }
 
+/* --- Button-Zustände ------------------------------------------------------ */
+.wr-btn--danger {
+    background-color: var(--wr-paper);
+    border-color: var(--wr-danger);
+    color: var(--wr-danger);
+}
+
+.wr-btn--danger:hover {
+    background-color: #f3dad5;
+    color: #7a2e24;
+}
+
+.wr-btn:disabled,
+.wr-btn[aria-disabled="true"] {
+    background-color: var(--wr-parchment-deep);
+    border-color: var(--wr-border);
+    color: var(--wr-ink-muted);
+    cursor: not-allowed;
+    pointer-events: none;
+}
+
+/* --- Hinweisbox (z. B. warum „Anmelden“ gesperrt ist) --------------------- */
+.wr-notice {
+    display: flex;
+    gap: .75rem;
+    align-items: flex-start;
+    padding: .85rem 1rem;
+    border: 1px solid #d9b871;
+    border-left: 4px solid #8a5a00;
+    border-radius: var(--wr-radius-control);
+    background-color: #fbf0d6;
+    color: var(--wr-ink);
+}
+
+.wr-notice p { margin: 0; }
+
+/* --- Faktenliste (Begriff/Wert), z. B. Abenteuer-Eckdaten ----------------- */
+.wr-facts {
+    display: grid;
+    gap: .75rem 1.5rem;
+    margin: 0;
+    grid-template-columns: minmax(0, 1fr);
+}
+
+@media (min-width: 520px) {
+    .wr-facts { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+}
+
+.wr-facts dt {
+    display: flex;
+    align-items: center;
+    gap: .35rem;
+    font-size: .85rem;
+    font-weight: 600;
+    color: var(--wr-ink-muted);
+}
+
+.wr-facts dt .icon { margin: 0; }
+
+.wr-facts dd {
+    margin: .1rem 0 0;
+    font-size: 1.02rem;
+    overflow-wrap: break-word;
+}
+
+.wr-facts--quiet dd { font-size: .95rem; }
+
+/* --- Fomantic-Reiter und Akkordeon im Waldritter-Bereich ------------------
+   Nur innerhalb von .wr-v1 – globale .ui-Regeln bleiben unverändert. */
+.wr-v1 .ui.tabular.menu {
+    border-bottom-color: var(--wr-border);
+    flex-wrap: wrap;
+}
+
+.wr-v1 .ui.tabular.menu .item {
+    min-height: 44px;
+    font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    font-weight: 600;
+    color: var(--wr-ink-muted);
+    border-top: 3px solid transparent;
+}
+
+.wr-v1 .ui.tabular.menu .item:hover {
+    color: var(--wr-ink);
+}
+
+.wr-v1 .ui.tabular.menu .active.item {
+    background-color: var(--wr-paper);
+    border-color: var(--wr-border);
+    border-top: 3px solid var(--wr-forest);
+    color: var(--wr-forest);
+}
+
+.wr-v1 .ui.tabular.menu .item:focus-visible {
+    outline: 3px solid var(--wr-focus);
+    outline-offset: -3px;
+}
+
+.wr-v1 .ui.bottom.attached.segment {
+    background-color: var(--wr-paper);
+    border-color: var(--wr-border);
+    color: var(--wr-ink);
+}
+
+.wr-v1 .mobile-accordion-section {
+    border-color: var(--wr-border);
+    background-color: var(--wr-paper);
+}
+
+.wr-v1 .mobile-accordion-section summary {
+    min-height: 44px;
+    background-color: var(--wr-parchment);
+    color: var(--wr-ink);
+}
+
+.wr-v1 .mobile-accordion-section summary:focus-visible {
+    outline: 3px solid var(--wr-focus);
+    outline-offset: -3px;
+}
+
 /* --- Teilnehmerliste in Anmeldekarten ------------------------------------ */
 .wr-participants {
     display: flex;
