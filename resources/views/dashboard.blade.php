@@ -216,7 +216,7 @@
                                tag="Persönlich" title="Dein Profil" text="Kontaktdaten und Einstellungen" />
 
                     @can('heldenregister.view')
-                        <x-wr.card compact :href="route('heroes.index')" image="/images/heroes_db_v2.png"
+                        <x-wr.card compact :href="route('heroes.index')" image="/images/heroes_db_v2.jpg"
                                    tag="Helden" title="Heldenverwaltung" text="Auflistung aller Helden" />
                     @endcan
 

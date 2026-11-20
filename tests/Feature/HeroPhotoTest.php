@@ -37,7 +37,7 @@ class HeroPhotoTest extends TestCase
     {
         $hero = Hero::factory()->create(['image' => null]);
 
-        $this->assertSame('/images/heroes_db_v2.png', $hero->image_url);
+        $this->assertSame('/images/heroes_db_v2.jpg', $hero->image_url);
     }
 
     public function test_hero_with_image_returns_storage_path(): void
@@ -165,6 +165,6 @@ class HeroPhotoTest extends TestCase
         $this->actingAs($owner)
             ->get(route('players.show', $player), ['X-Requested-With' => 'XMLHttpRequest'])
             ->assertOk()
-            ->assertSee('heroes_db_v2.png', false);
+            ->assertSee('heroes_db_v2.jpg', false);
     }
 }
