@@ -50,80 +50,7 @@
         {{-- UI-33: Verwalten ans Ende (nach spielrelevanten Sektionen) --}}
         @can('heldenregister.edit')
         <x-mobile.accordion-section title="Verwalten">
-            <div class="wr-verwalten-stack">
-
-                {{-- Helden-Siegel --}}
-                <div class="wr-verwalten-panel wr-verwalten-siegel">
-                    <h5 class="wr-verwalten-heading">
-                        <i class="id badge icon"></i> Helden-Siegel
-                    </h5>
-                    <form method="POST" action="{{ route('heroes.assign-code', $hero) }}" data-refresh-modal class="ui form">
-                        @csrf @method('PATCH')
-                        <div class="flex items-end gap-2 flex-wrap">
-                            <div class="field !mb-0">
-                                <input type="text" name="code" maxlength="6" minlength="6"
-                                       pattern="[A-HJ-NP-Z2-9]{6}"
-                                       placeholder="XXXXXX"
-                                       value="{{ old('code', $hero->public_code) }}"
-                                       class="font-mono tracking-widest w-28 siegel-input"
-                                       style="text-transform:uppercase"
-                                       required>
-                            </div>
-                            <button type="submit" class="ui primary mini button">Siegel zuweisen</button>
-                        </div>
-                    </form>
-                    @error('code') <p class="text-red-600 text-xs mt-1">{{ $message }}</p> @enderror
-                    <p class="wr-verwalten-hint mt-1">6 Zeichen aus A–Z (kein I/L/O) und 2–9</p>
-                    @if ($hero->public_code)
-                        <div class="mt-3">
-                            <a href="{{ route('admin.id-cards.reprint', $hero) }}" class="ui mini basic button" target="_blank" rel="noopener">
-                                <i class="print icon"></i> Ausweis drucken
-                            </a>
-                        </div>
-                    @endif
-                    @if ($hero->player)
-                        {{-- Willkommens-Mail: eigener Unterbereich --}}
-                        <div class="wr-verwalten-mail-box mt-3">
-                            <p class="wr-verwalten-mail-label">
-                                <i class="envelope icon"></i> Aufnahme-Bestätigung
-                            </p>
-                            <form method="POST" action="{{ route('heroes.welcome-mail', $hero) }}" data-refresh-modal>
-                                @csrf
-                                <button type="submit" class="ui mini teal button">
-                                    <i class="paper plane icon"></i> Mail senden
-                                </button>
-                            </form>
-                            <p class="wr-verwalten-hint mt-1">Sendet die Bestätigung an Eltern/Betreuer.</p>
-                        </div>
-                    @endif
-                </div>
-
-                {{-- Verschollen / Wiedergefunden --}}
-                <div class="wr-verwalten-panel {{ $hero->died ? 'wr-verwalten-verschollen-aktiv' : 'wr-verwalten-verschollen-warnung' }}">
-                    <h5 class="wr-verwalten-heading">
-                        <i class="user {{ $hero->died ? 'check circle' : 'times circle' }} icon"></i>
-                        {{ $hero->died ? 'Held verschollen' : 'Held aktiv' }}
-                    </h5>
-                    @if ($hero->died)
-                        <p class="wr-verwalten-hint mb-2">Dieser Held gilt derzeit als verschollen.</p>
-                    @else
-                        <p class="wr-verwalten-hint mb-2">Dieser Held ist im Register aktiv.</p>
-                    @endif
-                    <form method="POST" action="{{ route('heroes.missing', $hero) }}" data-refresh-modal>
-                        @csrf @method('PATCH')
-                        @if ($hero->died)
-                            <button type="submit" class="ui small green button">
-                                <i class="undo icon"></i> Als wiedergefunden markieren
-                            </button>
-                        @else
-                            <button type="submit" class="ui small red button">
-                                <i class="user times icon"></i> Als verschollen markieren
-                            </button>
-                        @endif
-                    </form>
-                </div>
-
-            </div>
+            @include('heroes.partials._manage', ['ctx' => 'm'])
         </x-mobile.accordion-section>
         @endcan
 
@@ -187,81 +114,8 @@
 
         {{-- Tab: Verwalten (nur Bürokrat / Admin) --}}
         @can('heldenregister.edit')
-        <div class="ui bottom attached tab segment wr-verwalten-tab" data-tab="manage">
-            <div class="wr-verwalten-grid">
-
-                {{-- Helden-Siegel --}}
-                <div class="wr-verwalten-panel wr-verwalten-siegel">
-                    <h4 class="wr-verwalten-heading wr-verwalten-heading--lg">
-                        <i class="id badge icon"></i> Helden-Siegel
-                    </h4>
-                    <form method="POST" action="{{ route('heroes.assign-code', $hero) }}" data-refresh-modal class="ui form">
-                        @csrf @method('PATCH')
-                        <div class="flex items-end gap-2 flex-wrap">
-                            <div class="field !mb-0">
-                                <input type="text" name="code" maxlength="6" minlength="6"
-                                       pattern="[A-HJ-NP-Z2-9]{6}"
-                                       placeholder="XXXXXX"
-                                       value="{{ old('code', $hero->public_code) }}"
-                                       class="font-mono tracking-widest w-28 siegel-input"
-                                       style="text-transform:uppercase"
-                                       required>
-                            </div>
-                            <button type="submit" class="ui primary small button">Siegel zuweisen</button>
-                        </div>
-                    </form>
-                    @error('code') <p class="text-red-600 text-sm mt-1">{{ $message }}</p> @enderror
-                    <p class="wr-verwalten-hint mt-1">6 Zeichen aus A–Z (kein I/L/O) und 2–9</p>
-                    @if ($hero->public_code)
-                        <div class="mt-3">
-                            <a href="{{ route('admin.id-cards.reprint', $hero) }}" class="ui small basic button" target="_blank" rel="noopener">
-                                <i class="print icon"></i> Ausweis drucken
-                            </a>
-                        </div>
-                    @endif
-                    @if ($hero->player)
-                        {{-- Willkommens-Mail: eigener Unterbereich --}}
-                        <div class="wr-verwalten-mail-box mt-4">
-                            <p class="wr-verwalten-mail-label">
-                                <i class="envelope icon"></i> Aufnahme-Bestätigung
-                            </p>
-                            <form method="POST" action="{{ route('heroes.welcome-mail', $hero) }}" data-refresh-modal>
-                                @csrf
-                                <button type="submit" class="ui small teal button">
-                                    <i class="paper plane icon"></i> Willkommens-Mail senden
-                                </button>
-                            </form>
-                            <p class="wr-verwalten-hint mt-1">Sendet die Aufnahme-Bestätigung an die Eltern/Betreuer des Spielers.</p>
-                        </div>
-                    @endif
-                </div>
-
-                {{-- Verschollen / Wiedergefunden --}}
-                <div class="wr-verwalten-panel {{ $hero->died ? 'wr-verwalten-verschollen-aktiv' : 'wr-verwalten-verschollen-warnung' }}">
-                    <h4 class="wr-verwalten-heading wr-verwalten-heading--lg">
-                        <i class="user {{ $hero->died ? 'check circle' : 'times circle' }} icon"></i>
-                        {{ $hero->died ? 'Held verschollen' : 'Held aktiv' }}
-                    </h4>
-                    @if ($hero->died)
-                        <p class="wr-verwalten-hint mb-3">Dieser Held gilt derzeit als verschollen und ist nicht aktiv im Spiel.</p>
-                    @else
-                        <p class="wr-verwalten-hint mb-3">Dieser Held ist im Heldenregister aktiv und nimmt am Spielgeschehen teil.</p>
-                    @endif
-                    <form method="POST" action="{{ route('heroes.missing', $hero) }}" data-refresh-modal>
-                        @csrf @method('PATCH')
-                        @if ($hero->died)
-                            <button type="submit" class="ui small green button">
-                                <i class="undo icon"></i> Als wiedergefunden markieren
-                            </button>
-                        @else
-                            <button type="submit" class="ui small red button">
-                                <i class="user times icon"></i> Als verschollen markieren
-                            </button>
-                        @endif
-                    </form>
-                </div>
-
-            </div>
+        <div class="ui bottom attached tab segment" data-tab="manage">
+            @include('heroes.partials._manage', ['ctx' => 'd'])
         </div>
         @endcan
 
