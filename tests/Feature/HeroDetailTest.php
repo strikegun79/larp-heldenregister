@@ -3,7 +3,9 @@
 namespace Tests\Feature;
 
 use App\Models\Hero;
+use App\Models\HeroClass;
 use App\Models\Player;
+use App\Models\Skill;
 use App\Models\User;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -99,5 +101,32 @@ class HeroDetailTest extends TestCase
             ->get(route('heroes.show', $hero), ['X-Requested-With' => 'XMLHttpRequest'])
             ->assertOk()
             ->assertSee('verschollen seit 01.05.2025');
+    }
+
+    public function test_skill_states_have_accessible_labels_symbols_and_buttons(): void
+    {
+        [$owner, $hero] = $this->ownerWithHero();
+        $class = HeroClass::create(['id' => 990, 'name' => 'Waldkunde', 'slug' => 'test-990', 'ep_cost' => 0]);
+        $learned = Skill::create(['name' => 'Spurenlesen', 'ep_costs' => 2, 'level' => 1, 'perl_count' => 0]);
+        $locked = Skill::create(['name' => 'Fallenstellen', 'ep_costs' => 4, 'level' => 2, 'perl_count' => 0]);
+        $prereq = Skill::create(['name' => 'Tarnung', 'ep_costs' => 3, 'level' => 1, 'perl_count' => 0]);
+        $locked->prerequisites()->attach($prereq->id, ['hero_class_id' => $class->id]);
+        $class->skills()->attach([$learned->id, $locked->id, $prereq->id]);
+        $hero->classes()->attach($class->id);
+        $hero->skills()->attach($learned->id);
+
+        $html = $this->actingAs($owner)
+            ->get(route('heroes.show', $hero), ['X-Requested-With' => 'XMLHttpRequest'])
+            ->assertOk()
+            ->assertSee('aria-label="Spurenlesen, 2 EP, erlernt"', false)
+            ->assertSee('aria-label="Fallenstellen, 4 EP, gesperrt"', false)
+            ->assertSee('aria-label="Tarnung, 3 EP, noch nicht erlernt"', false)
+            ->assertSee('gesperrt (erst Voraussetzungen lernen)')
+            ->assertSee('aria-pressed', false)
+            ->getContent();
+
+        // Alle Auslöser des Lern-Dialogs sind echte Buttons (Tastatur), keine Emojis als einzige Kennzeichnung.
+        $this->assertDoesNotMatchRegularExpression('/<(a|div)[^>]*class="[^"]*skill-trigger/', $html);
+        $this->assertStringNotContainsString('🔒', $html);
     }
 }

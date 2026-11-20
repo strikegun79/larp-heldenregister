@@ -542,7 +542,8 @@
     background-color: var(--wr-paper);
 }
 
-.wr-segmented a {
+.wr-segmented a,
+.wr-segmented button {
     display: inline-flex;
     align-items: center;
     gap: .35rem;
@@ -555,21 +556,25 @@
     text-decoration: none;
 }
 
-.wr-segmented a + a {
+.wr-segmented a + a,
+.wr-segmented button + button {
     border-left: 1px solid var(--wr-border);
 }
 
-.wr-segmented a:hover {
+.wr-segmented a:hover,
+.wr-segmented button:hover {
     background-color: var(--wr-parchment);
     color: var(--wr-ink);
 }
 
-.wr-segmented a[aria-current="page"] {
+.wr-segmented a[aria-current="page"],
+.wr-segmented button[aria-pressed="true"] {
     background-color: var(--wr-forest);
     color: #fff;
 }
 
-.wr-segmented a:focus-visible {
+.wr-segmented a:focus-visible,
+.wr-segmented button:focus-visible {
     outline: 3px solid var(--wr-focus);
     outline-offset: -3px;
 }
@@ -758,6 +763,115 @@
     outline: 3px solid var(--wr-focus);
     outline-offset: 3px;
 }
+
+/* --- Fertigkeiten (Heldenbuch) --------------------------------------------
+   Zustände aus heldenregister.css bleiben (Gold = lernbar, Grün = erlernt, Grau = gesperrt);
+   hier nur Ergänzungen innerhalb von .wr-v1: Symbol für „gesperrt“, Kontrast, Fokus. */
+.wr-segmented button {
+    border: 0;
+    background: transparent;
+    cursor: pointer;
+}
+
+.wr-v1 .skill-marker:focus-visible {
+    outline: 3px solid var(--wr-focus);
+    outline-offset: 2px;
+}
+
+.wr-v1 .skill-marker.locked {
+    background: #d6d0c4;
+    border-style: dashed;
+    opacity: 1;
+}
+
+/* Schloss-Symbol aus der Fomantic-Icon-Schrift */
+.wr-v1 .skill-marker.locked::after {
+    content: "\f023";
+    font-family: Icons;
+    font-size: 12px;
+    line-height: 24px;
+    display: block;
+    text-align: center;
+    color: #4f4234;
+}
+
+.wr-skill-legend {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    width: 1.25rem;
+    height: 1.25rem;
+    border: 2px solid #3b250f;
+    border-radius: 999px;
+    font-size: .7rem;
+    font-weight: 700;
+}
+
+.wr-skill-legend--learned { background: #21ba45; color: #fff; }
+.wr-skill-legend--unlearned { background: rgba(255, 230, 120, .85); }
+.wr-skill-legend--locked { background: #d6d0c4; border-style: dashed; color: #4f4234; }
+.wr-skill-legend--locked .icon { font-size: .6rem; height: auto; }
+
+.wr-skill-list {
+    margin: 1rem 0 0;
+    padding: 0;
+    list-style: none;
+    border-top: 1px solid var(--wr-border);
+}
+
+.wr-skill-list li { border-bottom: 1px solid var(--wr-border); }
+
+.wr-skill-item {
+    display: flex;
+    align-items: center;
+    gap: .6rem;
+    width: 100%;
+    min-height: 44px;
+    padding: .4rem .5rem;
+    border: 0;
+    background: transparent;
+    color: var(--wr-ink);
+    text-align: left;
+    cursor: pointer;
+}
+
+.wr-skill-item:hover { background-color: var(--wr-parchment); }
+.wr-skill-item:focus-visible { outline: 3px solid var(--wr-focus); outline-offset: -3px; }
+.wr-skill-item--learned { color: #2f4a26; font-weight: 600; }
+.wr-skill-item--locked { color: var(--wr-ink-muted); }
+
+.wr-skill-level {
+    position: sticky;
+    top: 0;
+    padding-bottom: .25rem;
+    margin-bottom: .1rem;
+    border-bottom: 1px solid var(--wr-border);
+    background-color: var(--wr-paper);
+    text-align: center;
+    font-size: .75rem;
+    font-weight: 700;
+    letter-spacing: .08em;
+    text-transform: uppercase;
+    color: var(--wr-ink-muted);
+}
+
+.wr-skill-card {
+    display: block;
+    width: 100%;
+    padding: .5rem .75rem;
+    border: 1px solid var(--wr-border);
+    border-radius: var(--wr-radius-control);
+    background-color: #fbf0d6;
+    color: var(--wr-ink);
+    font-size: .875rem;
+    text-align: left;
+    cursor: pointer;
+}
+
+.wr-skill-card:hover { border-color: var(--wr-leather); }
+.wr-skill-card:focus-visible { outline: 3px solid var(--wr-focus); outline-offset: 2px; }
+.wr-skill-card--learned { background-color: #e3ebdb; border-color: #9fbf8f; color: #2f4a26; }
+.wr-skill-card--locked { background-color: var(--wr-parchment); color: var(--wr-ink-muted); border-style: dashed; }
 
 /* --- Teilnehmerliste in Anmeldekarten ------------------------------------ */
 .wr-participants {
