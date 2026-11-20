@@ -69,7 +69,15 @@ class AdventureController extends Controller
             $sort = 'grouped';
         }
 
+        // Eigene Anmeldungen an der Karte („Deine Anmeldungen“): ausschließlich Buchungen
+        // der eigenen Spieler, auch für Rollen, die alle Abenteuer sehen.
+        $ownPlayerIds = $request->user()->players()->pluck('players.id');
+
         $base = Adventure::with(['location', 'status', 'category'])
+            ->with(['bookings' => fn ($query) => $query
+                ->whereIn('player_id', $ownPlayerIds)
+                ->whereIn('status', ['bestaetigt', 'offen'])
+                ->with(['player', 'role'])])
             ->withCount('occupiedSlots')
             ->visibleFor($request->user())
             ->when($q, fn ($query) => $query->where('name', 'like', "%{$q}%"));

@@ -5,6 +5,7 @@ namespace Tests\Feature;
 use App\Models\Adventure;
 use App\Models\Booking;
 use App\Models\EventStatus;
+use App\Models\Player;
 use App\Models\User;
 use Database\Seeders\EventLookupSeeder;
 use Database\Seeders\LocationSeeder;
@@ -111,6 +112,59 @@ class AdventureListTest extends TestCase
             ->assertDontSee('Burgfest am See')
             ->assertSee('Kein Abenteuer zu „Winterzauber“ gefunden.')
             ->assertSee('Alle Abenteuer zeigen');
+    }
+
+    public function test_card_shows_only_own_bookings(): void
+    {
+        $user = $this->viewer();
+        $own = Player::factory()->create(['name' => 'Lena Eigen']);
+        $foreign = Player::factory()->create(['name' => 'Fremdes Kind']);
+        $user->players()->attach($own->id, ['self' => false]);
+
+        $adventure = $this->adventure(['name' => 'Burgfest']);
+        Booking::factory()->for($adventure)->create(['player_id' => $own->id, 'status' => 'bestaetigt']);
+        Booking::factory()->for($adventure)->create(['player_id' => $foreign->id, 'status' => 'bestaetigt']);
+
+        $this->actingAs($user)->get(route('adventures.index'))
+            ->assertOk()
+            ->assertSee('Deine Anmeldungen')
+            ->assertSee('Lena Eigen')
+            ->assertDontSee('Fremdes Kind');
+    }
+
+    public function test_cancelled_own_booking_is_not_shown(): void
+    {
+        $user = $this->viewer();
+        $own = Player::factory()->create(['name' => 'Lena Eigen']);
+        $user->players()->attach($own->id, ['self' => false]);
+
+        $adventure = $this->adventure();
+        Booking::factory()->for($adventure)->create(['player_id' => $own->id, 'status' => 'storniert']);
+
+        $this->actingAs($user)->get(route('adventures.index'))
+            ->assertOk()
+            ->assertDontSee('Deine Anmeldungen');
+    }
+
+    public function test_several_adventures_with_bookings_do_not_lazy_load(): void
+    {
+        // Lazy-Loading-Schutz greift erst ab mehreren geladenen Modellen.
+        $user = $this->viewer();
+        $own = Player::factory()->create();
+        $user->players()->attach($own->id, ['self' => true]);
+
+        foreach (['Erstes', 'Zweites'] as $name) {
+            $adventure = $this->adventure(['name' => $name.' Abenteuer', 'fee' => 10]);
+            Booking::factory()->for($adventure)->create(['player_id' => $own->id, 'status' => 'offen']);
+        }
+
+        foreach (['grouped', 'asc'] as $sort) {
+            $this->actingAs($user)->get(route('adventures.index', ['sort' => $sort]))
+                ->assertOk()
+                ->assertSee('Erstes Abenteuer')
+                ->assertSee('Zweites Abenteuer')
+                ->assertSee('wartet auf Bestätigung');
+        }
     }
 
     public function test_hidden_adventures_stay_invisible_for_viewers(): void
