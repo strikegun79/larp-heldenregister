@@ -1265,6 +1265,91 @@
     .wr-nav__link { transition: none; }
 }
 
+/* --- Seitenkopf der noch nicht umgestellten Seiten (layouts/app, Slot „header“) ---
+   Ruhiges Papier statt Pergament-Verlauf; der Titel ist eine H1 im Stil der neuen Seiten. */
+.wr-page-header {
+    background-color: var(--wr-paper);
+    border-bottom: 1px solid var(--wr-border);
+    box-shadow: 0 1px 0 rgba(53, 40, 30, .04);
+}
+
+.wr-page-header h1,
+.wr-page-header h2 {
+    margin: 0;
+    font-family: var(--wr-font-heading);
+    font-weight: 700;
+    font-size: clamp(1.35rem, 1.05rem + 1.4vw, 2rem);
+    line-height: 1.2;
+    color: var(--wr-ink);
+    text-shadow: none;
+}
+
+.wr-page-header .font-uncial {
+    font-family: var(--wr-font-heading);
+    text-shadow: none;
+}
+
+.wr-page-header p { color: var(--wr-ink-muted); }
+
+/* --- Verwaltungsbereich (main.wr-admin-area): ruhig, lesbar, effizient --------
+   Nur dort und nur für die bekannten Muster der Admin-Listen. Die rote Signal-
+   kennzeichnung (app.css) bleibt unverändert. */
+.wr-admin-area .font-uncial {
+    font-family: var(--wr-font-heading);
+    text-shadow: none;
+}
+
+/* Panels: Papier statt halbtransparentem Weiß */
+.wr-admin-area .bg-white\/60,
+.wr-admin-area .bg-white\/70,
+.wr-admin-area .bg-white.shadow-sm {
+    background-color: var(--wr-paper);
+    border-radius: var(--wr-radius-card);
+}
+
+/* Admin-Tabellen (Muster: min-w-full divide-y) in der ruhigen wr-table-Optik */
+.wr-admin-area table.min-w-full.divide-y {
+    background-color: var(--wr-paper);
+}
+
+.wr-admin-area table.min-w-full.divide-y > thead,
+.wr-admin-area table.min-w-full.divide-y > thead.bg-stone-50 {
+    background-color: var(--wr-parchment);
+}
+
+.wr-admin-area table.min-w-full.divide-y > thead th {
+    border-bottom: 2px solid var(--wr-border);
+    font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    font-weight: 700;
+    letter-spacing: .06em;
+    color: var(--wr-ink-muted);
+}
+
+.wr-admin-area table.min-w-full.divide-y > tbody > tr {
+    border-color: var(--wr-border);
+}
+
+.wr-admin-area table.min-w-full.divide-y > tbody > tr:hover {
+    background-color: #fbf3df;
+}
+
+.wr-admin-area table.min-w-full.divide-y td {
+    color: var(--wr-ink);
+    font-variant-numeric: tabular-nums;
+}
+
+/* Amber-Hinweiskästen als Hinweisbox des Designsystems */
+.wr-admin-area .bg-amber-50.border-amber-200,
+.wr-admin-area .bg-amber-50.border-amber-300 {
+    background-color: #fbf0d6;
+    border-color: #d9b871;
+    border-left: 4px solid #8a5a00;
+}
+
+.wr-admin-area .text-amber-700 { color: #8a5a00; }
+.wr-admin-area .text-amber-900,
+.wr-admin-area .text-amber-800 { color: #5f4823; }
+
 /* --- Teilnehmerliste in Anmeldekarten ------------------------------------ */
 .wr-participants {
     display: flex;

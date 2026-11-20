@@ -33,10 +33,18 @@
             @include('layouts.navigation')
 
             <!-- Page Heading -->
+            {{-- Seitenkopf der noch nicht umgestellten Seiten (Waldritter v1): ruhiges Papier, Titel als H1.
+                 Die erste <h2> im Slot wird zur <h1>, damit jede Seite eine Hauptüberschrift hat. --}}
             @if (isset($header))
-                <header class="bg-white/50 border-b-2 border-[#5a3a22]/40 shadow-sm">
-                    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-                        {{ $header }}
+                @php
+                    $headerHtml = (string) $header;
+                    if (! str_contains($headerHtml, '<h1') && str_contains($headerHtml, '<h2')) {
+                        $headerHtml = \Illuminate\Support\Str::replaceFirst('</h2>', '</h1>', \Illuminate\Support\Str::replaceFirst('<h2', '<h1', $headerHtml));
+                    }
+                @endphp
+                <header class="wr-page-header">
+                    <div class="max-w-7xl mx-auto py-5 px-4 sm:px-6 lg:px-8">
+                        {!! $headerHtml !!}
                     </div>
                 </header>
             @endif
