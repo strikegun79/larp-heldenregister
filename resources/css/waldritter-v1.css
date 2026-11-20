@@ -681,10 +681,17 @@
 
 .wr-v1 .ui.tabular.menu .item {
     min-height: 44px;
+    padding: .6rem .9rem;
     font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
     font-weight: 600;
     color: var(--wr-ink-muted);
     border-top: 3px solid transparent;
+}
+
+/* Zähler im Reiter (z. B. Anzahl Klassen/Bilder) schlank halten */
+.wr-v1 .ui.tabular.menu .item .ui.label {
+    margin-left: .35rem;
+    padding: .25em .5em;
 }
 
 .wr-v1 .ui.tabular.menu .item:hover {
