@@ -1087,6 +1087,185 @@
     font-variant-numeric: tabular-nums;
 }
 
+/* --- Hauptnavigation (alle Seiten): Waldgrün, helle Schrift, goldene Markierung --- */
+.wr-nav {
+    background-color: var(--wr-forest);
+    border-bottom: 3px solid var(--wr-gold);
+    box-shadow: 0 2px 8px rgba(29, 59, 42, .25);
+    font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+
+/* Logo auf heller Papier-Plakette (dunkler Untertitel bleibt lesbar) */
+.wr-nav__logo {
+    display: inline-flex;
+    align-items: center;
+    padding: .2rem .6rem;
+    border-radius: var(--wr-radius-control);
+    background-color: var(--wr-paper);
+    box-shadow: 0 1px 3px rgba(0, 0, 0, .25);
+}
+
+.wr-nav__link {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    padding: 0 .35rem;
+    border-bottom: 3px solid transparent;
+    font-size: .95rem;
+    font-weight: 600;
+    color: #e9e1cc;
+    text-decoration: none;
+    transition: color .15s ease, border-color .15s ease;
+}
+
+.wr-nav__link:hover {
+    color: #fff;
+    border-bottom-color: rgba(241, 212, 139, .55);
+}
+
+.wr-nav__link--active,
+.wr-nav__link[aria-current="page"] {
+    color: #fff;
+    border-bottom-color: #f1d48b;
+}
+
+/* Fokus auf dunklem Grund: heller Rahmen */
+.wr-nav a:focus-visible,
+.wr-nav button:focus-visible,
+.wr-bottom-nav a:focus-visible,
+.wr-bottom-nav button:focus-visible {
+    outline: 3px solid #f1d48b;
+    outline-offset: 2px;
+}
+
+.wr-nav__icon-btn,
+.wr-nav__user {
+    position: relative;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: .35rem;
+    min-width: 44px;
+    min-height: 44px;
+    padding: 0 .6rem;
+    border: 1px solid transparent;
+    border-radius: var(--wr-radius-control);
+    background: transparent;
+    color: #e9e1cc;
+    font-size: .9rem;
+    font-weight: 600;
+    cursor: pointer;
+}
+
+.wr-nav__icon-btn:hover,
+.wr-nav__user:hover {
+    color: #fff;
+    background-color: rgba(255, 255, 255, .08);
+}
+
+.wr-nav__user { border-color: rgba(241, 212, 139, .45); }
+
+.wr-nav__badge {
+    position: absolute;
+    top: 2px;
+    right: 2px;
+    min-width: 1.15rem;
+    height: 1.15rem;
+    padding: 0 .25rem;
+    border-radius: 999px;
+    background-color: var(--wr-danger);
+    color: #fff;
+    font-size: .7rem;
+    font-weight: 700;
+    line-height: 1.15rem;
+    text-align: center;
+}
+
+/* Untere Leiste (Handy) */
+.wr-bottom-nav {
+    background-color: var(--wr-forest);
+    border-top: 3px solid var(--wr-gold);
+    box-shadow: 0 -2px 10px rgba(29, 59, 42, .3);
+}
+
+.wr-bottom-nav .bottom-nav-item {
+    position: relative;
+    color: #e9e1cc;
+    font-size: .75rem;
+    font-weight: 600;
+    min-width: 44px;
+}
+
+.wr-bottom-nav .bottom-nav-item:hover { color: #fff; }
+
+.wr-bottom-nav .bottom-nav-item[aria-current="page"],
+.wr-bottom-nav .bottom-nav-item.is-active {
+    color: #fff;
+}
+
+/* Aktiver Punkt: goldener Balken oben (zusätzlich zur hellen Schrift und aria-current) */
+.wr-bottom-nav .bottom-nav-item[aria-current="page"]::before,
+.wr-bottom-nav .bottom-nav-item.is-active::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 20%;
+    right: 20%;
+    height: 4px;
+    border-radius: 0 0 4px 4px;
+    background-color: #f1d48b;
+}
+
+.wr-bottom-nav__badge {
+    position: absolute;
+    top: -.4rem;
+    right: -.7rem;
+    min-width: 1rem;
+    height: 1rem;
+    padding: 0 .2rem;
+    border-radius: 999px;
+    background-color: var(--wr-danger);
+    color: #fff;
+    font-size: .6rem;
+    font-weight: 700;
+    line-height: 1rem;
+    text-align: center;
+}
+
+/* „Mehr“-Dialog */
+.wr-sheet {
+    background-color: var(--wr-paper);
+    border-top: 3px solid var(--wr-gold);
+    color: var(--wr-ink);
+    font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+}
+
+.wr-sheet__item {
+    display: flex;
+    align-items: center;
+    gap: .75rem;
+    width: 100%;
+    min-height: 48px;
+    padding: .6rem 1.25rem;
+    border: 0;
+    background: transparent;
+    color: var(--wr-ink);
+    font-size: .95rem;
+    text-align: left;
+    text-decoration: none;
+    cursor: pointer;
+}
+
+.wr-sheet__item:hover { background-color: var(--wr-parchment); color: var(--wr-ink); }
+.wr-sheet__item:focus-visible { outline: 3px solid var(--wr-focus); outline-offset: -3px; }
+.wr-sheet__item .icon { color: var(--wr-ink-muted); margin: 0; width: 1.25rem; }
+.wr-sheet__item--danger { color: var(--wr-danger); }
+.wr-sheet__item--danger .icon { color: var(--wr-danger); }
+
+@media (prefers-reduced-motion: reduce) {
+    .wr-nav__link { transition: none; }
+}
+
 /* --- Teilnehmerliste in Anmeldekarten ------------------------------------ */
 .wr-participants {
     display: flex;

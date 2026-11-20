@@ -51,7 +51,8 @@
             </main>
 
             <!-- Footer (Vereinskontakt, wie im Legacy) -->
-            <footer class="mt-8 border-t-2 border-[#5a3a22]/40 bg-black/10 text-waldritter">
+            {{-- mb-16 auf dem Handy: Footer nicht hinter der fixierten unteren Leiste verstecken (UI-46) --}}
+            <footer class="mt-8 mb-16 sm:mb-0 border-t-2 border-[#5a3a22]/40 bg-black/10 text-waldritter">
                 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 grid gap-6 sm:grid-cols-3 text-sm">
                     <div>
                         <strong>{{ config('portal.organization') }} – {{ config('portal.name') }}</strong><br>

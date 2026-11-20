@@ -1,3 +1,5 @@
+{{-- Dropdown der Navigation (Waldritter v1): schließt mit Escape und bei Klick daneben,
+     der Fokus kehrt zum Auslöser zurück; aria-expanded am Auslöser-Button. --}}
 @props(['align' => 'right', 'width' => '48', 'contentClasses' => 'py-1 bg-white'])
 
 @php
@@ -21,8 +23,23 @@ switch ($width) {
 }
 @endphp
 
-<div class="relative" x-data="{ open: false }" @click.outside="open = false" @close.stop="open = false">
-    <div @click="open = ! open">
+<div class="relative"
+     x-data="{
+         open: false,
+         schliessen(fokus) {
+             this.open = false;
+             if (fokus) this.$nextTick(() => this.$refs.trigger.querySelector('button')?.focus());
+         }
+     }"
+     x-init="
+         const aria = (v) => $refs.trigger?.querySelector('button')?.setAttribute('aria-expanded', v ? 'true' : 'false');
+         $nextTick(() => aria(false));
+         $watch('open', aria);
+     "
+     @click.outside="open = false"
+     @keydown.escape.window="if (open) schliessen(true)"
+     @close.stop="open = false">
+    <div x-ref="trigger" @click="open = ! open">
         {{ $trigger }}
     </div>
 
