@@ -947,7 +947,7 @@ Quelle: Prüfung des Dashboard-Piloten durch `accessibility-reviewer` und
 gelten deshalb für alle Seiten, nicht nur für das Dashboard.
 Siehe `docs/design/waldritter-v1/PILOT-NOTIZEN.md`.
 
-### UI-46 · [P1] Navigation und Bottom-Nav barrierefrei machen · ⏱ 4h · 🔲
+### UI-46 · [P1] Navigation und Bottom-Nav barrierefrei machen · ⏱ 4h · ✅
 **Beschreibung:** In `layouts/navigation.blade.php` gibt es mehrere Hürden für
 Tastatur- und Screenreader-Nutzer:
 - Die Glocke (Benachrichtigungen) hat keinen zugänglichen Namen.
@@ -958,14 +958,15 @@ Tastatur- und Screenreader-Nutzer:
 - Unter 640 px verdeckt die fixierte Bottom-Nav (`h-16`) den unteren Teil des
   Footers, weil `pb-16` nur am `<main>` sitzt und nicht hinter dem Footer.
 **Akzeptanzkriterien:**
-- [ ] Glocke mit `aria-label` (inkl. Anzahl ungelesener Meldungen).
-- [ ] Kein `focus:outline-none` ohne sichtbaren Ersatz; Fokusfarbe `--wr-focus`.
-- [ ] Dropdowns und „Mehr“-Sheet schließen mit Escape, Fokus kehrt zum Auslöser zurück.
-- [ ] „Mehr“-Sheet mit Dialog-Semantik und Fokusführung.
-- [ ] Footer auf 320–414 px vollständig sichtbar (Abstand am Seitenende statt am `<main>`).
+- [x] Glocke mit `aria-label` (inkl. Anzahl ungelesener Meldungen).
+- [x] Kein `focus:outline-none` ohne sichtbaren Ersatz; Fokusfarbe `--wr-focus`.
+- [x] Dropdowns und „Mehr“-Sheet schließen mit Escape, Fokus kehrt zum Auslöser zurück.
+- [x] „Mehr“-Sheet mit Dialog-Semantik und Fokusführung.
+- [x] Footer auf 320–414 px vollständig sichtbar (Abstand am Seitenende statt am `<main>`).
 **Betroffene Seiten/Routen:** `layouts/navigation.blade.php`, `layouts/app.blade.php`
 **Abhängigkeiten:** Sinnvoll zusammen mit der Umstellung der Navigation auf das
 Waldritter-Designsystem (globaler Schritt).
+**Erledigt:** Commit `2022982` (20.11.2026), zusammen mit der Umstellung der Navigation auf Waldgrün.
 
 ### UI-47 · [P2] Seitentitel pro Seite (Titel-Slot im Layout) · ⏱ 2h · 🔲
 **Beschreibung:** Jede Seite heißt im Browser-Tab nur „Heldenregister“
