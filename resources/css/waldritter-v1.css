@@ -880,6 +880,24 @@
 .wr-skill-card--learned { background-color: #e3ebdb; border-color: #9fbf8f; color: #2f4a26; }
 .wr-skill-card--locked { background-color: var(--wr-parchment); color: var(--wr-ink-muted); border-style: dashed; }
 
+/* --- Zeilenliste (z. B. EP-Verlauf, bestrittene Abenteuer) ---------------- */
+.wr-rows {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border-top: 1px solid var(--wr-border);
+}
+
+.wr-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: .35rem 1rem;
+    padding: .6rem .25rem;
+    border-bottom: 1px solid var(--wr-border);
+}
+
 /* --- Teilnehmerliste in Anmeldekarten ------------------------------------ */
 .wr-participants {
     display: flex;

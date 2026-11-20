@@ -2,11 +2,16 @@
 
 namespace Tests\Feature;
 
+use App\Models\Adventure;
+use App\Models\EpTransaction;
 use App\Models\Hero;
 use App\Models\HeroClass;
 use App\Models\Player;
 use App\Models\Skill;
 use App\Models\User;
+use Database\Seeders\EpTransactionTypeSeeder;
+use Database\Seeders\EventLookupSeeder;
+use Database\Seeders\LocationSeeder;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
@@ -22,7 +27,7 @@ class HeroDetailTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->seed(RoleSeeder::class);
+        $this->seed([RoleSeeder::class, EpTransactionTypeSeeder::class, LocationSeeder::class, EventLookupSeeder::class]);
     }
 
     /** Elternteil/Betreuer mit eigenem Spieler und Held. */
@@ -128,5 +133,41 @@ class HeroDetailTest extends TestCase
         // Alle Auslöser des Lern-Dialogs sind echte Buttons (Tastatur), keine Emojis als einzige Kennzeichnung.
         $this->assertDoesNotMatchRegularExpression('/<(a|div)[^>]*class="[^"]*skill-trigger/', $html);
         $this->assertStringNotContainsString('🔒', $html);
+    }
+
+    public function test_ep_history_and_adventures_show_text_not_only_color(): void
+    {
+        [$owner, $hero] = $this->ownerWithHero();
+        $adventure = Adventure::factory()->create(['name' => 'Die Nebelburg']);
+        EpTransaction::create(['hero_id' => $hero->id, 'adventure_id' => $adventure->id, 'ep_transaction_type_id' => Hero::ADVENTURE_EP_TYPE, 'ep_count' => 5, 'transacted_at' => '2026-03-15']);
+        EpTransaction::create(['hero_id' => $hero->id, 'ep_transaction_type_id' => 20, 'ep_count' => 3, 'transacted_at' => '2026-03-20']);
+
+        $this->actingAs($owner)
+            ->get(route('heroes.show', $hero), ['X-Requested-With' => 'XMLHttpRequest'])
+            ->assertOk()
+            ->assertSee('Bestrittene Abenteuer')
+            ->assertSee('Die Nebelburg')
+            ->assertSee('5 EP erhalten')
+            ->assertSee('+5 EP gutgeschrieben')
+            ->assertSee('−3 EP ausgegeben')
+            ->assertSee('EP-Auszug (CSV)');
+    }
+
+    public function test_gallery_has_meaningful_alt_texts_confirm_and_unique_upload_ids(): void
+    {
+        [$owner, $hero] = $this->ownerWithHero();
+        $hero->galleryImages()->create(['path' => 'gallery/eins.jpg', 'sort_order' => 1]);
+
+        $html = $this->actingAs($owner)
+            ->get(route('heroes.show', $hero), ['X-Requested-With' => 'XMLHttpRequest'])
+            ->assertOk()
+            ->assertSee('Galeriebild 1 von 1 von Ritter Kunibert')
+            ->assertSee('data-confirm="Galeriebild wirklich löschen?"', false)
+            ->assertSee('aria-label="Galeriebild 1 löschen"', false)
+            ->getContent();
+
+        // Upload-Felder: je Kontext (Handy/Desktop) eindeutige IDs, keine doppelten.
+        $this->assertSame(1, substr_count($html, 'id="gallery-upload-m-1"'));
+        $this->assertSame(1, substr_count($html, 'id="gallery-upload-d-1"'));
     }
 }

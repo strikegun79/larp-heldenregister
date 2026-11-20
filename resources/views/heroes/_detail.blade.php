@@ -32,107 +32,18 @@
 
         {{-- Abenteuer --}}
         <x-mobile.accordion-section :title="'Abenteuer (' . $hero->adventure_history->count() . ')'">
-            <h4 class="font-uncial text-sm text-waldritter mb-2">Bestrittene Abenteuer</h4>
-            @if ($hero->adventure_history->isEmpty())
-                <p class="text-stone-500 text-sm">Noch keine Abenteuer bestritten.</p>
-            @else
-                @foreach ($hero->adventure_history as $tx)
-                    <div class="flex items-center justify-between py-1.5 border-b border-stone-100 last:border-0 text-sm">
-                        <span class="text-stone-700">{{ $tx->adventure?->name ?? '—' }}</span>
-                        <span class="text-green-600 font-medium shrink-0 ml-2">+{{ number_format($tx->ep_count, 0, ',', '.') }} EP</span>
-                    </div>
-                @endforeach
-            @endif
-
-            @php($bookingsMobile = $hero->player?->bookings?->sortByDesc(fn ($b) => optional($b->adventure)->start_at) ?? collect())
-            <h4 class="font-uncial text-sm text-waldritter mt-4 mb-2">Anmeldungen des Spielers</h4>
-            @if ($bookingsMobile->isEmpty())
-                <p class="text-stone-500 text-sm">Keine Anmeldungen.</p>
-            @else
-                @foreach ($bookingsMobile as $booking)
-                    <div class="flex items-center justify-between py-1.5 border-b border-stone-100 last:border-0 text-sm">
-                        <span class="text-stone-700">{{ $booking->adventure?->name ?? '—' }}</span>
-                        <span class="text-stone-400 text-xs shrink-0 ml-2">{{ optional($booking->adventure?->start_at)->format('d.m.Y') ?? '—' }}</span>
-                    </div>
-                @endforeach
-                <p class="text-xs text-stone-400 mt-2">Anmeldungen sind spielerbezogen.</p>
-            @endif
+            @include('heroes.partials._adventures')
         </x-mobile.accordion-section>
 
         {{-- EP-Verlauf --}}
         <x-mobile.accordion-section title="EP-Verlauf">
-            <p class="text-xs text-stone-400 mb-3">Hier siehst du alle EP-Buchungen – zum Beispiel nach einem Abenteuer oder wenn du eine Fertigkeit gekauft hast.</p>
-            <a href="{{ route('heroes.ep.export', $hero) }}" class="ui small button mb-3" target="_blank" rel="noopener">EP-Auszug (CSV)</a>
-
-            @can('heldenregister.edit')
-                <form method="POST" action="{{ route('heroes.ep.store', $hero) }}" class="ui form mb-4" data-refresh-modal>
-                    @csrf
-                    <div class="field">
-                        <label>EP</label>
-                        <input type="number" name="ep_count" step="1" min="1" placeholder="Anzahl" required style="width:7rem">
-                    </div>
-                    <div class="field">
-                        <label>Grund</label>
-                        <select name="ep_transaction_type_id" required>
-                            @foreach ($epTypes as $type)
-                                <option value="{{ $type->id }}">{{ $type->description }} ({{ $type->is_credit ? '+' : '−' }})</option>
-                            @endforeach
-                        </select>
-                    </div>
-                    <div class="field">
-                        <label>Datum</label>
-                        <input type="date" name="transacted_at">
-                    </div>
-                    <button type="submit" class="ui primary button">Buchen</button>
-                </form>
-            @endcan
-
-            @forelse ($hero->epTransactions->sortByDesc('transacted_at') as $tx)
-                <div class="flex items-center justify-between py-1.5 border-b border-stone-100 last:border-0 text-sm">
-                    <div>
-                        <span class="text-stone-700">{{ $tx->type?->description }}</span>
-                        <span class="text-stone-400 text-xs ml-1">{{ optional($tx->transacted_at)->format('d.m.Y') }}</span>
-                    </div>
-                    <span class="{{ $tx->type?->is_credit ? 'text-green-600' : 'text-red-600' }} font-medium shrink-0 ml-2">
-                        {{ $tx->type?->is_credit ? '+' : '−' }}{{ number_format($tx->ep_count, 0, ',', '.') }}
-                    </span>
-                </div>
-            @empty
-                <p class="text-stone-500 text-sm">Keine EP-Buchungen.</p>
-            @endforelse
+            @include('heroes.partials._ep', ['ctx' => 'm'])
         </x-mobile.accordion-section>
 
         {{-- Galerie (HERO-24) --}}
         @if ($hero->galleryImages->isNotEmpty() || $canEditPhoto)
         <x-mobile.accordion-section title="Galerie">
-            <div class="grid grid-cols-2 gap-2">
-                @foreach ($hero->galleryImages as $img)
-                    <div class="relative">
-                        <img src="{{ $img->url }}" alt="Galerie-Bild"
-                             class="w-full h-auto rounded border border-stone-200" loading="lazy">
-                        @if ($canEditPhoto)
-                            <form method="POST" action="{{ route('heroes.gallery.destroy', [$hero, $img]) }}" data-refresh-modal>
-                                @csrf @method('DELETE')
-                                <button type="submit"
-                                        class="absolute top-1 right-1 ui mini red icon button"
-                                        title="Bild löschen">
-                                    <i class="trash icon"></i>
-                                </button>
-                            </form>
-                        @endif
-                    </div>
-                @endforeach
-                @if ($canEditPhoto)
-                    @for ($i = $hero->galleryImages->count(); $i < 4; $i++)
-                        <label class="flex flex-col items-center justify-center h-28 border-2 border-dashed border-stone-300 rounded cursor-pointer hover:border-waldritter hover:bg-stone-50 transition text-stone-400 text-sm select-none">
-                            <i class="camera icon text-xl mb-1"></i>
-                            Foto hinzufügen
-                            <input type="file" accept="image/*" class="hidden"
-                                   onchange="openPhotoCropper(this.files[0], '{{ route('heroes.gallery.store', $hero) }}', null, { aspectRatio: NaN })">
-                        </label>
-                    @endfor
-                @endif
-            </div>
+            @include('heroes.partials._gallery', ['ctx' => 'm'])
         </x-mobile.accordion-section>
         @endif
 
@@ -252,53 +163,7 @@
 
         {{-- Tab: Abenteuer --}}
         <div class="ui bottom attached tab segment" data-tab="adventures">
-            <h4 class="font-uncial text-base text-waldritter mb-2">Bestrittene Abenteuer</h4>
-            @if ($hero->adventure_history->isEmpty())
-                <p class="text-stone-500">Noch keine Abenteuer bestritten.</p>
-            @else
-                <div class="overflow-x-auto">
-                <table class="ui very basic compact table">
-                    <thead><tr><th>Datum</th><th>Abenteuer</th><th class="right aligned">EP</th></tr></thead>
-                    <tbody>
-                        @foreach ($hero->adventure_history as $tx)
-                            <tr>
-                                <td>{{ optional($tx->transacted_at)->format('d.m.Y') }}</td>
-                                <td>{{ $tx->adventure?->name ?? '—' }}</td>
-                                <td class="right aligned text-green-600">+{{ number_format($tx->ep_count, 0, ',', '.') }}</td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                    <tfoot>
-                        <tr>
-                            <th colspan="2" class="right aligned">EP aus Abenteuern gesamt</th>
-                            <th class="right aligned">{{ number_format($hero->adventures_ep_total, 0, ',', '.') }}</th>
-                        </tr>
-                    </tfoot>
-                </table>
-                </div>
-            @endif
-
-            @php($bookings = $hero->player?->bookings?->sortByDesc(fn ($b) => optional($b->adventure)->start_at) ?? collect())
-            <h4 class="font-uncial text-base text-waldritter mt-6 mb-2">Anmeldungen des Spielers</h4>
-            @if ($bookings->isEmpty())
-                <p class="text-stone-500">Keine Anmeldungen.</p>
-            @else
-                <div class="overflow-x-auto">
-                <table class="ui very basic compact table">
-                    <thead><tr><th>Abenteuer</th><th>Beginn</th><th>Liste</th></tr></thead>
-                    <tbody>
-                        @foreach ($bookings as $booking)
-                            <tr>
-                                <td>{{ $booking->adventure?->name ?? '—' }}</td>
-                                <td>{{ optional($booking->adventure?->start_at)->format('d.m.Y') ?? '—' }}</td>
-                                <td>{{ $booking->waitlisted ? 'Warteliste' : 'regulär' }}</td>
-                            </tr>
-                        @endforeach
-                    </tbody>
-                </table>
-                </div>
-                <p class="text-xs text-stone-400 mt-2">Anmeldungen sind spielerbezogen (alle Helden des Spielers).</p>
-            @endif
+            @include('heroes.partials._adventures')
         </div>
 
         {{-- Tab: Fertigkeiten (alle Klassen zusammengefasst, UI-33) --}}
@@ -310,89 +175,13 @@
 
         {{-- Tab: EP-Verlauf --}}
         <div class="ui bottom attached tab segment" data-tab="ep">
-            <a href="{{ route('heroes.ep.export', $hero) }}" class="ui small button mb-3" target="_blank" rel="noopener">EP-Auszug (CSV)</a>
-
-            @can('heldenregister.edit')
-                <form method="POST" action="{{ route('heroes.ep.store', $hero) }}" class="ui form" data-refresh-modal style="margin-bottom:1rem">
-                    @csrf
-                    <div class="inline fields" style="align-items:flex-end;flex-wrap:wrap">
-                        <div class="field">
-                            <label>EP</label>
-                            <input type="number" name="ep_count" step="1" min="1" placeholder="Anzahl" required style="width:7rem">
-                        </div>
-                        <div class="field" style="flex:1;min-width:12rem">
-                            <label>Grund</label>
-                            <select name="ep_transaction_type_id" required>
-                                @foreach ($epTypes as $type)
-                                    <option value="{{ $type->id }}">{{ $type->description }} ({{ $type->is_credit ? '+' : '−' }})</option>
-                                @endforeach
-                            </select>
-                        </div>
-                        <div class="field">
-                            <label>Datum</label>
-                            <input type="date" name="transacted_at" style="width:10rem">
-                        </div>
-                        <div class="field">
-                            <button type="submit" class="ui primary button">Buchen</button>
-                        </div>
-                    </div>
-                </form>
-            @endcan
-
-            <div class="overflow-x-auto">
-            <table class="ui very basic compact table">
-                <thead><tr><th>Datum</th><th>Art</th><th class="right aligned">EP</th></tr></thead>
-                <tbody>
-                    @forelse ($hero->epTransactions->sortByDesc('transacted_at') as $tx)
-                        <tr>
-                            <td>{{ optional($tx->transacted_at)->format('d.m.Y') }}</td>
-                            <td>{{ $tx->type?->description }}</td>
-                            <td class="right aligned {{ $tx->type?->is_credit ? 'text-green-600' : 'text-red-600' }}">
-                                {{ $tx->type?->is_credit ? '+' : '−' }}{{ number_format($tx->ep_count, 0, ',', '.') }}
-                            </td>
-                        </tr>
-                    @empty
-                        <tr><td colspan="3" class="text-stone-500">Keine EP-Buchungen.</td></tr>
-                    @endforelse
-                </tbody>
-            </table>
-            </div>
+            @include('heroes.partials._ep', ['ctx' => 'd'])
         </div>
 
         {{-- Tab: Galerie (HERO-24) --}}
         @if ($hero->galleryImages->isNotEmpty() || $canEditPhoto)
         <div class="ui bottom attached tab segment" data-tab="gallery">
-            <div class="grid grid-cols-2 sm:grid-cols-4 gap-3">
-                @foreach ($hero->galleryImages as $img)
-                    <div class="relative">
-                        <img src="{{ $img->url }}" alt="Galerie-Bild"
-                             class="w-full h-auto rounded border border-stone-200" loading="lazy">
-                        @if ($canEditPhoto)
-                            <form method="POST" action="{{ route('heroes.gallery.destroy', [$hero, $img]) }}" data-refresh-modal>
-                                @csrf @method('DELETE')
-                                <button type="submit"
-                                        class="absolute top-1 right-1 ui mini red icon button"
-                                        title="Bild löschen"
-                                        onclick="return confirm('Galerie-Bild wirklich löschen?')">
-                                    <i class="trash icon"></i>
-                                </button>
-                            </form>
-                        @endif
-                    </div>
-                @endforeach
-                @if ($canEditPhoto)
-                    @for ($i = $hero->galleryImages->count(); $i < 4; $i++)
-                        <label class="flex flex-col items-center justify-center h-36 border-2 border-dashed border-stone-300 rounded cursor-pointer hover:border-waldritter hover:bg-stone-50 transition text-stone-400 text-sm select-none">
-                            <i class="camera icon text-xl mb-1"></i>
-                            Foto hinzufügen
-                            <input type="file" accept="image/*" class="hidden"
-                                   onchange="openPhotoCropper(this.files[0], '{{ route('heroes.gallery.store', $hero) }}', null, { aspectRatio: NaN })">
-                        </label>
-                    @endfor
-                @elseif ($hero->galleryImages->isEmpty())
-                    <p class="text-stone-400 italic col-span-4">Noch keine Galerie-Bilder.</p>
-                @endif
-            </div>
+            @include('heroes.partials._gallery', ['ctx' => 'd'])
         </div>
         @endif
 
