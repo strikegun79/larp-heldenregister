@@ -48,11 +48,11 @@ class PlayerCardsTest extends TestCase
         // Papyrus-Hintergrund gehört auf die Spielerkarten (Korrektur PLAY-11).
         $response->assertSee('/images/player_background.png', false);
 
-        // Spielerkarte mit Feldern
+        // Spielerkarte (Waldritter v1): Alter, Abenteuer, aktiver Held; Erstellt/Geschlecht stehen im Detail.
         $response->assertSee('Mira Tan');
-        $response->assertSee('Erstellt:');
-        $response->assertSee('Geschlecht:');
-        $response->assertSee('Besuchte Events:');
+        $response->assertSee('Alter');
+        $response->assertSee('Abenteuer erlebt');
+        $response->assertSee('Aktiver Held');
         $response->assertSee('data-modal-url="'.route('players.show', $player).'"', false);
     }
 
@@ -104,6 +104,6 @@ class PlayerCardsTest extends TestCase
         $this->actingAs($user)
             ->get(route('players.index'))
             ->assertOk()
-            ->assertSee('Besuchte Events:</span> 1', false);
+            ->assertSee('1 Abenteuer erlebt');
     }
 }

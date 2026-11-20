@@ -1,80 +1,72 @@
 <x-app-layout>
-    <x-slot name="header">
-        <h2 class="font-uncial text-2xl text-waldritter leading-tight">Deine Spieler</h2>
-    </x-slot>
-
-    <div class="py-12">
+    {{-- Waldritter-Designsystem v1 --}}
+    <div class="wr-v1 py-6 sm:py-10">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="bg-white/60 border-2 border-[#5a3a22]/30 rounded-lg p-4 mb-6 text-stone-700">
-                Hier verwaltest du die Spieler, die an unseren Veranstaltungen teilnehmen – auch dich selbst.
-                Bevor ein Held oder eine Anmeldung möglich ist, muss ein Spieler existieren.
+
+            {{-- Seitenkopf --}}
+            <div class="mb-6">
+                <span class="wr-eyebrow">Familie und Spieler</span>
+                <h1 class="wr-heading">Deine Spieler</h1>
+                <p class="wr-intro">
+                    Hier verwaltest du die Spieler, die an unseren Veranstaltungen teilnehmen – auch dich selbst.
+                    Bevor ein Held oder eine Anmeldung möglich ist, muss ein Spieler existieren.
+                </p>
             </div>
 
             {{-- Suche (PLAY-09) --}}
-            <form method="GET" action="{{ route('players.index') }}"
-                  class="mb-6 bg-white/60 border-2 border-[#5a3a22]/30 rounded-lg p-4 flex flex-wrap gap-3 items-end">
-                <div class="flex-1 min-w-48">
-                    <label class="text-sm text-stone-600">Suche</label>
-                    <input type="text" name="q" value="{{ $q }}" placeholder="Name suchen…"
-                           class="mt-1 block w-full border-gray-300 rounded-md shadow-sm text-sm focus:border-amber-600 focus:ring-amber-600">
-                </div>
-                <div class="flex items-center gap-3">
-                    <button type="submit" class="ui small primary button">Filtern</button>
-                    <a href="{{ route('players.index') }}" class="text-sm text-stone-600 hover:underline">Zurücksetzen</a>
+            <form method="GET" action="{{ route('players.index') }}" role="search"
+                  class="wr-card wr-toolbar">
+                <div class="flex flex-wrap items-end gap-2 flex-1 min-w-0 md:max-w-xl">
+                    <div class="flex-1 min-w-[12rem]">
+                        <label for="players-search" class="wr-label">Spieler suchen</label>
+                        <input id="players-search" type="search" name="q" value="{{ $q }}"
+                               placeholder="Vor- oder Nachname" class="wr-input">
+                    </div>
+                    <button type="submit" class="wr-btn wr-btn--primary">
+                        <i class="search icon m-0" aria-hidden="true"></i> Suchen
+                    </button>
+                    @if ($q !== '')
+                        <a href="{{ route('players.index') }}" class="wr-btn wr-btn--secondary">Zurücksetzen</a>
+                    @endif
                 </div>
             </form>
 
-            {{-- Spielerkarten: Avatar links (150×150), Daten rechts (PLAY-11) --}}
-            <div class="grid gap-4 grid-cols-1 md:grid-cols-2">
+            <div class="grid gap-4 grid-cols-1 md:grid-cols-2 xl:grid-cols-3" role="list">
 
-                {{-- Karte „Neuer Spieler" --}}
-                <a href="{{ route('players.create') }}" data-modal-url="{{ route('players.create') }}"
-                   class="group flex rounded-lg overflow-hidden border-2 border-dashed border-[#5a3a22]/50 bg-white/50 shadow hover:shadow-xl hover:-translate-y-1 transition min-h-[150px]">
-                    <div class="shrink-0 overflow-hidden save-data-hide" style="width:150px; min-height:150px;">
-                        <img src="/images/wewantyou_poster4.jpg" alt="Neuer Spieler"
-                             loading="lazy" width="150" height="150"
-                             class="w-full h-full object-cover group-hover:scale-105 transition" style="min-height:150px;">
-                    </div>
-                    <div class="p-4 flex-1 flex flex-col justify-center">
-                        <div class="font-uncial text-xl text-waldritter">Neuer Spieler</div>
-                        <div class="text-sm text-stone-600 mt-1">Neuen Spieler erstellen</div>
-                    </div>
-                </a>
-
-                {{-- Spielerkarten mit Papyrus-Hintergrund --}}
-                @foreach ($players as $player)
-                    <a href="{{ route('players.show', $player) }}" data-modal-url="{{ route('players.show', $player) }}"
-                       class="group flex rounded-lg overflow-hidden border-2 border-[#5a3a22]/40 shadow hover:shadow-xl hover:-translate-y-1 transition min-h-[150px]"
-                       style="background-image:url('/images/player_background.png'); background-size:cover; background-position:center; background-color:#efe4cf;">
-                        {{-- Avatar 1:1, linksbündig --}}
-                        <div class="shrink-0 overflow-hidden" style="width:150px; min-height:150px;">
-                            <img src="{{ $player->avatar_url }}" alt="{{ $player->full_name }}"
-                                 loading="lazy" width="150" height="150"
-                                 class="w-full h-full object-cover group-hover:scale-105 transition" style="min-height:150px;">
+                {{-- Karte „Neuer Spieler“ --}}
+                <div role="listitem" class="flex">
+                    <a href="{{ route('players.create') }}" data-modal-url="{{ route('players.create') }}"
+                       class="wr-card wr-card--link wr-card--placeholder flex-1">
+                        <div class="wr-card__media save-data-hide">
+                            <img src="/images/wewantyou_poster4.jpg" alt="" aria-hidden="true"
+                                 loading="lazy" width="400" height="176">
                         </div>
-                        {{-- Name + Spielerdaten --}}
-                        <div class="p-4 flex-1">
-                            <div class="font-uncial text-lg text-waldritter leading-snug">
-                                {{ $player->full_name }}
-                                @if ($player->pivot->self)
-                                    <span class="align-middle rounded bg-[#5a3a22] text-amber-50 text-xs px-2 py-0.5">Du</span>
-                                @endif
-                            </div>
-                            <dl class="mt-2 text-sm text-stone-700 space-y-0.5">
-                                <div><span class="text-stone-500">Erstellt:</span> {{ optional($player->created_at)->format('d.m.Y') ?? '—' }}</div>
-                                <div><span class="text-stone-500">Alter:</span> {{ $player->age !== null ? $player->age.' Jahre' : '—' }}</div>
-                                <div><span class="text-stone-500">Geschlecht:</span> {{ $player->gender ?? '—' }}</div>
-                                <div><span class="text-stone-500">Besuchte Events:</span> {{ $player->visits_count }}</div>
-                            </dl>
+                        <div class="wr-card__body">
+                            <h2 class="wr-card__title"><i class="plus circle icon" aria-hidden="true"></i> Neuer Spieler</h2>
+                            <p class="wr-card__text">Neuen Spieler erstellen – für dich selbst oder dein Kind.</p>
                         </div>
                     </a>
+                </div>
+
+                @foreach ($players as $player)
+                    <div role="listitem" class="flex">
+                        <x-wr.player-card :player="$player" class="flex-1" />
+                    </div>
                 @endforeach
             </div>
 
             @if ($players->isEmpty())
-                <div class="mt-6 bg-amber-50 border border-amber-200 rounded-lg p-4 text-sm text-stone-700">
-                    <strong class="font-medium">Erste Schritte:</strong>
-                    Lege zunächst einen Spieler an und melde ihn zu einem Abenteuer an. Deinen Helden erstellst du dann direkt vor Ort beim Bürokraten – dem zuständigen Spielcharakter für das Heldenregister.
+                <div class="wr-notice mt-6" role="note">
+                    <i class="info circle icon m-0 mt-0.5" aria-hidden="true"></i>
+                    <p>
+                        @if ($q !== '')
+                            Kein Spieler zu „{{ $q }}“ gefunden.
+                        @else
+                            <strong>Erste Schritte:</strong>
+                            Lege zunächst einen Spieler an und melde ihn zu einem Abenteuer an. Den Helden erstellt ihr dann
+                            direkt vor Ort beim Bürokraten – das ist die Person der Waldritter, die die Helden ins Heldenregister einträgt.
+                        @endif
+                    </p>
                 </div>
             @endif
         </div>
