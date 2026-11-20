@@ -920,6 +920,126 @@
     -webkit-box-decoration-break: clone;
 }
 
+/* --- Formulare (Fomantic „ui form“ und Breeze-Felder) ----------------------
+   Nur innerhalb von .wr-v1. Klassen wie .field, IDs und name-Attribute bleiben,
+   damit die Skripte (Gesundheits-Einwilligung, Vorbelegung, Modal-Speichern) weiter greifen. */
+.wr-v1 .ui.form .field > label,
+.wr-v1 .wr-form label.wr-field-label {
+    margin-bottom: .3rem;
+    font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    font-size: .9rem;
+    font-weight: 600;
+    color: var(--wr-ink);
+}
+
+.wr-v1 .ui.form input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]):not([type="file"]),
+.wr-v1 .ui.form select,
+.wr-v1 .ui.form textarea,
+.wr-v1 .wr-form input:not([type="checkbox"]):not([type="radio"]):not([type="hidden"]):not([type="file"]),
+.wr-v1 .wr-form select,
+.wr-v1 .wr-form textarea {
+    min-height: 44px;
+    padding: .55rem .75rem;
+    border: 1px solid var(--wr-leather);
+    border-radius: var(--wr-radius-control);
+    background-color: #fff;
+    color: var(--wr-ink);
+    font-size: 1rem;
+    box-shadow: none;
+}
+
+.wr-v1 .ui.form input:not([type="checkbox"]):not([type="radio"]):focus,
+.wr-v1 .ui.form select:focus,
+.wr-v1 .ui.form textarea:focus,
+.wr-v1 .wr-form input:not([type="checkbox"]):not([type="radio"]):focus,
+.wr-v1 .wr-form select:focus,
+.wr-v1 .wr-form textarea:focus {
+    outline: 3px solid var(--wr-focus);
+    outline-offset: 1px;
+    border-color: var(--wr-focus);
+    box-shadow: none;
+}
+
+/* Pflichtfeld-Sternchen in Fehlerrot des Designsystems */
+.wr-v1 .ui.form .required.field > label::after,
+.wr-v1 .ui.form .required.fields > .field > label::after {
+    color: var(--wr-danger);
+}
+
+/* Hilfetexte unter Feldern */
+.wr-v1 .wr-help {
+    display: block;
+    margin-top: .3rem;
+    font-size: .85rem;
+    line-height: 1.4;
+    color: var(--wr-ink-muted);
+}
+
+/* Formularabschnitte */
+.wr-v1 .wr-fieldset {
+    margin: 0 0 1.25rem;
+    padding: 1rem 1rem .5rem;
+    border: 1px solid var(--wr-border);
+    border-radius: var(--wr-radius-card);
+    background-color: var(--wr-paper);
+}
+
+.wr-v1 .wr-fieldset > legend {
+    padding: 0 .4rem;
+    font-family: var(--wr-font-heading);
+    font-size: 1.05rem;
+    font-weight: 700;
+    color: var(--wr-ink);
+}
+
+.wr-v1 .wr-fieldset__intro {
+    margin: 0 0 .9rem;
+    font-size: .9rem;
+    color: var(--wr-ink-muted);
+}
+
+/* Kästchen/Optionen mit großer Klickfläche (mind. 44 px) */
+.wr-v1 .wr-check,
+.wr-v1 .ui.form .field > label.wr-check {
+    display: flex;
+    align-items: flex-start;
+    gap: .65rem;
+    min-height: 44px;
+    padding: .6rem .75rem;
+    border: 1px solid var(--wr-border);
+    border-radius: var(--wr-radius-control);
+    background-color: #fff;
+    margin: 0;
+    font-size: 1rem;
+    font-weight: 400;
+    cursor: pointer;
+}
+
+.wr-v1 .wr-check:hover { border-color: var(--wr-leather); }
+
+.wr-v1 .wr-check:has(input:checked) {
+    border-color: var(--wr-moss);
+    background-color: #f1f5ec;
+}
+
+.wr-v1 .wr-check input[type="checkbox"],
+.wr-v1 .wr-check input[type="radio"] {
+    flex-shrink: 0;
+    width: 1.25rem;
+    height: 1.25rem;
+    margin: .1rem 0 0;
+    accent-color: var(--wr-forest);
+}
+
+.wr-v1 .wr-check input:focus-visible {
+    outline: 3px solid var(--wr-focus);
+    outline-offset: 2px;
+}
+
+.wr-v1 .wr-check__text { display: block; }
+.wr-v1 .wr-check__title { display: block; font-weight: 600; color: var(--wr-ink); }
+.wr-v1 .wr-check__hint { display: block; font-size: .85rem; color: var(--wr-ink-muted); }
+
 /* --- Teilnehmerliste in Anmeldekarten ------------------------------------ */
 .wr-participants {
     display: flex;
