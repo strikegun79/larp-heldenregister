@@ -488,6 +488,118 @@
 .wr-class--heiler { --wr-class-color: var(--wr-class-healer); }
 .wr-class--alchemist { --wr-class-color: var(--wr-class-alchemist); }
 
+/* --- Werkzeugleiste (Suche, Ansicht, Aktionen) -------------------------- */
+.wr-toolbar {
+    display: flex;
+    flex-direction: column;
+    gap: 1rem;
+    padding: 1rem;
+    margin-bottom: 1.5rem;
+}
+
+@media (min-width: 768px) {
+    .wr-toolbar {
+        flex-direction: row;
+        flex-wrap: wrap;
+        align-items: flex-end;
+        justify-content: space-between;
+    }
+}
+
+.wr-label {
+    display: block;
+    margin-bottom: .3rem;
+    font-size: .9rem;
+    font-weight: 600;
+    color: var(--wr-ink);
+}
+
+.wr-input {
+    width: 100%;
+    min-height: 44px;
+    padding: .5rem .75rem;
+    border: 1px solid var(--wr-leather);
+    border-radius: var(--wr-radius-control);
+    background-color: #fff;
+    color: var(--wr-ink);
+    font-size: 1rem;
+}
+
+.wr-input:focus {
+    outline: 3px solid var(--wr-focus);
+    outline-offset: 1px;
+    border-color: var(--wr-focus);
+    box-shadow: none;
+}
+
+/* Umschalter aus Links (z. B. Sortierung); aktive Wahl mit aria-current */
+.wr-segmented {
+    display: inline-flex;
+    flex-wrap: wrap;
+    border: 1px solid var(--wr-leather);
+    border-radius: var(--wr-radius-control);
+    overflow: hidden;
+    background-color: var(--wr-paper);
+}
+
+.wr-segmented a {
+    display: inline-flex;
+    align-items: center;
+    gap: .35rem;
+    min-height: 44px;
+    padding: .45rem .85rem;
+    font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    font-size: .875rem;
+    font-weight: 600;
+    color: var(--wr-ink);
+    text-decoration: none;
+}
+
+.wr-segmented a + a {
+    border-left: 1px solid var(--wr-border);
+}
+
+.wr-segmented a:hover {
+    background-color: var(--wr-parchment);
+    color: var(--wr-ink);
+}
+
+.wr-segmented a[aria-current="page"] {
+    background-color: var(--wr-forest);
+    color: #fff;
+}
+
+.wr-segmented a:focus-visible {
+    outline: 3px solid var(--wr-focus);
+    outline-offset: -3px;
+}
+
+/* Kartenraster: 1 / 2 / 3 Spalten */
+.wr-card-grid {
+    display: grid;
+    gap: 1rem;
+    grid-template-columns: minmax(0, 1fr);
+}
+
+@media (min-width: 768px) {
+    .wr-card-grid { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1.25rem; }
+}
+
+@media (min-width: 1280px) {
+    .wr-card-grid { grid-template-columns: repeat(3, minmax(0, 1fr)); }
+}
+
+/* Farbpunkt aus der Datenbank (z. B. Abenteuerstatus): nur ergänzend zum Text */
+.wr-dot {
+    display: inline-block;
+    flex-shrink: 0;
+    width: .8rem;
+    height: .8rem;
+    border-radius: 999px;
+    border: 1px solid rgba(53, 40, 30, .35);
+    vertical-align: middle;
+}
+
 /* --- Teilnehmerliste in Anmeldekarten ------------------------------------ */
 .wr-participants {
     display: flex;
