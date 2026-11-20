@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Adventure;
+use App\Models\Booking;
 use App\Models\EventStatus;
 use App\Models\Player;
 use App\Models\User;
@@ -77,5 +78,44 @@ class BookingFormWrTest extends TestCase
             ->assertSee('data-prefill-url', false)
             ->assertSee('form="booking-create-form"', false)
             ->assertSee('Anmeldung absenden');
+    }
+
+    public function test_guest_form_uses_sections_and_linked_labels(): void
+    {
+        $user = User::factory()->create();
+        $user->roles()->attach(60);
+        $adventure = Adventure::factory()->create(['event_status_id' => EventStatus::REGISTRATION_OPEN]);
+
+        $this->actingAs($user)
+            ->get(route('adventures.bookings.create-guest', $adventure), ['X-Requested-With' => 'XMLHttpRequest'])
+            ->assertOk()
+            ->assertSee('class="wr-v1"', false)
+            ->assertSee('keine Erfahrungspunkte')
+            ->assertSeeInOrder(['Wer nimmt teil?', 'Gut zu wissen', 'Gesundheit und Notfall', 'Zustimmung'])
+            ->assertSee('<label for="guest-name">Vorname</label>', false)
+            ->assertSee('form="booking-guest-form"', false);
+    }
+
+    public function test_edit_form_keeps_values_hooks_and_explains_nsc(): void
+    {
+        $admin = User::factory()->create();
+        $admin->roles()->attach(10);
+        $adventure = Adventure::factory()->create();
+        $booking = Booking::factory()->for($adventure)->create([
+            'player_id' => Player::factory()->create()->id,
+            'vegetarier' => true,
+            'allergien' => 'Nüsse',
+        ]);
+
+        $this->actingAs($admin)
+            ->get(route('adventures.bookings.edit', [$adventure, $booking]), ['X-Requested-With' => 'XMLHttpRequest'])
+            ->assertOk()
+            ->assertSee('id="booking-edit-form"', false)
+            ->assertSee('id="health-consent-field-edit"', false)
+            ->assertSee('<label for="edit-role">Rolle</label>', false)
+            ->assertSee('NSC (Nichtspielercharakter)')
+            ->assertDontSee('Non-Spieler-Charakter')
+            ->assertSee('Nüsse')
+            ->assertSeeInOrder(['name="vegetarier"', 'checked'], false);
     }
 }

@@ -13,19 +13,7 @@
 </div>
 
 {{-- UI-31: Abenteuer-Kurzinfo vor dem Formular --}}
-<div class="wr-card p-4 mb-4">
-    <p class="wr-card__title text-lg mb-2">{{ $adventure->name }}</p>
-    <x-wr.adventure-meta :adventure="$adventure" class="text-wr-ink-muted mb-2" />
-    <div class="flex flex-wrap gap-1.5">
-        <x-wr.adventure-status :adventure="$adventure" :show-slots="false" />
-        @if ($adventure->max_player > 0)
-            <span class="wr-pill"><i class="users icon" aria-hidden="true"></i>Noch {{ $adventure->freeSlots() }} von {{ $adventure->max_player }} frei</span>
-        @endif
-        @if ($adventure->fee > 0 && $adventure->fee_reduced !== null)
-            <span class="wr-pill">ermäßigt {{ number_format($adventure->fee_reduced, 2, ',', '.') }} €</span>
-        @endif
-    </div>
-</div>
+@include('bookings._summary')
 
 @if (! $adventure->registrationOpen() && ! ($adminMode ?? false))
     <p class="text-wr-ink-muted">Die Anmeldung ist derzeit nicht geöffnet (Status: {{ $adventure->status?->description }}).</p>
