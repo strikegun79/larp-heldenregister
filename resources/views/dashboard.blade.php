@@ -187,15 +187,22 @@
             @endcan
 
             {{-- Aktive Helden der eigenen Spieler --}}
-            @if ($activePlayers->isNotEmpty())
+            @if ($activePlayers->isNotEmpty() || $playersAwaitingHero->isNotEmpty())
                 <section aria-labelledby="heroes-heading">
                     <x-wr.section-heading title="Deine Helden" id="heroes-heading" />
                     <div class="grid gap-4 lg:grid-cols-2">
                         @foreach ($activePlayers as $activePlayer)
                             @if ($activePlayer->activeHero)
                                 <x-wr.hero-card :hero="$activePlayer->activeHero"
-                                                :label="$activePlayer->pivot->self ? 'Mein aktiver Held' : 'Held von ' . $activePlayer->name" />
+                                                :label="$activePlayer->pivot->self ? 'Mein aktiver Held' : 'Held von ' . $activePlayer->name"
+                                                :skills-count="$activePlayer->activeHero->skills_count"
+                                                :adventures-count="$activePlayer->visits_count" />
                             @endif
+                        @endforeach
+
+                        {{-- Eigene Spieler ohne Helden: Platzhalter statt Leere --}}
+                        @foreach ($playersAwaitingHero as $waitingPlayer)
+                            <x-wr.hero-placeholder :player="$waitingPlayer" :self="(bool) $waitingPlayer->pivot->self" />
                         @endforeach
                     </div>
                 </section>

@@ -1,11 +1,14 @@
 {{-- Waldritter v1: Heldenkarte (Bild, Name, Klassen, verfügbare Erfahrungspunkte, nächste Aktion).
      Ganze Karte verlinkt auf das Heldenprofil. Erwartet einen Helden mit geladenen
      Relationen "classes" und "epTransactions" (für ep_balance).
+     Optional Fortschritts-Chips: "skillsCount" (Fertigkeiten) und "adventuresCount" (erlebte Abenteuer).
      Smartphone: Bild + Text nebeneinander, „Heldenbuch öffnen“ als eigene Zeile darunter,
      damit der Text die volle Breite neben dem Bild behält. Ab 640 px steht der Link rechts. --}}
 @props([
     'hero',
     'label' => null,
+    'skillsCount' => null,
+    'adventuresCount' => null,
 ])
 
 <a href="{{ route('heroes.show', $hero) }}"
@@ -35,6 +38,21 @@
                 <span class="text-sm font-semibold text-wr-forest">
                     {{ number_format($hero->ep_balance, 0, ',', '.') }} Erfahrungspunkte (EP) verfügbar
                 </span>
+
+                @if ($skillsCount !== null || $adventuresCount !== null)
+                    <ul class="flex flex-wrap gap-1.5 m-0 p-0 list-none" role="list" aria-label="Fortschritt">
+                        @if ($skillsCount !== null)
+                            <li class="wr-pill wr-pill--small">
+                                <i class="star icon" aria-hidden="true"></i>{{ $skillsCount }} {{ $skillsCount === 1 ? 'Fertigkeit' : 'Fertigkeiten' }}
+                            </li>
+                        @endif
+                        @if ($adventuresCount !== null)
+                            <li class="wr-pill wr-pill--small">
+                                <i class="map icon" aria-hidden="true"></i>{{ $adventuresCount }} Abenteuer erlebt
+                            </li>
+                        @endif
+                    </ul>
+                @endif
 
                 {{ $slot }}
             </div>

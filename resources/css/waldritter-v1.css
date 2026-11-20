@@ -383,6 +383,13 @@
     }
 }
 
+/* Platzhalterkarte (z. B. Held entsteht erst beim ersten Abenteuer) */
+.wr-card--placeholder {
+    border-style: dashed;
+    border-width: 2px;
+    box-shadow: none;
+}
+
 /* Zusatzhinweis in Karten (z. B. „auf der Waldritter-Website“) */
 .wr-card__hint {
     display: inline-flex;

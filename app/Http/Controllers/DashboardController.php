@@ -71,8 +71,20 @@ class DashboardController extends Controller
             ->players()
             ->withPivot('self')
             ->whereNotNull('active_hero_id')
-            // EP-Buchungen für ep_balance mitladen (sonst Lazy-Loading-Fehler).
-            ->with(['activeHero.classes', 'activeHero.epTransactions'])
+            // Teilnahmen des Spielers für den Fortschritts-Chip „X Abenteuer erlebt“.
+            ->withCount('visits')
+            // EP-Buchungen für ep_balance mitladen (sonst Lazy-Loading-Fehler);
+            // Anzahl Fertigkeiten für den Fortschritts-Chip.
+            ->with(['activeHero' => fn ($q) => $q->withCount('skills')->with(['classes', 'epTransactions'])])
+            ->get();
+
+        // Eigene Spieler, die noch gar keinen Helden haben (Platzhalter „Held wartet noch“).
+        $playersAwaitingHero = $request->user()
+            ->players()
+            ->withPivot('self')
+            ->whereNull('active_hero_id')
+            ->whereDoesntHave('heroes')
+            ->orderBy('players.name')
             ->get();
 
         $hasPlayers = $request->user()->players()->exists();
@@ -91,6 +103,6 @@ class DashboardController extends Controller
         // Startseiten-Nachricht (nur wenn aktiv und im Zeitraum).
         $motd = Motd::current();
 
-        return view('dashboard', compact('motd', 'metrics', 'nextAdventure', 'nextAdventureSlots', 'upcomingBookedAdventures', 'activePlayers', 'hasPlayers', 'profileComplete', 'hasBookings', 'showOnboarding', 'showNewsletterHint'));
+        return view('dashboard', compact('motd', 'metrics', 'nextAdventure', 'nextAdventureSlots', 'upcomingBookedAdventures', 'activePlayers', 'playersAwaitingHero', 'hasPlayers', 'profileComplete', 'hasBookings', 'showOnboarding', 'showNewsletterHint'));
     }
 }
