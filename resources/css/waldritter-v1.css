@@ -1051,6 +1051,42 @@
 .wr-v1 .wr-check__title { display: block; font-weight: 600; color: var(--wr-ink); }
 .wr-v1 .wr-check__hint { display: block; font-size: .85rem; color: var(--wr-ink-muted); }
 
+/* --- Ruhige Verwaltungstabelle ------------------------------------------- */
+.wr-table {
+    width: 100%;
+    border-collapse: collapse;
+    background-color: var(--wr-paper);
+    font-size: .95rem;
+}
+
+.wr-table th {
+    padding: .65rem 1rem;
+    border-bottom: 2px solid var(--wr-border);
+    background-color: var(--wr-parchment);
+    text-align: left;
+    font-family: system-ui, -apple-system, 'Segoe UI', Roboto, sans-serif;
+    font-size: .78rem;
+    font-weight: 700;
+    letter-spacing: .06em;
+    text-transform: uppercase;
+    color: var(--wr-ink-muted);
+}
+
+.wr-table td {
+    padding: .7rem 1rem;
+    border-bottom: 1px solid var(--wr-border);
+    color: var(--wr-ink);
+    vertical-align: middle;
+}
+
+.wr-table tbody tr[data-modal-url] { cursor: pointer; }
+.wr-table tbody tr:hover { background-color: #fbf3df; }
+
+.wr-table .wr-num {
+    text-align: right;
+    font-variant-numeric: tabular-nums;
+}
+
 /* --- Teilnehmerliste in Anmeldekarten ------------------------------------ */
 .wr-participants {
     display: flex;
