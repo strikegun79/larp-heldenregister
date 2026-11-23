@@ -23,6 +23,7 @@ use App\Http\Controllers\SignatureController;
 use App\Http\Controllers\SkillController;
 use App\Http\Controllers\SkilltreeController;
 use App\Http\Controllers\SurveyController;
+use App\Http\Controllers\TeamerCompensationController;
 use App\Http\Controllers\TeamerSignupController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -452,6 +453,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('adventures.teamer.reject');
     Route::post('adventures/{adventure}/teamer-signup/{signup}/resend-confirmation', [TeamerSignupController::class, 'resendConfirmation'])
         ->name('adventures.teamer.resend-confirmation');
+    // Issue #19: ausgefüllte Abrechnung der Aufwandsentschädigung (nur eigene Anmeldung).
+    Route::get('adventures/{adventure}/teamer-signup/{signup}/compensation', [TeamerCompensationController::class, 'download'])
+        ->name('adventures.teamer.compensation');
     // Inspektor (Slide-In) einer Teamer-Anmeldung in der Event-Verwaltung
     Route::get('adventures/{adventure}/teamer-signup/{signup}/inspector', [TeamerSignupController::class, 'inspector'])
         ->name('adventures.teamer.inspector');

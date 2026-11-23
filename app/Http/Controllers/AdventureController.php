@@ -194,6 +194,9 @@ class AdventureController extends Controller
 
         $teamerSignups = $adventure->teamerSignups;
         $myTeamerSignup = $teamerSignups->firstWhere('user_id', $request->user()->id);
+        // Issue #19: eigene Teamer-Anmeldung mit Rolle (Abrechnung in „Deine Anmeldungen“)
+        $myTeamerSignup?->load('eventRole');
+        $myTeamerSignup?->setRelation('adventure', $adventure);
 
         $profileComplete = $request->user()->hasCompleteAddress();
         $userHasPlayers = $request->user()->players()->exists();
