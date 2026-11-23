@@ -86,48 +86,28 @@
         </div>
     </div>
 
+    {{-- Vorlage für neue Fragen: dasselbe Markup wie bestehende Fragen (Platzhalter __INDEX__) --}}
+    <template id="question-template">
+        <div class="question-item border border-stone-200 rounded-lg p-4 bg-stone-50">
+            @include('admin.surveys.templates._question_row', ['i' => '__INDEX__', 'q' => null])
+        </div>
+    </template>
+
     <script>
     let qIdx = {{ $questions->count() }};
 
     function addQuestion() {
-        const i = qIdx++;
-        const types = {
-            rating: 'Bewertung (1–10)',
-            text:   'Freitext',
-            yes_no: 'Ja / Nein',
-        };
-        const opts = Object.entries(types)
-            .map(([v, l]) => `<option value="${v}">${l}</option>`).join('');
-
-        const html = `
-            <div class="question-item border border-stone-200 rounded-lg p-4 bg-stone-50">
-                <div class="flex gap-3 flex-wrap items-start">
-                    <div class="flex-1">
-                        <label class="text-xs text-stone-500">Fragetext</label>
-                        <input type="text"
-                               name="questions[${i}][question_text]"
-                               class="ui input w-full"
-                               placeholder="Wie hat dir … gefallen?"
-                               required>
-                    </div>
-                    <div>
-                        <label class="text-xs text-stone-500">Typ</label>
-                        <select name="questions[${i}][type]" class="ui dropdown">${opts}</select>
-                    </div>
-                    <div class="mt-4">
-                        <div class="ui checkbox">
-                            <input type="checkbox" name="questions[${i}][required]" value="1">
-                            <label>Pflicht</label>
-                        </div>
-                    </div>
-                    <button type="button"
-                            onclick="this.closest('.question-item').remove()"
-                            class="ui red icon button mt-4" title="Löschen">
-                        <i class="trash icon"></i>
-                    </button>
-                </div>
-            </div>`;
+        const html = document.getElementById('question-template').innerHTML.replaceAll('__INDEX__', qIdx++);
         document.getElementById('questions-list').insertAdjacentHTML('beforeend', html);
     }
+
+    // Issue #24: Typabhängige Einstellungen ein-/ausblenden.
+    document.getElementById('questions-list').addEventListener('change', (e) => {
+        if (!e.target.matches('[data-question-type]')) return;
+        const item = e.target.closest('.question-item');
+        item.querySelectorAll('[data-type-options]').forEach((el) => {
+            el.hidden = el.dataset.typeOptions !== e.target.value;
+        });
+    });
     </script>
 </x-app-layout>

@@ -7,6 +7,7 @@ use App\Models\SurveyTemplate;
 use App\Models\SurveyTemplateQuestion;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 /**
@@ -48,8 +49,14 @@ class SurveyTemplateController extends Controller
             'active' => ['boolean'],
             'questions' => ['array'],
             'questions.*.question_text' => ['required', 'string', 'max:1000'],
-            'questions.*.type' => ['required', 'in:rating,text,yes_no'],
+            'questions.*.type' => ['required', Rule::in(array_keys(SurveyTemplateQuestion::TYPES))],
             'questions.*.required' => ['boolean'],
+            // Issue #24: Einstellungen der Typen „Optionen“ und „Smileys“.
+            'questions.*.choices' => ['nullable', 'string', 'max:2000'],
+            'questions.*.multiple' => ['boolean'],
+            'questions.*.free_text' => ['boolean'],
+            'questions.*.labels' => ['nullable', 'array'],
+            'questions.*.labels.*' => ['nullable', 'string', 'max:100'],
         ]);
 
         $template = SurveyTemplate::create([
@@ -85,8 +92,14 @@ class SurveyTemplateController extends Controller
             'active' => ['boolean'],
             'questions' => ['array'],
             'questions.*.question_text' => ['required', 'string', 'max:1000'],
-            'questions.*.type' => ['required', 'in:rating,text,yes_no'],
+            'questions.*.type' => ['required', Rule::in(array_keys(SurveyTemplateQuestion::TYPES))],
             'questions.*.required' => ['boolean'],
+            // Issue #24: Einstellungen der Typen „Optionen“ und „Smileys“.
+            'questions.*.choices' => ['nullable', 'string', 'max:2000'],
+            'questions.*.multiple' => ['boolean'],
+            'questions.*.free_text' => ['boolean'],
+            'questions.*.labels' => ['nullable', 'array'],
+            'questions.*.labels.*' => ['nullable', 'string', 'max:100'],
         ]);
 
         $template->update([
@@ -124,6 +137,7 @@ class SurveyTemplateController extends Controller
                 'survey_template_id' => $template->id,
                 'question_text' => $q['question_text'],
                 'type' => $q['type'],
+                'options' => SurveyTemplateQuestion::optionsFromInput($q['type'], $q),
                 'sort_order' => $index,
                 'required' => (bool) ($q['required'] ?? false),
             ]);

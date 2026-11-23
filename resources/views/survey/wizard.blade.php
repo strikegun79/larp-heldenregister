@@ -101,6 +101,10 @@
                                             ❌ Nein
                                         </label>
                                     </div>
+
+                                @else
+                                    {{-- Issue #24: Optionen mit Freitext / Smileys --}}
+                                    @include('survey._question_extra')
                                 @endif
 
                                 @error("answers.{$question->id}")

@@ -35,9 +35,7 @@
                     @endphp
                     <div class="survey-result-card mb-4">
                         <div class="survey-result-card-header">
-                            @if($question->type === 'rating') 📊
-                            @elseif($question->type === 'text') 📝
-                            @else ✅ @endif
+                            {{ $question->typeIcon() }}
                             {{ $question->question_text }}
                         </div>
                         <div class="survey-result-card-body">
@@ -67,6 +65,30 @@
                                     <span class="ui green label text-base px-4 py-2">✅ Ja</span>
                                 @else
                                     <span class="ui red label text-base px-4 py-2">❌ Nein</span>
+                                @endif
+                            @elseif($question->type === 'smiley')
+                                {{-- Issue #24 --}}
+                                <div class="flex items-center gap-3">
+                                    <span class="text-3xl">{{ $question->smileyText($answer->rating_answer) }}</span>
+                                    <span class="text-stone-400 text-sm">({{ $answer->rating_answer }} von 5)</span>
+                                </div>
+                            @elseif($question->type === 'choice')
+                                {{-- Issue #24 --}}
+                                @if($answer->choice_answer)
+                                    <div class="flex flex-wrap gap-2">
+                                        @foreach($answer->choice_answer as $choice)
+                                            <span class="ui green label text-base px-4 py-2">☑ {{ $choice }}</span>
+                                        @endforeach
+                                    </div>
+                                @else
+                                    <p class="text-stone-400 italic text-sm">Keine Option gewählt</p>
+                                @endif
+                                @if(filled($answer->text_answer))
+                                    @can('survey.admin')
+                                        <blockquote class="survey-text-quote mt-3">{{ $answer->text_answer }}</blockquote>
+                                    @else
+                                        <p class="text-stone-400 italic text-sm mt-3">Nachricht nur für Umfrage-Admins sichtbar.</p>
+                                    @endcan
                                 @endif
                             @endif
                         </div>

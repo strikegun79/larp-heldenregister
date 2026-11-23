@@ -249,6 +249,21 @@ class SurveyAdminController extends Controller
             } elseif ($question->type === 'yes_no') {
                 $stat['yes_count'] = $answers->where('yes_no_answer', true)->count();
                 $stat['no_count'] = $answers->where('yes_no_answer', false)->count();
+            } elseif ($question->type === 'smiley') {
+                // Issue #24: Smiley-Skala 1–5
+                $stat['average'] = $answers->avg('rating_answer');
+                $stat['distribution'] = $answers->groupBy('rating_answer')->map->count();
+            } elseif ($question->type === 'choice') {
+                // Issue #24: Anzahl je Option (aktuelle Optionen zuerst, frühere Optionen dahinter) + Nachrichten
+                $counts = array_fill_keys($question->choices(), 0);
+                foreach ($answers as $answer) {
+                    foreach ($answer->choice_answer ?? [] as $choice) {
+                        $counts[$choice] = ($counts[$choice] ?? 0) + 1;
+                    }
+                }
+                $stat['choice_counts'] = $counts;
+                $stat['choice_respondents'] = $answers->filter(fn ($a) => ! empty($a->choice_answer))->count();
+                $stat['texts'] = $answers->pluck('text_answer')->filter()->values();
             }
 
             $stats[] = $stat;
