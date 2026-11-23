@@ -106,6 +106,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     Route::get('/profile/export-data', [ProfileController::class, 'exportData'])->name('profile.export-data');
+    Route::patch('/profile/teamer', [ProfileController::class, 'updateTeamer'])->name('profile.teamer.update'); // Issue #19
 
     // Newsletter-Opt-in/-out aus dem Profil heraus.
     Route::post('/newsletter/abonnieren', [NewsletterSubscriptionController::class, 'subscribe'])->name('newsletter.subscribe');
