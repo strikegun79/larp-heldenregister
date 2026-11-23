@@ -163,8 +163,8 @@ Tokens nur innerhalb von `.wr-v1` galten. Das gilt seit den globalen Schritten G
 3. ~~**Globale Token-Migration** und Primärbuttons in Waldgrün~~ – erledigt mit G2 (`a968069`).
 4. **Tests unabhängiger von CSS-Klassen machen** (`DashboardNextAdventureTest`, `MotdTest`), damit
    `_adventure_status` und `_motd` vollständig auf Tokens umgestellt werden können.
-5. **Bildgröße:** `abenteuer_v3.jpg` (350 KB, 1254 × 1254 px) ließe sich auf ca. 600 px verkleinern
-   (`heroes_db_v2.jpg` ist erledigt: 600 px, 91 KB).
+5. ~~**Bildgröße** `abenteuer_v3.jpg`~~ – auf 1000 px, Qualität 80 verkleinert (350 → 204 KB).
+   Nicht kleiner, weil das Quest-Banner auf dem Desktop bis etwa 1216 px breit ist.
 6. **Klassenfarben in der Datenbank:** `hero_classes.ribbon_color` ist überall leer. Die
    Designfarben gelten bisher nur per CSS. Ob sie in die Datenbank übernommen werden sollen,
    ist noch nicht entschieden.
