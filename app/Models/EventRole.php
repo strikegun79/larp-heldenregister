@@ -19,16 +19,26 @@ class EventRole extends Model
         'description',
         'for_participant',
         'for_teamer',
+        'billable',
+        'default_compensation',
     ];
 
     protected $casts = [
         'for_participant' => 'boolean',
         'for_teamer' => 'boolean',
+        'billable' => 'boolean',
+        'default_compensation' => 'decimal:2',
     ];
 
     public function scopeForParticipant(Builder $query): Builder
     {
         return $query->where('for_participant', true);
+    }
+
+    /** Issue #19: Rollen, für die eine Aufwandsentschädigung abgerechnet werden kann. */
+    public function scopeBillable(Builder $query): Builder
+    {
+        return $query->where('billable', true);
     }
 
     public function scopeForTeamer(Builder $query): Builder

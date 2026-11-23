@@ -162,6 +162,7 @@ class AdventureController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $adventure = Adventure::create($this->validateAdventure($request));
+        $this->syncCompensations($request, $adventure);
 
         return redirect()
             ->route('adventures.show', $adventure)
@@ -486,12 +487,39 @@ class AdventureController extends Controller
         }
 
         $adventure->update($data);
+        $this->syncCompensations($request, $adventure);
 
         $message = 'Abenteuer wurde aktualisiert.';
 
         return $request->expectsJson()
             ? response()->json(['message' => $message, 'reload' => true])
             : redirect()->route('adventures.show', $adventure)->with('status', $message);
+    }
+
+    /**
+     * Issue #19: Pauschalen je abrechnungsfähiger Rolle speichern. Leere Felder entfernen
+     * den Eintrag (keine Abrechnung). Ohne Feldgruppe im Formular bleibt alles unverändert.
+     */
+    private function syncCompensations(Request $request, Adventure $adventure): void
+    {
+        if (! $request->has('compensations')) {
+            return;
+        }
+
+        $billableIds = EventRole::billable()->pluck('id')->all();
+
+        foreach ((array) $request->input('compensations', []) as $roleId => $amount) {
+            $roleId = (int) $roleId;
+            if (! in_array($roleId, $billableIds, true)) {
+                continue;
+            }
+
+            if ($amount === null || $amount === '') {
+                $adventure->compensations()->where('event_role_id', $roleId)->delete();
+            } else {
+                $adventure->compensations()->updateOrCreate(['event_role_id' => $roleId], ['amount' => $amount]);
+            }
+        }
     }
 
     /**
@@ -614,7 +642,14 @@ class AdventureController extends Controller
             'is_hidden' => ['boolean'],
             'requires_confirmation' => ['boolean'],
             'asks_vegetarian' => ['boolean'],
+            'compensations' => ['nullable', 'array'],
+            'compensations.*' => ['nullable', 'numeric', 'min:0', 'max:9999.99'],
+        ], [
+            'compensations.*.numeric' => 'Die Pauschale muss eine Zahl sein.',
+            'compensations.*.min' => 'Die Pauschale darf nicht negativ sein.',
+            'compensations.*.max' => 'Die Pauschale ist zu hoch.',
         ]);
+        unset($data['compensations']);
 
         // Checkbox sendet keinen Wert wenn nicht angehakt → false setzen.
         $data['is_hidden'] = $request->boolean('is_hidden');

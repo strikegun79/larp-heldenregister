@@ -9,6 +9,7 @@
                 <th class="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase">Bezeichnung</th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase">Teilnehmer</th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase">Teamer</th>
+                <th class="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase">Abrechnung</th>
                 <th class="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase">Anmeldungen</th>
                 <th class="px-6 py-3"></th>
             </tr>
@@ -33,6 +34,16 @@
                             <span class="text-stone-400" title="Nein">&#8211;</span>
                         @endif
                     </td>
+                    {{-- Issue #19: abrechnungsfähig mit Standard-Pauschale --}}
+                    <td class="px-6 py-4" data-label="Abrechnung">
+                        @if ($role->billable)
+                            <span class="wr-pill wr-pill--success wr-pill--small">
+                                <i class="euro sign icon" aria-hidden="true"></i>abrechnungsfähig{{ $role->default_compensation !== null ? ' · '.number_format($role->default_compensation, 2, ',', '.').' €' : '' }}
+                            </span>
+                        @else
+                            <span class="text-stone-400">nein</span>
+                        @endif
+                    </td>
                     <td class="px-6 py-4" data-label="Anmeldungen">{{ $role->bookings_count }}</td>
                     <td class="px-6 py-4 text-right">
                                     {{-- Bearbeiten und Löschen im Inspektor (Zeilenklick / Enter) --}}
@@ -40,7 +51,7 @@
                                 </td>
                 </tr>
             @empty
-                <tr><td colspan="5" class="px-6 py-4 text-stone-500">Noch keine Rollen.</td></tr>
+                <tr><td colspan="6" class="px-6 py-4 text-stone-500">Noch keine Rollen.</td></tr>
             @endforelse
         </tbody>
     </table>

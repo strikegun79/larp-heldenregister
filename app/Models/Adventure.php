@@ -144,6 +144,25 @@ class Adventure extends Model
         return $this->hasMany(Booking::class);
     }
 
+    /** Issue #19: Pauschalen je abrechnungsfähiger Rolle. */
+    public function compensations(): HasMany
+    {
+        return $this->hasMany(AdventureCompensation::class);
+    }
+
+    /** Issue #19: Pauschale für eine Rolle bei dieser Veranstaltung (null = keine Abrechnung). */
+    public function compensationFor(?int $eventRoleId): ?string
+    {
+        if (! $eventRoleId) {
+            return null;
+        }
+
+        return $this->compensations()
+            ->where('event_role_id', $eventRoleId)
+            ->whereHas('eventRole', fn ($q) => $q->where('billable', true))
+            ->value('amount');
+    }
+
     public function teamerSignups(): HasMany
     {
         return $this->hasMany(TeamerSignup::class);
