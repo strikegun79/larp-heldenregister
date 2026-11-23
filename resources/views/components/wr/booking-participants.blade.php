@@ -39,3 +39,9 @@
         </li>
     @endforeach
 </ul>
+
+{{-- Issue #5: Bei offenem Beitrag erklären, bis wann Überweisungen erfasst sind --}}
+@if ($adventure->fee > 0 && $adventure->payments_reconciled_at
+    && $adventure->bookings->contains(fn ($b) => ! $b->paid && ! $b->waitlisted && ! $b->role?->is_teamer_like))
+    <x-wr.payments-reconciled-hint :date="$adventure->payments_reconciled_at" class="mt-2" />
+@endif

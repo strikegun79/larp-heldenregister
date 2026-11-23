@@ -206,5 +206,33 @@
                 </p>
             @endif
         </div>
+
+        {{-- Issue #5: Datum des letzten Bezahlungsabgleichs – Teilnehmer sehen es bei offenem Beitrag.
+             _bookings wird für Handy und Desktop zweimal eingebunden → eindeutige IDs per Suffix. --}}
+        @php($rid = 'reconciled-'.$adventure->id.'-'.\Illuminate\Support\Str::lower(\Illuminate\Support\Str::random(5)))
+        <div class="mt-3 flex flex-wrap items-end gap-2" role="group" aria-labelledby="{{ $rid }}-label">
+            <p id="{{ $rid }}-label" class="text-sm m-0 w-full">
+                Letzter Abgleich der Zahlungen:
+                <strong>{{ $adventure->payments_reconciled_at?->format('d.m.Y') ?? 'noch nicht eingetragen' }}</strong>
+            </p>
+            <form method="POST" action="{{ route('adventures.payments-reconciled', $adventure) }}" data-refresh-modal>
+                @csrf @method('PATCH')
+                <input type="hidden" name="today" value="1">
+                <button type="submit" class="wr-btn wr-btn--secondary wr-btn--small">
+                    <i class="calendar check icon m-0" aria-hidden="true"></i> Heute abgeglichen
+                </button>
+            </form>
+            <form method="POST" action="{{ route('adventures.payments-reconciled', $adventure) }}" data-refresh-modal
+                  class="flex flex-wrap items-end gap-2">
+                @csrf @method('PATCH')
+                <label for="{{ $rid }}-date" class="text-sm">
+                    Anderes Datum <span class="text-stone-500">(leer = entfernen)</span>
+                    <input type="date" id="{{ $rid }}-date" name="payments_reconciled_at"
+                           value="{{ $adventure->payments_reconciled_at?->format('Y-m-d') }}" max="{{ now()->format('Y-m-d') }}"
+                           class="block mt-1 rounded border-stone-300 text-sm">
+                </label>
+                <button type="submit" class="wr-btn wr-btn--secondary wr-btn--small">Datum speichern</button>
+            </form>
+        </div>
     @endcan
 @endif

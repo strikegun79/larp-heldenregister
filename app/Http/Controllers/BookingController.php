@@ -47,7 +47,7 @@ class BookingController extends Controller
         // (vorher ungeschützt – jeder angemeldete Nutzer konnte fremde Buchungen verschieben).
         $this->middleware('can:approve-bookings')->only('moveToWaitlist');
         // Bezahlt-Status pflegen (BOOK-06).
-        $this->middleware('can:manage-payments')->only('togglePaid');
+        $this->middleware('can:manage-payments')->only(['togglePaid', 'updatePaymentsReconciled']);
         // Inspektor in der Event-Verwaltung (Issue #9): gleiche Berechtigung wie die Verwaltungsansicht.
         $this->middleware('can:events.edit')->only('inspector');
         // Admin-Anmeldung (Issue #8): Betreuer + Gesundheitsdaten eines beliebigen Spielers laden.
@@ -668,6 +668,35 @@ class BookingController extends Controller
                 Notification::route('mail', $booking->player->email)->notify(new PaymentConfirmed($booking));
             }
         }
+
+        return $request->expectsJson()
+            ? response()->json(['message' => $message, 'refresh_modal' => true])
+            : back()->with('status', $message);
+    }
+
+    /**
+     * Issue #5: Datum des letzten Bezahlungsabgleichs setzen („Heute abgeglichen“),
+     * frei wählen oder leeren. Teilnehmer sehen das Datum bei offenen Beiträgen.
+     */
+    public function updatePaymentsReconciled(Request $request, Adventure $adventure): RedirectResponse|JsonResponse
+    {
+        $data = $request->validate([
+            'payments_reconciled_at' => ['nullable', 'date', 'before_or_equal:today'],
+        ], [
+            'payments_reconciled_at.before_or_equal' => 'Der Abgleich kann nicht in der Zukunft liegen.',
+        ]);
+
+        $date = $request->boolean('today') ? now()->toDateString() : ($data['payments_reconciled_at'] ?? null);
+        $adventure->update(['payments_reconciled_at' => $date]);
+
+        AuditLogger::log('adventure.payments_reconciled', $adventure, [
+            'adventure' => $adventure->name,
+            'payments_reconciled_at' => $date,
+        ]);
+
+        $message = $date
+            ? 'Letzter Abgleich: '.$adventure->payments_reconciled_at->format('d.m.Y').'.'
+            : 'Datum des letzten Abgleichs entfernt.';
 
         return $request->expectsJson()
             ? response()->json(['message' => $message, 'refresh_modal' => true])

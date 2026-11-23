@@ -37,6 +37,7 @@ class Adventure extends Model
         'asks_vegetarian',
         'fee',
         'fee_reduced',
+        'payments_reconciled_at',
         'legacy_id',
     ];
 
@@ -46,6 +47,7 @@ class Adventure extends Model
         'reminder_sent_at' => 'datetime',
         'fee' => 'decimal:2',
         'fee_reduced' => 'decimal:2',
+        'payments_reconciled_at' => 'date',
         'loot_ep_day' => 'integer',
         'max_player' => 'integer',
         'min_age' => 'integer',

@@ -42,6 +42,12 @@
                         @if ($adventure->fee_reduced !== null)
                             <span class="text-sm text-wr-ink-muted">(ermäßigt {{ number_format($adventure->fee_reduced, 2, ',', '.') }} €)</span>
                         @endif
+                        {{-- Issue #5: Stand des letzten Bezahlungsabgleichs --}}
+                        @if ($adventure->payments_reconciled_at)
+                            <span class="block text-sm text-wr-ink-muted">
+                                Zahlungseingänge geprüft bis {{ $adventure->payments_reconciled_at->format('d.m.Y') }}
+                            </span>
+                        @endif
                     @else
                         kostenlos
                     @endif

@@ -59,6 +59,11 @@
             @endif
         </div>
 
+        {{-- Issue #5: Bei offenem Beitrag erklären, bis wann Überweisungen erfasst sind --}}
+        @if (! $isTeamer && $adventure->fee > 0 && $booking->status !== 'storniert' && ! $booking->paid && $adventure->payments_reconciled_at)
+            <x-wr.payments-reconciled-hint :date="$adventure->payments_reconciled_at" />
+        @endif
+
         @if ($canAct)
             <div class="flex flex-wrap gap-2 mt-1">
                 @if ($booking->status !== 'storniert')

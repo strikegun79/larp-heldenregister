@@ -239,6 +239,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Teilnahmebeitrag-Status – Toggle paid (BOOK-06).
     Route::patch('adventures/{adventure}/bookings/{booking}/payment', [BookingController::class, 'togglePaid'])
         ->name('adventures.bookings.payment');
+    // Datum des letzten Bezahlungsabgleichs pro Veranstaltung (Issue #5).
+    Route::patch('adventures/{adventure}/payments-reconciled', [BookingController::class, 'updatePaymentsReconciled'])
+        ->name('adventures.payments-reconciled');
     Route::delete('adventures/{adventure}/bookings/{booking}', [BookingController::class, 'destroy'])
         ->name('adventures.bookings.destroy');
     Route::patch('adventures/{adventure}/bookings/{booking}/reinstate', [BookingController::class, 'reinstate'])
