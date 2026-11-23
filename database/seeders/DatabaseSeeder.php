@@ -23,6 +23,7 @@ class DatabaseSeeder extends Seeder
             EventLookupSeeder::class,
             SettingsSeeder::class,
             TaskTypeDefinitionSeeder::class,
+            PlotCharacterSeeder::class,
         ]);
     }
 }

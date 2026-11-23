@@ -10,6 +10,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Storage;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 /**
@@ -104,14 +105,48 @@ class PlotCharacterController extends Controller
      */
     private function validateCharacter(Request $request): array
     {
+        $in = fn (array $options) => Rule::in(array_keys($options));
+
         $data = $request->validate([
             'name' => ['required', 'string', 'max:100'],
             'title' => ['nullable', 'string', 'max:150'],
-            'description' => ['nullable', 'string', 'max:5000'],
+            'character_type' => ['nullable', $in(PlotCharacter::TYPES)],
+            'status' => ['nullable', $in(PlotCharacter::STATUSES)],
+            'class_name' => ['nullable', 'string', 'max:100'],
+            'home' => ['nullable', 'string', 'max:150'],
+            'species' => ['nullable', $in(PlotCharacter::SPECIES)],
+            'faction' => ['nullable', 'string', 'max:150'],
+            'alignment' => ['nullable', $in(PlotCharacter::ALIGNMENTS)],
+            'location' => ['nullable', 'string', 'max:150'],
+            'first_seen' => ['nullable', 'string', 'max:150'],
+            'missing_since' => ['nullable', 'string', 'max:150'],
+            'last_seen' => ['nullable', 'string', 'max:150'],
+            'description' => ['nullable', 'string', 'max:10000'],
+            'known_titles' => ['nullable', 'string', 'max:3000'],
+            'abilities' => ['nullable', 'string', 'max:3000'],
+            'artifacts' => ['nullable', 'string', 'max:3000'],
+            'connections' => ['nullable', 'string', 'max:3000'],
+            'chronicle' => ['nullable', 'string', 'max:10000'],
+            'quote' => ['nullable', 'string', 'max:500'],
+            'motto' => ['nullable', 'string', 'max:500'],
+            'public_lore' => ['nullable', 'string', 'max:10000'],
+            'gm_notes' => ['nullable', 'string', 'max:10000'],
             'public_visible' => ['boolean'],
             'image' => ['nullable', 'image', 'mimes:jpg,jpeg,png,webp', 'max:8192'],
             'remove_image' => ['boolean'],
         ]);
+
+        // Nicht gesetzte Auswahlfelder: NSC bzw. „Unbekannt“.
+        $data['character_type'] ??= 'nsc';
+        foreach (['status', 'species', 'alignment'] as $field) {
+            $data[$field] ??= 'unknown';
+        }
+
+        // Mehrzeilige Eingaben in Listen bzw. Chronik-Einträge zerlegen.
+        foreach (PlotCharacter::LIST_FIELDS as $field) {
+            $data[$field] = PlotCharacter::parseList($data[$field] ?? null);
+        }
+        $data['chronicle'] = PlotCharacter::parseChronicle($data['chronicle'] ?? null);
 
         $data['public_visible'] = $request->boolean('public_visible');
         unset($data['image'], $data['remove_image']);

@@ -79,6 +79,13 @@
                                     @if ($character->title)
                                         <span class="block text-stone-500 text-sm">{{ $character->title }}</span>
                                     @endif
+                                    {{-- Issue #34: Status und Volk als kurze Kennzeichen --}}
+                                    <span class="flex flex-wrap gap-1 mt-1">
+                                        <span class="ui mini {{ $character->statusColor() }} label">{{ $character->statusLabel() }}</span>
+                                        @if ($character->species !== 'unknown')
+                                            <span class="ui mini basic label">{{ $character->speciesLabel() }}</span>
+                                        @endif
+                                    </span>
                                 </span>
                             </a>
                         @endforeach
