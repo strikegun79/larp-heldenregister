@@ -66,6 +66,8 @@
                                 data-skill-name="{{ $skill->name }}"
                                 data-skill-desc="{{ $skill->description }}"
                                 data-skill-cost="{{ $skill->ep_costs }}"
+                                data-skill-perl-name="{{ $skill->perlColor?->name }}"
+                                data-skill-perl-code="{{ $skill->perlColor?->code }}"
                                 data-skill-learned="{{ $learned ? 1 : 0 }}"
                                 data-skill-locked="{{ $locked ? 1 : 0 }}"
                                 data-skill-prereqs="{{ $locked ? $missingPrereqs->pluck('req_name')->join(', ') : '' }}"></button>
@@ -89,6 +91,8 @@
                                         data-skill-name="{{ $skill->name }}"
                                         data-skill-desc="{{ $skill->description }}"
                                         data-skill-cost="{{ $skill->ep_costs }}"
+                                        data-skill-perl-name="{{ $skill->perlColor?->name }}"
+                                        data-skill-perl-code="{{ $skill->perlColor?->code }}"
                                         data-skill-learned="{{ $learned ? 1 : 0 }}"
                                         data-skill-locked="{{ $locked ? 1 : 0 }}"
                                         data-skill-prereqs="{{ $locked ? $missingPrereqs->pluck('req_name')->join(', ') : '' }}">

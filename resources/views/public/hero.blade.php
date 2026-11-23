@@ -11,7 +11,7 @@
 {{-- PUB-12: Alpine-Wrapper für Read-only Skill-Modal --}}
 <div x-data="{
         showSkillModal: false,
-        skill: { name:'', desc:'', cost:0, learned:false, locked:false, prereqs:'' }
+        skill: { name:'', desc:'', cost:0, learned:false, locked:false, prereqs:'', perlName:'', perlCode:'' }
      }"
      @open-skill.window="skill = $event.detail; showSkillModal = true"
      @keydown.escape.window="showSkillModal = false">
@@ -215,6 +215,14 @@
                 <p class="text-sm text-stone-500">
                     Kosten: <strong class="text-stone-800" x-text="skill.cost + ' EP'"></strong>
                 </p>
+                {{-- Issue #25: Perlenfarbe der Fertigkeit --}}
+                <template x-if="skill.perlName">
+                    <p class="text-sm text-stone-500 flex items-center gap-2">
+                        <span class="inline-block w-5 h-5 rounded-full border-2 border-stone-400 shrink-0" aria-hidden="true"
+                              :style="/^#[0-9a-fA-F]{3,8}$/.test(skill.perlCode || '') ? 'background:' + skill.perlCode : ''"></span>
+                        <span>Perlenfarbe: <strong class="text-stone-800" x-text="skill.perlName"></strong></span>
+                    </p>
+                </template>
                 <template x-if="skill.learned">
                     <p class="text-green-700 font-medium text-sm">✓ Diese Fertigkeit wurde erlernt.</p>
                 </template>
