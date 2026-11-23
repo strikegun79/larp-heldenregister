@@ -152,4 +152,21 @@ class AdminInspectorListsTest extends TestCase
         $this->assertStringNotContainsString(route('admin.users.edit', $other).'?inspector=1', $html);
         $this->assertStringContainsString('Wiederherstellen', $html);
     }
+
+    public function test_skill_full_pages_render_without_ajax(): void
+    {
+        $skill = Skill::factory()->create(['name' => 'Feuerfaust']);
+        $admin = $this->admin();
+
+        $this->actingAs($admin)->get(route('admin.skills.edit', $skill))
+            ->assertOk()
+            ->assertSee('<h1 class="wr-heading break-words">Feuerfaust</h1>', false)
+            ->assertSee('form="skill-form"', false)
+            // Gefahrenbereich nur im Inspektor
+            ->assertDontSee('Fertigkeit löschen');
+
+        $this->actingAs($admin)->get(route('admin.skills.create'))
+            ->assertOk()
+            ->assertSee('Neue Fertigkeit');
+    }
 }

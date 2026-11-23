@@ -176,11 +176,9 @@ Tokens nur innerhalb von `.wr-v1` galten. Das gilt seit den globalen Schritten G
    der Browserdaten wieder. Bei Bedarf einen Link im Profil ergänzen.
 10. ~~**Reiter „Verwalten“ im Heldenbuch** und die Verwaltung des Abenteuers~~ – erledigt mit V2–V4.
 11. **Modal-Breite:** Falls die Reiterleiste im Heldenbuch-Modal umbricht, Modal-Breite anpassen.
-12. **Ungenutzte CSS-Regeln:** Die `wr-verwalten-*`-Regeln in `resources/css/app.css` werden
-    von keiner Ansicht mehr verwendet und können entfernt werden.
-13. **Fertigkeiten-Vollseite fehlt:** `admin.skills.edit` ohne AJAX sucht die nicht vorhandene
-    Ansicht `admin/skills/edit.blade.php` (Fehler beim direkten Aufruf der URL). Über Modal und
-    Inspektor nicht betroffen; Fehler bestand schon vor der Umstellung.
+12. ~~**Ungenutzte CSS-Regeln** `wr-verwalten-*`~~ – entfernt (`.siegel-input` bleibt).
+13. ~~**Fertigkeiten-Vollseite fehlt**~~ – `admin/skills/edit` und `create` ergänzt; Symbol-Upload lädt
+    dort die Seite neu.
 14. **Unzuverlässiger Test:** `PublicHeroProfileTest` schlägt gelegentlich fehl, weil zufällige
     Faker-Namen den geprüften Text („Max“) enthalten können.
 15. **Deployment** (nur nach Freigabe): In Produktion fehlen u. a. die Migration

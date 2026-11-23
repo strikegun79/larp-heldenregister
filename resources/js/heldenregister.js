@@ -659,7 +659,10 @@ document.addEventListener('submit', function (e) {
                 showToast(data.message || 'Gespeichert.', 'success');
                 // Helden-Detailseite hat #skilltree → alles neu laden
                 if (document.getElementById('skilltree')) refreshHeroDetail();
-                else refreshManageTab();
+                // Seiten mit Reitern/Akkordeon (Abenteuer-Verwaltung): nur den aktiven Bereich
+                else if (document.querySelector('.ui.top.attached.tabular.menu, details.mobile-accordion-section')) refreshManageTab();
+                // Sonst (z. B. Fertigkeit bearbeiten als Vollseite): Seite neu laden
+                else window.location.reload();
             } else if (resp.status === 422) {
                 const errors = data.errors ? Object.values(data.errors).flat() : [];
                 showToast(errors.join('<br>') || data.message || 'Bitte prüfen.', 'error');
