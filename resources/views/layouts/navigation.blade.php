@@ -36,7 +36,7 @@
                             {{ __('Abenteuer') }}
                         </x-nav-link>
                     @endcan
-                    @canany(['portal.manage', 'newsletter.manage', 'survey.view', 'survey.admin', 'roles.view'])
+                    @canany(['portal.manage', 'newsletter.manage', 'survey.view', 'survey.admin', 'roles.view', 'plot-characters.manage'])
                         <x-nav-link :href="route('admin.index')" :active="request()->routeIs('admin.*')">
                             {{ __('Verwaltung') }}
                         </x-nav-link>
@@ -283,7 +283,7 @@
                         <i class="book icon" aria-hidden="true"></i> Fertigkeiten
                     </a>
                 @endcan
-                @canany(['portal.manage', 'newsletter.manage', 'survey.view', 'survey.admin', 'roles.view'])
+                @canany(['portal.manage', 'newsletter.manage', 'survey.view', 'survey.admin', 'roles.view', 'plot-characters.manage'])
                     <a href="{{ route('admin.index') }}" class="wr-sheet__item">
                         <i class="cogs icon" aria-hidden="true"></i> Verwaltung
                     </a>

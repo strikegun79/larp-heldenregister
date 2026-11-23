@@ -43,6 +43,18 @@
                 </section>
             @endcanany
 
+            {{-- Plot & Geschichte (Issue #30) --}}
+            @can('plot-characters.manage')
+                <section aria-labelledby="admin-plot" class="mb-8">
+                    <h2 id="admin-plot" class="wr-section-heading__title mb-4 flex items-center gap-2">
+                        <i class="book icon m-0" aria-hidden="true"></i> Plot &amp; Geschichte
+                    </h2>
+                    <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                        <x-admin.dashboard-card :card="$adminCard('Plot-Charaktere', 'Bekannte Gestalten fürs Verzeichnis', 'heldenarchiv.jpg', route('admin.plot-characters.index'))" />
+                    </div>
+                </section>
+            @endcan
+
             {{-- Veranstaltungen --}}
             @can('events.admin-access')
                 <section aria-labelledby="admin-events" class="mb-8">

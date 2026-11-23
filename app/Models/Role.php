@@ -16,6 +16,7 @@ class Role extends Model
         'admin',
         'registrar',
         'project_lead',
+        'plot_writer',
         'game_master',
         'lehrmeister',
         'teamer',

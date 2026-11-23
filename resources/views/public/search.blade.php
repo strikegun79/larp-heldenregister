@@ -7,6 +7,7 @@
             <h1 class="font-uncial text-2xl text-waldritter mb-2 text-center">Helden suchen</h1>
             <p class="text-stone-600 text-sm text-center mb-3">
                 Gib das 6-stellige Helden-Siegel oder einen Heldennamen ein.
+                Auch bekannte Gestalten aus unseren Abenteuern – etwa Bran oder die Babayaga – kannst du hier erforschen.
             </p>
             {{-- PUB-09: Hinweis auf Code-Quellen --}}
             <div class="bg-amber-50 border border-amber-200 rounded px-4 py-3 mb-5 text-xs text-amber-900 leading-snug">
@@ -48,13 +49,47 @@
 
         </div>
 
-        {{-- PUB-08: Suchergebnisse nach Name --}}
+        {{-- PUB-08 / Issue #30: Suchergebnisse nach Name (Plot-Charaktere und Helden) --}}
         @isset($results)
-            @if ($results->isEmpty())
+            @php($plotResults ??= collect())
+            @if ($results->isEmpty() && $plotResults->isEmpty())
                 <div class="bg-white/70 border-2 border-[#5a3a22]/40 shadow sm:rounded-lg p-6 text-center text-stone-500">
-                    Kein Held mit diesem Namen gefunden.
+                    Niemand mit diesem Namen gefunden.
                 </div>
-            @else
+            @endif
+
+            {{-- Issue #30: Bekannte Plot-Charaktere als Vorschlag-Cards --}}
+            @if ($plotResults->isNotEmpty())
+                <section aria-labelledby="plot-results-heading" class="mb-6">
+                    <h2 id="plot-results-heading" class="font-uncial text-lg text-waldritter mb-3">Bekannte Gestalten</h2>
+                    <div class="grid gap-3 sm:grid-cols-2">
+                        @foreach ($plotResults as $character)
+                            <a href="{{ route('public.plot-character', $character) }}"
+                               class="flex items-center gap-3 bg-white/70 border-2 border-[#5a3a22]/40 shadow sm:rounded-lg p-3 hover:border-[#5a3a22] transition-colors">
+                                @if ($character->imageUrl())
+                                    <img src="{{ $character->imageUrl() }}" alt=""
+                                         class="h-16 w-16 object-cover rounded border border-[#5a3a22]/30 shrink-0" loading="lazy">
+                                @else
+                                    <span class="h-16 w-16 rounded border border-[#5a3a22]/30 bg-amber-50 flex items-center justify-center shrink-0" aria-hidden="true">
+                                        <i class="user secret icon text-[#5a3a22] m-0 text-2xl"></i>
+                                    </span>
+                                @endif
+                                <span class="min-w-0">
+                                    <span class="block font-uncial text-waldritter text-lg leading-tight">{{ $character->name }}</span>
+                                    @if ($character->title)
+                                        <span class="block text-stone-500 text-sm">{{ $character->title }}</span>
+                                    @endif
+                                </span>
+                            </a>
+                        @endforeach
+                    </div>
+                </section>
+            @endif
+
+            @if ($results->isNotEmpty())
+                @if ($plotResults->isNotEmpty())
+                    <h2 class="font-uncial text-lg text-waldritter mb-3">Helden</h2>
+                @endif
                 <div class="space-y-3">
                     @foreach ($results as $hero)
                         <a href="{{ route('public.hero', $hero->public_code) }}"

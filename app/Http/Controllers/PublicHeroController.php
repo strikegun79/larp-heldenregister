@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Hero;
+use App\Models\PlotCharacter;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -24,7 +25,8 @@ class PublicHeroController extends Controller
     /**
      * PUB-03/08: Code oder Heldennamen suchen.
      * Gültiger 6-Zeichen-Code → direkte Weiterleitung auf /h/{code}.
-     * Sonst → Namenssuche (nur public_searchable + public_visible).
+     * Sonst → Namenssuche (nur public_searchable + public_visible) sowie
+     * Suche nach sichtbaren Plot-Charakteren (Issue #30).
      */
     public function search(Request $request): RedirectResponse|View
     {
@@ -53,10 +55,31 @@ class PublicHeroController extends Controller
             ->limit(20)
             ->get();
 
+        // Issue #30: Bekannte Plot-Charaktere nach Name oder Titel.
+        $plotResults = PlotCharacter::visible()
+            ->where(function ($q) use ($query) {
+                $q->where('name', 'like', '%'.$query.'%')
+                    ->orWhere('title', 'like', '%'.$query.'%');
+            })
+            ->orderBy('name')
+            ->limit(20)
+            ->get();
+
         return view('public.search', [
             'results' => $results,
+            'plotResults' => $plotResults,
             'input' => $query,
         ]);
+    }
+
+    /**
+     * Issue #30: Öffentliche Seite eines Plot-Charakters (nur sichtbare).
+     */
+    public function plotCharacter(PlotCharacter $plotCharacter): View
+    {
+        abort_unless($plotCharacter->public_visible, 404);
+
+        return view('public.plot_character', ['character' => $plotCharacter]);
     }
 
     public function show(string $code): View
