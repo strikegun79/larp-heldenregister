@@ -171,6 +171,14 @@
 </div>
 @endif
 
+{{-- Löschen nur im Inspektor (?inspector=1); gesperrt, solange Helden die Fertigkeit haben --}}
+@if ($skill->exists)
+    @php($usedBy = $skill->heroes()->count())
+    <x-admin.inspector-delete :action="route('admin.skills.destroy', $skill)"
+        title="Fertigkeit löschen" :confirm="'Fertigkeit '.$skill->name.' löschen?'"
+        :blocked="$usedBy ? 'Nicht löschbar: '.$usedBy.' Held(en) haben diese Fertigkeit.' : null" />
+@endif
+
 <div data-modal-actions hidden>
     <button type="submit" form="skill-form" class="ui primary button">Speichern</button>
 </div>

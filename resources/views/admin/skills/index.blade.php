@@ -48,10 +48,11 @@
                     </thead>
                     <tbody class="divide-y divide-stone-200 text-stone-800">
                         @forelse ($skills as $skill)
-                            <tr>
+                            <tr data-inspector-url="{{ route('admin.skills.edit', $skill) }}?inspector=1" tabindex="0"
+                                aria-label="Fertigkeit {{ $skill->name }} bearbeiten">
                                 <td class="px-2 py-2">
                                     @if ($skill->icon_url)
-                                        <img src="{{ $skill->icon_url }}" alt="{{ $skill->name }}" class="w-8 h-8 object-contain rounded" loading="lazy">
+                                        <img src="{{ $skill->icon_url }}" alt="" class="w-8 h-8 object-contain rounded" loading="lazy">
                                     @else
                                         <span class="inline-block w-8 h-8"></span>
                                     @endif
@@ -73,27 +74,18 @@
                                     @if ($skill->active_heroes_count > 0)
                                         <a href="{{ route('admin.skills.heroes', $skill) }}"
                                            data-modal-url="{{ route('admin.skills.heroes', $skill) }}"
-                                           class="ui mini basic button">
+                                           class="wr-btn wr-btn--secondary wr-btn--small"
+                                           aria-label="{{ $skill->active_heroes_count }} Helden mit {{ $skill->name }} anzeigen">
                                             {{ $skill->active_heroes_count }}
-                                            <i class="users icon ml-1"></i>
+                                            <i class="users icon m-0" aria-hidden="true"></i>
                                         </a>
                                     @else
                                         <span class="text-stone-400">0</span>
                                     @endif
                                 </td>
                                 <td class="px-4 py-3 text-right">
-                                    <div class="flex items-center justify-end gap-3">
-                                        <a href="{{ route('admin.skills.edit', $skill) }}"
-                                           data-modal-url="{{ route('admin.skills.edit', $skill) }}"
-                                           class="text-waldritter hover:underline">Bearbeiten</a>
-                                        @if (! $skill->heroes_count)
-                                            <form method="POST" action="{{ route('admin.skills.destroy', $skill) }}"
-                                                  data-confirm="Fertigkeit {{ $skill->name }} löschen?">
-                                                @csrf @method('DELETE')
-                                                <button type="submit" class="text-red-600 hover:underline">Löschen</button>
-                                            </form>
-                                        @endif
-                                    </div>
+                                    {{-- Bearbeiten und Löschen im Inspektor (Zeilenklick / Enter) --}}
+                                    <i class="chevron right icon text-wr-ink-muted m-0" aria-hidden="true"></i>
                                 </td>
                             </tr>
                         @empty

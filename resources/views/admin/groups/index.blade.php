@@ -26,7 +26,8 @@
                     </thead>
                     <tbody class="divide-y divide-stone-200 text-stone-800">
                         @forelse ($groups as $group)
-                            <tr>
+                            <tr data-inspector-url="{{ route('admin.groups.edit', $group) }}?inspector=1" tabindex="0"
+                                aria-label="Gruppe {{ $group->name }} bearbeiten">
                                 <td class="px-6 py-4 font-medium" data-label="Name">{{ $group->name }}</td>
                                 <td class="px-6 py-4 text-stone-500" data-label="Beschreibung">{{ Str::limit($group->description, 60) ?: '—' }}</td>
                                 <td class="px-6 py-4" data-label="Helden">{{ $group->heroes_count }}</td>
@@ -38,14 +39,8 @@
                                         <a href="{{ route('admin.groups.members', $group) }}"
                                            data-modal-url="{{ route('admin.groups.members', $group) }}"
                                            class="text-waldritter hover:underline">Mitglieder</a>
-                                        <a href="{{ route('admin.groups.edit', $group) }}"
-                                           data-modal-url="{{ route('admin.groups.edit', $group) }}"
-                                           class="text-waldritter hover:underline">Bearbeiten</a>
-                                        <form method="POST" action="{{ route('admin.groups.destroy', $group) }}"
-                                              data-confirm="Gruppe „{{ $group->name }}” löschen?{{ $group->heroes_count ? ' '.$group->heroes_count.' Held(en) werden ausgetragen.' : '' }}">
-                                            @csrf @method('DELETE')
-                                            <button type="submit" class="text-red-600 hover:underline">Löschen</button>
-                                        </form>
+                                        {{-- Bearbeiten und Löschen im Inspektor (Zeilenklick / Enter) --}}
+                                        <i class="chevron right icon text-wr-ink-muted m-0" aria-hidden="true"></i>
                                     </div>
                                 </td>
                             </tr>

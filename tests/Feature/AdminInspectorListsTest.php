@@ -4,7 +4,10 @@ namespace Tests\Feature;
 
 use App\Models\Booking;
 use App\Models\EventRole;
+use App\Models\Group;
+use App\Models\Hero;
 use App\Models\Location;
+use App\Models\Skill;
 use App\Models\User;
 use Database\Seeders\EpTransactionTypeSeeder;
 use Database\Seeders\EventLookupSeeder;
@@ -54,12 +57,18 @@ class AdminInspectorListsTest extends TestCase
             'Teilnahme-Rollen' => ['admin.event-roles.index'],
             'Event-Status' => ['admin.event-statuses.index'],
             'Taskmanager' => ['admin.task-manager.index'],
+            'Portal-Nutzer' => ['admin.users.index'],
+            'Fertigkeiten' => ['admin.skills.index'],
+            'Gruppen' => ['admin.groups.index'],
         ];
     }
 
     #[DataProvider('lists')]
     public function test_rows_open_in_inspector_without_edit_links(string $route): void
     {
+        Skill::factory()->create();
+        Group::factory()->create();
+
         $html = $this->actingAs($this->admin())->get(route($route))->assertOk()->getContent();
 
         $this->assertStringContainsString('?inspector=1" tabindex="0"', $html);
@@ -94,5 +103,53 @@ class AdminInspectorListsTest extends TestCase
             ->assertSee('Nicht löschbar: 1 Anmeldung(en) nutzen diese Rolle.')
             // Update und Destroy teilen sich die URL – daher auf das Lösch-Formular prüfen.
             ->assertDontSee('data-inspector-close-on-success', false);
+    }
+
+    public function test_skill_delete_blocked_while_heroes_have_it(): void
+    {
+        $skill = Skill::factory()->create();
+        $admin = $this->admin();
+        $url = route('admin.skills.edit', $skill).'?inspector=1';
+
+        $this->actingAs($admin)->get($url, ['X-Requested-With' => 'XMLHttpRequest', 'Accept' => '*/*'])
+            ->assertOk()
+            ->assertSee('Fertigkeit löschen')
+            ->assertSee('data-inspector-close-on-success', false);
+
+        Hero::factory()->create()->skills()->attach($skill->id);
+
+        $this->actingAs($admin)->get($url, ['X-Requested-With' => 'XMLHttpRequest', 'Accept' => '*/*'])
+            ->assertOk()
+            ->assertSee('Nicht löschbar: 1 Held(en) haben diese Fertigkeit.')
+            ->assertDontSee('data-inspector-close-on-success', false);
+    }
+
+    public function test_group_delete_in_inspector_names_members(): void
+    {
+        $group = Group::factory()->create();
+        $group->heroes()->attach(Hero::factory()->create()->id);
+
+        $this->actingAs($this->admin())
+            ->get(route('admin.groups.edit', $group).'?inspector=1', ['X-Requested-With' => 'XMLHttpRequest', 'Accept' => '*/*'])
+            ->assertOk()
+            ->assertSee('Gruppe löschen')
+            ->assertSee('1 Held(en) werden beim Löschen aus der Gruppe ausgetragen.');
+    }
+
+    public function test_user_delete_closes_inspector_and_deleted_users_are_not_inspectable(): void
+    {
+        $admin = $this->admin();
+        $other = User::factory()->create(['name' => 'Gelöschte', 'lastname' => 'Person']);
+
+        $this->actingAs($admin)
+            ->get(route('admin.users.edit', $other).'?inspector=1', ['X-Requested-With' => 'XMLHttpRequest', 'Accept' => '*/*'])
+            ->assertOk()
+            ->assertSee('data-inspector-close-on-success', false);
+
+        $other->delete();
+
+        $html = $this->actingAs($admin)->get(route('admin.users.index'))->assertOk()->getContent();
+        $this->assertStringNotContainsString(route('admin.users.edit', $other).'?inspector=1', $html);
+        $this->assertStringContainsString('Wiederherstellen', $html);
     }
 }
