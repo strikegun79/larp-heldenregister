@@ -3,6 +3,7 @@
 namespace Tests\Feature;
 
 use App\Models\Adventure;
+use App\Models\EventRole;
 use App\Models\TeamerSignup;
 use App\Models\User;
 use Database\Seeders\EventLookupSeeder;
@@ -169,6 +170,27 @@ class TeamerSignupTest extends TestCase
             ->assertSessionDoesntHaveErrors();
 
         $this->assertDatabaseHas('teamer_signups', ['id' => $signup->id, 'event_role_id' => 3]);
+    }
+
+    public function test_detail_teamer_list_shows_assigned_role(): void
+    {
+        $adventure = $this->adventure();
+        $lehrmeisterRole = EventRole::create([
+            'id' => 6, 'description' => 'Lehrmeister', 'for_participant' => false, 'for_teamer' => true,
+        ]);
+        $signup = TeamerSignup::factory()->create([
+            'adventure_id' => $adventure->id,
+            'user_id' => $this->lehrmeister()->id,
+            'event_role_id' => $lehrmeisterRole->id,
+        ]);
+
+        $html = $this->actingAs($this->teamer())
+            ->get(route('adventures.show', $adventure))
+            ->assertOk()
+            ->getContent();
+
+        $this->assertStringContainsString('<td data-label="Rolle">Lehrmeister</td>', $html);
+        $this->assertStringContainsString($signup->user->lastname, $html);
     }
 
     public function test_teamer_cannot_assign_role(): void

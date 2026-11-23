@@ -177,7 +177,7 @@ class AdventureController extends Controller
             abort(404);
         }
 
-        $adventure->load(['location', 'status', 'category', 'client', 'bookings.player', 'bookings.role', 'visits', 'gamemaster', 'eventleader', 'teamerSignups.user']);
+        $adventure->load(['location', 'status', 'category', 'client', 'bookings.player', 'bookings.role', 'visits', 'gamemaster', 'eventleader', 'teamerSignups.user', 'teamerSignups.eventRole']);
 
         // Buchbare Spieler: Bürokrat/Admin alle, sonst nur eigene/betreute (BOOK-10).
         $players = Gate::allows('book-any-player')
@@ -303,6 +303,7 @@ class AdventureController extends Controller
             'bookings.bookedBy',
             'bookings.role',
             'teamerSignups.user',
+            'teamerSignups.eventRole',
             'visits',
         ]);
 

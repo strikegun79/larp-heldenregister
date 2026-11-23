@@ -18,7 +18,7 @@
             @foreach ($teamerSignups as $signup)
                 <tr>
                     <td data-label="Name">{{ $signup->user->name }} {{ $signup->user->lastname }}</td>
-                    <td data-label="Rolle">{{ $signup->teamer_role ?? '—' }}</td>
+                    <td data-label="Rolle">{{ $signup->eventRole?->description ?? '—' }}</td>
                 </tr>
             @endforeach
         </tbody>
