@@ -1,6 +1,6 @@
 # Pilot „Dashboard“ – Waldritter-Designsystem v1
 
-Stand: 20.11.2026 · Branch `develop`
+Stand: 23.11.2026 · Branch `develop`
 
 > Ab Abschnitt „Weitere umgestellte Seiten“ dokumentiert diese Datei auch die Seiten nach dem Pilot.
 
@@ -11,10 +11,9 @@ Das Dashboard (`/dashboard`) ist als erste Seite auf das Designsystem
 `accessibility-reviewer` und `child-experience-reviewer` geprüft worden.
 Alle Befunde, die das Dashboard selbst betreffen, sind umgesetzt.
 
-Alle anderen Seiten sind optisch unverändert, weil die neuen Werte für kollidierende
-Tokens nur innerhalb von `.wr-v1` gelten und keine globalen Fomantic-Regeln (`.ui.*`)
-verändert wurden. Ausnahmen mit Wirkung über das Dashboard hinaus: siehe
-„Änderungen außerhalb des Dashboards“.
+Im Pilot blieben alle anderen Seiten optisch unverändert, weil die neuen Werte für kollidierende
+Tokens nur innerhalb von `.wr-v1` galten. Das gilt seit den globalen Schritten G1/G2
+(Navigation, Tokens, Buttons, Fokus) nicht mehr – siehe „Globale Umstellung“.
 
 ### Umbau
 
@@ -153,17 +152,15 @@ verändert wurden. Ausnahmen mit Wirkung über das Dashboard hinaus: siehe
 ## Offene Punkte
 
 1. **Backlog-Tickets aus dem Review:**
-   - UI-46 Navigation und Bottom-Nav barrierefrei (inkl. verdecktem Footer auf dem Smartphone)
+   - ~~UI-46 Navigation und Bottom-Nav barrierefrei~~ – erledigt mit G1 (`2022982`)
    - UI-47 Seitentitel pro Seite
    - UI-48 Basis-Schriftgröße relativ statt 17,5 px
    - ADM-11 Alt-Text für MOTD-Bilder
    - PUB-13 Heldenbilder nicht ohne Login abrufbar
    - AUTH-15 Newsletter-Abo nur durch Volljährige/Erziehungsberechtigte
    - AUTH-16 Gespeicherten Einwilligungstext anzeigen
-2. **Navigation** auf Waldgrün umstellen (globaler Schritt, alle Seiten).
-3. **Globale Token-Migration** von `--wr-ink` (`#5a3a22` → `#35281E`) und `--wr-gold`
-   (`#c8962a` → `#B58A3A`) sowie `.ui.primary.button` von Gold auf Waldgrün. Bis dahin
-   haben das Dashboard grüne und alle anderen Seiten goldene Primärbuttons.
+2. ~~**Navigation** auf Waldgrün umstellen~~ – erledigt mit G1 (`2022982`).
+3. ~~**Globale Token-Migration** und Primärbuttons in Waldgrün~~ – erledigt mit G2 (`a968069`).
 4. **Tests unabhängiger von CSS-Klassen machen** (`DashboardNextAdventureTest`, `MotdTest`), damit
    `_adventure_status` und `_motd` vollständig auf Tokens umgestellt werden können.
 5. **Bildgröße:** `abenteuer_v3.jpg` (350 KB, 1254 × 1254 px) ließe sich auf ca. 600 px verkleinern
@@ -177,9 +174,17 @@ verändert wurden. Ausnahmen mit Wirkung über das Dashboard hinaus: siehe
    sagen bereits „Anmeldung möglich“. Ggf. Status-Bezeichnung in der Datenbank angleichen.
 9. **Onboarding wieder einblenden:** Einmal ausgeblendet, erscheint es erst nach dem Löschen
    der Browserdaten wieder. Bei Bedarf einen Link im Profil ergänzen.
-10. **Reiter „Verwalten“ im Heldenbuch** und die Verwaltung des Abenteuers (`manage`, `_bookings`)
-    mit den Verwaltungsansichten umstellen.
+10. ~~**Reiter „Verwalten“ im Heldenbuch** und die Verwaltung des Abenteuers~~ – erledigt mit V2–V4.
 11. **Modal-Breite:** Falls die Reiterleiste im Heldenbuch-Modal umbricht, Modal-Breite anpassen.
+12. **Ungenutzte CSS-Regeln:** Die `wr-verwalten-*`-Regeln in `resources/css/app.css` werden
+    von keiner Ansicht mehr verwendet und können entfernt werden.
+13. **Fertigkeiten-Vollseite fehlt:** `admin.skills.edit` ohne AJAX sucht die nicht vorhandene
+    Ansicht `admin/skills/edit.blade.php` (Fehler beim direkten Aufruf der URL). Über Modal und
+    Inspektor nicht betroffen; Fehler bestand schon vor der Umstellung.
+14. **Unzuverlässiger Test:** `PublicHeroProfileTest` schlägt gelegentlich fehl, weil zufällige
+    Faker-Namen den geprüften Text („Max“) enthalten können.
+15. **Deployment** (nur nach Freigabe): In Produktion fehlen u. a. die Migration
+    `adventures.asks_vegetarian` und neue Bilder wie `wewantyou_v2.jpg`.
 
 ## Weitere umgestellte Seiten
 
@@ -257,6 +262,83 @@ verändert wurden. Ausnahmen mit Wirkung über das Dashboard hinaus: siehe
   Snapshot vorher: `storage/backups/larp_heldenregister_dev_vor-asks-vegetarian.sql.gz`.
 - **Bitte inhaltlich prüfen:** Formulierungen zu Leih-Tunika/Leih-Waffe und zur Fotoerlaubnis sind neutral gehalten.
 
+### Heldenliste und Heldenformular (Team)
+
+| Commit | Inhalt |
+|---|---|
+| `1397f39` | Heldenliste: Seitenkopf, Filter mit Labels, Trefferzahl als Live-Region, `wr-table`, Handy-Karten |
+| `f886076` | Heldenformular in Abschnitten; Bearbeiten-Modal mit Klassenbannern; Löschen im Gefahrenbereich |
+
+- Charaktername ist ein echter Link; Zeilen ohne `role="button"`.
+- Status als Pill (aktiv / inaktiv / verschollen) statt abgeblendeter Zeile.
+- Korrektur-Hinweis im Formular sichtbar statt als Tooltip.
+
+## Globale Umstellung
+
+| Schritt | Commit | Inhalt |
+|---|---|---|
+| G1 | `2022982` | Navigation oben und Bottom-Nav in Waldgrün, barrierefrei (UI-46) |
+| G2 | `a968069` | Tokens, Primärbuttons und Fokus global |
+
+- **G1:** Aktive Punkte mit goldener Unterstreichung bzw. goldenem Balken und `aria-current`;
+  Klickflächen 44 px; Glocke mit zugänglichem Namen und Anzahl; Dropdowns schließen mit Escape,
+  Fokus zurück zum Auslöser. „Mehr“ ist ein echter Dialog (Titel, Fokus hinein/zurück, Tab-Falle).
+  Der Footer liegt auf dem Handy nicht mehr hinter der unteren Leiste.
+- **G2:** `--wr-ink` (`#35281E`) und `--wr-gold` (`#B58A3A`) gelten global, die Sonderregel in `.wr-v1`
+  ist entfernt. Fomantic- und Breeze-Primärbuttons in Waldgrün mit weißer Schrift, Rundung 9 px,
+  kein Vergrößern beim Hover. Fokus überall `#245F93`. Link-Hover in Waldgrün.
+
+## Verwaltungsansichten
+
+| Schritt | Commit | Inhalt |
+|---|---|---|
+| V1 | `333a660` | Gemeinsame Grundlage für Admin-Seiten, Verwaltungsübersicht |
+| V2a | `6ffb281` | Abenteuer verwalten: Liste |
+| V2b | `a88ece0` | Abenteuer verwalten: Modal und Vollseite (`_manage`) |
+| V3 | `ae732d9` | Inspektor für Anmeldungen und Teamer |
+| V4 | `e661269` | Heldenbuch „Verwalten“, Handy- und Desktop-Version zusammengeführt |
+| I1 | `8485ee0` | Inspektor für Admin-Modalansichten; Admin-Spielerliste |
+| I2 | `7094aee` | Neun Stammdaten-Listen im Inspektor |
+| I3 | `5291f50` | Portal-Nutzer, Fertigkeiten und Gruppen im Inspektor |
+
+- **V1:** Noch nicht einzeln umgestellte Seiten bekommen einen ruhigen Seitenkopf: Die erste `<h2>`
+  im Header-Slot wird zur `<h1>` (`wr-page-header`), Cinzel statt Uncial. Nur innerhalb von
+  `wr-admin-area` erscheinen Admin-Tabellen (`min-w-full divide-y`) in `wr-table`-Optik, Panels auf
+  Papier und Amber-Kästen als Hinweisbox. Die rote Signalkennzeichnung des Admin-Bereichs bleibt.
+- **V2:** Belegung als Text-Pills (Plätze, Warteliste, Teamer) statt Farben mit Tooltip. Reiter
+  „Anmeldungen (1 aktiv · 0 Warteliste · 0 storniert)“ als Text. Status und Beitrag in der
+  Anmeldetabelle als Pills statt Emojis. Löschen mit Rückfrage bzw. sichtbarem Sperrgrund.
+- **V3:** Statuskopf und Beitrag als Pills; beschriftete Aktions-Buttons; Formulare unverändert.
+- **V4:** „Verwalten“ nur noch einmal geschrieben (`heroes/partials/_manage`); Helden-Siegel mit
+  Label, Hinweis und Fehlermeldung als `role="alert"`; Status im Spiel als Pill.
+  `heroes/_detail.blade.php` hat jetzt 131 Zeilen (anfangs 1046).
+
+### Inspektor in Admin-Listen
+
+Admin-Listen öffnen eine Zeile im seitlichen Inspektor statt in einem eigenen Modal.
+
+| Liste | Im Inspektor | Bleibt in der Zeile |
+|---|---|---|
+| Spieler | Kurzinfo, Anschrift, Betreuer, Matrix, Löschen (auch „Trotzdem löschen“) | Profil (Modal), Wiederherstellen |
+| Helden-Klassen, Perlenfarben, EP-Buchungsarten, Orte, Kategorien, Auftraggeber, Teilnahme-Rollen, Event-Status, Taskmanager | Bearbeiten, Löschen im Gefahrenbereich (bei Helden-Klassen und Taskmanager kein Löschen) | Anforderungen der Auftraggeber |
+| Portal-Nutzer | Rollen, Aktivierung, Löschen im Aktionsbereich | Profil (Seite), Wiederherstellen |
+| Fertigkeiten | Bearbeiten, Symbol, Löschen im Gefahrenbereich | Helden (Modal) |
+| Gruppen | Bearbeiten, Löschen mit Hinweis auf ausgetragene Helden | Details (Seite), Mitglieder (Modal) |
+
+- **Bedienung:** Klick auf die Zeile oder Enter/Leertaste öffnet; Esc oder Klick daneben schließt,
+  der Fokus kehrt zur Zeile zurück. Die geöffnete Zeile ist markiert (`.is-inspected`).
+- **Technik:** `tr[data-inspector-url]`; Stammdaten laden die vorhandene Bearbeiten-Ansicht mit
+  `?inspector=1`. `adaptModalViewForInspector()` übernimmt den Titel aus `data-modal-title`, zeigt
+  `data-modal-actions` als Leiste unten und sendet alle Formulare per AJAX (`data-inspector-form`).
+  Nach dem Speichern werden Inspektor und Liste neu geladen; `data-inspector-close-on-success`
+  schließt den Inspektor nach dem Löschen.
+- **Gefahrenbereich:** `x-admin.inspector-delete` erscheint nur mit `?inspector=1`, nicht im
+  bisherigen Bearbeiten-Modal. Gesperrtes Löschen zeigt den Grund sichtbar statt des Buttons.
+- **„Neu …“** öffnet weiterhin das Modal.
+- Deaktivierte bzw. gelöschte Einträge werden nicht mehr abgeblendet; der Status steht als Text oder Pill.
+- Neue Route `admin.players.inspector`. Spieler-Löschen und Matrix-Speichern/-Entziehen antworten bei
+  AJAX mit JSON, sonst unverändert.
+
 ### Gemeinsame Regeln aus diesen Seiten
 
 - Status, Zustände und Beträge immer als Text mit Symbol, nie nur Farbe oder Tooltip.
@@ -267,13 +349,28 @@ verändert wurden. Ausnahmen mit Wirkung über das Dashboard hinaus: siehe
 - Versteckte Datei-Felder: `sr-only wr-file-input` vor dem Label, damit der Tastaturfokus sichtbar ist.
 - Nach Uploads per Zuschnitt-Dialog: Callback lädt offenes Modal neu, sonst die Seite (`window.location.reload()`).
 - Dateien, die auch im Modal laden: Inline-Skripte sofort ausführen, nicht auf `DOMContentLoaded` warten.
+- Klickbare Tabellenzeilen ohne `role="button"`: entweder echter Link in der Zeile oder Inspektor-Zeile
+  mit `tabindex="0"` und zugänglichem Namen (`aria-label`).
+- Löschen gehört in den Inspektor bzw. die Detailansicht, nicht in die Listenzeile.
 
 ### Entwicklungsumgebung
 
 - `public/storage` fehlte (404 für hochgeladene Bilder); mit `php artisan storage:link` angelegt (nicht versioniert).
 - Bilder: `abenteuer_v3.jpg`, `heroes_db_v2.jpg` (600 px) ersetzen die alten Motive bzw. das Helden-Ersatzbild.
 
-## Nächste Seiten (Reihenfolge laut Designsystem)
+## Stand der Prüfung
 
-Helden- und Abenteuerkarten, Listen, Formulare, Tabs → Verwaltungsansichten → Regression.
-Die Komponenten aus der Tabelle oben sind dafür vorbereitet.
+- Komplette Testsuite grün (1114 Tests, 23.11.2026), PHPStan ohne Fehler; nur gegen die `_test`-Datenbank.
+- Neue Tests seit dem Pilot u. a.: `AdventureListTest`, `AdventureDetailTest`, `HeroDetailTest`,
+  `PlayerListTest`, `PlayerDetailWrTest`, `PlayerFormWrTest`, `BookingFormWrTest`,
+  `AdventureVegetarianSettingTest`, `HeroListWrTest`, `HeroFormWrTest`, `NavigationWrTest`,
+  `AdminOverviewWrTest`, `AdventureManageListWrTest`, `AdventureManageModalWrTest`, `InspectorWrTest`,
+  `HeroManageTabWrTest`, `AdminPlayerInspectorTest`, `AdminInspectorListsTest`.
+
+## Nächste Schritte (Reihenfolge laut Designsystem)
+
+Die Seiten- und Verwaltungsansichten sind umgestellt. Bewusst nur mit der Grundlage aus V1:
+Startseiten-Nachricht, Newsletter, Umfragen, Datenpannen, Verarbeitungstätigkeiten (große Editoren),
+Rollen und Rechte (Matrix), Einstellungen, Audit-Log, Ausweise.
+
+Als Nächstes: Regression über alle Seiten (Desktop, Tablet, Handy) und die offenen Punkte oben.
