@@ -236,7 +236,7 @@
                                    tag="Portal-Administration" title="Verwaltung" text="Stammdaten, Einstellungen und Auswertungen" />
                     @endcan
 
-                    <x-wr.card compact href="https://www.waldritter-giessen.de/brans-tagebuch/" hint="auf der Waldritter-Website" image="/images/Brans-Tagebuch-400x176.jpg"
+                    <x-wr.card compact href="https://www.waldritter-giessen.de/brans-tagebuch/" hint="auf der Waldritter-Website" image="/images/brans_tagebuch_hr.jpg"
                                tag="Chronik" title="Brans Tagebuch" text="Erzählungen aus den Abenteuern" />
                 </div>
             </section>
