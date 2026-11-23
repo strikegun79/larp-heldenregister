@@ -8,10 +8,11 @@ use Laravel\Dusk\Browser;
 use Tests\DuskTestCase;
 
 /**
- * QA-03: E2E-Tests für das AJAX-Modal-System und data-confirm.
+ * QA-03: E2E-Tests für das AJAX-Nachladen (Inspektor) und data-confirm.
  * Testet den kompletten Frontend-Pfad:
- *   [data-modal-url] klicken → Modal via fetch() laden → Formular absenden →
+ *   [data-inspector-url] klicken → Inspektor via fetch() laden → Formular absenden →
  *   JSON-Antwort → Toast anzeigen.
+ * Die Admin-Listen öffnen Datensätze seit dem Waldritter-Umbau im Inspektor statt im Modal.
  *
  * Voraussetzung: `php artisan serve --env=dusk.local --port=8000` läuft.
  * Lokal starten: php artisan dusk --filter=ModalAjaxTest
@@ -40,10 +41,10 @@ class ModalAjaxTest extends DuskTestCase
     }
 
     /**
-     * Klick auf eine Zeile mit [data-modal-url] öffnet das AJAX-Modal.
-     * Verifies: fetch() liefert Partial, #app-modal wird sichtbar, Formular ist drin.
+     * Klick auf eine Zeile mit [data-inspector-url] öffnet den Inspektor.
+     * Verifies: fetch() liefert Partial, #booking-inspector wird sichtbar, Formular ist drin.
      */
-    public function test_modal_trigger_oeffnet_ajax_modal(): void
+    public function test_inspector_trigger_oeffnet_ajax_inspektor(): void
     {
         $admin = $this->adminUser();
         $target = User::factory()->create([
@@ -55,22 +56,22 @@ class ModalAjaxTest extends DuskTestCase
             $browser->loginAs($admin)
                 ->visit('/admin/users')
                 ->assertSee('Zielperson')
-                // Zeile anklicken (enthält data-modal-url="…/admin/users/{id}/edit")
-                ->click("tr[data-modal-url*='/admin/users/{$target->id}/edit']")
-                // Fomantic-UI fügt .active hinzu, wenn Modal sichtbar
-                ->waitFor('#app-modal.active', 8)
+                // Zeile anklicken (enthält data-inspector-url="…/admin/users/{id}/edit?inspector=1")
+                ->click("tr[data-inspector-url*='/admin/users/{$target->id}/edit']")
+                // Inspektor bekommt .is-open, sobald er eingeblendet ist
+                ->waitFor('#booking-inspector.is-open', 8)
                 // Inhalt muss per AJAX geladen sein (Formular im Content-Bereich)
-                ->assertPresent('#app-modal-content #user-edit-form')
-                // Titel aus dem Partial muss im Header erscheinen
-                ->assertSeeIn('#app-modal-header', 'Zielperson');
+                ->waitFor('#booking-inspector-content #user-edit-form', 8)
+                // Titel aus dem Partial muss im Kopf erscheinen
+                ->assertSeeIn('#booking-inspector-title', 'Zielperson');
         });
     }
 
     /**
-     * AJAX-Formular im Modal: absenden → Server antwortet mit JSON → Toast erscheint.
-     * Verifies: JS-Submit-Handler, fetch() mit Accept:application/json, showToast().
+     * AJAX-Formular im Inspektor: absenden → Server antwortet mit JSON → Toast erscheint.
+     * Verifies: JS-Submit-Handler (data-inspector-form), fetch() mit Accept:application/json, showToast().
      */
-    public function test_ajax_modal_formular_submit_zeigt_toast(): void
+    public function test_ajax_inspektor_formular_submit_zeigt_toast(): void
     {
         $admin = $this->adminUser();
         $target = User::factory()->create([
@@ -81,11 +82,11 @@ class ModalAjaxTest extends DuskTestCase
         $this->browse(function (Browser $browser) use ($admin, $target) {
             $browser->loginAs($admin)
                 ->visit('/admin/users')
-                ->click("tr[data-modal-url*='/admin/users/{$target->id}/edit']")
-                ->waitFor('#app-modal.active', 8)
-                ->waitFor('#app-modal-actions .primary.button', 5)
-                // "Speichern"-Button klicken (liegt in #app-modal-actions nach Extraktion)
-                ->click('#app-modal-actions .primary.button')
+                ->click("tr[data-inspector-url*='/admin/users/{$target->id}/edit']")
+                ->waitFor('#booking-inspector.is-open', 8)
+                // "Speichern" liegt nach der Anpassung in der Aktionsleiste des Inspektors
+                ->waitFor('#booking-inspector-content .wr-inspector-actions .primary.button', 8)
+                ->click('#booking-inspector-content .wr-inspector-actions .primary.button')
                 // Fomantic-UI-Toast erscheint im DOM
                 ->waitFor('.ui.toast', 8)
                 ->assertSeeIn('.ui.toast', 'aktualisiert');

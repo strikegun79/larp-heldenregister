@@ -97,7 +97,7 @@
                         <td class="nr">{{ $nr++ }}</td>
                         <td>{{ $signup->user->lastname }}</td>
                         <td>{{ $signup->user->name }}</td>
-                        <td>{{ $signup->teamer_role ?? '—' }}</td>
+                        <td>{{ $signup->eventRole?->description ?? '—' }}</td>
                         <td>{{ $signup->status_label }}</td>
                     </tr>
                 @endforeach

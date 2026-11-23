@@ -69,7 +69,15 @@ class AdventureController extends Controller
             $sort = 'grouped';
         }
 
+        // Eigene Anmeldungen an der Karte („Deine Anmeldungen“): ausschließlich Buchungen
+        // der eigenen Spieler, auch für Rollen, die alle Abenteuer sehen.
+        $ownPlayerIds = $request->user()->players()->pluck('players.id');
+
         $base = Adventure::with(['location', 'status', 'category'])
+            ->with(['bookings' => fn ($query) => $query
+                ->whereIn('player_id', $ownPlayerIds)
+                ->whereIn('status', ['bestaetigt', 'offen'])
+                ->with(['player', 'role'])])
             ->withCount('occupiedSlots')
             ->visibleFor($request->user())
             ->when($q, fn ($query) => $query->where('name', 'like', "%{$q}%"));
@@ -154,6 +162,7 @@ class AdventureController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $adventure = Adventure::create($this->validateAdventure($request));
+        $this->syncCompensations($request, $adventure);
 
         return redirect()
             ->route('adventures.show', $adventure)
@@ -168,7 +177,7 @@ class AdventureController extends Controller
             abort(404);
         }
 
-        $adventure->load(['location', 'status', 'category', 'client', 'bookings.player', 'bookings.role', 'visits', 'gamemaster', 'eventleader', 'teamerSignups.user']);
+        $adventure->load(['location', 'status', 'category', 'client', 'bookings.player', 'bookings.role', 'visits', 'gamemaster', 'eventleader', 'teamerSignups.user', 'teamerSignups.eventRole']);
 
         // Buchbare Spieler: Bürokrat/Admin alle, sonst nur eigene/betreute (BOOK-10).
         $players = Gate::allows('book-any-player')
@@ -185,6 +194,9 @@ class AdventureController extends Controller
 
         $teamerSignups = $adventure->teamerSignups;
         $myTeamerSignup = $teamerSignups->firstWhere('user_id', $request->user()->id);
+        // Issue #19: eigene Teamer-Anmeldung mit Rolle (Abrechnung in „Deine Anmeldungen“)
+        $myTeamerSignup?->load('eventRole');
+        $myTeamerSignup?->setRelation('adventure', $adventure);
 
         $profileComplete = $request->user()->hasCompleteAddress();
         $userHasPlayers = $request->user()->players()->exists();
@@ -291,6 +303,7 @@ class AdventureController extends Controller
             'bookings.bookedBy',
             'bookings.role',
             'teamerSignups.user',
+            'teamerSignups.eventRole',
             'visits',
         ]);
 
@@ -478,12 +491,39 @@ class AdventureController extends Controller
         }
 
         $adventure->update($data);
+        $this->syncCompensations($request, $adventure);
 
         $message = 'Abenteuer wurde aktualisiert.';
 
         return $request->expectsJson()
             ? response()->json(['message' => $message, 'reload' => true])
             : redirect()->route('adventures.show', $adventure)->with('status', $message);
+    }
+
+    /**
+     * Issue #19: Pauschalen je abrechnungsfähiger Rolle speichern. Leere Felder entfernen
+     * den Eintrag (keine Abrechnung). Ohne Feldgruppe im Formular bleibt alles unverändert.
+     */
+    private function syncCompensations(Request $request, Adventure $adventure): void
+    {
+        if (! $request->has('compensations')) {
+            return;
+        }
+
+        $billableIds = EventRole::billable()->pluck('id')->all();
+
+        foreach ((array) $request->input('compensations', []) as $roleId => $amount) {
+            $roleId = (int) $roleId;
+            if (! in_array($roleId, $billableIds, true)) {
+                continue;
+            }
+
+            if ($amount === null || $amount === '') {
+                $adventure->compensations()->where('event_role_id', $roleId)->delete();
+            } else {
+                $adventure->compensations()->updateOrCreate(['event_role_id' => $roleId], ['amount' => $amount]);
+            }
+        }
     }
 
     /**
@@ -605,11 +645,20 @@ class AdventureController extends Controller
             'fee_reduced' => ['nullable', 'numeric', 'min:0'],
             'is_hidden' => ['boolean'],
             'requires_confirmation' => ['boolean'],
+            'asks_vegetarian' => ['boolean'],
+            'compensations' => ['nullable', 'array'],
+            'compensations.*' => ['nullable', 'numeric', 'min:0', 'max:9999.99'],
+        ], [
+            'compensations.*.numeric' => 'Die Pauschale muss eine Zahl sein.',
+            'compensations.*.min' => 'Die Pauschale darf nicht negativ sein.',
+            'compensations.*.max' => 'Die Pauschale ist zu hoch.',
         ]);
+        unset($data['compensations']);
 
         // Checkbox sendet keinen Wert wenn nicht angehakt → false setzen.
         $data['is_hidden'] = $request->boolean('is_hidden');
         $data['requires_confirmation'] = $request->boolean('requires_confirmation');
+        $data['asks_vegetarian'] = $request->boolean('asks_vegetarian');
 
         // Leeres Feld (NOT NULL mit Default 0) → Integer-Default setzen.
         $data['loot_ep_day'] = (int) ($data['loot_ep_day'] ?? 0);

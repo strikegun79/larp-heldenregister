@@ -939,3 +939,51 @@ neue Middleware (`app/Http/Middleware/DetectSaveData.php`),
 `app/Http/Kernel.php` bzw. `bootstrap/app.php` (Middleware-Registrierung),
 `layouts/app.blade.php`, `dashboard.blade.php`, `admin/index.blade.php`,
 `players/index.blade.php`, ggf. `profile/edit.blade.php` (Toggle).
+
+## Waldritter-Designsystem – Befunde aus dem Dashboard-Pilot 2026-11 (🔲)
+
+Quelle: Prüfung des Dashboard-Piloten durch `accessibility-reviewer` und
+`child-experience-reviewer` (19.11.2026). Die Befunde betreffen das Layout und
+gelten deshalb für alle Seiten, nicht nur für das Dashboard.
+Siehe `docs/design/waldritter-v1/PILOT-NOTIZEN.md`.
+
+### UI-46 · [P1] Navigation und Bottom-Nav barrierefrei machen · ⏱ 4h · ✅
+**Beschreibung:** In `layouts/navigation.blade.php` gibt es mehrere Hürden für
+Tastatur- und Screenreader-Nutzer:
+- Die Glocke (Benachrichtigungen) hat keinen zugänglichen Namen.
+- Mehrere Buttons haben `focus:outline-none`, der Fokus ist dort unsichtbar.
+- Die Dropdowns lassen sich nicht mit Escape schließen.
+- Das „Mehr“-Sheet der Bottom-Nav hat keine Dialog-Semantik
+  (`role="dialog"`, `aria-modal`, Fokus hinein und beim Schließen zurück).
+- Unter 640 px verdeckt die fixierte Bottom-Nav (`h-16`) den unteren Teil des
+  Footers, weil `pb-16` nur am `<main>` sitzt und nicht hinter dem Footer.
+**Akzeptanzkriterien:**
+- [x] Glocke mit `aria-label` (inkl. Anzahl ungelesener Meldungen).
+- [x] Kein `focus:outline-none` ohne sichtbaren Ersatz; Fokusfarbe `--wr-focus`.
+- [x] Dropdowns und „Mehr“-Sheet schließen mit Escape, Fokus kehrt zum Auslöser zurück.
+- [x] „Mehr“-Sheet mit Dialog-Semantik und Fokusführung.
+- [x] Footer auf 320–414 px vollständig sichtbar (Abstand am Seitenende statt am `<main>`).
+**Betroffene Seiten/Routen:** `layouts/navigation.blade.php`, `layouts/app.blade.php`
+**Abhängigkeiten:** Sinnvoll zusammen mit der Umstellung der Navigation auf das
+Waldritter-Designsystem (globaler Schritt).
+**Erledigt:** Commit `2022982` (20.11.2026), zusammen mit der Umstellung der Navigation auf Waldgrün.
+
+### UI-47 · [P2] Seitentitel pro Seite (Titel-Slot im Layout) · ⏱ 2h · 🔲
+**Beschreibung:** Jede Seite heißt im Browser-Tab nur „Heldenregister“
+(`<title>{{ config('app.name') }}</title>`). Screenreader-Nutzer und Nutzer mit
+vielen Tabs können Seiten so nicht unterscheiden (WCAG 2.4.2).
+**Akzeptanzkriterien:**
+- [ ] `layouts/app.blade.php` bietet einen optionalen Slot bzw. eine Prop `title`.
+- [ ] Format: „Seitentitel – Heldenregister“, ohne Angabe nur „Heldenregister“.
+- [ ] Dashboard, Helden, Abenteuer, Spieler und Verwaltung setzen einen Titel.
+**Betroffene Seiten/Routen:** `layouts/app.blade.php`, `layouts/guest.blade.php`, Hauptansichten
+
+### UI-48 · [P2] Basis-Schriftgröße nicht fest in Pixeln setzen · ⏱ 3h · 🔲
+**Beschreibung:** `resources/css/app.css` setzt `html { font-size: 17.5px }`.
+Damit wird die im Browser eingestellte Schriftgröße überschrieben; Nutzer, die
+größere Schrift brauchen, bekommen sie nicht (WCAG 1.4.4).
+**Akzeptanzkriterien:**
+- [ ] Basisgröße relativ, z. B. `font-size: 109.375%` (entspricht 17,5 px bei Standard 16 px).
+- [ ] Fomantic-Elemente, die auf die Basisgröße angepasst wurden (u. a. Spinner, siehe Kommentar in `app.css`), geprüft.
+- [ ] Sichtprüfung bei Browser-Schriftgröße 16 px und 24 px.
+**Betroffene Seiten/Routen:** `resources/css/app.css`, alle Seiten (Regression)

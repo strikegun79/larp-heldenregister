@@ -7,7 +7,7 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="mb-4">
                 <a href="{{ route('admin.perl-colors.create') }}"
-                   data-modal-url="{{ route('admin.perl-colors.create') }}"
+                   data-inspector-new="{{ route('admin.perl-colors.create') }}"
                    class="ui primary button">Neue Perlenfarbe</a>
             </div>
 
@@ -25,7 +25,9 @@
                     </thead>
                     <tbody class="divide-y divide-stone-200 text-stone-800">
                         @forelse ($colors as $color)
-                            <tr>
+                            <tr
+                                data-inspector-url="{{ route('admin.perl-colors.edit', $color) }}?inspector=1" tabindex="0"
+                                aria-label="{{ $color->name }} bearbeiten">
                                 <td class="px-6 py-4" data-label="Farbe">
                                     <span style="display:inline-block;width:1.5rem;height:1.5rem;border-radius:50%;border:1px solid #ccc;background:{{ $color->code }};"></span>
                                 </td>
@@ -33,18 +35,8 @@
                                 <td class="px-6 py-4 font-mono text-sm" data-label="Code">{{ $color->code }}</td>
                                 <td class="px-6 py-4" data-label="Fertigkeiten">{{ $color->skills_count }}</td>
                                 <td class="px-6 py-4 text-right">
-                                    <div class="flex items-center justify-end gap-3">
-                                        <a href="{{ route('admin.perl-colors.edit', $color) }}"
-                                           data-modal-url="{{ route('admin.perl-colors.edit', $color) }}"
-                                           class="text-waldritter hover:underline">Bearbeiten</a>
-                                        @if (! $color->skills_count)
-                                            <form method="POST" action="{{ route('admin.perl-colors.destroy', $color) }}"
-                                                  data-confirm="Perlenfarbe {{ $color->name }} löschen?">
-                                                @csrf @method('DELETE')
-                                                <button type="submit" class="text-red-600 hover:underline">Löschen</button>
-                                            </form>
-                                        @endif
-                                    </div>
+                                    {{-- Bearbeiten und Löschen im Inspektor (Zeilenklick / Enter) --}}
+                                    <i class="chevron right icon text-wr-ink-muted m-0" aria-hidden="true"></i>
                                 </td>
                             </tr>
                         @empty

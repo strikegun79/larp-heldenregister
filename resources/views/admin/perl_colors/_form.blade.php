@@ -34,6 +34,14 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 </script>
 
+{{-- Löschen nur im Inspektor (?inspector=1), Rückfrage und Sperrgrund wie in der bisherigen Liste --}}
+@if ($color->exists)
+    @php($usedBy = $color->skills()->count())
+    <x-admin.inspector-delete :action="route('admin.perl-colors.destroy', $color)"
+        title="Perlenfarbe löschen" :confirm="'Perlenfarbe '.$color->name.' löschen?'"
+        :blocked="$usedBy ? 'Nicht löschbar: wird von '.$usedBy.' Fertigkeit(en) verwendet.' : null" />
+@endif
+
 <div data-modal-actions hidden>
     <button type="submit" form="perl-color-form" class="ui primary button">Speichern</button>
 </div>

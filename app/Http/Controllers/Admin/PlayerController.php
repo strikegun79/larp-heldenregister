@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
+use App\Models\MatrixAccount;
+use App\Models\MatrixManagedRoom;
 use App\Models\Player;
 use App\Models\User;
 use App\Services\AuditLogger;
@@ -66,6 +68,34 @@ class PlayerController extends Controller
         $players = $query->paginate(30)->withQueryString();
 
         return view('admin.players.index', compact('players', 'q', 'sort', 'dir', 'hideAdults', 'noHeroes'));
+    }
+
+    /**
+     * Inspektor (Seitenpanel) eines Spielers in der Admin-Liste: Kurzinfos, Anschrift,
+     * Betreuer, Matrix-Konto und Löschen. Formulare speichern per AJAX (data-inspector-form).
+     */
+    public function inspector(Player $player): View
+    {
+        $player->load('users')->loadCount('heroes');
+
+        // Auch entzogene (soft-gelöschte) Konten anzeigen, wie in MatrixAccountController@edit.
+        $account = MatrixAccount::withTrashed()->where('player_id', $player->id)->first();
+        $rooms = MatrixManagedRoom::orderBy('roomname')->get();
+        // MTX-06: Neues Konto → default_allow-Räume vorselektieren (wie MatrixAccountController@edit).
+        $joined = $account
+            ? $account->rooms()->pluck('matrix_managed_rooms.roomid')->all()
+            : $rooms->where('default_allow', true)->pluck('roomid')->all();
+
+        return view('admin.players._inspector', [
+            'player' => $player,
+            'available' => User::whereNotIn('id', $player->users->pluck('id'))
+                ->orderBy('name')->orderBy('lastname')->get(),
+            'blockers' => $this->collectBlockers($player),
+            'account' => $account,
+            'rooms' => $rooms,
+            'joined' => $joined,
+            'mxid' => $account->mxid ?? $player->deriveMatrixId(),
+        ]);
     }
 
     /**
@@ -172,7 +202,7 @@ class PlayerController extends Controller
      * Ohne ?force=1: bei offenen Buchungen/aktiven Helden Warnung und Abbruch.
      * Mit ?force=1: Löschen trotz Warnung (Admin-Override).
      */
-    public function destroy(Request $request, int $id): RedirectResponse
+    public function destroy(Request $request, int $id): RedirectResponse|JsonResponse
     {
         $player = Player::withTrashed()->findOrFail($id);
 
@@ -180,6 +210,11 @@ class PlayerController extends Controller
             $blockers = $this->collectBlockers($player);
 
             if ($blockers !== []) {
+                // Inspektor (AJAX): Hinweise als Meldung; dort steht „Trotzdem löschen“ bereit.
+                if ($request->expectsJson()) {
+                    return response()->json(['message' => implode(' ', $blockers)], 422);
+                }
+
                 return redirect()
                     ->route('admin.players.index')
                     ->with('warning', implode(' ', $blockers))
@@ -193,8 +228,11 @@ class PlayerController extends Controller
 
         $player->delete();
 
-        return redirect()->route('admin.players.index')
-            ->with('status', 'Spieler "'.$player->full_name.'" wurde gelöscht.');
+        $message = 'Spieler "'.$player->full_name.'" wurde gelöscht.';
+
+        return $request->expectsJson()
+            ? response()->json(['message' => $message])
+            : redirect()->route('admin.players.index')->with('status', $message);
     }
 
     /**

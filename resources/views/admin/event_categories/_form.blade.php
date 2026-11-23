@@ -19,6 +19,12 @@
     </div>
 </form>
 
+{{-- Löschen nur im Inspektor (?inspector=1), Rückfrage und Sperrgrund wie in der bisherigen Liste --}}
+@if ($category->exists)
+    <x-admin.inspector-delete :action="route('admin.event-categories.destroy', $category)"
+        title="Kategorie löschen" :confirm="'Kategorie „'.$category->name.'“ löschen?'" />
+@endif
+
 <div data-modal-actions hidden>
     <button type="submit" form="category-form" class="ui primary button">Speichern</button>
 </div>

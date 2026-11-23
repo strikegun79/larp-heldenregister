@@ -10,21 +10,21 @@
     @php($fieldId = $idPrefix.'_'.$requirement->id)
     @php($pdfUrl = $requirement->pdf_path ? route('requirements.pdf', $requirement) : null)
     <div class="field required mt-3">
-        <div class="flex items-start gap-2">
+        <div class="wr-check">
             <input type="checkbox" id="{{ $fieldId }}"
-                   name="requirements[{{ $requirement->id }}]" value="1" required class="mt-1 shrink-0 cursor-pointer">
+                   name="requirements[{{ $requirement->id }}]" value="1" required class="cursor-pointer">
             <span>
                 <label for="{{ $fieldId }}" class="font-normal cursor-pointer" style="display: inline; font-weight: normal;">Ich habe die</label>
-                <a href="#" role="button" class="text-waldritter underline"
+                <a href="#" role="button" class="wr-interactive underline text-wr-forest font-semibold"
                    data-requirement-modal="{{ $fieldId }}_text"
                    data-title="{{ $requirement->title }}"
                    data-download="{{ $pdfUrl }}">{{ $requirement->title }}</a>
                 <label for="{{ $fieldId }}" class="font-normal cursor-pointer" style="display: inline; font-weight: normal;">gelesen und stimme ihr zu.</label>
                 @if ($pdfUrl)
                     <a href="{{ $pdfUrl }}" target="_blank" rel="noopener" download
-                       class="text-red-700 hover:text-red-900 whitespace-nowrap"
+                       class="wr-interactive text-wr-danger whitespace-nowrap"
                        title="PDF herunterladen" aria-label="{{ $requirement->title }} als PDF herunterladen">
-                        <i class="file pdf outline icon" aria-hidden="true"></i>
+                        <i class="file pdf icon" aria-hidden="true"></i>
                     </a>
                 @endif
             </span>

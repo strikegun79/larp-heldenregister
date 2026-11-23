@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\ProfileUpdateRequest;
 use App\Models\NewsletterSubscription;
+use App\Support\Iban;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -70,6 +71,36 @@ class ProfileController extends Controller
     }
 
     /**
+     * Issue #19: Angaben für die Teamer-Abrechnung (Bereich „Teamer“ im Profil).
+     * Eigenes Formular, damit die Benachrichtigungs-Schalter von update() unberührt bleiben.
+     */
+    public function updateTeamer(Request $request): RedirectResponse
+    {
+        $user = $request->user();
+        abort_unless($user->canBillAsTeamer(), 403);
+
+        $request->merge(['teamer_iban' => Iban::normalize($request->input('teamer_iban')) ?: null]);
+
+        $data = $request->validateWithBag('teamerBilling', [
+            'teamer_tax_number' => ['nullable', 'string', 'max:30', 'regex:/^[0-9\/ ]+$/'],
+            'teamer_account_holder' => ['nullable', 'string', 'max:100'],
+            'teamer_iban' => ['nullable', 'string', 'max:34', function (string $attribute, mixed $value, \Closure $fail) {
+                if (! Iban::isValid($value)) {
+                    $fail('Die IBAN ist ungültig. Bitte prüfe sie noch einmal.');
+                }
+            }],
+            'teamer_bank_name' => ['nullable', 'string', 'max:100'],
+        ], [
+            'teamer_tax_number.regex' => 'Die Steuernummer darf nur Ziffern, Schrägstriche und Leerzeichen enthalten.',
+        ]);
+
+        // Bewusst ohne Audit-Log der Werte (sensible Daten).
+        $user->forceFill($data)->save();
+
+        return Redirect::route('profile.edit')->with('status', 'teamer-billing-updated');
+    }
+
+    /**
      * DSGVO Art. 20: Alle personenbezogenen Daten des Nutzers als JSON-Download.
      */
     public function exportData(Request $request): Response
@@ -99,6 +130,13 @@ class ProfileController extends Controller
                 'registriert_am' => $user->created_at?->toIso8601String(),
                 'zuletzt_eingeloggt' => $user->lastlogin_at?->toIso8601String(),
                 'newsletter_abonniert' => $nlSub?->isActive() ?? false,
+            ],
+            // Issue #19: Angaben für die Teamer-Abrechnung
+            'teamer_abrechnung' => [
+                'steuernummer' => $user->teamer_tax_number,
+                'kontoinhaber' => $user->teamer_account_holder,
+                'iban' => $user->teamer_iban,
+                'bank' => $user->teamer_bank_name,
             ],
             'spieler' => $user->players->map(fn ($player) => [
                 'vorname' => $player->name,

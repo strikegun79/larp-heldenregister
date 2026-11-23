@@ -113,3 +113,16 @@ Code (z. B. Base32 ohne Verwechslungszeichen).
 - [x] Der Platz für den Helden-Kode ist im template 293px X 106px groß und beginnt an der Position x:105px und y:1053px
 - [x] benenne überall den Begriff Helden-ID, Helden-Code oder Helden-Kode um in Helden-Siegel.
 - [x] beim Generieren von mehreren Ausweisen, sollen kachelförmig die Ausweise auf eine duplex Seite passen. mit 2px abstand dazwischen.
+
+### PUB-13 · [P1] Heldenbilder nicht ohne Anmeldung abrufbar machen · ⏱ 4h · 🔲
+**Beschreibung:** Heldenbilder liegen unter `/storage/…` (`Hero::image_url`) und
+sind über ihre URL ohne Anmeldung abrufbar. Die Bilder zeigen oft Kinder. Wer
+die URL kennt (Weitergabe, Browserverlauf, Logs), sieht das Bild ohne Login.
+Quelle: Prüfung des Dashboard-Piloten (19.11.2026), zur Bewertung durch den
+`privacy-reviewer`.
+**Akzeptanzkriterien:**
+- [ ] Bestandsaufnahme: Welche Bilder sind öffentlich gewollt (öffentliche Heldenansicht per Code, PUB-*)?
+- [ ] Alle anderen Heldenbilder nur über eine Route mit Berechtigungsprüfung (oder signierte URL).
+- [ ] Bestehende Bilder migriert, alte öffentliche Pfade liefern keinen Inhalt mehr.
+- [ ] Tests: Gast erhält 403/404, berechtigter Nutzer erhält das Bild.
+**Betroffene Seiten/Routen:** `Hero`-Model (`image_url`), Upload-Logik, Storage-Konfiguration, öffentliche Heldenansicht

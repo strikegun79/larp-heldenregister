@@ -33,10 +33,18 @@
             @include('layouts.navigation')
 
             <!-- Page Heading -->
+            {{-- Seitenkopf der noch nicht umgestellten Seiten (Waldritter v1): ruhiges Papier, Titel als H1.
+                 Die erste <h2> im Slot wird zur <h1>, damit jede Seite eine Hauptüberschrift hat. --}}
             @if (isset($header))
-                <header class="bg-white/50 border-b-2 border-[#5a3a22]/40 shadow-sm">
-                    <div class="max-w-7xl mx-auto py-6 px-4 sm:px-6 lg:px-8">
-                        {{ $header }}
+                @php
+                    $headerHtml = (string) $header;
+                    if (! str_contains($headerHtml, '<h1') && str_contains($headerHtml, '<h2')) {
+                        $headerHtml = \Illuminate\Support\Str::replaceFirst('</h2>', '</h1>', \Illuminate\Support\Str::replaceFirst('<h2', '<h1', $headerHtml));
+                    }
+                @endphp
+                <header class="wr-page-header">
+                    <div class="max-w-7xl mx-auto py-5 px-4 sm:px-6 lg:px-8">
+                        {!! $headerHtml !!}
                     </div>
                 </header>
             @endif
@@ -51,7 +59,8 @@
             </main>
 
             <!-- Footer (Vereinskontakt, wie im Legacy) -->
-            <footer class="mt-8 border-t-2 border-[#5a3a22]/40 bg-black/10 text-waldritter">
+            {{-- mb-16 auf dem Handy: Footer nicht hinter der fixierten unteren Leiste verstecken (UI-46) --}}
+            <footer class="mt-8 mb-16 sm:mb-0 border-t-2 border-[#5a3a22]/40 bg-black/10 text-waldritter">
                 <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 grid gap-6 sm:grid-cols-3 text-sm">
                     <div>
                         <strong>{{ config('portal.organization') }} – {{ config('portal.name') }}</strong><br>
@@ -107,12 +116,13 @@
         <aside id="booking-inspector" class="booking-inspector" hidden
                role="dialog" aria-modal="false" aria-labelledby="booking-inspector-title">
             <div class="booking-inspector__header">
-                <h2 id="booking-inspector-title" class="font-uncial text-lg text-waldritter m-0 truncate">Anmeldung</h2>
-                <button type="button" class="ui mini icon basic button" data-inspector-close aria-label="Inspektor schließen">
-                    <i class="close icon"></i>
+                <h2 id="booking-inspector-title" class="wr-inspector-title m-0 truncate">Details</h2>
+                <button type="button" class="wr-btn wr-btn--secondary wr-btn--small !px-3" data-inspector-close aria-label="Inspektor schließen">
+                    <i class="close icon m-0" aria-hidden="true"></i>
                 </button>
             </div>
-            <div id="booking-inspector-content" class="booking-inspector__content"></div>
+            {{-- wr-v1: Formulare und Inhalte im Inspektor im Waldritter-Stil --}}
+            <div id="booking-inspector-content" class="booking-inspector__content wr-v1"></div>
         </aside>
 
         <!-- Gestapeltes Modal (ADV-22): öffnet über #app-modal (z. B. Anmeldung,

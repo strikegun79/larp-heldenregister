@@ -3,14 +3,30 @@
         $stunde = (int) now()->format('H');
         $gruss = $stunde >= 6 && $stunde < 10 ? 'Guten Morgen' : ($stunde >= 10 && $stunde < 18 ? 'Guten Tag' : 'Guten Abend');
     @endphp
-    <x-slot name="header">
-        <h2 class="font-uncial text-2xl text-waldritter leading-tight">
-            {{ $gruss }}, <em>{{ Auth::user()->name }}</em>
-        </h2>
-    </x-slot>
 
-    <div class="py-6 sm:py-12">
+    {{-- Waldritter-Designsystem v1 (Pilot): neue Tokens gelten nur innerhalb von .wr-v1 --}}
+    <div class="wr-v1 py-6 sm:py-10">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+            {{-- Begrüßung --}}
+            <div class="mb-6 sm:mb-8">
+                <span class="wr-eyebrow">Deine Abenteuerwelt</span>
+                <h1 id="dashboard-heading" tabindex="-1" class="wr-heading focus:outline-none">{{ $gruss }}, {{ Auth::user()->name }}</h1>
+
+                {{-- Willkommenstext nur ohne Startseiten-Nachricht; bei wegklickbarer MOTD erscheint er nach dem Schließen --}}
+                @if (! $motd || $motd->dismissible)
+                    <p @if ($motd)
+                           x-data="{
+                               zeigen: false,
+                               init() { try { this.zeigen = !!localStorage.getItem('{{ $motd->dismiss_key }}'); } catch (e) {} }
+                           }"
+                           x-show="zeigen" x-cloak @motd-dismissed.window="zeigen = true"
+                       @endif
+                       class="wr-intro">
+                        Willkommen im Heldenregister. Hier findest du alles rund um deine Spieler, Helden und Abenteuer.
+                    </p>
+                @endif
+            </div>
 
             @if (session('newsletter_status') === 'confirmation_sent')
                 <div class="ui success message mb-4">
@@ -24,545 +40,258 @@
                 </div>
             @endif
 
-            {{-- Willkommenstext nur ohne Startseiten-Nachricht; bei wegklickbarer MOTD erscheint er nach dem Schließen --}}
-            @if (! $motd || $motd->dismissible)
-                <div @if ($motd)
-                         x-data="{
-                             zeigen: false,
-                             init() { try { this.zeigen = !!localStorage.getItem('{{ $motd->dismiss_key }}'); } catch (e) {} }
-                         }"
-                         x-show="zeigen" x-cloak @motd-dismissed.window="zeigen = true"
-                     @endif
-                     class="bg-white/60 border-2 border-[#5a3a22]/30 rounded-lg p-4 sm:p-6 mb-6 sm:mb-8 text-stone-800">
-                    <p>Willkommen im Heldenregister. Hier findest du alles rund um deine Spieler, Helden und Abenteuer.</p>
-                </div>
-            @endif
-
             @include('dashboard._motd')
 
-            {{-- Newsletter-Hinweis für Nicht-Abonnenten (Panoramabanner mit Hintergrundbild) --}}
+            {{-- Onboarding-Fortschrittsbox: solange nicht alle drei Aufgaben erledigt sind --}}
+            @if ($showOnboarding)
+                {{-- „Ausblenden“ wird pro Konto im Browser gemerkt (geteilte Geräte von Eltern und Kindern). --}}
+                <section aria-labelledby="onboarding-heading"
+                         x-data="{
+                             elternOffen: false,
+                             key: 'onboarding_dismissed_{{ Auth::id() }}',
+                             sichtbar: true,
+                             init() { try { this.sichtbar = !localStorage.getItem(this.key); } catch (e) {} },
+                             ausblenden() {
+                                 try { localStorage.setItem(this.key, '1'); } catch (e) {}
+                                 this.sichtbar = false;
+                                 this.$nextTick(() => document.getElementById('dashboard-heading')?.focus());
+                             }
+                         }"
+                         x-show="sichtbar" x-cloak
+                         class="wr-card p-4 sm:p-6 mb-6 sm:mb-8">
+
+                    <div class="flex items-start justify-between gap-3 mb-1">
+                        <h2 id="onboarding-heading" class="wr-section-heading__title">Deine ersten Schritte</h2>
+                        <button type="button" @click="ausblenden()"
+                                class="wr-btn wr-btn--secondary wr-btn--small shrink-0">
+                            <i class="eye slash icon m-0" aria-hidden="true"></i>
+                            Ausblenden
+                        </button>
+                    </div>
+                    <p class="wr-card__text mb-5">
+                        Herzlich willkommen bei den Waldrittern! Erledige diese drei Aufgaben, um loszulegen.
+                    </p>
+
+                    <ol role="list" class="space-y-5 mb-5 p-0 list-none">
+                        <x-wr.step :number="1" title="Profil vervollständigen" :done="$profileComplete">
+                            <p class="m-0">Trage deine Adresse und Telefonnummer ein – diese werden für die Anmeldung zu Veranstaltungen benötigt.</p>
+                            <a href="{{ route('profile.edit') }}" class="wr-btn wr-btn--primary wr-btn--small">Zum Profil</a>
+                        </x-wr.step>
+
+                        <x-wr.step :number="2" title="Spieler anlegen" :done="$hasPlayers"
+                                   :later-hint="! $profileComplete && ! $hasPlayers ? 'nach Schritt 1' : null">
+                            <p class="m-0">Lege deinen Spieler (oder dein Kind) an – das geht direkt hier im Portal.</p>
+                            <a href="{{ route('players.create') }}"
+                               class="wr-btn wr-btn--small {{ $profileComplete ? 'wr-btn--primary' : 'wr-btn--secondary' }}">
+                                Spieler anlegen
+                            </a>
+                            <p class="text-xs m-0">
+                                Existiert ein Spieler bereits über ein anderes Elternteil?
+                                Schreibe uns bitte eine E-Mail an
+                                <a href="mailto:{{ config('portal.contact_email') }}"
+                                   class="wr-interactive underline text-wr-ink">{{ config('portal.contact_email') }}</a>,
+                                damit wir den Spieler deinem Konto zuordnen können.
+                            </p>
+                        </x-wr.step>
+
+                        <x-wr.step :number="3" title="Zu einer Veranstaltung anmelden" :done="$hasBookings"
+                                   :later-hint="! $hasPlayers && ! $hasBookings ? 'nach Schritt 2' : null">
+                            <p class="m-0">
+                                Such dir ein Abenteuer aus und melde deinen Spieler an. Deinen Helden erstellst du dann direkt vor Ort
+                                beim <strong class="font-medium">Bürokraten</strong> – das ist die Person der Waldritter, die die Helden ins Heldenregister einträgt.
+                            </p>
+                            @can('adventure.access')
+                                <a href="{{ route('adventures.index') }}"
+                                   class="wr-btn wr-btn--small {{ $hasPlayers ? 'wr-btn--primary' : 'wr-btn--secondary' }}">
+                                    Abenteuer ansehen
+                                </a>
+                            @endcan
+                        </x-wr.step>
+                    </ol>
+
+                    <div class="pt-3 border-t border-wr-border">
+                        <button type="button"
+                                x-on:click="elternOffen = !elternOffen"
+                                :aria-expanded="elternOffen.toString()"
+                                aria-controls="onboarding-eltern"
+                                class="wr-interactive inline-flex items-center gap-1 min-h-[44px] text-sm underline text-wr-ink-muted hover:text-wr-ink">
+                            <i class="info circle icon" aria-hidden="true"></i>
+                            Infos für Eltern &amp; Erziehungsberechtigte
+                        </button>
+                        <div id="onboarding-eltern"
+                             x-show="elternOffen"
+                             x-cloak
+                             class="mt-2 text-sm text-wr-ink-muted space-y-2">
+                            <p>Lege zunächst dein Kind als Spieler an und melde es zu einer Veranstaltung an. Auf der Veranstaltung erstellt die Spielleitung gemeinsam mit deinem Kind den Charakter (Helden). Eingetragen wird er vom Bürokraten: einer Person der Waldritter, die im Spiel für das Heldenregister zuständig ist. Erst nach der ersten Veranstaltung erscheint der Held hier im Portal.</p>
+                            <p>Für Kinder unter 18 Jahren ist die Anmeldung nur mit deiner Einwilligung als erziehungsberechtigte Person möglich.</p>
+                        </div>
+                    </div>
+                </section>
+            @endif
+
+            {{-- Abenteuer: eigene Anmeldungen oder – falls keine – das nächste Abenteuer (UI-43) --}}
+            @can('adventure.access')
+                @if ($upcomingBookedAdventures->isNotEmpty())
+                    @php
+                        // Das nächste gebuchte Abenteuer wird zum Quest-Banner mit Countdown, weitere bleiben Karten.
+                        $naechstesGebucht = $upcomingBookedAdventures->first();
+                        $tageBis = (int) now()->startOfDay()->diffInDays($naechstesGebucht->start_at->copy()->startOfDay());
+                        $countdown = match (true) {
+                            $tageBis <= 0 => 'Heute geht es los!',
+                            $tageBis === 1 => 'Morgen geht es los!',
+                            default => 'Noch ' . $tageBis . ' Tage bis zum Abenteuer!',
+                        };
+                    @endphp
+                    <section aria-labelledby="bookings-heading">
+                        <x-wr.section-heading title="Meine Anmeldungen" id="bookings-heading" class="mt-0" />
+
+                        <x-wr.quest-banner :title="$naechstesGebucht->name"
+                                           :eyebrow="$countdown"
+                                           heading-id="booked-adventure-heading"
+                                           heading-level="h3">
+                            <x-wr.adventure-meta :adventure="$naechstesGebucht" class="wr-quest__meta" />
+                            <x-wr.booking-participants :adventure="$naechstesGebucht" class="mb-4" />
+                            <div>
+                                <a href="{{ route('adventures.show', $naechstesGebucht) }}" class="wr-btn wr-btn--on-dark">
+                                    Details ansehen
+                                    <i class="arrow right icon" aria-hidden="true"></i>
+                                </a>
+                            </div>
+                        </x-wr.quest-banner>
+
+                        @if ($upcomingBookedAdventures->count() > 1)
+                            <h3 class="font-semibold text-base mt-5 mb-2">Weitere Anmeldungen</h3>
+                            <div class="space-y-3">
+                                @foreach ($upcomingBookedAdventures->skip(1) as $adventure)
+                                    <x-wr.booking-card :adventure="$adventure" />
+                                @endforeach
+                            </div>
+                        @endif
+                    </section>
+                @elseif ($nextAdventure)
+                    <x-wr.quest-banner :title="$nextAdventure->name"
+                                       eyebrow="Das nächste Kapitel wartet"
+                                       heading-id="next-adventure-heading">
+                        <x-wr.adventure-meta :adventure="$nextAdventure" class="wr-quest__meta" />
+                        <div class="wr-status-chip mb-4">
+                            @include('dashboard._adventure_status', ['slots' => $nextAdventureSlots])
+                        </div>
+                        <div>
+                            <a href="{{ route('adventures.show', $nextAdventure) }}" class="wr-btn wr-btn--on-dark">
+                                {{ $nextAdventure->registrationOpen() ? 'Jetzt anmelden' : 'Details ansehen' }}
+                                <i class="arrow right icon" aria-hidden="true"></i>
+                            </a>
+                        </div>
+                    </x-wr.quest-banner>
+                @endif
+            @endcan
+
+            {{-- Issue #19: abrechenbare Teamer-Anmeldungen --}}
+            @include('dashboard._teamer_compensations')
+
+            {{-- Aktive Helden der eigenen Spieler --}}
+            @if ($activePlayers->isNotEmpty() || $playersAwaitingHero->isNotEmpty())
+                <section aria-labelledby="heroes-heading">
+                    <x-wr.section-heading title="Deine Helden" id="heroes-heading" />
+                    <div class="grid gap-4 lg:grid-cols-2">
+                        @foreach ($activePlayers as $activePlayer)
+                            @if ($activePlayer->activeHero)
+                                <x-wr.hero-card :hero="$activePlayer->activeHero"
+                                                :label="$activePlayer->pivot->self ? 'Mein aktiver Held' : 'Held von ' . $activePlayer->name"
+                                                :skills-count="$activePlayer->activeHero->skills_count"
+                                                :adventures-count="$activePlayer->visits_count" />
+                            @endif
+                        @endforeach
+
+                        {{-- Eigene Spieler ohne Helden: Platzhalter statt Leere --}}
+                        @foreach ($playersAwaitingHero as $waitingPlayer)
+                            <x-wr.hero-placeholder :player="$waitingPlayer" :self="(bool) $waitingPlayer->pivot->self" />
+                        @endforeach
+                    </div>
+                </section>
+            @endif
+
+            {{-- Kachel-Navigation (alle Bildschirmgrößen) --}}
+            <section aria-labelledby="world-heading">
+                <x-wr.section-heading title="Wohin möchtest du?" id="world-heading" focusable />
+                <div class="grid gap-3 grid-cols-2 sm:gap-5 lg:grid-cols-3">
+                    <x-wr.card compact :href="route('profile.edit')" image="/images/dein_profil.jpg"
+                               tag="Persönlich" title="Dein Profil" text="Kontaktdaten und Einstellungen" />
+
+                    @can('heldenregister.view')
+                        <x-wr.card compact :href="route('heroes.index')" image="/images/heroes_db_v2.jpg"
+                                   tag="Helden" title="Heldenverwaltung" text="Auflistung aller Helden" />
+                    @endcan
+
+                    @can('adventure.access')
+                        <x-wr.card compact :href="route('adventures.index')" image="/images/abenteuer_v3.jpg"
+                                   tag="Veranstaltungen" title="Abenteuer" text="Entdecke Abenteuer und melde dich an" />
+                    @endcan
+
+                    <x-wr.card compact :href="route('players.index')" image="/images/spieler_verwaltung2.jpg"
+                               tag="Spielerdatenbank" title="Deine Spieler" text="Spieler anlegen und verwalten" />
+
+                    @can('portal.manage')
+                        <x-wr.card compact :href="route('admin.index')" image="/images/verwaltung.jpg"
+                                   tag="Portal-Administration" title="Verwaltung" text="Stammdaten, Einstellungen und Auswertungen" />
+                    @endcan
+
+                    <x-wr.card compact href="https://www.waldritter-giessen.de/brans-tagebuch/" hint="auf der Waldritter-Website" image="/images/brans_tagebuch_hr.jpg"
+                               tag="Chronik" title="Brans Tagebuch" text="Erzählungen aus den Abenteuern" />
+                </div>
+            </section>
+
+            {{-- Newsletter-Hinweis für Nicht-Abonnenten (Panoramabanner mit Hintergrundbild).
+                 Bewusst hinter den Kacheln: erst die eigenen Aufgaben, dann Werbung.
+                 Inline-Hintergrund bewusst beibehalten: der Datensparmodus blendet [style*="background-image"] aus. --}}
             @if ($showNewsletterHint)
                 <div x-data="{
                          sichtbar: !localStorage.getItem('newsletter_banner_dismissed'),
-                         schliessen() { localStorage.setItem('newsletter_banner_dismissed', '1'); this.sichtbar = false; }
+                         schliessen() {
+                             localStorage.setItem('newsletter_banner_dismissed', '1');
+                             this.sichtbar = false;
+                             {{-- Fokus nicht an den Seitenanfang verlieren --}}
+                             this.$nextTick(() => document.getElementById('world-heading')?.focus());
+                         }
                      }"
                      x-show="sichtbar" x-cloak
-                     class="relative overflow-hidden rounded-xl mb-6 sm:mb-8 border-2 border-[#5a3a22]/40"
+                     class="relative overflow-hidden rounded-[14px] mt-8 border border-wr-border bg-wr-parchment"
                      style="background-image: url('/images/newsletter_banner.jpg'); background-size: cover; background-position: center; min-height: 120px;">
 
                     {{-- Inhalt direkt auf dem hellen Pergamentbild (kein dunkles Overlay, siehe Issue #12) --}}
                     <div class="relative z-10 flex flex-col sm:flex-row sm:items-center gap-3 sm:gap-4 p-4 sm:p-5">
-                        {{-- Textbereich mit hellem Pergament-Panel: dunkelbraune Schrift auf hellem Grund --}}
-                        <div class="flex-1 bg-amber-50/85 border border-[#5a3a22]/20 rounded-lg px-4 py-2 shadow-sm">
-                            <p class="text-sm text-[#5a3a22] leading-snug">
-                                <strong class="font-uncial text-[#5a3a22] text-base block mb-0.5">Kein Newsletter?</strong>
+                        <div class="flex-1 bg-wr-paper border border-wr-border rounded-lg px-4 py-2 shadow-sm">
+                            <p class="text-sm leading-snug m-0">
+                                <strong class="font-heading text-base block mb-0.5">Kein Newsletter?</strong>
                                 Verpasse keine Neuigkeiten zu Abenteuern und Ankündigungen der Waldritter.
                             </p>
                         </div>
-                        {{-- Schaltflächen --}}
-                        <div class="flex gap-2 shrink-0">
+                        <div class="flex flex-wrap gap-2 shrink-0">
                             <form method="POST" action="{{ route('newsletter.subscribe') }}">
                                 @csrf
-                                <button type="submit" class="ui small primary button">
-                                    <i class="envelope icon"></i> Jetzt abonnieren
+                                <button type="submit" class="wr-btn wr-btn--primary wr-btn--small">
+                                    <i class="envelope icon" aria-hidden="true"></i> Jetzt abonnieren
                                 </button>
                             </form>
-                            <button type="button" @click="schliessen()"
-                                    class="ui small button">
-                                Nein Danke
+                            <button type="button" @click="schliessen()" class="wr-btn wr-btn--secondary wr-btn--small">
+                                Nein danke
                             </button>
                         </div>
                     </div>
                 </div>
             @endif
 
-            {{-- Onboarding-Fortschrittsbox: solange nicht alle drei Aufgaben erledigt sind --}}
-            @if ($showOnboarding)
-                <section
-                    role="region"
-                    aria-labelledby="onboarding-heading"
-                    x-data="{ elternOffen: false }"
-                    class="bg-amber-50 border-2 border-[#5a3a22]/40 rounded-lg p-4 sm:p-6 mb-6 sm:mb-8 text-stone-800">
-
-                    <h2 id="onboarding-heading" class="font-uncial text-xl text-waldritter mb-1">
-                        Deine ersten Schritte
-                    </h2>
-                    <p class="text-stone-600 text-sm mb-5">
-                        Herzlich willkommen bei den Waldritter! Erledige diese drei Aufgaben, um loszulegen.
-                    </p>
-
-                    <ol class="space-y-4 mb-5">
-
-                        {{-- Schritt 1: Profil vervollständigen --}}
-                        <li class="flex gap-3 items-start">
-                            @if ($profileComplete)
-                                <span aria-label="Erledigt"
-                                      class="shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-green-600 text-white font-bold">&#10003;</span>
-                            @else
-                                <span aria-hidden="true"
-                                      class="shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-[#5a3a22] text-amber-50 font-semibold text-sm">1</span>
-                            @endif
-                            <div class="flex-1 min-w-0">
-                                <p class="font-semibold {{ $profileComplete ? 'line-through text-stone-400' : 'text-waldritter' }}">
-                                    Profil vervollständigen
-                                </p>
-                                @unless ($profileComplete)
-                                    <p class="text-sm text-stone-600 mt-0.5 mb-2">
-                                        Trage deine Adresse und Telefonnummer ein – diese werden für die Anmeldung zu Veranstaltungen benötigt.
-                                    </p>
-                                    <a href="{{ route('profile.edit') }}"
-                                       class="ui small primary button focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-600 focus-visible:outline-offset-2">
-                                        Zum Profil
-                                    </a>
-                                @endunless
-                            </div>
-                        </li>
-
-                        {{-- Schritt 2: Spieler anlegen --}}
-                        <li class="flex gap-3 items-start {{ ! $profileComplete && ! $hasPlayers ? 'opacity-50' : '' }}">
-                            @if ($hasPlayers)
-                                <span aria-label="Erledigt"
-                                      class="shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-green-600 text-white font-bold">&#10003;</span>
-                            @else
-                                <span aria-hidden="true"
-                                      class="shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-[#5a3a22] text-amber-50 font-semibold text-sm">2</span>
-                            @endif
-                            <div class="flex-1 min-w-0">
-                                <p class="font-semibold {{ $hasPlayers ? 'line-through text-stone-400' : 'text-waldritter' }}">
-                                    Spieler anlegen
-                                </p>
-                                @unless ($hasPlayers)
-                                    <p class="text-sm text-stone-600 mt-0.5 mb-2">
-                                        Lege deinen Spieler (oder dein Kind) an – das geht direkt hier im Portal.
-                                    </p>
-                                    <div class="flex flex-wrap gap-3 items-center mb-2">
-                                        <a href="{{ route('players.create') }}"
-                                           class="ui small {{ $profileComplete ? 'primary' : '' }} button focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-600 focus-visible:outline-offset-2">
-                                            Spieler anlegen
-                                        </a>
-                                    </div>
-                                    <p class="text-xs text-stone-500">
-                                        Existiert ein Spieler bereits über ein anderes Elternteil?
-                                        Schreibe uns bitte eine E-Mail an
-                                        <a href="mailto:{{ config('portal.contact_email') }}"
-                                           class="underline hover:text-stone-800">{{ config('portal.contact_email') }}</a>,
-                                        damit wir den Spieler deinem Konto zuordnen können.
-                                    </p>
-                                @endunless
-                            </div>
-                        </li>
-
-                        {{-- Schritt 3: Zur Veranstaltung anmelden --}}
-                        <li class="flex gap-3 items-start {{ ! $hasPlayers && ! $hasBookings ? 'opacity-50' : '' }}">
-                            @if ($hasBookings)
-                                <span aria-label="Erledigt"
-                                      class="shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-green-600 text-white font-bold">&#10003;</span>
-                            @else
-                                <span aria-hidden="true"
-                                      class="shrink-0 w-8 h-8 flex items-center justify-center rounded-full bg-[#5a3a22] text-amber-50 font-semibold text-sm">3</span>
-                            @endif
-                            <div class="flex-1 min-w-0">
-                                <p class="font-semibold {{ $hasBookings ? 'line-through text-stone-400' : 'text-waldritter' }}">
-                                    Zu einer Veranstaltung anmelden
-                                </p>
-                                @unless ($hasBookings)
-                                    <p class="text-sm text-stone-600 mt-0.5 mb-2">
-                                        Such dir ein Abenteuer aus und melde deinen Spieler an. Deinen Helden erstellst du dann direkt vor Ort
-                                        beim <strong class="font-medium">Bürokraten</strong>.
-                                    </p>
-                                    @can('adventure.access')
-                                        <a href="{{ route('adventures.index') }}"
-                                           class="ui small {{ $hasPlayers ? 'primary' : '' }} button focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-600 focus-visible:outline-offset-2">
-                                            Abenteuer ansehen
-                                        </a>
-                                    @endcan
-                                @endunless
-                            </div>
-                        </li>
-
-                    </ol>
-
-                    <div class="pt-4 border-t border-[#5a3a22]/20">
-                        <button type="button"
-                                x-on:click="elternOffen = !elternOffen"
-                                :aria-expanded="elternOffen.toString()"
-                                aria-controls="onboarding-eltern"
-                                class="text-sm text-stone-600 hover:text-stone-900 underline focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-600 focus-visible:outline-offset-2">
-                            Infos für Eltern &amp; Erziehungsberechtigte
-                        </button>
-                        <div id="onboarding-eltern"
-                             x-show="elternOffen"
-                             x-cloak
-                             class="mt-3 text-sm text-stone-700 space-y-2">
-                            <p>Bitte legt zunächst euer Kind als Spieler an und meldet es zu einer Veranstaltung an. Auf der Veranstaltung erstellt die Spielleitung gemeinsam mit eurem Kind den Charakter (Helden). Der Bürokrat ist dabei ein Spielcharakter (NSC), der als Ansprechperson für das Heldenregister zuständig ist. Erst nach der ersten Veranstaltung erscheint der Held hier im Portal.</p>
-                            <p>Für Kinder unter 18 Jahren ist die Anmeldung nur mit Einwilligung der Erziehungsberechtigten möglich.</p>
-                        </div>
+            {{-- Admin-Kennzahlen (REP-06): ruhiger Verwaltungsabschnitt am Ende --}}
+            @if (! empty($metrics))
+                <section aria-labelledby="metrics-heading">
+                    <x-wr.section-heading title="Verwaltung auf einen Blick" id="metrics-heading" />
+                    <div class="grid gap-3 sm:gap-4 grid-cols-2 lg:grid-cols-4">
+                        <x-wr.stat-tile label="Spieler" :value="$metrics['players']" icon="users" />
+                        <x-wr.stat-tile label="Helden" :value="$metrics['heroes']" icon="chess knight" />
+                        <x-wr.stat-tile label="Kommende Abenteuer" :value="$metrics['upcoming_events']" icon="calendar alternate" />
+                        <x-wr.stat-tile label="Unbestätigte Anmeldungen" :value="$metrics['open_bookings']" icon="clipboard list" />
                     </div>
                 </section>
-            @endif
-
-            {{-- Admin-Kennzahlen (REP-06) --}}
-            @if (! empty($metrics))
-                <div class="grid gap-4 grid-cols-2 lg:grid-cols-4 mb-6 sm:mb-8">
-                    @foreach ([
-                        ['Spieler', $metrics['players']],
-                        ['Helden', $metrics['heroes']],
-                        ['Kommende Abenteuer', $metrics['upcoming_events']],
-                        ['Offene Anmeldungen', $metrics['open_bookings']],
-                    ] as [$label, $value])
-                        <div class="bg-white/70 border-2 border-[#5a3a22]/40 rounded-lg p-4 text-center">
-                            <div class="text-3xl font-semibold text-waldritter">{{ $value }}</div>
-                            <div class="text-sm text-stone-600">{{ $label }}</div>
-                        </div>
-                    @endforeach
-                </div>
-            @endif
-
-           {{-- UI-43: Mobile-Dashboard (< sm) --}}
-            <div class="sm:hidden space-y-4 mb-4">
-
-                {{-- Aktive Helden --}}
-                @if ($activePlayers->isNotEmpty())
-                    <div class="text-xs text-stone-400 uppercase tracking-wide mb-2">Helden deiner Spieler</div>
-                @endif
-                @foreach ($activePlayers as $activePlayer)
-                    @php($activeHero = $activePlayer->activeHero)
-                    @if ($activeHero)
-                        <a href="{{ route('heroes.show', $activeHero) }}"
-                           class="flex items-center gap-4 bg-white/70 border-2 border-[#5a3a22]/40 rounded-lg p-4 shadow-sm active:bg-amber-50 transition-colors">
-                            <img src="{{ $activeHero->image_url }}" alt="{{ $activeHero->character_name }}"
-                                 class="w-16 h-16 object-cover rounded border-2 border-[#5a3a22]/40 shrink-0" loading="lazy">
-                            <div class="flex-1 min-w-0">
-                                <div class="text-xs text-stone-500 uppercase tracking-wide mb-0.5">
-                                    {{ $activePlayer->pivot->self ? 'Mein aktiver Held' : 'Held von ' . $activePlayer->name }}
-                                </div>
-                                <div class="font-uncial text-waldritter text-lg leading-tight truncate">{{ $activeHero->character_name }}</div>
-                                <div class="text-xs text-stone-500 truncate">{{ $activeHero->classes->pluck('name')->implode(', ') ?: '—' }}</div>
-                                <div class="text-sm font-semibold text-waldritter mt-1">{{ number_format($activeHero->ep_balance, 0, ',', '.') }} EP verfügbar</div>
-                            </div>
-                            <svg class="h-5 w-5 text-stone-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
-                            </svg>
-                        </a>
-                    @endif
-                @endforeach
-
-                {{-- Meine Anmeldungen (mobile) --}}
-                @if ($upcomingBookedAdventures->isNotEmpty())
-                    <div>
-                        <div class="text-xs text-stone-400 uppercase tracking-wide mb-2">Meine Anmeldungen</div>
-                        <div class="space-y-2">
-                            @foreach ($upcomingBookedAdventures as $adventure)
-                                <a href="{{ route('adventures.show', $adventure) }}"
-                                   class="flex items-center gap-3 bg-white/70 border-2 border-[#5a3a22]/40 rounded-lg p-3 shadow-sm active:bg-amber-50 transition-colors">
-                                    <div class="flex-1 min-w-0">
-                                        <div class="font-uncial text-waldritter text-base leading-tight truncate">{{ $adventure->name }}</div>
-                                        <div class="text-xs text-stone-500 mt-0.5">
-                                            @if ($adventure->start_at)
-                                                {{ $adventure->start_at->format('d.m.Y') }}
-                                                @if ($adventure->location) · {{ $adventure->location->titel }} @endif
-                                            @endif
-                                        </div>
-                                        <div class="flex flex-wrap gap-1 mt-1">
-                                            @foreach ($adventure->bookings as $booking)
-                                                <span class="inline-flex items-center gap-1 text-xs px-1.5 py-0.5 rounded
-                                                    {{ $booking->waitlisted ? 'bg-stone-100 text-stone-600' : ($booking->status === 'bestaetigt' ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800') }}">
-                                                    @if ($booking->waitlisted)
-                                                        <i class="hourglass half icon" title="Warteliste" aria-label="Warteliste"></i>
-                                                    @else
-                                                        &#10003;
-                                                    @endif
-                                                    {{ $booking->participant_name }}
-                                                    @if ($booking->role?->is_teamer_like)
-                                                        <i class="shield alternate icon text-xs ml-0.5"
-                                                           style="color:#6366f1"
-                                                           title="Teamer"
-                                                           aria-label="Teamer"></i>
-                                                    @elseif ($adventure->fee > 0 && ! $booking->waitlisted)
-                                                        <i class="{{ $booking->paid ? 'money bill alternate icon' : 'clock icon' }} text-xs ml-0.5"
-                                                           style="color:{{ $booking->paid ? '#16a34a' : '#d97706' }}"
-                                                           title="{{ $booking->paid ? 'Bezahlt' : 'Zahlung ausstehend' }}"
-                                                           aria-label="{{ $booking->paid ? 'Bezahlt' : 'Zahlung ausstehend' }}"></i>
-                                                    @endif
-                                                </span>
-                                            @endforeach
-                                        </div>
-                                    </div>
-                                    <svg class="h-4 w-4 text-stone-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
-                                    </svg>
-                                </a>
-                            @endforeach
-                        </div>
-                    </div>
-
-                {{-- Fallback: nächstes Abenteuer wenn keine eigenen Buchungen --}}
-                @elseif ($nextAdventure)
-                    <a href="{{ route('adventures.show', $nextAdventure) }}"
-                       class="block bg-white/70 border-2 border-[#5a3a22]/40 rounded-lg p-4 shadow-sm active:bg-amber-50 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-600 focus-visible:outline-offset-[-2px]">
-                        <div class="text-xs text-stone-400 uppercase tracking-wide mb-1">Nächstes Abenteuer</div>
-                        <div class="font-uncial text-waldritter text-lg leading-tight mb-2">{{ $nextAdventure->name }}</div>
-                        <dl class="text-sm text-stone-600 space-y-0.5 mb-3">
-                            @if ($nextAdventure->start_at)
-                                <div class="flex gap-2">
-                                    <dt class="text-stone-400 shrink-0">Datum</dt>
-                                    <dd>{{ $nextAdventure->start_at->format('d.m.Y') }}</dd>
-                                </div>
-                            @endif
-                            @if ($nextAdventure->location)
-                                <div class="flex gap-2">
-                                    <dt class="text-stone-400 shrink-0">Ort</dt>
-                                    <dd class="truncate">{{ $nextAdventure->location->titel }}</dd>
-                                </div>
-                            @endif
-                            <div class="flex gap-2">
-                                <dt class="text-stone-400 shrink-0">Beitrag</dt>
-                                <dd>{{ $nextAdventure->fee > 0 ? number_format($nextAdventure->fee, 2, ',', '.') . ' €' : 'kostenlos' }}</dd>
-                            </div>
-                        </dl>
-                        @include('dashboard._adventure_status', ['slots' => $nextAdventureSlots, 'class' => 'mb-3'])
-                        <div class="flex items-center justify-between">
-                            @if ($nextAdventure->registrationOpen())
-                                <span class="ui small primary button pointer-events-none">Jetzt anmelden</span>
-                            @else
-                                <span class="text-stone-400 text-sm">Details ansehen</span>
-                            @endif
-                            <svg class="h-5 w-5 text-stone-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                                <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
-                            </svg>
-                        </div>
-                    </a>
-                @endif
-
-                {{-- Leerzustand: kein Held, keine Abenteuer --}}
-                @if ($activePlayers->isEmpty() && $upcomingBookedAdventures->isEmpty() && ! $nextAdventure)
-                    <div class="bg-white/60 border-2 border-[#5a3a22]/30 rounded-lg p-6 text-center text-stone-500">
-                        <p class="font-uncial text-waldritter text-lg mb-1">Herzlich willkommen!</p>
-                        <p class="text-sm">Erkunde die Abenteuer oder lege deinen ersten Spieler an.</p>
-                        <div class="flex justify-center gap-3 mt-4 flex-wrap">
-                            @can('adventure.access')
-                                <a href="{{ route('adventures.index') }}" class="ui button">Abenteuer</a>
-                            @endcan
-                            <a href="{{ route('players.index') }}" class="ui button">Meine Spieler</a>
-                        </div>
-                    </div>
-                @endif
-
-            </div>
-
-            {{-- Desktop: Meine Anmeldungen (sm+) --}}
-            @if ($upcomingBookedAdventures->isNotEmpty())
-                @can('adventure.access')
-                <div class="hidden sm:block mb-6">
-                    <div class="text-xs text-stone-400 uppercase tracking-wide mb-2">Meine Anmeldungen</div>
-                    <div class="space-y-3">
-                        @foreach ($upcomingBookedAdventures as $adventure)
-                            <a href="{{ route('adventures.show', $adventure) }}"
-                               class="flex items-center gap-6 bg-white/70 border-2 border-[#5a3a22]/40 rounded-lg p-5 shadow hover:shadow-xl hover:-translate-y-0.5 transition-all group focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-600 focus-visible:outline-offset-[-2px]">
-                                <div class="flex-1 min-w-0">
-                                    <div class="font-uncial text-waldritter text-xl leading-tight mb-1 group-hover:text-amber-700 transition-colors">{{ $adventure->name }}</div>
-                                    <dl class="flex flex-wrap gap-x-6 gap-y-1 text-sm text-stone-600">
-                                        @if ($adventure->start_at)
-                                            <div class="flex items-center gap-1.5">
-                                                <dt><i class="calendar alternate icon text-stone-400" aria-hidden="true"></i></dt>
-                                                <dd>{{ $adventure->start_at->format('d.m.Y') }}</dd>
-                                            </div>
-                                        @endif
-                                        @if ($adventure->location)
-                                            <div class="flex items-center gap-1.5">
-                                                <dt><i class="map marker alternate icon text-stone-400" aria-hidden="true"></i></dt>
-                                                <dd>{{ $adventure->location->titel }}</dd>
-                                            </div>
-                                        @endif
-                                        <div class="flex items-center gap-1.5">
-                                            <dt><i class="euro sign icon text-stone-400" aria-hidden="true"></i></dt>
-                                            <dd>{{ $adventure->fee > 0 ? number_format($adventure->fee, 2, ',', '.') . ' €' : 'kostenlos' }}</dd>
-                                        </div>
-                                    </dl>
-                                </div>
-                                <div class="flex flex-wrap items-center gap-2 shrink-0">
-                                    @foreach ($adventure->bookings as $booking)
-                                        <span class="inline-flex items-center gap-1.5 text-sm font-medium px-2.5 py-1 rounded-full
-                                            {{ $booking->waitlisted ? 'bg-stone-100 text-stone-600' : ($booking->status === 'bestaetigt' ? 'bg-green-100 text-green-800' : 'bg-amber-100 text-amber-800') }}"
-                                            title="{{ $booking->waitlisted ? 'Warteliste' : ($booking->status === 'bestaetigt' ? 'Bestätigt' : 'Angemeldet') }}">
-                                            @if ($booking->waitlisted)
-                                                <i class="hourglass half icon" aria-label="Warteliste"></i>
-                                            @else
-                                                &#10003;
-                                            @endif
-                                            {{ $booking->participant_name }}
-                                            @if ($booking->role?->is_teamer_like)
-                                                <i class="shield alternate icon"
-                                                   style="color:#6366f1;font-size:.85em"
-                                                   title="Teamer"
-                                                   aria-label="Teamer"></i>
-                                            @elseif ($adventure->fee > 0 && ! $booking->waitlisted)
-                                                <i class="{{ $booking->paid ? 'money bill alternate icon' : 'clock icon' }}"
-                                                   style="color:{{ $booking->paid ? '#16a34a' : '#d97706' }};font-size:.85em"
-                                                   title="{{ $booking->paid ? 'Bezahlt' : 'Zahlung ausstehend' }}"
-                                                   aria-label="{{ $booking->paid ? 'Bezahlt' : 'Zahlung ausstehend' }}"></i>
-                                            @endif
-                                        </span>
-                                    @endforeach
-                                    <svg class="h-5 w-5 text-stone-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                                        <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
-                                    </svg>
-                                </div>
-                            </a>
-                        @endforeach
-                    </div>
-                </div>
-                @endcan
-
-            {{-- Desktop: Fallback nächstes Abenteuer wenn keine eigenen Buchungen --}}
-            @elseif ($nextAdventure)
-                @can('adventure.access')
-                <a href="{{ route('adventures.show', $nextAdventure) }}"
-                   class="hidden sm:flex items-center gap-6 bg-white/70 border-2 border-[#5a3a22]/40 rounded-lg p-5 shadow mb-6 hover:shadow-xl hover:-translate-y-0.5 transition-all group focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-600 focus-visible:outline-offset-[-2px]">
-                    <div class="flex-1 min-w-0">
-                        <div class="text-xs text-stone-400 uppercase tracking-wide mb-1">Nächstes Abenteuer</div>
-                        <div class="font-uncial text-waldritter text-xl leading-tight mb-2 group-hover:text-amber-700 transition-colors">{{ $nextAdventure->name }}</div>
-                        <dl class="flex flex-wrap gap-x-6 gap-y-1 text-sm text-stone-600">
-                            @if ($nextAdventure->start_at)
-                                <div class="flex items-center gap-1.5">
-                                    <dt><i class="calendar alternate icon text-stone-400" aria-hidden="true"></i></dt>
-                                    <dd>{{ $nextAdventure->start_at->format('d.m.Y') }}</dd>
-                                </div>
-                            @endif
-                            @if ($nextAdventure->location)
-                                <div class="flex items-center gap-1.5">
-                                    <dt><i class="map marker alternate icon text-stone-400" aria-hidden="true"></i></dt>
-                                    <dd>{{ $nextAdventure->location->titel }}</dd>
-                                </div>
-                            @endif
-                            <div class="flex items-center gap-1.5">
-                                <dt><i class="euro sign icon text-stone-400" aria-hidden="true"></i></dt>
-                                <dd>{{ $nextAdventure->fee > 0 ? number_format($nextAdventure->fee, 2, ',', '.') . ' €' : 'kostenlos' }}</dd>
-                            </div>
-                        </dl>
-                        @include('dashboard._adventure_status', ['slots' => $nextAdventureSlots, 'class' => 'mt-2'])
-                    </div>
-                    <div class="flex items-center gap-3 shrink-0">
-                        @if ($nextAdventure->registrationOpen())
-                            <span class="ui small primary button pointer-events-none">Jetzt anmelden</span>
-                        @else
-                            <span class="ui small button pointer-events-none">Details ansehen</span>
-                        @endif
-                        <svg class="h-5 w-5 text-stone-400 shrink-0" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                            <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
-                        </svg>
-                    </div>
-                </a>
-                @endcan
-            @endif
-
-            {{-- Desktop: Kachel-Navigation (sm+) --}}
-            <div class="hidden sm:grid gap-6 sm:grid-cols-2 lg:grid-cols-3">
-                {{-- Dein Profil --}}
-                <a href="{{ route('profile.edit') }}"
-                   class="group block rounded-lg overflow-hidden border-2 border-[#5a3a22]/40 bg-white/60 shadow hover:shadow-xl hover:-translate-y-1 transition">
-                    <div class="h-44 overflow-hidden save-data-hide">
-                        <img src="/images/dein_profil.jpg" alt="" aria-hidden="true" loading="lazy" width="400" height="176" class="w-full h-full object-cover group-hover:scale-105 transition">
-                    </div>
-                    <div class="p-4 text-center">
-                        <div class="font-uncial text-lg text-waldritter">Dein Profil</div>
-                        <div class="text-sm text-stone-600">Persönlich</div>
-                    </div>
-                </a>
-
-                {{-- Heldenregister --}}
-                @can('heldenregister.view')
-                    <a href="{{ route('heroes.index') }}"
-                       class="group block rounded-lg overflow-hidden border-2 border-[#5a3a22]/40 bg-white/60 shadow hover:shadow-xl hover:-translate-y-1 transition">
-                        <div class="h-44 overflow-hidden save-data-hide">
-                            <img src="/images/heroes_db.jpg" alt="" aria-hidden="true" loading="lazy" width="400" height="176" class="w-full h-full object-cover group-hover:scale-105 transition">
-                        </div>
-                        <div class="p-4 text-center">
-                            <div class="font-uncial text-lg text-waldritter">Heldenverwaltung</div>
-                            <div class="text-sm text-stone-600">Auflistung aller Helden</div>
-                        </div>
-                    </a>
-                @endcan
-
-                {{-- Abenteuer --}}
-                @can('adventure.access')
-                    <a href="{{ route('adventures.index') }}"
-                       class="group block rounded-lg overflow-hidden border-2 border-[#5a3a22]/40 bg-white/60 shadow hover:shadow-xl hover:-translate-y-1 transition">
-                        <div class="h-44 overflow-hidden save-data-hide">
-                            <img src="/images/abenteuer_v2.jpg" alt="" aria-hidden="true" loading="lazy" width="400" height="176" class="w-full h-full object-cover group-hover:scale-105 transition">
-                        </div>
-                        <div class="p-4 text-center">
-                            <div class="font-uncial text-lg text-waldritter">Abenteuer</div>
-                            <div class="text-sm text-stone-600">Veranstaltungen</div>
-                        </div>
-                    </a>
-                @endcan
-
-                {{-- Deine Spieler --}}
-                <a href="{{ route('players.index') }}"
-                   class="group block rounded-lg overflow-hidden border-2 border-[#5a3a22]/40 bg-white/60 shadow hover:shadow-xl hover:-translate-y-1 transition">
-                    <div class="h-44 overflow-hidden save-data-hide">
-                        <img src="/images/spieler_verwaltung2.jpg" alt="" aria-hidden="true" loading="lazy" width="400" height="176" class="w-full h-full object-cover group-hover:scale-105 transition">
-                    </div>
-                    <div class="p-4 text-center">
-                        <div class="font-uncial text-lg text-waldritter">Deine Spieler</div>
-                        <div class="text-sm text-stone-600">Spielerdatenbank</div>
-                    </div>
-                </a>
-				
-
-                {{-- Verwaltung (nur Admins) --}}
-                @can('portal.manage')
-                    <a href="{{ route('admin.index') }}"
-                       class="group block rounded-lg overflow-hidden border-2 border-[#5a3a22]/40 bg-white/60 shadow hover:shadow-xl hover:-translate-y-1 transition">
-                        <div class="h-44 overflow-hidden save-data-hide">
-                            <img src="/images/verwaltung.jpg" alt="" aria-hidden="true" loading="lazy" width="400" height="176" class="w-full h-full object-cover group-hover:scale-105 transition">
-                        </div>
-                        <div class="p-4 text-center">
-                            <div class="font-uncial text-lg text-waldritter">Verwaltung</div>
-                            <div class="text-sm text-stone-600">Portal-Administration</div>
-                        </div>
-                    </a>
-                @endcan
-				{{-- Brans Tagebuch --}}
-				<a href="https://www.waldritter-giessen.de/brans-tagebuch/"
-                       class="group block rounded-lg overflow-hidden border-2 border-[#5a3a22]/40 bg-white/60 shadow hover:shadow-xl hover:-translate-y-1 transition">
-                        <div class="h-44 overflow-hidden save-data-hide">
-                            <img src="/images/Brans-Tagebuch-400x176.jpg" alt="" aria-hidden="true" loading="lazy" width="400" height="176" class="w-full h-full object-cover group-hover:scale-105 transition">
-                        </div>
-                        <div class="p-4 text-center">
-                            <div class="font-uncial text-lg text-waldritter">Brans Tagebuch</div>
-                            <div class="text-sm text-stone-600">Erzählungen aus den Abenteuern</div>
-                        </div>
-                    </a>
-            </div>
-			
-
-            {{-- Desktop: Aktive Helden (sm+) --}}
-            @if ($activePlayers->isNotEmpty())
-                <div class="hidden sm:block mt-6 pt-6 border-t border-[#5a3a22]/30 space-y-3">
-                    @foreach ($activePlayers as $activePlayer)
-                        @php($activeHero = $activePlayer->activeHero)
-                        @if ($activeHero)
-                            <a href="{{ route('heroes.show', $activeHero) }}"
-                               class="flex items-center gap-4 bg-white/70 border-2 border-[#5a3a22]/40 rounded-lg p-4 shadow hover:shadow-xl hover:-translate-y-0.5 transition-all group focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-600 focus-visible:outline-offset-[-2px]">
-                                <img src="{{ $activeHero->image_url }}" alt="{{ $activeHero->character_name }}"
-                                     class="w-16 h-16 object-cover rounded border-2 border-[#5a3a22]/40 shrink-0" loading="lazy">
-                                <div class="flex-1 min-w-0">
-                                    <div class="text-xs text-stone-500 uppercase tracking-wide mb-0.5">
-                                        {{ $activePlayer->pivot->self ? 'Mein aktiver Held' : 'Held von ' . $activePlayer->name }}
-                                    </div>
-                                    <div class="font-uncial text-waldritter text-lg leading-tight truncate">{{ $activeHero->character_name }}</div>
-                                    <div class="text-xs text-stone-500 truncate">{{ $activeHero->classes->pluck('name')->implode(', ') ?: '—' }}</div>
-                                    <div class="text-sm font-semibold text-waldritter mt-1">{{ number_format($activeHero->ep_balance, 0, ',', '.') }} EP verfügbar</div>
-                                </div>
-                                <svg class="h-5 w-5 text-stone-400 shrink-0 group-hover:translate-x-1 transition-transform" fill="none" viewBox="0 0 24 24" stroke="currentColor" stroke-width="2" aria-hidden="true">
-                                    <path stroke-linecap="round" stroke-linejoin="round" d="M9 5l7 7-7 7"/>
-                                </svg>
-                            </a>
-                        @endif
-                    @endforeach
-                </div>
             @endif
 
         </div>

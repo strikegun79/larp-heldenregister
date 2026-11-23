@@ -1,29 +1,46 @@
 <x-app-layout>
-    <x-slot name="header">
-        <div class="flex items-center justify-between">
-            <h2 class="font-uncial text-2xl text-waldritter leading-tight">
-                Heldenverwaltung
-            </h2>
-            @can('heldenregister.edit')
-                <a href="{{ route('heroes.create') }}" class="ui primary button">
-                    <i class="plus icon"></i> Neuer Held
-                </a>
-            @endcan
-        </div>
-    </x-slot>
+    @php
+        $hasFilter = $q !== '' || $classId || $playerId || $status;
+        // Status eines Helden als Pill (Text + Symbol, kein Abblenden der Zeile)
+        $statusPill = function ($hero) {
+            if ($hero->died) {
+                return ['wr-pill--danger', 'question circle', 'verschollen'];
+            }
 
-    <div class="py-12">
-        <div class="max-w-7xl mx-auto sm:px-6 lg:px-8">
-            @php($selectClass = 'mt-1 block w-full border-gray-300 rounded-md shadow-sm text-sm focus:border-amber-600 focus:ring-amber-600')
-            <form method="GET" action="{{ route('heroes.index') }}"
-                  class="mb-4 bg-white/60 border-2 border-[#5a3a22]/30 rounded-lg p-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-5 items-end">
+            return $hero->active
+                ? ['wr-pill--success', 'check circle', 'aktiv']
+                : ['wr-pill--waitlist', 'pause circle', 'inaktiv'];
+        };
+    @endphp
+
+    {{-- Waldritter-Designsystem v1 (Verwaltungsliste: ruhig, klare Spalten, Filter) --}}
+    <div class="wr-v1 py-6 sm:py-10">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+
+            {{-- Seitenkopf --}}
+            <div class="mb-6 flex flex-wrap items-end justify-between gap-3">
+                <div>
+                    <span class="wr-eyebrow">Heldenregister</span>
+                    <h1 class="wr-heading">Heldenverwaltung</h1>
+                </div>
+                @can('heldenregister.edit')
+                    <a href="{{ route('heroes.create') }}" class="wr-btn wr-btn--primary">
+                        <i class="plus icon m-0" aria-hidden="true"></i> Neuer Held
+                    </a>
+                @endcan
+            </div>
+
+            {{-- Filter --}}
+            <form method="GET" action="{{ route('heroes.index') }}" role="search"
+                  class="wr-card wr-form p-4 mb-4 grid gap-3 sm:grid-cols-2 lg:grid-cols-5 items-end">
                 <div class="lg:col-span-2">
-                    <label class="text-sm text-stone-600">Suche (Spieler-, Charakter- oder Fertigkeitsname)</label>
-                    <input type="text" name="q" value="{{ $q }}" placeholder="z. B. Tilix, Müller oder Erste Hilfe" class="{{ $selectClass }}">
+                    <label for="heroes-q" class="wr-label">Suche</label>
+                    <input id="heroes-q" type="search" name="q" value="{{ $q }}" placeholder="z. B. Tilix, Müller oder Erste Hilfe" class="w-full">
+                    <small class="wr-help">Spieler-, Charakter- oder Fertigkeitsname, auch Helden-Siegel.</small>
                 </div>
                 <div>
-                    <label class="text-sm text-stone-600">Klasse</label>
-                    <select name="class_id" class="{{ $selectClass }}">
+                    <label for="heroes-class" class="wr-label">Klasse</label>
+                    <select id="heroes-class" name="class_id" class="w-full">
                         <option value="">Alle</option>
                         @foreach ($classes as $class)
                             <option value="{{ $class->id }}" @selected((string) $classId === (string) $class->id)>{{ $class->name }}</option>
@@ -31,8 +48,8 @@
                     </select>
                 </div>
                 <div>
-                    <label class="text-sm text-stone-600">Spieler</label>
-                    <select name="player_id" class="{{ $selectClass }}">
+                    <label for="heroes-player" class="wr-label">Spieler</label>
+                    <select id="heroes-player" name="player_id" class="w-full">
                         <option value="">Alle</option>
                         @foreach ($players as $player)
                             <option value="{{ $player->id }}" @selected((string) $playerId === (string) $player->id)>{{ $player->full_name }}</option>
@@ -40,129 +57,119 @@
                     </select>
                 </div>
                 <div>
-                    <label class="text-sm text-stone-600">Status</label>
-                    <select name="status" class="{{ $selectClass }}">
+                    <label for="heroes-status" class="wr-label">Status</label>
+                    <select id="heroes-status" name="status" class="w-full">
                         <option value="">Alle</option>
                         <option value="active" @selected($status === 'active')>Aktiv</option>
                         <option value="inactive" @selected($status === 'inactive')>Inaktiv</option>
                         <option value="missing" @selected($status === 'missing')>Verschollen</option>
                     </select>
                 </div>
-                <div class="sm:col-span-2 lg:col-span-5 flex items-center gap-3">
-                    <button type="submit" class="ui small primary button">Filtern</button>
-                    <a href="{{ route('heroes.index') }}" class="text-sm text-stone-600 hover:underline">Zurücksetzen</a>
+                <div class="sm:col-span-2 lg:col-span-5 flex flex-wrap items-center gap-2">
+                    <button type="submit" class="wr-btn wr-btn--primary">
+                        <i class="filter icon m-0" aria-hidden="true"></i> Filtern
+                    </button>
+                    @if ($hasFilter)
+                        <a href="{{ route('heroes.index') }}" class="wr-btn wr-btn--secondary">Zurücksetzen</a>
+                    @endif
                 </div>
             </form>
 
-            <div class="bg-white overflow-hidden shadow-sm sm:rounded-lg">
+            <p class="text-sm text-wr-ink-muted mb-3" role="status" aria-live="polite">
+                {{ $heroes->total() }} {{ $heroes->total() === 1 ? 'Held' : 'Helden' }} gefunden
+            </p>
 
-                {{-- Mobile: Kartenliste (nur < sm) --}}
-                <div class="sm:hidden divide-y divide-stone-200">
-                    @forelse ($heroes as $hero)
-                        <a href="{{ route('heroes.show', $hero) }}"
-                           data-modal-url="{{ route('heroes.show', $hero) }}"
-                           class="block p-4 hover:bg-black/5 active:bg-black/10 transition-colors focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-600 focus-visible:outline-offset-[-2px] {{ $hero->died ? 'opacity-60' : '' }}">
-                            <div class="font-medium text-stone-800">
-                                {{ $hero->character_name ?? '—' }}
-                                @if ($hero->image)
-                                    <i class="image icon text-stone-400 text-xs ml-0.5" title="Avatar hochgeladen"></i>
-                                @endif
-                                @if ($hero->gallery_images_count > 0)
-                                    <i class="images icon text-stone-400 text-xs ml-0.5" title="{{ $hero->gallery_images_count }} Galeriebild(er)"></i>
-                                @endif
-                            </div>
-                            <div class="text-sm text-stone-500 mt-0.5">{{ $hero->player?->full_name ?? '—' }}</div>
-                            <div class="flex flex-wrap items-center gap-x-3 gap-y-1 mt-2 text-xs text-stone-500">
-                                @if ($hero->classes->isNotEmpty())
-                                    <span>{{ $hero->classes->pluck('name')->implode(', ') }}</span>
-                                @endif
-                                <span>{{ number_format($hero->ep_balance, 0, ',', '.') }} EP</span>
-                                @if ($hero->died)
-                                    <span class="text-red-700 font-medium">verschollen</span>
-                                @else
-                                    <span>{{ $hero->active ? 'aktiv' : 'inaktiv' }}</span>
-                                @endif
-                            </div>
-                        </a>
-                    @empty
-                        <div class="p-8 text-center">
-                            <p class="font-medium text-stone-700 mb-1">Noch keine Helden erfasst.</p>
-                            <p class="text-sm text-stone-500 mb-4">
-                                Bevor ein Held angelegt werden kann, muss ein
-                                <a href="{{ route('players.index') }}" class="text-waldritter hover:underline">Spieler</a>
-                                vorhanden sein.
-                            </p>
-                            @can('heldenregister.edit')
-                                <a href="{{ route('heroes.create') }}" class="ui small primary button">Neuen Helden anlegen</a>
-                            @endcan
-                        </div>
-                    @endforelse
+            @if ($heroes->isEmpty())
+                <div class="wr-card p-8 text-center items-center">
+                    @if ($hasFilter)
+                        <p class="font-semibold m-0 mb-1">Kein Held passt zu den Filtern.</p>
+                        <p class="wr-card__text mb-4">Passe die Suche an oder setze die Filter zurück.</p>
+                        <a href="{{ route('heroes.index') }}" class="wr-btn wr-btn--secondary">Filter zurücksetzen</a>
+                    @else
+                        <p class="font-semibold m-0 mb-1">Noch keine Helden erfasst.</p>
+                        <p class="wr-card__text mb-4">
+                            Bevor ein Held angelegt werden kann, muss ein
+                            <a href="{{ route('players.index') }}" class="wr-interactive underline text-wr-forest">Spieler</a>
+                            vorhanden sein.
+                        </p>
+                        @can('heldenregister.edit')
+                            <a href="{{ route('heroes.create') }}" class="wr-btn wr-btn--primary">Neuen Helden anlegen</a>
+                        @endcan
+                    @endif
                 </div>
-
-                {{-- Desktop: Tabelle (ab sm) --}}
-                <div class="hidden sm:block overflow-x-auto">
-                    <table class="min-w-full divide-y divide-stone-200">
-                        <thead class="bg-stone-50">
-                            <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase">Spieler</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase">Charakter</th>
-                                <th class="px-6 py-3 text-right text-xs font-medium text-stone-500 uppercase">EP gesamt</th>
-                                <th class="px-6 py-3 text-right text-xs font-medium text-stone-500 uppercase">EP verfügbar</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase">Klassen</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase">Aktiv</th>
-                            </tr>
-                        </thead>
-                        <tbody class="divide-y divide-stone-200 text-stone-800">
-                            @forelse ($heroes as $hero)
-                                <tr data-modal-url="{{ route('heroes.show', $hero) }}"
-                                    role="button" tabindex="0"
-                                    aria-label="Held {{ $hero->character_name ?? 'unbenannt' }} öffnen"
-                                    class="cursor-pointer hover:bg-black/5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-600 focus-visible:outline-offset-[-2px] {{ $hero->died ? 'opacity-60' : '' }}">
-                                    <td class="px-6 py-4">{{ $hero->player?->full_name ?? '—' }}</td>
-                                    <td class="px-6 py-4 font-medium">
+            @else
+                {{-- Handy: Karten --}}
+                <ul class="sm:hidden space-y-3 m-0 p-0 list-none" role="list">
+                    @foreach ($heroes as $hero)
+                        @php([$pillClass, $pillIcon, $pillText] = $statusPill($hero))
+                        <li>
+                            <a href="{{ route('heroes.show', $hero) }}" data-modal-url="{{ route('heroes.show', $hero) }}"
+                               class="wr-card wr-card--link">
+                                <div class="wr-card__body">
+                                    <span class="wr-card__title break-words">
                                         {{ $hero->character_name ?? '—' }}
                                         @if ($hero->image)
-                                            <i class="image icon text-stone-400 text-xs ml-0.5" title="Avatar hochgeladen"></i>
+                                            <i class="image icon text-wr-ink-muted text-xs" aria-hidden="true"></i><span class="sr-only">(Foto vorhanden)</span>
                                         @endif
                                         @if ($hero->gallery_images_count > 0)
-                                            <i class="images icon text-stone-400 text-xs ml-0.5" title="{{ $hero->gallery_images_count }} Galeriebild(er)"></i>
+                                            <i class="images icon text-wr-ink-muted text-xs" aria-hidden="true"></i><span class="sr-only">({{ $hero->gallery_images_count }} Galeriebilder)</span>
+                                        @endif
+                                    </span>
+                                    <span class="text-sm text-wr-ink-muted">{{ $hero->player?->full_name ?? '—' }}</span>
+                                    <div class="flex flex-wrap items-center gap-1.5 mt-1">
+                                        <span class="wr-pill wr-pill--small {{ $pillClass }}"><i class="{{ $pillIcon }} icon" aria-hidden="true"></i>{{ $pillText }}</span>
+                                        <span class="wr-pill wr-pill--small">{{ number_format($hero->ep_balance, 0, ',', '.') }} EP verfügbar</span>
+                                        @foreach ($hero->classes as $heroClass)
+                                            <span class="wr-pill wr-pill--small">{{ $heroClass->name }}</span>
+                                        @endforeach
+                                    </div>
+                                </div>
+                            </a>
+                        </li>
+                    @endforeach
+                </ul>
+
+                {{-- Desktop: Tabelle. Charaktername ist der Link (Tastatur), die Zeile bleibt per Maus klickbar. --}}
+                <div class="hidden sm:block wr-card overflow-x-auto">
+                    <table class="wr-table">
+                        <caption class="sr-only">Helden, Seite {{ $heroes->currentPage() }} von {{ $heroes->lastPage() }}</caption>
+                        <thead>
+                            <tr>
+                                <th scope="col">Spieler</th>
+                                <th scope="col">Charakter</th>
+                                <th scope="col" class="wr-num">EP gesamt</th>
+                                <th scope="col" class="wr-num">EP verfügbar</th>
+                                <th scope="col">Klassen</th>
+                                <th scope="col">Aktiv</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach ($heroes as $hero)
+                                @php([$pillClass, $pillIcon, $pillText] = $statusPill($hero))
+                                <tr data-modal-url="{{ route('heroes.show', $hero) }}">
+                                    <td>{{ $hero->player?->full_name ?? '—' }}</td>
+                                    <td>
+                                        <a href="{{ route('heroes.show', $hero) }}" data-modal-url="{{ route('heroes.show', $hero) }}"
+                                           class="wr-interactive font-semibold text-wr-forest underline">{{ $hero->character_name ?? '—' }}</a>
+                                        @if ($hero->image)
+                                            <i class="image icon text-wr-ink-muted text-xs ml-0.5" aria-hidden="true"></i><span class="sr-only">(Foto vorhanden)</span>
+                                        @endif
+                                        @if ($hero->gallery_images_count > 0)
+                                            <i class="images icon text-wr-ink-muted text-xs ml-0.5" aria-hidden="true"></i><span class="sr-only">({{ $hero->gallery_images_count }} Galeriebilder)</span>
                                         @endif
                                     </td>
-                                    <td class="px-6 py-4 text-right">{{ number_format($hero->ep_total, 0, ',', '.') }}</td>
-                                    <td class="px-6 py-4 text-right">{{ number_format($hero->ep_balance, 0, ',', '.') }}</td>
-                                    <td class="px-6 py-4">{{ $hero->classes->pluck('name')->implode(', ') ?: '—' }}</td>
-                                    <td class="px-6 py-4">
-                                        @if ($hero->died)
-                                            <span class="text-red-700">verschollen</span>
-                                        @else
-                                            {{ $hero->active ? 'ja' : 'nein' }}
-                                        @endif
-                                    </td>
+                                    <td class="wr-num">{{ number_format($hero->ep_total, 0, ',', '.') }}</td>
+                                    <td class="wr-num">{{ number_format($hero->ep_balance, 0, ',', '.') }}</td>
+                                    <td>{{ $hero->classes->pluck('name')->implode(', ') ?: '—' }}</td>
+                                    <td><span class="wr-pill wr-pill--small {{ $pillClass }}"><i class="{{ $pillIcon }} icon" aria-hidden="true"></i>{{ $pillText }}</span></td>
                                 </tr>
-                            @empty
-                                <tr>
-                                    <td colspan="6" class="px-6 py-10 text-center">
-                                        <p class="font-medium text-stone-700 mb-1">Noch keine Helden erfasst.</p>
-                                        <p class="text-sm text-stone-500 mb-4">
-                                            Bevor ein Held angelegt werden kann, muss ein
-                                            <a href="{{ route('players.index') }}" class="text-waldritter hover:underline">Spieler</a>
-                                            vorhanden sein.
-                                        </p>
-                                        @can('heldenregister.edit')
-                                            <a href="{{ route('heroes.create') }}" class="ui small primary button">Neuen Helden anlegen</a>
-                                        @endcan
-                                    </td>
-                                </tr>
-                            @endforelse
+                            @endforeach
                         </tbody>
                     </table>
                 </div>
 
-            </div>
-
-            <div class="mt-4">
-                {{ $heroes->links() }}
-            </div>
+                <div class="mt-4">{{ $heroes->links() }}</div>
+            @endif
         </div>
     </div>
 </x-app-layout>

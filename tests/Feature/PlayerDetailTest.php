@@ -50,7 +50,10 @@ class PlayerDetailTest extends TestCase
         $response->assertSee('data-tab="p-allg"', false);
         $response->assertSee('data-tab="p-helden"', false);
         $response->assertSee('data-tab="p-abenteuer"', false);
-        $response->assertSee('data-tab="p-avatar"', false);
+        // Waldritter v1: Avatar-Upload steht unter dem Avatar in „Allgemeines“ (kein eigener Reiter).
+        $response->assertDontSee('data-tab="p-avatar"', false);
+        $response->assertSee('Avatar ändern');
+        $response->assertSee(route('players.avatar', $player), false);
         $response->assertSee('(12 Jahre)');
         // Papyrus-Hintergrund gehört auf die Kartei-Übersicht, nicht ins Detail (Korrektur).
         $response->assertDontSee('/images/player_background.png', false);

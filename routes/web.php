@@ -23,6 +23,7 @@ use App\Http\Controllers\SignatureController;
 use App\Http\Controllers\SkillController;
 use App\Http\Controllers\SkilltreeController;
 use App\Http\Controllers\SurveyController;
+use App\Http\Controllers\TeamerCompensationController;
 use App\Http\Controllers\TeamerSignupController;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
@@ -106,6 +107,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::patch('/profile', [ProfileController::class, 'update'])->name('profile.update');
     Route::delete('/profile', [ProfileController::class, 'destroy'])->name('profile.destroy');
     Route::get('/profile/export-data', [ProfileController::class, 'exportData'])->name('profile.export-data');
+    Route::patch('/profile/teamer', [ProfileController::class, 'updateTeamer'])->name('profile.teamer.update'); // Issue #19
 
     // Newsletter-Opt-in/-out aus dem Profil heraus.
     Route::post('/newsletter/abonnieren', [NewsletterSubscriptionController::class, 'subscribe'])->name('newsletter.subscribe');
@@ -239,6 +241,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     // Teilnahmebeitrag-Status – Toggle paid (BOOK-06).
     Route::patch('adventures/{adventure}/bookings/{booking}/payment', [BookingController::class, 'togglePaid'])
         ->name('adventures.bookings.payment');
+    // Datum des letzten Bezahlungsabgleichs pro Veranstaltung (Issue #5).
+    Route::patch('adventures/{adventure}/payments-reconciled', [BookingController::class, 'updatePaymentsReconciled'])
+        ->name('adventures.payments-reconciled');
     Route::delete('adventures/{adventure}/bookings/{booking}', [BookingController::class, 'destroy'])
         ->name('adventures.bookings.destroy');
     Route::patch('adventures/{adventure}/bookings/{booking}/reinstate', [BookingController::class, 'reinstate'])
@@ -308,6 +313,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('players/{player}/edit', [Admin\PlayerController::class, 'edit'])->name('players.edit');
         Route::put('players/{player}', [Admin\PlayerController::class, 'update'])->name('players.update');
         // Betreuer je Spieler verwalten (PLAY-06).
+        Route::get('players/{player}/inspector', [Admin\PlayerController::class, 'inspector'])->name('players.inspector');
         Route::get('players/{player}/caretakers', [Admin\PlayerController::class, 'caretakers'])->name('players.caretakers');
         Route::post('players/{player}/caretakers', [Admin\PlayerController::class, 'attachCaretaker'])->name('players.caretakers.store');
         Route::delete('players/{player}/caretakers/{user}', [Admin\PlayerController::class, 'detachCaretaker'])->name('players.caretakers.destroy');
@@ -447,6 +453,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('adventures.teamer.reject');
     Route::post('adventures/{adventure}/teamer-signup/{signup}/resend-confirmation', [TeamerSignupController::class, 'resendConfirmation'])
         ->name('adventures.teamer.resend-confirmation');
+    // Issue #19: ausgefüllte Abrechnung der Aufwandsentschädigung (nur eigene Anmeldung).
+    Route::get('adventures/{adventure}/teamer-signup/{signup}/compensation', [TeamerCompensationController::class, 'download'])
+        ->name('adventures.teamer.compensation');
     // Inspektor (Slide-In) einer Teamer-Anmeldung in der Event-Verwaltung
     Route::get('adventures/{adventure}/teamer-signup/{signup}/inspector', [TeamerSignupController::class, 'inspector'])
         ->name('adventures.teamer.inspector');

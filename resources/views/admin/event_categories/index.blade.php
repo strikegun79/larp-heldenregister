@@ -6,7 +6,7 @@
     <div class="py-12">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="mb-4">
-                <a href="{{ route('admin.event-categories.create') }}" data-modal-url="{{ route('admin.event-categories.create') }}" class="ui primary button">Neue Kategorie</a>
+                <a href="{{ route('admin.event-categories.create') }}" data-inspector-new="{{ route('admin.event-categories.create') }}" class="ui primary button">Neue Kategorie</a>
             </div>
 
             <div class="bg-white/70 border-2 border-[#5a3a22]/40 shadow sm:rounded-lg overflow-hidden">
@@ -22,19 +22,15 @@
                     </thead>
                     <tbody class="divide-y divide-stone-200 text-stone-800">
                         @forelse ($categories as $category)
-                            <tr>
+                            <tr
+                                data-inspector-url="{{ route('admin.event-categories.edit', $category) }}?inspector=1" tabindex="0"
+                                aria-label="{{ $category->name }} bearbeiten">
                                 <td class="px-6 py-4" data-label="Name">{{ $category->name }}</td>
                                 <td class="px-6 py-4" data-label="Beschreibung">{{ $category->description ?: '—' }}</td>
                                 <td class="px-6 py-4" data-label="Events">{{ $category->adventures_count }}</td>
                                 <td class="px-6 py-4 text-right">
-                                    <div class="flex items-center justify-end gap-3">
-                                        <a href="{{ route('admin.event-categories.edit', $category) }}" data-modal-url="{{ route('admin.event-categories.edit', $category) }}" class="text-waldritter hover:underline">Bearbeiten</a>
-                                        <form method="POST" action="{{ route('admin.event-categories.destroy', $category) }}"
-                                              data-confirm="Kategorie „{{ $category->name }}” löschen?">
-                                            @csrf @method('DELETE')
-                                            <button type="submit" class="text-red-600 hover:underline">Löschen</button>
-                                        </form>
-                                    </div>
+                                    {{-- Bearbeiten und Löschen im Inspektor (Zeilenklick / Enter) --}}
+                                    <i class="chevron right icon text-wr-ink-muted m-0" aria-hidden="true"></i>
                                 </td>
                             </tr>
                         @empty

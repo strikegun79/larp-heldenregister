@@ -14,6 +14,14 @@
 
 </form>
 
+{{-- Löschen nur im Inspektor (?inspector=1), Rückfrage und Sperrgrund wie in der bisherigen Liste --}}
+@if ($client->exists)
+    @php($usedBy = $client->adventures()->count())
+    <x-admin.inspector-delete :action="route('admin.event-clients.destroy', $client)"
+        title="Auftraggeber löschen" :confirm="'Auftraggeber „'.$client->name.'“ löschen?'"
+        :blocked="$usedBy ? 'Nicht löschbar: '.$usedBy.' Abenteuer gehören zu diesem Auftraggeber.' : null" />
+@endif
+
 <div data-modal-actions hidden>
     <button type="submit" form="client-form" class="ui primary button">Speichern</button>
 </div>

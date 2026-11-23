@@ -1,5 +1,8 @@
 <span data-modal-title hidden>Verwaltung: {{ $adventure->name }}</span>
 
+{{-- Waldritter v1: eigener Wrapper (Modal und Vollseite); Reiter/Akkordeon-Mechanik unverändert --}}
+<div class="wr-v1">
+
 @php
     $collectEmail = fn($b) => $b->guardian()?->email ?? $b->player?->email;
 
@@ -48,7 +51,8 @@
     $cntActive    = $mainBookings->where('waitlisted', false)->where('status', '!=', 'storniert')->count();
     $cntWaitlist  = $mainBookings->where('waitlisted', true)->count();
     $cntCancelled = $mainBookings->where('status', 'storniert')->count();
-    $bookingsTabLabel = 'Anmeldungen (<span class="text-green-700">' . $cntActive . '</span>/<span class="text-amber-600">' . $cntWaitlist . '</span>/<span class="text-red-600">' . $cntCancelled . '</span>)';
+    // Reiter-Beschriftung mit Zahlen als Text (nicht nur Farbe): aktiv · Warteliste · storniert
+    $bookingsTabLabel = 'Anmeldungen (' . $cntActive . ' aktiv · ' . $cntWaitlist . ' Warteliste · ' . $cntCancelled . ' storniert)';
 @endphp
 
 {{-- UI-40: Mobile Accordion (< sm) --}}
@@ -59,21 +63,21 @@
             @include('adventures._form', ['inModal' => true])
         </form>
         @if ($adventure->event_status_id !== \App\Models\EventStatus::CANCELLED)
-            <div class="ui red segment mt-4">
-                <h5 class="ui header" style="color: #9b2c2c;">
-                    <i class="ban icon"></i>
-                    <div class="content">Gefahrenzone</div>
-                </h5>
+            <section class="wr-card p-4 mt-4 border-wr-danger" aria-label="Gefahrenzone">
+                <h3 class="wr-section-heading__title text-base mb-1 text-wr-danger">
+                    <i class="ban icon m-0" aria-hidden="true"></i> Gefahrenzone
+                </h3>
+                <p class="wr-card__text mb-3">Nach dem Absagen sind keine Anmeldungen mehr möglich.</p>
                 <form method="POST" action="{{ route('adventures.cancel', $adventure) }}" data-refresh-modal
                       data-confirm="Abenteuer wirklich absagen? Es sind danach keine Anmeldungen mehr möglich.">
                     @csrf @method('PATCH')
-                    <button type="submit" class="ui red basic button">
-                        <i class="ban icon"></i> Abenteuer absagen
+                    <button type="submit" class="wr-btn wr-btn--danger">
+                        <i class="ban icon m-0" aria-hidden="true"></i> Abenteuer absagen
                     </button>
                 </form>
-            </div>
+            </section>
         @else
-            <div class="ui warning message mt-4" style="display:block">Dieses Event ist abgesagt.</div>
+            <div class="wr-notice mt-4" role="note"><i class="ban icon m-0 mt-0.5" aria-hidden="true"></i><p>Dieses Event ist abgesagt.</p></div>
         @endif
     </x-mobile.accordion-section>
 
@@ -187,21 +191,21 @@
             @include('adventures._form', ['inModal' => true])
         </form>
         @if ($adventure->event_status_id !== \App\Models\EventStatus::CANCELLED)
-            <div class="ui red segment mt-4">
-                <h5 class="ui header" style="color: #9b2c2c;">
-                    <i class="ban icon"></i>
-                    <div class="content">Gefahrenzone</div>
-                </h5>
+            <section class="wr-card p-4 mt-4 border-wr-danger" aria-label="Gefahrenzone">
+                <h3 class="wr-section-heading__title text-base mb-1 text-wr-danger">
+                    <i class="ban icon m-0" aria-hidden="true"></i> Gefahrenzone
+                </h3>
+                <p class="wr-card__text mb-3">Nach dem Absagen sind keine Anmeldungen mehr möglich.</p>
                 <form method="POST" action="{{ route('adventures.cancel', $adventure) }}" data-refresh-modal
                       data-confirm="Abenteuer wirklich absagen? Es sind danach keine Anmeldungen mehr möglich.">
                     @csrf @method('PATCH')
-                    <button type="submit" class="ui red basic button">
-                        <i class="ban icon"></i> Abenteuer absagen
+                    <button type="submit" class="wr-btn wr-btn--danger">
+                        <i class="ban icon m-0" aria-hidden="true"></i> Abenteuer absagen
                     </button>
                 </form>
-            </div>
+            </section>
         @else
-            <div class="ui warning message mt-4" style="display:block">Dieses Event ist abgesagt.</div>
+            <div class="wr-notice mt-4" role="note"><i class="ban icon m-0 mt-0.5" aria-hidden="true"></i><p>Dieses Event ist abgesagt.</p></div>
         @endif
     </div>
 
@@ -371,7 +375,8 @@
 @endif
 
 <div data-modal-actions hidden>
-    <button type="submit" form="manage-adventure-form" class="ui primary button">
-        <i class="save icon"></i> Speichern
+    <button type="submit" form="manage-adventure-form" class="wr-btn wr-btn--primary">
+        <i class="save icon m-0" aria-hidden="true"></i> Speichern
     </button>
+</div>
 </div>

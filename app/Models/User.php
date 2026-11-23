@@ -29,6 +29,11 @@ class User extends Authenticatable implements MustVerifyEmail
         'house_number',
         'zip',
         'city',
+        // Issue #19: Teamer-Abrechnung (verschlüsselt gespeichert)
+        'teamer_tax_number',
+        'teamer_account_holder',
+        'teamer_iban',
+        'teamer_bank_name',
         'password',
         'needs_password_reset',
         'lastlogin_at',
@@ -54,6 +59,10 @@ class User extends Authenticatable implements MustVerifyEmail
     protected $hidden = [
         'password',
         'remember_token',
+        'teamer_tax_number',
+        'teamer_account_holder',
+        'teamer_iban',
+        'teamer_bank_name',
     ];
 
     /**
@@ -84,6 +93,11 @@ class User extends Authenticatable implements MustVerifyEmail
      */
     protected $casts = [
         'email_verified_at' => 'datetime',
+        // Issue #19: sensible Abrechnungsdaten nur verschlüsselt in der Datenbank
+        'teamer_tax_number' => 'encrypted',
+        'teamer_account_holder' => 'encrypted',
+        'teamer_iban' => 'encrypted',
+        'teamer_bank_name' => 'encrypted',
         'lastlogin_at' => 'datetime',
         'activated' => 'boolean',
         'needs_password_reset' => 'boolean',
@@ -184,6 +198,33 @@ class User extends Authenticatable implements MustVerifyEmail
         return $missing;
     }
 
+    /** Issue #19: Wer als Teamer abrechnen kann, sieht im Profil den Bereich „Teamer“. */
+    public function canBillAsTeamer(): bool
+    {
+        return $this->hasAnyRole('teamer', 'lehrmeister', 'project_lead');
+    }
+
+    /**
+     * Issue #19: Welche Angaben für die Teamer-Abrechnung noch fehlen (leer = vollständig).
+     *
+     * @return list<string>
+     */
+    public function missingTeamerBillingFields(): array
+    {
+        $labels = [
+            'street' => 'Straße',
+            'house_number' => 'Hausnummer',
+            'zip' => 'PLZ',
+            'city' => 'Ort',
+            'teamer_tax_number' => 'Steuernummer',
+            'teamer_account_holder' => 'Kontoinhaber',
+            'teamer_iban' => 'IBAN',
+            'teamer_bank_name' => 'Name der Bank',
+        ];
+
+        return array_values(array_filter($labels, fn ($label, $field) => blank($this->{$field}), ARRAY_FILTER_USE_BOTH));
+    }
+
     /**
      * DSGVO Art. 17: Konto anonymisieren (Recht auf Löschung).
      * Überschreibt alle Klardaten durch Platzhalter und soft-deleted den Datensatz.
@@ -203,6 +244,10 @@ class User extends Authenticatable implements MustVerifyEmail
             'house_number' => null,
             'zip' => null,
             'city' => null,
+            'teamer_tax_number' => null,
+            'teamer_account_holder' => null,
+            'teamer_iban' => null,
+            'teamer_bank_name' => null,
             'password' => Str::random(64),
             'remember_token' => null,
             'email_verified_at' => null,

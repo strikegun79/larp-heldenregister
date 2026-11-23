@@ -3,7 +3,7 @@
         <div class="flex items-center justify-between">
             <h2 class="font-uncial text-2xl text-waldritter leading-tight">Portal-Nutzer</h2>
             <a href="{{ route('admin.users.create') }}"
-               data-modal-url="{{ route('admin.users.create') }}"
+               data-inspector-new="{{ route('admin.users.create') }}"
                class="ui primary button">Nutzer einladen</a>
         </div>
     </x-slot>
@@ -46,25 +46,22 @@
                     </thead>
                     <tbody class="divide-y divide-stone-200 text-stone-800">
                         @forelse ($users as $user)
-                            <tr @if (! $user->trashed())
-                                    data-modal-url="{{ route('admin.users.edit', $user) }}"
-                                    role="button" tabindex="0"
+                            {{-- Zeile öffnet Rollen/Aktivierung/Löschen im Inspektor; gelöschte Konten nur wiederherstellen --}}
+                            <tr @unless ($user->trashed())
+                                    data-inspector-url="{{ route('admin.users.edit', $user) }}?inspector=1" tabindex="0"
                                     aria-label="Nutzer {{ trim($user->name . ' ' . $user->lastname) }} bearbeiten"
-                                    class="cursor-pointer hover:bg-black/5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-amber-600 focus-visible:outline-offset-[-2px]"
-                                @else
-                                    class="opacity-50 bg-stone-50"
-                                @endif>
+                                @endunless>
                                 <td class="px-6 py-4" data-label="Name">
                                     {{ trim("{$user->name} {$user->lastname}") }}
                                     @if ($user->trashed())
-                                        <span class="ml-2 text-xs text-red-600 font-semibold">[gelöscht]</span>
+                                        <span class="wr-pill wr-pill--danger wr-pill--small ml-2">gelöscht</span>
                                     @endif
                                 </td>
                                 <td class="px-6 py-4" data-label="E-Mail">{{ $user->email }}</td>
                                 <td class="px-6 py-4 text-sm" data-label="Rollen">{{ $user->roles->pluck('label')->implode(', ') ?: '—' }}</td>
                                 <td class="px-6 py-4" data-label="Aktiv">{{ $user->activated ? 'ja' : 'nein' }}</td>
-                                {{-- stopPropagation verhindert, dass Klick auf Aktions-Buttons den Row-Modal-Trigger auslöst --}}
-                                <td class="px-6 py-4 text-right" onclick="event.stopPropagation()">
+                                {{-- Links und Buttons in der Zeile öffnen nicht den Inspektor (JS prüft das Ziel) --}}
+                                <td class="px-6 py-4 text-right">
                                     @if ($user->trashed())
                                         <form method="POST" action="{{ route('admin.users.restore', $user->id) }}" class="inline"
                                               data-confirm="Konto von {{ trim($user->name . ' ' . $user->lastname) }} wiederherstellen?">
@@ -74,12 +71,15 @@
                                             </button>
                                         </form>
                                     @else
-                                        {{-- AUTH-14: Lösch-Button ist ins Bearbeitungs-Modal gewandert;
-                                             stattdessen Profil-Seite öffnen --}}
-                                        <a href="{{ route('admin.users.profile', $user) }}"
-                                           class="ui mini basic icon button" title="Profil öffnen">
-                                            <i class="user icon"></i>
-                                        </a>
+                                        {{-- AUTH-14: Löschen steht im Inspektor; hier nur die Profil-Seite --}}
+                                        <span class="inline-flex items-center gap-2">
+                                            <a href="{{ route('admin.users.profile', $user) }}"
+                                               class="wr-btn wr-btn--secondary wr-btn--small"
+                                               aria-label="Profil von {{ trim($user->name . ' ' . $user->lastname) }} öffnen">
+                                                <i class="user icon m-0" aria-hidden="true"></i> Profil
+                                            </a>
+                                            <i class="chevron right icon text-wr-ink-muted m-0" aria-hidden="true"></i>
+                                        </span>
                                     @endif
                                 </td>
                             </tr>

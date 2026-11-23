@@ -9,6 +9,7 @@ use App\Models\Hero;
 use App\Models\Motd;
 use App\Models\NewsletterSubscription;
 use App\Models\Player;
+use App\Models\TeamerSignup;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -71,9 +72,36 @@ class DashboardController extends Controller
             ->players()
             ->withPivot('self')
             ->whereNotNull('active_hero_id')
-            // EP-Buchungen für ep_balance mitladen (sonst Lazy-Loading-Fehler).
-            ->with(['activeHero.classes', 'activeHero.epTransactions'])
+            // Teilnahmen des Spielers für den Fortschritts-Chip „X Abenteuer erlebt“.
+            ->withCount('visits')
+            // EP-Buchungen für ep_balance mitladen (sonst Lazy-Loading-Fehler);
+            // Anzahl Fertigkeiten für den Fortschritts-Chip.
+            ->with(['activeHero' => fn ($q) => $q->withCount('skills')->with(['classes', 'epTransactions'])])
             ->get();
+
+        // Eigene Spieler, die noch gar keinen Helden haben (Platzhalter „Held wartet noch“).
+        $playersAwaitingHero = $request->user()
+            ->players()
+            ->withPivot('self')
+            ->whereNull('active_hero_id')
+            ->whereDoesntHave('heroes')
+            ->orderBy('players.name')
+            ->get();
+
+        // Issue #19: abrechenbare Teamer-Anmeldungen (bestätigt, Pauschale festgelegt).
+        // Das Portal kennt den Abrechnungsstand nicht – daher nur Abenteuer der letzten 60 Tage und kommende.
+        $teamerCompensations = TeamerSignup::where('user_id', $request->user()->id)
+            ->whereNotNull('approved_at')
+            ->whereNotNull('event_role_id')
+            ->whereHas('adventure', fn ($q) => $q
+                ->where('event_status_id', '!=', EventStatus::CANCELLED)
+                ->where(fn ($q) => $q->where('end_at', '>=', now()->subDays(60)->startOfDay())
+                    ->orWhere(fn ($q) => $q->whereNull('end_at')->where('start_at', '>=', now()->subDays(60)->startOfDay()))))
+            ->with(['adventure.location', 'eventRole'])
+            ->get()
+            ->filter(fn (TeamerSignup $signup) => $signup->compensationBlocker() === null)
+            ->sortBy(fn (TeamerSignup $signup) => $signup->adventure?->start_at)
+            ->values();
 
         $hasPlayers = $request->user()->players()->exists();
 
@@ -91,6 +119,6 @@ class DashboardController extends Controller
         // Startseiten-Nachricht (nur wenn aktiv und im Zeitraum).
         $motd = Motd::current();
 
-        return view('dashboard', compact('motd', 'metrics', 'nextAdventure', 'nextAdventureSlots', 'upcomingBookedAdventures', 'activePlayers', 'hasPlayers', 'profileComplete', 'hasBookings', 'showOnboarding', 'showNewsletterHint'));
+        return view('dashboard', compact('motd', 'metrics', 'nextAdventure', 'nextAdventureSlots', 'upcomingBookedAdventures', 'activePlayers', 'playersAwaitingHero', 'hasPlayers', 'profileComplete', 'hasBookings', 'showOnboarding', 'showNewsletterHint', 'teamerCompensations'));
     }
 }

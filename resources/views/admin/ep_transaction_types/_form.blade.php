@@ -23,6 +23,14 @@
     </div>
 </form>
 
+{{-- Löschen nur im Inspektor (?inspector=1), Rückfrage und Sperrgrund wie in der bisherigen Liste --}}
+@if ($type->exists)
+    @php($usedBy = $type->transactions()->count())
+    <x-admin.inspector-delete :action="route('admin.ep-transaction-types.destroy', $type)"
+        title="Buchungsart löschen" :confirm="'Buchungsart '.$type->description.' löschen?'"
+        :blocked="$usedBy ? 'Nicht löschbar: '.$usedBy.' EP-Buchung(en) nutzen diese Buchungsart.' : null" />
+@endif
+
 <div data-modal-actions hidden>
     <button type="submit" form="ep-type-form" class="ui primary button">Speichern</button>
 </div>

@@ -45,7 +45,8 @@ class BookingActionIconsTest extends TestCase
         $response = $this->detail($user, $adventure)->assertOk();
 
         $response->assertSee(route('adventures.bookings.destroy', [$adventure, $booking]), false);
-        $response->assertSee('data-tooltip="Stornieren"', false);
+        // Detailansicht (Waldritter v1): Aktion mit sichtbarem Text statt nur Tooltip.
+        $response->assertSee('Stornieren');
         $response->assertSee('times icon', false);
     }
 

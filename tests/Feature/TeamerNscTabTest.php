@@ -181,7 +181,7 @@ class TeamerNscTabTest extends TestCase
         // Manage-Modal zeigt beide Buchungen insgesamt, aber getrennt
         $response->assertOk();
         // Tab-Beschriftung: Anmeldungen (aktiv/Warteliste/storniert) — ohne NSC
-        $response->assertSee('Anmeldungen (<span class="text-green-700">1</span>/', false);
+        $response->assertSee('Anmeldungen (1 aktiv', false);
         // Teamer/NSC (0+1)
         $response->assertSee('Teamer/NSC (1)');
     }

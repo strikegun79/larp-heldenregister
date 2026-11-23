@@ -34,8 +34,10 @@ class Adventure extends Model
         'waitlist_mode',
         'is_hidden',
         'requires_confirmation',
+        'asks_vegetarian',
         'fee',
         'fee_reduced',
+        'payments_reconciled_at',
         'legacy_id',
     ];
 
@@ -45,6 +47,7 @@ class Adventure extends Model
         'reminder_sent_at' => 'datetime',
         'fee' => 'decimal:2',
         'fee_reduced' => 'decimal:2',
+        'payments_reconciled_at' => 'date',
         'loot_ep_day' => 'integer',
         'max_player' => 'integer',
         'min_age' => 'integer',
@@ -53,6 +56,7 @@ class Adventure extends Model
         'waitlist_mode' => 'boolean',
         'is_hidden' => 'boolean',
         'requires_confirmation' => 'boolean',
+        'asks_vegetarian' => 'boolean',
     ];
 
     /** Gibt die Altersbeschränkung als lesbaren String zurück, z. B. „8–17 Jahre". */
@@ -138,6 +142,25 @@ class Adventure extends Model
     public function bookings(): HasMany
     {
         return $this->hasMany(Booking::class);
+    }
+
+    /** Issue #19: Pauschalen je abrechnungsfähiger Rolle. */
+    public function compensations(): HasMany
+    {
+        return $this->hasMany(AdventureCompensation::class);
+    }
+
+    /** Issue #19: Pauschale für eine Rolle bei dieser Veranstaltung (null = keine Abrechnung). */
+    public function compensationFor(?int $eventRoleId): ?string
+    {
+        if (! $eventRoleId) {
+            return null;
+        }
+
+        return $this->compensations()
+            ->where('event_role_id', $eventRoleId)
+            ->whereHas('eventRole', fn ($q) => $q->where('billable', true))
+            ->value('amount');
     }
 
     public function teamerSignups(): HasMany

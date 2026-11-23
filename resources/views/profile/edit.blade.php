@@ -28,6 +28,15 @@
                 </div>
             </div>
 
+            {{-- Issue #19: Bereich „Teamer“ (Teamer, Lehrmeister, Projektleitung) --}}
+            @if (auth()->user()->canBillAsTeamer())
+                <div class="p-4 sm:p-8 bg-white/60 border-2 border-[#5a3a22]/40 rounded-lg" id="teamer">
+                    <div class="max-w-xl">
+                        @include('profile.partials.teamer-billing-form', ['user' => auth()->user()])
+                    </div>
+                </div>
+            @endif
+
             {{-- NL-01: Newsletter-Opt-in --}}
             <div class="p-4 sm:p-8 bg-white/60 border-2 border-[#5a3a22]/40 rounded-lg">
                 <div class="max-w-xl">

@@ -164,7 +164,7 @@ class EventClientRequirementTest extends TestCase
             ->assertSee('Einverständniserklärung Testverein')
             // Formatierte Beschreibung für das Popup und PDF-Symbol hinter dem Label.
             ->assertSee('<strong>Betreten des Waldes</strong>', false)
-            ->assertSee('file pdf outline icon', false)
+            ->assertSee('file pdf icon', false) // gefülltes Symbol (keine outline-Varianten)
             ->assertSee(route('requirements.pdf', $requirement), false);
     }
 

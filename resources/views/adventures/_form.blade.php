@@ -2,9 +2,10 @@
 @php
     $selectClass = 'mt-1 block w-full border-gray-300 focus:border-amber-600 focus:ring-amber-600 rounded-md shadow-sm';
 @endphp
-<div class="space-y-6">
-    <div class="grid grid-cols-3 gap-4">
-        <div class="col-span-2">
+{{-- Eventformular (Waldritter v1): wr-form greift innerhalb von .wr-v1 (Felder 44 px, Fokus); auf dem Handy einspaltig --}}
+<div class="wr-form space-y-6">
+    <div class="grid gap-4 sm:grid-cols-3">
+        <div class="sm:col-span-2">
             <x-input-label for="name" value="Name" />
             <x-text-input id="name" name="name" type="text" class="mt-1 block w-full"
                           :value="old('name', $adventure->name)" required />
@@ -40,7 +41,7 @@
         <x-input-error :messages="$errors->get('location_id')" class="mt-2" />
     </div>
 
-    <div class="grid grid-cols-2 gap-4">
+    <div class="grid gap-4 sm:grid-cols-2">
         <div>
             <x-input-label for="start_at" value="Beginn" />
             <x-date-picker name="start_at" type="datetime"
@@ -57,11 +58,11 @@
         </div>
     </div>
 
-    <div class="grid grid-cols-3 gap-4">
+    <div class="grid gap-4 sm:grid-cols-3">
         <div>
             <x-input-label for="event_status_id" value="Status" />
             {{-- Geführter Workflow (ADV-05): nur erlaubte Folgestatus anbieten. --}}
-            @php($allowedStatusIds = $allowedStatusIds ?? null)
+            @php $allowedStatusIds = $allowedStatusIds ?? null; @endphp
             <select id="event_status_id" name="event_status_id" class="{{ $selectClass }}">
                 @foreach ($statuses as $status)
                     @if (is_null($allowedStatusIds) || in_array($status->id, $allowedStatusIds))
@@ -128,8 +129,25 @@
         </div>
     </div>
 
+    {{-- Vegetarisches Essen nur abfragen, wenn es Verpflegung gibt (Standard: aus) --}}
+    <div class="flex items-start gap-3 p-3 bg-amber-50 border border-amber-200 rounded-md">
+        <input type="hidden" name="asks_vegetarian" value="0">
+        <input type="checkbox" id="asks_vegetarian" name="asks_vegetarian" value="1"
+               class="mt-0.5 rounded border-gray-300 text-amber-700 focus:ring-amber-600"
+               @checked(old('asks_vegetarian', $adventure->asks_vegetarian ?? false))>
+        <div>
+            <label for="asks_vegetarian" class="font-medium text-amber-900 cursor-pointer">
+                Nach vegetarischem Essen fragen
+            </label>
+            <p class="text-sm text-amber-700 mt-0.5">
+                Zeigt im Anmeldeformular das Kästchen „Vegetarisches Essen“. Bei eintägigen
+                Veranstaltungen ohne Verpflegung ausgeschaltet lassen.
+            </p>
+        </div>
+    </div>
+
     {{-- Spielleiter & Eventleiter (ADV-11): berechtigte Nutzer. --}}
-    <div class="grid grid-cols-2 gap-4">
+    <div class="grid gap-4 sm:grid-cols-2">
         <div>
             <x-input-label for="gamemaster_id" value="Spielleiter" />
             <select id="gamemaster_id" name="gamemaster_id" class="{{ $selectClass }}">
@@ -177,6 +195,39 @@
             <x-input-error :messages="$errors->get('fee_reduced')" class="mt-2" />
         </div>
     </div>
+
+    {{-- Issue #19: Aufwandsentschädigung je abrechnungsfähiger Rolle. Leer = keine Abrechnung.
+         Neue Veranstaltungen (bzw. solche ohne Einträge) werden mit der Standard-Pauschale vorbelegt.
+         _form wird in der Verwaltung doppelt eingebunden → eindeutige IDs per Suffix. --}}
+    @php
+        $billableRoles = \App\Models\EventRole::billable()->orderBy('id')->get();
+        $compAmounts = $adventure->exists ? $adventure->compensations()->pluck('amount', 'event_role_id') : collect();
+        $compSuffix = \Illuminate\Support\Str::lower(\Illuminate\Support\Str::random(5));
+    @endphp
+    @if ($billableRoles->isNotEmpty())
+        <fieldset class="border border-stone-200 rounded-md p-3">
+            <legend class="px-1 font-medium text-stone-800">Aufwandsentschädigung für Teamer (€)</legend>
+            <p class="text-sm text-stone-600 mb-3">
+                Pauschale je Rolle für diese Veranstaltung. Teamer mit bestätigter Anmeldung laden damit ihre
+                ausgefüllte Abrechnung herunter. Leeres Feld = für diese Rolle keine Abrechnung.
+            </p>
+            <div class="grid gap-4 sm:grid-cols-3">
+                @foreach ($billableRoles as $role)
+                    @php
+                        $default = $compAmounts->isEmpty() ? $role->default_compensation : null;
+                        $value = old('compensations.'.$role->id, $compAmounts[$role->id] ?? $default);
+                    @endphp
+                    <div>
+                        <x-input-label for="comp-{{ $role->id }}-{{ $compSuffix }}" :value="$role->description" />
+                        <x-text-input id="comp-{{ $role->id }}-{{ $compSuffix }}" name="compensations[{{ $role->id }}]"
+                                      type="number" step="0.01" min="0" max="9999.99" class="mt-1 block w-full"
+                                      :value="$value" placeholder="keine" />
+                        <x-input-error :messages="$errors->get('compensations.'.$role->id)" class="mt-2" />
+                    </div>
+                @endforeach
+            </div>
+        </fieldset>
+    @endif
 
     <div class="grid grid-cols-4 gap-4">
         <div>

@@ -27,7 +27,9 @@
                     </thead>
                     <tbody class="divide-y divide-stone-200 text-stone-800">
                         @forelse ($statuses as $status)
-                            <tr>
+                            <tr
+                                data-inspector-url="{{ route('admin.event-statuses.edit', $status) }}?inspector=1" tabindex="0"
+                                aria-label="{{ $status->description }} bearbeiten">
                                 <td class="px-6 py-4 font-mono text-stone-500" data-label="ID">{{ $status->id }}</td>
                                 <td class="px-6 py-4" data-label="Farbe">
                                     <span class="inline-block w-6 h-6 rounded border border-stone-300"
@@ -37,21 +39,8 @@
                                 <td class="px-6 py-4" data-label="Bezeichnung">{{ $status->description }}</td>
                                 <td class="px-6 py-4" data-label="Events">{{ $status->adventures_count }}</td>
                                 <td class="px-6 py-4 text-right">
-                                    <div class="flex items-center justify-end gap-3">
-                                        <a href="{{ route('admin.event-statuses.edit', $status) }}"
-                                           data-modal-url="{{ route('admin.event-statuses.edit', $status) }}"
-                                           class="text-waldritter hover:underline">Bearbeiten</a>
-                                        @if ($status->adventures_count === 0)
-                                            <form method="POST"
-                                                  action="{{ route('admin.event-statuses.destroy', $status) }}"
-                                                  data-confirm="Status „{{ $status->description }}" löschen?">
-                                                @csrf @method('DELETE')
-                                                <button type="submit" class="text-red-600 hover:underline">Löschen</button>
-                                            </form>
-                                        @else
-                                            <span class="text-stone-400 text-sm">in Verwendung</span>
-                                        @endif
-                                    </div>
+                                    {{-- Bearbeiten und Löschen im Inspektor (Zeilenklick / Enter) --}}
+                                    <i class="chevron right icon text-wr-ink-muted m-0" aria-hidden="true"></i>
                                 </td>
                             </tr>
                         @empty

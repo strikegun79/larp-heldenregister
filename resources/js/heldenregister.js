@@ -466,7 +466,7 @@ document.addEventListener('submit', function (e) {
 // Seiteninhalt (nur <main>) per AJAX neu laden (kein Seiten-Reload)
 // ------------------------------------------------------------------
 function refreshPageContent() {
-    fetch(window.location.href, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+    return fetch(window.location.href, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
         .then(r => r.text())
         .then(html => {
             const doc    = new DOMParser().parseFromString(html, 'text/html');
@@ -659,7 +659,10 @@ document.addEventListener('submit', function (e) {
                 showToast(data.message || 'Gespeichert.', 'success');
                 // Helden-Detailseite hat #skilltree → alles neu laden
                 if (document.getElementById('skilltree')) refreshHeroDetail();
-                else refreshManageTab();
+                // Seiten mit Reitern/Akkordeon (Abenteuer-Verwaltung): nur den aktiven Bereich
+                else if (document.querySelector('.ui.top.attached.tabular.menu, details.mobile-accordion-section')) refreshManageTab();
+                // Sonst (z. B. Fertigkeit bearbeiten als Vollseite): Seite neu laden
+                else window.location.reload();
             } else if (resp.status === 422) {
                 const errors = data.errors ? Object.values(data.errors).flat() : [];
                 showToast(errors.join('<br>') || data.message || 'Bitte prüfen.', 'error');
@@ -679,6 +682,9 @@ document.addEventListener('submit', function (e) {
 // ------------------------------------------------------------------
 let inspectorUrl = null;
 let inspectorCloseTimer = null;
+// „Neu …“ im Inspektor: nach dem Anlegen schließen, Fokus zurück zum Auslöser.
+let inspectorCreateMode = false;
+let inspectorOpener = null;
 
 function inspectorEl() {
     return document.getElementById('booking-inspector');
@@ -719,10 +725,13 @@ function loadInspector(focusPanel) {
         .then(r => { if (!r.ok) throw new Error(r.status); return r.text(); })
         .then(html => {
             if (url !== inspectorUrl) return; // inzwischen andere Zeile geöffnet
-            content.innerHTML = html;
-            const t = content.querySelector('[data-inspector-title]');
-            title.textContent = t ? t.textContent.trim() : 'Anmeldung';
+            // jQuery .html() führt Inline-Skripte der geladenen Ansicht aus (wie im Modal).
+            $(content).html(html);
+            // Titel: eigener Inspektor-Titel oder – bei Modal-Ansichten – der Modal-Titel.
+            const t = content.querySelector('[data-inspector-title]') || content.querySelector('[data-modal-title]');
+            title.textContent = t ? t.textContent.trim() : 'Details';
             t?.remove();
+            adaptModalViewForInspector(content);
             if (focusPanel) inspectorEl().querySelector('[data-inspector-close]')?.focus();
         })
         .catch(() => {
@@ -730,10 +739,38 @@ function loadInspector(focusPanel) {
         });
 }
 
-function openInspector(url) {
+// Für das Modal gebaute Ansichten (z. B. Admin-Bearbeiten-Formulare) im Inspektor nutzbar machen:
+// Modal-Aktionen sichtbar unten anzeigen, Formulare per AJAX im Inspektor speichern,
+// Fomantic-Elemente initialisieren. Eigene Inspektor-Ansichten bleiben unverändert.
+function adaptModalViewForInspector(content) {
+    const actions = content.querySelector('[data-modal-actions]');
+    if (actions) {
+        const bar = document.createElement('div');
+        bar.className = 'wr-inspector-actions';
+        bar.innerHTML = actions.innerHTML;
+        actions.remove();
+        content.appendChild(bar);
+    }
+    content.querySelectorAll('form').forEach(form => {
+        // Neu anlegen: nach Erfolg schließen (statt das leere Formular neu zu laden).
+        if (inspectorCreateMode) form.setAttribute('data-inspector-close-on-success', '');
+        if (form.hasAttribute('data-inspector-form')) return;
+        form.removeAttribute('data-refresh-modal');
+        form.removeAttribute('data-reload');
+        form.setAttribute('data-inspector-form', '');
+    });
+    const $c = $(content);
+    $c.find('.ui.dropdown').dropdown();
+    $c.find('.ui.checkbox').checkbox();
+    initFomanticCalendars($c);
+}
+
+function openInspector(url, opener) {
     const el = inspectorEl();
     if (!el) return;
     clearTimeout(inspectorCloseTimer);
+    inspectorCreateMode = !!opener;
+    inspectorOpener = opener || null;
     inspectorUrl = url;
     markInspectedRow(url);
     placeInspector();
@@ -745,8 +782,10 @@ function openInspector(url) {
 function closeInspector(restoreFocus) {
     const el = inspectorEl();
     if (!inspectorIsOpen()) return;
-    const row = findInspectorRow(inspectorUrl);
+    const row = findInspectorRow(inspectorUrl) || inspectorOpener;
     inspectorUrl = null;
+    inspectorCreateMode = false;
+    inspectorOpener = null;
     markInspectedRow(null);
     el.classList.remove('is-open');
     inspectorCloseTimer = setTimeout(() => { el.hidden = true; }, 200);
@@ -757,7 +796,9 @@ function closeInspector(restoreFocus) {
 // Teilnehmerliste dahinter aktualisieren (Modal oder Vollseite).
 function refreshInspectorBackground() {
     const inModal = window.appModalUrl && $('#app-modal').hasClass('active');
-    const done = inModal ? loadModalContent(window.appModalUrl, true) : refreshManageTab();
+    // Vollseite mit Reitern (Abenteuer-Verwaltung): nur den aktiven Reiter; sonst (Admin-Listen) den Seiteninhalt.
+    const hasTabs = !! document.querySelector('.ui.top.attached.tabular.menu .item[data-tab]');
+    const done = inModal ? loadModalContent(window.appModalUrl, true) : (hasTabs ? refreshManageTab() : refreshPageContent());
     return Promise.resolve(done).then(() => {
         markInspectedRow(inspectorUrl);
         // loadModalContent setzt den Fokus ins Modal – zurück in den Inspektor holen.
@@ -768,6 +809,14 @@ function refreshInspectorBackground() {
 }
 
 document.addEventListener('click', function (e) {
+    // „Neu …“-Button (data-inspector-new): leeres Formular im Inspektor statt im Modal.
+    const newBtn = e.target.closest('[data-inspector-new]');
+    if (newBtn && inspectorEl()) {
+        e.preventDefault();
+        openInspector(newBtn.getAttribute('data-inspector-new'), newBtn);
+        return;
+    }
+
     // Zeilenklick öffnet den Inspektor (Buttons/Links in der Zeile behalten ihre Funktion).
     const row = e.target.closest('tr[data-inspector-url]');
     if (row) {
@@ -846,8 +895,15 @@ document.addEventListener('submit', function (e) {
                 showToast(data.message || 'Gespeichert.', 'success');
                 // Gelöschte Einträge (z. B. stornierte Teamer-Anmeldung): Inspektor schließen statt neu laden.
                 if (form.hasAttribute('data-inspector-close-on-success')) {
-                    closeInspector(false);
-                    refreshInspectorBackground();
+                    // Nach „Neu …“ Fokus zurück zum Button (auch wenn die Liste ihn neu rendert);
+                    // nach Löschen gibt es die Zeile nicht mehr.
+                    const createdFrom = inspectorCreateMode ? inspectorUrl : null;
+                    closeInspector(!!createdFrom);
+                    refreshInspectorBackground().then(() => {
+                        if (!createdFrom) return;
+                        Array.from(document.querySelectorAll('[data-inspector-new]'))
+                            .find(b => b.getAttribute('data-inspector-new') === createdFrom)?.focus();
+                    });
                     return;
                 }
                 refreshInspectorBackground();

@@ -86,7 +86,7 @@ class Hero extends Model
     /** Öffentliche URL des Helden-Fotos; Standardbild wenn keins hochgeladen (HERO-22). */
     public function getImageUrlAttribute(): string
     {
-        return $this->image ? '/storage/'.$this->image : '/images/heroes_db.jpg';
+        return $this->image ? '/storage/'.$this->image : '/images/heroes_db_v2.jpg';
     }
 
     /**
@@ -241,9 +241,16 @@ class Hero extends Model
         return $this->ep_total - $this->ep_balance;
     }
 
-    /** Anzahl erlernter Fertigkeiten (REP-01). */
+    /**
+     * Anzahl erlernter Fertigkeiten (REP-01).
+     * Nutzt einen per withCount('skills') geladenen Wert, sonst die geladene Relation.
+     */
     public function getSkillsCountAttribute(): int
     {
+        if (array_key_exists('skills_count', $this->attributes)) {
+            return (int) $this->attributes['skills_count'];
+        }
+
         return $this->skills->count();
     }
 

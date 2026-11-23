@@ -26,14 +26,15 @@
 </form>
 
 <div data-modal-actions hidden>
-    {{-- AUTH-14: Lösch-Button im Modal (nicht in der Übersicht) --}}
+    {{-- AUTH-14: Lösch-Button im Modal bzw. Inspektor (nicht in der Übersicht);
+         im Inspektor schließt er sich nach erfolgreichem Löschen --}}
     @if ($user->id !== Auth::id())
         @if ($user->hasRole('admin'))
             <button type="button" class="ui basic red button disabled" title="Admin-Konten können nicht gelöscht werden." disabled>
                 <i class="trash icon"></i> Löschen
             </button>
         @else
-            <form method="POST" action="{{ route('admin.users.destroy', $user->id) }}" class="inline"
+            <form method="POST" action="{{ route('admin.users.destroy', $user->id) }}" class="inline" data-inspector-close-on-success
                   data-confirm="Konto von {{ trim($user->name . ' ' . $user->lastname) }} wirklich löschen?">
                 @csrf @method('DELETE')
                 <button type="submit" class="ui basic red button">

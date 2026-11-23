@@ -79,7 +79,7 @@ E-Mail-Benachrichtigungen (Mailables/Notifications, via Queue).
 **Beschreibung:** Teilnehmer erhalten E-Mails bei Bestätigung, Ablehnung,
 Stornierung und Zahlungseingang ihrer Buchung.
 **Akzeptanzkriterien:**
-- [x] Mail bei Buchungsbestätigung (`approved_at` gesetzt): `BookingApproved`.
+- [x] ~~Mail bei Buchungsbestätigung (`approved_at` gesetzt): `BookingApproved`.~~ Entfallen: Bestätigung läuft über die confirm-Route, Klasse entfernt.
 - [x] Mail bei Ablehnung (Status `abgelehnt`): `BookingRejected`.
 - [x] Mail bei Stornierung der Buchung: `BookingCancelledParticipant`.
 - [x] Mail bei Zahlungseingang (`paid` true): `PaymentConfirmed`.

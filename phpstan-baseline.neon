@@ -252,11 +252,6 @@ parameters:
 			count: 1
 			path: app/Http/Controllers/Admin/RoleController.php
 
-		-
-			message: '#^Parameter \#1 \$view of function view expects view\-string\|null, string given\.$#'
-			identifier: argument.type
-			count: 2
-			path: app/Http/Controllers/Admin/SkillController.php
 
 		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$email\.$#'
@@ -1000,42 +995,6 @@ parameters:
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$full_name\.$#'
 			identifier: property.notFound
 			count: 1
-			path: app/Notifications/BookingApproved.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$id\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Notifications/BookingApproved.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$kuerzel\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Notifications/BookingApproved.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name\.$#'
-			identifier: property.notFound
-			count: 3
-			path: app/Notifications/BookingApproved.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$start_at\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Notifications/BookingApproved.php
-
-		-
-			message: '#^Using nullsafe property access "\?\-\>full_name" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
-			identifier: nullsafe.neverNull
-			count: 1
-			path: app/Notifications/BookingApproved.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$full_name\.$#'
-			identifier: property.notFound
-			count: 1
 			path: app/Notifications/BookingMovedToWaitlist.php
 
 		-
@@ -1164,23 +1123,8 @@ parameters:
 			count: 1
 			path: app/Notifications/TeamerApproved.php
 
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$end_at\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Notifications/TeamerApproved.php
 
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$name\.$#'
-			identifier: property.notFound
-			count: 4
-			path: app/Notifications/TeamerApproved.php
 
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$start_at\.$#'
-			identifier: property.notFound
-			count: 2
-			path: app/Notifications/TeamerApproved.php
 
 		-
 			message: '#^Using nullsafe property access "\?\-\>description" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'

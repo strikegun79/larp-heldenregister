@@ -54,7 +54,7 @@ class DashboardNextAdventureTest extends TestCase
             ->assertOk()
             ->assertSee('8 von 10 Plätzen frei')
             ->assertSee('text-green-700')
-            ->assertSee('Anmeldung offen');
+            ->assertSee('Anmeldung möglich');
     }
 
     public function test_few_free_slots_are_yellow(): void
@@ -75,8 +75,8 @@ class DashboardNextAdventureTest extends TestCase
         $this->dashboard()
             ->assertSee('0 von 10 Plätzen frei')
             ->assertSee('text-red-700')
-            ->assertSee('Warteliste')
-            ->assertDontSee('Anmeldung offen');
+            ->assertSee('Nur noch Warteliste')
+            ->assertDontSee('Anmeldung möglich');
     }
 
     public function test_waitlist_shown_when_someone_is_waiting(): void
@@ -86,7 +86,7 @@ class DashboardNextAdventureTest extends TestCase
 
         $this->dashboard()
             ->assertSee('10 von 10 Plätzen frei')
-            ->assertSee('Warteliste');
+            ->assertSee('Nur noch Warteliste');
     }
 
     public function test_closed_registration(): void
@@ -95,6 +95,6 @@ class DashboardNextAdventureTest extends TestCase
 
         $this->dashboard()
             ->assertSee('Anmeldung geschlossen')
-            ->assertDontSee('Anmeldung offen');
+            ->assertDontSee('Anmeldung möglich');
     }
 }

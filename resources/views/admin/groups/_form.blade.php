@@ -19,6 +19,15 @@
     </div>
 </form>
 
+{{-- Löschen nur im Inspektor (?inspector=1); Mitglieder werden dabei ausgetragen --}}
+@if ($group->exists)
+    @php($members = $group->heroes()->count())
+    <x-admin.inspector-delete :action="route('admin.groups.destroy', $group)"
+        title="Gruppe löschen"
+        :confirm="'Gruppe „'.$group->name.'“ löschen?'.($members ? ' '.$members.' Held(en) werden ausgetragen.' : '')"
+        :hint="$members ? $members.' Held(en) werden beim Löschen aus der Gruppe ausgetragen.' : null" />
+@endif
+
 <div data-modal-actions hidden>
     <button type="submit" form="group-form" class="ui primary button">Speichern</button>
 </div>

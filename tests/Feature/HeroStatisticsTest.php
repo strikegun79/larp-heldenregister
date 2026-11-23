@@ -60,7 +60,10 @@ class HeroStatisticsTest extends TestCase
         $this->actingAs($user)
             ->get(route('heroes.show', $hero), ['X-Requested-With' => 'XMLHttpRequest'])
             ->assertOk()
-            ->assertSee('EP insgesamt / ausgegeben')
-            ->assertSee('Fertigkeiten / Klassen');
+            // Heldenbuch (Waldritter v1): Schatzkiste und Fortschritts-Chips.
+            ->assertSee('gesammelt')
+            ->assertSee('ausgegeben')
+            ->assertSee('1 Fertigkeit')
+            ->assertSee('1 Klasse');
     }
 }

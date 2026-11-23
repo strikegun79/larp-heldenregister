@@ -52,7 +52,7 @@ class ProfileDeleteTest extends TestCase
             ->get(route('admin.users.index'))
             ->assertOk()
             ->assertSee('Gelöschter Nutzer')
-            ->assertSee('[gelöscht]');
+            ->assertSee('wr-pill--danger wr-pill--small ml-2">gelöscht</span>', false);
     }
 
     public function test_admin_can_restore_soft_deleted_user(): void

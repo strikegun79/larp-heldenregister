@@ -3,8 +3,8 @@
     $free = $slots['free'];
     $slotColor = $free === 0 ? 'text-red-700' : ($free <= 5 ? 'text-amber-600' : 'text-green-700');
     $badge = [
-        'open'     => ['label' => 'Anmeldung offen',       'class' => 'bg-green-100 text-green-800', 'icon' => 'check circle'],
-        'waitlist' => ['label' => 'Warteliste',            'class' => 'bg-amber-100 text-amber-800', 'icon' => 'hourglass half'],
+        'open'     => ['label' => 'Anmeldung möglich',     'class' => 'bg-green-100 text-green-800', 'icon' => 'check circle'],
+        'waitlist' => ['label' => 'Nur noch Warteliste',   'class' => 'bg-amber-100 text-amber-800', 'icon' => 'hourglass half'],
         'closed'   => ['label' => 'Anmeldung geschlossen', 'class' => 'bg-red-100 text-red-800',     'icon' => 'lock'],
     ][$slots['state']];
 @endphp
