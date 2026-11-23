@@ -7,7 +7,7 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="mb-4">
                 <a href="{{ route('admin.perl-colors.create') }}"
-                   data-modal-url="{{ route('admin.perl-colors.create') }}"
+                   data-inspector-new="{{ route('admin.perl-colors.create') }}"
                    class="ui primary button">Neue Perlenfarbe</a>
             </div>
 

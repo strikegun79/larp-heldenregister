@@ -21,7 +21,7 @@
         <div class="flex items-center justify-between">
             <h2 class="font-uncial text-2xl text-waldritter leading-tight">{{ $title }}</h2>
             <a href="{{ $createRoute }}"
-               data-modal-url="{{ $createRoute }}"
+               data-inspector-new="{{ $createRoute }}"
                class="ui primary button">{{ $createLabel }}</a>
         </div>
     </x-slot>

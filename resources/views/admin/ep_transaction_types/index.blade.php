@@ -7,7 +7,7 @@
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="mb-4">
                 <a href="{{ route('admin.ep-transaction-types.create') }}"
-                   data-modal-url="{{ route('admin.ep-transaction-types.create') }}"
+                   data-inspector-new="{{ route('admin.ep-transaction-types.create') }}"
                    class="ui primary button">Neue Buchungsart</a>
             </div>
 

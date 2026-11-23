@@ -6,7 +6,7 @@
     <div class="py-12">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
             <div class="mb-4">
-                <a href="{{ route('admin.locations.create') }}" data-modal-url="{{ route('admin.locations.create') }}" class="ui primary button">Neuer Ort</a>
+                <a href="{{ route('admin.locations.create') }}" data-inspector-new="{{ route('admin.locations.create') }}" class="ui primary button">Neuer Ort</a>
             </div>
 
             <div class="bg-white/70 border-2 border-[#5a3a22]/40 shadow sm:rounded-lg overflow-hidden">

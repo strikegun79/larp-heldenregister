@@ -169,4 +169,32 @@ class AdminInspectorListsTest extends TestCase
             ->assertOk()
             ->assertSee('Neue Fertigkeit');
     }
+
+    public static function createButtons(): array
+    {
+        return [
+            'Teilnahme-Rollen' => ['admin.event-roles.index', 'admin.event-roles.create'],
+            'Helden-Klassen' => ['admin.hero-classes.index', 'admin.hero-classes.create'],
+            'Perlenfarben' => ['admin.perl-colors.index', 'admin.perl-colors.create'],
+            'EP-Buchungsarten' => ['admin.ep-transaction-types.index', 'admin.ep-transaction-types.create'],
+            'Orte' => ['admin.locations.index', 'admin.locations.create'],
+            'Kategorien' => ['admin.event-categories.index', 'admin.event-categories.create'],
+            'Auftraggeber' => ['admin.event-clients.index', 'admin.event-clients.create'],
+            'Fertigkeiten' => ['admin.skills.index', 'admin.skills.create'],
+            'Gruppen' => ['admin.groups.index', 'admin.groups.create'],
+            'Portal-Nutzer' => ['admin.users.index', 'admin.users.create'],
+        ];
+    }
+
+    #[DataProvider('createButtons')]
+    public function test_new_button_opens_inspector_instead_of_modal(string $index, string $create): void
+    {
+        $url = route($create);
+
+        $this->actingAs($this->admin())->get(route($index))
+            ->assertOk()
+            ->assertSee('href="'.$url.'"', false) // ohne JavaScript: Vollseite
+            ->assertSee('data-inspector-new="'.$url.'"', false)
+            ->assertDontSee('data-modal-url="'.$url.'"', false);
+    }
 }

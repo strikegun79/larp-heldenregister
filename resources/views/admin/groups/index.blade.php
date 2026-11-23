@@ -8,7 +8,7 @@
 
             <div class="mb-4">
                 <a href="{{ route('admin.groups.create') }}"
-                   data-modal-url="{{ route('admin.groups.create') }}"
+                   data-inspector-new="{{ route('admin.groups.create') }}"
                    class="ui primary button">Neue Gruppe</a>
             </div>
 

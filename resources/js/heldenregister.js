@@ -682,6 +682,9 @@ document.addEventListener('submit', function (e) {
 // ------------------------------------------------------------------
 let inspectorUrl = null;
 let inspectorCloseTimer = null;
+// „Neu …“ im Inspektor: nach dem Anlegen schließen, Fokus zurück zum Auslöser.
+let inspectorCreateMode = false;
+let inspectorOpener = null;
 
 function inspectorEl() {
     return document.getElementById('booking-inspector');
@@ -749,6 +752,8 @@ function adaptModalViewForInspector(content) {
         content.appendChild(bar);
     }
     content.querySelectorAll('form').forEach(form => {
+        // Neu anlegen: nach Erfolg schließen (statt das leere Formular neu zu laden).
+        if (inspectorCreateMode) form.setAttribute('data-inspector-close-on-success', '');
         if (form.hasAttribute('data-inspector-form')) return;
         form.removeAttribute('data-refresh-modal');
         form.removeAttribute('data-reload');
@@ -760,10 +765,12 @@ function adaptModalViewForInspector(content) {
     initFomanticCalendars($c);
 }
 
-function openInspector(url) {
+function openInspector(url, opener) {
     const el = inspectorEl();
     if (!el) return;
     clearTimeout(inspectorCloseTimer);
+    inspectorCreateMode = !!opener;
+    inspectorOpener = opener || null;
     inspectorUrl = url;
     markInspectedRow(url);
     placeInspector();
@@ -775,8 +782,10 @@ function openInspector(url) {
 function closeInspector(restoreFocus) {
     const el = inspectorEl();
     if (!inspectorIsOpen()) return;
-    const row = findInspectorRow(inspectorUrl);
+    const row = findInspectorRow(inspectorUrl) || inspectorOpener;
     inspectorUrl = null;
+    inspectorCreateMode = false;
+    inspectorOpener = null;
     markInspectedRow(null);
     el.classList.remove('is-open');
     inspectorCloseTimer = setTimeout(() => { el.hidden = true; }, 200);
@@ -800,6 +809,14 @@ function refreshInspectorBackground() {
 }
 
 document.addEventListener('click', function (e) {
+    // „Neu …“-Button (data-inspector-new): leeres Formular im Inspektor statt im Modal.
+    const newBtn = e.target.closest('[data-inspector-new]');
+    if (newBtn && inspectorEl()) {
+        e.preventDefault();
+        openInspector(newBtn.getAttribute('data-inspector-new'), newBtn);
+        return;
+    }
+
     // Zeilenklick öffnet den Inspektor (Buttons/Links in der Zeile behalten ihre Funktion).
     const row = e.target.closest('tr[data-inspector-url]');
     if (row) {
@@ -878,8 +895,15 @@ document.addEventListener('submit', function (e) {
                 showToast(data.message || 'Gespeichert.', 'success');
                 // Gelöschte Einträge (z. B. stornierte Teamer-Anmeldung): Inspektor schließen statt neu laden.
                 if (form.hasAttribute('data-inspector-close-on-success')) {
-                    closeInspector(false);
-                    refreshInspectorBackground();
+                    // Nach „Neu …“ Fokus zurück zum Button (auch wenn die Liste ihn neu rendert);
+                    // nach Löschen gibt es die Zeile nicht mehr.
+                    const createdFrom = inspectorCreateMode ? inspectorUrl : null;
+                    closeInspector(!!createdFrom);
+                    refreshInspectorBackground().then(() => {
+                        if (!createdFrom) return;
+                        Array.from(document.querySelectorAll('[data-inspector-new]'))
+                            .find(b => b.getAttribute('data-inspector-new') === createdFrom)?.focus();
+                    });
                     return;
                 }
                 refreshInspectorBackground();

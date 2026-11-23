@@ -3,7 +3,7 @@
         <div class="flex items-center justify-between">
             <h2 class="font-uncial text-2xl text-waldritter leading-tight">Fertigkeiten</h2>
             <a href="{{ route('admin.skills.create') }}"
-               data-modal-url="{{ route('admin.skills.create') }}"
+               data-inspector-new="{{ route('admin.skills.create') }}"
                class="ui primary button">Neue Fertigkeit</a>
         </div>
     </x-slot>
