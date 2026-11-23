@@ -179,8 +179,7 @@ Tokens nur innerhalb von `.wr-v1` galten. Das gilt seit den globalen Schritten G
 12. ~~**Ungenutzte CSS-Regeln** `wr-verwalten-*`~~ – entfernt (`.siegel-input` bleibt).
 13. ~~**Fertigkeiten-Vollseite fehlt**~~ – `admin/skills/edit` und `create` ergänzt; Symbol-Upload lädt
     dort die Seite neu.
-14. **Unzuverlässiger Test:** `PublicHeroProfileTest` schlägt gelegentlich fehl, weil zufällige
-    Faker-Namen den geprüften Text („Max“) enthalten können.
+14. ~~**Unzuverlässiger Test** `PublicHeroProfileTest`~~ – feste Namen und Orte statt Zufallswerten.
 15. **Deployment** (nur nach Freigabe): In Produktion fehlen u. a. die Migration
     `adventures.asks_vegetarian` und neue Bilder wie `wewantyou_v2.jpg`.
 

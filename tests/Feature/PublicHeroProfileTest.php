@@ -33,16 +33,21 @@ class PublicHeroProfileTest extends TestCase
 
     public function test_spieler_realname_wird_nicht_angezeigt(): void
     {
-        $player = Player::factory()->create(['name' => 'Max', 'lastname' => 'Mustermann']);
-        $hero = Hero::factory()->create([
+        // Feste, unverwechselbare Werte: Zufallsnamen/-orte aus der Factory (z. B. „Maximilian“,
+        // „Maxdorf“) dürfen den Realnamen nicht versehentlich enthalten.
+        $player = Player::factory()->create(['name' => 'Quirinella', 'lastname' => 'Zwackelmann']);
+        Hero::factory()->create([
             'player_id' => $player->id,
             'public_code' => 'NONAME',
+            'character_name' => 'Aldric der Kühne',
+            'homeplace' => 'Eichenhain',
         ]);
 
         $this->get(route('public.hero', 'NONAME'))
             ->assertOk()
-            ->assertDontSee('Max')
-            ->assertDontSee('Mustermann');
+            ->assertSee('Aldric der Kühne')
+            ->assertDontSee('Quirinella')
+            ->assertDontSee('Zwackelmann');
     }
 
     public function test_unbekannter_code_liefert_404(): void
