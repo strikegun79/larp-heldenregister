@@ -186,6 +186,9 @@
                 @endif
             @endcan
 
+            {{-- Issue #19: abrechenbare Teamer-Anmeldungen --}}
+            @include('dashboard._teamer_compensations')
+
             {{-- Aktive Helden der eigenen Spieler --}}
             @if ($activePlayers->isNotEmpty() || $playersAwaitingHero->isNotEmpty())
                 <section aria-labelledby="heroes-heading">

@@ -126,7 +126,9 @@ class TeamerCompensationDownloadTest extends TestCase
             ->assertOk()
             ->assertSee('Deine Teamer-Anmeldung')
             ->assertSee('Aufwandsentschädigung 63,00 €')
-            ->assertSee(route('adventures.teamer.compensation', [$adventure, $signup]), false);
+            ->assertSee(route('adventures.teamer.compensation', [$adventure, $signup]), false)
+            ->assertSee('Bitte ausdrucken und unterschreiben oder füge mit Acrobat deine Signatur hinzu.')
+            ->assertSee('Deine Anmeldungen (1)');
 
         $incomplete = $this->teamer(false);
         [$adventure2] = $this->signupFor($incomplete);
@@ -134,5 +136,52 @@ class TeamerCompensationDownloadTest extends TestCase
             ->assertOk()
             ->assertSee('Für die Abrechnung fehlt in deinem Profil noch: Steuernummer, Kontoinhaber, IBAN, Name der Bank.')
             ->assertDontSee('Abrechnung herunterladen (PDF)');
+    }
+
+    public function test_dashboard_lists_billable_signup_with_download(): void
+    {
+        $user = $this->teamer();
+        [$adventure, $signup] = $this->signupFor($user);
+        $adventure->update(['start_at' => now()->addDays(10), 'end_at' => now()->addDays(12)]);
+
+        $this->actingAs($user)->get(route('dashboard'))
+            ->assertOk()
+            ->assertSee('Deine Teamer-Abrechnung')
+            ->assertSee('Sommerlager')
+            ->assertSee('Aufwandsentschädigung 63,00 €')
+            ->assertSee(route('adventures.teamer.compensation', [$adventure, $signup]), false);
+    }
+
+    public function test_dashboard_points_to_profile_when_billing_data_missing(): void
+    {
+        $user = $this->teamer(false);
+        // Vor 30 Tagen beendet: liegt noch im 60-Tage-Fenster
+        [$adventure] = $this->signupFor($user);
+        $adventure->update(['start_at' => now()->subDays(32), 'end_at' => now()->subDays(30)]);
+
+        $this->actingAs($user)->get(route('dashboard'))
+            ->assertOk()
+            ->assertSee('Deine Teamer-Abrechnung')
+            ->assertSee('Für die Abrechnung fehlt in deinem Profil noch: Steuernummer, Kontoinhaber, IBAN, Name der Bank.')
+            ->assertDontSee('Abrechnung herunterladen (PDF)');
+    }
+
+    public function test_dashboard_hides_unapproved_without_amount_old_or_cancelled(): void
+    {
+        $user = $this->teamer();
+        $future = ['start_at' => now()->addDays(10), 'end_at' => now()->addDays(12)];
+
+        [$unapproved] = $this->signupFor($user, ['approved_at' => null]);
+        $unapproved->update($future);
+        [$withoutAmount] = $this->signupFor($user, [], null);
+        $withoutAmount->update($future);
+        [$old] = $this->signupFor($user);
+        $old->update(['start_at' => now()->subDays(70), 'end_at' => now()->subDays(61)]);
+        [$cancelled] = $this->signupFor($user);
+        $cancelled->update($future + ['event_status_id' => EventStatus::CANCELLED]);
+
+        $this->actingAs($user)->get(route('dashboard'))
+            ->assertOk()
+            ->assertDontSee('Deine Teamer-Abrechnung');
     }
 }

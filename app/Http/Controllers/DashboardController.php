@@ -9,6 +9,7 @@ use App\Models\Hero;
 use App\Models\Motd;
 use App\Models\NewsletterSubscription;
 use App\Models\Player;
+use App\Models\TeamerSignup;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
 
@@ -87,6 +88,21 @@ class DashboardController extends Controller
             ->orderBy('players.name')
             ->get();
 
+        // Issue #19: abrechenbare Teamer-Anmeldungen (bestätigt, Pauschale festgelegt).
+        // Das Portal kennt den Abrechnungsstand nicht – daher nur Abenteuer der letzten 60 Tage und kommende.
+        $teamerCompensations = TeamerSignup::where('user_id', $request->user()->id)
+            ->whereNotNull('approved_at')
+            ->whereNotNull('event_role_id')
+            ->whereHas('adventure', fn ($q) => $q
+                ->where('event_status_id', '!=', EventStatus::CANCELLED)
+                ->where(fn ($q) => $q->where('end_at', '>=', now()->subDays(60)->startOfDay())
+                    ->orWhere(fn ($q) => $q->whereNull('end_at')->where('start_at', '>=', now()->subDays(60)->startOfDay()))))
+            ->with(['adventure.location', 'eventRole'])
+            ->get()
+            ->filter(fn (TeamerSignup $signup) => $signup->compensationBlocker() === null)
+            ->sortBy(fn (TeamerSignup $signup) => $signup->adventure?->start_at)
+            ->values();
+
         $hasPlayers = $request->user()->players()->exists();
 
         $profileComplete = $request->user()->hasCompleteAddress();
@@ -103,6 +119,6 @@ class DashboardController extends Controller
         // Startseiten-Nachricht (nur wenn aktiv und im Zeitraum).
         $motd = Motd::current();
 
-        return view('dashboard', compact('motd', 'metrics', 'nextAdventure', 'nextAdventureSlots', 'upcomingBookedAdventures', 'activePlayers', 'playersAwaitingHero', 'hasPlayers', 'profileComplete', 'hasBookings', 'showOnboarding', 'showNewsletterHint'));
+        return view('dashboard', compact('motd', 'metrics', 'nextAdventure', 'nextAdventureSlots', 'upcomingBookedAdventures', 'activePlayers', 'playersAwaitingHero', 'hasPlayers', 'profileComplete', 'hasBookings', 'showOnboarding', 'showNewsletterHint', 'teamerCompensations'));
     }
 }

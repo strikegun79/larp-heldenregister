@@ -6,7 +6,9 @@
 <x-wr.booking-blocked-notice :adventure="$adventure" :profile-complete="$profileComplete"
                              :user-has-players="$userHasPlayers" class="mb-4" />
 
-@php($bookingsTitle = 'Deine Anmeldungen (' . $visibleBookings->count() . ')')
+{{-- Die eigene Teamer-Anmeldung (Abrechnung, Issue #19) zählt mit, damit der Abschnitt auffällt --}}
+@php($ownBookingsCount = $visibleBookings->count() + ($myTeamerSignup ? 1 : 0))
+@php($bookingsTitle = 'Deine Anmeldungen (' . $ownBookingsCount . ')')
 
 {{-- ARCH-003 Pilot: Mobile Accordion (< sm) — Akkordeon statt Tabs auf kleinen Bildschirmen --}}
 <div class="sm:hidden space-y-2">
@@ -14,7 +16,7 @@
         @include('adventures._event_info')
     </x-mobile.accordion-section>
 
-    <x-mobile.accordion-section :title="$bookingsTitle" :open="$visibleBookings->isNotEmpty()">
+    <x-mobile.accordion-section :title="$bookingsTitle" :open="$ownBookingsCount > 0">
         @include('adventures._own_bookings')
     </x-mobile.accordion-section>
 

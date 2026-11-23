@@ -37,7 +37,7 @@
                            class="wr-btn wr-btn--secondary wr-btn--small" download>
                             <i class="file pdf icon m-0" aria-hidden="true"></i> Abrechnung herunterladen (PDF)
                         </a>
-                        <p class="wr-help mt-1 mb-0">Bitte ausdrucken und unterschreiben.</p>
+                        <p class="wr-help mt-1 mb-0">Bitte ausdrucken und unterschreiben oder füge mit Acrobat deine Signatur hinzu.</p>
                     </div>
                 @endif
             @endif
