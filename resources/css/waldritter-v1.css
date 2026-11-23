@@ -312,6 +312,12 @@
     margin: 0 0 .75rem;
 }
 
+/* Hilfetexte auf dem dunklen Quest-Banner (z. B. Hinweis zum Zahlungsabgleich) */
+.wr-quest .wr-help,
+.wr-v1 .wr-quest .wr-help {
+    color: #f7f1e3;
+}
+
 .wr-quest__text {
     font-size: 1.02rem;
     line-height: 1.5;
