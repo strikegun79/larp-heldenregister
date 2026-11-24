@@ -43,6 +43,9 @@
                 <h3 class="wr-section-heading__title text-lg mb-3">{{ $class->name }}</h3>
             @endif
 
+            {{-- Issue #29: Helden-Schwur der Klasse (nur Bürokrat) --}}
+            @include('heroes.partials._oath')
+
             {{-- Baum-Ansicht (Bild mit Markern) + Liste --}}
             <div x-show="view === 'tree'">
                 <div class="skill-map">

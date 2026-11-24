@@ -39,6 +39,8 @@ return [
         'plot-characters.manage',
         // Reiter „SL-Planung“ der Plot-Charaktere einsehen (Issue #34)
         'plot-characters.secret',
+        // Helden-Schwur im Heldenbuch anzeigen (Issue #29)
+        'heroes.oath',
     ],
 
     'roles' => [
@@ -54,6 +56,7 @@ return [
             'groups.manage',
             'roles.view',
             'plot-characters.manage', 'plot-characters.secret',
+            'heroes.oath',        // Helden-Schwur vor der Bändchen-Übergabe vorsagen (Issue #29)
         ],
 
         // Projektleitung

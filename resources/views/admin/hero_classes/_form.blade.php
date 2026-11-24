@@ -36,6 +36,30 @@
         <x-input-error :messages="$errors->get('ribbon_color')" class="mt-2" />
     </div>
 
+    {{-- Issue #29: Helden-Schwur (Bürokrat) und feierliche Aufnahme (Spielleitung) --}}
+    <fieldset class="border-t border-stone-200 pt-4">
+        <legend class="text-sm font-medium text-stone-700">Helden-Schwur</legend>
+        <p class="text-xs text-stone-500 mb-2">
+            Wird im Heldenbuch für Bürokraten angezeigt und vor der Übergabe des Bändchens aufgesagt.
+            Ohne Schwurtext erscheint kein Schwur-Button.
+        </p>
+        <div class="field">
+            <label for="oath_title">Titel (z.&nbsp;B. „Schwur der Tapferkeit“)</label>
+            <input type="text" id="oath_title" name="oath_title" maxlength="100" value="{{ old('oath_title', $class->oath_title) }}">
+            <x-input-error :messages="$errors->get('oath_title')" class="mt-2" />
+        </div>
+        <div class="field">
+            <label for="oath_text">Schwur – vom Bürokraten vorgesagt (eine Zeile je Satz)</label>
+            <textarea id="oath_text" name="oath_text" rows="4" maxlength="2000">{{ old('oath_text', $class->oath_text) }}</textarea>
+            <x-input-error :messages="$errors->get('oath_text')" class="mt-2" />
+        </div>
+        <div class="field">
+            <label for="ceremony_text">Feierliche Aufnahme – Spielleitung</label>
+            <textarea id="ceremony_text" name="ceremony_text" rows="4" maxlength="2000">{{ old('ceremony_text', $class->ceremony_text) }}</textarea>
+            <x-input-error :messages="$errors->get('ceremony_text')" class="mt-2" />
+        </div>
+    </fieldset>
+
     <label class="flex items-center gap-2 text-stone-700">
         <input type="checkbox" name="disabled" value="1" @checked(old('disabled', $class->disabled))>
         Deaktiviert (nicht mehr für neue Helden wählbar)
