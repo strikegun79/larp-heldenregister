@@ -121,9 +121,16 @@ class UserController extends Controller
             'house_number' => ['nullable', 'string', 'max:10'],
             'zip' => ['nullable', 'string', 'max:10'],
             'city' => ['nullable', 'string', 'max:100'],
+            // Issue #31: Nextcloud-Benutzername, falls er nicht über die E-Mail gefunden wird.
+            'nextcloud_user_id' => ['nullable', 'string', 'max:64', 'regex:/^[\pL\pN _.@-]+$/u'],
+        ], [
+            'nextcloud_user_id.regex' => 'Der Nextcloud-Benutzername enthält unzulässige Zeichen.',
         ]);
 
+        $nextcloudUserId = $data['nextcloud_user_id'] ?? null;
+        unset($data['nextcloud_user_id']);
         $user->fill($data);
+        $user->nextcloud_user_id = filled($nextcloudUserId) ? trim($nextcloudUserId) : null;
 
         if ($user->isDirty('email')) {
             $user->email_verified_at = null;

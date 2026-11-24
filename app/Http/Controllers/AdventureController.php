@@ -17,6 +17,8 @@ use App\Models\Player;
 use App\Models\User;
 use App\Notifications\EventCancelled;
 use App\Notifications\WaitlistPromoted;
+use App\Services\NextcloudTalk\AdventureTalkService;
+use App\Services\NextcloudTalk\NextcloudTalkClient;
 use Barryvdh\DomPDF\Facade\Pdf;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -167,6 +169,14 @@ class AdventureController extends Controller
         // starten mit den Standard-Pauschalen der abrechnungsfähigen Rollen.
         foreach (EventRole::billable()->whereNotNull('default_compensation')->get() as $role) {
             $adventure->compensations()->create(['event_role_id' => $role->id, 'amount' => $role->default_compensation]);
+        }
+
+        // Issue #31: gewünschte Talk-Struktur (Abschnitt „Talk“, nur bei aktiver Integration sichtbar).
+        if (NextcloudTalkClient::fromConfig()->isActive()) {
+            $adventure->talk_plot_thread = $request->boolean('talk_plot_thread');
+            $adventure->talk_teamer_room = $request->boolean('talk_teamer_room');
+            $adventure->save();
+            AdventureTalkService::queueSetup($adventure);
         }
 
         return redirect()
@@ -497,6 +507,11 @@ class AdventureController extends Controller
 
         $adventure->update($data);
 
+        // Issue #31: neuer Eventname → Plot-Thread und Teamer-Raum umbenennen.
+        if ($adventure->wasChanged('name')) {
+            AdventureTalkService::queueSetup($adventure);
+        }
+
         $message = 'Abenteuer wurde aktualisiert.';
 
         return $request->expectsJson()
@@ -631,6 +646,8 @@ class AdventureController extends Controller
             // Geführter Workflow: bei bestehendem Event nur erlaubte Ziel-Status,
             // bei der Neuanlage alle (ADV-05).
             'allowedStatusIds' => $adventure->exists ? $adventure->allowedStatusIds() : null,
+            // Issue #31: Talk-Abschnitt nur bei konfigurierter und eingeschalteter Integration.
+            'talkActive' => NextcloudTalkClient::fromConfig()->isActive(),
         ];
     }
 

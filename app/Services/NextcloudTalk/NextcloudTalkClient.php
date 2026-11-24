@@ -2,6 +2,7 @@
 
 namespace App\Services\NextcloudTalk;
 
+use App\Models\Setting;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\Response;
@@ -9,7 +10,7 @@ use Illuminate\Support\Facades\Http;
 
 /**
  * Issue #31: Schlanker Client für die OCS-API von Nextcloud (Talk = App „spreed“).
- * Phase 1: Verbindungstest. Räume, Threads, Teilnehmer und Konten folgen in Phase 2/3.
+ * Phase 1: Verbindungstest. Phase 2: Threads, Räume und Teilnehmer. Konten folgen in Phase 3.
  *
  * Zugangsdaten (App-Passwort) erscheinen nie in Rückgaben oder Meldungen.
  */
@@ -92,6 +93,159 @@ class NextcloudTalkClient
             'version' => $version,
             'talk_version' => $talkVersion !== '' ? $talkVersion : 'unbekannt',
         ];
+    }
+
+    /**
+     * Ist die Integration nutzbar? Zugangsdaten in der .env und Hauptschalter in der Verwaltung.
+     */
+    public function isActive(): bool
+    {
+        return $this->isConfigured() && Setting::get('talk_enabled') === '1';
+    }
+
+    /** Link zu einem Talk-Raum, optional direkt in einen Thread. */
+    public function roomUrl(string $token, ?int $threadId = null): string
+    {
+        return $this->url.'/call/'.$token.($threadId ? '?threadId='.$threadId : '');
+    }
+
+    // ── Phase 2: Threads, Räume, Teilnehmer ─────────────────────────
+
+    /**
+     * Thread in einem bestehenden Raum starten (Talk ≥ 22, Fähigkeit „threads“).
+     * Die erste Nachricht trägt den Thread-Titel; zurück kommt die Thread-ID.
+     */
+    public function createThread(string $roomToken, string $title, string $message): int
+    {
+        $response = $this->send('post', 'apps/spreed/api/v1/chat/'.rawurlencode($roomToken), [
+            'message' => $message,
+            'threadTitle' => $title,
+        ], [404 => 'Der Plot-Team-Chat wurde nicht gefunden. Ist das technische Konto Mitglied im Chat?']);
+
+        $threadId = (int) ($response->json('ocs.data.threadId') ?: $response->json('ocs.data.id'));
+        if ($threadId <= 0) {
+            throw new NextcloudTalkException('Talk hat keinen Thread angelegt (unterstützt die Talk-Version Threads?).');
+        }
+
+        return $threadId;
+    }
+
+    public function renameThread(string $roomToken, int $threadId, string $title): void
+    {
+        $this->send('put', 'apps/spreed/api/v1/chat/'.rawurlencode($roomToken).'/threads/'.$threadId, [
+            'threadTitle' => $title,
+        ]);
+    }
+
+    /** Gruppen-Unterhaltung (roomType 2, nicht öffentlich) anlegen; zurück kommt der Raum-Token. */
+    public function createGroupRoom(string $name): string
+    {
+        $response = $this->send('post', 'apps/spreed/api/v4/room', [
+            'roomType' => 2,
+            'roomName' => $name,
+        ]);
+
+        $token = (string) $response->json('ocs.data.token', '');
+        if ($token === '') {
+            throw new NextcloudTalkException('Talk hat keinen Raum-Token zurückgegeben.');
+        }
+
+        return $token;
+    }
+
+    public function renameRoom(string $token, string $name): void
+    {
+        $this->send('put', 'apps/spreed/api/v4/room/'.rawurlencode($token), ['roomName' => $name]);
+    }
+
+    public function addUser(string $token, string $userId): void
+    {
+        $this->send('post', 'apps/spreed/api/v4/room/'.rawurlencode($token).'/participants', [
+            'newParticipant' => $userId,
+            'source' => 'users',
+        ], [404 => 'Raum oder Nextcloud-Konto „'.$userId.'“ wurde nicht gefunden.']);
+    }
+
+    /**
+     * Teilnehmer eines Raums.
+     *
+     * @return list<array{attendeeId: int, actorType: string, actorId: string}>
+     */
+    public function participants(string $token): array
+    {
+        $response = $this->send('get', 'apps/spreed/api/v4/room/'.rawurlencode($token).'/participants');
+
+        return collect((array) $response->json('ocs.data', []))
+            ->filter(fn ($p) => is_array($p) && isset($p['attendeeId']))
+            ->map(fn (array $p) => [
+                'attendeeId' => (int) $p['attendeeId'],
+                'actorType' => (string) ($p['actorType'] ?? ''),
+                'actorId' => (string) ($p['actorId'] ?? ''),
+            ])
+            ->values()
+            ->all();
+    }
+
+    public function removeAttendee(string $token, int $attendeeId): void
+    {
+        $this->send('delete', 'apps/spreed/api/v4/room/'.rawurlencode($token).'/attendees', [
+            'attendeeId' => $attendeeId,
+        ]);
+    }
+
+    /**
+     * Nextcloud-Benutzername zu einer E-Mail-Adresse (Provisioning-API, benötigt Admin-Rechte).
+     * Nur ein eindeutiger, exakter Treffer zählt – sonst null.
+     */
+    public function findUserIdByEmail(string $email): ?string
+    {
+        $email = mb_strtolower(trim($email));
+        if ($email === '') {
+            return null;
+        }
+
+        $response = $this->send('get', 'cloud/users/details', ['search' => $email, 'limit' => 25]);
+
+        $matches = collect((array) $response->json('ocs.data.users', []))
+            ->filter(fn ($u) => is_array($u) && mb_strtolower((string) ($u['email'] ?? '')) === $email)
+            ->map(fn (array $u, $key) => (string) ($u['id'] ?? $key))
+            ->values();
+
+        return $matches->count() === 1 ? $matches->first() : null;
+    }
+
+    /** Benutzername des technischen Kontos (wird beim Abgleich nie entfernt). */
+    public function technicalUser(): string
+    {
+        return (string) $this->user;
+    }
+
+    /**
+     * OCS-Aufruf mit verständlicher Fehlermeldung; wirft NextcloudTalkException.
+     *
+     * @param  array<string, mixed>  $data
+     * @param  array<int, string>  $messages  Eigene Meldungen je HTTP-Status
+     */
+    private function send(string $method, string $path, array $data = [], array $messages = []): Response
+    {
+        if (! $this->isConfigured()) {
+            throw new NextcloudTalkException('Nextcloud ist nicht konfiguriert.');
+        }
+
+        try {
+            $request = $this->request();
+            $response = $method === 'get'
+                ? $request->get($this->ocs($path), $data)
+                : $request->asJson()->{$method}($this->ocs($path), $data);
+        } catch (ConnectionException) {
+            throw new NextcloudTalkException('Nextcloud ist nicht erreichbar (Adresse prüfen oder Zeitüberschreitung).');
+        }
+
+        if ($response->successful()) {
+            return $response;
+        }
+
+        throw new NextcloudTalkException($messages[$response->status()] ?? (string) $this->errorMessage($response));
     }
 
     /**

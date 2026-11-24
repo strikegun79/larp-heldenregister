@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin;
 use App\Http\Controllers\AdventureController;
+use App\Http\Controllers\AdventureTalkController;
 use App\Http\Controllers\AttendanceController;
 use App\Http\Controllers\BookingController;
 use App\Http\Controllers\ChangelogController;
@@ -191,6 +192,12 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::put('adventures/{adventure}/tasks', [AdventureController::class, 'saveTasks'])->name('adventures.tasks.save');
     // Aufwandsentschädigungen je Rolle im Reiter Teamer/NSC speichern (Issue #38).
     Route::put('adventures/{adventure}/compensations', [AdventureController::class, 'saveCompensations'])->name('adventures.compensations.save');
+    // Issue #31 (Phase 2): Reiter „Talk“ – Plot-Thread, Teamer-Raum, Teamer-Abgleich.
+    Route::middleware('can:events.edit')->group(function () {
+        Route::put('adventures/{adventure}/talk', [AdventureTalkController::class, 'update'])->name('adventures.talk.update');
+        Route::post('adventures/{adventure}/talk/sync', [AdventureTalkController::class, 'sync'])->name('adventures.talk.sync');
+        Route::post('adventures/{adventure}/talk/retry', [AdventureTalkController::class, 'retry'])->name('adventures.talk.retry');
+    });
 
     // PDF einer Auftraggeber-Anforderung herunterladen (Issue #14), nur für eingeloggte Nutzer.
     Route::get('requirements/{requirement}/pdf', [EventClientRequirementPdfController::class, 'show'])

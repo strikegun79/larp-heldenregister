@@ -211,6 +211,36 @@
         </div>
     </div>
 
+    {{-- Issue #31: Talk-Struktur beim Anlegen wählen (später im Verwaltungs-Reiter „Talk“). --}}
+    @if (! $adventure->exists && ($talkActive ?? false))
+        <fieldset class="p-3 bg-amber-50 border border-amber-200 rounded-md">
+            <legend class="px-1 font-medium text-amber-900"><i class="comments icon" aria-hidden="true"></i> Nextcloud Talk</legend>
+            <p class="text-sm text-amber-700 mb-2">Wird nach dem Speichern im Hintergrund eingerichtet.</p>
+            <div class="space-y-2">
+                <div class="flex items-start gap-3">
+                    <input type="hidden" name="talk_plot_thread" value="0">
+                    <input type="checkbox" id="talk_plot_thread" name="talk_plot_thread" value="1"
+                           class="mt-0.5 rounded border-gray-300 text-amber-700 focus:ring-amber-600"
+                           @checked(old('talk_plot_thread'))>
+                    <div>
+                        <label for="talk_plot_thread" class="font-medium text-amber-900 cursor-pointer">Plot-Thread erstellen</label>
+                        <p class="text-sm text-amber-700 mt-0.5">Thread mit dem Eventnamen im Plot-Team-Chat.</p>
+                    </div>
+                </div>
+                <div class="flex items-start gap-3">
+                    <input type="hidden" name="talk_teamer_room" value="0">
+                    <input type="checkbox" id="talk_teamer_room" name="talk_teamer_room" value="1"
+                           class="mt-0.5 rounded border-gray-300 text-amber-700 focus:ring-amber-600"
+                           @checked(old('talk_teamer_room'))>
+                    <div>
+                        <label for="talk_teamer_room" class="font-medium text-amber-900 cursor-pointer">Teamer-Raum erstellen</label>
+                        <p class="text-sm text-amber-700 mt-0.5">Privater Raum für die Teamer dieses Events; bestätigte Teamer werden automatisch hinzugefügt.</p>
+                    </div>
+                </div>
+            </div>
+        </fieldset>
+    @endif
+
     @unless($inModal ?? false)
     <div class="flex items-center gap-4">
         <x-primary-button>Speichern</x-primary-button>

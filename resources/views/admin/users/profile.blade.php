@@ -109,6 +109,15 @@
                         </div>
                     </div>
 
+                    {{-- Issue #31: Zuordnung zum Nextcloud-Konto (Talk-Räume) --}}
+                    <div>
+                        <x-input-label for="nextcloud_user_id" value="Nextcloud-Benutzername (Talk)" />
+                        <x-text-input id="nextcloud_user_id" name="nextcloud_user_id" type="text" class="mt-1 block w-full"
+                                      :value="old('nextcloud_user_id', $user->nextcloud_user_id)" maxlength="64" autocomplete="off" />
+                        <p class="text-xs text-stone-500 mt-1">Leer lassen: Das Konto wird automatisch über die E-Mail-Adresse gesucht.</p>
+                        <x-input-error class="mt-2" :messages="$errors->get('nextcloud_user_id')" />
+                    </div>
+
                     <div>
                         <x-primary-button>Speichern</x-primary-button>
                     </div>
