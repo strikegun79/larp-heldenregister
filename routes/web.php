@@ -189,6 +189,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::patch('adventures/{adventure}/toggle-waitlist-mode', [AdventureController::class, 'toggleWaitlistMode'])->name('adventures.toggle-waitlist-mode');
     // Taskmanager-Einstellungen speichern (TASK-01).
     Route::put('adventures/{adventure}/tasks', [AdventureController::class, 'saveTasks'])->name('adventures.tasks.save');
+    // Aufwandsentschädigungen je Rolle im Reiter Teamer/NSC speichern (Issue #38).
+    Route::put('adventures/{adventure}/compensations', [AdventureController::class, 'saveCompensations'])->name('adventures.compensations.save');
 
     // PDF einer Auftraggeber-Anforderung herunterladen (Issue #14), nur für eingeloggte Nutzer.
     Route::get('requirements/{requirement}/pdf', [EventClientRequirementPdfController::class, 'show'])
