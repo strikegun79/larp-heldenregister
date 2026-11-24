@@ -10,7 +10,7 @@ use Illuminate\Support\Facades\Http;
 
 /**
  * Issue #31: Schlanker Client für die OCS-API von Nextcloud (Talk = App „spreed“).
- * Phase 1: Verbindungstest. Phase 2: Threads, Räume und Teilnehmer. Konten folgen in Phase 3.
+ * Phase 1: Verbindungstest. Phase 2: Threads, Räume und Teilnehmer. Phase 3: Konten.
  *
  * Zugangsdaten (App-Passwort) erscheinen nie in Rückgaben oder Meldungen.
  */
@@ -214,6 +214,49 @@ class NextcloudTalkClient
         return $matches->count() === 1 ? $matches->first() : null;
     }
 
+    // ── Phase 3: Konten (Provisioning-API, benötigt Admin-Rechte) ───
+
+    /** Gibt es ein Nextcloud-Konto mit diesem Benutzernamen? */
+    public function userExists(string $userId): bool
+    {
+        $response = $this->send('get', 'cloud/users/'.rawurlencode($userId), [], [], [404]);
+
+        return $response->status() !== 404;
+    }
+
+    /**
+     * Konto ohne Passwort anlegen – Nextcloud verschickt dann selbst die Willkommensmail
+     * mit dem Link zum Setzen des Passworts.
+     */
+    public function createUser(string $userId, string $displayName, string $email): void
+    {
+        $this->send('post', 'cloud/users', [
+            'userid' => $userId,
+            'password' => '',
+            'displayName' => mb_substr($displayName, 0, 64),
+            'email' => $email,
+            'language' => 'de',
+        ], [400 => 'Nextcloud hat das Konto „'.$userId.'“ nicht angelegt (Benutzername oder E-Mail ungültig bzw. vergeben).']);
+    }
+
+    public function addUserToGroup(string $userId, string $group): void
+    {
+        $this->send('post', 'cloud/users/'.rawurlencode($userId).'/groups', ['groupid' => $group], [
+            400 => 'Die Nextcloud-Gruppe „'.$group.'“ gibt es nicht.',
+            404 => 'Das Nextcloud-Konto „'.$userId.'“ wurde nicht gefunden.',
+        ]);
+    }
+
+    public function enableUser(string $userId): void
+    {
+        $this->send('put', 'cloud/users/'.rawurlencode($userId).'/enable');
+    }
+
+    public function disableUser(string $userId): void
+    {
+        $this->send('put', 'cloud/users/'.rawurlencode($userId).'/disable', [], [], [404]);
+    }
+
     /** Benutzername des technischen Kontos (wird beim Abgleich nie entfernt). */
     public function technicalUser(): string
     {
@@ -225,8 +268,9 @@ class NextcloudTalkClient
      *
      * @param  array<string, mixed>  $data
      * @param  array<int, string>  $messages  Eigene Meldungen je HTTP-Status
+     * @param  list<int>  $allowed  Status, die nicht als Fehler gelten (z. B. 404 bei Existenzprüfung)
      */
-    private function send(string $method, string $path, array $data = [], array $messages = []): Response
+    private function send(string $method, string $path, array $data = [], array $messages = [], array $allowed = []): Response
     {
         if (! $this->isConfigured()) {
             throw new NextcloudTalkException('Nextcloud ist nicht konfiguriert.');
@@ -241,7 +285,7 @@ class NextcloudTalkClient
             throw new NextcloudTalkException('Nextcloud ist nicht erreichbar (Adresse prüfen oder Zeitüberschreitung).');
         }
 
-        if ($response->successful()) {
+        if ($response->successful() || in_array($response->status(), $allowed, true)) {
             return $response;
         }
 

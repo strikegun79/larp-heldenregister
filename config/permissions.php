@@ -43,6 +43,8 @@ return [
         'heroes.oath',
         // Nextcloud-Talk-Anbindung verwalten (Issue #31) – nur Admin via '*'
         'talk.manage',
+        // Talk-Nutzung je Spieler freigeben (Issue #31, Phase 3)
+        'talk.approve',
     ],
 
     'roles' => [
@@ -59,6 +61,7 @@ return [
             'roles.view',
             'plot-characters.manage', 'plot-characters.secret',
             'heroes.oath',        // Helden-Schwur vor der Bändchen-Übergabe vorsagen (Issue #29)
+            'talk.approve',       // Nextcloud Talk je Spieler freigeben (Issue #31)
         ],
 
         // Projektleitung

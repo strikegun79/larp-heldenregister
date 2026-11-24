@@ -99,7 +99,7 @@
             @endcan
 
             {{-- Kommunikation: Newsletter, Nextcloud Talk (Issue #31) --}}
-            @canany(['newsletter.manage', 'talk.manage'])
+            @canany(['newsletter.manage', 'talk.manage', 'talk.approve'])
                 <section aria-labelledby="admin-communication" class="mb-8">
                     <h2 id="admin-communication" class="wr-section-heading__title mb-4 flex items-center gap-2">
                         <i class="newspaper icon m-0" aria-hidden="true"></i> Kommunikation
@@ -110,6 +110,9 @@
                         @endcan
                         @can('talk.manage')
                             <x-admin.dashboard-card :card="$adminCard('Nextcloud Talk', 'Verbindung & Einstellungen', 'verwaltung.jpg', route('admin.talk.index'))" />
+                        @endcan
+                        @can('talk.approve')
+                            <x-admin.dashboard-card :card="$adminCard('Talk-Freigaben', 'Talk je Spieler freigeben', 'verwaltung.jpg', route('admin.talk.approvals.index'))" />
                         @endcan
                     </div>
                 </section>

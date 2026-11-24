@@ -58,7 +58,7 @@ class PermissionMatrixTest extends TestCase
                 'profile.view', 'player.view', 'heldenregister.view', 'heldenregister.edit',
                 'adventure.book', 'adventure.modify', 'adventure.cancel', 'events.view', 'events.edit',
                 'groups.manage', 'roles.view', 'plot-characters.manage', 'plot-characters.secret',
-                'heroes.oath',
+                'heroes.oath', 'talk.approve',
             ]],
             // ROLE-10, SURV-01, NL-01: Verwaltungsbereiche der Projektleitung.
             'Projektleitung' => [30, [
