@@ -16,20 +16,38 @@
     </head>
     <body class="antialiased text-stone-800 bg-parchment min-h-screen flex flex-col">
 
-        {{-- Minimale öffentliche Navigation --}}
-        <nav class="bg-[#e4cea5]/80 backdrop-blur border-b-2 border-[#5a3a22]/50 shadow-sm">
-            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16">
-                <a href="/">
-                    <x-application-logo class="block h-12 w-auto" />
-                </a>
-                <a href="{{ route('login') }}"
-                   class="text-sm text-waldritter hover:underline font-medium">
-                    Anmelden
-                </a>
-            </div>
-        </nav>
+        @php
+            // Issue #37: Angemeldete sehen die Hauptnavigation – außer auf Umfrage-Seiten,
+            // dort bleibt die schlanke Leiste (kein Ablenken, keine fixierte Handy-Leiste über dem Wizard).
+            $showAppNav = auth()->check() && ! request()->routeIs('survey.*');
+        @endphp
 
-        <main class="flex-1 py-10">
+        @if ($showAppNav)
+            @include('layouts.navigation')
+        @else
+            {{-- Minimale öffentliche Navigation --}}
+            <nav class="bg-[#e4cea5]/80 backdrop-blur border-b-2 border-[#5a3a22]/50 shadow-sm">
+                <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center justify-between h-16">
+                    <a href="/">
+                        <x-application-logo class="block h-12 w-auto" />
+                    </a>
+                    @auth
+                        <a href="{{ route('dashboard') }}"
+                           class="text-sm text-waldritter hover:underline font-medium">
+                            Zum Heldenregister
+                        </a>
+                    @else
+                        <a href="{{ route('login') }}"
+                           class="text-sm text-waldritter hover:underline font-medium">
+                            Anmelden
+                        </a>
+                    @endauth
+                </div>
+            </nav>
+        @endif
+
+        {{-- Auf dem Handy Platz für die fixierte untere Leiste der Hauptnavigation --}}
+        <main @class(['flex-1 py-10', 'pb-24 sm:pb-10' => $showAppNav])>
             {{ $slot }}
         </main>
 
