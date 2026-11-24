@@ -196,39 +196,6 @@
         </div>
     </div>
 
-    {{-- Issue #19: Aufwandsentschädigung je abrechnungsfähiger Rolle. Leer = keine Abrechnung.
-         Neue Veranstaltungen (bzw. solche ohne Einträge) werden mit der Standard-Pauschale vorbelegt.
-         _form wird in der Verwaltung doppelt eingebunden → eindeutige IDs per Suffix. --}}
-    @php
-        $billableRoles = \App\Models\EventRole::billable()->orderBy('id')->get();
-        $compAmounts = $adventure->exists ? $adventure->compensations()->pluck('amount', 'event_role_id') : collect();
-        $compSuffix = \Illuminate\Support\Str::lower(\Illuminate\Support\Str::random(5));
-    @endphp
-    @if ($billableRoles->isNotEmpty())
-        <fieldset class="border border-stone-200 rounded-md p-3">
-            <legend class="px-1 font-medium text-stone-800">Aufwandsentschädigung für Teamer (€)</legend>
-            <p class="text-sm text-stone-600 mb-3">
-                Pauschale je Rolle für diese Veranstaltung. Teamer mit bestätigter Anmeldung laden damit ihre
-                ausgefüllte Abrechnung herunter. Leeres Feld = für diese Rolle keine Abrechnung.
-            </p>
-            <div class="grid gap-4 sm:grid-cols-3">
-                @foreach ($billableRoles as $role)
-                    @php
-                        $default = $compAmounts->isEmpty() ? $role->default_compensation : null;
-                        $value = old('compensations.'.$role->id, $compAmounts[$role->id] ?? $default);
-                    @endphp
-                    <div>
-                        <x-input-label for="comp-{{ $role->id }}-{{ $compSuffix }}" :value="$role->description" />
-                        <x-text-input id="comp-{{ $role->id }}-{{ $compSuffix }}" name="compensations[{{ $role->id }}]"
-                                      type="number" step="0.01" min="0" max="9999.99" class="mt-1 block w-full"
-                                      :value="$value" placeholder="keine" />
-                        <x-input-error :messages="$errors->get('compensations.'.$role->id)" class="mt-2" />
-                    </div>
-                @endforeach
-            </div>
-        </fieldset>
-    @endif
-
     <div class="grid grid-cols-4 gap-4">
         <div>
             <x-input-label for="min_age" value="Mindestalter (Jahre)" />

@@ -36,6 +36,8 @@
                                 data-skill-name="{{ $skill->name }}"
                                 data-skill-desc="{{ $skill->description ?? '' }}"
                                 data-skill-cost="{{ $skill->ep_costs }}"
+                                data-skill-perl-name="{{ $skill->perlColor?->name }}"
+                                data-skill-perl-code="{{ $skill->perlColor?->code }}"
                                 data-skill-learned="{{ $learned ? '1' : '0' }}"
                                 data-skill-locked="{{ $locked ? '1' : '0' }}"
                                 data-skill-prereqs="{{ $locked ? $missing->pluck('req_name')->join(', ') : '' }}"
@@ -45,7 +47,9 @@
                                     cost:    $el.dataset.skillCost,
                                     learned: $el.dataset.skillLearned === '1',
                                     locked:  $el.dataset.skillLocked  === '1',
-                                    prereqs: $el.dataset.skillPrereqs
+                                    prereqs: $el.dataset.skillPrereqs,
+                                    perlName: $el.dataset.skillPerlName,
+                                    perlCode: $el.dataset.skillPerlCode
                                 })"
                                 title="{{ $skill->name }}{{ $locked ? ' – gesperrt' : '' }}">
                             <div class="flex items-start gap-1.5 leading-snug">

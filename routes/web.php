@@ -79,6 +79,9 @@ Route::middleware('throttle:public-hero')->group(function () {
     Route::get('/h', [PublicHeroController::class, 'index'])->name('public.hero.search');
     Route::get('/h/search', [PublicHeroController::class, 'search'])->name('public.hero.search.go');
 
+    // Issue #30: Öffentliche Seite eines bekannten Plot-Charakters (vor {code}-Route).
+    Route::get('/h/plot/{plotCharacter}', [PublicHeroController::class, 'plotCharacter'])->name('public.plot-character');
+
     // PUB-02: Öffentliches Helden-Profil.
     Route::get('/h/{code}', [PublicHeroController::class, 'show'])->name('public.hero');
 });
@@ -186,6 +189,8 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::patch('adventures/{adventure}/toggle-waitlist-mode', [AdventureController::class, 'toggleWaitlistMode'])->name('adventures.toggle-waitlist-mode');
     // Taskmanager-Einstellungen speichern (TASK-01).
     Route::put('adventures/{adventure}/tasks', [AdventureController::class, 'saveTasks'])->name('adventures.tasks.save');
+    // Aufwandsentschädigungen je Rolle im Reiter Teamer/NSC speichern (Issue #38).
+    Route::put('adventures/{adventure}/compensations', [AdventureController::class, 'saveCompensations'])->name('adventures.compensations.save');
 
     // PDF einer Auftraggeber-Anforderung herunterladen (Issue #14), nur für eingeloggte Nutzer.
     Route::get('requirements/{requirement}/pdf', [EventClientRequirementPdfController::class, 'show'])
@@ -486,6 +491,11 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::get('groups/{group}/members', [Admin\GroupMemberController::class, 'index'])->name('groups.members');
         Route::post('groups/{group}/members', [Admin\GroupMemberController::class, 'store'])->name('groups.members.store');
         Route::delete('groups/{group}/members/{hero}', [Admin\GroupMemberController::class, 'destroy'])->name('groups.members.destroy');
+    });
+
+    // Plot-Charaktere für das öffentliche Verzeichnis (Issue #30): plot-characters.manage.
+    Route::prefix('admin')->name('admin.')->middleware('can:plot-characters.manage')->group(function () {
+        Route::resource('plot-characters', Admin\PlotCharacterController::class)->except('show');
     });
 });
 

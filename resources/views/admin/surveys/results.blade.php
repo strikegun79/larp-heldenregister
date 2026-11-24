@@ -264,10 +264,11 @@
                     @foreach($stats as $stat)
                         <div class="survey-result-card">
                             <div class="survey-result-card-header">
-                                @if($stat['question']->type === 'rating') 📊
-                                @elseif($stat['question']->type === 'text') 📝
-                                @else ✅ @endif
+                                {{ $stat['question']->typeIcon() }}
                                 {{ $stat['question']->question_text }}
+                                @if($stat['question']->isArchived())
+                                    <span class="ui tiny grey label ml-2">entfernte Frage</span>
+                                @endif
                                 <span class="ml-auto text-xs opacity-70">{{ $stat['count'] }} Antworten</span>
                             </div>
                             <div class="survey-result-card-body">
@@ -320,6 +321,75 @@
                                             <p class="text-xs text-stone-400">Nein ({{ round($no / $t * 100) }} %)</p>
                                         </div>
                                     </div>
+
+                                @elseif($stat['question']->type === 'smiley')
+                                    {{-- Issue #24: Smiley-Skala 1–5 --}}
+                                    @php
+                                        $avg = $stat['average'];
+                                        $avgSmiley = $avg !== null ? \App\Models\SurveyTemplateQuestion::SMILEYS[(int) round($avg)] : '';
+                                        $maxVal = max($stat['distribution']->max() ?? 0, 1);
+                                    @endphp
+                                    <div class="flex flex-wrap items-start gap-6">
+                                        <div class="text-center">
+                                            <div class="survey-avg-value">
+                                                {{ $avgSmiley }} {{ $avg !== null ? number_format($avg, 1, ',', '') : '–' }}
+                                            </div>
+                                            <p class="text-xs text-stone-400">Ø von 5</p>
+                                        </div>
+                                        <table class="text-sm flex-1 min-w-[14rem]">
+                                            <caption class="sr-only">Verteilung der Smiley-Antworten</caption>
+                                            <tbody>
+                                                @foreach($stat['question']->smileyLabels() as $points => $label)
+                                                    @php $cnt = $stat['distribution'][$points] ?? 0; @endphp
+                                                    <tr>
+                                                        <th scope="row" class="text-left font-normal pr-3 py-0.5 whitespace-nowrap">
+                                                            {{ \App\Models\SurveyTemplateQuestion::SMILEYS[$points] }} {{ $label }}
+                                                        </th>
+                                                        <td class="w-full py-0.5">
+                                                            <div class="h-3 rounded bg-amber-500/70" style="width: {{ round($cnt / $maxVal * 100) }}%"></div>
+                                                        </td>
+                                                        <td class="text-right pl-3 py-0.5 tabular-nums">{{ $cnt }}</td>
+                                                    </tr>
+                                                @endforeach
+                                            </tbody>
+                                        </table>
+                                    </div>
+
+                                @elseif($stat['question']->type === 'choice')
+                                    {{-- Issue #24: Optionen mit Freitext --}}
+                                    @php $base = max($stat['choice_respondents'], 1); @endphp
+                                    <table class="text-sm w-full">
+                                        <caption class="sr-only">Anzahl je Antwortoption</caption>
+                                        <tbody>
+                                            @foreach($stat['choice_counts'] as $choice => $cnt)
+                                                <tr>
+                                                    <th scope="row" class="text-left font-normal pr-3 py-0.5 whitespace-nowrap">{{ $choice }}</th>
+                                                    <td class="w-full py-0.5">
+                                                        <div class="h-3 rounded bg-green-600/60" style="width: {{ round($cnt / $base * 100) }}%"></div>
+                                                    </td>
+                                                    <td class="text-right pl-3 py-0.5 tabular-nums whitespace-nowrap">{{ $cnt }} ({{ round($cnt / $base * 100) }} %)</td>
+                                                </tr>
+                                            @endforeach
+                                        </tbody>
+                                    </table>
+                                    @if($stat['question']->allowsMultiple())
+                                        <p class="text-xs text-stone-400 mt-1">Mehrfachauswahl – Anteile bezogen auf {{ $stat['choice_respondents'] }} Personen mit Auswahl.</p>
+                                    @endif
+
+                                    @if($stat['question']->hasFreeText() || $stat['texts']->isNotEmpty())
+                                        <h4 class="text-xs font-semibold text-stone-500 uppercase mt-4 mb-2">Nachrichten</h4>
+                                        @can('survey.admin')
+                                            @forelse($stat['texts'] as $text)
+                                                <blockquote class="survey-text-quote mb-2">{{ $text }}</blockquote>
+                                            @empty
+                                                <p class="text-sm text-stone-400">Keine Nachrichten.</p>
+                                            @endforelse
+                                        @else
+                                            <p class="text-sm text-stone-400 italic">
+                                                Freitext-Antworten sind nur für Umfrage-Admins einsehbar.
+                                            </p>
+                                        @endcan
+                                    @endif
 
                                 @elseif($stat['question']->type === 'text')
                                     @can('survey.admin')

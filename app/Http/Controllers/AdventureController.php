@@ -39,7 +39,7 @@ class AdventureController extends Controller
         $this->middleware('can:adventure.access')->only(['index', 'show', 'calendar']);
         // Events anlegen/bearbeiten/absagen + Verwaltungsliste: events.edit
         // (Admin, Bürokrat, Projektleitung).
-        $this->middleware('can:events.edit')->only(['create', 'store', 'edit', 'update', 'destroy', 'manage', 'cancel', 'manageIndex', 'toggleWaitlistMode', 'saveTasks']);
+        $this->middleware('can:events.edit')->only(['create', 'store', 'edit', 'update', 'destroy', 'manage', 'cancel', 'manageIndex', 'toggleWaitlistMode', 'saveTasks', 'saveCompensations']);
         // Teilnehmer-PDF: Projektleitung, Bürokrat, Admin (ADV-17).
         $this->middleware('can:take-signatures')->only('participantsPdf');
         // Teilnahme-/Belegungsreport (REP-03): Event-Verwalter.
@@ -162,7 +162,12 @@ class AdventureController extends Controller
     public function store(Request $request): RedirectResponse
     {
         $adventure = Adventure::create($this->validateAdventure($request));
-        $this->syncCompensations($request, $adventure);
+
+        // Issue #38: Pauschalen werden im Reiter Teamer/NSC gepflegt – neue Veranstaltungen
+        // starten mit den Standard-Pauschalen der abrechnungsfähigen Rollen.
+        foreach (EventRole::billable()->whereNotNull('default_compensation')->get() as $role) {
+            $adventure->compensations()->create(['event_role_id' => $role->id, 'amount' => $role->default_compensation]);
+        }
 
         return redirect()
             ->route('adventures.show', $adventure)
@@ -491,7 +496,6 @@ class AdventureController extends Controller
         }
 
         $adventure->update($data);
-        $this->syncCompensations($request, $adventure);
 
         $message = 'Abenteuer wurde aktualisiert.';
 
@@ -501,14 +505,19 @@ class AdventureController extends Controller
     }
 
     /**
-     * Issue #19: Pauschalen je abrechnungsfähiger Rolle speichern. Leere Felder entfernen
-     * den Eintrag (keine Abrechnung). Ohne Feldgruppe im Formular bleibt alles unverändert.
+     * Issue #19/#38: Pauschalen je abrechnungsfähiger Rolle speichern (Reiter Teamer/NSC).
+     * Leere Felder entfernen den Eintrag (keine Abrechnung); nicht abrechnungsfähige Rollen werden ignoriert.
      */
-    private function syncCompensations(Request $request, Adventure $adventure): void
+    public function saveCompensations(Request $request, Adventure $adventure): RedirectResponse|JsonResponse
     {
-        if (! $request->has('compensations')) {
-            return;
-        }
+        $request->validate([
+            'compensations' => ['nullable', 'array'],
+            'compensations.*' => ['nullable', 'numeric', 'min:0', 'max:9999.99'],
+        ], [
+            'compensations.*.numeric' => 'Die Pauschale muss eine Zahl sein.',
+            'compensations.*.min' => 'Die Pauschale darf nicht negativ sein.',
+            'compensations.*.max' => 'Die Pauschale ist zu hoch.',
+        ]);
 
         $billableIds = EventRole::billable()->pluck('id')->all();
 
@@ -524,6 +533,12 @@ class AdventureController extends Controller
                 $adventure->compensations()->updateOrCreate(['event_role_id' => $roleId], ['amount' => $amount]);
             }
         }
+
+        $message = 'Aufwandsentschädigungen wurden gespeichert.';
+
+        return $request->expectsJson()
+            ? response()->json(['message' => $message, 'refresh_modal' => true])
+            : back()->with('status', $message);
     }
 
     /**
@@ -646,14 +661,7 @@ class AdventureController extends Controller
             'is_hidden' => ['boolean'],
             'requires_confirmation' => ['boolean'],
             'asks_vegetarian' => ['boolean'],
-            'compensations' => ['nullable', 'array'],
-            'compensations.*' => ['nullable', 'numeric', 'min:0', 'max:9999.99'],
-        ], [
-            'compensations.*.numeric' => 'Die Pauschale muss eine Zahl sein.',
-            'compensations.*.min' => 'Die Pauschale darf nicht negativ sein.',
-            'compensations.*.max' => 'Die Pauschale ist zu hoch.',
         ]);
-        unset($data['compensations']);
 
         // Checkbox sendet keinen Wert wenn nicht angehakt → false setzen.
         $data['is_hidden'] = $request->boolean('is_hidden');

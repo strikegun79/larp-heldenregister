@@ -57,18 +57,24 @@ class PermissionMatrixTest extends TestCase
             'Bürokrat' => [20, [
                 'profile.view', 'player.view', 'heldenregister.view', 'heldenregister.edit',
                 'adventure.book', 'adventure.modify', 'adventure.cancel', 'events.view', 'events.edit',
-                'groups.manage', 'roles.view',
+                'groups.manage', 'roles.view', 'plot-characters.manage', 'plot-characters.secret',
+                'heroes.oath',
             ]],
             // ROLE-10, SURV-01, NL-01: Verwaltungsbereiche der Projektleitung.
             'Projektleitung' => [30, [
                 'profile.view', 'player.view', 'heldenregister.view',
                 'adventure.book', 'adventure.modify', 'adventure.cancel', 'events.view', 'events.edit',
                 'events.admin', 'survey.admin', 'survey.view', 'roles.view', 'newsletter.manage',
+                'plot-characters.manage', 'plot-characters.secret',
+            ]],
+            // Issue #30: Plot-Schreiber pflegt nur die Plot-Charaktere.
+            'Plot-Schreiber' => [35, [
+                'profile.view', 'player.view', 'plot-characters.manage', 'plot-characters.secret',
             ]],
             'Spielleiter' => [40, [
                 'profile.view', 'player.view', 'heldenregister.view',
                 'adventure.book', 'adventure.modify', 'adventure.cancel', 'events.view',
-                'groups.manage', 'heroes.admin', 'roles.view',
+                'groups.manage', 'heroes.admin', 'roles.view', 'plot-characters.secret',
             ]],
             // roles.view: Rollen- & DSGVO-Übersicht für alle Teamer-Rollen.
             'Lehrmeister' => [45, [

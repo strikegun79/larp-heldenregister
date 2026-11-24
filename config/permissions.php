@@ -35,6 +35,12 @@ return [
         // Verwaltungs-Dashboards für Teilrollen (ROLE-10)
         'events.admin',   // Veranstaltungs-Lookups pflegen (Orte, Kategorien …)
         'heroes.admin',   // Helden-Konfiguration pflegen (Klassen, Skills …)
+        // Plot-Charaktere im öffentlichen Verzeichnis pflegen (Issue #30)
+        'plot-characters.manage',
+        // Reiter „SL-Planung“ der Plot-Charaktere einsehen (Issue #34)
+        'plot-characters.secret',
+        // Helden-Schwur im Heldenbuch anzeigen (Issue #29)
+        'heroes.oath',
     ],
 
     'roles' => [
@@ -49,6 +55,8 @@ return [
             'events.view', 'events.edit',
             'groups.manage',
             'roles.view',
+            'plot-characters.manage', 'plot-characters.secret',
+            'heroes.oath',        // Helden-Schwur vor der Bändchen-Übergabe vorsagen (Issue #29)
         ],
 
         // Projektleitung
@@ -62,6 +70,13 @@ return [
             'survey.view',
             'roles.view',
             'newsletter.manage',
+            'plot-characters.manage', 'plot-characters.secret',
+        ],
+
+        // Plot-Schreiber (Issue #30): pflegt die bekannten Plot-Charaktere
+        'plot_writer' => [
+            'profile.view', 'player.view',
+            'plot-characters.manage', 'plot-characters.secret',
         ],
 
         // Spielleiter
@@ -73,6 +88,7 @@ return [
             'groups.manage',
             'heroes.admin',       // Helden-Konfiguration in der Verwaltung pflegen (ROLE-10)
             'roles.view',
+            'plot-characters.secret', // SL-Planung der Plot-Charaktere lesen (Issue #34)
         ],
 
         // Lehrmeister (erweiterter Teamer mit Helden-Einsicht, ROLE-09)

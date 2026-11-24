@@ -34,6 +34,7 @@ class Survey extends Model
         return $this->belongsTo(Adventure::class);
     }
 
+    /** @return BelongsTo<SurveyTemplate, $this> */
     public function template(): BelongsTo
     {
         return $this->belongsTo(SurveyTemplate::class, 'survey_template_id');

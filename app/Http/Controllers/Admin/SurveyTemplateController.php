@@ -7,6 +7,8 @@ use App\Models\SurveyTemplate;
 use App\Models\SurveyTemplateQuestion;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 /**
@@ -47,9 +49,16 @@ class SurveyTemplateController extends Controller
             'target_group' => ['required', 'in:'.implode(',', array_keys(SurveyTemplate::TARGET_GROUPS))],
             'active' => ['boolean'],
             'questions' => ['array'],
+            'questions.*.id' => ['nullable', 'integer'],
             'questions.*.question_text' => ['required', 'string', 'max:1000'],
-            'questions.*.type' => ['required', 'in:rating,text,yes_no'],
+            'questions.*.type' => ['required', Rule::in(array_keys(SurveyTemplateQuestion::TYPES))],
             'questions.*.required' => ['boolean'],
+            // Issue #24: Einstellungen der Typen „Optionen“ und „Smileys“.
+            'questions.*.choices' => ['nullable', 'string', 'max:2000'],
+            'questions.*.multiple' => ['boolean'],
+            'questions.*.free_text' => ['boolean'],
+            'questions.*.labels' => ['nullable', 'array'],
+            'questions.*.labels.*' => ['nullable', 'string', 'max:100'],
         ]);
 
         $template = SurveyTemplate::create([
@@ -68,11 +77,12 @@ class SurveyTemplateController extends Controller
 
     public function edit(SurveyTemplate $template): View
     {
-        $template->load('questions');
+        // Anzahl der Antworten je Frage für den Hinweis im Editor (Issue #35).
+        $questions = $template->questions()->withCount('answers')->get();
 
         return view('admin.surveys.templates.edit', [
             'template' => $template,
-            'questions' => $template->questions,
+            'questions' => $questions,
         ]);
     }
 
@@ -84,9 +94,16 @@ class SurveyTemplateController extends Controller
             'target_group' => ['required', 'in:'.implode(',', array_keys(SurveyTemplate::TARGET_GROUPS))],
             'active' => ['boolean'],
             'questions' => ['array'],
+            'questions.*.id' => ['nullable', 'integer'],
             'questions.*.question_text' => ['required', 'string', 'max:1000'],
-            'questions.*.type' => ['required', 'in:rating,text,yes_no'],
+            'questions.*.type' => ['required', Rule::in(array_keys(SurveyTemplateQuestion::TYPES))],
             'questions.*.required' => ['boolean'],
+            // Issue #24: Einstellungen der Typen „Optionen“ und „Smileys“.
+            'questions.*.choices' => ['nullable', 'string', 'max:2000'],
+            'questions.*.multiple' => ['boolean'],
+            'questions.*.free_text' => ['boolean'],
+            'questions.*.labels' => ['nullable', 'array'],
+            'questions.*.labels.*' => ['nullable', 'string', 'max:100'],
         ]);
 
         $template->update([
@@ -115,18 +132,48 @@ class SurveyTemplateController extends Controller
             ->with('success', 'Vorlage gelöscht.');
     }
 
+    /**
+     * Issue #35: Fragen abgleichen, ohne beantwortete Fragen zu löschen.
+     *
+     * - Bestehende Fragen (per ID) werden aktualisiert und behalten ihre ID.
+     * - Typwechsel bei vorhandenen Antworten: alte Frage archivieren, neue anlegen
+     *   (sonst würden alte Antworten im neuen Typ falsch gelesen).
+     * - Entfernte Fragen: ohne Antworten löschen, mit Antworten archivieren.
+     */
     private function syncQuestions(SurveyTemplate $template, array $questions): void
     {
-        $template->questions()->delete();
+        DB::transaction(function () use ($template, $questions) {
+            $existing = $template->questions()->withCount('answers')->get()->keyBy('id');
+            $kept = [];
 
-        foreach ($questions as $index => $q) {
-            SurveyTemplateQuestion::create([
-                'survey_template_id' => $template->id,
-                'question_text' => $q['question_text'],
-                'type' => $q['type'],
-                'sort_order' => $index,
-                'required' => (bool) ($q['required'] ?? false),
-            ]);
-        }
+            foreach (array_values($questions) as $index => $q) {
+                $attributes = [
+                    'question_text' => $q['question_text'],
+                    'type' => $q['type'],
+                    'options' => SurveyTemplateQuestion::optionsFromInput($q['type'], $q),
+                    'sort_order' => $index,
+                    'required' => (bool) ($q['required'] ?? false),
+                ];
+
+                $question = isset($q['id']) ? $existing->get((int) $q['id']) : null;
+
+                if ($question && ! ($question->type !== $q['type'] && $question->answers_count > 0)) {
+                    $question->update($attributes);
+                    $kept[] = $question->id;
+
+                    continue;
+                }
+
+                $template->questions()->create($attributes);
+            }
+
+            foreach ($existing->except($kept) as $question) {
+                if ($question->answers_count > 0) {
+                    $question->update(['archived_at' => now()]);
+                } else {
+                    $question->delete();
+                }
+            }
+        });
     }
 }

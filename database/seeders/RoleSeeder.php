@@ -18,6 +18,7 @@ class RoleSeeder extends Seeder
             ['id' => 10, 'slug' => 'admin',         'label' => 'Admin'],
             ['id' => 20, 'slug' => 'registrar',     'label' => 'Bürokrat'],
             ['id' => 30, 'slug' => 'project_lead',  'label' => 'Projektleitung'],
+            ['id' => 35, 'slug' => 'plot_writer',   'label' => 'Plot-Schreiber'],
             ['id' => 40, 'slug' => 'game_master',   'label' => 'Spielleiter'],
             ['id' => 45, 'slug' => 'lehrmeister',   'label' => 'Lehrmeister'],
             ['id' => 50, 'slug' => 'teamer',        'label' => 'Teamer'],

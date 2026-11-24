@@ -940,6 +940,14 @@ document.addEventListener('click', function (e) {
     $('#skill-modal-title').text(node.getAttribute('data-skill-name') || 'Fertigkeit');
     $('#skill-modal-desc').text(node.getAttribute('data-skill-desc') || '');
 
+    // Issue #25: Perlenfarbe anzeigen (Name als Text, Farbe nur als gültiger Hex-Code).
+    const perlName = node.getAttribute('data-skill-perl-name') || '';
+    const perlCode = node.getAttribute('data-skill-perl-code') || '';
+    $('#skill-modal-perl-name').text(perlName);
+    document.getElementById('skill-modal-perl-dot').style.background =
+        /^#[0-9a-fA-F]{3,8}$/.test(perlCode) ? perlCode : 'transparent';
+    $('#skill-modal-perl').toggle(perlName !== '');
+
     const locked  = node.getAttribute('data-skill-locked') === '1';
     const prereqs = node.getAttribute('data-skill-prereqs') || '';
 

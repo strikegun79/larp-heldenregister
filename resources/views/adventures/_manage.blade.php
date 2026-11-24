@@ -121,6 +121,8 @@
     </x-mobile.accordion-section>
 
     <x-mobile.accordion-section :title="'Teamer/NSC (' . ($adventure->teamerSignups->count() + $nscBookings->count()) . ')'">
+        {{-- Issue #38: Aufwandsentschädigungen oberhalb der Teamer-Tabelle --}}
+        @include('adventures._compensations_form', ['ctx' => 'mob'])
         @if ($hasAnyTeamerEmails)
             <div class="inline-flex rounded border border-stone-200 bg-white mb-3">
                 <select id="email-filter-teamer-mob"
@@ -249,6 +251,8 @@
     </div>
 
     <div class="ui bottom attached tab segment" data-tab="teamer-nsc">
+        {{-- Issue #38: Aufwandsentschädigungen oberhalb der Teamer-Tabelle --}}
+        @include('adventures._compensations_form', ['ctx' => 'desk'])
         @if ($hasAnyTeamerEmails)
             <div class="inline-flex rounded border border-stone-200 bg-white mb-3">
                 <select id="email-filter-teamer-desk"

@@ -161,6 +161,11 @@
             <div class="header" id="skill-modal-title"></div>
             <div class="content">
                 <p id="skill-modal-desc" class="text-stone-700"></p>
+                {{-- Issue #25: Perlenfarbe, damit der Bürokrat die richtige Perle ausgibt --}}
+                <p id="skill-modal-perl" class="flex items-center gap-2" style="display:none">
+                    <span id="skill-modal-perl-dot" class="inline-block w-5 h-5 rounded-full border-2 border-stone-400 shrink-0" aria-hidden="true"></span>
+                    <span>Perlenfarbe: <strong id="skill-modal-perl-name"></strong></span>
+                </p>
                 <p id="skill-modal-meta"></p>
                 <p id="skill-modal-warn" class="text-red-700 font-medium" style="display:none">Nicht genug EP. EP werden durch Abenteuer-Teilnahme gutgeschrieben.</p>
             </div>

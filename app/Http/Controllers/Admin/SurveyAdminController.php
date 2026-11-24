@@ -229,15 +229,20 @@ class SurveyAdminController extends Controller
     {
         $this->authorize('survey.view');
 
-        $survey->load(['template.questions', 'adventure']);
+        $survey->load(['template.questionsWithArchived', 'adventure']);
 
-        $questions = $survey->template->questions;
+        // Issue #35: inkl. archivierter Fragen, sofern es zu dieser Umfrage Antworten gibt.
+        $questions = $survey->template->questionsWithArchived;
         $stats = [];
 
         foreach ($questions as $question) {
             $answers = SurveyAnswer::where('survey_template_question_id', $question->id)
                 ->whereHas('response.link', fn ($q) => $q->where('survey_id', $survey->id))
                 ->get();
+
+            if ($question->isArchived() && $answers->isEmpty()) {
+                continue;
+            }
 
             $stat = ['question' => $question, 'count' => $answers->count()];
 
@@ -249,6 +254,21 @@ class SurveyAdminController extends Controller
             } elseif ($question->type === 'yes_no') {
                 $stat['yes_count'] = $answers->where('yes_no_answer', true)->count();
                 $stat['no_count'] = $answers->where('yes_no_answer', false)->count();
+            } elseif ($question->type === 'smiley') {
+                // Issue #24: Smiley-Skala 1–5
+                $stat['average'] = $answers->avg('rating_answer');
+                $stat['distribution'] = $answers->groupBy('rating_answer')->map->count();
+            } elseif ($question->type === 'choice') {
+                // Issue #24: Anzahl je Option (aktuelle Optionen zuerst, frühere Optionen dahinter) + Nachrichten
+                $counts = array_fill_keys($question->choices(), 0);
+                foreach ($answers as $answer) {
+                    foreach ($answer->choice_answer ?? [] as $choice) {
+                        $counts[$choice] = ($counts[$choice] ?? 0) + 1;
+                    }
+                }
+                $stat['choice_counts'] = $counts;
+                $stat['choice_respondents'] = $answers->filter(fn ($a) => ! empty($a->choice_answer))->count();
+                $stat['texts'] = $answers->pluck('text_answer')->filter()->values();
             }
 
             $stats[] = $stat;
@@ -273,7 +293,7 @@ class SurveyAdminController extends Controller
     {
         $this->authorize('survey.view');
 
-        $link->load(['response.answers.question', 'player', 'survey.template.questions', 'survey.adventure']);
+        $link->load(['response.answers.question', 'player', 'survey.template.questionsWithArchived', 'survey.adventure']);
 
         return view('admin.surveys.response', compact('survey', 'link'));
     }
@@ -283,7 +303,7 @@ class SurveyAdminController extends Controller
     {
         $this->authorize('survey.view');
 
-        $survey->load(['template.questions', 'adventure']);
+        $survey->load(['template.questionsWithArchived', 'adventure']);
 
         $links = $survey->links()
             ->with(['response.answers.question', 'player'])

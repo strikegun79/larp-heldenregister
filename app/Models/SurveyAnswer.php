@@ -5,6 +5,9 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * @property list<string>|null $choice_answer
+ */
 class SurveyAnswer extends Model
 {
     protected $fillable = [
@@ -13,10 +16,12 @@ class SurveyAnswer extends Model
         'rating_answer',
         'text_answer',
         'yes_no_answer',
+        'choice_answer',
     ];
 
     protected $casts = [
         'yes_no_answer' => 'boolean',
+        'choice_answer' => 'array',
     ];
 
     public function response(): BelongsTo

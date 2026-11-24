@@ -168,6 +168,20 @@
                     'loeschung'  => 'Keine automatische Löschung (Rechenschaftspflicht). Auf Antrag nach Einzelfallprüfung.',
                     'tom'        => 'HTTPS, rollenbasierte Zugriffskontrolle (nur Admin/Bürokrat), keine Löschfunktion im UI.',
                 ],
+                // Issue #32: Teamer-Abrechnung (Aufwandsentschädigungen, vgl. Issue #19)
+                [
+                    'nr'         => 10,
+                    'name'       => 'Teamer-Abrechnung (Aufwandsentschädigungen)',
+                    'zweck'      => 'Verwaltung und Abrechnung von Aufwandsentschädigungen und Vergütungen für Teamer im Rahmen der Durchführung von LARP-Veranstaltungen. Erstellung, Dokumentation und Verwaltung veranstaltungsbezogener Abrechnungen sowie Vorbereitung und Durchführung von Auszahlungen.',
+                    'grundlage'  => 'Art. 6 Abs. 1 lit. b DSGVO (Erfüllung einer Vereinbarung über die Teamer-Tätigkeit und deren Vergütung bzw. Aufwandsentschädigung). Art. 6 Abs. 1 lit. c DSGVO (Erfüllung gesetzlicher steuerlicher, buchhalterischer und aufbewahrungsrechtlicher Verpflichtungen, soweit anwendbar).',
+                    'personen'   => 'Teamer und weitere ehrenamtliche Helfer, für die veranstaltungsbezogene Abrechnungen erstellt werden.',
+                    'daten'      => 'Kontoinhaber, Steuernummer, IBAN, Name der Bank, zugeordneter Teamer (Name/Nutzer-ID), Veranstaltungsbezeichnung und Veranstaltungsdatum, Abrechnungsdaten: Abrechnungsnummer, Datum, Betrag, Abrechnungspositionen und gegebenenfalls Auszahlungsstatus, erstellte Abrechnungsdokumente (z. B. PDF).',
+                    'intern'     => 'Admin und ausdrücklich berechtigte Personen der Vereinsverwaltung bzw. Abrechnung. Teamer ausschließlich für die eigenen Bank- und Steuerdaten sowie eigenen Abrechnungen, sofern diese Funktionen im Portal angeboten werden.',
+                    'extern'     => 'Kontoführende Kreditinstitute zur Durchführung von Überweisungen. Gegebenenfalls Steuerberatung, Finanzbehörden und zuständige Prüfstellen, soweit erforderlich. Hosting-Dienstleister als Auftragsverarbeiter, soweit sie personenbezogene Daten im Auftrag verarbeiten.',
+                    'drittland'  => 'Keine vorgesehen. Abhängig von den tatsächlich eingesetzten Hosting- und sonstigen Dienstleistern zu überprüfen.',
+                    'loeschung'  => 'Veranstaltungsbezogene Abrechnungsunterlagen und Zahlungsnachweise werden entsprechend den anwendbaren gesetzlichen Aufbewahrungspflichten gespeichert. Buchungsbelege grundsätzlich acht Jahre ab Ende des Kalenderjahres ihrer Entstehung; für andere Unterlagen können abweichende Fristen gelten. Bank- und Steuerstammdaten werden gelöscht, sobald sie für weitere Abrechnungen nicht mehr erforderlich sind und keine gesetzlichen Aufbewahrungs- oder Nachweispflichten entgegenstehen. Aufbewahrungspflichtige Abrechnungsbelege bleiben hiervon unberührt.',
+                    'tom'        => 'HTTPS/TLS, rollenbasierte Zugriffskontrolle, Beschränkung auf berechtigte Verwaltungsrollen, verschlüsselte Speicherung von Bank- und Steuerdaten, gesicherte Datensicherung, geschützte PDF-Downloads, Protokollierung administrativer Änderungen und keine Ausgabe vollständiger Bank- oder Steuerdaten in Anwendungslogs.',
+                ],
             ];
             @endphp
 

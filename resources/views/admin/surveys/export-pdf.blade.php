@@ -234,17 +234,22 @@
             @if(! $link->response)
                 <p class="answer-none">Keine Antwort eingegangen.</p>
             @else
-                @foreach($survey->template->questions as $question)
+                @foreach($survey->template->questionsWithArchived as $question)
                     @php
                         $answer = $link->response->answers->firstWhere('survey_template_question_id', $question->id);
                     @endphp
+                    {{-- Issue #35: entfernte Fragen nur zeigen, wenn hier eine Antwort vorliegt --}}
+                    @continue($question->isArchived() && ! $answer)
                     <div class="question-block">
                         <div class="question-label">
                             @if($question->type === 'rating') [Bewertung]
                             @elseif($question->type === 'text') [Freitext]
+                            @elseif($question->type === 'choice') [Optionen]
+                            @elseif($question->type === 'smiley') [Smileys]
                             @else [Ja/Nein]
                             @endif
                             {{ $question->question_text }}
+                            @if($question->isArchived()) (entfernte Frage) @endif
                         </div>
 
                         @if(! $answer)
@@ -267,6 +272,21 @@
                                 <span class="answer-yes">✓ Ja</span>
                             @else
                                 <span class="answer-no">✗ Nein</span>
+                            @endif
+                        @elseif($question->type === 'smiley')
+                            {{-- Issue #24: ohne Emoji (im PDF-Font nicht enthalten) --}}
+                            <div class="answer-rating">
+                                {{ $answer->rating_answer }}
+                                <span>/ 5 – {{ $question->smileyLabels()[$answer->rating_answer] ?? '' }}</span>
+                            </div>
+                        @elseif($question->type === 'choice')
+                            @if($answer->choice_answer)
+                                <span class="answer-yes">✓ {{ implode(', ', $answer->choice_answer) }}</span>
+                            @else
+                                <span class="answer-none">Keine Option gewählt</span>
+                            @endif
+                            @if(filled($answer->text_answer))
+                                <div class="answer-text">{{ $answer->text_answer }}</div>
                             @endif
                         @endif
                     </div>

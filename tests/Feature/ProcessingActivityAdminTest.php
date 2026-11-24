@@ -35,6 +35,22 @@ class ProcessingActivityAdminTest extends TestCase
             ->assertOk();
     }
 
+    /** Issue #32: Eintrag 10 zur Teamer-Abrechnung ist im Verzeichnis enthalten. */
+    public function test_processing_activities_contain_teamer_billing_entry(): void
+    {
+        $this->actingAs($this->admin())
+            ->get(route('admin.processing-activities.index'))
+            ->assertOk()
+            ->assertSeeInOrder([
+                '9.',
+                'Administratives Protokoll (Audit-Log)',
+                '10.',
+                'Teamer-Abrechnung (Aufwandsentschädigungen)',
+                'Art. 6 Abs. 1 lit. c DSGVO',
+            ])
+            ->assertSee('verschlüsselte Speicherung von Bank- und Steuerdaten');
+    }
+
     public function test_non_admin_cannot_view_processing_activities(): void
     {
         $this->actingAs(User::factory()->create())

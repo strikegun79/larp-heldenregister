@@ -126,6 +126,10 @@ class HeroClassController extends Controller
             'disabled' => ['boolean'],
             'ep_cost' => ['required', 'integer', 'min:0'],
             'ribbon_color' => ['nullable', 'string', 'regex:/^#[0-9a-fA-F]{6}$/'],
+            // Issue #29: Helden-Schwur
+            'oath_title' => ['nullable', 'string', 'max:100'],
+            'oath_text' => ['nullable', 'string', 'max:2000'],
+            'ceremony_text' => ['nullable', 'string', 'max:2000'],
         ]);
         $data['disabled'] = $request->boolean('disabled');
 
