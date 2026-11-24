@@ -41,6 +41,8 @@ return [
         'plot-characters.secret',
         // Helden-Schwur im Heldenbuch anzeigen (Issue #29)
         'heroes.oath',
+        // Nextcloud-Talk-Anbindung verwalten (Issue #31) – nur Admin via '*'
+        'talk.manage',
     ],
 
     'roles' => [

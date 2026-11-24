@@ -522,6 +522,13 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified', 'can:new
     Route::post('newsletter/bild-hochladen', [Admin\NewsletterController::class, 'uploadImage'])->name('newsletter.upload-image');
 });
 
+// Admin: Nextcloud-Talk-Anbindung (Issue #31, nur talk.manage).
+Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified', 'can:talk.manage'])->group(function () {
+    Route::get('talk', [Admin\TalkSettingsController::class, 'index'])->name('talk.index');
+    Route::put('talk', [Admin\TalkSettingsController::class, 'update'])->name('talk.update');
+    Route::post('talk/test', [Admin\TalkSettingsController::class, 'test'])->name('talk.test');
+});
+
 // Admin: Umfragen verwalten (survey.view = einsehen, survey.admin = alles).
 Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified'])->group(function () {
     Route::get('surveys', [Admin\SurveyAdminController::class, 'index'])->name('surveys.index');
