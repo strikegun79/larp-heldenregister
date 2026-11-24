@@ -45,7 +45,11 @@ class TeamerCompensationController extends Controller
             'iban' => Iban::format($user->teamer_iban),
         ])->setPaper('a4');
 
-        $filename = 'Aufwandsentschaedigung_'.Str::slug($adventure->kuerzel ?: $adventure->name).'_'.Str::slug($user->lastname ?: $user->name).'.pdf';
+        // Dateiname mit Startdatum der Veranstaltung, z. B. Aufwandsentschaedigung_jufolarp_muller_2026-11-14.pdf
+        $filename = 'Aufwandsentschaedigung_'.Str::slug($adventure->kuerzel ?: $adventure->name)
+            .'_'.Str::slug($user->lastname ?: $user->name)
+            .'_'.$adventure->start_at->format('Y-m-d')
+            .'.pdf';
 
         return $pdf->download($filename);
     }

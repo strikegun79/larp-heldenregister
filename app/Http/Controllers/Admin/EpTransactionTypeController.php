@@ -78,6 +78,8 @@ class EpTransactionTypeController extends Controller
         return $request->validate([
             'description' => ['required', 'string', 'max:100'],
             'is_credit' => ['boolean'],
+            // Issue #28: optionaler Standardwert für das EP-Feld beim Buchen
+            'default_ep' => ['nullable', 'integer', 'min:1', 'max:9999'],
         ]);
     }
 

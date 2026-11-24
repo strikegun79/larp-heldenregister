@@ -14,10 +14,12 @@ class EpTransactionType extends Model
         'id',
         'description',
         'is_credit',
+        'default_ep', // Issue #28: Standardwert beim EP-Buchen
     ];
 
     protected $casts = [
         'is_credit' => 'boolean',
+        'default_ep' => 'integer',
     ];
 
     /**

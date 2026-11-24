@@ -19,6 +19,7 @@
                             <th class="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase">ID</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase">Beschreibung</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase">Typ</th>
+                            <th class="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase">Standard-EP</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase">Buchungen</th>
                             <th class="px-6 py-3"></th>
                         </tr>
@@ -37,6 +38,7 @@
                                         <span class="ui mini orange label">Buchung</span>
                                     @endif
                                 </td>
+                                <td class="px-6 py-4" data-label="Standard-EP">{{ $type->default_ep ?? '–' }}</td>
                                 <td class="px-6 py-4" data-label="Buchungen">{{ $type->transactions_count }}</td>
                                 <td class="px-6 py-4 text-right">
                                     {{-- Bearbeiten und Löschen im Inspektor (Zeilenklick / Enter) --}}

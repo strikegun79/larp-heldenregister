@@ -70,7 +70,7 @@ class TeamerCompensationDownloadTest extends TestCase
 
         $response->assertOk();
         $this->assertSame('application/pdf', $response->headers->get('content-type'));
-        $this->assertStringContainsString('Aufwandsentschaedigung_sola_muster.pdf', $response->headers->get('content-disposition'));
+        $this->assertStringContainsString('Aufwandsentschaedigung_sola_muster_2026-07-10.pdf', $response->headers->get('content-disposition'));
     }
 
     public function test_pdf_view_contains_filled_values(): void
