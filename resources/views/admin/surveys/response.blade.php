@@ -29,14 +29,19 @@
                     Für diesen Link liegt noch keine Antwort vor.
                 </div>
             @else
-                @foreach($survey->template->questions as $question)
+                @foreach($survey->template->questionsWithArchived as $question)
                     @php
                         $answer = $link->response->answers->firstWhere('survey_template_question_id', $question->id);
                     @endphp
+                    {{-- Issue #35: entfernte Fragen nur zeigen, wenn hier eine Antwort vorliegt --}}
+                    @continue($question->isArchived() && ! $answer)
                     <div class="survey-result-card mb-4">
                         <div class="survey-result-card-header">
                             {{ $question->typeIcon() }}
                             {{ $question->question_text }}
+                            @if($question->isArchived())
+                                <span class="ui tiny grey label ml-2">entfernte Frage</span>
+                            @endif
                         </div>
                         <div class="survey-result-card-body">
                             @if(! $answer)

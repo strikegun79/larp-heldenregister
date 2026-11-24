@@ -229,15 +229,20 @@ class SurveyAdminController extends Controller
     {
         $this->authorize('survey.view');
 
-        $survey->load(['template.questions', 'adventure']);
+        $survey->load(['template.questionsWithArchived', 'adventure']);
 
-        $questions = $survey->template->questions;
+        // Issue #35: inkl. archivierter Fragen, sofern es zu dieser Umfrage Antworten gibt.
+        $questions = $survey->template->questionsWithArchived;
         $stats = [];
 
         foreach ($questions as $question) {
             $answers = SurveyAnswer::where('survey_template_question_id', $question->id)
                 ->whereHas('response.link', fn ($q) => $q->where('survey_id', $survey->id))
                 ->get();
+
+            if ($question->isArchived() && $answers->isEmpty()) {
+                continue;
+            }
 
             $stat = ['question' => $question, 'count' => $answers->count()];
 
@@ -288,7 +293,7 @@ class SurveyAdminController extends Controller
     {
         $this->authorize('survey.view');
 
-        $link->load(['response.answers.question', 'player', 'survey.template.questions', 'survey.adventure']);
+        $link->load(['response.answers.question', 'player', 'survey.template.questionsWithArchived', 'survey.adventure']);
 
         return view('admin.surveys.response', compact('survey', 'link'));
     }
@@ -298,7 +303,7 @@ class SurveyAdminController extends Controller
     {
         $this->authorize('survey.view');
 
-        $survey->load(['template.questions', 'adventure']);
+        $survey->load(['template.questionsWithArchived', 'adventure']);
 
         $links = $survey->links()
             ->with(['response.answers.question', 'player'])

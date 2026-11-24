@@ -7,6 +7,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
+ * @property int|null $answers_count Nur mit withCount('answers') geladen
  * @property string $type Fragetyp, siehe TYPES (seit Issue #24 VARCHAR statt ENUM)
  * @property array{choices?: list<string>, multiple?: bool, free_text?: bool, labels?: array<int|string, string>}|null $options
  */
@@ -19,11 +20,13 @@ class SurveyTemplateQuestion extends Model
         'options',
         'sort_order',
         'required',
+        'archived_at',
     ];
 
     protected $casts = [
         'required' => 'boolean',
         'options' => 'array',
+        'archived_at' => 'datetime',
     ];
 
     public const TYPES = [
@@ -51,6 +54,12 @@ class SurveyTemplateQuestion extends Model
     public function answers(): HasMany
     {
         return $this->hasMany(SurveyAnswer::class);
+    }
+
+    /** Issue #35: Frage wurde aus der Vorlage entfernt, hat aber Antworten. */
+    public function isArchived(): bool
+    {
+        return $this->archived_at !== null;
     }
 
     /**

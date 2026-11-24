@@ -234,10 +234,12 @@
             @if(! $link->response)
                 <p class="answer-none">Keine Antwort eingegangen.</p>
             @else
-                @foreach($survey->template->questions as $question)
+                @foreach($survey->template->questionsWithArchived as $question)
                     @php
                         $answer = $link->response->answers->firstWhere('survey_template_question_id', $question->id);
                     @endphp
+                    {{-- Issue #35: entfernte Fragen nur zeigen, wenn hier eine Antwort vorliegt --}}
+                    @continue($question->isArchived() && ! $answer)
                     <div class="question-block">
                         <div class="question-label">
                             @if($question->type === 'rating') [Bewertung]
@@ -247,6 +249,7 @@
                             @else [Ja/Nein]
                             @endif
                             {{ $question->question_text }}
+                            @if($question->isArchived()) (entfernte Frage) @endif
                         </div>
 
                         @if(! $answer)

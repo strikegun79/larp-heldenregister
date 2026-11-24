@@ -266,6 +266,9 @@
                             <div class="survey-result-card-header">
                                 {{ $stat['question']->typeIcon() }}
                                 {{ $stat['question']->question_text }}
+                                @if($stat['question']->isArchived())
+                                    <span class="ui tiny grey label ml-2">entfernte Frage</span>
+                                @endif
                                 <span class="ml-auto text-xs opacity-70">{{ $stat['count'] }} Antworten</span>
                             </div>
                             <div class="survey-result-card-body">

@@ -10,6 +10,10 @@
     $freeText = $hasOld ? (bool) old("questions.{$i}.free_text") : ($q?->type === 'choice' ? $q->hasFreeText() : true);
     $smileyLabels = $q?->type === 'smiley' ? $q->smileyLabels() : SurveyTemplateQuestion::DEFAULT_SMILEY_LABELS;
 @endphp
+{{-- Issue #35: ID mitschicken, damit die Frage beim Speichern aktualisiert statt neu angelegt wird --}}
+@if($q?->id)
+    <input type="hidden" name="questions[{{ $i }}][id]" value="{{ $q->id }}">
+@endif
 <div class="flex gap-3 flex-wrap items-start">
     <div class="flex-1">
         <label class="text-xs text-stone-500" for="q_{{ $i }}_text">Fragetext</label>
@@ -79,3 +83,13 @@
         @endforeach
     </div>
 </div>
+
+{{-- Issue #35: Hinweis bei Fragen mit vorhandenen Antworten --}}
+@if(($q->answers_count ?? 0) > 0)
+    <p class="text-xs text-stone-500 mt-2 mb-0">
+        <i class="info circle icon"></i>
+        {{ $q->answers_count }} {{ $q->answers_count === 1 ? 'Antwort' : 'Antworten' }} vorhanden.
+        Textänderungen gelten auch für bestehende Antworten. Ein anderer Typ legt eine neue Frage an,
+        und Entfernen archiviert die Frage; die bisherigen Antworten bleiben in der Auswertung erhalten.
+    </p>
+@endif
