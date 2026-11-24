@@ -98,17 +98,22 @@
                 </section>
             @endcan
 
-            {{-- Kommunikation: Newsletter --}}
-            @can('newsletter.manage')
+            {{-- Kommunikation: Newsletter, Nextcloud Talk (Issue #31) --}}
+            @canany(['newsletter.manage', 'talk.manage'])
                 <section aria-labelledby="admin-communication" class="mb-8">
                     <h2 id="admin-communication" class="wr-section-heading__title mb-4 flex items-center gap-2">
                         <i class="newspaper icon m-0" aria-hidden="true"></i> Kommunikation
                     </h2>
                     <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                        <x-admin.dashboard-card :card="$adminCard('Newsletter', 'Erstellen, bearbeiten & versenden', 'verwaltung_newsletter.jpg', route('admin.newsletter.index'))" />
+                        @can('newsletter.manage')
+                            <x-admin.dashboard-card :card="$adminCard('Newsletter', 'Erstellen, bearbeiten & versenden', 'verwaltung_newsletter.jpg', route('admin.newsletter.index'))" />
+                        @endcan
+                        @can('talk.manage')
+                            <x-admin.dashboard-card :card="$adminCard('Nextcloud Talk', 'Verbindung & Einstellungen', 'verwaltung.jpg', route('admin.talk.index'))" />
+                        @endcan
                     </div>
                 </section>
-            @endcan
+            @endcanany
 
             {{-- Feedback & Qualität --}}
             @canany(['survey.view', 'survey.admin'])

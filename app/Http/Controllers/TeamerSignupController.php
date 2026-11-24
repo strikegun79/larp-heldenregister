@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Notifications\TeamerApproved;
 use App\Notifications\TeamerInvitation;
 use App\Notifications\TeamerRejected;
+use App\Services\NextcloudTalk\AdventureTalkService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -94,6 +95,9 @@ class TeamerSignupController extends Controller
         abort_if($signup->adventure_id !== $adventure->id, 404);
 
         $signup->delete();
+
+        // Issue #31: stornierte Teamer verlassen den Teamer-Raum.
+        AdventureTalkService::queueSync($adventure, [$signup->user_id]);
 
         $msg = 'Teamer-Anmeldung wurde storniert.';
 
@@ -202,6 +206,9 @@ class TeamerSignupController extends Controller
             $signup->user->notify(new TeamerApproved($signup));
         }
 
+        // Issue #31: Teamer-Raum in Talk abgleichen.
+        AdventureTalkService::queueSync($adventure);
+
         $msg = ! $wasApproved ? 'Teamer bestätigt.' : 'Bestätigung zurückgenommen.';
 
         return $request->expectsJson()
@@ -224,6 +231,8 @@ class TeamerSignupController extends Controller
         if (! $wasRejected) {
             $signup->user->notify(new TeamerRejected($adventure));
         }
+
+        AdventureTalkService::queueSync($adventure);
 
         $msg = ! $wasRejected ? 'Teamer abgelehnt.' : 'Ablehnung zurückgenommen.';
 

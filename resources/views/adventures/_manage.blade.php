@@ -170,6 +170,11 @@
     <x-mobile.accordion-section title="Taskmanager">
         @include('adventures._tasks', ['tasks' => $tasks])
     </x-mobile.accordion-section>
+
+    {{-- Issue #31: Nextcloud Talk --}}
+    <x-mobile.accordion-section title="Talk">
+        @include('adventures._talk_tab', ['ctx' => 'mob'])
+    </x-mobile.accordion-section>
 </div>
 
 {{-- Desktop: Fomantic-Tabs (sm+) --}}
@@ -185,6 +190,7 @@
                 <span class="ui mini teal circular label ml-1">{{ $tasks->where('is_active', true)->count() }}</span>
             @endif
         </a>
+        <a class="item" data-tab="talk" style="white-space: nowrap;"><i class="comments icon"></i> Talk</a>
     </div>
 
     <div class="ui bottom attached tab segment active" data-tab="data">
@@ -299,6 +305,10 @@
 
     <div class="ui bottom attached tab segment" data-tab="tasks">
         @include('adventures._tasks', ['tasks' => $tasks])
+    </div>
+
+    <div class="ui bottom attached tab segment" data-tab="talk">
+        @include('adventures._talk_tab', ['ctx' => 'desk'])
     </div>
 </div>
 

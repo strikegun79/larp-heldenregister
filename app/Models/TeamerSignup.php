@@ -78,6 +78,7 @@ class TeamerSignup extends Model
         return $this->belongsTo(Adventure::class);
     }
 
+    /** @return BelongsTo<User, $this> */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

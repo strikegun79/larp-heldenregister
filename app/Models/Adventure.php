@@ -57,6 +57,10 @@ class Adventure extends Model
         'is_hidden' => 'boolean',
         'requires_confirmation' => 'boolean',
         'asks_vegetarian' => 'boolean',
+        // Issue #31: Talk-Struktur (nicht massenzuweisbar, wird gezielt gesetzt).
+        'talk_plot_thread' => 'boolean',
+        'talk_teamer_room' => 'boolean',
+        'talk_plot_thread_id' => 'integer',
     ];
 
     /** Gibt die Altersbeschränkung als lesbaren String zurück, z. B. „8–17 Jahre". */
@@ -163,6 +167,7 @@ class Adventure extends Model
             ->value('amount');
     }
 
+    /** @return HasMany<TeamerSignup, $this> */
     public function teamerSignups(): HasMany
     {
         return $this->hasMany(TeamerSignup::class);
