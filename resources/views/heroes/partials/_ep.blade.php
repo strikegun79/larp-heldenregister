@@ -12,21 +12,27 @@
     </a>
 
     @can('heldenregister.edit')
-        {{-- EP buchen (Team): Felder und Ablauf unverändert --}}
+        {{-- EP buchen (Team) --}}
         <form method="POST" action="{{ route('heroes.ep.store', $hero) }}" class="ui form wr-card p-3" data-refresh-modal>
             @csrf
+            @php($firstDefault = $epTypes->first()?->default_ep)
             <div class="flex flex-wrap items-end gap-3">
-                <div class="field m-0">
-                    <label for="ep-count-{{ $ctx }}">EP</label>
-                    <input id="ep-count-{{ $ctx }}" type="number" name="ep_count" step="1" min="1" placeholder="Anzahl" required style="width:7rem">
-                </div>
+                {{-- Issue #28: Erst die Buchungsart, dann die EP; der Standardwert der Art wird vorbelegt --}}
                 <div class="field m-0 flex-1 min-w-[12rem]">
                     <label for="ep-type-{{ $ctx }}">Grund</label>
-                    <select id="ep-type-{{ $ctx }}" name="ep_transaction_type_id" required>
+                    <select id="ep-type-{{ $ctx }}" name="ep_transaction_type_id" required
+                            data-ep-type-select data-ep-count-target="ep-count-{{ $ctx }}">
                         @foreach ($epTypes as $type)
-                            <option value="{{ $type->id }}">{{ $type->description }} ({{ $type->is_credit ? '+' : '−' }})</option>
+                            <option value="{{ $type->id }}" data-default-ep="{{ $type->default_ep }}">
+                                {{ $type->description }} ({{ $type->is_credit ? '+' : '−' }}{{ $type->default_ep ? ', Standard '.$type->default_ep.' EP' : '' }})
+                            </option>
                         @endforeach
                     </select>
+                </div>
+                <div class="field m-0">
+                    <label for="ep-count-{{ $ctx }}">EP</label>
+                    <input id="ep-count-{{ $ctx }}" type="number" name="ep_count" step="1" min="1" placeholder="Anzahl" required style="width:7rem"
+                           value="{{ $firstDefault }}" @if ($firstDefault) data-ep-auto="{{ $firstDefault }}" @endif>
                 </div>
                 <div class="field m-0">
                     <label for="ep-date-{{ $ctx }}">Datum</label>

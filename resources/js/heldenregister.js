@@ -1644,3 +1644,25 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     }
 });
+
+// ------------------------------------------------------------------
+// Issue #28: EP buchen – Standard-EP der gewählten Buchungsart vorbelegen.
+// Delegiert, da das Heldenbuch auch per AJAX in Modals geladen wird.
+// Ohne Standardwert wird nur ein zuvor automatisch gesetzter Wert geleert;
+// selbst eingetippte Werte bleiben dann stehen.
+// ------------------------------------------------------------------
+document.addEventListener('change', function (e) {
+    const select = e.target;
+    if (!(select instanceof HTMLSelectElement) || !select.matches('[data-ep-type-select]')) return;
+    const input = document.getElementById(select.dataset.epCountTarget);
+    if (!input) return;
+
+    const def = select.selectedOptions[0]?.dataset.defaultEp || '';
+    if (def !== '') {
+        input.value = def;
+        input.dataset.epAuto = def;
+    } else {
+        if (input.dataset.epAuto !== undefined && input.value === input.dataset.epAuto) input.value = '';
+        delete input.dataset.epAuto;
+    }
+});

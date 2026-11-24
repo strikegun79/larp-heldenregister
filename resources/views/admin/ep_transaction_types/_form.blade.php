@@ -21,6 +21,15 @@
         </label>
         <x-input-error :messages="$errors->get('is_credit')" class="mt-2" />
     </div>
+
+    {{-- Issue #28: Regelwerk-Standard, wird beim EP-Buchen im Heldenbuch vorbelegt --}}
+    <div class="field">
+        <label for="ep-type-default">Standard-EP (optional)</label>
+        <input type="number" id="ep-type-default" name="default_ep" min="1" max="9999" step="1"
+               value="{{ old('default_ep', $type->default_ep) }}" placeholder="kein Standardwert" style="max-width:10rem">
+        <p class="text-xs text-stone-500 mt-1">Wird beim Buchen im Heldenbuch automatisch ins EP-Feld eingetragen und lässt sich dort ändern.</p>
+        <x-input-error :messages="$errors->get('default_ep')" class="mt-2" />
+    </div>
 </form>
 
 {{-- Löschen nur im Inspektor (?inspector=1), Rückfrage und Sperrgrund wie in der bisherigen Liste --}}
