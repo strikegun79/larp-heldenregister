@@ -1,10 +1,10 @@
-<x-public-layout title="Helden suchen – Heldenregister">
+<x-public-layout title="Helden- und Charakterverzeichnis – Heldenregister">
 
     <div class="max-w-lg mx-auto px-4 sm:px-6">
 
         <div class="bg-white/70 border-2 border-[#5a3a22]/40 shadow sm:rounded-lg p-6 mb-6">
 
-            <h1 class="font-uncial text-2xl text-waldritter mb-2 text-center">Helden suchen</h1>
+            <h1 class="font-uncial text-2xl text-waldritter mb-2 text-center">Helden- und Charakterverzeichnis</h1>
             <p class="text-stone-600 text-sm text-center mb-3">
                 Gib das 6-stellige Helden-Siegel oder einen Heldennamen ein.
                 Auch bekannte Gestalten aus unseren Abenteuern – etwa Bran oder die Babayaga – kannst du hier erforschen.
@@ -64,30 +64,7 @@
                     <h2 id="plot-results-heading" class="font-uncial text-lg text-waldritter mb-3">Bekannte Gestalten</h2>
                     <div class="grid gap-3 sm:grid-cols-2">
                         @foreach ($plotResults as $character)
-                            <a href="{{ route('public.plot-character', $character) }}"
-                               class="flex items-center gap-3 bg-white/70 border-2 border-[#5a3a22]/40 shadow sm:rounded-lg p-3 hover:border-[#5a3a22] transition-colors">
-                                @if ($character->imageUrl())
-                                    <img src="{{ $character->imageUrl() }}" alt=""
-                                         class="h-16 w-16 object-cover rounded border border-[#5a3a22]/30 shrink-0" loading="lazy">
-                                @else
-                                    <span class="h-16 w-16 rounded border border-[#5a3a22]/30 bg-amber-50 flex items-center justify-center shrink-0" aria-hidden="true">
-                                        <i class="user secret icon text-[#5a3a22] m-0 text-2xl"></i>
-                                    </span>
-                                @endif
-                                <span class="min-w-0">
-                                    <span class="block font-uncial text-waldritter text-lg leading-tight">{{ $character->name }}</span>
-                                    @if ($character->title)
-                                        <span class="block text-stone-500 text-sm">{{ $character->title }}</span>
-                                    @endif
-                                    {{-- Issue #34: Status und Volk als kurze Kennzeichen --}}
-                                    <span class="flex flex-wrap gap-1 mt-1">
-                                        <span class="ui mini {{ $character->statusColor() }} label">{{ $character->statusLabel() }}</span>
-                                        @if ($character->species !== 'unknown')
-                                            <span class="ui mini basic label">{{ $character->speciesLabel() }}</span>
-                                        @endif
-                                    </span>
-                                </span>
-                            </a>
+                            @include('public._plot_character_card')
                         @endforeach
                     </div>
                 </section>
@@ -119,6 +96,24 @@
                 </div>
             @endif
         @endisset
+
+        {{-- Issue #36: Zufällige Plot-Charaktere vorschlagen, um auf sie aufmerksam zu machen --}}
+        @if (($suggestions ?? collect())->isNotEmpty())
+            <section aria-labelledby="plot-suggestions-heading" class="mb-6">
+                <h2 id="plot-suggestions-heading" class="font-uncial text-lg text-waldritter mb-1">Bekannten Gestalten begegnen</h2>
+                <p class="text-stone-600 text-sm mb-3">Wer streift durch Silvanien? Lerne die bekannten Gestalten unserer Abenteuer kennen.</p>
+                <div class="grid gap-3 sm:grid-cols-2">
+                    @foreach ($suggestions as $character)
+                        @include('public._plot_character_card')
+                    @endforeach
+                </div>
+                <p class="text-center mt-3">
+                    <a href="{{ route('public.hero.search') }}" class="text-sm text-waldritter hover:underline">
+                        <i class="random icon" aria-hidden="true"></i> Andere Gestalten zeigen
+                    </a>
+                </p>
+            </section>
+        @endif
 
     </div>
 

@@ -19,7 +19,17 @@ class PublicHeroController extends Controller
     /** PUB-03: Suchformular anzeigen. */
     public function index(): View
     {
-        return view('public.search');
+        return view('public.search', ['suggestions' => $this->plotSuggestions()]);
+    }
+
+    /**
+     * Issue #36: Zufällige sichtbare Plot-Charaktere als Vorschläge, um auf sie aufmerksam zu machen.
+     *
+     * @return Collection<int, PlotCharacter>
+     */
+    private function plotSuggestions(): Collection
+    {
+        return PlotCharacter::visible()->inRandomOrder()->limit(4)->get();
     }
 
     /**
@@ -43,6 +53,7 @@ class PublicHeroController extends Controller
             return view('public.search', [
                 'error' => 'Bitte gib mindestens 2 Zeichen oder ein 6-stelliges Helden-Siegel ein.',
                 'input' => $query,
+                'suggestions' => $this->plotSuggestions(),
             ]);
         }
 
@@ -69,6 +80,8 @@ class PublicHeroController extends Controller
             'results' => $results,
             'plotResults' => $plotResults,
             'input' => $query,
+            // Issue #36: Ohne Treffer Plot-Charaktere vorschlagen.
+            'suggestions' => $results->isEmpty() && $plotResults->isEmpty() ? $this->plotSuggestions() : collect(),
         ]);
     }
 
