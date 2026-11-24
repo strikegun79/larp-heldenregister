@@ -48,8 +48,14 @@ class ProfileDeleteTest extends TestCase
         $deleted = User::factory()->create(['name' => 'Gelöschter Nutzer']);
         $deleted->delete();
 
+        // Gelöschte Konten erscheinen nur mit dem Häkchen „Gelöschte Nutzer anzeigen“.
         $this->actingAs($admin)
             ->get(route('admin.users.index'))
+            ->assertOk()
+            ->assertDontSee('Gelöschter Nutzer');
+
+        $this->actingAs($admin)
+            ->get(route('admin.users.index', ['deleted' => 1]))
             ->assertOk()
             ->assertSee('Gelöschter Nutzer')
             ->assertSee('wr-pill--danger wr-pill--small ml-2">gelöscht</span>', false);

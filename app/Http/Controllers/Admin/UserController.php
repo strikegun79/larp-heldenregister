@@ -22,14 +22,22 @@ use Illuminate\View\View;
 class UserController extends Controller
 {
     /**
-     * Liste aller Portal-Nutzer inkl. soft-gelöschter (AUTH-08).
-     * Unterstützt Freitextsuche nach Name und E-Mail.
+     * Liste der Portal-Nutzer (AUTH-08): Freitextsuche nach Name und E-Mail, Filter nach Rolle
+     * („none“ = ohne Rolle) und optional mit soft-gelöschten Konten.
      */
     public function index(Request $request): View
     {
         $q = trim($request->string('q'));
+        // Rolle 0 („keine“, Altsystem) ist keine echte Rolle und erscheint nicht im Filter.
+        $roles = Role::where('id', '>', 0)->orderBy('id')->get();
+        $role = (string) $request->string('role');
+        if ($role !== 'none' && ! (ctype_digit($role) && $roles->contains('id', (int) $role))) {
+            $role = '';
+        }
+        $showDeleted = $request->boolean('deleted');
 
-        $users = User::withTrashed()
+        $users = User::query()
+            ->when($showDeleted, fn ($query) => $query->withTrashed())
             ->with('roles')
             ->when($q !== '', function ($query) use ($q) {
                 $query->where(function ($b) use ($q) {
@@ -38,11 +46,15 @@ class UserController extends Controller
                         ->orWhere('email', 'like', "%{$q}%");
                 });
             })
+            ->when($role === 'none', fn ($query) => $query->whereDoesntHave('roles', fn ($r) => $r->where('roles.id', '>', 0)))
+            ->when($role !== '' && $role !== 'none', fn ($query) => $query->whereHas('roles', fn ($r) => $r->where('roles.id', (int) $role)))
             ->orderBy('name')
             ->paginate(25)
             ->withQueryString();
 
-        return view('admin.users.index', compact('users', 'q'));
+        $filtered = $q !== '' || $role !== '' || $showDeleted;
+
+        return view('admin.users.index', compact('users', 'q', 'roles', 'role', 'showDeleted', 'filtered'));
     }
 
     /**
