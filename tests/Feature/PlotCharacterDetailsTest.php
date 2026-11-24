@@ -68,7 +68,8 @@ class PlotCharacterDetailsTest extends TestCase
         $this->assertSame(['Dunkle Magie', 'Verbindung zu einem Artefakt'], $character->abilities);
         $this->assertSame(['Der dunkle Würfel'], $character->artifacts);
         $this->assertNull($character->known_titles);
-        $this->assertSame([
+        // assertEquals: MySQL-JSON sortiert die Schlüssel je Eintrag, die Reihenfolge ist egal.
+        $this->assertEquals([
             ['date' => '24.08.2024', 'title' => 'Kunde aus dem Waldritterlager', 'url' => 'https://www.waldritter-giessen.de/brans-tagebuch/'],
             ['date' => '18.04.2026', 'title' => 'Ein Versteck für den Würfel', 'url' => null],
             ['date' => null, 'title' => 'Zahlreiche weitere Berichte', 'url' => null],
