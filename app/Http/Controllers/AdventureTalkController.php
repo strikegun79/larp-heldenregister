@@ -8,6 +8,7 @@ use App\Services\NextcloudTalk\NextcloudTalkClient;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
+use Illuminate\View\View;
 
 /**
  * Issue #31 (Phase 2): Reiter „Talk“ in der Event-Verwaltung – Plot-Thread und Teamer-Raum
@@ -15,6 +16,21 @@ use Illuminate\Http\Request;
  */
 class AdventureTalkController extends Controller
 {
+    /**
+     * Inhalt des Reiters „Talk“ frisch rendern – wird beim Öffnen des Reiters nachgeladen,
+     * damit z. B. gerade bestätigte Teamer und neue Protokolleinträge sichtbar sind.
+     */
+    public function tab(Request $request, Adventure $adventure): View
+    {
+        $adventure->load('teamerSignups.user');
+
+        return view('adventures._talk_tab', [
+            'adventure' => $adventure,
+            'ctx' => $request->input('ctx') === 'mob' ? 'mob' : 'desk',
+            'talkActive' => NextcloudTalkClient::fromConfig()->isActive(),
+        ]);
+    }
+
     /** Gewählte Optionen einrichten (bereits verknüpfte bleiben unverändert). */
     public function update(Request $request, Adventure $adventure): RedirectResponse|JsonResponse
     {

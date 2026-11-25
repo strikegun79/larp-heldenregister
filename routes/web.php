@@ -199,6 +199,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::put('adventures/{adventure}/compensations', [AdventureController::class, 'saveCompensations'])->name('adventures.compensations.save');
     // Issue #31 (Phase 2): Reiter „Talk“ – Plot-Thread, Teamer-Raum, Teamer-Abgleich.
     Route::middleware('can:events.edit')->group(function () {
+        Route::get('adventures/{adventure}/talk', [AdventureTalkController::class, 'tab'])->name('adventures.talk.tab');
         Route::put('adventures/{adventure}/talk', [AdventureTalkController::class, 'update'])->name('adventures.talk.update');
         Route::post('adventures/{adventure}/talk/sync', [AdventureTalkController::class, 'sync'])->name('adventures.talk.sync');
         Route::post('adventures/{adventure}/talk/retry', [AdventureTalkController::class, 'retry'])->name('adventures.talk.retry');

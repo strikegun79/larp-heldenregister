@@ -173,7 +173,10 @@
 
     {{-- Issue #31: Nextcloud Talk --}}
     <x-mobile.accordion-section title="Talk">
-        @include('adventures._talk_tab', ['ctx' => 'mob'])
+        {{-- Wird beim Aufklappen frisch nachgeladen (z. B. nach dem Bestätigen von Teamern) --}}
+        <div data-refresh-url="{{ route('adventures.talk.tab', [$adventure, 'ctx' => 'mob']) }}">
+            @include('adventures._talk_tab', ['ctx' => 'mob'])
+        </div>
     </x-mobile.accordion-section>
 </div>
 
@@ -308,7 +311,10 @@
     </div>
 
     <div class="ui bottom attached tab segment" data-tab="talk">
-        @include('adventures._talk_tab', ['ctx' => 'desk'])
+        {{-- Wird beim Öffnen des Reiters frisch nachgeladen (z. B. nach dem Bestätigen von Teamern) --}}
+        <div data-refresh-url="{{ route('adventures.talk.tab', [$adventure, 'ctx' => 'desk']) }}">
+            @include('adventures._talk_tab', ['ctx' => 'desk'])
+        </div>
     </div>
 </div>
 
