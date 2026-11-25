@@ -71,7 +71,7 @@
                         <label for="talk_plot_room">Plot-Team-Chat</label>
                         <input type="text" id="talk_plot_room" name="talk_plot_room" maxlength="255"
                                value="{{ old('talk_plot_room', $values['talk_plot_room_token'] ?? '') }}"
-                               placeholder="Talk-Link (…/call/abc123) oder Raum-Token">
+                               placeholder="Talk-Link (…/index.php/call/abc123) oder Raum-Token">
                         <p class="text-xs text-stone-500 mt-1">In diesem Raum werden später die Plot-Threads zu neuen Events angelegt. Gespeichert wird nur der Raum-Token.</p>
                         <x-input-error :messages="$errors->get('talk_plot_room')" class="mt-1" />
                     </div>
@@ -86,7 +86,7 @@
                     <div class="field">
                         <label for="talk_app_url">Link zur Talk-App</label>
                         <input type="url" id="talk_app_url" name="talk_app_url" maxlength="255"
-                               value="{{ old('talk_app_url', $values['talk_app_url'] ?? '') }}" placeholder="https://…/apps/spreed">
+                               value="{{ old('talk_app_url', $values['talk_app_url'] ?? '') }}" placeholder="https://…/index.php/apps/spreed">
                         <x-input-error :messages="$errors->get('talk_app_url')" class="mt-1" />
                     </div>
 

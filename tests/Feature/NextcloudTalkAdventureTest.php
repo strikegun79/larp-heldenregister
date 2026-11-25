@@ -415,7 +415,7 @@ class NextcloudTalkAdventureTest extends TestCase
 
         $this->actingAs($admin)
             ->get(route('adventures.manage', $adventure))
-            ->assertSee('https://cloud.example.test/call/plot42ab?threadId=500', false)
+            ->assertSee('https://cloud.example.test/index.php/call/plot42ab?threadId=500', false)
             ->assertDontSee('id="talk-plot-thread-desk"', false)
             ->assertSee('id="talk-teamer-room-desk"', false);
     }

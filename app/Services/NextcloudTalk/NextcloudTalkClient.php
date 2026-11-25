@@ -103,10 +103,14 @@ class NextcloudTalkClient
         return $this->isConfigured() && Setting::get('talk_enabled') === '1';
     }
 
-    /** Link zu einem Talk-Raum, optional direkt in einen Thread. */
+    /**
+     * Link zu einem Talk-Raum, optional direkt in einen Thread.
+     * Mit „/index.php/“, damit der Link auch ohne Pretty URLs (mod_rewrite) funktioniert –
+     * so erzeugt ihn auch Nextcloud selbst (linkToRouteAbsolute('spreed.Page.showCall')).
+     */
     public function roomUrl(string $token, ?int $threadId = null): string
     {
-        return $this->url.'/call/'.$token.($threadId ? '?threadId='.$threadId : '');
+        return $this->url.'/index.php/call/'.$token.($threadId ? '?threadId='.$threadId : '');
     }
 
     // ── Phase 2: Threads, Räume, Teilnehmer ─────────────────────────
