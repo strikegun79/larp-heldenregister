@@ -211,6 +211,16 @@ class Player extends Model
     }
 
     /**
+     * Talk-Protokoll dieses Spielers (Konto anlegen, Gruppe, Deaktivieren).
+     *
+     * @return HasMany<TalkLog, $this>
+     */
+    public function talkLogs(): HasMany
+    {
+        return $this->hasMany(TalkLog::class);
+    }
+
+    /**
      * DSGVO Art. 17: Spieler anonymisieren (Recht auf Löschung).
      * Überschreibt alle Klardaten, löscht das Profilfoto und soft-deleted.
      * Verknüpfte Helden bleiben erhalten (Charaktername ist kein Realname).

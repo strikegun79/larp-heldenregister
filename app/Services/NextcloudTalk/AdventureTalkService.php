@@ -59,6 +59,7 @@ class AdventureTalkService
      */
     public function setup(Adventure $adventure): void
     {
+        $this->client->forContext(adventure: $adventure);
         if (! $this->client->isActive()) {
             return;
         }
@@ -94,6 +95,7 @@ class AdventureTalkService
      */
     public function syncTeamers(Adventure $adventure, array $removedUserIds = []): void
     {
+        $this->client->forContext(adventure: $adventure);
         if (! $this->client->isActive() || ! $adventure->talk_teamer_room_token) {
             return;
         }

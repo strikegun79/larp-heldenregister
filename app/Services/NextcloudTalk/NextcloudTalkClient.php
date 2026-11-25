@@ -2,11 +2,15 @@
 
 namespace App\Services\NextcloudTalk;
 
+use App\Models\Adventure;
+use App\Models\Player;
 use App\Models\Setting;
+use App\Models\TalkLog;
 use Illuminate\Http\Client\ConnectionException;
 use Illuminate\Http\Client\PendingRequest;
 use Illuminate\Http\Client\Response;
 use Illuminate\Support\Facades\Http;
+use Throwable;
 
 /**
  * Issue #31: Schlanker Client für die OCS-API von Nextcloud (Talk = App „spreed“).
@@ -22,6 +26,20 @@ class NextcloudTalkClient
         private readonly ?string $appPassword,
         private readonly int $timeout = 10,
     ) {}
+
+    /** Talk-Protokoll: Bezug der folgenden Anfragen (Veranstaltung bzw. Spieler). */
+    private ?int $logAdventureId = null;
+
+    private ?int $logPlayerId = null;
+
+    /** Folgende Anfragen im Talk-Protokoll dieser Veranstaltung bzw. diesem Spieler zuordnen. */
+    public function forContext(?Adventure $adventure = null, ?Player $player = null): static
+    {
+        $this->logAdventureId = $adventure?->id;
+        $this->logPlayerId = $player?->id;
+
+        return $this;
+    }
 
     /** Client aus config/nextcloud.php (Werte aus der .env). */
     public static function fromConfig(): self
@@ -280,20 +298,33 @@ class NextcloudTalkClient
             throw new NextcloudTalkException('Nextcloud ist nicht konfiguriert.');
         }
 
+        $action = self::describe($method, $path, $data);
+
         try {
             $request = $this->request();
             $response = $method === 'get'
                 ? $request->get($this->ocs($path), $data)
                 : $request->asJson()->{$method}($this->ocs($path), $data);
         } catch (ConnectionException) {
-            throw new NextcloudTalkException('Nextcloud ist nicht erreichbar (Adresse prüfen oder Zeitüberschreitung).');
+            $message = $action.': Nextcloud ist nicht erreichbar (Adresse prüfen oder Zeitüberschreitung).';
+            $this->log($method, $path, $action, null, false, $message);
+
+            throw new NextcloudTalkException($message);
         }
 
         if ($response->successful() || in_array($response->status(), $allowed, true)) {
+            // Erfolgreiche Lesezugriffe nicht protokollieren (nur Änderungen und Fehler).
+            if ($method !== 'get') {
+                $this->log($method, $path, $action, $response->status(), true, null);
+            }
+
             return $response;
         }
 
-        throw new NextcloudTalkException($messages[$response->status()] ?? (string) $this->errorMessage($response));
+        $message = $action.': '.($messages[$response->status()] ?? $this->errorMessage($response, $path));
+        $this->log($method, $path, $action, $response->status(), false, $message);
+
+        throw new NextcloudTalkException($message);
     }
 
     /**
@@ -322,13 +353,61 @@ class NextcloudTalkClient
             ->timeout($this->timeout);
     }
 
+    /** Aktion einer Anfrage in Klartext (für Fehlermeldungen und das Talk-Protokoll). */
+    public static function describe(string $method, string $path, array $data = []): string
+    {
+        $method = strtolower($method);
+        $segments = explode('/', trim($path, '/'));
+        $last = rawurldecode((string) end($segments));
+
+        return match (true) {
+            $path === 'cloud/users/details' => 'Konto per E-Mail suchen',
+            $path === 'cloud/users' && $method === 'post' => 'Konto anlegen: '.($data['userid'] ?? ''),
+            str_ends_with($path, '/groups') => 'Zur Gruppe hinzufügen: '.($data['groupid'] ?? ''),
+            str_ends_with($path, '/enable') => 'Konto aktivieren: '.rawurldecode($segments[2] ?? ''),
+            str_ends_with($path, '/disable') => 'Konto deaktivieren: '.rawurldecode($segments[2] ?? ''),
+            str_starts_with($path, 'cloud/users/') => 'Benutzername prüfen: '.$last,
+            str_contains($path, '/threads/') => 'Plot-Thread umbenennen',
+            str_contains($path, '/chat/') => isset($data['threadTitle']) ? 'Plot-Thread anlegen: '.$data['threadTitle'] : 'Nachricht senden',
+            str_ends_with($path, '/participants') && $method === 'post' => 'Teamer hinzufügen: '.($data['newParticipant'] ?? ''),
+            str_ends_with($path, '/participants') => 'Teilnehmer abrufen',
+            str_ends_with($path, '/attendees') => 'Teamer entfernen',
+            $path === 'apps/spreed/api/v4/room' => 'Teamer-Raum anlegen: '.($data['roomName'] ?? ''),
+            str_starts_with($path, 'apps/spreed/api/v4/room/') && $method === 'put' => 'Teamer-Raum umbenennen: '.($data['roomName'] ?? ''),
+            default => strtoupper($method).' '.$path,
+        };
+    }
+
+    /** Eintrag im Talk-Protokoll – darf die eigentliche Anfrage nie stören. */
+    private function log(string $method, string $path, string $action, ?int $status, bool $success, ?string $message): void
+    {
+        try {
+            TalkLog::create([
+                'adventure_id' => $this->logAdventureId,
+                'player_id' => $this->logPlayerId,
+                'user_id' => auth()->id(),
+                'action' => mb_substr(trim($action, ' :'), 0, 190),
+                'method' => strtoupper($method),
+                'endpoint' => mb_substr($path, 0, 255),
+                'status' => $status,
+                'success' => $success,
+                'message' => $message !== null ? mb_substr($message, 0, 1000) : null,
+            ]);
+        } catch (Throwable) {
+            // Protokoll ist Zusatz; Fehler beim Schreiben ignorieren.
+        }
+    }
+
     private function ocs(string $path): string
     {
         return $this->url.'/ocs/v2.php/'.ltrim($path, '/').'?format=json';
     }
 
-    /** Verständliche Fehlermeldung für eine fehlgeschlagene Antwort, sonst null. */
-    private function errorMessage(Response $response): ?string
+    /**
+     * Verständliche Fehlermeldung für eine fehlgeschlagene Antwort, sonst null.
+     * Bei 403 mit Hinweis, welches Recht dem technischen Konto fehlt.
+     */
+    private function errorMessage(Response $response, string $path = ''): ?string
     {
         if ($response->successful()) {
             return null;
@@ -336,7 +415,11 @@ class NextcloudTalkClient
 
         return match ($response->status()) {
             401 => 'Anmeldung abgelehnt: Benutzer oder App-Passwort ist falsch.',
-            403 => 'Zugriff verweigert: Das Konto hat nicht die nötigen Rechte.',
+            403 => match (true) {
+                str_starts_with($path, 'cloud/users') => 'Zugriff verweigert: Das technische Konto braucht Admin-Rechte in Nextcloud (Gruppe „admin“).',
+                str_starts_with($path, 'apps/spreed') => 'Zugriff verweigert: Das technische Konto muss Moderator in diesem Talk-Raum sein.',
+                default => 'Zugriff verweigert: Das Konto hat nicht die nötigen Rechte.',
+            },
             404 => 'Nicht gefunden: Ist die Nextcloud-Adresse richtig?',
             default => 'Nextcloud antwortet mit Fehler '.$response->status().'.',
         };

@@ -6,6 +6,7 @@ use App\Models\AuditLog;
 use App\Models\Booking;
 use App\Models\Hero;
 use App\Models\Player;
+use App\Models\TalkLog;
 use App\Models\TeamerSignup;
 use App\Models\User;
 use Illuminate\Console\Command;
@@ -38,6 +39,7 @@ class DsgvoPrune extends Command
         $this->pruneExpiredPlayers($dryRun);
         $this->pruneExpiredUsers($dryRun);
         $this->pruneAuditLogs($dryRun);
+        $this->pruneTalkLogs($dryRun);
         $this->pruneNotifications($dryRun);
         $this->pruneSurveyTexts($dryRun);
         $this->pruneSurveyIpAddresses($dryRun);
@@ -127,6 +129,18 @@ class DsgvoPrune extends Command
 
         if (! $dryRun && $count > 0) {
             AuditLog::where('created_at', '<', now()->subYears(3))->delete();
+        }
+    }
+
+    // Talk-Protokoll: nach 90 Tagen löschen (enthält Namen und Nextcloud-Benutzernamen).
+    private function pruneTalkLogs(bool $dryRun): void
+    {
+        $query = TalkLog::where('created_at', '<', now()->subDays(TalkLog::RETENTION_DAYS));
+        $count = $query->count();
+        $this->line('  Talk-Protokoll (> '.TalkLog::RETENTION_DAYS." Tage): {$count}");
+
+        if (! $dryRun && $count > 0) {
+            $query->delete();
         }
     }
 

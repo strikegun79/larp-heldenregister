@@ -89,6 +89,7 @@ class PlayerTalkService
 
     public function provision(Player $player): void
     {
+        $this->client->forContext(player: $player);
         if (! $this->client->isActive() || ! $player->talkReadyForAccount()) {
             return;
         }
@@ -129,6 +130,7 @@ class PlayerTalkService
 
     public function disable(Player $player): void
     {
+        $this->client->forContext(player: $player);
         if (! $this->client->isActive() || ! $player->nextcloud_user_id || ! $player->nextcloud_account_created) {
             return;
         }
