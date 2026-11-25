@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Models\AuditLog;
 use App\Models\Booking;
+use App\Models\Hero;
 use App\Models\Player;
 use App\Models\TeamerSignup;
 use App\Models\User;
@@ -33,6 +34,7 @@ class DsgvoPrune extends Command
         $this->pruneHealthData($dryRun);
         $this->pruneTeamerSignupHealthData($dryRun);
         $this->pruneBookings($dryRun);
+        $this->anonymizeDeletedPlayers($dryRun);
         $this->pruneExpiredPlayers($dryRun);
         $this->pruneExpiredUsers($dryRun);
         $this->pruneAuditLogs($dryRun);
@@ -178,6 +180,29 @@ class DsgvoPrune extends Command
     }
 
     /**
+     * Issue #42: Gelöschte Spieler nach Ablauf der Wiederherstellungsfrist anonymisieren
+     * (Klardaten überschreiben, Profilfoto löschen). Helden bleiben ausgeblendet und werden
+     * mit dem Spieler nach 3 Jahren endgültig gelöscht.
+     */
+    private function anonymizeDeletedPlayers(bool $dryRun): void
+    {
+        $query = Player::onlyTrashed()
+            ->whereNull('anonymized_at')
+            ->where('deleted_at', '<', now()->subDays(Player::ANONYMIZE_AFTER_DAYS));
+
+        $count = $query->count();
+        $this->line('  Spieler anonymisieren (gelöscht > '.Player::ANONYMIZE_AFTER_DAYS." Tage): {$count}");
+
+        if (! $dryRun && $count > 0) {
+            $query->chunkById(50, function ($players) {
+                foreach ($players as $player) {
+                    $player->anonymize();
+                }
+            });
+        }
+    }
+
+    /**
      * Spieler-Datensätze endgültig löschen, die seit > 3 Jahren soft-deleted sind.
      *
      * Reihenfolge pro Spieler:
@@ -200,7 +225,7 @@ class DsgvoPrune extends Command
                 ->chunkById(50, function ($players) {
                     foreach ($players as $player) {
                         // Helden-Fotos und Galerie-Bilder (Model-Events feuern bei DB-Cascade nicht).
-                        foreach ($player->heroes()->with('galleryImages:id,hero_id,path')->get() as $hero) {
+                        foreach ($player->heroes()->withoutGlobalScope(Hero::SCOPE_PLAYER_NOT_DELETED)->with('galleryImages:id,hero_id,path')->get() as $hero) {
                             foreach ($hero->galleryImages as $gi) {
                                 Storage::disk('public')->delete($gi->path);
                             }

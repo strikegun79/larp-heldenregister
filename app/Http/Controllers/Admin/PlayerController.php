@@ -8,6 +8,7 @@ use App\Models\MatrixManagedRoom;
 use App\Models\Player;
 use App\Models\User;
 use App\Services\AuditLogger;
+use App\Services\PlayerDeletionService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -226,7 +227,7 @@ class PlayerController extends Controller
         // M-3: Spieler-Löschung protokollieren (vor delete, damit Label noch greift).
         AuditLogger::log('player.deleted', $player);
 
-        $player->delete();
+        PlayerDeletionService::delete($player);
 
         $message = 'Spieler "'.$player->full_name.'" wurde gelöscht.';
 
@@ -241,6 +242,13 @@ class PlayerController extends Controller
     public function restore(int $id): RedirectResponse
     {
         $player = Player::withTrashed()->findOrFail($id);
+
+        // Issue #42: Nach der Anonymisierung gibt es nichts mehr wiederherzustellen.
+        if ($player->anonymized_at !== null) {
+            return redirect()->route('admin.players.index')
+                ->with('error', 'Der Spieler wurde bereits anonymisiert und kann nicht wiederhergestellt werden.');
+        }
+
         $player->restore();
 
         // M-3: Wiederherstellung protokollieren.

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -20,12 +21,21 @@ class Hero extends Model
 
     public const DESCRIPTION_MAX_HTML = 60000;
 
+    /** Issue #42: Name des globalen Scopes, der Helden gelöschter Spieler ausblendet. */
+    public const SCOPE_PLAYER_NOT_DELETED = 'player_not_deleted';
+
     /**
      * PUB-01: Eindeutigen 6-stelligen Code generieren und beim Erstellen setzen.
      * DSGVO: Heldenfoto beim Löschen aus dem Storage entfernen.
      */
     protected static function booted(): void
     {
+        // Issue #42: Helden gelöschter (soft-deleted) Spieler überall ausblenden.
+        // Wird der Spieler wiederhergestellt, sind seine Helden wieder sichtbar.
+        static::addGlobalScope(self::SCOPE_PLAYER_NOT_DELETED, function (Builder $query) {
+            $query->whereHas('player');
+        });
+
         static::creating(function (Hero $hero) {
             if (empty($hero->public_code)) {
                 $hero->public_code = static::generatePublicCode();

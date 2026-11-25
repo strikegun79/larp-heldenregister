@@ -60,7 +60,12 @@ class Player extends Model
         'talk_consent_at' => 'datetime',
         'talk_account_ready_at' => 'datetime',
         'nextcloud_account_created' => 'boolean',
+        // Issue #42: Zeitpunkt der DSGVO-Anonymisierung nach dem Löschen.
+        'anonymized_at' => 'datetime',
     ];
+
+    /** Issue #42: Frist zwischen Löschen und Anonymisierung (Wiederherstellung möglich). */
+    public const ANONYMIZE_AFTER_DAYS = 30;
 
     /** Issue #31: Mindestalter für Nextcloud Talk. */
     public const TALK_MIN_AGE = 14;
@@ -229,10 +234,25 @@ class Player extends Model
             'city' => null,
             'allergien' => null,
             'medikamente' => null,
+            'health_data_consent_at' => null,
+            'parental_consent_at' => null,
             'address_same_as_guardian' => false,
+            // Issue #42: Talk-Daten (Konto wird beim Löschen deaktiviert).
+            'talk_approved_at' => null,
+            'talk_approved_by' => null,
+            'talk_consent_at' => null,
+            'talk_consent_by' => null,
+            'talk_consent_version' => null,
+            'talk_account_ready_at' => null,
+            'talk_error' => null,
+            'nextcloud_user_id' => null,
+            'nextcloud_account_created' => false,
+            'anonymized_at' => now(),
         ])->save();
 
-        $this->delete();
+        if (! $this->trashed()) {
+            $this->delete();
+        }
     }
 
     /**
