@@ -52,7 +52,7 @@ class TalkSettingsController extends Controller
         if (filled($data['talk_plot_room'] ?? null)) {
             $token = NextcloudTalkClient::roomTokenFrom($data['talk_plot_room']);
             if ($token === null) {
-                return back()->withInput()->withErrors(['talk_plot_room' => 'Kein gültiger Talk-Link oder Raum-Token (Link in der Form …/call/abc123).']);
+                return back()->withInput()->withErrors(['talk_plot_room' => 'Kein gültiger Talk-Link oder Raum-Token (Link in der Form …/index.php/call/abc123).']);
             }
         }
 
