@@ -101,10 +101,14 @@
         @if (($suggestions ?? collect())->isNotEmpty())
             <section aria-labelledby="plot-suggestions-heading" class="mb-6">
                 <h2 id="plot-suggestions-heading" class="font-uncial text-lg text-waldritter mb-1">Bekannten Gestalten begegnen</h2>
-                <p class="text-stone-600 text-sm mb-3">Wer streift durch Silvanien? Lerne die bekannten Gestalten unserer Abenteuer kennen.</p>
+                <p class="text-stone-600 text-sm mb-3">Wer streift durch Silvanien? Lerne die bekannten Gestalten und Helden unserer Abenteuer kennen.</p>
                 <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
-                    @foreach ($suggestions as $character)
-                        @include('public._plot_character_card')
+                    @foreach ($suggestions as $suggestion)
+                        @if ($suggestion instanceof \App\Models\Hero)
+                            @include('public._hero_card', ['hero' => $suggestion])
+                        @else
+                            @include('public._plot_character_card', ['character' => $suggestion])
+                        @endif
                     @endforeach
                 </div>
                 <p class="text-center mt-3">

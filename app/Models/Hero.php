@@ -73,6 +73,7 @@ class Hero extends Model
         'public_code',
         'public_visible',
         'public_searchable',
+        'public_suggested',
     ];
 
     protected $casts = [
@@ -81,6 +82,7 @@ class Hero extends Model
         'active' => 'boolean',
         'public_visible' => 'boolean',
         'public_searchable' => 'boolean',
+        'public_suggested' => 'boolean',
     ];
 
     /** Öffentliche URL des Helden-Fotos; Standardbild wenn keins hochgeladen (HERO-22). */

@@ -150,6 +150,7 @@ Route::middleware(['auth', 'verified'])->group(function () {
         ->name('heroes.welcome-mail');
     Route::patch('heroes/{hero}/visibility', [HeroController::class, 'toggleVisibility'])->name('heroes.visibility');
     Route::patch('heroes/{hero}/searchable', [HeroController::class, 'toggleSearchable'])->name('heroes.searchable');
+    Route::patch('heroes/{hero}/suggested', [HeroController::class, 'toggleSuggested'])->name('heroes.suggested');
     Route::get('heroes/{hero}/player-edit', [HeroController::class, 'playerEditForm'])->name('heroes.player-edit');
     Route::get('heroes/{hero}/steckbrief', [HeroController::class, 'steckbrief'])->name('heroes.steckbrief');
     Route::patch('heroes/{hero}/player-info', [HeroController::class, 'updatePlayerInfo'])->name('heroes.player-info');

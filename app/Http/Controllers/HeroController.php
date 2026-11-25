@@ -417,6 +417,25 @@ class HeroController extends Controller
     }
 
     /**
+     * Vorschlag im öffentlichen Heldenverzeichnis („Bekannten Gestalten begegnen“) umschalten.
+     * Erlaubt für: heldenregister.edit ODER Betreuer des Spielers.
+     */
+    public function toggleSuggested(Request $request, Hero $hero): RedirectResponse|JsonResponse
+    {
+        abort_unless($this->canManagePublicSettings($request, $hero), 403);
+
+        $hero->update(['public_suggested' => ! $hero->public_suggested]);
+
+        $message = $hero->public_suggested
+            ? "{$hero->character_name} wird jetzt im Heldenverzeichnis vorgeschlagen."
+            : "{$hero->character_name} wird nicht mehr im Heldenverzeichnis vorgeschlagen.";
+
+        return $request->expectsJson()
+            ? response()->json(['message' => $message, 'refresh_modal' => true])
+            : back()->with('status', $message);
+    }
+
+    /**
      * Willkommens-Mail an Eltern/Betreuer des Spielers senden.
      * Nur Bürokrat/Admin; setzt voraus dass der Held einem Spieler zugeordnet ist.
      */
