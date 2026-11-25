@@ -16,7 +16,7 @@
      @open-skill.window="skill = $event.detail; showSkillModal = true"
      @keydown.escape.window="showSkillModal = false">
 
-    <div class="max-w-2xl mx-auto px-4 sm:px-6">
+    <div class="max-w-2xl lg:max-w-[65rem] mx-auto px-4 sm:px-6">
 
         {{-- Helden-Header --}}
         <div class="bg-white/70 border-2 border-[#5a3a22]/40 shadow sm:rounded-lg overflow-hidden mb-6">
