@@ -53,20 +53,38 @@
                             </div>
                         </div>
 
+                        {{-- Issue #46: Bereiche als Seiten --}}
+                        <div class="field mt-2">
+                            <div class="ui checkbox">
+                                <input type="checkbox" name="section_pages" id="section_pages" value="1"
+                                       aria-describedby="section_pages_hint"
+                                    {{ old('section_pages', $template->section_pages ?? false) ? 'checked' : '' }}>
+                                <label for="section_pages">Bereiche als einzelne Seiten anzeigen</label>
+                            </div>
+                            <p id="section_pages_hint" class="text-xs text-stone-500 mt-1">
+                                Jeder Bereich wird eine eigene Seite mit „Weiter“ und „Zurück“ – gerade für Jüngere übersichtlicher.
+                            </p>
+                        </div>
+
                     </div>
 
                     {{-- Frageneditor --}}
                     <div class="mt-8">
                         <div class="flex items-center justify-between mb-3">
-                            <h3 class="font-semibold text-waldritter">Fragen</h3>
-                            <button type="button" onclick="addQuestion()" class="ui secondary small button">
-                                + Frage hinzufügen
-                            </button>
+                            <h3 class="font-semibold text-waldritter">Fragen und Bereiche</h3>
+                            <span class="flex gap-2">
+                                <button type="button" onclick="addQuestion('section-template')" class="ui small button">
+                                    + Bereich hinzufügen
+                                </button>
+                                <button type="button" onclick="addQuestion()" class="ui secondary small button">
+                                    + Frage hinzufügen
+                                </button>
+                            </span>
                         </div>
 
                         <div id="questions-list" class="space-y-3">
                             @foreach($questions as $i => $q)
-                                <div class="question-item border border-stone-200 rounded-lg p-4 bg-stone-50"
+                                <div class="question-item border rounded-lg p-4 {{ $q->isSection() ? 'border-amber-300 bg-amber-50' : 'border-stone-200 bg-stone-50' }}"
                                      data-index="{{ $i }}">
                                     @include('admin.surveys.templates._question_row', ['i' => $i, 'q' => $q])
                                 </div>
@@ -93,13 +111,35 @@
         </div>
     </template>
 
+    {{-- Issue #46: Vorlage für neue Bereiche --}}
+    <template id="section-template">
+        <div class="question-item border border-amber-300 rounded-lg p-4 bg-amber-50">
+            @include('admin.surveys.templates._question_row', ['i' => '__INDEX__', 'q' => null, 'newType' => 'section'])
+        </div>
+    </template>
+
     <script>
     let qIdx = {{ $questions->count() }};
 
-    function addQuestion() {
-        const html = document.getElementById('question-template').innerHTML.replaceAll('__INDEX__', qIdx++);
-        document.getElementById('questions-list').insertAdjacentHTML('beforeend', html);
+    function addQuestion(templateId = 'question-template') {
+        const html = document.getElementById(templateId).innerHTML.replaceAll('__INDEX__', qIdx++);
+        const list = document.getElementById('questions-list');
+        list.insertAdjacentHTML('beforeend', html);
+        list.lastElementChild?.querySelector('input[type="text"]')?.focus();
     }
+
+    // Issue #46: Fragen und Bereiche verschieben; die Reihenfolge im Formular wird gespeichert.
+    document.getElementById('questions-list').addEventListener('click', (e) => {
+        const button = e.target.closest('[data-move]');
+        if (!button) return;
+        const item = button.closest('.question-item');
+        if (button.dataset.move === 'up' && item.previousElementSibling) {
+            item.parentNode.insertBefore(item, item.previousElementSibling);
+        } else if (button.dataset.move === 'down' && item.nextElementSibling) {
+            item.parentNode.insertBefore(item.nextElementSibling, item);
+        }
+        button.focus();
+    });
 
     // Issue #24: Typabhängige Einstellungen ein-/ausblenden.
     document.getElementById('questions-list').addEventListener('change', (e) => {

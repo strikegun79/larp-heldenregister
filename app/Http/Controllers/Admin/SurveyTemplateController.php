@@ -24,7 +24,8 @@ class SurveyTemplateController extends Controller
 
     public function index(): View
     {
-        $templates = SurveyTemplate::withCount('questions')
+        // Issue #46: Bereiche zählen nicht als Fragen.
+        $templates = SurveyTemplate::withCount(['questions' => fn ($q) => $q->where('type', '!=', SurveyTemplateQuestion::SECTION)])
             ->with('creator')
             ->orderBy('target_group')
             ->orderBy('name')
@@ -47,18 +48,8 @@ class SurveyTemplateController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string', 'max:1000'],
             'target_group' => ['required', 'in:'.implode(',', array_keys(SurveyTemplate::TARGET_GROUPS))],
-            'active' => ['boolean'],
-            'questions' => ['array'],
-            'questions.*.id' => ['nullable', 'integer'],
-            'questions.*.question_text' => ['required', 'string', 'max:1000'],
-            'questions.*.type' => ['required', Rule::in(array_keys(SurveyTemplateQuestion::TYPES))],
-            'questions.*.required' => ['boolean'],
-            // Issue #24: Einstellungen der Typen „Optionen“ und „Smileys“.
-            'questions.*.choices' => ['nullable', 'string', 'max:2000'],
-            'questions.*.multiple' => ['boolean'],
-            'questions.*.free_text' => ['boolean'],
-            'questions.*.labels' => ['nullable', 'array'],
-            'questions.*.labels.*' => ['nullable', 'string', 'max:100'],
+        ] + $this->questionRules(), [
+            'questions.*.question_text.required' => 'Bitte gib für jede Frage und jeden Bereich einen Text ein.',
         ]);
 
         $template = SurveyTemplate::create([
@@ -66,6 +57,7 @@ class SurveyTemplateController extends Controller
             'description' => $data['description'] ?? null,
             'target_group' => $data['target_group'],
             'active' => $data['active'] ?? true,
+            'section_pages' => $data['section_pages'] ?? false,
             'created_by' => auth()->id(),
         ]);
 
@@ -92,18 +84,8 @@ class SurveyTemplateController extends Controller
             'name' => ['required', 'string', 'max:255'],
             'description' => ['nullable', 'string', 'max:1000'],
             'target_group' => ['required', 'in:'.implode(',', array_keys(SurveyTemplate::TARGET_GROUPS))],
-            'active' => ['boolean'],
-            'questions' => ['array'],
-            'questions.*.id' => ['nullable', 'integer'],
-            'questions.*.question_text' => ['required', 'string', 'max:1000'],
-            'questions.*.type' => ['required', Rule::in(array_keys(SurveyTemplateQuestion::TYPES))],
-            'questions.*.required' => ['boolean'],
-            // Issue #24: Einstellungen der Typen „Optionen“ und „Smileys“.
-            'questions.*.choices' => ['nullable', 'string', 'max:2000'],
-            'questions.*.multiple' => ['boolean'],
-            'questions.*.free_text' => ['boolean'],
-            'questions.*.labels' => ['nullable', 'array'],
-            'questions.*.labels.*' => ['nullable', 'string', 'max:100'],
+        ] + $this->questionRules(), [
+            'questions.*.question_text.required' => 'Bitte gib für jede Frage und jeden Bereich einen Text ein.',
         ]);
 
         $template->update([
@@ -111,6 +93,7 @@ class SurveyTemplateController extends Controller
             'description' => $data['description'] ?? null,
             'target_group' => $data['target_group'],
             'active' => $data['active'] ?? true,
+            'section_pages' => $data['section_pages'] ?? false,
         ]);
 
         $this->syncQuestions($template, $data['questions'] ?? []);
@@ -133,6 +116,35 @@ class SurveyTemplateController extends Controller
     }
 
     /**
+     * Validierungsregeln für Vorlageneinstellungen und Fragen (Anlegen und Bearbeiten).
+     *
+     * @return array<string, mixed>
+     */
+    private function questionRules(): array
+    {
+        return [
+            'active' => ['boolean'],
+            // Issue #46: Bereiche als Seiten.
+            'section_pages' => ['boolean'],
+            'questions' => ['array'],
+            'questions.*.id' => ['nullable', 'integer'],
+            'questions.*.question_text' => ['required', 'string', 'max:1000'],
+            'questions.*.type' => ['required', Rule::in(SurveyTemplateQuestion::allTypes())],
+            'questions.*.required' => ['boolean'],
+            // Issue #24: Einstellungen der Typen „Optionen“ und „Smileys“.
+            'questions.*.choices' => ['nullable', 'string', 'max:2000'],
+            'questions.*.multiple' => ['boolean'],
+            'questions.*.free_text' => ['boolean'],
+            'questions.*.labels' => ['nullable', 'array'],
+            'questions.*.labels.*' => ['nullable', 'string', 'max:100'],
+            // Issue #46: Smiley-Zusatzantwort und Untertext eines Bereichs.
+            'questions.*.na_option' => ['boolean'],
+            'questions.*.na_label' => ['nullable', 'string', 'max:100'],
+            'questions.*.subtitle' => ['nullable', 'string', 'max:500'],
+        ];
+    }
+
+    /**
      * Issue #35: Fragen abgleichen, ohne beantwortete Fragen zu löschen.
      *
      * - Bestehende Fragen (per ID) werden aktualisiert und behalten ihre ID.
@@ -152,7 +164,8 @@ class SurveyTemplateController extends Controller
                     'type' => $q['type'],
                     'options' => SurveyTemplateQuestion::optionsFromInput($q['type'], $q),
                     'sort_order' => $index,
-                    'required' => (bool) ($q['required'] ?? false),
+                    // Issue #46: Bereiche sind nie Pflicht.
+                    'required' => $q['type'] !== SurveyTemplateQuestion::SECTION && (bool) ($q['required'] ?? false),
                 ];
 
                 $question = isset($q['id']) ? $existing->get((int) $q['id']) : null;

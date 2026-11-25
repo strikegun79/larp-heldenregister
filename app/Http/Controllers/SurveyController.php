@@ -5,9 +5,9 @@ namespace App\Http\Controllers;
 use App\Models\SurveyAnswer;
 use App\Models\SurveyLink;
 use App\Models\SurveyResponse;
+use App\Models\SurveyTemplate;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
-use Illuminate\Validation\Rule;
 use Illuminate\View\View;
 
 class SurveyController extends Controller
@@ -45,10 +45,16 @@ class SurveyController extends Controller
             return view('survey.expired', ['reason' => 'expired', 'link' => $link]);
         }
 
-        $questions = $link->survey->template->questions;
+        $template = $link->survey->template;
+        $items = $template->questions;
+        $questions = $items->reject->isSection()->values();
         $view = $link->usesWizard() ? 'survey.wizard' : 'survey.scroll';
 
-        return view($view, compact('link', 'questions'));
+        // Issue #46: Nach Bereichen gruppieren; mit „Bereiche als Seiten“ ist jeder Bereich eine Seite.
+        $groups = SurveyTemplate::groupBySection($items);
+        $paged = $template->section_pages && $items->contains->isSection();
+
+        return view($view, compact('link', 'questions', 'groups', 'paged'));
     }
 
     /** Antwort speichern + Token sperren. */
@@ -62,46 +68,11 @@ class SurveyController extends Controller
             return redirect()->route('survey.start', ['token' => $token]);
         }
 
-        $questions = $link->survey->template->questions;
+        // Issue #46: Bereiche werden nicht beantwortet.
+        $questions = $link->survey->template->questions->reject->isSection()->values();
 
-        // Validation-Regeln dynamisch aus Fragetypen ableiten
-        $rules = [];
-        $messages = [];
-        foreach ($questions as $question) {
-            $key = "answers.{$question->id}";
-            $requiredRule = $question->required ? 'required' : 'nullable';
-
-            // Issue #24: Optionen (Einfach-/Mehrfachauswahl) plus optionale Nachricht.
-            if ($question->type === 'choice') {
-                $choicesRule = ['nullable', 'array'];
-                if ($question->required) {
-                    $choicesRule[0] = $question->hasFreeText() ? "required_without:{$key}.text" : 'required';
-                }
-                if (! $question->allowsMultiple()) {
-                    $choicesRule[] = 'max:1';
-                }
-
-                $rules[$key] = ['nullable', 'array'];
-                $rules["{$key}.choices"] = $choicesRule;
-                $rules["{$key}.choices.*"] = ['string', Rule::in($question->choices())];
-                $rules["{$key}.text"] = ['nullable', 'string', 'max:2000'];
-
-                $messages["{$key}.choices.required"] = 'Bitte wähle eine Antwort aus.';
-                $messages["{$key}.choices.required_without"] = 'Bitte wähle eine Antwort aus oder schreib eine Nachricht.';
-                $messages["{$key}.choices.max"] = 'Bitte wähle nur eine Antwort aus.';
-                $messages["{$key}.choices.*.in"] = 'Diese Antwort gibt es bei der Frage nicht.';
-
-                continue;
-            }
-
-            $rules[$key] = match ($question->type) {
-                'rating' => [$requiredRule, 'integer', 'min:1', 'max:10'],
-                'smiley' => [$requiredRule, 'integer', 'min:1', 'max:5'],
-                'text' => [$requiredRule, 'string', 'max:2000'],
-                'yes_no' => [$requiredRule, 'in:1,0'],
-                default => [$requiredRule],
-            };
-        }
+        // Validation-Regeln dynamisch aus Fragetypen ableiten (gemeinsam mit der Vorschau).
+        [$rules, $messages] = SurveyTemplate::answerRules($questions);
 
         $validated = $request->validate($rules, $messages);
 

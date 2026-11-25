@@ -4,11 +4,15 @@
     <div class="survey-wrap">
         <div class="survey-form-wrap--child">
 
+            @isset($preview)
+                @include('survey._preview_banner')
+            @endisset
+
             {{-- Wizard-Container, gesteuert via JS --}}
-            <div id="survey-wizard" data-total="{{ $questions->count() }}">
+            <div id="survey-wizard">
 
                 <form method="POST"
-                      action="{{ route('survey.submit', ['token' => $link->token]) }}"
+                      action="{{ $preview['action'] ?? route('survey.submit', ['token' => $link->token]) }}"
                       id="survey-form"
                       novalidate>
                     @csrf
@@ -25,92 +29,50 @@
                         </div>
                     @endif
 
-                    @foreach($questions as $index => $question)
+                    {{-- Issue #46: Schritte – mit „Bereiche als Seiten“ ein Bereich je Schritt, sonst eine Frage je Schritt
+                         (Bereichstitel steht dann über jeder Frage des Bereichs). --}}
+                    @php
+                        $steps = [];
+                        foreach ($groups as $group) {
+                            if ($paged) {
+                                $steps[] = $group;
+                                continue;
+                            }
+                            foreach ($group['questions'] as $groupQuestion) {
+                                $steps[] = ['section' => $group['section'], 'number' => $group['number'], 'questions' => [$groupQuestion]];
+                            }
+                        }
+                        $stepCount = count($steps);
+                    @endphp
+                    @foreach($steps as $index => $step)
                         <div class="survey-step survey-card mb-0"
                              data-step="{{ $index + 1 }}"
                              style="{{ $index > 0 ? 'display:none;' : '' }}">
 
                             {{-- Fortschrittsbalken --}}
                             <div class="survey-progress-label">
-                                Frage {{ $index + 1 }} von {{ $questions->count() }}
+                                {{ $paged ? 'Seite' : 'Frage' }} {{ $index + 1 }} von {{ $stepCount }}
                             </div>
                             <div class="survey-progress-bar mb-4">
                                 <div class="survey-progress-bar-fill"
-                                     style="width: {{ round((($index + 1) / $questions->count()) * 100) }}%">
+                                     style="width: {{ round((($index + 1) / $stepCount) * 100) }}%">
                                 </div>
                             </div>
 
-                            {{-- Frage --}}
-                            <fieldset>
-                                <legend class="survey-question-label">
-                                    {{ $question->question_text }}
-                                    @unless($question->required)
-                                        <span class="optional-badge">(freiwillig)</span>
-                                    @endunless
-                                </legend>
+                            @if($step['section'])
+                                <div class="survey-section-header">
+                                    <h2 class="survey-section-title">{{ $step['number'] }}. {{ $step['section']->question_text }}</h2>
+                                    @if($step['section']->subtitle())
+                                        <p class="survey-section-subtitle">{{ $step['section']->subtitle() }}</p>
+                                    @endif
+                                </div>
+                            @endif
 
-                                @if($question->type === 'rating')
-                                    {{-- Schildskala 1–5 für Kinder --}}
-                                    <div class="shield-rating" role="radiogroup">
-                                        @php
-                                            $labels = ['', 'naja', 'okay', 'gut', 'toll', 'super!'];
-                                        @endphp
-                                        @for($v = 1; $v <= 5; $v++)
-                                            <div>
-                                                <input type="radio"
-                                                       name="answers[{{ $question->id }}]"
-                                                       id="q{{ $question->id }}_r{{ $v }}"
-                                                       value="{{ $v * 2 }}"
-                                                       {{ old("answers.{$question->id}") == $v * 2 ? 'checked' : '' }}>
-                                                <label for="q{{ $question->id }}_r{{ $v }}">
-                                                    <span class="shield-icon">🛡</span>
-                                                    <span class="shield-label">{{ $labels[$v] }}</span>
-                                                </label>
-                                            </div>
-                                        @endfor
-                                    </div>
-
-                                @elseif($question->type === 'text')
-                                    <textarea name="answers[{{ $question->id }}]"
-                                              id="q{{ $question->id }}"
-                                              class="parchment-textarea"
-                                              placeholder="Schreib hier auf, was dir in den Sinn kommt …"
-                                              maxlength="2000"
-                                              aria-describedby="q{{ $question->id }}_hint">{{ old("answers.{$question->id}") }}</textarea>
-                                    <p id="q{{ $question->id }}_hint" class="text-xs text-stone-400 mt-1">
-                                        Freiwillig – du kannst diese Frage auch überspringen.
-                                    </p>
-
-                                @elseif($question->type === 'yes_no')
-                                    <div class="yes-no-buttons" role="radiogroup">
-                                        <input type="radio"
-                                               name="answers[{{ $question->id }}]"
-                                               id="q{{ $question->id }}_yes"
-                                               value="1"
-                                               {{ old("answers.{$question->id}") === '1' ? 'checked' : '' }}>
-                                        <label for="q{{ $question->id }}_yes" class="yes-label">
-                                            ✅ Ja
-                                        </label>
-
-                                        <input type="radio"
-                                               name="answers[{{ $question->id }}]"
-                                               id="q{{ $question->id }}_no"
-                                               value="0"
-                                               {{ old("answers.{$question->id}") === '0' ? 'checked' : '' }}>
-                                        <label for="q{{ $question->id }}_no" class="no-label">
-                                            ❌ Nein
-                                        </label>
-                                    </div>
-
-                                @else
-                                    {{-- Issue #24: Optionen mit Freitext / Smileys --}}
-                                    @include('survey._question_extra')
-                                @endif
-
-                                @error("answers.{$question->id}")
-                                    <p class="survey-question-error" role="alert">{{ $message }}</p>
-                                @enderror
-                            </fieldset>
+                            @foreach($step['questions'] as $question)
+                                <div class="survey-step-question">
+                                    @include('survey._wizard_question', ['question' => $question])
+                                </div>
+                            @endforeach
 
                             {{-- Navigation --}}
                             <div class="survey-wizard-nav mt-6">
@@ -122,7 +84,7 @@
                                     </button>
                                 @endif
 
-                                @if($index < $questions->count() - 1)
+                                @if($index < $stepCount - 1)
                                     <button type="button"
                                             class="survey-btn-primary"
                                             onclick="wizardGo({{ $index + 2 }})">
@@ -156,6 +118,15 @@
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
     }
+
+    // Issue #46: Bei Validierungsfehlern den Schritt mit dem ersten Fehler öffnen.
+    (function () {
+        const firstError = document.querySelector('.survey-step .survey-question-error');
+        const step = firstError?.closest('.survey-step');
+        if (step) {
+            wizardGo(Number(step.dataset.step));
+        }
+    })();
 
     // Schildskala: Hover-Aufleuchten der Vorgänger-Schilde
     document.querySelectorAll('.shield-rating').forEach(group => {

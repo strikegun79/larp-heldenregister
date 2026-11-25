@@ -50,7 +50,7 @@
 
             {{-- Info-Box: Dauer, Fragen, Freiwilligkeit --}}
             <div class="mb-6 text-sm text-stone-600 space-y-1">
-                <p>📋 <strong>{{ $link->survey->template->questions->count() }} Fragen</strong> – dauert nur wenige Minuten</p>
+                <p>📋 <strong>{{ $link->survey->template->questions->reject->isSection()->count() }} Fragen</strong> – dauert nur wenige Minuten</p>
                 <p>🔒 Deine Antworten werden nur intern ausgewertet</p>
                 <p>✋ Das Ausfüllen ist freiwillig – du kannst Fragen überspringen</p>
                 @if($link->survey->closes_at)

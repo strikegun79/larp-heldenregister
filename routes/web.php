@@ -563,6 +563,11 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified'])->group(
     Route::get('surveys/{survey}/links/{link}/response', [Admin\SurveyAdminController::class, 'showResponse'])->name('surveys.links.response');
     Route::get('surveys/{survey}/export/pdf', [Admin\SurveyAdminController::class, 'exportPdf'])->name('surveys.export.pdf');
     Route::patch('surveys/{survey}/close', [Admin\SurveyAdminController::class, 'close'])->name('surveys.close');
+    // Vorschau: Antworten werden geprüft, aber nie gespeichert (nur survey.admin).
+    Route::get('surveys/{survey}/preview', [Admin\SurveyPreviewController::class, 'survey'])->name('surveys.preview');
+    Route::post('surveys/{survey}/preview', [Admin\SurveyPreviewController::class, 'submitSurvey'])->name('surveys.preview.submit');
+    Route::get('surveys/templates/{template}/preview', [Admin\SurveyPreviewController::class, 'template'])->name('surveys.templates.preview');
+    Route::post('surveys/templates/{template}/preview', [Admin\SurveyPreviewController::class, 'submitTemplate'])->name('surveys.templates.preview.submit');
 
     // Vorlagenverwaltung: nur survey.admin.
     Route::resource('surveys/templates', Admin\SurveyTemplateController::class)

@@ -21,6 +21,9 @@
                     </a>
                 @endif
                 @can('survey.admin')
+                    <a href="{{ route('admin.surveys.preview', $survey) }}" class="ui button" target="_blank" rel="noopener">
+                        <i class="eye icon"></i> Vorschau
+                    </a>
                     @if($survey->status !== 'closed')
                         <form method="POST" action="{{ route('admin.surveys.close', $survey) }}" class="inline">
                             @csrf @method('PATCH')
@@ -262,6 +265,16 @@
                     <h3 class="font-uncial text-lg text-waldritter mb-3">Auswertung</h3>
 
                     @foreach($stats as $stat)
+                        {{-- Issue #46: Bereich als Zwischenüberschrift --}}
+                        @if(isset($stat['section']))
+                            <div class="mt-6 mb-2">
+                                <h4 class="font-semibold text-waldritter text-base">{{ $stat['number'] }}. {{ $stat['section']->question_text }}</h4>
+                                @if($stat['section']->subtitle())
+                                    <p class="text-sm text-stone-500">{{ $stat['section']->subtitle() }}</p>
+                                @endif
+                            </div>
+                            @continue
+                        @endif
                         <div class="survey-result-card">
                             <div class="survey-result-card-header">
                                 {{ $stat['question']->typeIcon() }}
@@ -354,6 +367,13 @@
                                             </tbody>
                                         </table>
                                     </div>
+                                    {{-- Issue #46: Zusatzantwort ohne Smiley, nicht im Durchschnitt --}}
+                                    @if($stat['question']->hasNaOption() || $stat['na_count'] > 0)
+                                        <p class="text-sm text-stone-600 mt-2">
+                                            {{ $stat['question']->naLabel() }}: <strong class="tabular-nums">{{ $stat['na_count'] }}</strong>
+                                            <span class="text-xs text-stone-400">(nicht im Durchschnitt)</span>
+                                        </p>
+                                    @endif
 
                                 @elseif($stat['question']->type === 'choice')
                                     {{-- Issue #24: Optionen mit Freitext --}}

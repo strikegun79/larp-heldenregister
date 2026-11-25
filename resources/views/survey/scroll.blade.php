@@ -4,6 +4,10 @@
     <div class="survey-wrap">
         <div class="survey-form-wrap--adult">
 
+            @isset($preview)
+                @include('survey._preview_banner')
+            @endisset
+
             {{-- Kopfzeile --}}
             <div class="survey-card mb-4 text-center py-3">
                 <h1 class="text-xl font-semibold text-waldritter" style="font-family:'EB Garamond',serif;">
@@ -19,12 +23,16 @@
                     <div class="survey-rücklauf-fill" id="scroll-progress-fill" style="width:0%"></div>
                 </div>
                 <p class="text-xs text-center text-stone-500 mt-1" id="scroll-progress-label">
-                    Frage 0 von {{ $questions->count() }}
+                    @if($paged)
+                        Seite 1 von {{ count($groups) }}
+                    @else
+                        Frage 0 von {{ $questions->count() }}
+                    @endif
                 </p>
             </div>
 
             <form method="POST"
-                  action="{{ route('survey.submit', ['token' => $link->token]) }}"
+                  action="{{ $preview['action'] ?? route('survey.submit', ['token' => $link->token]) }}"
                   id="survey-form"
                   novalidate>
                 @csrf
@@ -41,76 +49,45 @@
                     </div>
                 @endif
 
-                @foreach($questions as $index => $question)
-                    <div class="survey-card mb-4" data-question-index="{{ $index + 1 }}">
-                        <fieldset>
-                            <legend class="survey-question-label">
-                                <span class="text-stone-400 text-sm mr-1">{{ $index + 1 }}.</span>
-                                {{ $question->question_text }}
-                                @unless($question->required)
-                                    <span class="optional-badge">(freiwillig)</span>
-                                @endunless
-                            </legend>
+                {{-- Issue #46: Fragen nach Bereichen; mit „Bereiche als Seiten“ ist jeder Bereich eine Seite --}}
+                @php($questionNumber = 0)
+                @foreach($groups as $p => $group)
+                    <div class="survey-page" data-page="{{ $p + 1 }}" @if($paged && $p > 0) hidden @endif>
+                        @if($group['section'])
+                            <div class="survey-section-header">
+                                <h2 class="survey-section-title" tabindex="-1">{{ $group['number'] }}. {{ $group['section']->question_text }}</h2>
+                                @if($group['section']->subtitle())
+                                    <p class="survey-section-subtitle">{{ $group['section']->subtitle() }}</p>
+                                @endif
+                            </div>
+                        @endif
 
-                            @if($question->type === 'rating')
-                                {{-- 1–10 Zahlen-Buttons für Erwachsene --}}
-                                <div class="rating-buttons" role="radiogroup">
-                                    @for($v = 1; $v <= 10; $v++)
-                                        <input type="radio"
-                                               name="answers[{{ $question->id }}]"
-                                               id="q{{ $question->id }}_r{{ $v }}"
-                                               value="{{ $v }}"
-                                               {{ old("answers.{$question->id}") == $v ? 'checked' : '' }}>
-                                        <label for="q{{ $question->id }}_r{{ $v }}">{{ $v }}</label>
-                                    @endfor
-                                </div>
-                                <p class="text-xs text-stone-400 mt-1">1 = nicht gut, 10 = sehr gut</p>
+                        @foreach($group['questions'] as $question)
+                            @php($questionNumber++)
+                            @include('survey._scroll_question', ['question' => $question, 'number' => $questionNumber])
+                        @endforeach
 
-                            @elseif($question->type === 'text')
-                                <textarea name="answers[{{ $question->id }}]"
-                                          id="q{{ $question->id }}"
-                                          class="parchment-textarea"
-                                          placeholder="Deine Anmerkungen …"
-                                          maxlength="2000">{{ old("answers.{$question->id}") }}</textarea>
-
-                            @elseif($question->type === 'yes_no')
-                                <div class="yes-no-buttons" role="radiogroup">
-                                    <input type="radio"
-                                           name="answers[{{ $question->id }}]"
-                                           id="q{{ $question->id }}_yes"
-                                           value="1"
-                                           {{ old("answers.{$question->id}") === '1' ? 'checked' : '' }}>
-                                    <label for="q{{ $question->id }}_yes" class="yes-label">
-                                        ✅ Ja
-                                    </label>
-
-                                    <input type="radio"
-                                           name="answers[{{ $question->id }}]"
-                                           id="q{{ $question->id }}_no"
-                                           value="0"
-                                           {{ old("answers.{$question->id}") === '0' ? 'checked' : '' }}>
-                                    <label for="q{{ $question->id }}_no" class="no-label">
-                                        ❌ Nein
-                                    </label>
-                                </div>
-
-                            @else
-                                {{-- Issue #24: Optionen mit Freitext / Smileys --}}
-                                @include('survey._question_extra')
-                            @endif
-
-                            @error("answers.{$question->id}")
-                                <p class="survey-question-error" role="alert">{{ $message }}</p>
-                            @enderror
-
-                        </fieldset>
+                        @if($paged)
+                            <div class="survey-wizard-nav pb-6">
+                                @if($p > 0)
+                                    <button type="button" class="survey-btn-secondary" data-page-go="{{ $p }}">← Zurück</button>
+                                @endif
+                                @if($p < count($groups) - 1)
+                                    <button type="button" class="survey-btn-primary" data-page-go="{{ $p + 2 }}">Weiter →</button>
+                                @else
+                                    <button type="submit" class="survey-btn-primary">Fragebogen abschicken</button>
+                                @endif
+                            </div>
+                        @endif
                     </div>
                 @endforeach
 
                 <div class="pb-6">
-                    <button type="submit" class="survey-btn-primary w-full">
-                        Fragebogen abschicken
-                    </button>
+                    @unless($paged)
+                        <button type="submit" class="survey-btn-primary w-full">
+                            Fragebogen abschicken
+                        </button>
+                    @endunless
                     <p class="text-xs text-center text-stone-400 mt-3">
                         Das Ausfüllen ist freiwillig. Nicht beantwortete optionale Fragen werden einfach übersprungen.
                     </p>
@@ -121,33 +98,56 @@
     </div>
 
     <script>
-    // Sticky-Fortschrittsbalken beim Scrollen
     (function() {
-        const questions = document.querySelectorAll('[data-question-index]');
         const fill  = document.getElementById('scroll-progress-fill');
         const label = document.getElementById('scroll-progress-label');
-        const total = questions.length;
+        const pages = document.querySelectorAll('.survey-page');
+        const paged = {{ $paged ? 'true' : 'false' }};
 
-        function update() {
-            let answered = 0;
-            questions.forEach((el, i) => {
-                const rect = el.getBoundingClientRect();
-                if (rect.top < window.innerHeight * 0.6) answered = i + 1;
-            });
-            const pct = total ? Math.round((answered / total) * 100) : 0;
-            if (fill)  fill.style.width  = pct + '%';
-            if (label) label.textContent = 'Frage ' + answered + ' von ' + total;
+        // Issue #46: Bereiche als Seiten – eine Seite zeigen, Fortschritt nach Seiten.
+        function showPage(n, focus = true) {
+            pages.forEach((el) => { el.hidden = Number(el.dataset.page) !== n; });
+            const pct = Math.round((n / pages.length) * 100);
+            if (fill)  fill.style.width = pct + '%';
+            if (label) label.textContent = 'Seite ' + n + ' von ' + pages.length;
+            if (!focus) return;
+            window.scrollTo({ top: 0, behavior: 'smooth' });
+            pages[n - 1]?.querySelector('h2')?.focus({ preventScroll: true });
         }
 
-        window.addEventListener('scroll', update, { passive: true });
-        update();
-    })();
+        if (paged) {
+            document.querySelectorAll('[data-page-go]').forEach((btn) => {
+                btn.addEventListener('click', () => showPage(Number(btn.dataset.pageGo)));
+            });
+            showPage(1, false);
+        } else {
+            // Sticky-Fortschrittsbalken beim Scrollen
+            const questions = document.querySelectorAll('[data-question-index]');
+            const total = questions.length;
 
-    // Zum ersten Fehler-Feld scrollen
-    const firstError = document.querySelector('.survey-question-error');
-    if (firstError) {
-        firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
-        firstError.closest('fieldset')?.querySelector('input,textarea')?.focus();
-    }
+            function update() {
+                let answered = 0;
+                questions.forEach((el, i) => {
+                    const rect = el.getBoundingClientRect();
+                    if (rect.top < window.innerHeight * 0.6) answered = i + 1;
+                });
+                const pct = total ? Math.round((answered / total) * 100) : 0;
+                if (fill)  fill.style.width  = pct + '%';
+                if (label) label.textContent = 'Frage ' + answered + ' von ' + total;
+            }
+
+            window.addEventListener('scroll', update, { passive: true });
+            update();
+        }
+
+        // Zum ersten Fehler-Feld (bei Seiten: dessen Seite öffnen)
+        const firstError = document.querySelector('.survey-question-error');
+        if (firstError) {
+            const page = firstError.closest('.survey-page');
+            if (paged && page) showPage(Number(page.dataset.page), false);
+            firstError.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            firstError.closest('fieldset')?.querySelector('input,textarea')?.focus();
+        }
+    })();
     </script>
 </x-public-layout>

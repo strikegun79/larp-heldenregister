@@ -51,6 +51,11 @@
                                     </span>
                                 </td>
                                 <td class="px-4 py-3 text-right">
+                                    <a href="{{ route('admin.surveys.templates.preview', $template) }}"
+                                       class="ui small button" target="_blank" rel="noopener"
+                                       aria-label="Vorschau von {{ $template->name }} (neuer Tab)">
+                                        <i class="eye icon"></i> Vorschau
+                                    </a>
                                     <a href="{{ route('admin.surveys.templates.edit', $template) }}"
                                        class="ui small button">Bearbeiten</a>
                                     <form method="POST"
