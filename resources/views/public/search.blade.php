@@ -1,6 +1,6 @@
 <x-public-layout title="Helden- und Charakterverzeichnis – Heldenregister">
 
-    <div class="max-w-lg mx-auto px-4 sm:px-6">
+    <div class="max-w-lg lg:max-w-[65rem] mx-auto px-4 sm:px-6">
 
         <div class="bg-white/70 border-2 border-[#5a3a22]/40 shadow sm:rounded-lg p-6 mb-6">
 
@@ -62,7 +62,7 @@
             @if ($plotResults->isNotEmpty())
                 <section aria-labelledby="plot-results-heading" class="mb-6">
                     <h2 id="plot-results-heading" class="font-uncial text-lg text-waldritter mb-3">Bekannte Gestalten</h2>
-                    <div class="grid gap-3 sm:grid-cols-2">
+                    <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                         @foreach ($plotResults as $character)
                             @include('public._plot_character_card')
                         @endforeach
@@ -102,7 +102,7 @@
             <section aria-labelledby="plot-suggestions-heading" class="mb-6">
                 <h2 id="plot-suggestions-heading" class="font-uncial text-lg text-waldritter mb-1">Bekannten Gestalten begegnen</h2>
                 <p class="text-stone-600 text-sm mb-3">Wer streift durch Silvanien? Lerne die bekannten Gestalten unserer Abenteuer kennen.</p>
-                <div class="grid gap-3 sm:grid-cols-2">
+                <div class="grid gap-3 sm:grid-cols-2 lg:grid-cols-3">
                     @foreach ($suggestions as $character)
                         @include('public._plot_character_card')
                     @endforeach
