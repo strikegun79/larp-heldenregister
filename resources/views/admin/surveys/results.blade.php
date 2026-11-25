@@ -21,6 +21,9 @@
                     </a>
                 @endif
                 @can('survey.admin')
+                    <a href="{{ route('admin.surveys.preview', $survey) }}" class="ui button" target="_blank" rel="noopener">
+                        <i class="eye icon"></i> Vorschau
+                    </a>
                     @if($survey->status !== 'closed')
                         <form method="POST" action="{{ route('admin.surveys.close', $survey) }}" class="inline">
                             @csrf @method('PATCH')

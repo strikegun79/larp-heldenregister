@@ -2,6 +2,9 @@
     <link rel="stylesheet" href="{{ asset('css/survey.css') }}">
 
     <div class="survey-wrap">
+        @isset($preview)
+            @include('survey._preview_banner')
+        @endisset
         <div class="survey-card survey-danke-wrap">
 
             <div class="survey-badge">
@@ -32,10 +35,10 @@
                 Veranstaltung: <strong>{{ $link->survey->adventure->name }}</strong>
             </p>
 
-            <a href="/"
+            <a href="{{ $preview['back'] ?? '/' }}"
                class="survey-btn-secondary inline-block mt-6 px-6 py-3 rounded-lg no-underline"
                style="text-decoration:none;">
-                Zur Startseite
+                {{ isset($preview) ? 'Zurück zur Verwaltung' : 'Zur Startseite' }}
             </a>
 
         </div>

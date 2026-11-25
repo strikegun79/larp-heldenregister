@@ -4,6 +4,10 @@
     <div class="survey-wrap">
         <div class="survey-form-wrap--adult">
 
+            @isset($preview)
+                @include('survey._preview_banner')
+            @endisset
+
             {{-- Kopfzeile --}}
             <div class="survey-card mb-4 text-center py-3">
                 <h1 class="text-xl font-semibold text-waldritter" style="font-family:'EB Garamond',serif;">
@@ -28,7 +32,7 @@
             </div>
 
             <form method="POST"
-                  action="{{ route('survey.submit', ['token' => $link->token]) }}"
+                  action="{{ $preview['action'] ?? route('survey.submit', ['token' => $link->token]) }}"
                   id="survey-form"
                   novalidate>
                 @csrf

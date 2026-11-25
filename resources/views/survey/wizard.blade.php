@@ -4,11 +4,15 @@
     <div class="survey-wrap">
         <div class="survey-form-wrap--child">
 
+            @isset($preview)
+                @include('survey._preview_banner')
+            @endisset
+
             {{-- Wizard-Container, gesteuert via JS --}}
             <div id="survey-wizard">
 
                 <form method="POST"
-                      action="{{ route('survey.submit', ['token' => $link->token]) }}"
+                      action="{{ $preview['action'] ?? route('survey.submit', ['token' => $link->token]) }}"
                       id="survey-form"
                       novalidate>
                     @csrf
