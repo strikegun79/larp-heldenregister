@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\Player;
 use App\Models\User;
 use App\Services\NextcloudTalk\PlayerTalkService;
+use App\Services\PlayerDeletionService;
 use App\Support\AvatarStorage;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -197,11 +198,14 @@ class PlayerController extends Controller
     public function destroy(Player $player): RedirectResponse
     {
         $this->authorize('delete', $player);
-        $player->delete();
+
+        // Issue #42: Talk-Zugang beenden (Konto wird deaktiviert), dann soft-deleten.
+        // Helden werden über den Hero-Scope ausgeblendet; anonymisiert wird nach 30 Tagen (dsgvo:prune).
+        PlayerDeletionService::delete($player);
 
         return redirect()
             ->route('players.index')
-            ->with('status', 'Spieler wurde gelöscht.');
+            ->with('status', 'Spieler und seine Helden wurden gelöscht.');
     }
 
     /**

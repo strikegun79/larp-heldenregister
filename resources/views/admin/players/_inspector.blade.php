@@ -192,7 +192,7 @@
                 <button type="submit" class="wr-btn wr-btn--danger wr-btn--small"><i class="trash icon m-0" aria-hidden="true"></i> Trotzdem löschen</button>
             </form>
         @else
-            <p class="text-sm mb-2">Der Spieler wird gelöscht und kann über die Liste wiederhergestellt werden.</p>
+            <p class="text-sm mb-2">Der Spieler und seine Helden werden ausgeblendet. Innerhalb von {{ \App\Models\Player::ANONYMIZE_AFTER_DAYS }} Tagen kann er über die Liste wiederhergestellt werden, danach werden seine Daten anonymisiert.</p>
             <form method="POST" action="{{ route('admin.players.destroy', $player->id) }}" data-inspector-form data-inspector-close-on-success
                   data-confirm="Spieler {{ $player->full_name }} löschen?">
                 @csrf @method('DELETE')

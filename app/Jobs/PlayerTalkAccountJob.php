@@ -35,7 +35,10 @@ class PlayerTalkAccountJob implements ShouldQueue
 
     public function handle(): void
     {
-        $player = Player::find($this->playerId);
+        // Issue #42: Deaktivieren auch für gelöschte Spieler (Konto beim Löschen sperren).
+        $player = $this->action === self::DISABLE
+            ? Player::withTrashed()->find($this->playerId)
+            : Player::find($this->playerId);
         if (! $player) {
             return;
         }

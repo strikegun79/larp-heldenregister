@@ -50,7 +50,7 @@ class PlayerTalkService
      *
      * @param  TalkAccessEnded::REVOKED|TalkAccessEnded::WITHDRAWN  $reason
      */
-    public static function revoke(Player $player, string $reason = TalkAccessEnded::REVOKED): void
+    public static function revoke(Player $player, string $reason = TalkAccessEnded::REVOKED, bool $notify = true): void
     {
         $wasApproved = $player->talk_approved_at !== null;
 
@@ -65,7 +65,7 @@ class PlayerTalkService
 
         self::queueDisable($player);
 
-        if ($wasApproved) {
+        if ($wasApproved && $notify) {
             Notification::send($player->users, new TalkAccessEnded($player, $reason));
         }
     }

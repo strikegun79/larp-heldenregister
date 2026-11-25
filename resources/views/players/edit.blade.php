@@ -22,9 +22,15 @@
             {{-- Gefahrenbereich: Löschen deutlich abgesetzt, mit Rückfrage --}}
             <section class="wr-card p-4 sm:p-5 border-wr-danger" aria-labelledby="player-delete-heading">
                 <h2 id="player-delete-heading" class="wr-section-heading__title text-lg mb-1">Spieler löschen</h2>
-                <p class="wr-card__text mb-3">Der Spieler wird gelöscht und erscheint nicht mehr in deiner Liste. Bei Fragen hilft das Organisationsteam.</p>
+                {{-- Issue #42: Hinweis auf Helden und Anonymisierung --}}
+                @php($heroCount = $player->heroes()->count())
+                <p class="wr-card__text mb-3">
+                    Der Spieler und seine Helden werden aus dem Heldenregister entfernt.
+                    Innerhalb von {{ \App\Models\Player::ANONYMIZE_AFTER_DAYS }} Tagen kann das Organisationsteam das rückgängig machen,
+                    danach werden die persönlichen Daten anonymisiert.
+                </p>
                 <form method="POST" action="{{ route('players.destroy', $player) }}"
-                      data-confirm="Diesen Spieler wirklich löschen?">
+                      data-confirm="{{ $player->full_name }} wirklich löschen?{{ $heroCount > 0 ? ' Dabei '.($heroCount === 1 ? 'wird 1 Held' : 'werden '.$heroCount.' Helden').' ebenfalls entfernt.' : '' }}">
                     @csrf
                     @method('DELETE')
                     <button type="submit" class="wr-btn wr-btn--danger">

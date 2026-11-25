@@ -184,7 +184,10 @@
                                 </td>
                                 <td class="px-6 py-4 text-right">
                                     <div class="flex items-center justify-end gap-3">
-                                        @if ($player->trashed())
+                                        @if ($player->trashed() && $player->anonymized_at !== null)
+                                            {{-- Issue #42: Nach der Anonymisierung keine Wiederherstellung mehr --}}
+                                            <span class="text-xs text-stone-500">anonymisiert am {{ $player->anonymized_at->format('d.m.Y') }}</span>
+                                        @elseif ($player->trashed())
                                             <form method="POST" action="{{ route('admin.players.restore', $player->id) }}">
                                                 @csrf @method('PATCH')
                                                 <button type="submit" class="wr-btn wr-btn--secondary wr-btn--small"
