@@ -1730,3 +1730,44 @@ document.addEventListener('change', function (e) {
         runAutoFilter(form);
     });
 })();
+
+// ------------------------------------------------------------------
+// Bereiche mit data-refresh-url beim Sichtbarwerden frisch nachladen:
+// beim Öffnen eines Reiters (Desktop) bzw. Aufklappen eines Abschnitts (Mobil).
+// Genutzt vom Reiter „Talk“ der Event-Verwaltung (Issue #31).
+// ------------------------------------------------------------------
+function refreshRegion(el) {
+    if (!el || el.dataset.refreshing === '1') return;
+    el.dataset.refreshing = '1';
+    el.setAttribute('aria-busy', 'true');
+    el.style.opacity = '0.6';
+
+    fetch(el.dataset.refreshUrl, { headers: { 'X-Requested-With': 'XMLHttpRequest' } })
+        .then((r) => (r.ok ? r.text() : Promise.reject(r.status)))
+        .then((html) => {
+            el.innerHTML = html;
+            $(el).find('.ui.dropdown').dropdown();
+            $(el).find('.ui.checkbox').checkbox();
+        })
+        .catch(() => { /* alter Inhalt bleibt stehen */ })
+        .finally(() => {
+            el.dataset.refreshing = '';
+            el.removeAttribute('aria-busy');
+            el.style.opacity = '';
+        });
+}
+
+document.addEventListener('click', (e) => {
+    const item = e.target.closest('.menu .item[data-tab]');
+    if (!item) return;
+    const name = item.getAttribute('data-tab');
+    const scope = item.closest('.wr-v1, .ui.modal, main') || document;
+    scope.querySelectorAll('.tab.segment[data-tab="' + name + '"] [data-refresh-url]').forEach(refreshRegion);
+});
+
+// „toggle“ blubbert nicht → in der Capture-Phase abfangen.
+document.addEventListener('toggle', (e) => {
+    const details = e.target;
+    if (!(details instanceof HTMLDetailsElement) || !details.open) return;
+    details.querySelectorAll(':scope > div > [data-refresh-url]').forEach(refreshRegion);
+}, true);

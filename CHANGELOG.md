@@ -4,6 +4,38 @@ Alle wesentlichen Änderungen am Heldenregister werden hier festgehalten.
 Das Format orientiert sich an [Keep a Changelog](https://keepachangelog.com/de/1.1.0/),
 die Versionsnummern folgen [Semantic Versioning](https://semver.org/lang/de/).
 
+## [1.9.0] – 2026-11-25
+
+### Neu
+- **Nextcloud Talk:** Das Portal ist an Nextcloud Talk angebunden. Admins richten die Verbindung in der Verwaltung ein. Je Event lassen sich ein Plot-Thread („Plot: …“) und ein Teamer-Raum anlegen, bestätigte Teamer werden automatisch abgeglichen. Spielende erhalten mit Einverständnis der Erziehungsberechtigten Zugang. Dazu kommen Regeln für die E-Mail-Adressen der Talk-Konten, Benachrichtigungen, ein Talk-Protokoll und verständlichere Fehlermeldungen. Im Teamer-Reiter stehen Links zu Raum und Thread.
+- **Plot-Charaktere:** Verzeichnis bekannter Plot-Charaktere mit ausführlichen Profilen und der neuen Rolle „Plotschreiber“. Die bekannten Charaktere Silvaniens sind bereits angelegt. Das Heldenverzeichnis schlägt zufällig Plot-Charaktere vor.
+- **Öffentliches Heldenverzeichnis:** Schlägt Helden vor, deren Besitzer der Veröffentlichung zugestimmt haben.
+- **Teamer-Aufwandsentschädigung:** Abrechenbare Event-Rollen und Entschädigung je Abenteuer. Teamer hinterlegen Steuernummer und Bankdaten im Profil und laden den ausgefüllten Antrag als PDF herunter; Startseite und Abenteuer-Detail weisen darauf hin. Die Verwaltung liegt im Reiter „Teamer/NSC“, der PDF-Dateiname enthält das Startdatum des Events.
+- **Umfragen:** Neue Fragetypen „Optionen mit Freitext“ und „Smileys 1–5“. Vorlagen lassen sich sortieren und in Abschnitte bzw. Abschnittsseiten gliedern, Smiley-Fragen erhalten eine Zusatzoption. Umfragen und Vorlagen lassen sich in einer Vorschau ansehen, ohne dass Antworten gespeichert werden.
+- **EP-Standardwerte** je EP-Buchungsart.
+- **Heldeneid** je Klasse im Heldenbuch für Bürokraten.
+- **Perlenfarbe** im Fertigkeiten-Fenster.
+- **Vegetarisches Essen:** Neue Event-Einstellung zur Abfrage bei der Anmeldung; Gastanmeldungen mit Leih- und NSC-Optionen.
+- **Letzter Zahlungsabgleich** wird je Abenteuer angezeigt.
+- **Benutzerliste der Verwaltung:** Filter nach Rolle, Live-Suche und Ein-/Ausblenden gelöschter Konten.
+
+### Geändert
+- **Neues Design „Waldritter“:** Startseite, Navigation (waldgrün und barrierearm), Abenteuerliste und -details, Heldenbuch, Spielerseiten, Formulare und Verwaltung wurden einheitlich neu gestaltet.
+- **Verwaltung:** Einträge in den Listen und „Neu …“ öffnen sich im Inspektor, Löschen liegt im Gefahrenbereich des Inspektors.
+- **Startseite:** Banner für das gebuchte Abenteuer mit vollständigen Daten, ausblendbare Einführung und Fortschrittsanzeige der Helden.
+- **Spielende löschen:** Ihre Helden werden ausgeblendet und nach 30 Tagen anonymisiert.
+- **Reiter „Talk“** in der Event-Verwaltung wird beim Öffnen frisch geladen, sodass gerade bestätigte Teamer und neue Protokolleinträge sofort sichtbar sind.
+- Öffentliche Helden- und Plot-Charakterseiten sowie das Heldenverzeichnis nutzen auf großen Bildschirmen mehr Breite.
+
+### Behoben
+- Talk-Links funktionieren auch ohne „schöne“ URLs.
+- Die Hauptnavigation erscheint auch auf öffentlichen Seiten für angemeldete Nutzer.
+- Umfragevorlagen bleiben bearbeitbar, wenn bereits Antworten vorliegen.
+- Die zugewiesene Teamer-Rolle wird im Abenteuer-Detail und in der Teilnehmer-PDF angezeigt.
+- Beim Bearbeiten eines Kindes ist „Mein Kind“ wieder vorausgewählt.
+- Die Heldengalerie aktualisiert sich nach dem Hochladen.
+- Fehlende Vollseiten für Fertigkeiten ergänzt.
+
 ## [1.8.0] – 2026-11-17
 
 ### Neu

@@ -429,6 +429,7 @@ class NextcloudTalkAdventureTest extends TestCase
             $this->actingAs($user)->putJson(route('adventures.talk.update', $adventure), ['talk_plot_thread' => '1'])->assertForbidden();
             $this->actingAs($user)->postJson(route('adventures.talk.sync', $adventure))->assertForbidden();
             $this->actingAs($user)->postJson(route('adventures.talk.retry', $adventure))->assertForbidden();
+            $this->actingAs($user)->get(route('adventures.talk.tab', $adventure))->assertForbidden();
         }
 
         // Bürokrat (events.edit) darf.
@@ -517,5 +518,34 @@ class NextcloudTalkAdventureTest extends TestCase
             ->get(route('adventures.show', $adventure))
             ->assertOk()
             ->assertDontSee('Teamer-Raum in Talk öffnen');
+    }
+
+    public function test_reiter_talk_wird_frisch_nachgeladen(): void
+    {
+        $admin = $this->userWithRole(10);
+        $adventure = Adventure::factory()->create(['name' => 'Sommerlager']);
+        $adventure->forceFill([
+            'talk_teamer_room' => true,
+            'talk_teamer_room_token' => 'team77xy',
+            'talk_teamer_room_name' => 'Teamer: Sommerlager',
+        ])->save();
+
+        // Verwaltungsseite bindet den Reiter mit Nachlade-Adresse ein.
+        $this->actingAs($admin)
+            ->get(route('adventures.manage', $adventure))
+            ->assertSee('data-refresh-url="'.route('adventures.talk.tab', [$adventure, 'ctx' => 'desk']).'"', false)
+            ->assertSee('data-refresh-url="'.route('adventures.talk.tab', [$adventure, 'ctx' => 'mob']).'"', false);
+
+        // Danach wird ein Teamer bestätigt → der nachgeladene Reiter zeigt ihn.
+        $teamer = $this->userWithRole(50, ['name' => 'Tilda', 'lastname' => 'Teamer']);
+        TeamerSignup::factory()->create(['adventure_id' => $adventure->id, 'user_id' => $teamer->id, 'approved_at' => now()]);
+
+        $this->actingAs($admin)
+            ->get(route('adventures.talk.tab', [$adventure, 'ctx' => 'mob']))
+            ->assertOk()
+            ->assertSee('Bestätigte Teamer (1)')
+            ->assertSee('Tilda Teamer')
+            ->assertSee('id="talk-teamers-mob"', false)
+            ->assertDontSee('<html', false);
     }
 }
