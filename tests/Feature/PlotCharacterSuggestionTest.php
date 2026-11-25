@@ -32,9 +32,9 @@ class PlotCharacterSuggestionTest extends TestCase
         }
     }
 
-    public function test_startseite_zeigt_hoechstens_vier_sichtbare_vorschlaege(): void
+    public function test_startseite_zeigt_hoechstens_sechs_sichtbare_vorschlaege(): void
     {
-        $this->characters(6, 2);
+        $this->characters(8, 2);
 
         $response = $this->get(route('public.hero.search'))
             ->assertOk()
@@ -44,9 +44,9 @@ class PlotCharacterSuggestionTest extends TestCase
             ->assertDontSee('Verborgen');
 
         $suggestions = $response->viewData('suggestions');
-        $this->assertCount(4, $suggestions);
+        $this->assertCount(6, $suggestions);
         $this->assertTrue($suggestions->every(fn ($c) => $c->public_visible));
-        $this->assertSame(4, substr_count($response->getContent(), 'href="'.url('/h/plot/')));
+        $this->assertSame(6, substr_count($response->getContent(), 'href="'.url('/h/plot/')));
     }
 
     public function test_ohne_sichtbare_plot_charaktere_gibt_es_keinen_abschnitt(): void

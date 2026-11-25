@@ -200,6 +200,22 @@
                                     <label>In öffentlicher Heldensuche anzeigen</label>
                                 </div>
                             </form>
+                            <form method="POST" action="{{ route('heroes.suggested', $hero) }}" data-refresh-modal class="ui form">
+                                @csrf @method('PATCH')
+                                <div class="ui toggle checkbox">
+                                    <input type="checkbox" {{ $hero->public_suggested ? 'checked' : '' }}
+                                           aria-describedby="hero-suggested-hint-{{ $hero->id }}"
+                                           onchange="this.form.requestSubmit()">
+                                    <label>Im Heldenverzeichnis vorschlagen</label>
+                                </div>
+                                <p id="hero-suggested-hint-{{ $hero->id }}" class="text-xs text-wr-ink-muted mt-1">
+                                    @if ($hero->public_visible)
+                                        Der Held erscheint unter „Bekannten Gestalten begegnen“ im öffentlichen Heldenverzeichnis.
+                                    @else
+                                        Wirkt erst, wenn das Profil öffentlich sichtbar ist.
+                                    @endif
+                                </p>
+                            </form>
                         </div>
                     @endif
 

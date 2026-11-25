@@ -22,14 +22,33 @@ class PublicHeroController extends Controller
         return view('public.search', ['suggestions' => $this->plotSuggestions()]);
     }
 
+    /** Anzahl der Vorschläge (zwei Reihen à drei Karten auf dem Desktop). */
+    private const SUGGESTION_COUNT = 6;
+
     /**
-     * Issue #36: Zufällige sichtbare Plot-Charaktere als Vorschläge, um auf sie aufmerksam zu machen.
+     * Issue #36: Zufällige sichtbare Plot-Charaktere und vorgeschlagene Helden gemischt,
+     * um auf sie aufmerksam zu machen.
      *
-     * @return Collection<int, PlotCharacter>
+     * @return Collection<int, PlotCharacter|Hero>
      */
     private function plotSuggestions(): Collection
     {
-        return PlotCharacter::visible()->inRandomOrder()->limit(4)->get();
+        $plot = PlotCharacter::visible()->inRandomOrder()->limit(self::SUGGESTION_COUNT)->get();
+
+        // Helden nur, wenn öffentlich sichtbar UND für Vorschläge freigegeben.
+        $heroes = Hero::where('public_visible', true)
+            ->where('public_suggested', true)
+            ->whereNotNull('public_code')
+            ->with('classes')
+            ->inRandomOrder()
+            ->limit(self::SUGGESTION_COUNT)
+            ->get();
+
+        return collect($plot->all())
+            ->merge($heroes->all())
+            ->shuffle()
+            ->take(self::SUGGESTION_COUNT)
+            ->values();
     }
 
     /**
