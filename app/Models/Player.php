@@ -55,12 +55,72 @@ class Player extends Model
         'address_same_as_guardian' => 'boolean',
         'health_data_consent_at' => 'datetime',
         'parental_consent_at' => 'datetime',
+        // Issue #31: Talk-Freigabe (nicht massenzuweisbar, wird gezielt gesetzt).
+        'talk_approved_at' => 'datetime',
+        'talk_consent_at' => 'datetime',
+        'talk_account_ready_at' => 'datetime',
+        'nextcloud_account_created' => 'boolean',
     ];
+
+    /** Issue #31: Mindestalter für Nextcloud Talk. */
+    public const TALK_MIN_AGE = 14;
 
     /** Aktuelles Alter in Jahren bzw. null (PLAY-07). */
     public function getAgeAttribute(): ?int
     {
         return $this->dayofbirth?->age;
+    }
+
+    /** Issue #31: Unter 18 → Eltern müssen der Talk-Nutzung zustimmen. Ohne Geburtsdatum vorsichtshalber ja. */
+    public function isTalkMinor(): bool
+    {
+        return $this->age === null || $this->age < 18;
+    }
+
+    /** Issue #31: Warum Talk (noch) nicht freigegeben werden kann – null = möglich. */
+    public function talkApprovalBlocker(): ?string
+    {
+        if ($this->age === null) {
+            return 'Kein Geburtsdatum hinterlegt.';
+        }
+        if ($this->age < self::TALK_MIN_AGE) {
+            return 'Talk ist erst ab '.self::TALK_MIN_AGE.' Jahren möglich.';
+        }
+
+        return null;
+    }
+
+    /** Issue #31: Freigabe und (bei U18) Elternerlaubnis liegen vor → Konto kann eingerichtet werden. */
+    public function talkReadyForAccount(): bool
+    {
+        return $this->talk_approved_at !== null && (! $this->isTalkMinor() || $this->talk_consent_at !== null);
+    }
+
+    /**
+     * Issue #31: Talk-Status für Anzeige.
+     *
+     * @return 'none'|'consent'|'pending'|'ready'|'error'
+     */
+    public function talkStatus(): string
+    {
+        return match (true) {
+            $this->talk_approved_at === null => 'none',
+            ! $this->talkReadyForAccount() => 'consent',
+            $this->talk_account_ready_at !== null => 'ready',
+            filled($this->talk_error) => 'error',
+            default => 'pending',
+        };
+    }
+
+    public function talkStatusLabel(): string
+    {
+        return match ($this->talkStatus()) {
+            'none' => 'nicht freigegeben',
+            'consent' => 'wartet auf Erlaubnis der Eltern',
+            'pending' => 'Konto wird eingerichtet',
+            'ready' => 'Konto eingerichtet',
+            'error' => 'Fehler',
+        };
     }
 
     /** Avatar-URL: hochgeladenes Bild oder Standardbild (PLAY-10). */
@@ -103,6 +163,8 @@ class Player extends Model
 
     /**
      * Benutzer, denen dieser Spieler zugeordnet ist (Legacy: user2player).
+     *
+     * @return BelongsToMany<User, $this>
      */
     public function users(): BelongsToMany
     {
@@ -217,7 +279,7 @@ class Player extends Model
      * Konvertiert einen Namensteil in einen gültigen Matrix-Localpart-Abschnitt.
      * Matrix-Spec erlaubt nur [a-z0-9._-] im Localpart.
      */
-    private static function sanitizeMxidLocalpart(string $name): string
+    public static function sanitizeMxidLocalpart(string $name): string
     {
         // Umlaute und häufige Akzente in ASCII-Äquivalente auflösen
         $name = strtr($name, [

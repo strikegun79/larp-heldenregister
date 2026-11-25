@@ -148,7 +148,7 @@ class AdminInspectorListsTest extends TestCase
 
         $other->delete();
 
-        $html = $this->actingAs($admin)->get(route('admin.users.index'))->assertOk()->getContent();
+        $html = $this->actingAs($admin)->get(route('admin.users.index', ['deleted' => 1]))->assertOk()->getContent();
         $this->assertStringNotContainsString(route('admin.users.edit', $other).'?inspector=1', $html);
         $this->assertStringContainsString('Wiederherstellen', $html);
     }

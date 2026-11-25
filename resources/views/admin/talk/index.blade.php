@@ -103,6 +103,30 @@
                 </form>
             </section>
 
+            {{-- Issue #31 (Phase 3): Texte für die Elternerlaubnis --}}
+            <section aria-labelledby="talk-texts" class="bg-white/70 border-2 border-[#5a3a22]/40 shadow sm:rounded-lg p-6">
+                <h3 id="talk-texts" class="font-semibold text-waldritter text-lg mb-1">Texte für die Elternerlaubnis</h3>
+                <p class="text-sm text-stone-600 mb-4">
+                    Eltern minderjähriger Spieler lesen diese Texte im Reiter „Talk“ und stimmen dann zu.
+                    Vorbelegt ist ein Entwurf – bitte vor dem Start anpassen. Bereits erteilte Erlaubnisse
+                    behalten die Fassung, der zugestimmt wurde. Leeres Feld = Entwurf.
+                </p>
+                <form method="POST" action="{{ route('admin.talk.texts.update') }}" class="ui form space-y-5">
+                    @csrf
+                    @method('PUT')
+                    @foreach (\App\Services\NextcloudTalk\TalkTexts::SECTIONS as $key => $label)
+                        <div class="field">
+                            <label for="{{ $key }}">{{ $label }}</label>
+                            <textarea id="{{ $key }}" name="{{ $key }}" rows="6" maxlength="5000">{{ old($key, $texts[$key]) }}</textarea>
+                            <x-input-error :messages="$errors->get($key)" class="mt-1" />
+                        </div>
+                    @endforeach
+                    <div class="pt-2">
+                        <x-primary-button>Texte speichern</x-primary-button>
+                    </div>
+                </form>
+            </section>
+
         </div>
     </div>
 </x-app-layout>

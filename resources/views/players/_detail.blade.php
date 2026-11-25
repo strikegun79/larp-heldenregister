@@ -20,6 +20,13 @@
         @include('players.partials._visits')
     </x-mobile.accordion-section>
 
+    {{-- Issue #31: Reiter „Talk“ erst nach der Freigabe durch den Bürokraten --}}
+    @if ($player->talk_approved_at)
+        <x-mobile.accordion-section title="Talk">
+            @include('players.partials._talk', ['ctx' => 'm'])
+        </x-mobile.accordion-section>
+    @endif
+
     {{-- N-2: Fotoerlaubnis-Verwaltung je Buchung --}}
     @if ($player->bookings->isNotEmpty())
         <x-mobile.accordion-section :title="'Fotoerlaubnis (' . $player->bookings->count() . ')'">
@@ -36,6 +43,9 @@
         <a class="item" data-tab="p-abenteuer">Abenteuer ({{ $player->visits->count() }})</a>
         @if ($player->bookings->isNotEmpty())
             <a class="item" data-tab="p-buchungen">Fotoerlaubnis ({{ $player->bookings->count() }})</a>
+        @endif
+        @if ($player->talk_approved_at)
+            <a class="item" data-tab="p-talk"><i class="comments icon"></i> Talk</a>
         @endif
     </div>
 
@@ -54,6 +64,12 @@
     @if ($player->bookings->isNotEmpty())
         <div class="ui bottom attached tab segment" data-tab="p-buchungen">
             @include('players.partials._photo_consent')
+        </div>
+    @endif
+
+    @if ($player->talk_approved_at)
+        <div class="ui bottom attached tab segment" data-tab="p-talk">
+            @include('players.partials._talk', ['ctx' => 'd'])
         </div>
     @endif
 </div>

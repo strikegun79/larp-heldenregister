@@ -1,0 +1,215 @@
+<?php
+
+namespace App\Services\NextcloudTalk;
+
+use App\Jobs\PlayerTalkAccountJob;
+use App\Models\Player;
+use App\Models\Setting;
+use App\Models\User;
+use App\Notifications\TalkAccessApproved;
+use App\Notifications\TalkAccessEnded;
+use App\Notifications\TalkAccountReady;
+use Illuminate\Support\Facades\Notification;
+
+/**
+ * Issue #31 (Phase 3): Nextcloud-Konto eines Spielers einrichten bzw. deaktivieren.
+ * Ein verknüpftes Konto wird weiterverwendet, sonst per E-Mail gesucht, sonst neu angelegt
+ * (Nextcloud verschickt die Willkommensmail). U18-Konten kommen in die U18-Gruppe.
+ * Benachrichtigungen (Freigabe, Konto fertig, Ende) gehen an die verknüpften Nutzer.
+ * Fehler landen in players.talk_error (Anzeige), nie als Ausnahme nach außen.
+ */
+class PlayerTalkService
+{
+    public function __construct(private readonly NextcloudTalkClient $client) {}
+
+    public static function make(): self
+    {
+        return new self(NextcloudTalkClient::fromConfig());
+    }
+
+    /** Einrichtung einplanen, sobald Freigabe und (bei U18) Elternerlaubnis vorliegen. */
+    public static function queueProvision(Player $player): void
+    {
+        if ($player->talkReadyForAccount() && NextcloudTalkClient::fromConfig()->isActive()) {
+            PlayerTalkAccountJob::dispatch($player->id, PlayerTalkAccountJob::PROVISION);
+        }
+    }
+
+    /** Deaktivierung einplanen (nur für vom Heldenregister angelegte Konten). */
+    public static function queueDisable(Player $player): void
+    {
+        if ($player->nextcloud_user_id && $player->nextcloud_account_created && NextcloudTalkClient::fromConfig()->isActive()) {
+            PlayerTalkAccountJob::dispatch($player->id, PlayerTalkAccountJob::DISABLE);
+        }
+    }
+
+    /**
+     * Freigabe bzw. Erlaubnis zurücknehmen: Talk-Status zurücksetzen, Konto deaktivieren und die
+     * Nutzer (Eltern bzw. Spieler selbst) benachrichtigen. Die Kontoverknüpfung bleibt, damit eine
+     * erneute Freigabe dasselbe Konto nutzt.
+     *
+     * @param  TalkAccessEnded::REVOKED|TalkAccessEnded::WITHDRAWN  $reason
+     */
+    public static function revoke(Player $player, string $reason = TalkAccessEnded::REVOKED): void
+    {
+        $wasApproved = $player->talk_approved_at !== null;
+
+        $player->talk_approved_at = null;
+        $player->talk_approved_by = null;
+        $player->talk_consent_at = null;
+        $player->talk_consent_by = null;
+        $player->talk_consent_version = null;
+        $player->talk_account_ready_at = null;
+        $player->talk_error = null;
+        $player->save();
+
+        self::queueDisable($player);
+
+        if ($wasApproved) {
+            Notification::send($player->users, new TalkAccessEnded($player, $reason));
+        }
+    }
+
+    /** Nach der Freigabe: Nutzer benachrichtigen (bei U18 mit Bitte um Erlaubnis). */
+    public static function notifyApproved(Player $player): void
+    {
+        Notification::send($player->users, new TalkAccessApproved($player));
+    }
+
+    /**
+     * Wartet der Spieler auf sein Konto (z. B. weil die E-Mail fehlte)? Dann erneut einplanen –
+     * etwa nach dem Speichern des Spielerprofils.
+     */
+    public static function retryIfWaiting(Player $player): void
+    {
+        if ($player->talkReadyForAccount() && blank($player->nextcloud_user_id)) {
+            self::queueProvision($player);
+        }
+    }
+
+    public function provision(Player $player): void
+    {
+        if (! $this->client->isActive() || ! $player->talkReadyForAccount()) {
+            return;
+        }
+
+        try {
+            $group = Setting::get('talk_u18_group');
+            if ($player->isTalkMinor() && blank($group)) {
+                throw new NextcloudTalkException('In der Verwaltung ist keine Nextcloud-Gruppe für U18-Konten hinterlegt.');
+            }
+
+            if (blank($player->nextcloud_user_id)) {
+                $this->linkOrCreate($player);
+            } elseif ($player->nextcloud_account_created) {
+                // Nach einer Rücknahme deaktiviertes Konto wieder einschalten.
+                $this->client->enableUser($player->nextcloud_user_id);
+            }
+
+            if ($player->isTalkMinor()) {
+                $this->client->addUserToGroup((string) $player->nextcloud_user_id, (string) $group);
+            }
+
+            $newlyReady = $player->talk_account_ready_at === null;
+            $player->talk_account_ready_at = now();
+            $player->talk_error = null;
+            $player->save();
+
+            if ($newlyReady) {
+                Notification::send($player->users, new TalkAccountReady($player, self::accountEmail($player)));
+            }
+
+            return;
+        } catch (NextcloudTalkException $e) {
+            $player->talk_error = mb_substr($e->getMessage(), 0, 500);
+        }
+
+        $player->save();
+    }
+
+    public function disable(Player $player): void
+    {
+        if (! $this->client->isActive() || ! $player->nextcloud_user_id || ! $player->nextcloud_account_created) {
+            return;
+        }
+        // Inzwischen erneut freigegeben → nicht deaktivieren.
+        if ($player->talk_approved_at !== null) {
+            return;
+        }
+
+        try {
+            $this->client->disableUser($player->nextcloud_user_id);
+        } catch (NextcloudTalkException $e) {
+            $player->talk_error = mb_substr('Deaktivieren: '.$e->getMessage(), 0, 500);
+            $player->save();
+        }
+    }
+
+    /**
+     * E-Mail für das Konto: beim Spieler „ich selbst“ die des Nutzerkontos, bei verwalteten
+     * Spielern (z. B. Kindern) nur die optionale E-Mail im Spielerprofil – nie die der Eltern.
+     */
+    public static function accountEmail(Player $player): ?string
+    {
+        $self = self::selfUser($player);
+        $email = $self ? $self->email : $player->email;
+
+        return filled($email) ? (string) $email : null;
+    }
+
+    /** Fehlt die E-Mail für das Talk-Konto? (Hinweis im Reiter „Talk“) */
+    public static function missingAccountEmail(Player $player): bool
+    {
+        return self::accountEmail($player) === null;
+    }
+
+    /** Nutzer, der mit dem Spieler als „ich selbst“ verknüpft ist. */
+    public static function selfUser(Player $player): ?User
+    {
+        return $player->users()->wherePivot('self', true)->first();
+    }
+
+    private function linkOrCreate(Player $player): void
+    {
+        $email = self::accountEmail($player);
+
+        $found = $email ? $this->client->findUserIdByEmail($email) : null;
+        if ($found !== null) {
+            $player->nextcloud_user_id = $found;
+            $player->nextcloud_account_created = false;
+            $player->save();
+
+            return;
+        }
+
+        if ($email === null) {
+            throw new NextcloudTalkException(self::selfUser($player)
+                ? 'Das Nutzerkonto des Spielers hat keine E-Mail-Adresse.'
+                : 'Beim Spieler ist keine E-Mail-Adresse hinterlegt (Spielerprofil → „E-Mail (optional)“).');
+        }
+
+        $userId = $this->uniqueUserId($player);
+        $this->client->createUser($userId, $player->full_name, $email);
+
+        $player->nextcloud_user_id = $userId;
+        $player->nextcloud_account_created = true;
+        $player->save();
+    }
+
+    /** vorname.nachname, bei Kollision mit angehängter Zahl (vorname.nachname2 …). */
+    private function uniqueUserId(Player $player): string
+    {
+        $base = trim(Player::sanitizeMxidLocalpart((string) $player->name).'.'.Player::sanitizeMxidLocalpart((string) $player->lastname), '.');
+        $base = mb_substr($base !== '' ? $base : 'spieler'.$player->id, 0, 56);
+
+        $candidate = $base;
+        for ($i = 2; $this->client->userExists($candidate); $i++) {
+            if ($i > 50) {
+                throw new NextcloudTalkException('Kein freier Nextcloud-Benutzername für „'.$base.'“ gefunden.');
+            }
+            $candidate = $base.$i;
+        }
+
+        return $candidate;
+    }
+}

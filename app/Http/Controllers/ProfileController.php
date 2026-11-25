@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Http\Requests\ProfileUpdateRequest;
 use App\Models\NewsletterSubscription;
+use App\Models\Player;
+use App\Services\NextcloudTalk\PlayerTalkService;
 use App\Support\Iban;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -66,6 +68,12 @@ class ProfileController extends Controller
         }
 
         $request->user()->save();
+
+        // Issue #31: Spieler „ich selbst“ nutzt die Nutzer-E-Mail für Talk – wartendes Konto jetzt einrichten.
+        $selfPlayers = Player::whereHas('users', fn ($q) => $q->whereKey($user->id)->where('player_user.self', true))->get();
+        foreach ($selfPlayers as $selfPlayer) {
+            PlayerTalkService::retryIfWaiting($selfPlayer);
+        }
 
         return Redirect::route('profile.edit')->with('status', 'profile-updated');
     }

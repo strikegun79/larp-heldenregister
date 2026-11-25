@@ -83,7 +83,7 @@
                 <x-text-input id="email" name="email" type="email" class="mt-1 block w-full"
                               :value="old('email', $player->email)" autocomplete="email" />
                 <x-input-error :messages="$errors->get('email')" class="mt-2" />
-                <small class="wr-help">Nur für das Organisationsteam sichtbar, z. B. für Rückfragen zur Anmeldung.</small>
+                <small class="wr-help">Nur für das Organisationsteam sichtbar, z.B. Talk-Zugang.</small>
             </div>
         </div>
     </fieldset>

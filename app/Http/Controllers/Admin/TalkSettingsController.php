@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Admin;
 use App\Http\Controllers\Controller;
 use App\Models\Setting;
 use App\Services\NextcloudTalk\NextcloudTalkClient;
+use App\Services\NextcloudTalk\TalkTexts;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -28,6 +29,7 @@ class TalkSettingsController extends Controller
             'url' => $client->url(),
             'values' => $values,
             'defaultHelpUrl' => config('nextcloud.default_help_url'),
+            'texts' => TalkTexts::all(),
         ]);
     }
 
@@ -61,6 +63,26 @@ class TalkSettingsController extends Controller
         Setting::set('talk_help_url', $data['talk_help_url'] ?? null);
 
         return redirect()->route('admin.talk.index')->with('status', 'Talk-Einstellungen wurden gespeichert.');
+    }
+
+    /**
+     * Issue #31 (Phase 3): Texte für die Elternerlaubnis. Leeres Feld = Entwurf.
+     * Bereits erteilte Erlaubnisse behalten ihre gespeicherte Fassung (Prüfsumme).
+     */
+    public function updateTexts(Request $request): RedirectResponse
+    {
+        $rules = [];
+        foreach (array_keys(TalkTexts::SECTIONS) as $key) {
+            $rules[$key] = ['nullable', 'string', 'max:5000'];
+        }
+        $data = $request->validate($rules);
+
+        foreach (array_keys(TalkTexts::SECTIONS) as $key) {
+            $value = trim((string) ($data[$key] ?? ''));
+            Setting::set($key, $value === '' || $value === TalkTexts::DEFAULTS[$key] ? null : $value);
+        }
+
+        return redirect()->route('admin.talk.index')->with('status', 'Texte für die Elternerlaubnis wurden gespeichert.');
     }
 
     /** Verbindung zur Nextcloud prüfen (Ergebnis als Flash-Meldung). */

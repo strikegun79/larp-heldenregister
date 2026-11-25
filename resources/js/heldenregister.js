@@ -1666,3 +1666,67 @@ document.addEventListener('change', function (e) {
         delete input.dataset.epAuto;
     }
 });
+
+// ------------------------------------------------------------------
+// Automatische Filter (form[data-auto-filter="#ziel"]): Ein GET-Formular lädt beim
+// Tippen (verzögert) bzw. bei Auswahl/Häkchen sofort die Seite im Hintergrund und tauscht
+// nur das Ziel aus – Fokus und Cursor bleiben im Suchfeld, die Adresszeile wird mitgeführt.
+// Ohne JavaScript bleibt es ein normales Formular (Enter/Such-Knopf).
+// ------------------------------------------------------------------
+(function () {
+    let timer = null;
+    let controller = null;
+    const isTextField = (el) => el.matches('input[type=search], input[type=text]');
+
+    function runAutoFilter(form) {
+        const selector = form.getAttribute('data-auto-filter');
+        const target = document.querySelector(selector);
+        if (!target) { form.submit(); return; }
+
+        // Leere Felder weglassen → saubere, verlinkbare Adresse; Filterwechsel startet auf Seite 1.
+        const params = new URLSearchParams();
+        for (const [key, value] of new FormData(form)) {
+            if (value !== '') params.append(key, value);
+        }
+        const query = params.toString();
+        const url = form.action + (query ? '?' + query : '');
+
+        controller?.abort();
+        controller = new AbortController();
+        target.setAttribute('aria-busy', 'true');
+
+        fetch(url, { headers: { 'X-Requested-With': 'XMLHttpRequest' }, signal: controller.signal })
+            .then(r => (r.ok ? r.text() : Promise.reject(new Error(String(r.status)))))
+            .then(html => {
+                const fresh = new DOMParser().parseFromString(html, 'text/html').querySelector(selector);
+                if (!fresh) throw new Error('Ziel fehlt');
+                target.innerHTML = fresh.innerHTML;
+                history.replaceState(null, '', url);
+                form.querySelector('[data-auto-filter-reset]')?.classList.toggle('hidden', query === '');
+            })
+            .catch(err => { if (err?.name !== 'AbortError') form.submit(); })
+            .finally(() => target.removeAttribute('aria-busy'));
+    }
+
+    document.addEventListener('input', function (e) {
+        const form = e.target.closest?.('form[data-auto-filter]');
+        if (!form || !isTextField(e.target)) return;
+        clearTimeout(timer);
+        timer = setTimeout(() => runAutoFilter(form), 300);
+    });
+
+    document.addEventListener('change', function (e) {
+        const form = e.target.closest?.('form[data-auto-filter]');
+        if (!form || isTextField(e.target)) return;
+        clearTimeout(timer);
+        runAutoFilter(form);
+    });
+
+    document.addEventListener('submit', function (e) {
+        const form = e.target;
+        if (!form.matches?.('form[data-auto-filter]') || e.defaultPrevented) return;
+        e.preventDefault();
+        clearTimeout(timer);
+        runAutoFilter(form);
+    });
+})();

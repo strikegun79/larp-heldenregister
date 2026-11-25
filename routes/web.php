@@ -18,6 +18,7 @@ use App\Http\Controllers\MotdClickController;
 use App\Http\Controllers\NewsletterSubscriptionController;
 use App\Http\Controllers\NotificationController;
 use App\Http\Controllers\PlayerController;
+use App\Http\Controllers\PlayerTalkController;
 use App\Http\Controllers\ProfileController;
 use App\Http\Controllers\PublicHeroController;
 use App\Http\Controllers\SignatureController;
@@ -137,6 +138,9 @@ Route::middleware(['auth', 'verified'])->group(function () {
     Route::delete('players/{player}/avatar', [PlayerController::class, 'deleteAvatar'])->name('players.avatar.destroy');
     // Gesundheitsdaten zum Vorausfüllen der Anmeldung (PLAY-15).
     Route::get('players/{player}/health-prefill', [PlayerController::class, 'healthPrefill'])->name('players.health-prefill');
+    // Issue #31 (Phase 3): Eltern erlauben bzw. widerrufen die Talk-Nutzung.
+    Route::post('players/{player}/talk-consent', [PlayerTalkController::class, 'consent'])->name('players.talk.consent');
+    Route::delete('players/{player}/talk-consent', [PlayerTalkController::class, 'withdraw'])->name('players.talk.withdraw');
     Route::resource('heroes', HeroController::class);
     // Verschollen-Status umschalten (HERO-08).
     Route::patch('heroes/{hero}/missing', [HeroController::class, 'toggleMissing'])->name('heroes.missing');
@@ -534,6 +538,15 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified', 'can:tal
     Route::get('talk', [Admin\TalkSettingsController::class, 'index'])->name('talk.index');
     Route::put('talk', [Admin\TalkSettingsController::class, 'update'])->name('talk.update');
     Route::post('talk/test', [Admin\TalkSettingsController::class, 'test'])->name('talk.test');
+    Route::put('talk/texts', [Admin\TalkSettingsController::class, 'updateTexts'])->name('talk.texts.update');
+});
+
+// Issue #31 (Phase 3): Talk-Freigaben je Spieler (Bürokrat, Admin).
+Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified', 'can:talk.approve'])->group(function () {
+    Route::get('talk/approvals', [Admin\TalkApprovalController::class, 'index'])->name('talk.approvals.index');
+    Route::post('talk/approvals/{player}', [Admin\TalkApprovalController::class, 'approve'])->name('talk.approvals.approve');
+    Route::delete('talk/approvals/{player}', [Admin\TalkApprovalController::class, 'revoke'])->name('talk.approvals.revoke');
+    Route::post('talk/approvals/{player}/retry', [Admin\TalkApprovalController::class, 'retry'])->name('talk.approvals.retry');
 });
 
 // Admin: Umfragen verwalten (survey.view = einsehen, survey.admin = alles).

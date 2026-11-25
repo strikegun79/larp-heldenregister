@@ -86,7 +86,7 @@ class AuthServiceProvider extends ServiceProvider
         // Admin-Übersichtsseite zugänglich für alle Rollen mit mind. einem Verwaltungsbereich.
         Gate::define('admin.panel', fn (User $user) => collect([
             'portal.manage', 'newsletter.manage', 'survey.view', 'survey.admin', 'roles.view',
-            'events.admin', 'heroes.admin', 'groups.manage', 'plot-characters.manage', 'talk.manage',
+            'events.admin', 'heroes.admin', 'groups.manage', 'plot-characters.manage', 'talk.manage', 'talk.approve',
         ])->contains(fn ($p) => $user->hasPermission($p)));
 
         // Admins dürfen grundsätzlich alles.
