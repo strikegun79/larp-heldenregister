@@ -158,13 +158,13 @@ class NextcloudTalkAdventureTest extends TestCase
 
         $adventure = Adventure::where('name', 'Sommerlager')->firstOrFail();
         $this->assertSame(500, $adventure->talk_plot_thread_id);
-        $this->assertSame('Sommerlager', $adventure->talk_plot_thread_title);
+        $this->assertSame('Plot: Sommerlager', $adventure->talk_plot_thread_title);
         $this->assertSame('team77xy', $adventure->talk_teamer_room_token);
         $this->assertSame('Teamer: Sommerlager', $adventure->talk_teamer_room_name);
         $this->assertNull($adventure->talk_error);
 
         Http::assertSent(fn (Request $r) => str_ends_with($r->url(), '/v1/chat/plot42ab?format=json')
-            && $r['threadTitle'] === 'Sommerlager'
+            && $r['threadTitle'] === 'Plot: Sommerlager'
             && str_contains($r['message'], '01.08.2026 – 02.08.2026'));
         Http::assertSent(fn (Request $r) => str_ends_with($r->url(), '/v4/room?format=json')
             && $r['roomType'] === 2 && $r['roomName'] === 'Teamer: Sommerlager');
@@ -240,9 +240,9 @@ class NextcloudTalkAdventureTest extends TestCase
             ->assertOk();
 
         $adventure->refresh();
-        $this->assertSame('Frostlager', $adventure->talk_plot_thread_title);
+        $this->assertSame('Plot: Frostlager', $adventure->talk_plot_thread_title);
         $this->assertSame('Teamer: Frostlager', $adventure->talk_teamer_room_name);
-        Http::assertSent(fn (Request $r) => $r->method() === 'PUT' && str_contains($r->url(), '/threads/500') && $r['threadTitle'] === 'Frostlager');
+        Http::assertSent(fn (Request $r) => $r->method() === 'PUT' && str_contains($r->url(), '/threads/500') && $r['threadTitle'] === 'Plot: Frostlager');
         Http::assertSent(fn (Request $r) => $r->method() === 'PUT' && str_contains($r->url(), '/v4/room/team77xy') && $r['roomName'] === 'Teamer: Frostlager');
     }
 
@@ -459,5 +459,63 @@ class NextcloudTalkAdventureTest extends TestCase
             ->patch(route('admin.users.profile.update', $user), $data + ['nextcloud_user_id' => ''])
             ->assertRedirect();
         $this->assertNull($user->fresh()->nextcloud_user_id);
+    }
+
+    // ── Plot-Präfix, Umbenennen, Links im Teamer-Reiter ─────────────────
+
+    public function test_veraltete_namen_zeigen_hinweis_und_werden_umbenannt(): void
+    {
+        $admin = $this->userWithRole(10);
+        $adventure = Adventure::factory()->create(['name' => 'Sommerlager']);
+        $adventure->forceFill([
+            'talk_plot_thread' => true,
+            'talk_plot_thread_id' => 500,
+            'talk_plot_thread_title' => 'Sommerlager', // altes Schema ohne „Plot:“
+        ])->save();
+
+        $this->assertTrue(AdventureTalkService::namesOutdated($adventure));
+        $this->actingAs($admin)
+            ->get(route('adventures.manage', $adventure))
+            ->assertSee('Namen in Talk aktualisieren');
+
+        $this->actingAs($admin)
+            ->postJson(route('adventures.talk.retry', $adventure))
+            ->assertOk();
+
+        Http::assertSent(fn (Request $r) => $r->method() === 'PUT' && str_contains($r->url(), '/threads/500') && $r['threadTitle'] === 'Plot: Sommerlager');
+        $adventure->refresh();
+        $this->assertSame('Plot: Sommerlager', $adventure->talk_plot_thread_title);
+        $this->assertFalse(AdventureTalkService::namesOutdated($adventure));
+        $this->actingAs($admin)
+            ->get(route('adventures.manage', $adventure))
+            ->assertDontSee('Namen in Talk aktualisieren');
+    }
+
+    public function test_teamer_reiter_zeigt_links_zu_raum_und_thread(): void
+    {
+        $adventure = Adventure::factory()->create(['name' => 'Sommerlager']);
+        $adventure->forceFill([
+            'talk_plot_thread' => true,
+            'talk_plot_thread_id' => 500,
+            'talk_plot_thread_title' => 'Plot: Sommerlager',
+            'talk_teamer_room' => true,
+            'talk_teamer_room_token' => 'team77xy',
+            'talk_teamer_room_name' => 'Teamer: Sommerlager',
+        ])->save();
+
+        $this->actingAs($this->userWithRole(30))
+            ->get(route('adventures.show', $adventure))
+            ->assertOk()
+            ->assertSee('Teamer-Raum in Talk öffnen')
+            ->assertSee('https://cloud.example.test/index.php/call/team77xy', false)
+            ->assertSee('Plot-Thread in Talk öffnen')
+            ->assertSee('https://cloud.example.test/index.php/call/plot42ab?threadId=500', false);
+
+        // Talk aus → keine Links.
+        Setting::set('talk_enabled', '0');
+        $this->actingAs($this->userWithRole(30))
+            ->get(route('adventures.show', $adventure))
+            ->assertOk()
+            ->assertDontSee('Teamer-Raum in Talk öffnen');
     }
 }

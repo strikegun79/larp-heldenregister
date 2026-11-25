@@ -31,6 +31,20 @@
         </div>
     @endif
 
+    {{-- Namen in Talk weichen ab (z. B. Plot-Thread noch ohne „Plot:“) → umbenennen --}}
+    @if (! $adventure->talk_error && \App\Services\NextcloudTalk\AdventureTalkService::namesOutdated($adventure))
+        <div class="wr-notice mb-4" role="note">
+            <i class="info circle icon m-0 mt-0.5" aria-hidden="true"></i>
+            <div>
+                <p>Die Namen in Talk sind nicht aktuell (z. B. „{{ \App\Services\NextcloudTalk\AdventureTalkService::threadTitle($adventure) }}“).</p>
+                <form method="POST" action="{{ route('adventures.talk.retry', $adventure) }}" data-refresh-modal class="mt-2">
+                    @csrf
+                    <button type="submit" class="ui small button"><i class="pencil alternate icon" aria-hidden="true"></i> Namen in Talk aktualisieren</button>
+                </form>
+            </div>
+        </div>
+    @endif
+
     <div class="grid gap-4 sm:grid-cols-2 mb-4">
         {{-- Plot-Thread --}}
         <section class="border border-stone-200 rounded-md p-3 bg-white/60" aria-labelledby="talk-plot-{{ $ctx }}">
