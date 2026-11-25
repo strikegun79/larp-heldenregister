@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\Player;
+use App\Notifications\TalkAccessEnded;
 use App\Services\AuditLogger;
 use App\Services\NextcloudTalk\NextcloudTalkClient;
 use App\Services\NextcloudTalk\PlayerTalkService;
@@ -62,6 +63,7 @@ class TalkApprovalController extends Controller
             $player->talk_error = null;
             $player->save();
             AuditLogger::log('talk.approved', $player);
+            PlayerTalkService::notifyApproved($player);
         }
 
         PlayerTalkService::queueProvision($player);
@@ -75,7 +77,7 @@ class TalkApprovalController extends Controller
 
     public function revoke(Player $player): RedirectResponse
     {
-        PlayerTalkService::revoke($player);
+        PlayerTalkService::revoke($player, TalkAccessEnded::REVOKED);
         AuditLogger::log('talk.revoked', $player);
 
         return back()->with('status', 'Talk-Freigabe für '.$player->full_name.' zurückgenommen.');

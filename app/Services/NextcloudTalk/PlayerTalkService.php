@@ -6,11 +6,16 @@ use App\Jobs\PlayerTalkAccountJob;
 use App\Models\Player;
 use App\Models\Setting;
 use App\Models\User;
+use App\Notifications\TalkAccessApproved;
+use App\Notifications\TalkAccessEnded;
+use App\Notifications\TalkAccountReady;
+use Illuminate\Support\Facades\Notification;
 
 /**
  * Issue #31 (Phase 3): Nextcloud-Konto eines Spielers einrichten bzw. deaktivieren.
  * Ein verknüpftes Konto wird weiterverwendet, sonst per E-Mail gesucht, sonst neu angelegt
  * (Nextcloud verschickt die Willkommensmail). U18-Konten kommen in die U18-Gruppe.
+ * Benachrichtigungen (Freigabe, Konto fertig, Ende) gehen an die verknüpften Nutzer.
  * Fehler landen in players.talk_error (Anzeige), nie als Ausnahme nach außen.
  */
 class PlayerTalkService
@@ -39,11 +44,16 @@ class PlayerTalkService
     }
 
     /**
-     * Freigabe bzw. Erlaubnis zurücknehmen: Talk-Status zurücksetzen, Konto deaktivieren.
-     * Die Kontoverknüpfung bleibt, damit eine erneute Freigabe dasselbe Konto nutzt.
+     * Freigabe bzw. Erlaubnis zurücknehmen: Talk-Status zurücksetzen, Konto deaktivieren und die
+     * Nutzer (Eltern bzw. Spieler selbst) benachrichtigen. Die Kontoverknüpfung bleibt, damit eine
+     * erneute Freigabe dasselbe Konto nutzt.
+     *
+     * @param  TalkAccessEnded::REVOKED|TalkAccessEnded::WITHDRAWN  $reason
      */
-    public static function revoke(Player $player): void
+    public static function revoke(Player $player, string $reason = TalkAccessEnded::REVOKED): void
     {
+        $wasApproved = $player->talk_approved_at !== null;
+
         $player->talk_approved_at = null;
         $player->talk_approved_by = null;
         $player->talk_consent_at = null;
@@ -54,6 +64,27 @@ class PlayerTalkService
         $player->save();
 
         self::queueDisable($player);
+
+        if ($wasApproved) {
+            Notification::send($player->users, new TalkAccessEnded($player, $reason));
+        }
+    }
+
+    /** Nach der Freigabe: Nutzer benachrichtigen (bei U18 mit Bitte um Erlaubnis). */
+    public static function notifyApproved(Player $player): void
+    {
+        Notification::send($player->users, new TalkAccessApproved($player));
+    }
+
+    /**
+     * Wartet der Spieler auf sein Konto (z. B. weil die E-Mail fehlte)? Dann erneut einplanen –
+     * etwa nach dem Speichern des Spielerprofils.
+     */
+    public static function retryIfWaiting(Player $player): void
+    {
+        if ($player->talkReadyForAccount() && blank($player->nextcloud_user_id)) {
+            self::queueProvision($player);
+        }
     }
 
     public function provision(Player $player): void
@@ -79,8 +110,16 @@ class PlayerTalkService
                 $this->client->addUserToGroup((string) $player->nextcloud_user_id, (string) $group);
             }
 
+            $newlyReady = $player->talk_account_ready_at === null;
             $player->talk_account_ready_at = now();
             $player->talk_error = null;
+            $player->save();
+
+            if ($newlyReady) {
+                Notification::send($player->users, new TalkAccountReady($player, self::accountEmail($player)));
+            }
+
+            return;
         } catch (NextcloudTalkException $e) {
             $player->talk_error = mb_substr($e->getMessage(), 0, 500);
         }
@@ -106,20 +145,28 @@ class PlayerTalkService
         }
     }
 
-    /** E-Mail für das Konto: die des Spielers, sonst des zustimmenden Elternteils bzw. des eigenen Nutzerkontos. */
+    /**
+     * E-Mail für das Konto: beim Spieler „ich selbst“ die des Nutzerkontos, bei verwalteten
+     * Spielern (z. B. Kindern) nur die optionale E-Mail im Spielerprofil – nie die der Eltern.
+     */
     public static function accountEmail(Player $player): ?string
     {
-        if (filled($player->email)) {
-            return (string) $player->email;
-        }
+        $self = self::selfUser($player);
+        $email = $self ? $self->email : $player->email;
 
-        if ($player->talk_consent_by && ($guardian = User::find($player->talk_consent_by)) && filled($guardian->email)) {
-            return (string) $guardian->email;
-        }
+        return filled($email) ? (string) $email : null;
+    }
 
-        $self = $player->users()->wherePivot('self', true)->first();
+    /** Fehlt die E-Mail für das Talk-Konto? (Hinweis im Reiter „Talk“) */
+    public static function missingAccountEmail(Player $player): bool
+    {
+        return self::accountEmail($player) === null;
+    }
 
-        return $self && filled($self->email) ? (string) $self->email : null;
+    /** Nutzer, der mit dem Spieler als „ich selbst“ verknüpft ist. */
+    public static function selfUser(Player $player): ?User
+    {
+        return $player->users()->wherePivot('self', true)->first();
     }
 
     private function linkOrCreate(Player $player): void
@@ -136,7 +183,9 @@ class PlayerTalkService
         }
 
         if ($email === null) {
-            throw new NextcloudTalkException('Für das Konto fehlt eine E-Mail-Adresse (beim Spieler oder bei den Eltern).');
+            throw new NextcloudTalkException(self::selfUser($player)
+                ? 'Das Nutzerkonto des Spielers hat keine E-Mail-Adresse.'
+                : 'Beim Spieler ist keine E-Mail-Adresse hinterlegt (Spielerprofil → „E-Mail (optional)“).');
         }
 
         $userId = $this->uniqueUserId($player);

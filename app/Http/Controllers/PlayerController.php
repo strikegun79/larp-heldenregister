@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Player;
 use App\Models\User;
+use App\Services\NextcloudTalk\PlayerTalkService;
 use App\Support\AvatarStorage;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\RedirectResponse;
@@ -182,6 +183,9 @@ class PlayerController extends Controller
 
         $player->update($this->playerData($request, $player));
         $this->enforceSingleSelf($request->user(), $player, $request->boolean('self'));
+
+        // Issue #31: Wartet der Spieler wegen fehlender E-Mail auf sein Talk-Konto → jetzt einrichten.
+        PlayerTalkService::retryIfWaiting($player);
 
         $message = 'Spieler wurde aktualisiert.';
 

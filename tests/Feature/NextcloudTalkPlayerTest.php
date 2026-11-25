@@ -5,11 +5,16 @@ namespace Tests\Feature;
 use App\Models\Player;
 use App\Models\Setting;
 use App\Models\User;
+use App\Notifications\TalkAccessApproved;
+use App\Notifications\TalkAccessEnded;
+use App\Notifications\TalkAccountReady;
 use App\Services\NextcloudTalk\TalkTexts;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use Illuminate\Http\Client\Request;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
+use Illuminate\Support\Facades\Notification;
 use Tests\TestCase;
 
 /**
@@ -29,6 +34,7 @@ class NextcloudTalkPlayerTest extends TestCase
         parent::setUp();
         $this->seed(RoleSeeder::class);
         Http::preventStrayRequests();
+        Notification::fake();
 
         config([
             'nextcloud.url' => 'https://cloud.example.test',
@@ -187,7 +193,7 @@ class NextcloudTalkPlayerTest extends TestCase
     public function test_eltern_erlauben_und_konto_wird_angelegt_mit_u18_gruppe(): void
     {
         $guardian = $this->userWithRole(70, ['name' => 'Petra', 'lastname' => 'Müller', 'email' => 'petra@example.test']);
-        $player = $this->player(15, $guardian, ['email' => null]);
+        $player = $this->player(15, $guardian, ['email' => 'mia@example.test']);
         $player->talk_approved_at = now();
         $player->save();
 
@@ -202,17 +208,127 @@ class NextcloudTalkPlayerTest extends TestCase
         $this->assertTrue($player->nextcloud_account_created);
         $this->assertSame('ready', $player->talkStatus());
 
-        // Konto ohne Passwort (Willkommensmail) mit E-Mail des Elternteils, in der U18-Gruppe.
-        $this->assertSame('petra@example.test', $this->accounts['mia.mueller']['email']);
+        // Konto ohne Passwort (Willkommensmail) mit der optionalen Spieler-E-Mail, in der U18-Gruppe.
+        $this->assertSame('mia@example.test', $this->accounts['mia.mueller']['email']);
         $this->assertSame(['talk-u18'], $this->accounts['mia.mueller']['groups']);
         Http::assertSent(fn (Request $r) => $r->method() === 'POST' && str_ends_with((string) parse_url($r->url(), PHP_URL_PATH), '/cloud/users')
             && $r['password'] === '' && $r['displayName'] === 'Mia Müller');
+
+        // Info „Konto eingerichtet“ geht an die Nutzer-E-Mail der Eltern.
+        Notification::assertSentTo($guardian, TalkAccountReady::class, function ($n) use ($guardian) {
+            $mail = $n->toMail($guardian)->render();
+
+            return str_contains($mail, 'mia.mueller') && str_contains($mail, 'mia@example.test');
+        });
 
         $this->actingAs($guardian)
             ->get(route('players.show', $player))
             ->assertSee('Nextcloud-Benutzername: <strong>mia.mueller</strong>', false)
             ->assertSee('https://cloud.example.test/apps/spreed', false)
             ->assertSee('Erlaubt von Petra Müller');
+    }
+
+    public function test_verwalteter_spieler_ohne_email_bekommt_hinweis_und_keinen_rueckgriff_auf_eltern(): void
+    {
+        $guardian = $this->userWithRole(70, ['email' => 'petra@example.test']);
+        // Hat das Elternteil ein eigenes Nextcloud-Konto, darf es nicht verknüpft werden.
+        $this->accounts['petra.nc'] = ['email' => 'petra@example.test', 'groups' => [], 'enabled' => true];
+        $player = $this->player(15, $guardian, ['email' => null]);
+        $player->talk_approved_at = now();
+        $player->save();
+
+        $this->actingAs($guardian)
+            ->get(route('players.show', $player))
+            ->assertSee('Für das Talk-Konto fehlt die E-Mail-Adresse des Spielers.');
+
+        $this->actingAs($guardian)
+            ->post(route('players.talk.consent', $player), ['accept' => '1'])
+            ->assertSessionHas('status', fn ($m) => str_contains($m, 'E-Mail-Adresse des Spielers ein'));
+
+        $player->refresh();
+        $this->assertNull($player->nextcloud_user_id);
+        $this->assertStringContainsString('Beim Spieler ist keine E-Mail-Adresse hinterlegt', $player->talk_error);
+        $this->assertSame([], $this->accounts['petra.nc']['groups']);
+        Http::assertNotSent(fn (Request $r) => str_contains($r->url(), 'petra'));
+
+        // E-Mail im Spielerprofil nachtragen → Konto wird automatisch eingerichtet.
+        $this->actingAs($guardian)
+            ->put(route('players.update', $player), [
+                'name' => 'Mia', 'lastname' => 'Müller', 'email' => 'mia@example.test',
+                'dayofbirth' => $player->dayofbirth->toDateString(), 'parental_consent' => '1',
+            ])
+            ->assertSessionHasNoErrors();
+
+        $player->refresh();
+        $this->assertSame('mia.mueller', $player->nextcloud_user_id);
+        $this->assertSame('ready', $player->talkStatus());
+        $this->assertSame('mia@example.test', $this->accounts['mia.mueller']['email']);
+    }
+
+    public function test_spieler_ich_selbst_nutzt_die_nutzer_email(): void
+    {
+        $user = $this->userWithRole(70, ['name' => 'Jan', 'email' => 'jan@example.test']);
+        $player = $this->player(22, null, ['name' => 'Jan', 'lastname' => 'Berg', 'email' => 'optional@example.test']);
+        $user->players()->attach($player->id, ['self' => true]);
+
+        $this->actingAs($this->registrar())->post(route('admin.talk.approvals.approve', $player));
+
+        $player->refresh();
+        $this->assertSame('jan.berg', $player->nextcloud_user_id);
+        $this->assertSame('jan@example.test', $this->accounts['jan.berg']['email']);
+        Notification::assertSentTo($user, TalkAccessApproved::class);
+        Notification::assertSentTo($user, TalkAccountReady::class);
+    }
+
+    public function test_ich_selbst_ohne_nutzer_email_zeigt_hinweis(): void
+    {
+        $user = $this->userWithRole(70, ['email' => 'jan@example.test']);
+        $player = $this->player(22, null, ['email' => 'optional@example.test']);
+        $user->players()->attach($player->id, ['self' => true]);
+        // E-Mail des Nutzerkontos fehlt (Altdaten) – die optionale Spieler-E-Mail zählt nicht.
+        DB::table('users')->where('id', $user->id)->update(['email' => '']);
+        $player->talk_approved_at = now();
+        $player->save();
+
+        $this->actingAs($user->fresh())
+            ->get(route('players.show', $player))
+            ->assertSee('Für das Talk-Konto fehlt die E-Mail-Adresse in deinem Nutzerprofil.');
+    }
+
+    public function test_nutzer_email_nachtragen_richtet_konto_fuer_ich_selbst_ein(): void
+    {
+        $user = $this->userWithRole(70, ['name' => 'Jan', 'email' => 'jan@example.test']);
+        $player = $this->player(22, null, ['name' => 'Jan', 'lastname' => 'Berg']);
+        $user->players()->attach($player->id, ['self' => true]);
+        DB::table('users')->where('id', $user->id)->update(['email' => '']);
+        $player->talk_approved_at = now();
+        $player->save();
+
+        // Ohne Nutzer-E-Mail wartet die Einrichtung …
+        $this->actingAs($this->registrar())->post(route('admin.talk.approvals.retry', $player));
+        $this->assertNull($player->fresh()->nextcloud_user_id);
+
+        // … und läuft nach dem Speichern des Nutzerprofils automatisch.
+        $this->actingAs($user->fresh())
+            ->patch(route('profile.update'), ['name' => 'Jan', 'email' => 'jan.neu@example.test'])
+            ->assertSessionHasNoErrors();
+
+        $this->assertSame('jan.berg', $player->fresh()->nextcloud_user_id);
+        $this->assertSame('jan.neu@example.test', $this->accounts['jan.berg']['email']);
+    }
+
+    public function test_freigabe_info_geht_an_nutzer_email_nicht_an_spieler_email(): void
+    {
+        $guardian = $this->userWithRole(70, ['email' => 'eltern@example.test']);
+        $player = $this->player(15, $guardian, ['email' => 'kind@example.test']);
+
+        $this->actingAs($this->registrar())->post(route('admin.talk.approvals.approve', $player));
+
+        Notification::assertSentTo($guardian, TalkAccessApproved::class, function ($n, $channels) use ($guardian) {
+            return in_array('mail', $channels, true)
+                && str_contains($n->toMail($guardian)->render(), 'Erlaubnis');
+        });
+        Notification::assertSentTimes(TalkAccessApproved::class, 1);
     }
 
     public function test_erlaubnis_braucht_das_haekchen_und_die_freigabe(): void
@@ -364,6 +480,36 @@ class NextcloudTalkPlayerTest extends TestCase
         // Verknüpftes (nicht vom Heldenregister angelegtes) Konto wird nicht deaktiviert.
         $this->assertTrue($this->accounts['mia.alt']['enabled']);
         $this->assertDatabaseHas('audit_logs', ['action' => 'talk.consent_withdrawn']);
+        Notification::assertSentTo($guardian, TalkAccessEnded::class, fn ($n) => str_contains($n->toMail($guardian)->render(), 'widerrufen'));
+    }
+
+    public function test_ruecknahme_durch_buerokrat_informiert_die_eltern(): void
+    {
+        $guardian = $this->userWithRole(70);
+        $player = $this->player(15, $guardian, ['email' => 'mia@example.test']);
+        $player->talk_approved_at = now();
+        $player->save();
+
+        $this->actingAs($this->registrar())->delete(route('admin.talk.approvals.revoke', $player));
+
+        Notification::assertSentTo($guardian, TalkAccessEnded::class, fn ($n) => str_contains($n->toMail($guardian)->render(), 'vom Verein zurückgenommen'));
+
+        // Ohne bestehende Freigabe keine Nachricht.
+        Notification::fake();
+        $this->actingAs($this->registrar())->delete(route('admin.talk.approvals.revoke', $player));
+        Notification::assertNothingSent();
+    }
+
+    public function test_hilfetext_zur_spieler_email_nennt_talk(): void
+    {
+        $guardian = $this->userWithRole(70);
+        $player = $this->player(15, $guardian);
+
+        $this->actingAs($guardian)
+            ->get(route('players.edit', $player))
+            ->assertOk()
+            ->assertSee('Nur für das Organisationsteam sichtbar, z.B. Talk-Zugang.')
+            ->assertDontSee('für Rückfragen zur Anmeldung');
     }
 
     public function test_ausgeschaltete_integration_speichert_freigabe_aber_sendet_nichts(): void

@@ -14,6 +14,20 @@
         <span class="font-medium">Status:</span> {{ $player->talkStatusLabel() }}
     </p>
 
+    {{-- Fehlende E-Mail für das Talk-Konto (bei „ich selbst“ die Nutzer-E-Mail, sonst die optionale Spieler-E-Mail) --}}
+    @if (blank($player->nextcloud_user_id) && \App\Services\NextcloudTalk\PlayerTalkService::missingAccountEmail($player))
+        <div class="wr-notice" role="note">
+            <i class="exclamation triangle icon m-0 mt-0.5" aria-hidden="true"></i>
+            <p>
+                @if (\App\Services\NextcloudTalk\PlayerTalkService::selfUser($player))
+                    Für das Talk-Konto fehlt die E-Mail-Adresse in deinem Nutzerprofil.
+                @else
+                    Für das Talk-Konto fehlt die E-Mail-Adresse des Spielers. Bitte im Spielerprofil unter „E-Mail (optional)“ eintragen.
+                @endif
+            </p>
+        </div>
+    @endif
+
     @if ($status === 'consent')
         @if ($isGuardian)
             <section aria-labelledby="talk-texts-{{ $ctx }}" class="space-y-3">
@@ -49,9 +63,9 @@
         </p>
     @endif
 
-    @if ($status === 'pending')
+    @if ($status === 'pending' && ! \App\Services\NextcloudTalk\PlayerTalkService::missingAccountEmail($player))
         <p class="text-sm text-stone-700"><i class="hourglass half icon" aria-hidden="true"></i> Das Konto wird eingerichtet. Die Einladung kommt per E-Mail.</p>
-    @elseif ($status === 'error')
+    @elseif ($status === 'error' && ! \App\Services\NextcloudTalk\PlayerTalkService::missingAccountEmail($player))
         <p class="text-sm text-amber-800"><i class="exclamation triangle icon" aria-hidden="true"></i> Beim Einrichten des Kontos gab es ein Problem. Der Verein kümmert sich darum.</p>
     @elseif ($status === 'ready')
         <p class="text-sm text-stone-700">

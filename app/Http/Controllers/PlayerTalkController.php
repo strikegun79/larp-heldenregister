@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Models\Player;
+use App\Notifications\TalkAccessEnded;
 use App\Services\AuditLogger;
 use App\Services\NextcloudTalk\PlayerTalkService;
 use App\Services\NextcloudTalk\TalkTexts;
@@ -39,14 +40,16 @@ class PlayerTalkController extends Controller
 
         PlayerTalkService::queueProvision($player);
 
-        return $this->respond($request, 'Danke! Das Talk-Konto wird eingerichtet. Die Einladung kommt per E-Mail.');
+        return $this->respond($request, PlayerTalkService::missingAccountEmail($player)
+            ? 'Danke für die Erlaubnis! Bitte trage noch die E-Mail-Adresse des Spielers ein, dann wird das Talk-Konto eingerichtet.'
+            : 'Danke! Das Talk-Konto wird eingerichtet. Die Einladung kommt per E-Mail.');
     }
 
     public function withdraw(Request $request, Player $player): RedirectResponse|JsonResponse
     {
         $this->authorizeGuardian($request, $player);
 
-        PlayerTalkService::revoke($player);
+        PlayerTalkService::revoke($player, TalkAccessEnded::WITHDRAWN);
         AuditLogger::log('talk.consent_withdrawn', $player);
 
         return $this->respond($request, 'Die Erlaubnis wurde widerrufen. Das Talk-Konto wird deaktiviert.');
