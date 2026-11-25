@@ -234,7 +234,14 @@
             @if(! $link->response)
                 <p class="answer-none">Keine Antwort eingegangen.</p>
             @else
+                @php $sectionNumber = 0; @endphp
                 @foreach($survey->template->questionsWithArchived as $question)
+                    {{-- Issue #46: Bereich als Zwischenüberschrift --}}
+                    @if($question->isSection())
+                        @continue($question->isArchived())
+                        <div class="question-label" style="margin-top:10px;font-size:12px;">{{ ++$sectionNumber }}. {{ $question->question_text }}</div>
+                        @continue
+                    @endif
                     @php
                         $answer = $link->response->answers->firstWhere('survey_template_question_id', $question->id);
                     @endphp
@@ -275,10 +282,15 @@
                             @endif
                         @elseif($question->type === 'smiley')
                             {{-- Issue #24: ohne Emoji (im PDF-Font nicht enthalten) --}}
-                            <div class="answer-rating">
-                                {{ $answer->rating_answer }}
-                                <span>/ 5 – {{ $question->smileyLabels()[$answer->rating_answer] ?? '' }}</span>
-                            </div>
+                            @if($answer->rating_answer === 0)
+                                {{-- Issue #46: Zusatzantwort ohne Smiley --}}
+                                <div class="answer-text">{{ $question->naLabel() }}</div>
+                            @else
+                                <div class="answer-rating">
+                                    {{ $answer->rating_answer }}
+                                    <span>/ 5 – {{ $question->smileyLabels()[$answer->rating_answer] ?? '' }}</span>
+                                </div>
+                            @endif
                         @elseif($question->type === 'choice')
                             @if($answer->choice_answer)
                                 <span class="answer-yes">✓ {{ implode(', ', $answer->choice_answer) }}</span>

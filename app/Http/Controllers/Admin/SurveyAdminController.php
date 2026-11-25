@@ -234,8 +234,18 @@ class SurveyAdminController extends Controller
         // Issue #35: inkl. archivierter Fragen, sofern es zu dieser Umfrage Antworten gibt.
         $questions = $survey->template->questionsWithArchived;
         $stats = [];
+        $sectionNumber = 0;
 
         foreach ($questions as $question) {
+            // Issue #46: Bereiche als Zwischenüberschrift (keine Antworten).
+            if ($question->isSection()) {
+                if (! $question->isArchived()) {
+                    $stats[] = ['section' => $question, 'number' => ++$sectionNumber];
+                }
+
+                continue;
+            }
+
             $answers = SurveyAnswer::where('survey_template_question_id', $question->id)
                 ->whereHas('response.link', fn ($q) => $q->where('survey_id', $survey->id))
                 ->get();
@@ -255,9 +265,11 @@ class SurveyAdminController extends Controller
                 $stat['yes_count'] = $answers->where('yes_no_answer', true)->count();
                 $stat['no_count'] = $answers->where('yes_no_answer', false)->count();
             } elseif ($question->type === 'smiley') {
-                // Issue #24: Smiley-Skala 1–5
-                $stat['average'] = $answers->avg('rating_answer');
-                $stat['distribution'] = $answers->groupBy('rating_answer')->map->count();
+                // Issue #24: Smiley-Skala 1–5; Issue #46: 0 = Zusatzantwort, zählt nicht mit.
+                $rated = $answers->where('rating_answer', '>', 0);
+                $stat['average'] = $rated->avg('rating_answer');
+                $stat['distribution'] = $rated->groupBy('rating_answer')->map->count();
+                $stat['na_count'] = $answers->where('rating_answer', 0)->count();
             } elseif ($question->type === 'choice') {
                 // Issue #24: Anzahl je Option (aktuelle Optionen zuerst, frühere Optionen dahinter) + Nachrichten
                 $counts = array_fill_keys($question->choices(), 0);

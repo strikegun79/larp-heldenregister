@@ -5,6 +5,7 @@ namespace App\Models;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Support\Collection;
 
 /**
  * @property string $target_group Zielgruppe, siehe TARGET_GROUPS (inkl. „all“)
@@ -16,11 +17,14 @@ class SurveyTemplate extends Model
         'description',
         'target_group',
         'active',
+        'section_pages',
         'created_by',
     ];
 
     protected $casts = [
         'active' => 'boolean',
+        // Issue #46: Bereiche als einzelne Seiten anzeigen.
+        'section_pages' => 'boolean',
     ];
 
     public const TARGET_GROUPS = [
@@ -57,6 +61,38 @@ class SurveyTemplate extends Model
         return $this->hasMany(SurveyTemplateQuestion::class)
             ->orderBy('sort_order')
             ->orderBy('id');
+    }
+
+    /**
+     * Issue #46: Fragen nach Bereichen gruppieren (Bereiche werden fortlaufend nummeriert).
+     * Fragen vor dem ersten Bereich bilden eine Gruppe ohne Bereich.
+     *
+     * @param  Collection<int, SurveyTemplateQuestion>  $items
+     * @return list<array{section: SurveyTemplateQuestion|null, number: int|null, questions: list<SurveyTemplateQuestion>}>
+     */
+    public static function groupBySection(Collection $items): array
+    {
+        $groups = [];
+        $current = ['section' => null, 'number' => null, 'questions' => []];
+        $number = 0;
+
+        foreach ($items as $item) {
+            if ($item->isSection()) {
+                if ($current['section'] !== null || $current['questions'] !== []) {
+                    $groups[] = $current;
+                }
+                $current = ['section' => $item, 'number' => ++$number, 'questions' => []];
+
+                continue;
+            }
+            $current['questions'][] = $item;
+        }
+
+        if ($current['section'] !== null || $current['questions'] !== []) {
+            $groups[] = $current;
+        }
+
+        return $groups;
     }
 
     public function creator(): BelongsTo

@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use App\Models\SurveyAnswer;
 use App\Models\SurveyLink;
 use App\Models\SurveyResponse;
+use App\Models\SurveyTemplate;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\Validation\Rule;
@@ -45,10 +46,16 @@ class SurveyController extends Controller
             return view('survey.expired', ['reason' => 'expired', 'link' => $link]);
         }
 
-        $questions = $link->survey->template->questions;
+        $template = $link->survey->template;
+        $items = $template->questions;
+        $questions = $items->reject->isSection()->values();
         $view = $link->usesWizard() ? 'survey.wizard' : 'survey.scroll';
 
-        return view($view, compact('link', 'questions'));
+        // Issue #46: Nach Bereichen gruppieren; mit „Bereiche als Seiten“ ist jeder Bereich eine Seite.
+        $groups = SurveyTemplate::groupBySection($items);
+        $paged = $template->section_pages && $items->contains->isSection();
+
+        return view($view, compact('link', 'questions', 'groups', 'paged'));
     }
 
     /** Antwort speichern + Token sperren. */
@@ -62,7 +69,8 @@ class SurveyController extends Controller
             return redirect()->route('survey.start', ['token' => $token]);
         }
 
-        $questions = $link->survey->template->questions;
+        // Issue #46: Bereiche werden nicht beantwortet.
+        $questions = $link->survey->template->questions->reject->isSection()->values();
 
         // Validation-Regeln dynamisch aus Fragetypen ableiten
         $rules = [];
@@ -96,7 +104,8 @@ class SurveyController extends Controller
 
             $rules[$key] = match ($question->type) {
                 'rating' => [$requiredRule, 'integer', 'min:1', 'max:10'],
-                'smiley' => [$requiredRule, 'integer', 'min:1', 'max:5'],
+                // Issue #46: 0 = Zusatzantwort ohne Smiley (nur wenn aktiviert).
+                'smiley' => [$requiredRule, 'integer', 'min:'.($question->hasNaOption() ? 0 : 1), 'max:5'],
                 'text' => [$requiredRule, 'string', 'max:2000'],
                 'yes_no' => [$requiredRule, 'in:1,0'],
                 default => [$requiredRule],

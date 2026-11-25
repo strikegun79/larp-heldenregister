@@ -39,7 +39,8 @@
     @endforeach
 
 @elseif($question->type === 'smiley')
-    <div class="smiley-rating" role="radiogroup">
+    <div role="radiogroup">
+    <div class="smiley-rating">
         @foreach($question->smileyLabels() as $points => $label)
             <input type="radio"
                    name="answers[{{ $question->id }}]"
@@ -51,5 +52,17 @@
                 <span class="smiley-label">{{ $label }}</span>
             </label>
         @endforeach
+    </div>
+    {{-- Issue #46: Zusatzantwort ohne Smiley (wird als 0 gespeichert, zählt nicht mit) --}}
+    @if($question->hasNaOption())
+        <div class="smiley-na">
+            <input type="radio"
+                   name="answers[{{ $question->id }}]"
+                   id="q{{ $question->id }}_s0"
+                   value="0"
+                   {{ (string) old("answers.{$question->id}") === '0' ? 'checked' : '' }}>
+            <label for="q{{ $question->id }}_s0">{{ $question->naLabel() }}</label>
+        </div>
+    @endif
     </div>
 @endif

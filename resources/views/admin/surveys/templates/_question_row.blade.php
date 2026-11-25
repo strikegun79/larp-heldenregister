@@ -1,7 +1,8 @@
 @use('App\Models\SurveyTemplateQuestion')
 @php
     // $q ist bei neuen Fragen (JS-Vorlage) null; $i ist dann der Platzhalter „__INDEX__“.
-    $type = old("questions.{$i}.type", $q->type ?? 'rating');
+    // Issue #46: $newType = 'section' für die JS-Vorlage eines neuen Bereichs.
+    $type = old("questions.{$i}.type", $q->type ?? ($newType ?? 'rating'));
     $hasOld = old("questions.{$i}.question_text") !== null;
 
     // Issue #24: Einstellungen der Typen „Optionen“ und „Smileys“ (Vorauswahl, falls leer).
@@ -9,11 +10,60 @@
     $multiple = $hasOld ? (bool) old("questions.{$i}.multiple") : ($q?->type === 'choice' && $q->allowsMultiple());
     $freeText = $hasOld ? (bool) old("questions.{$i}.free_text") : ($q?->type === 'choice' ? $q->hasFreeText() : true);
     $smileyLabels = $q?->type === 'smiley' ? $q->smileyLabels() : SurveyTemplateQuestion::DEFAULT_SMILEY_LABELS;
+    // Issue #46: Smiley-Zusatzantwort ohne Smiley.
+    $naOption = $hasOld ? (bool) old("questions.{$i}.na_option") : ($q?->type === 'smiley' && $q->hasNaOption());
+    $naLabel = old("questions.{$i}.na_label", $q?->type === 'smiley' ? $q->naLabel() : SurveyTemplateQuestion::DEFAULT_NA_LABEL);
 @endphp
 {{-- Issue #35: ID mitschicken, damit die Frage beim Speichern aktualisiert statt neu angelegt wird --}}
 @if($q?->id)
     <input type="hidden" name="questions[{{ $i }}][id]" value="{{ $q->id }}">
 @endif
+
+{{-- Issue #46: Reihenfolge verschieben (Fragen und Bereiche) --}}
+@php($itemLabel = $type === SurveyTemplateQuestion::SECTION ? 'Bereich' : 'Frage')
+<div class="flex justify-end gap-1 -mt-1 mb-1">
+    <button type="button" class="ui mini basic icon button" data-move="up"
+            title="{{ $itemLabel }} nach oben" aria-label="{{ $itemLabel }} nach oben verschieben">
+        <i class="arrow up icon"></i>
+    </button>
+    <button type="button" class="ui mini basic icon button" data-move="down"
+            title="{{ $itemLabel }} nach unten" aria-label="{{ $itemLabel }} nach unten verschieben">
+        <i class="arrow down icon"></i>
+    </button>
+</div>
+
+@if($type === SurveyTemplateQuestion::SECTION)
+    {{-- Issue #46: Bereich – Titel und Untertext, beim Ausfüllen automatisch nummeriert --}}
+    <input type="hidden" name="questions[{{ $i }}][type]" value="{{ SurveyTemplateQuestion::SECTION }}">
+    <div class="flex gap-3 flex-wrap items-start">
+        <div class="flex-1 ui form">
+            <div class="field">
+                <label class="text-xs text-stone-500" for="q_{{ $i }}_text">Bereich (Titel, wird automatisch nummeriert)</label>
+                <input type="text"
+                       id="q_{{ $i }}_text"
+                       name="questions[{{ $i }}][question_text]"
+                       value="{{ old("questions.{$i}.question_text", $q->question_text ?? '') }}"
+                       placeholder="z. B. Über dich"
+                       maxlength="1000"
+                       required>
+            </div>
+            <div class="field">
+                <label class="text-xs text-stone-500" for="q_{{ $i }}_subtitle">Untertext (optional)</label>
+                <input type="text"
+                       id="q_{{ $i }}_subtitle"
+                       name="questions[{{ $i }}][subtitle]"
+                       value="{{ old("questions.{$i}.subtitle", $q?->subtitle() ?? '') }}"
+                       placeholder="z. B. Damit wir unsere Teilnehmer besser kennenlernen."
+                       maxlength="500">
+            </div>
+        </div>
+        <button type="button"
+                onclick="this.closest('.question-item').remove()"
+                class="ui red icon button mt-5" title="Bereich entfernen" aria-label="Bereich entfernen">
+            <i class="trash icon"></i>
+        </button>
+    </div>
+@else
 <div class="flex gap-3 flex-wrap items-start">
     <div class="flex-1">
         <label class="text-xs text-stone-500" for="q_{{ $i }}_text">Fragetext</label>
@@ -82,7 +132,24 @@
             </div>
         @endforeach
     </div>
+    {{-- Issue #46: Zusatzantwort ohne Smiley, zählt nicht in Durchschnitt und Verteilung --}}
+    <div class="flex flex-wrap items-center gap-3 mt-2">
+        <div class="ui checkbox">
+            <input type="checkbox" id="q_{{ $i }}_na_option" name="questions[{{ $i }}][na_option]" value="1" {{ $naOption ? 'checked' : '' }}>
+            <label for="q_{{ $i }}_na_option">Zusätzliche Antwort ohne Smiley</label>
+        </div>
+        <div class="field flex-1 min-w-[12rem] mb-0">
+            <label class="sr-only" for="q_{{ $i }}_na_label">Text der Zusatzantwort</label>
+            <input type="text" maxlength="100"
+                   id="q_{{ $i }}_na_label"
+                   name="questions[{{ $i }}][na_label]"
+                   value="{{ $naLabel }}">
+        </div>
+    </div>
+    <p class="text-xs text-stone-500 mt-1 mb-0">Wird als 0 gespeichert und zählt nicht im Durchschnitt mit.</p>
 </div>
+
+@endif
 
 {{-- Issue #35: Hinweis bei Fragen mit vorhandenen Antworten --}}
 @if(($q->answers_count ?? 0) > 0)
