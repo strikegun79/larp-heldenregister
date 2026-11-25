@@ -43,9 +43,17 @@ class AdventureTalkService
     }
 
     /** Titel des Plot-Threads und Name des Teamer-Raums. */
+    /** Thread-Titel mit „Plot:“ davor, damit er in der Thread-Liste als Teil des Plots erkennbar ist. */
     public static function threadTitle(Adventure $adventure): string
     {
-        return mb_substr($adventure->name, 0, 200);
+        return mb_substr('Plot: '.$adventure->name, 0, 200);
+    }
+
+    /** Weichen Thread- oder Raumname in Talk vom gewünschten Namen ab (z. B. nach neuem Namensschema)? */
+    public static function namesOutdated(Adventure $adventure): bool
+    {
+        return ($adventure->talk_plot_thread_id && $adventure->talk_plot_thread_title !== self::threadTitle($adventure))
+            || ($adventure->talk_teamer_room_token && $adventure->talk_teamer_room_name !== self::roomName($adventure));
     }
 
     public static function roomName(Adventure $adventure): string
@@ -59,6 +67,7 @@ class AdventureTalkService
      */
     public function setup(Adventure $adventure): void
     {
+        $this->client->forContext(adventure: $adventure);
         if (! $this->client->isActive()) {
             return;
         }
@@ -94,6 +103,7 @@ class AdventureTalkService
      */
     public function syncTeamers(Adventure $adventure, array $removedUserIds = []): void
     {
+        $this->client->forContext(adventure: $adventure);
         if (! $this->client->isActive() || ! $adventure->talk_teamer_room_token) {
             return;
         }

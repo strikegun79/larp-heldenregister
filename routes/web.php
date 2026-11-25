@@ -548,6 +548,7 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified', 'can:tal
     Route::post('talk/approvals/{player}', [Admin\TalkApprovalController::class, 'approve'])->name('talk.approvals.approve');
     Route::delete('talk/approvals/{player}', [Admin\TalkApprovalController::class, 'revoke'])->name('talk.approvals.revoke');
     Route::post('talk/approvals/{player}/retry', [Admin\TalkApprovalController::class, 'retry'])->name('talk.approvals.retry');
+    Route::get('talk/logs', [Admin\TalkLogController::class, 'index'])->name('talk.logs.index');
 });
 
 // Admin: Umfragen verwalten (survey.view = einsehen, survey.admin = alles).

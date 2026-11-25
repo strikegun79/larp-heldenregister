@@ -21,6 +21,10 @@
                 </div>
             @endunless
 
+            <p class="text-sm">
+                <a href="{{ route('admin.talk.logs.index', ['errors' => 1]) }}" class="underline"><i class="list icon" aria-hidden="true"></i>Talk-Protokoll (Fehler)</a>
+            </p>
+
             <p class="text-sm text-stone-700">
                 Talk ist ab {{ \App\Models\Player::TALK_MIN_AGE }} Jahren möglich. Bei Minderjährigen müssen nach der Freigabe
                 die Eltern im Reiter „Talk“ des Spielers zustimmen; erst dann wird das Nextcloud-Konto eingerichtet.
@@ -75,6 +79,9 @@
                                         {{ $player->talkStatusLabel() }}
                                         @if ($player->talk_error)
                                             <span class="block text-red-700">{{ $player->talk_error }}</span>
+                                        @endif
+                                        @if ($player->talk_logs_exists)
+                                            <a href="{{ route('admin.talk.logs.index', ['player' => $player->id]) }}" class="text-xs underline">Protokoll</a>
                                         @endif
                                     </td>
                                     <td class="px-4 py-3 text-sm" data-label="Nextcloud">{{ $player->nextcloud_user_id ?? '—' }}</td>

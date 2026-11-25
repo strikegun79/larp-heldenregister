@@ -11,6 +11,11 @@
                 <div class="p-3 bg-green-100 text-green-800 rounded" role="status">{{ session('status') }}</div>
             @endif
 
+            <p class="text-sm">
+                <a href="{{ route('admin.talk.logs.index') }}" class="underline"><i class="list icon" aria-hidden="true"></i>Talk-Protokoll</a>
+                – alle Änderungen in Nextcloud und alle Fehler
+            </p>
+
             {{-- Verbindung (Zugangsdaten aus der .env) --}}
             <section aria-labelledby="talk-connection" class="bg-white/70 border-2 border-[#5a3a22]/40 shadow sm:rounded-lg p-6">
                 <h3 id="talk-connection" class="font-semibold text-waldritter text-lg mb-3">Verbindung</h3>

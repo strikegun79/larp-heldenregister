@@ -36,6 +36,7 @@ class TalkApprovalController extends Controller
             ->when($filter === 'approved', fn ($query) => $query->whereNotNull('talk_approved_at'))
             ->when($filter === 'open', fn ($query) => $query->whereNull('talk_approved_at'))
             ->when($filter === 'error', fn ($query) => $query->whereNotNull('talk_error'))
+            ->withExists('talkLogs')
             ->orderBy('lastname')
             ->orderBy('name')
             ->paginate(25)

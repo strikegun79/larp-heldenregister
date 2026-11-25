@@ -31,6 +31,20 @@
         </div>
     @endif
 
+    {{-- Namen in Talk weichen ab (z. B. Plot-Thread noch ohne „Plot:“) → umbenennen --}}
+    @if (! $adventure->talk_error && \App\Services\NextcloudTalk\AdventureTalkService::namesOutdated($adventure))
+        <div class="wr-notice mb-4" role="note">
+            <i class="info circle icon m-0 mt-0.5" aria-hidden="true"></i>
+            <div>
+                <p>Die Namen in Talk sind nicht aktuell (z. B. „{{ \App\Services\NextcloudTalk\AdventureTalkService::threadTitle($adventure) }}“).</p>
+                <form method="POST" action="{{ route('adventures.talk.retry', $adventure) }}" data-refresh-modal class="mt-2">
+                    @csrf
+                    <button type="submit" class="ui small button"><i class="pencil alternate icon" aria-hidden="true"></i> Namen in Talk aktualisieren</button>
+                </form>
+            </div>
+        </div>
+    @endif
+
     <div class="grid gap-4 sm:grid-cols-2 mb-4">
         {{-- Plot-Thread --}}
         <section class="border border-stone-200 rounded-md p-3 bg-white/60" aria-labelledby="talk-plot-{{ $ctx }}">
@@ -89,6 +103,22 @@
                 <button type="submit" class="ui small primary button"><i class="plus icon" aria-hidden="true"></i> Einrichten</button>
             </fieldset>
         </form>
+    @endif
+
+    {{-- Talk-Protokoll dieser Veranstaltung (letzte 20 Einträge) --}}
+    @php($talkLogs = \App\Models\TalkLog::with('user:id,name,lastname')->where('adventure_id', $adventure->id)->latest('id')->limit(20)->get())
+    @if ($talkLogs->isNotEmpty())
+        <details class="mb-4" @if ($talkLogs->first()->success === false) open @endif>
+            <summary class="cursor-pointer font-medium text-stone-800">
+                Protokoll ({{ $talkLogs->count() }} {{ $talkLogs->count() === 1 ? 'Eintrag' : 'Einträge' }}{{ $talkLogs->where('success', false)->isNotEmpty() ? ', davon '.$talkLogs->where('success', false)->count().' Fehler' : '' }})
+            </summary>
+            <div class="mt-2">
+                @include('admin.talk._log_list', ['logs' => $talkLogs])
+                @can('talk.approve')
+                    <a href="{{ route('admin.talk.logs.index', ['adventure' => $adventure->id]) }}" class="text-sm underline mt-1 inline-block">Ganzes Protokoll</a>
+                @endcan
+            </div>
+        </details>
     @endif
 
     @if ($adventure->talk_teamer_room_token)
