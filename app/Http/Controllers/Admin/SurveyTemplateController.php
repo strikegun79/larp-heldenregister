@@ -56,7 +56,8 @@ class SurveyTemplateController extends Controller
             'name' => $data['name'],
             'description' => $data['description'] ?? null,
             'target_group' => $data['target_group'],
-            'active' => $data['active'] ?? true,
+            // Nicht angehakte Checkbox wird nicht mitgeschickt → ohne Häkchen inaktiv.
+            'active' => $request->boolean('active'),
             'section_pages' => $data['section_pages'] ?? false,
             'created_by' => auth()->id(),
         ]);
@@ -92,7 +93,8 @@ class SurveyTemplateController extends Controller
             'name' => $data['name'],
             'description' => $data['description'] ?? null,
             'target_group' => $data['target_group'],
-            'active' => $data['active'] ?? true,
+            // Nicht angehakte Checkbox wird nicht mitgeschickt → ohne Häkchen inaktiv.
+            'active' => $request->boolean('active'),
             'section_pages' => $data['section_pages'] ?? false,
         ]);
 
