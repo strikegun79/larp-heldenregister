@@ -169,4 +169,26 @@ class SurveyTemplateTest extends TestCase
 
         $this->assertDatabaseHas('survey_templates', ['id' => $template->id]);
     }
+
+    public function test_vorlage_laesst_sich_deaktivieren_und_wieder_aktivieren(): void
+    {
+        $template = $this->template();
+        $payload = ['name' => 'Teamer-Vorlage', 'target_group' => 'teamer'];
+
+        // Ohne Häkchen (Checkbox wird vom Browser nicht mitgeschickt) → inaktiv.
+        $this->actingAs($this->admin())
+            ->put(route('admin.surveys.templates.update', $template), $payload)
+            ->assertRedirect(route('admin.surveys.templates.index'));
+        $this->assertFalse($template->fresh()->active);
+
+        // Inaktive Vorlage steht bei „Neue Umfrage“ nicht zur Auswahl.
+        $this->actingAs($this->admin())
+            ->get(route('admin.surveys.create'))
+            ->assertOk()
+            ->assertViewHas('templates', fn ($templates) => ! $templates->contains('id', $template->id));
+
+        $this->actingAs($this->admin())
+            ->put(route('admin.surveys.templates.update', $template), $payload + ['active' => '1']);
+        $this->assertTrue($template->fresh()->active);
+    }
 }
