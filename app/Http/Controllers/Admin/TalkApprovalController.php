@@ -84,6 +84,22 @@ class TalkApprovalController extends Controller
         return back()->with('status', 'Talk-Freigabe für '.$player->full_name.' zurückgenommen.');
     }
 
+    /** Verknüpfung mit dem Nextcloud-Konto lösen (nur im Heldenregister). */
+    public function unlink(Player $player): RedirectResponse
+    {
+        if (blank($player->nextcloud_user_id)) {
+            return back()->with('error', $player->full_name.' ist mit keinem Nextcloud-Konto verknüpft.');
+        }
+
+        $userId = $player->nextcloud_user_id;
+        NextcloudTalkClient::fromConfig()->forContext(player: $player)
+            ->note('Verknüpfung von Hand gelöst: '.$userId);
+        PlayerTalkService::unlink($player);
+        AuditLogger::log('talk.unlinked', $player);
+
+        return back()->with('status', 'Verknüpfung von '.$player->full_name.' mit dem Nextcloud-Konto „'.$userId.'“ gelöst.');
+    }
+
     public function retry(Player $player): RedirectResponse
     {
         PlayerTalkService::queueProvision($player);

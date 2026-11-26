@@ -97,6 +97,11 @@ class PlayerTalkService
         try {
             $group = self::targetGroup($player);
 
+            // In Nextcloud gelöschtes Konto: Verknüpfung lösen und neu einrichten.
+            if (filled($player->nextcloud_user_id) && ! $this->client->userExists($player->nextcloud_user_id)) {
+                $this->forgetDeletedAccount($player);
+            }
+
             if (blank($player->nextcloud_user_id)) {
                 $this->linkOrCreate($player, $group);
             } elseif ($player->nextcloud_account_created) {
@@ -188,6 +193,14 @@ class PlayerTalkService
 
                     $this->client->forContext(player: $player);
                     try {
+                        // Konto in Nextcloud gelöscht → nicht täglich denselben Fehler melden, sondern lösen.
+                        if (! $this->client->userExists((string) $player->nextcloud_user_id)) {
+                            $this->forgetDeletedAccount($player);
+                            $player->talk_error = 'Das Nextcloud-Konto wurde gelöscht. Über „Erneut versuchen“ wird es neu eingerichtet.';
+                            $player->save();
+
+                            continue;
+                        }
                         $this->applyGroups($player, $group);
                         $player->talk_error = null;
                         $changed++;
@@ -199,6 +212,26 @@ class PlayerTalkService
             });
 
         return $changed;
+    }
+
+    /**
+     * Verknüpfung mit dem Nextcloud-Konto lösen (nur im Heldenregister, in Nextcloud wird nichts
+     * gelöscht). Danach wird beim nächsten Einrichten erneut gesucht bzw. ein Konto angelegt.
+     */
+    public static function unlink(Player $player): void
+    {
+        $player->nextcloud_user_id = null;
+        $player->nextcloud_account_created = false;
+        $player->nextcloud_group = null;
+        $player->talk_account_ready_at = null;
+        $player->talk_error = null;
+        $player->save();
+    }
+
+    private function forgetDeletedAccount(Player $player): void
+    {
+        $this->client->note('Konto existiert nicht mehr: '.$player->nextcloud_user_id.' – Verknüpfung gelöst');
+        self::unlink($player);
     }
 
     public function disable(Player $player): void

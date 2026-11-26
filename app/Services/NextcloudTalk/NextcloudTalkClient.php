@@ -539,6 +539,12 @@ class NextcloudTalkClient
         };
     }
 
+    /** Eigener Eintrag im Talk-Protokoll (ohne Anfrage an Nextcloud), z. B. „Verknüpfung gelöst“. */
+    public function note(string $action, bool $success = true, ?string $message = null): void
+    {
+        $this->log('note', '-', $action, null, $success, $message);
+    }
+
     /** Eintrag im Talk-Protokoll – darf die eigentliche Anfrage nie stören. */
     private function log(string $method, string $path, string $action, ?int $status, bool $success, ?string $message): void
     {

@@ -87,6 +87,17 @@
                                     <td class="px-4 py-3 text-sm" data-label="Nextcloud">{{ $player->nextcloud_user_id ?? '—' }}</td>
                                     <td class="px-4 py-3 text-right">
                                         <span class="inline-flex flex-wrap justify-end gap-2">
+                                            {{-- Verknüpfung lösen, z. B. nachdem das Konto in Nextcloud gelöscht wurde --}}
+                                            @if ($player->nextcloud_user_id)
+                                                <form method="POST" action="{{ route('admin.talk.approvals.unlink', $player) }}"
+                                                      data-confirm="Verknüpfung von {{ $player->full_name }} mit dem Nextcloud-Konto „{{ $player->nextcloud_user_id }}“ lösen? In Nextcloud wird nichts gelöscht; beim nächsten Einrichten wird erneut gesucht bzw. ein Konto angelegt.">
+                                                    @csrf
+                                                    <button type="submit" class="ui mini basic button"
+                                                            aria-label="Nextcloud-Verknüpfung von {{ $player->full_name }} lösen">
+                                                        <i class="unlink icon"></i> Verknüpfung lösen
+                                                    </button>
+                                                </form>
+                                            @endif
                                             @if ($player->talk_approved_at === null)
                                                 @if ($blocker)
                                                     <span class="text-xs text-stone-500">{{ $blocker }}</span>
