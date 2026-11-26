@@ -117,68 +117,6 @@
     @endif
 </section>
 
-{{-- Matrix-Konto (corporal User-DB) --}}
-<section class="mb-6" aria-labelledby="insp-p-matrix">
-    <h3 id="insp-p-matrix" class="wr-section-heading__title text-base mb-2">Matrix</h3>
-    <p class="text-sm m-0">Matrix-User-ID</p>
-    <p class="font-mono text-sm mb-2 break-all">{{ $mxid }}</p>
-    @unless ($account)
-        <p class="wr-help mt-0 mb-2">Noch kein Konto – wird beim Speichern mit aktivem Zugang angelegt.</p>
-    @endunless
-
-    <form method="POST" action="{{ route('admin.players.matrix.update', $player) }}" data-inspector-form class="ui form">
-        @csrf @method('PUT')
-        <div class="grid gap-2 mb-3">
-            <label class="wr-check">
-                <input type="checkbox" name="active" value="1" @checked($account?->active)>
-                <span class="wr-check__text"><span class="wr-check__title">Matrix-Zugang aktiv</span></span>
-            </label>
-            <label class="wr-check">
-                <input type="checkbox" name="forbid_room_creation" value="1" @checked($account?->forbid_room_creation ?? true)>
-                <span class="wr-check__text"><span class="wr-check__title">Raumerstellung verbieten</span></span>
-            </label>
-        </div>
-        <div class="field">
-            <label for="insp-matrix-password">Passwort</label>
-            <input type="text" id="insp-matrix-password" name="auth_credential" value="{{ $account?->auth_credential }}"
-                   placeholder="{{ $account ? 'unverändert lassen' : 'Passwort setzen' }}" autocomplete="off">
-            <small class="wr-help">Klartext (matrix-corporal nutzt authType „plain“).</small>
-        </div>
-        <fieldset class="mb-3">
-            <legend class="font-semibold text-sm mb-1">Räume</legend>
-            @if ($rooms->isEmpty())
-                <p class="text-wr-ink-muted text-sm m-0">Keine verwalteten Räume vorhanden.</p>
-            @else
-                @unless ($account)
-                    <p class="wr-help mt-0 mb-1">Vorauswahl: Räume mit „Standard: allow“.</p>
-                @endunless
-                <div class="grid gap-1.5 max-h-64 overflow-y-auto pr-1">
-                    @foreach ($rooms as $room)
-                        <label class="wr-check !min-h-0 !py-1.5 text-sm">
-                            <input type="checkbox" name="rooms[]" value="{{ $room->roomid }}" @checked(in_array($room->roomid, $joined))>
-                            <span class="wr-check__text">
-                                <span class="wr-check__title text-sm">{{ $room->roomname }}</span>
-                                <span class="wr-check__hint">
-                                    {{ $room->roomtype }}@if ($room->default_allow) · Standard @elseif ($room->default_deny) · gesperrt @endif
-                                </span>
-                            </span>
-                        </label>
-                    @endforeach
-                </div>
-            @endif
-        </fieldset>
-        <button type="submit" class="wr-btn wr-btn--primary wr-btn--small">Matrix speichern</button>
-    </form>
-
-    @if ($account && ! $account->trashed())
-        <form method="POST" action="{{ route('admin.players.matrix.destroy', $player) }}" data-inspector-form class="mt-2"
-              data-confirm="Matrix-Zugang wirklich entziehen?">
-            @csrf @method('DELETE')
-            <button type="submit" class="wr-btn wr-btn--danger wr-btn--small">Matrix-Zugang entziehen</button>
-        </form>
-    @endif
-</section>
-
 {{-- Gefahrenbereich: Spieler löschen (PLAY-08, Soft-Delete) --}}
 @unless ($player->trashed())
     <section class="wr-danger-zone" aria-labelledby="insp-p-delete">

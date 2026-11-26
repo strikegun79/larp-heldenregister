@@ -3,8 +3,6 @@
 use App\Http\Controllers\Api\V1\AdventureController;
 use App\Http\Controllers\Api\V1\BookingController;
 use App\Http\Controllers\Api\V1\HeroController;
-use App\Http\Controllers\Matrix\CorporalPolicyController;
-use App\Http\Middleware\VerifyMatrixCorporalToken;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 
@@ -47,8 +45,3 @@ Route::prefix('v1')->name('api.v1.')->group(function () {
             ->name('me.bookings');
     });
 });
-
-// matrix-corporal Policy-Endpoint (per Bearer-Token geschützt, zustandslos).
-Route::middleware(VerifyMatrixCorporalToken::class)
-    ->get('/matrix/corporal/policy', CorporalPolicyController::class)
-    ->name('matrix.corporal.policy');

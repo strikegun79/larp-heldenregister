@@ -307,7 +307,7 @@ class PlayerTalkService
     /** vorname.nachname, bei Kollision mit angehängter Zahl (vorname.nachname2 …). */
     private function uniqueUserId(Player $player): string
     {
-        $base = trim(Player::sanitizeMxidLocalpart((string) $player->name).'.'.Player::sanitizeMxidLocalpart((string) $player->lastname), '.');
+        $base = trim(Player::sanitizeUsernamePart((string) $player->name).'.'.Player::sanitizeUsernamePart((string) $player->lastname), '.');
         $base = mb_substr($base !== '' ? $base : 'spieler'.$player->id, 0, 56);
 
         $candidate = $base;

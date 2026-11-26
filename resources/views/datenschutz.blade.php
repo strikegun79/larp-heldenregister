@@ -123,10 +123,13 @@
         Auftragsverarbeitungsvertrag.</li>
         <li><strong>Datenbankhosting:</strong> Die Datenbank liegt auf einem Server in Deutschland
         (netcup GmbH, Karlsruhe).</li>
-        <li><strong>Gruppen-Kommunikation (Matrix/Element):</strong> Für die interne Team-Kommunikation
-        wird ein selbst betriebener Matrix-Server (Element-Chat) genutzt. Dabei werden Nutzernamen
-        und Raum-Mitgliedschaften übertragen. Es besteht eine Auftragsverarbeitungsvereinbarung;
-        der Server wird in Deutschland betrieben.</li>
+        <li><strong>Chat (Nextcloud Talk):</strong> Für Absprachen rund um unsere Veranstaltungen nutzen wir
+        Nextcloud Talk auf dem Nextcloud-Server des Vereins. Spieler ab 14 Jahren erhalten ein Konto nur nach
+        Freigabe durch den Verein, bei Minderjährigen zusätzlich mit Erlaubnis der Eltern. Für Konten und
+        Teamer-Räume übermitteln wir Name, E-Mail-Adresse, einen daraus gebildeten Benutzernamen sowie die
+        Gruppen- und Raumzugehörigkeit. Freigabe und Erlaubnis können jederzeit widerrufen werden; das Konto wird
+        dann deaktiviert. Änderungen, die das Heldenregister in Nextcloud vornimmt, protokollieren wir 90 Tage lang.
+        Es besteht eine Auftragsverarbeitungsvereinbarung mit dem Hoster; der Server wird in Deutschland betrieben.</li>
         <li>Eine Weitergabe an sonstige Dritte findet nicht statt.</li>
     </ul>
 

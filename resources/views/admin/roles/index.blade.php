@@ -404,7 +404,7 @@
                             <div class="item"><i class="check circle green icon"></i> Datenpannen-Protokoll mit 72h-Frist (Art. 33)</div>
                             <div class="item"><i class="check circle green icon"></i> Gesendete Mails im IMAP-Postfach nachvollziehbar</div>
                             <div class="item"><i class="check circle green icon"></i> Elterliche Einwilligung <code>parental_consent_at</code> in <code>players</code> (Art. 8 DSGVO) [H-5]</div>
-                            <div class="item"><i class="check circle green icon"></i> Matrix-Dienst in Datenschutzerklärung als Drittempfänger aufgeführt [M-1]</div>
+                            <div class="item"><i class="check circle green icon"></i> Nextcloud Talk in Datenschutzerklärung als Empfänger aufgeführt [M-1]</div>
                             <div class="item"><i class="check circle green icon"></i> Teamer-Gesundheitsdaten in Datenschutzerklärung (Abschn. 2.4) dokumentiert [M-2]</div>
                             <div class="item"><i class="check circle green icon"></i> Newsletter: Double-Opt-in, Einwilligung Art. 6 Abs. 1 lit. a, Abmeldelink</div>
                             <div class="item"><i class="check circle green icon"></i> Audit-Log für Buchungsänderungen und Spielerprofil-Edits durch Admins [M-3]</div>
