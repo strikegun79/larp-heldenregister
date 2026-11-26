@@ -237,7 +237,7 @@
                     @endcan
 
                     {{-- Issue #30: Öffentliches Heldenverzeichnis (Helden und bekannte Plot-Charaktere) --}}
-                    <x-wr.card compact :href="route('public.hero.search')" image="/images/heldenarchiv.jpg"
+                    <x-wr.card compact :href="route('public.hero.search')" image="/images/Helden-Verzeichnis.jpg"
                                tag="Verzeichnis" title="Heldenverzeichnis" text="Helden und bekannte Gestalten erforschen" />
 
                     <x-wr.card compact href="https://www.waldritter-giessen.de/brans-tagebuch/" hint="auf der Waldritter-Website" image="/images/brans_tagebuch_hr.jpg"

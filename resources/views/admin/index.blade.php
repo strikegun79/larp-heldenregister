@@ -50,7 +50,7 @@
                         <i class="book icon m-0" aria-hidden="true"></i> Plot &amp; Geschichte
                     </h2>
                     <div class="grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
-                        <x-admin.dashboard-card :card="$adminCard('Plot-Charaktere', 'Bekannte Gestalten fürs Verzeichnis', 'heldenarchiv.jpg', route('admin.plot-characters.index'))" />
+                        <x-admin.dashboard-card :card="$adminCard('Plot-Charaktere', 'Bekannte Gestalten fürs Verzeichnis', 'Helden-Verzeichnis.jpg', route('admin.plot-characters.index'))" />
                     </div>
                 </section>
             @endcan
