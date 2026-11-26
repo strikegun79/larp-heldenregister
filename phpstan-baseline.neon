@@ -217,30 +217,6 @@ parameters:
 			path: app/Http/Controllers/Admin/IdCardController.php
 
 		-
-			message: '#^Call to an undefined method Illuminate\\Database\\Eloquent\\Relations\\HasOne\:\:withTrashed\(\)\.$#'
-			identifier: method.notFound
-			count: 2
-			path: app/Http/Controllers/Admin/MatrixAccountController.php
-
-		-
-			message: '#^Cannot access property \$mxid on array\|float\|int\|string\|false\.$#'
-			identifier: property.nonObject
-			count: 1
-			path: app/Http/Controllers/Admin/MatrixAccountController.php
-
-		-
-			message: '#^Parameter \#2 \$subject of static method App\\Services\\AuditLogger\:\:log\(\) expects Illuminate\\Database\\Eloquent\\Model\|null, array\|float\|int\|string\|false\|null given\.$#'
-			identifier: argument.type
-			count: 1
-			path: app/Http/Controllers/Admin/MatrixAccountController.php
-
-		-
-			message: '#^Using nullsafe property access "\?\-\>mxid" on left side of \?\? is unnecessary\. Use \-\> instead\.$#'
-			identifier: nullsafe.neverNull
-			count: 1
-			path: app/Http/Controllers/Admin/MatrixAccountController.php
-
-		-
 			message: '#^Parameter \#1 \$view of function view expects view\-string\|null, string given\.$#'
 			identifier: argument.type
 			count: 2
@@ -651,12 +627,6 @@ parameters:
 
 		-
 			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$lastname\.$#'
-			identifier: property.notFound
-			count: 1
-			path: app/Http/Controllers/ProfileController.php
-
-		-
-			message: '#^Access to an undefined property Illuminate\\Database\\Eloquent\\Model\:\:\$matrixAccount\.$#'
 			identifier: property.notFound
 			count: 1
 			path: app/Http/Controllers/ProfileController.php

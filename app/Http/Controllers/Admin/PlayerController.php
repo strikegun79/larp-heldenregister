@@ -3,8 +3,6 @@
 namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
-use App\Models\MatrixAccount;
-use App\Models\MatrixManagedRoom;
 use App\Models\Player;
 use App\Models\User;
 use App\Services\AuditLogger;
@@ -37,7 +35,7 @@ class PlayerController extends Controller
 
         $query = Player::withTrashed()
             ->withCount('heroes')
-            ->with(['users', 'matrixAccount' => fn ($q) => $q->withCount('rooms')]);
+            ->with(['users']);
 
         if ($q !== '') {
             $query->where(function ($builder) use ($q) {
@@ -73,29 +71,17 @@ class PlayerController extends Controller
 
     /**
      * Inspektor (Seitenpanel) eines Spielers in der Admin-Liste: Kurzinfos, Anschrift,
-     * Betreuer, Matrix-Konto und Löschen. Formulare speichern per AJAX (data-inspector-form).
+     * Betreuer und Löschen. Formulare speichern per AJAX (data-inspector-form).
      */
     public function inspector(Player $player): View
     {
         $player->load('users')->loadCount('heroes');
-
-        // Auch entzogene (soft-gelöschte) Konten anzeigen, wie in MatrixAccountController@edit.
-        $account = MatrixAccount::withTrashed()->where('player_id', $player->id)->first();
-        $rooms = MatrixManagedRoom::orderBy('roomname')->get();
-        // MTX-06: Neues Konto → default_allow-Räume vorselektieren (wie MatrixAccountController@edit).
-        $joined = $account
-            ? $account->rooms()->pluck('matrix_managed_rooms.roomid')->all()
-            : $rooms->where('default_allow', true)->pluck('roomid')->all();
 
         return view('admin.players._inspector', [
             'player' => $player,
             'available' => User::whereNotIn('id', $player->users->pluck('id'))
                 ->orderBy('name')->orderBy('lastname')->get(),
             'blockers' => $this->collectBlockers($player),
-            'account' => $account,
-            'rooms' => $rooms,
-            'joined' => $joined,
-            'mxid' => $account->mxid ?? $player->deriveMatrixId(),
         ]);
     }
 

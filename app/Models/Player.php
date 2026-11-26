@@ -7,7 +7,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Support\Facades\Storage;
 
@@ -203,14 +202,6 @@ class Player extends Model
     }
 
     /**
-     * Das Matrix-Konto dieses Spielers (Legacy: matrix_account.player_id).
-     */
-    public function matrixAccount(): HasOne
-    {
-        return $this->hasOne(MatrixAccount::class);
-    }
-
-    /**
      * Talk-Protokoll dieses Spielers (Konto anlegen, Gruppe, Deaktivieren).
      *
      * @return HasMany<TalkLog, $this>
@@ -267,50 +258,10 @@ class Player extends Model
     }
 
     /**
-     * Leitet die Matrix-User-ID aus dem Namen ab (Legacy:
-     * "@vorname.nachname:domain"). Wird nur bei der Erstanlage genutzt –
-     * eine bestehende mxid bleibt als stabile Matrix-Identität erhalten.
+     * Konvertiert einen Namensteil in einen Benutzernamen-Abschnitt (nur [a-z0-9._-]),
+     * z. B. für Nextcloud-Talk-Konten (vorname.nachname).
      */
-    public function deriveMatrixId(): string
-    {
-        $domain = config('matrix.domain');
-        $local = self::sanitizeMxidLocalpart($this->name)
-                .'.'
-                .self::sanitizeMxidLocalpart($this->lastname);
-
-        return '@'.$local.':'.$domain;
-    }
-
-    /**
-     * Wie deriveMatrixId(), aber prüft auf Kollisionen in matrix_accounts
-     * und hängt eine Zahl an, falls der Localpart bereits an einen anderen
-     * Spieler vergeben ist (@max.muster → @max.muster2 → @max.muster3 …).
-     */
-    public function uniqueMatrixId(): string
-    {
-        $domain = config('matrix.domain');
-        $base = self::sanitizeMxidLocalpart($this->name)
-                .'.'
-                .self::sanitizeMxidLocalpart($this->lastname);
-
-        $candidate = '@'.$base.':'.$domain;
-        $i = 2;
-
-        while (MatrixAccount::where('mxid', $candidate)
-            ->where('player_id', '!=', $this->id)
-            ->exists()) {
-            $candidate = '@'.$base.$i.':'.$domain;
-            $i++;
-        }
-
-        return $candidate;
-    }
-
-    /**
-     * Konvertiert einen Namensteil in einen gültigen Matrix-Localpart-Abschnitt.
-     * Matrix-Spec erlaubt nur [a-z0-9._-] im Localpart.
-     */
-    public static function sanitizeMxidLocalpart(string $name): string
+    public static function sanitizeUsernamePart(string $name): string
     {
         // Umlaute und häufige Akzente in ASCII-Äquivalente auflösen
         $name = strtr($name, [

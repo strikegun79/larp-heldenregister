@@ -346,16 +346,6 @@ Route::middleware(['auth', 'verified'])->group(function () {
         Route::post('motd/{motd}/activate', [Admin\MotdController::class, 'activate'])->name('motd.activate');
         Route::post('motd/{motd}/deactivate', [Admin\MotdController::class, 'deactivate'])->name('motd.deactivate');
         Route::post('motd/{motd}/duplicate', [Admin\MotdController::class, 'duplicate'])->name('motd.duplicate');
-
-        // Matrix-Konto-Provisionierung pro Spieler (corporal User-DB).
-        Route::get('players/{player}/matrix', [Admin\MatrixAccountController::class, 'edit'])->name('players.matrix.edit');
-        Route::put('players/{player}/matrix', [Admin\MatrixAccountController::class, 'update'])->name('players.matrix.update');
-        Route::delete('players/{player}/matrix', [Admin\MatrixAccountController::class, 'destroy'])->name('players.matrix.destroy');
-
-        // Matrix-Räume verwalten (MTX-05).
-        Route::resource('matrix/rooms', Admin\MatrixRoomController::class)
-            ->parameters(['rooms' => 'room'])
-            ->names('matrix.rooms');
     });
 
     // Veranstaltungs-Lookups (ROLE-10): portal.manage (Admin) ODER events.admin (Projektleitung).

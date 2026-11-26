@@ -11,7 +11,7 @@ use Tests\TestCase;
 
 /**
  * Admin-Spielerliste mit Inspektor: Zeilen öffnen das Seitenpanel, dort Anschrift,
- * Betreuer, Matrix und Löschen; AJAX-Antworten als JSON.
+ * Betreuer und Löschen; AJAX-Antworten als JSON.
  */
 class AdminPlayerInspectorTest extends TestCase
 {
@@ -42,10 +42,10 @@ class AdminPlayerInspectorTest extends TestCase
             ->assertSee('kein Held')
             ->assertSee('Profil')
             ->assertDontSee('href="'.route('admin.players.caretakers', $player).'"', false)
-            ->assertDontSee('href="'.route('admin.players.matrix.edit', $player).'"', false);
+            ->assertDontSee('Matrix');
     }
 
-    public function test_inspector_contains_address_caretakers_matrix_and_delete(): void
+    public function test_inspector_contains_address_caretakers_and_delete(): void
     {
         $player = Player::factory()->create(['name' => 'Mira', 'lastname' => 'Tan']);
 
@@ -53,10 +53,10 @@ class AdminPlayerInspectorTest extends TestCase
             ->get(route('admin.players.inspector', $player), ['X-Requested-With' => 'XMLHttpRequest'])
             ->assertOk()
             ->assertSee('data-inspector-title', false)
-            ->assertSeeInOrder(['Anschrift', 'Betreuer', 'Matrix', 'Spieler löschen'])
+            ->assertSeeInOrder(['Anschrift', 'Betreuer', 'Spieler löschen'])
+            ->assertDontSee('Matrix')
             ->assertSee(route('admin.players.update', $player), false)
             ->assertSee(route('admin.players.caretakers.store', $player), false)
-            ->assertSee(route('admin.players.matrix.update', $player), false)
             ->assertSee('data-inspector-close-on-success', false);
     }
 
@@ -78,15 +78,5 @@ class AdminPlayerInspectorTest extends TestCase
             ->get(route('admin.players.inspector', $withHero), ['X-Requested-With' => 'XMLHttpRequest'])
             ->assertSee('Trotzdem löschen')
             ->assertSee('name="force" value="1"', false);
-    }
-
-    public function test_matrix_update_answers_json_for_ajax(): void
-    {
-        $player = Player::factory()->create();
-
-        $this->actingAs($this->admin())
-            ->putJson(route('admin.players.matrix.update', $player), ['active' => '0'])
-            ->assertOk()
-            ->assertJson(['message' => 'Kein Matrix-Zugang vergeben.']);
     }
 }

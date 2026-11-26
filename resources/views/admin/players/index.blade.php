@@ -57,7 +57,7 @@
                     </div>
 
                     {{-- Legende innerhalb der Filter-Box (Farben ergänzend, Kennzeichnung steht auch als Text am Namen) --}}
-                    <p class="text-xs text-wr-ink-muted m-0 mb-2">Zeile anklicken (oder Enter), um Anschrift, Betreuer, Matrix und Löschen im Seitenpanel zu öffnen.</p>
+                    <p class="text-xs text-wr-ink-muted m-0 mb-2">Zeile anklicken (oder Enter), um Anschrift, Betreuer und Löschen im Seitenpanel zu öffnen.</p>
                     <div class="flex flex-wrap gap-4 text-xs text-stone-500 pt-2 border-t border-[#5a3a22]/20">
                         <span class="flex items-center gap-1">
                             <span class="inline-block w-3 h-3 rounded-sm bg-green-100 border border-green-400"></span>
@@ -133,7 +133,6 @@
                             </th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase">Betreut von</th>
                             <th class="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase">Status</th>
-                            <th class="px-6 py-3 text-left text-xs font-medium text-stone-500 uppercase">Matrix</th>
                             <th class="px-6 py-3"></th>
                         </tr>
                     </thead>
@@ -150,7 +149,7 @@
                                     default                                                        => '',
                                 };
                             @endphp
-                            {{-- Zeilenklick / Enter öffnet den Inspektor (Anschrift, Betreuer, Matrix, Löschen) --}}
+                            {{-- Zeilenklick / Enter öffnet den Inspektor (Anschrift, Betreuer, Löschen) --}}
                             <tr class="{{ $rowClass }}"
                                 @unless ($player->trashed())
                                     data-inspector-url="{{ route('admin.players.inspector', $player) }}" tabindex="0"
@@ -170,18 +169,6 @@
                                 <td class="px-6 py-4" data-label="Helden">{{ $player->heroes_count }}</td>
                                 <td class="px-6 py-4 text-sm" data-label="Betreut von">{{ $player->users->pluck('name')->implode(', ') ?: '—' }}</td>
                                 <td class="px-6 py-4" data-label="Status">{{ $player->trashed() ? 'gelöscht' : ($player->active ? 'aktiv' : 'inaktiv') }}</td>
-                                <td class="px-6 py-4 text-sm" data-label="Matrix">
-                                    @if ($player->matrixAccount)
-                                        <span class="{{ $player->matrixAccount->active ? 'text-green-700' : 'text-stone-500' }}">
-                                            {{ $player->matrixAccount->active ? 'aktiv' : 'inaktiv' }}
-                                        </span>
-                                        <span class="text-stone-400 text-xs block">
-                                            {{ $player->matrixAccount->rooms_count }} {{ $player->matrixAccount->rooms_count === 1 ? 'Raum' : 'Räume' }}
-                                        </span>
-                                    @else
-                                        <span class="text-stone-400">—</span>
-                                    @endif
-                                </td>
                                 <td class="px-6 py-4 text-right">
                                     <div class="flex items-center justify-end gap-3">
                                         @if ($player->trashed() && $player->anonymized_at !== null)
@@ -196,7 +183,7 @@
                                                 </button>
                                             </form>
                                         @else
-                                            {{-- Profil bleibt als Modal; Anschrift, Betreuer, Matrix und Löschen im Inspektor --}}
+                                            {{-- Profil bleibt als Modal; Anschrift, Betreuer und Löschen im Inspektor --}}
                                             <a href="{{ route('players.show', $player) }}"
                                                data-modal-url="{{ route('players.show', $player) }}"
                                                class="wr-btn wr-btn--secondary wr-btn--small"

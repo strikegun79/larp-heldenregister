@@ -117,7 +117,6 @@ class ProfileController extends Controller
         $user->load([
             'players.heroes.classes',
             'players.heroes.epTransactions.type',
-            'players.matrixAccount',
             'players.bookings.adventure:id,name,start_at',
             'players.bookings.role:id,description',
         ]);
@@ -155,7 +154,6 @@ class ProfileController extends Controller
                 'hausnummer' => $player->address_same_as_guardian ? null : $player->house_number,
                 'plz' => $player->address_same_as_guardian ? null : $player->zip,
                 'ort' => $player->address_same_as_guardian ? null : $player->city,
-                'matrix_konto' => $player->matrixAccount?->mxid,
                 'helden' => $player->heroes->map(fn ($hero) => [
                     'charaktername' => $hero->character_name,
                     'klassen' => $hero->classes->pluck('name'),
