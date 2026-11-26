@@ -5,7 +5,7 @@
     </x-slot>
 
     <div class="py-12">
-        <div class="max-w-2xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
+        <div class="max-w-2xl lg:max-w-6xl mx-auto px-4 sm:px-6 lg:px-8 space-y-6">
 
             @if (session('status'))
                 <div class="p-3 bg-green-100 text-green-800 rounded" role="status">{{ session('status') }}</div>
@@ -15,6 +15,9 @@
                 <a href="{{ route('admin.talk.logs.index') }}" class="underline"><i class="list icon" aria-hidden="true"></i>Talk-Protokoll</a>
                 – alle Änderungen in Nextcloud und alle Fehler
             </p>
+
+            {{-- Desktop: Verbindung und Einstellungen nebeneinander --}}
+            <div class="grid gap-6 lg:grid-cols-2 items-start">
 
             {{-- Verbindung (Zugangsdaten aus der .env) --}}
             <section aria-labelledby="talk-connection" class="bg-white/70 border-2 border-[#5a3a22]/40 shadow sm:rounded-lg p-6">
@@ -150,6 +153,8 @@
                     </div>
                 </form>
             </section>
+
+            </div>
 
             {{-- Issue #31 (Phase 3): Texte für die Elternerlaubnis --}}
             <section aria-labelledby="talk-texts" class="bg-white/70 border-2 border-[#5a3a22]/40 shadow sm:rounded-lg p-6">
