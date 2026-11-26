@@ -10,6 +10,7 @@ use App\Notifications\TalkAccessEnded;
 use App\Notifications\TalkAccountReady;
 use App\Services\NextcloudTalk\NextcloudTalkClient;
 use App\Services\NextcloudTalk\NextcloudTalkException;
+use App\Services\NextcloudTalk\PlayerTalkService;
 use App\Services\NextcloudTalk\TalkTexts;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -654,5 +655,101 @@ class NextcloudTalkPlayerTest extends TestCase
         $this->assertFalse(NextcloudTalkClient::isAllowedEndpoint('delete', 'cloud/users/mia'));
         $this->assertTrue(NextcloudTalkClient::isAllowedEndpoint('post', 'cloud/users/mia/groups'));
         $this->assertTrue(NextcloudTalkClient::isAllowedEndpoint('put', 'cloud/users/mia/disable'));
+    }
+
+    // ── Gelöschte Nextcloud-Konten ──────────────────────────────────────
+
+    /** Volljähriger Spieler, dessen Konto „mia.mueller“ in Nextcloud gelöscht wurde. */
+    private function playerWithDeletedAccount(): Player
+    {
+        $player = $this->player(25, null, ['email' => 'mia@example.test']);
+        $player->forceFill([
+            'talk_approved_at' => now(),
+            'talk_account_ready_at' => now(),
+            'nextcloud_user_id' => 'mia.mueller',
+            'nextcloud_account_created' => true,
+            'nextcloud_group' => 'TALK-User',
+        ])->save();
+        // Kein Eintrag in $this->accounts → Konto gibt es nicht mehr.
+
+        return $player;
+    }
+
+    public function test_geloeschtes_konto_wird_erkannt_und_neu_angelegt(): void
+    {
+        $player = $this->playerWithDeletedAccount();
+
+        $this->actingAs($this->registrar())
+            ->post(route('admin.talk.approvals.retry', $player))
+            ->assertSessionHas('status');
+
+        $player->refresh();
+        $this->assertSame('mia.mueller', $player->nextcloud_user_id);
+        $this->assertTrue($player->nextcloud_account_created);
+        $this->assertNull($player->talk_error);
+        $this->assertSame('ready', $player->talkStatus());
+        $this->assertArrayHasKey('mia.mueller', $this->accounts);
+        $this->assertDatabaseHas('talk_logs', ['player_id' => $player->id, 'action' => 'Konto existiert nicht mehr: mia.mueller – Verknüpfung gelöst']);
+    }
+
+    public function test_neue_freigabe_nach_geloeschtem_konto(): void
+    {
+        $player = $this->playerWithDeletedAccount();
+        PlayerTalkService::revoke($player, TalkAccessEnded::REVOKED);
+
+        $this->actingAs($this->registrar())
+            ->post(route('admin.talk.approvals.approve', $player->fresh()))
+            ->assertSessionHas('status');
+
+        $this->assertSame('ready', $player->fresh()->talkStatus());
+        $this->assertArrayHasKey('mia.mueller', $this->accounts);
+    }
+
+    public function test_taeglicher_abgleich_loest_geloeschtes_konto(): void
+    {
+        $player = $this->playerWithDeletedAccount();
+        $player->forceFill(['nextcloud_group' => 'talk-u18'])->save(); // Gruppe passt nicht → wird geprüft
+
+        $this->artisan('talk:sync-age-groups')->assertSuccessful();
+
+        $player->refresh();
+        $this->assertNull($player->nextcloud_user_id);
+        $this->assertNull($player->talk_account_ready_at);
+        $this->assertStringContainsString('Erneut versuchen', (string) $player->talk_error);
+        // Nicht automatisch neu angelegt.
+        $this->assertArrayNotHasKey('mia.mueller', $this->accounts);
+    }
+
+    public function test_verknuepfung_von_hand_loesen(): void
+    {
+        $player = $this->player(25, null, ['email' => 'mia@example.test']);
+        $this->accounts['mia.alt'] = ['email' => 'alt@example.test', 'groups' => ['TALK-User'], 'enabled' => true];
+        $player->forceFill([
+            'talk_approved_at' => now(),
+            'talk_account_ready_at' => now(),
+            'nextcloud_user_id' => 'mia.alt',
+            'nextcloud_account_created' => false,
+        ])->save();
+        $registrar = $this->registrar();
+
+        $this->actingAs($registrar)
+            ->get(route('admin.talk.approvals.index'))
+            ->assertSee('Verknüpfung lösen');
+
+        $this->actingAs($registrar)
+            ->post(route('admin.talk.approvals.unlink', $player))
+            ->assertSessionHas('status', fn ($m) => str_contains($m, 'mia.alt'));
+
+        $player->refresh();
+        $this->assertNull($player->nextcloud_user_id);
+        $this->assertNull($player->talk_account_ready_at);
+        // In Nextcloud wurde nichts gelöscht.
+        $this->assertArrayHasKey('mia.alt', $this->accounts);
+        $this->assertDatabaseHas('talk_logs', ['player_id' => $player->id, 'action' => 'Verknüpfung von Hand gelöst: mia.alt']);
+
+        // Teilnehmer dürfen das nicht.
+        $this->actingAs($this->userWithRole(70))
+            ->post(route('admin.talk.approvals.unlink', $player))
+            ->assertForbidden();
     }
 }
