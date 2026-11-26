@@ -95,21 +95,16 @@ class PlayerTalkService
         }
 
         try {
-            $group = Setting::get('talk_u18_group');
-            if ($player->isTalkMinor() && blank($group)) {
-                throw new NextcloudTalkException('In der Verwaltung ist keine Nextcloud-Gruppe für U18-Konten hinterlegt.');
-            }
+            $group = self::targetGroup($player);
 
             if (blank($player->nextcloud_user_id)) {
-                $this->linkOrCreate($player);
+                $this->linkOrCreate($player, $group);
             } elseif ($player->nextcloud_account_created) {
                 // Nach einer Rücknahme deaktiviertes Konto wieder einschalten.
                 $this->client->enableUser($player->nextcloud_user_id);
             }
 
-            if ($player->isTalkMinor()) {
-                $this->client->addUserToGroup((string) $player->nextcloud_user_id, (string) $group);
-            }
+            $this->applyGroups($player, $group);
 
             $newlyReady = $player->talk_account_ready_at === null;
             $player->talk_account_ready_at = now();
@@ -126,6 +121,84 @@ class PlayerTalkService
         }
 
         $player->save();
+    }
+
+    /**
+     * Gruppe nach Alter: Minderjährige in die U18-Gruppe, Volljährige in die Gruppe für
+     * volljährige Talk-Nutzer. Nur Gruppen mit „TALK-“ am Anfang sind erlaubt.
+     */
+    public static function targetGroup(Player $player): string
+    {
+        $minor = $player->isTalkMinor();
+        $group = trim((string) Setting::get($minor ? 'talk_u18_group' : 'talk_user_group'));
+
+        if ($group === '') {
+            throw new NextcloudTalkException($minor
+                ? 'In der Verwaltung ist keine Nextcloud-Gruppe für U18-Konten hinterlegt.'
+                : 'In der Verwaltung ist keine Nextcloud-Gruppe für volljährige Talk-Nutzer hinterlegt.');
+        }
+        if (! NextcloudTalkClient::isAllowedGroup($group)) {
+            throw new NextcloudTalkException('Die Gruppe „'.$group.'“ ist nicht erlaubt (nur Gruppen, die mit „'.NextcloudTalkClient::GROUP_PREFIX.'“ beginnen).');
+        }
+
+        return $group;
+    }
+
+    /**
+     * Konto in die Gruppe nach Alter aufnehmen; Volljährige zusätzlich aus der U18-Gruppe nehmen
+     * (Wechsel am 18. Geburtstag). Merkt sich die vergebene Gruppe am Spieler.
+     */
+    private function applyGroups(Player $player, string $group): void
+    {
+        $userId = (string) $player->nextcloud_user_id;
+        $this->client->addUserToGroup($userId, $group);
+
+        $u18 = trim((string) Setting::get('talk_u18_group'));
+        if (! $player->isTalkMinor() && $u18 !== '' && $u18 !== $group
+            && in_array($u18, $this->client->userGroups($userId), true)) {
+            $this->client->removeUserFromGroup($userId, $u18);
+        }
+
+        $player->nextcloud_group = $group;
+    }
+
+    /**
+     * Täglicher Abgleich: Konten, deren Gruppe nicht (mehr) zum Alter passt – z. B. am
+     * 18. Geburtstag von der U18- in die Volljährigen-Gruppe. Liefert die Zahl der Wechsel.
+     */
+    public function syncAgeGroups(): int
+    {
+        if (! $this->client->isActive()) {
+            return 0;
+        }
+
+        $changed = 0;
+        Player::whereNotNull('talk_account_ready_at')
+            ->whereNotNull('nextcloud_user_id')
+            ->chunkById(100, function ($players) use (&$changed) {
+                foreach ($players as $player) {
+                    try {
+                        $group = self::targetGroup($player);
+                    } catch (NextcloudTalkException) {
+                        continue;
+                    }
+                    if ($player->nextcloud_group === $group) {
+                        continue;
+                    }
+
+                    $this->client->forContext(player: $player);
+                    try {
+                        $this->applyGroups($player, $group);
+                        $player->talk_error = null;
+                        $changed++;
+                    } catch (NextcloudTalkException $e) {
+                        $player->talk_error = mb_substr($e->getMessage(), 0, 500);
+                    }
+                    $player->save();
+                }
+            });
+
+        return $changed;
     }
 
     public function disable(Player $player): void
@@ -171,7 +244,7 @@ class PlayerTalkService
         return $player->users()->wherePivot('self', true)->first();
     }
 
-    private function linkOrCreate(Player $player): void
+    private function linkOrCreate(Player $player, string $group): void
     {
         $email = self::accountEmail($player);
 
@@ -191,7 +264,7 @@ class PlayerTalkService
         }
 
         $userId = $this->uniqueUserId($player);
-        $this->client->createUser($userId, $player->full_name, $email);
+        $this->client->createUser($userId, $player->full_name, $email, $group);
 
         $player->nextcloud_user_id = $userId;
         $player->nextcloud_account_created = true;

@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use App\Models\Setting;
 use App\Models\User;
+use App\Services\NextcloudTalk\AdventureTalkService;
 use App\Services\NextcloudTalk\NextcloudTalkClient;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
@@ -201,5 +202,58 @@ class NextcloudTalkSettingsTest extends TestCase
         $this->actingAs($this->userWithRole(10))
             ->get(route('admin.talk.index'))
             ->assertSee('https://hilfe.waldritter-giessen.de/70_nextcloud-talk/index.html');
+    }
+
+    public function test_nur_talk_gruppen_sind_erlaubt(): void
+    {
+        foreach (['admin', 'Admin', 'users', 'U18'] as $group) {
+            $this->actingAs($this->userWithRole(10))
+                ->put(route('admin.talk.update'), ['talk_user_group' => $group, 'talk_u18_group' => $group])
+                ->assertSessionHasErrors(['talk_user_group', 'talk_u18_group']);
+        }
+
+        $this->actingAs($this->userWithRole(10))
+            ->put(route('admin.talk.update'), ['talk_user_group' => 'TALK-User', 'talk_u18_group' => 'TALK-U18'])
+            ->assertSessionHasNoErrors();
+
+        $this->assertSame('TALK-User', Setting::get('talk_user_group'));
+        $this->assertSame('TALK-U18', Setting::get('talk_u18_group'));
+    }
+
+    public function test_verbindungstest_prueft_die_talk_gruppen(): void
+    {
+        $this->configure();
+        Setting::set('talk_user_group', 'TALK-User');
+        Setting::set('talk_u18_group', 'TALK-Teen');
+        Http::fake([
+            'cloud.example.test/ocs/v2.php/cloud/user?*' => Http::response(['ocs' => ['data' => ['id' => 'heldenregister']]]),
+            'cloud.example.test/ocs/v2.php/cloud/capabilities*' => Http::response(['ocs' => ['data' => [
+                'version' => ['string' => '35.0.3'],
+                'capabilities' => ['spreed' => ['version' => '25.0.8']],
+            ]]]),
+            // Als Gruppen-Admin sieht das Konto nur seine Gruppen – TALK-Teen gibt es nicht.
+            'cloud.example.test/ocs/v2.php/cloud/groups*' => Http::response(['ocs' => ['data' => ['groups' => ['TALK-User']]]]),
+        ]);
+
+        $this->actingAs($this->userWithRole(10))
+            ->followingRedirects()
+            ->post(route('admin.talk.test'))
+            ->assertOk()
+            ->assertSee('Volljährige: Gruppe „TALK-User“ gefunden')
+            ->assertSee('U18: Gruppe „TALK-Teen“ nicht gefunden')
+            ->assertDontSee(self::SECRET);
+    }
+
+    public function test_moderatoren_werden_gespeichert_und_geprueft(): void
+    {
+        $this->actingAs($this->userWithRole(10))
+            ->put(route('admin.talk.update'), ['talk_moderators' => "anna.admin\n bert.admin , anna.admin"])
+            ->assertSessionHasNoErrors();
+        $this->assertSame("anna.admin\nbert.admin", Setting::get('talk_moderators'));
+        $this->assertSame(['anna.admin', 'bert.admin'], AdventureTalkService::moderators());
+
+        $this->actingAs($this->userWithRole(10))
+            ->put(route('admin.talk.update'), ['talk_moderators' => 'anna<script>'])
+            ->assertSessionHasErrors('talk_moderators');
     }
 }

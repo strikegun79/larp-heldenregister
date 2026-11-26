@@ -27,6 +27,52 @@ class NextcloudTalkClient
         private readonly int $timeout = 10,
     ) {}
 
+    /**
+     * Sicherheit: Nur diese Anfragen darf das Heldenregister an Nextcloud stellen (Methode + Pfad).
+     * Alles andere – insbesondere das Vergeben von Admin- oder Gruppen-Admin-Rechten
+     * (…/subadmins) – wird verweigert, bevor eine Anfrage das Haus verlässt.
+     */
+    private const ALLOWED_ENDPOINTS = [
+        ['get', '#^cloud/users/details$#'],
+        ['post', '#^cloud/users$#'],
+        ['get', '#^cloud/users/[^/]+$#'],
+        ['get', '#^cloud/users/[^/]+/groups$#'],
+        ['post', '#^cloud/users/[^/]+/groups$#'],
+        ['delete', '#^cloud/users/[^/]+/groups$#'],
+        ['put', '#^cloud/users/[^/]+/(enable|disable)$#'],
+        ['get', '#^cloud/groups$#'],
+        ['post', '#^apps/spreed/api/v1/chat/[A-Za-z0-9]+$#'],
+        ['put', '#^apps/spreed/api/v1/chat/[A-Za-z0-9]+/threads/\d+$#'],
+        ['post', '#^apps/spreed/api/v4/room$#'],
+        ['put', '#^apps/spreed/api/v4/room/[A-Za-z0-9]+$#'],
+        ['get', '#^apps/spreed/api/v4/room/[A-Za-z0-9]+/participants$#'],
+        ['post', '#^apps/spreed/api/v4/room/[A-Za-z0-9]+/participants$#'],
+        ['delete', '#^apps/spreed/api/v4/room/[A-Za-z0-9]+/attendees$#'],
+        // Teilnehmer eines Talk-Raums zum Moderator machen (nur der Raum, keine Nextcloud-Rechte).
+        ['post', '#^apps/spreed/api/v4/room/[A-Za-z0-9]+/moderators$#'],
+    ];
+
+    /** Sicherheit: Nextcloud-Gruppen, die das Heldenregister vergeben darf, beginnen hiermit. */
+    public const GROUP_PREFIX = 'TALK-';
+
+    /** Darf das Heldenregister Konten in diese Gruppe aufnehmen bzw. daraus entfernen? */
+    public static function isAllowedGroup(?string $group): bool
+    {
+        $group = trim((string) $group);
+
+        return $group !== ''
+            && strcasecmp($group, 'admin') !== 0
+            && stripos($group, self::GROUP_PREFIX) === 0
+            && preg_match('/^[\pL\pN _.@-]+$/u', $group) === 1;
+    }
+
+    private static function assertAllowedGroup(string $group): void
+    {
+        if (! self::isAllowedGroup($group)) {
+            throw new NextcloudTalkException('Die Gruppe „'.$group.'“ darf das Heldenregister nicht vergeben (nur Gruppen, die mit „'.self::GROUP_PREFIX.'“ beginnen).');
+        }
+    }
+
     /** Talk-Protokoll: Bezug der folgenden Anfragen (Veranstaltung bzw. Spieler). */
     private ?int $logAdventureId = null;
 
@@ -191,7 +237,7 @@ class NextcloudTalkClient
     /**
      * Teilnehmer eines Raums.
      *
-     * @return list<array{attendeeId: int, actorType: string, actorId: string}>
+     * @return list<array{attendeeId: int, actorType: string, actorId: string, participantType: int}>
      */
     public function participants(string $token): array
     {
@@ -203,9 +249,19 @@ class NextcloudTalkClient
                 'attendeeId' => (int) $p['attendeeId'],
                 'actorType' => (string) ($p['actorType'] ?? ''),
                 'actorId' => (string) ($p['actorId'] ?? ''),
+                // 1 = Besitzer, 2 = Moderator, 3 = Teilnehmer
+                'participantType' => (int) ($p['participantType'] ?? 3),
             ])
             ->values()
             ->all();
+    }
+
+    /** Teilnehmer im Raum zum Moderator machen (darf den Raum dann verwalten und löschen). */
+    public function promoteModerator(string $token, int $attendeeId): void
+    {
+        $this->send('post', 'apps/spreed/api/v4/room/'.rawurlencode($token).'/moderators', [
+            'attendeeId' => $attendeeId,
+        ]);
     }
 
     public function removeAttendee(string $token, int $attendeeId): void
@@ -216,7 +272,7 @@ class NextcloudTalkClient
     }
 
     /**
-     * Nextcloud-Benutzername zu einer E-Mail-Adresse (Provisioning-API, benötigt Admin-Rechte).
+     * Nextcloud-Benutzername zu einer E-Mail-Adresse (Provisioning-API, als Gruppen-Admin nur Konten der eigenen Gruppen).
      * Nur ein eindeutiger, exakter Treffer zählt – sonst null.
      */
     public function findUserIdByEmail(string $email): ?string
@@ -236,7 +292,7 @@ class NextcloudTalkClient
         return $matches->count() === 1 ? $matches->first() : null;
     }
 
-    // ── Phase 3: Konten (Provisioning-API, benötigt Admin-Rechte) ───
+    // ── Phase 3: Konten (Provisioning-API, Admin oder Gruppen-Admin der Talk-Gruppen) ───
 
     /** Gibt es ein Nextcloud-Konto mit diesem Benutzernamen? */
     public function userExists(string $userId): bool
@@ -250,23 +306,83 @@ class NextcloudTalkClient
      * Konto ohne Passwort anlegen – Nextcloud verschickt dann selbst die Willkommensmail
      * mit dem Link zum Setzen des Passworts.
      */
-    public function createUser(string $userId, string $displayName, string $email): void
+    public function createUser(string $userId, string $displayName, string $email, string $group): void
     {
+        // Direkt mit Gruppe anlegen: so genügen dem technischen Konto Gruppen-Admin-Rechte.
+        self::assertAllowedGroup($group);
+
         $this->send('post', 'cloud/users', [
             'userid' => $userId,
             'password' => '',
             'displayName' => mb_substr($displayName, 0, 64),
             'email' => $email,
+            'groups' => [$group],
             'language' => 'de',
-        ], [400 => 'Nextcloud hat das Konto „'.$userId.'“ nicht angelegt (Benutzername oder E-Mail ungültig bzw. vergeben).']);
+        ], [
+            'ocs:102' => 'Den Benutzernamen „'.$userId.'“ gibt es in Nextcloud schon.',
+            'ocs:104' => self::groupMissing($group),
+            'ocs:105' => self::groupForbidden($group),
+            'ocs:106' => 'Als Gruppen-Admin muss das technische Konto beim Anlegen eine Gruppe angeben – Gruppe „'.$group.'“ prüfen.',
+            400 => 'Nextcloud hat das Konto „'.$userId.'“ nicht angelegt (Benutzername oder E-Mail ungültig bzw. vergeben).',
+        ]);
     }
 
     public function addUserToGroup(string $userId, string $group): void
     {
-        $this->send('post', 'cloud/users/'.rawurlencode($userId).'/groups', ['groupid' => $group], [
-            400 => 'Die Nextcloud-Gruppe „'.$group.'“ gibt es nicht.',
+        self::assertAllowedGroup($group);
+
+        $this->send('post', 'cloud/users/'.rawurlencode($userId).'/groups', ['groupid' => $group], self::groupMessages($userId, $group));
+    }
+
+    public function removeUserFromGroup(string $userId, string $group): void
+    {
+        self::assertAllowedGroup($group);
+
+        $this->send('delete', 'cloud/users/'.rawurlencode($userId).'/groups', ['groupid' => $group], self::groupMessages($userId, $group));
+    }
+
+    /**
+     * Gruppen eines Kontos (als Gruppen-Admin nur die eigenen Gruppen sichtbar).
+     *
+     * @return list<string>
+     */
+    public function userGroups(string $userId): array
+    {
+        $response = $this->send('get', 'cloud/users/'.rawurlencode($userId).'/groups', [], [
             404 => 'Das Nextcloud-Konto „'.$userId.'“ wurde nicht gefunden.',
         ]);
+
+        return array_values(array_map('strval', (array) $response->json('ocs.data.groups', [])));
+    }
+
+    /** Ist die Gruppe für das technische Konto sichtbar (existiert und wird von ihm verwaltet)? */
+    public function groupVisible(string $group): bool
+    {
+        $response = $this->send('get', 'cloud/groups', ['search' => $group]);
+
+        return in_array($group, array_map('strval', (array) $response->json('ocs.data.groups', [])), true);
+    }
+
+    /** @return array<string|int, string> */
+    private static function groupMessages(string $userId, string $group): array
+    {
+        return [
+            'ocs:102' => self::groupMissing($group),
+            'ocs:103' => 'Das Nextcloud-Konto „'.$userId.'“ wurde nicht gefunden.',
+            'ocs:104' => self::groupForbidden($group),
+            'ocs:105' => 'Nextcloud konnte die Gruppenzugehörigkeit für „'.$group.'“ nicht ändern.',
+            404 => 'Das Nextcloud-Konto „'.$userId.'“ wurde nicht gefunden.',
+        ];
+    }
+
+    private static function groupMissing(string $group): string
+    {
+        return 'Die Nextcloud-Gruppe „'.$group.'“ gibt es nicht (in den Talk-Einstellungen die Gruppen-ID eintragen, nicht den Anzeigenamen).';
+    }
+
+    private static function groupForbidden(string $group): string
+    {
+        return 'Keine Berechtigung für die Gruppe „'.$group.'“ – das technische Konto muss in Nextcloud Gruppen-Admin dieser Gruppe sein.';
     }
 
     public function enableUser(string $userId): void
@@ -289,7 +405,7 @@ class NextcloudTalkClient
      * OCS-Aufruf mit verständlicher Fehlermeldung; wirft NextcloudTalkException.
      *
      * @param  array<string, mixed>  $data
-     * @param  array<int, string>  $messages  Eigene Meldungen je HTTP-Status
+     * @param  array<int|string, string>  $messages  Eigene Meldungen je HTTP-Status (int) oder OCS-Statuscode („ocs:102“)
      * @param  list<int>  $allowed  Status, die nicht als Fehler gelten (z. B. 404 bei Existenzprüfung)
      */
     private function send(string $method, string $path, array $data = [], array $messages = [], array $allowed = []): Response
@@ -299,6 +415,13 @@ class NextcloudTalkClient
         }
 
         $action = self::describe($method, $path, $data);
+
+        if (! self::isAllowedEndpoint($method, $path)) {
+            $message = $action.': Diese Anfrage an Nextcloud ist für das Heldenregister nicht freigegeben.';
+            $this->log($method, $path, $action, null, false, $message);
+
+            throw new NextcloudTalkException($message);
+        }
 
         try {
             $request = $this->request();
@@ -321,7 +444,17 @@ class NextcloudTalkClient
             return $response;
         }
 
-        $message = $action.': '.($messages[$response->status()] ?? $this->errorMessage($response, $path));
+        // OCS-Statuscode (z. B. 102 = Gruppe fehlt, 104 = keine Berechtigung) vor dem HTTP-Status auswerten.
+        $ocsCode = (int) $response->json('ocs.meta.statuscode', 0);
+        // Raum abrufen bzw. umbenennen mit 404: Raum gelöscht oder technisches Konto nicht mehr Mitglied.
+        if ($response->status() === 404 && self::isRoomLookup($method, $path)) {
+            $message = $action.': Der Talk-Raum wurde in Nextcloud gelöscht oder das technische Konto ist nicht mehr Mitglied.';
+            $this->log($method, $path, $action, 404, false, $message);
+
+            throw new NextcloudRoomNotFoundException($message);
+        }
+
+        $message = $action.': '.($messages['ocs:'.$ocsCode] ?? $messages[$response->status()] ?? $this->errorMessage($response, $path));
         $this->log($method, $path, $action, $response->status(), false, $message);
 
         throw new NextcloudTalkException($message);
@@ -353,6 +486,30 @@ class NextcloudTalkClient
             ->timeout($this->timeout);
     }
 
+    /** Anfragen, deren 404 bedeutet, dass es den Raum nicht (mehr) gibt. */
+    private static function isRoomLookup(string $method, string $path): bool
+    {
+        $method = strtolower($method);
+
+        return ($method === 'get' && preg_match('#^apps/spreed/api/v4/room/[A-Za-z0-9]+/participants$#', $path) === 1)
+            || ($method === 'put' && preg_match('#^apps/spreed/api/v4/room/[A-Za-z0-9]+$#', $path) === 1);
+    }
+
+    /** Steht die Anfrage auf der Liste der erlaubten Endpunkte? */
+    public static function isAllowedEndpoint(string $method, string $path): bool
+    {
+        $method = strtolower($method);
+        $path = trim($path, '/');
+
+        foreach (self::ALLOWED_ENDPOINTS as [$allowedMethod, $pattern]) {
+            if ($allowedMethod === $method && preg_match($pattern, $path) === 1) {
+                return true;
+            }
+        }
+
+        return false;
+    }
+
     /** Aktion einer Anfrage in Klartext (für Fehlermeldungen und das Talk-Protokoll). */
     public static function describe(string $method, string $path, array $data = []): string
     {
@@ -363,7 +520,10 @@ class NextcloudTalkClient
         return match (true) {
             $path === 'cloud/users/details' => 'Konto per E-Mail suchen',
             $path === 'cloud/users' && $method === 'post' => 'Konto anlegen: '.($data['userid'] ?? ''),
+            str_ends_with($path, '/groups') && $method === 'delete' => 'Aus Gruppe entfernen: '.($data['groupid'] ?? ''),
+            str_ends_with($path, '/groups') && $method === 'get' => 'Gruppen abrufen: '.rawurldecode($segments[2] ?? ''),
             str_ends_with($path, '/groups') => 'Zur Gruppe hinzufügen: '.($data['groupid'] ?? ''),
+            $path === 'cloud/groups' => 'Gruppe suchen: '.($data['search'] ?? ''),
             str_ends_with($path, '/enable') => 'Konto aktivieren: '.rawurldecode($segments[2] ?? ''),
             str_ends_with($path, '/disable') => 'Konto deaktivieren: '.rawurldecode($segments[2] ?? ''),
             str_starts_with($path, 'cloud/users/') => 'Benutzername prüfen: '.$last,
@@ -372,6 +532,7 @@ class NextcloudTalkClient
             str_ends_with($path, '/participants') && $method === 'post' => 'Teamer hinzufügen: '.($data['newParticipant'] ?? ''),
             str_ends_with($path, '/participants') => 'Teilnehmer abrufen',
             str_ends_with($path, '/attendees') => 'Teamer entfernen',
+            str_ends_with($path, '/moderators') => 'Zum Moderator machen',
             $path === 'apps/spreed/api/v4/room' => 'Teamer-Raum anlegen: '.($data['roomName'] ?? ''),
             str_starts_with($path, 'apps/spreed/api/v4/room/') && $method === 'put' => 'Teamer-Raum umbenennen: '.($data['roomName'] ?? ''),
             default => strtoupper($method).' '.$path,
@@ -416,7 +577,7 @@ class NextcloudTalkClient
         return match ($response->status()) {
             401 => 'Anmeldung abgelehnt: Benutzer oder App-Passwort ist falsch.',
             403 => match (true) {
-                str_starts_with($path, 'cloud/users') => 'Zugriff verweigert: Das technische Konto braucht Admin-Rechte in Nextcloud (Gruppe „admin“).',
+                str_starts_with($path, 'cloud/') => 'Zugriff verweigert: Das technische Konto muss in Nextcloud Gruppen-Admin der Talk-Gruppen sein (oder Admin).',
                 str_starts_with($path, 'apps/spreed') => 'Zugriff verweigert: Das technische Konto muss Moderator in diesem Talk-Raum sein.',
                 default => 'Zugriff verweigert: Das Konto hat nicht die nötigen Rechte.',
             },

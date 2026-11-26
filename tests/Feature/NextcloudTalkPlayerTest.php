@@ -8,9 +8,12 @@ use App\Models\User;
 use App\Notifications\TalkAccessApproved;
 use App\Notifications\TalkAccessEnded;
 use App\Notifications\TalkAccountReady;
+use App\Services\NextcloudTalk\NextcloudTalkClient;
+use App\Services\NextcloudTalk\NextcloudTalkException;
 use App\Services\NextcloudTalk\TalkTexts;
 use Database\Seeders\RoleSeeder;
 use Illuminate\Foundation\Testing\RefreshDatabase;
+use Illuminate\Http\Client\Factory;
 use Illuminate\Http\Client\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Http;
@@ -43,6 +46,7 @@ class NextcloudTalkPlayerTest extends TestCase
         ]);
         Setting::set('talk_enabled', '1');
         Setting::set('talk_u18_group', 'talk-u18');
+        Setting::set('talk_user_group', 'TALK-User');
         Setting::set('talk_app_url', 'https://cloud.example.test/apps/spreed');
 
         Http::fake(function (Request $request) {
@@ -59,7 +63,7 @@ class NextcloudTalkPlayerTest extends TestCase
                 )]]]);
             }
             if ($method === 'POST' && $path === $prefix) {
-                $this->accounts[$request['userid']] = ['email' => $request['email'], 'groups' => [], 'enabled' => true];
+                $this->accounts[$request['userid']] = ['email' => $request['email'], 'groups' => (array) ($request['groups'] ?? []), 'enabled' => true];
 
                 return Http::response(['ocs' => ['data' => ['id' => $request['userid']]]]);
             }
@@ -69,8 +73,15 @@ class NextcloudTalkPlayerTest extends TestCase
                     return Http::response(['ocs' => []], 404);
                 }
 
+                if (($m[3] ?? '') === 'groups') {
+                    return match ($method) {
+                        'GET' => Http::response(['ocs' => ['data' => ['groups' => $this->accounts[$id]['groups']]]]),
+                        'DELETE' => tap(Http::response(['ocs' => ['data' => []]]), fn () => $this->accounts[$id]['groups'] = array_values(array_diff($this->accounts[$id]['groups'], [$request['groupid']]))),
+                        default => tap(Http::response(['ocs' => ['data' => []]]), fn () => $this->accounts[$id]['groups'] = array_values(array_unique([...$this->accounts[$id]['groups'], $request['groupid']]))),
+                    };
+                }
+
                 return match ($m[3] ?? '') {
-                    'groups' => tap(Http::response(['ocs' => ['data' => []]]), fn () => $this->accounts[$id]['groups'][] = $request['groupid']),
                     'enable' => tap(Http::response(['ocs' => ['data' => []]]), fn () => $this->accounts[$id]['enabled'] = true),
                     'disable' => tap(Http::response(['ocs' => ['data' => []]]), fn () => $this->accounts[$id]['enabled'] = false),
                     default => Http::response(['ocs' => ['data' => ['id' => $id]]]),
@@ -397,7 +408,7 @@ class NextcloudTalkPlayerTest extends TestCase
         $this->assertSame('mia.mueller3', $player->fresh()->nextcloud_user_id);
     }
 
-    public function test_erwachsene_brauchen_keine_elternerlaubnis_und_keine_u18_gruppe(): void
+    public function test_erwachsene_brauchen_keine_elternerlaubnis_und_kommen_in_talk_user(): void
     {
         $player = $this->player(25, null, ['email' => 'erwachsen@example.test']);
 
@@ -407,7 +418,10 @@ class NextcloudTalkPlayerTest extends TestCase
 
         $player->refresh();
         $this->assertSame('ready', $player->talkStatus());
-        $this->assertSame([], $this->accounts['mia.mueller']['groups']);
+        // Volljährige: nur die Gruppe für volljährige Talk-Nutzer, direkt beim Anlegen.
+        $this->assertSame(['TALK-User'], $this->accounts['mia.mueller']['groups']);
+        $this->assertSame('TALK-User', $player->nextcloud_group);
+        Http::assertSent(fn ($r) => $r->method() === 'POST' && str_ends_with(parse_url($r->url(), PHP_URL_PATH), '/cloud/users') && $r['groups'] === ['TALK-User']);
     }
 
     public function test_fehlende_u18_gruppe_oder_email_wird_als_fehler_angezeigt(): void
@@ -554,5 +568,91 @@ class NextcloudTalkPlayerTest extends TestCase
         $this->assertNotSame($before, TalkTexts::version());
 
         $this->actingAs($this->registrar())->put(route('admin.talk.texts.update'), [])->assertForbidden();
+    }
+
+    // ── Gruppen nach Alter und Absicherung ─────────────────────────────
+
+    public function test_am_18_geburtstag_wechselt_das_konto_die_gruppe(): void
+    {
+        $player = $this->player(17, null, ['email' => 'mia@example.test']);
+        $this->accounts['mia.mueller'] = ['email' => 'mia@example.test', 'groups' => ['talk-u18'], 'enabled' => true];
+        $player->forceFill([
+            'talk_approved_at' => now(),
+            'talk_account_ready_at' => now(),
+            'nextcloud_user_id' => 'mia.mueller',
+            'nextcloud_account_created' => true,
+            'nextcloud_group' => 'talk-u18',
+        ])->save();
+
+        // Noch 17 → nichts zu tun.
+        $this->artisan('talk:sync-age-groups')->expectsOutput('Talk-Gruppen angepasst: 0')->assertSuccessful();
+        $this->assertSame(['talk-u18'], $this->accounts['mia.mueller']['groups']);
+
+        // Genau heute 18 geworden.
+        $player->update(['dayofbirth' => now()->subYears(18)->toDateString()]);
+        $this->artisan('talk:sync-age-groups')->expectsOutput('Talk-Gruppen angepasst: 1')->assertSuccessful();
+
+        $this->assertSame(['TALK-User'], $this->accounts['mia.mueller']['groups']);
+        $this->assertSame('TALK-User', $player->fresh()->nextcloud_group);
+
+        // Zweiter Lauf ändert nichts mehr.
+        $this->artisan('talk:sync-age-groups')->expectsOutput('Talk-Gruppen angepasst: 0');
+    }
+
+    public function test_ocs_code_unterscheidet_fehlende_gruppe_und_fehlende_rechte(): void
+    {
+        $client = NextcloudTalkClient::fromConfig();
+
+        // Eigene simulierte Antworten statt der Nextcloud aus setUp().
+        Http::swap(new Factory);
+        Http::fake(['*' => Http::response(['ocs' => ['meta' => ['statuscode' => 102]]], 400)]);
+        try {
+            $client->addUserToGroup('mia', 'TALK-Teen');
+            $this->fail('Keine Ausnahme');
+        } catch (NextcloudTalkException $e) {
+            $this->assertStringContainsString('gibt es nicht', $e->getMessage());
+            $this->assertStringContainsString('Gruppen-ID', $e->getMessage());
+        }
+
+        Http::swap(new Factory);
+        Http::fake(['*' => Http::response(['ocs' => ['meta' => ['statuscode' => 104]]], 400)]);
+        try {
+            $client->addUserToGroup('mia', 'TALK-U18');
+            $this->fail('Keine Ausnahme');
+        } catch (NextcloudTalkException $e) {
+            $this->assertStringContainsString('Keine Berechtigung für die Gruppe „TALK-U18“', $e->getMessage());
+            $this->assertStringContainsString('Gruppen-Admin', $e->getMessage());
+        }
+    }
+
+    public function test_admin_gruppe_und_fremde_gruppen_werden_nie_vergeben(): void
+    {
+        $client = NextcloudTalkClient::fromConfig();
+
+        foreach (['admin', 'Admin', 'users', 'ALL-Talk'] as $group) {
+            try {
+                $client->addUserToGroup('mia', $group);
+                $this->fail("Gruppe {$group} wurde nicht verweigert");
+            } catch (NextcloudTalkException $e) {
+                $this->assertStringContainsString('darf das Heldenregister nicht vergeben', $e->getMessage());
+            }
+        }
+        Http::assertNotSent(fn ($r) => str_contains($r->url(), '/groups'));
+
+        // Auch eine manipulierte Einstellung führt zu keiner Anfrage.
+        Setting::set('talk_user_group', 'admin');
+        $player = $this->player(25, null, ['email' => 'erwachsen@example.test']);
+        $this->actingAs($this->registrar())->post(route('admin.talk.approvals.approve', $player));
+        $this->assertStringContainsString('nicht erlaubt', (string) $player->fresh()->talk_error);
+        $this->assertArrayNotHasKey('mia.mueller', $this->accounts);
+    }
+
+    public function test_nicht_freigegebene_endpunkte_werden_verweigert(): void
+    {
+        $this->assertFalse(NextcloudTalkClient::isAllowedEndpoint('post', 'cloud/users/mia/subadmins'));
+        $this->assertFalse(NextcloudTalkClient::isAllowedEndpoint('put', 'cloud/users/mia'));
+        $this->assertFalse(NextcloudTalkClient::isAllowedEndpoint('delete', 'cloud/users/mia'));
+        $this->assertTrue(NextcloudTalkClient::isAllowedEndpoint('post', 'cloud/users/mia/groups'));
+        $this->assertTrue(NextcloudTalkClient::isAllowedEndpoint('put', 'cloud/users/mia/disable'));
     }
 }

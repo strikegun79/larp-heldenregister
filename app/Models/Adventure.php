@@ -133,6 +133,7 @@ class Adventure extends Model
             ->all();
     }
 
+    /** @return BelongsTo<User, $this> */
     public function gamemaster(): BelongsTo
     {
         return $this->belongsTo(User::class, 'gamemaster_id');

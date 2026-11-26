@@ -61,7 +61,8 @@ class HeroApiTest extends TestCase
     public function test_response_enthaelt_keine_realnamen(): void
     {
         $player = Player::factory()->create(['name' => 'Klaus', 'lastname' => 'Mustermann']);
-        $hero = Hero::factory()->create(['player_id' => $player->id, 'public_visible' => true]);
+        // Fester Heldenname, damit ein zufälliger Faker-Name (z. B. „Klaus-Jürgen“) den Test nicht verfälscht.
+        $hero = Hero::factory()->create(['player_id' => $player->id, 'public_visible' => true, 'character_name' => 'Ylvaine Sturmherz', 'homeplace' => 'Silvanien']);
 
         $response = $this->getJson("/api/v1/heroes/{$hero->public_code}");
 
