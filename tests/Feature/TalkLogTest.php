@@ -61,11 +61,11 @@ class TalkLogTest extends TestCase
         $player = Player::factory()->create();
 
         try {
-            NextcloudTalkClient::fromConfig()->forContext(player: $player)->createUser('mara.muster', 'Mara Muster', 'mara@example.test');
+            NextcloudTalkClient::fromConfig()->forContext(player: $player)->createUser('mara.muster', 'Mara Muster', 'mara@example.test', 'TALK-User');
             $this->fail('Keine Ausnahme');
         } catch (NextcloudTalkException $e) {
             $this->assertSame(
-                'Konto anlegen: mara.muster: Zugriff verweigert: Das technische Konto braucht Admin-Rechte in Nextcloud (Gruppe „admin“).',
+                'Konto anlegen: mara.muster: Zugriff verweigert: Das technische Konto muss in Nextcloud Gruppen-Admin der Talk-Gruppen sein (oder Admin).',
                 $e->getMessage()
             );
         }

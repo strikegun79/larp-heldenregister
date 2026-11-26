@@ -26,6 +26,9 @@ class Kernel extends ConsoleKernel
         // DSGVO Art. 5 Abs. 1 lit. e: Aufbewahrungsfristen täglich prüfen und bereinigen.
         $schedule->command('dsgvo:prune')->dailyAt('03:00');
 
+        // Talk: am 18. Geburtstag von der U18- in die Volljährigen-Gruppe wechseln.
+        $schedule->command('talk:sync-age-groups')->dailyAt('05:00');
+
         // T-4: Failed Jobs älter als 7 Tage aus der Datenbank entfernen.
         $schedule->command('queue:prune-failed --hours=168')->dailyAt('04:00');
     }

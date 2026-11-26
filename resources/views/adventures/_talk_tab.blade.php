@@ -130,6 +130,17 @@
                     <button type="submit" class="ui small button"><i class="sync icon" aria-hidden="true"></i> Jetzt synchronisieren</button>
                 </form>
             </div>
+            {{-- Spielleiter ist immer Moderator des Teamer-Raums --}}
+            @if ($adventure->gamemaster)
+                <p class="text-sm mb-2">
+                    Spielleiter: <strong>{{ trim($adventure->gamemaster->name.' '.$adventure->gamemaster->lastname) }}</strong> (Moderator)
+                    @if ($adventure->gamemaster->nextcloud_user_id)
+                        <span class="text-green-800 ml-1"><i class="check circle icon" aria-hidden="true"></i> Nextcloud: {{ $adventure->gamemaster->nextcloud_user_id }}</span>
+                    @else
+                        <span class="text-amber-800 ml-1"><i class="exclamation triangle icon" aria-hidden="true"></i> Kein Nextcloud-Konto gefunden</span>
+                    @endif
+                </p>
+            @endif
             @if ($approvedTeamers->isEmpty())
                 <p class="text-sm text-stone-600">Noch keine bestätigten Teamer.</p>
             @else

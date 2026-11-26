@@ -511,6 +511,10 @@ class AdventureController extends Controller
         if ($adventure->wasChanged('name')) {
             AdventureTalkService::queueSetup($adventure);
         }
+        // Neuer Spielleiter → im Teamer-Raum aufnehmen und zum Moderator machen.
+        if ($adventure->wasChanged('gamemaster_id') && $adventure->talk_teamer_room_token) {
+            AdventureTalkService::queueSync($adventure);
+        }
 
         $message = 'Abenteuer wurde aktualisiert.';
 

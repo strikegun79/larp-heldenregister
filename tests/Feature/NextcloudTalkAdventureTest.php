@@ -34,6 +34,12 @@ class NextcloudTalkAdventureTest extends TestCase
 
     private int $plotStatus = 201;
 
+    /** Raum in Nextcloud gelöscht → alle Raum-Aufrufe liefern 404. */
+    private bool $roomDeleted = false;
+
+    /** Moderatoren im simulierten Raum (Benutzername → true). */
+    private array $roomModerators = [];
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -71,13 +77,23 @@ class NextcloudTalkAdventureTest extends TestCase
 
                 return Http::response(['ocs' => ['data' => ['token' => 'team77xy']]], 201);
             }
+            if ($this->roomDeleted && str_starts_with($path, $base.'v4/room/team77xy')) {
+                return Http::response(['ocs' => []], 404);
+            }
+            if ($method === 'POST' && $path === $base.'v4/room/team77xy/moderators') {
+                $actor = array_search((int) $request['attendeeId'], $this->roomMembers, true);
+                $this->roomModerators[$actor] = true;
+
+                return Http::response(['ocs' => ['data' => []]]);
+            }
             if ($method === 'PUT' && $path === $base.'v4/room/team77xy') {
                 return Http::response(['ocs' => ['data' => []]]);
             }
             if ($method === 'GET' && $path === $base.'v4/room/team77xy/participants') {
                 $list = [];
                 foreach ($this->roomMembers as $actorId => $attendeeId) {
-                    $list[] = ['attendeeId' => $attendeeId, 'actorType' => 'users', 'actorId' => $actorId];
+                    $type = $actorId === 'heldenregister' ? 1 : (isset($this->roomModerators[$actorId]) ? 2 : 3);
+                    $list[] = ['attendeeId' => $attendeeId, 'actorType' => 'users', 'actorId' => $actorId, 'participantType' => $type];
                 }
 
                 return Http::response(['ocs' => ['data' => $list]]);
@@ -547,5 +563,132 @@ class NextcloudTalkAdventureTest extends TestCase
             ->assertSee('Tilda Teamer')
             ->assertSee('id="talk-teamers-mob"', false)
             ->assertDontSee('<html', false);
+    }
+
+    // ── Moderatoren und gelöschte Räume ─────────────────────────────────
+
+    public function test_moderatoren_werden_aufgenommen_und_befoerdert(): void
+    {
+        $adventure = $this->adventureWithRoom();
+        $this->roomMembers['bert.admin'] = 5; // schon im Raum, aber noch kein Moderator
+        Setting::set('talk_moderators', "anna.admin\nbert.admin\nheldenregister");
+
+        AdventureTalkService::make()->syncTeamers($adventure);
+
+        $this->assertArrayHasKey('anna.admin', $this->roomMembers);
+        $this->assertTrue($this->roomModerators['anna.admin'] ?? false);
+        $this->assertTrue($this->roomModerators['bert.admin'] ?? false);
+        // Das technische Konto (Besitzer) wird nicht befördert.
+        $this->assertArrayNotHasKey('heldenregister', $this->roomModerators);
+        $this->assertNull($adventure->fresh()->talk_error);
+
+        // Zweiter Abgleich: nichts mehr zu tun.
+        $before = $this->requests('POST', '/moderators');
+        AdventureTalkService::make()->syncTeamers($adventure->fresh());
+        $this->assertSame($before, $this->requests('POST', '/moderators'));
+        $this->assertSame(2, $before);
+    }
+
+    public function test_moderator_bleibt_auch_als_abgelehnter_teamer_im_raum(): void
+    {
+        $adventure = $this->adventureWithRoom();
+        $teamer = $this->userWithRole(50, ['nextcloud_user_id' => 'anna.admin']);
+        TeamerSignup::factory()->create(['adventure_id' => $adventure->id, 'user_id' => $teamer->id, 'approved_at' => null]);
+        $this->roomMembers['anna.admin'] = 7;
+        Setting::set('talk_moderators', 'anna.admin');
+
+        AdventureTalkService::make()->syncTeamers($adventure);
+
+        $this->assertArrayHasKey('anna.admin', $this->roomMembers);
+    }
+
+    public function test_geloeschter_raum_wird_erkannt_und_vergessen(): void
+    {
+        $admin = $this->userWithRole(10);
+        $adventure = $this->adventureWithRoom();
+        $this->roomDeleted = true;
+
+        AdventureTalkService::make()->syncTeamers($adventure);
+
+        $adventure->refresh();
+        $this->assertFalse($adventure->talk_teamer_room);
+        $this->assertNull($adventure->talk_teamer_room_token);
+        $this->assertStringContainsString('in Nextcloud gelöscht', (string) $adventure->talk_error);
+
+        // Reiter bietet „Teamer-Raum erstellen“ wieder an; Einrichten legt einen neuen Raum an.
+        $this->actingAs($admin)
+            ->get(route('adventures.talk.tab', $adventure))
+            ->assertSee('Teamer-Raum erstellen')
+            ->assertDontSee('Teamer-Raum in Talk öffnen');
+
+        $this->roomDeleted = false;
+        $this->actingAs($admin)
+            ->putJson(route('adventures.talk.update', $adventure), ['talk_teamer_room' => '1'])
+            ->assertOk();
+        $this->assertSame('team77xy', $adventure->fresh()->talk_teamer_room_token);
+    }
+
+    public function test_geloeschter_raum_beim_umbenennen_wird_vergessen(): void
+    {
+        $adventure = $this->adventureWithRoom();
+        $adventure->forceFill(['talk_teamer_room_name' => 'Teamer: Alter Name'])->save();
+        $this->roomDeleted = true;
+
+        AdventureTalkService::make()->setup($adventure);
+
+        $this->assertNull($adventure->fresh()->talk_teamer_room_token);
+        $this->assertStringContainsString('Über „Einrichten“', (string) $adventure->fresh()->talk_error);
+    }
+
+    // ── Spielleiter als Moderator ───────────────────────────────────────
+
+    public function test_spielleiter_wird_moderator_und_bleibt_im_raum(): void
+    {
+        $gm = $this->userWithRole(40, ['name' => 'Greta', 'lastname' => 'Spielleitung', 'nextcloud_user_id' => 'greta.sl']);
+        $adventure = $this->adventureWithRoom();
+        $adventure->update(['gamemaster_id' => $gm->id]);
+        // Auch als abgelehnte Teamerin bleibt sie im Raum.
+        TeamerSignup::factory()->create(['adventure_id' => $adventure->id, 'user_id' => $gm->id, 'approved_at' => null]);
+
+        AdventureTalkService::make()->syncTeamers($adventure->fresh());
+
+        $this->assertArrayHasKey('greta.sl', $this->roomMembers);
+        $this->assertTrue($this->roomModerators['greta.sl'] ?? false);
+        $this->assertNull($adventure->fresh()->talk_error);
+
+        $this->actingAs($this->userWithRole(10))
+            ->get(route('adventures.talk.tab', $adventure))
+            ->assertSee('Spielleiter:')
+            ->assertSee('Greta Spielleitung')
+            ->assertSee('Nextcloud: greta.sl');
+    }
+
+    public function test_spielleiter_ohne_konto_wird_angezeigt_aber_kein_fehler(): void
+    {
+        $gm = $this->userWithRole(40, ['name' => 'Greta', 'lastname' => 'Ohnekonto', 'email' => 'greta@example.test']);
+        $adventure = $this->adventureWithRoom();
+        $adventure->update(['gamemaster_id' => $gm->id]);
+
+        AdventureTalkService::make()->syncTeamers($adventure->fresh());
+
+        $this->assertSame([], $this->roomModerators);
+        $this->assertNull($adventure->fresh()->talk_error);
+        $this->actingAs($this->userWithRole(10))
+            ->get(route('adventures.talk.tab', $adventure))
+            ->assertSee('Greta Ohnekonto')
+            ->assertSee('Kein Nextcloud-Konto gefunden');
+    }
+
+    public function test_wechsel_des_spielleiters_startet_den_abgleich(): void
+    {
+        $adventure = $this->adventureWithRoom();
+        $gm = $this->userWithRole(40, ['nextcloud_user_id' => 'neuer.sl']);
+        Bus::fake([SyncAdventureTalkTeamersJob::class]);
+
+        $this->actingAs($this->userWithRole(10))
+            ->put(route('adventures.update', $adventure), $this->payload(['name' => 'Herbstlager', 'gamemaster_id' => $gm->id]))
+            ->assertRedirect();
+
+        Bus::assertDispatched(SyncAdventureTalkTeamersJob::class, fn ($job) => $job->adventureId === $adventure->id);
     }
 }

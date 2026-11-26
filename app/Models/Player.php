@@ -257,6 +257,7 @@ class Player extends Model
             'talk_error' => null,
             'nextcloud_user_id' => null,
             'nextcloud_account_created' => false,
+            'nextcloud_group' => null,
             'anonymized_at' => now(),
         ])->save();
 

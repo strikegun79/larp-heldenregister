@@ -7,6 +7,7 @@ use App\Jobs\SyncAdventureTalkTeamersJob;
 use App\Models\Adventure;
 use App\Models\Setting;
 use App\Models\User;
+use Illuminate\Support\Collection;
 
 /**
  * Issue #31 (Phase 2): Talk-Struktur eines Events – Plot-Thread im Plot-Team-Chat und privater
@@ -87,6 +88,8 @@ class AdventureTalkService
                 if ($this->setupTeamerRoom($adventure)) {
                     $errors = array_merge($errors, $this->syncErrors($adventure, []));
                 }
+            } catch (NextcloudRoomNotFoundException) {
+                $errors[] = $this->forgetTeamerRoom($adventure);
             } catch (NextcloudTalkException $e) {
                 $errors[] = 'Teamer-Raum: '.$e->getMessage();
             }
@@ -151,9 +154,24 @@ class AdventureTalkService
                 }
             }
 
+            // Moderatoren: Liste aus den Einstellungen plus der Spielleiter der Veranstaltung.
+            $moderators = self::moderators();
+            if ($adventure->gamemaster) {
+                try {
+                    if ($gamemasterId = $this->nextcloudUserFor($adventure->gamemaster)) {
+                        $moderators[] = $gamemasterId;
+                    }
+                } catch (NextcloudTalkException $e) {
+                    $errors[] = 'Spielleiter: '.$e->getMessage();
+                }
+            }
+            $moderators = array_values(array_unique($moderators));
+
             foreach ($toRemove->unique('id') as $user) {
                 $ncId = $user->nextcloud_user_id;
-                if ($ncId === null || $ncId === $this->client->technicalUser() || ! $members->has($ncId)) {
+                // Moderatoren (Einstellungen, Spielleiter) bleiben im Raum, auch als ehemalige Teamer.
+                if ($ncId === null || $ncId === $this->client->technicalUser() || ! $members->has($ncId)
+                    || in_array($ncId, $moderators, true)) {
                     continue;
                 }
                 try {
@@ -162,11 +180,93 @@ class AdventureTalkService
                     $errors[] = $user->name.': '.$e->getMessage();
                 }
             }
+
+            $errors = array_merge($errors, $this->syncModerators($token, $members, $moderators));
+        } catch (NextcloudRoomNotFoundException) {
+            return [$this->forgetTeamerRoom($adventure)];
         } catch (NextcloudTalkException $e) {
             $errors[] = $e->getMessage();
         }
 
         return array_map(fn ($e) => 'Teamer-Abgleich: '.$e, $errors);
+    }
+
+    /**
+     * Talk-Moderatoren aus den Einstellungen: Nextcloud-Benutzernamen, die in jedem
+     * Teamer-Raum Moderator sind (z. B. andere Nextcloud-Admins zum Verwalten und Löschen).
+     *
+     * @return list<string>
+     */
+    public static function moderators(): array
+    {
+        return collect(preg_split('/[\s,;]+/', (string) Setting::get('talk_moderators')))
+            ->map(fn ($name) => trim((string) $name))
+            ->filter()
+            ->unique()
+            ->values()
+            ->all();
+    }
+
+    /**
+     * Moderatoren in den Raum aufnehmen und zum Moderator machen. Wer aus der Einstellung
+     * entfernt wird, bleibt im Raum (keine automatische Herabstufung).
+     *
+     * @param  Collection<string, array{attendeeId: int, actorType: string, actorId: string, participantType: int}>  $members
+     * @param  list<string>  $moderators
+     * @return list<string>
+     */
+    private function syncModerators(string $token, Collection $members, array $moderators): array
+    {
+        $moderators = array_values(array_diff($moderators, [$this->client->technicalUser()]));
+        if ($moderators === []) {
+            return [];
+        }
+
+        $errors = [];
+        $added = false;
+        foreach ($moderators as $name) {
+            if (! $members->has($name)) {
+                try {
+                    $this->client->addUser($token, $name);
+                    $added = true;
+                } catch (NextcloudTalkException $e) {
+                    $errors[] = 'Moderator '.$name.': '.$e->getMessage();
+                }
+            }
+        }
+
+        if ($added) {
+            $members = collect($this->client->participants($token))->where('actorType', 'users')->keyBy('actorId');
+        }
+
+        foreach ($moderators as $name) {
+            $member = $members->get($name);
+            if ($member === null || in_array($member['participantType'], [1, 2], true)) {
+                continue;
+            }
+            try {
+                $this->client->promoteModerator($token, $member['attendeeId']);
+            } catch (NextcloudTalkException $e) {
+                $errors[] = 'Moderator '.$name.': '.$e->getMessage();
+            }
+        }
+
+        return $errors;
+    }
+
+    /**
+     * Raum gibt es in Nextcloud nicht mehr: Verknüpfung vergessen, damit er über „Einrichten“
+     * neu angelegt oder dauerhaft weggelassen werden kann.
+     */
+    private function forgetTeamerRoom(Adventure $adventure): string
+    {
+        $adventure->talk_teamer_room = false;
+        $adventure->talk_teamer_room_token = null;
+        $adventure->talk_teamer_room_name = null;
+        $adventure->save();
+
+        return 'Teamer-Raum: Der Raum wurde in Nextcloud gelöscht oder ist für das technische Konto nicht mehr erreichbar. '
+            .'Über „Einrichten“ kann er neu angelegt werden.';
     }
 
     /** @param  list<string>  $errors */

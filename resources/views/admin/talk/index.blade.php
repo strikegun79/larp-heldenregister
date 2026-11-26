@@ -28,7 +28,7 @@
                     <p class="text-sm text-stone-700 mb-4">
                         Adresse und Zugang werden in der <code>.env</code> eingetragen:
                         <code>NEXTCLOUD_URL</code>, <code>NEXTCLOUD_USER</code> und <code>NEXTCLOUD_APP_PASSWORD</code>
-                        (App-Passwort eines technischen Kontos mit Admin-Rechten). Ohne diese Angaben bleiben alle Talk-Funktionen aus.
+                        (App-Passwort eines technischen Kontos). Ohne diese Angaben bleiben alle Talk-Funktionen aus.
                     </p>
                 @endif
 
@@ -42,10 +42,28 @@
                                     <li>Nextcloud-Version: {{ $result['version'] }}</li>
                                 @endif
                                 <li>Talk-Version: {{ $result['talk_version'] ?? 'nicht installiert' }}</li>
+                                @foreach ($result['groups'] ?? [] as $groupCheck)
+                                    <li>
+                                        <i class="{{ $groupCheck['ok'] ? 'check circle' : 'exclamation triangle' }} icon" aria-hidden="true"></i>
+                                        {{ $groupCheck['text'] }}
+                                    </li>
+                                @endforeach
                             </ul>
                         @endif
                     </div>
                 @endif
+
+                <details class="text-sm text-stone-700 mb-4">
+                    <summary class="cursor-pointer font-medium">Rechte des technischen Kontos in Nextcloud</summary>
+                    <ul class="list-disc pl-5 mt-2 space-y-1">
+                        <li><strong>Kein Admin</strong>, sondern <strong>Gruppen-Admin</strong> der beiden Talk-Gruppen (z. B. TALK-User und TALK-U18).
+                            So kann es Konten anlegen und sperren, aber niemandem Admin-Rechte geben.</li>
+                        <li><strong>Mitglied</strong> der Gruppe für volljährige Talk-Nutzer, falls nur diese Gruppe Unterhaltungen anlegen darf (für die Teamer-Räume).</li>
+                        <li><strong>Moderator</strong> im Plot-Team-Chat (Plot-Threads anlegen und umbenennen).</li>
+                        <li>Hinweis: Als Gruppen-Admin findet das Konto vorhandene Nextcloud-Konten nur in seinen Gruppen.
+                            Teamer mit eigenem Konto einmal in die Volljährigen-Gruppe aufnehmen oder den Benutzernamen im Nutzerprofil eintragen.</li>
+                    </ul>
+                </details>
 
                 <form method="POST" action="{{ route('admin.talk.test') }}">
                     @csrf
@@ -82,10 +100,35 @@
                     </div>
 
                     <div class="field">
+                        <label for="talk_user_group">Nextcloud-Gruppe für volljährige Talk-Nutzer</label>
+                        <input type="text" id="talk_user_group" name="talk_user_group" maxlength="64"
+                               value="{{ old('talk_user_group', $values['talk_user_group'] ?? '') }}" placeholder="z. B. TALK-User">
+                        <x-input-error :messages="$errors->get('talk_user_group')" class="mt-1" />
+                    </div>
+
+                    <div class="field">
                         <label for="talk_u18_group">Nextcloud-Gruppe für U18-Konten</label>
                         <input type="text" id="talk_u18_group" name="talk_u18_group" maxlength="64"
-                               value="{{ old('talk_u18_group', $values['talk_u18_group'] ?? '') }}" placeholder="z. B. talk-u18">
+                               value="{{ old('talk_u18_group', $values['talk_u18_group'] ?? '') }}" placeholder="z. B. TALK-U18">
                         <x-input-error :messages="$errors->get('talk_u18_group')" class="mt-1" />
+                        <p class="text-xs text-stone-500 mt-1">
+                            Gruppen-ID aus Nextcloud eintragen (Benutzer → Gruppe anklicken → ID in der Adresszeile).
+                            Aus Sicherheitsgründen sind nur Gruppen erlaubt, die mit „{{ \App\Services\NextcloudTalk\NextcloudTalkClient::GROUP_PREFIX }}“ beginnen.
+                            Am 18. Geburtstag wechselt das Konto automatisch von der U18- in die Volljährigen-Gruppe.
+                        </p>
+                    </div>
+
+                    <div class="field">
+                        <label for="talk_moderators">Moderatoren der Teamer-Räume</label>
+                        <textarea id="talk_moderators" name="talk_moderators" rows="3" maxlength="2000"
+                                  aria-describedby="talk_moderators_hint"
+                                  placeholder="Nextcloud-Benutzernamen, einer pro Zeile">{{ old('talk_moderators', $values['talk_moderators'] ?? '') }}</textarea>
+                        <p id="talk_moderators_hint" class="text-xs text-stone-500 mt-1">
+                            Diese Personen werden in jeden Teamer-Raum aufgenommen und zu Moderatoren gemacht – so können z. B. andere
+                            Nextcloud-Admins die Räume in Talk umbenennen, verwalten und löschen. Gilt für neue Räume sofort, für bestehende
+                            beim nächsten Abgleich („Jetzt synchronisieren“). Wer aus der Liste entfernt wird, bleibt im Raum.
+                        </p>
+                        <x-input-error :messages="$errors->get('talk_moderators')" class="mt-1" />
                     </div>
 
                     <div class="field">
