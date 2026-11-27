@@ -82,7 +82,9 @@ class TalkApprovalController extends Controller
         PlayerTalkService::revoke($player, TalkAccessEnded::REVOKED);
         AuditLogger::log('talk.revoked', $player);
 
-        return back()->with('status', 'Talk-Freigabe für '.$player->full_name.' zurückgenommen.');
+        $hint = $player->nextcloud_external ? ' Das Konto wird in Nextcloud nicht deaktiviert (extern verwaltet).' : '';
+
+        return back()->with('status', 'Talk-Freigabe für '.$player->full_name.' zurückgenommen.'.$hint);
     }
 
     /** Bewusst mit einem vorhandenen Nextcloud-Konto verknüpfen (z. B. wenn der Name schon vergeben war). */
@@ -90,12 +92,13 @@ class TalkApprovalController extends Controller
     {
         $data = $request->validate([
             'nextcloud_user_id' => ['required', 'string', 'max:64', 'regex:/^[\pL\pN_.@-]+$/u'],
+            'external' => ['boolean'],
         ], [
             'nextcloud_user_id.regex' => 'Der Nextcloud-Benutzername enthält unzulässige Zeichen.',
         ]);
 
         try {
-            PlayerTalkService::make()->linkExisting($player, $data['nextcloud_user_id']);
+            PlayerTalkService::make()->linkExisting($player, $data['nextcloud_user_id'], $request->boolean('external'));
         } catch (NextcloudTalkException $e) {
             return back()->with('error', $player->full_name.': '.$e->getMessage());
         }

@@ -135,6 +135,12 @@
                                                             <input type="text" id="nc-link-{{ $player->id }}" name="nextcloud_user_id" maxlength="64" required
                                                                    placeholder="Nextcloud-Benutzername" autocomplete="off"
                                                                    class="border border-stone-300 rounded px-2 py-1 text-sm w-44">
+                                                            @unless ($player->isTalkMinor())
+                                                                <label class="inline-flex items-center gap-1 text-xs w-full">
+                                                                    <input type="checkbox" name="external" value="1" class="rounded border-gray-300">
+                                                                    Konto wird nicht vom Heldenregister verwaltet (z. B. Nextcloud-Admin)
+                                                                </label>
+                                                            @endunless
                                                             <button type="submit" class="ui mini button"><i class="linkify icon"></i> Verknüpfen</button>
                                                         </form>
                                                     </details>

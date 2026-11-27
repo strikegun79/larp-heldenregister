@@ -59,6 +59,8 @@ class Player extends Model
         'talk_consent_at' => 'datetime',
         'talk_account_ready_at' => 'datetime',
         'nextcloud_account_created' => 'boolean',
+        // Verknüpftes Konto wird nicht vom Heldenregister verwaltet (z. B. Nextcloud-Admin).
+        'nextcloud_external' => 'boolean',
         // Issue #42: Zeitpunkt der DSGVO-Anonymisierung nach dem Löschen.
         'anonymized_at' => 'datetime',
     ];
@@ -122,7 +124,7 @@ class Player extends Model
             'none' => 'nicht freigegeben',
             'consent' => 'wartet auf Erlaubnis der Eltern',
             'pending' => 'Konto wird eingerichtet',
-            'ready' => 'Konto eingerichtet',
+            'ready' => $this->nextcloud_external ? 'Konto eingerichtet (extern verwaltet)' : 'Konto eingerichtet',
             'error' => 'Fehler',
         };
     }
@@ -249,6 +251,7 @@ class Player extends Model
             'nextcloud_user_id' => null,
             'nextcloud_account_created' => false,
             'nextcloud_group' => null,
+            'nextcloud_external' => false,
             'anonymized_at' => now(),
         ])->save();
 
