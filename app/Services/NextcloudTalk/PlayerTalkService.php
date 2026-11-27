@@ -106,6 +106,19 @@ class PlayerTalkService
             return;
         }
 
+        // Extern verwaltetes Konto (z. B. Nextcloud-Admin): keine Kontoverwaltung, nur als eingerichtet markieren.
+        if ($player->nextcloud_external && filled($player->nextcloud_user_id)) {
+            $newlyReady = $player->talk_account_ready_at === null;
+            $player->talk_account_ready_at = now();
+            $player->talk_error = null;
+            $player->save();
+            if ($newlyReady) {
+                Notification::send($player->users, new TalkAccountReady($player, self::accountEmail($player)));
+            }
+
+            return;
+        }
+
         try {
             $group = self::targetGroup($player);
 
@@ -147,23 +160,32 @@ class PlayerTalkService
      * Das Konto muss für das technische Konto sichtbar sein (in einer TALK-Gruppe) und darf keinem
      * anderen Spieler gehören.
      */
-    public function linkExisting(Player $player, string $userId): void
+    public function linkExisting(Player $player, string $userId, bool $external = false): void
     {
         $userId = trim($userId);
         $this->client->forContext(player: $player);
+
+        if ($external && $player->isTalkMinor()) {
+            throw new NextcloudTalkException('Extern verwaltete Konten sind nur für Volljährige möglich – Minderjährige müssen in der U18-Gruppe sein.');
+        }
 
         $other = Player::withTrashed()->where('nextcloud_user_id', $userId)->whereKeyNot($player->id)->first();
         if ($other) {
             throw new NextcloudTalkException('Das Nextcloud-Konto „'.$userId.'“ ist bereits mit '.$other->full_name.' verknüpft.');
         }
-        if (! $this->client->userExists($userId)) {
+        // Extern verwaltete Konten (z. B. Admins) kann das technische Konto nicht sehen – daher keine Prüfung.
+        if (! $external && ! $this->client->userExists($userId)) {
+            $this->client->note('Verknüpfen fehlgeschlagen: '.$userId, false, 'Konto nicht gefunden oder für das technische Konto nicht sichtbar.');
+
             throw new NextcloudTalkException('Das Nextcloud-Konto „'.$userId.'“ gibt es nicht oder es ist in keiner TALK-Gruppe '
-                .'(das technische Konto sieht nur Konten in den Talk-Gruppen). In Nextcloud zuerst in die passende Gruppe aufnehmen.');
+                .'(das technische Konto sieht nur Konten in den Talk-Gruppen). In Nextcloud zuerst in die passende Gruppe aufnehmen. '
+                .'Ist die Person Nextcloud-Admin, das Häkchen „extern verwaltet“ setzen. Groß- und Kleinschreibung des Benutzernamens beachten.');
         }
 
-        $this->client->note('Mit vorhandenem Konto verknüpft: '.$userId);
+        $this->client->note('Mit vorhandenem Konto verknüpft'.($external ? ' (extern verwaltet)' : '').': '.$userId);
         $player->nextcloud_user_id = $userId;
         $player->nextcloud_account_created = false;
+        $player->nextcloud_external = $external;
         $player->nextcloud_group = null;
         $player->talk_error = null;
         $player->save();
@@ -221,6 +243,7 @@ class PlayerTalkService
         $changed = 0;
         Player::whereNotNull('talk_account_ready_at')
             ->whereNotNull('nextcloud_user_id')
+            ->where('nextcloud_external', false)
             ->chunkById(100, function ($players) use (&$changed) {
                 foreach ($players as $player) {
                     try {
@@ -264,6 +287,7 @@ class PlayerTalkService
         $player->nextcloud_user_id = null;
         $player->nextcloud_account_created = false;
         $player->nextcloud_group = null;
+        $player->nextcloud_external = false;
         $player->talk_account_ready_at = null;
         $player->talk_error = null;
         $player->save();

@@ -63,10 +63,16 @@
             </div>
             <div>
                 <x-input-label for="dayofbirth" value="Geburtsdatum" class="wr-field-label" />
-                <x-date-picker name="dayofbirth"
-                               :value="old('dayofbirth', optional($player->dayofbirth)->format('Y-m-d'))" />
+                {{-- Issue #60: einfache Eingabe statt Kalender (TT.MM.JJJJ), Prüfung im PlayerController --}}
+                <input type="text" id="dayofbirth" name="dayofbirth"
+                       value="{{ old('dayofbirth', optional($player->dayofbirth)->format('d.m.Y')) }}"
+                       placeholder="TT.MM.JJJJ" maxlength="10" autocomplete="bday"
+                       pattern="\d{1,2}\.\d{1,2}\.\d{4}|\d{8}"
+                       title="Geburtsdatum im Format TT.MM.JJJJ, z. B. 15.03.2012"
+                       aria-describedby="dayofbirth-hint"
+                       class="mt-1 block w-full border-gray-300 rounded-md shadow-sm focus:border-amber-600 focus:ring-amber-600">
                 <x-input-error :messages="$errors->get('dayofbirth')" class="mt-2" />
-                <small class="wr-help">Für altersgerechte Gruppen und die Notfallvorsorge.</small>
+                <small id="dayofbirth-hint" class="wr-help">Format TT.MM.JJJJ, z. B. 15.03.2012. Für altersgerechte Gruppen und die Notfallvorsorge.</small>
             </div>
             <div>
                 <x-input-label for="gender" value="Geschlecht" class="wr-field-label" />

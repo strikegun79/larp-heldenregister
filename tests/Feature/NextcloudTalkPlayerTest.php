@@ -846,4 +846,54 @@ class NextcloudTalkPlayerTest extends TestCase
             ->post(route('admin.talk.approvals.link', $player), ['nextcloud_user_id' => 'böse<script>'])
             ->assertSessionHasErrors('nextcloud_user_id');
     }
+
+    // ── Extern verwaltete Konten (z. B. Nextcloud-Admins) ───────────────
+
+    public function test_admin_konto_extern_verwaltet_verknuepfen(): void
+    {
+        // Admin-Konto: für das technische Konto (Gruppen-Admin) unsichtbar.
+        $this->hiddenAccounts = ['Richy.Mueller'];
+        $player = $this->readyAdult();
+        $registrar = $this->registrar();
+
+        // Ohne Häkchen → Fehler mit Hinweis auf „extern verwaltet“.
+        $this->actingAs($registrar)
+            ->post(route('admin.talk.approvals.link', $player), ['nextcloud_user_id' => 'Richy.Mueller'])
+            ->assertSessionHas('error', fn ($m) => str_contains($m, 'extern verwaltet'));
+        $this->assertDatabaseHas('talk_logs', ['player_id' => $player->id, 'action' => 'Verknüpfen fehlgeschlagen: Richy.Mueller', 'success' => false]);
+
+        // Mit Häkchen → verknüpft, eingerichtet, ohne Gruppen- oder Kontoaufrufe.
+        $this->actingAs($registrar)
+            ->post(route('admin.talk.approvals.link', $player), ['nextcloud_user_id' => 'Richy.Mueller', 'external' => '1'])
+            ->assertSessionHas('status');
+
+        $player->refresh();
+        $this->assertSame('Richy.Mueller', $player->nextcloud_user_id);
+        $this->assertTrue($player->nextcloud_external);
+        $this->assertSame('ready', $player->talkStatus());
+        $this->assertSame('Konto eingerichtet (extern verwaltet)', $player->talkStatusLabel());
+        Http::assertNotSent(fn ($r) => str_contains($r->url(), '/groups') || str_contains($r->url(), '/enable'));
+
+        // Täglicher Abgleich lässt es in Ruhe (kein Lösen trotz 404).
+        $this->artisan('talk:sync-age-groups')->assertSuccessful();
+        $this->assertSame('Richy.Mueller', $player->fresh()->nextcloud_user_id);
+
+        // Rücknahme: Hinweis, keine Deaktivierung.
+        $this->actingAs($registrar)
+            ->delete(route('admin.talk.approvals.revoke', $player))
+            ->assertSessionHas('status', fn ($m) => str_contains($m, 'nicht deaktiviert'));
+        Http::assertNotSent(fn ($r) => str_contains($r->url(), '/disable'));
+    }
+
+    public function test_extern_verwaltet_nicht_fuer_minderjaehrige(): void
+    {
+        $guardian = $this->userWithRole(70);
+        $player = $this->player(15, $guardian);
+        $player->forceFill(['talk_approved_at' => now()])->save();
+
+        $this->actingAs($this->registrar())
+            ->post(route('admin.talk.approvals.link', $player), ['nextcloud_user_id' => 'Kind.Konto', 'external' => '1'])
+            ->assertSessionHas('error', fn ($m) => str_contains($m, 'nur für Volljährige'));
+        $this->assertNull($player->fresh()->nextcloud_user_id);
+    }
 }

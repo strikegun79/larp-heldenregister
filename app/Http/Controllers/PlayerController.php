@@ -249,15 +249,42 @@ class PlayerController extends Controller
      *
      * @return array<string, mixed>
      */
+    /**
+     * Issue #60: Geburtsdatum aus der Eingabe (TT.MM.JJJJ, T.M.JJJJ, TTMMJJJJ oder JJJJ-MM-TT)
+     * in JJJJ-MM-TT umwandeln. Ungültige Daten (z. B. 31.02.) bleiben unverändert und
+     * scheitern dann an der Validierung; leere Eingabe wird null.
+     */
+    public static function normalizeBirthday(mixed $input): ?string
+    {
+        $value = trim((string) $input);
+        if ($value === '') {
+            return null;
+        }
+
+        if (preg_match('/^(\d{1,2})\.(\d{1,2})\.(\d{4})$/', $value, $m)
+            || preg_match('/^(\d{2})(\d{2})(\d{4})$/', $value, $m)) {
+            [$day, $month, $year] = [(int) $m[1], (int) $m[2], (int) $m[3]];
+        } elseif (preg_match('/^(\d{4})-(\d{2})-(\d{2})$/', $value, $m)) {
+            [$year, $month, $day] = [(int) $m[1], (int) $m[2], (int) $m[3]];
+        } else {
+            return $value;
+        }
+
+        return checkdate($month, $day, $year) ? sprintf('%04d-%02d-%02d', $year, $month, $day) : $value;
+    }
+
     private function playerData(Request $request, ?Player $existing = null): array
     {
         $sameAsGuardian = filter_var($request->input('address_same_as_guardian', '1'), FILTER_VALIDATE_BOOLEAN);
+
+        // Issue #60: Geburtsdatum als TT.MM.JJJJ (auch 15.3.2012 oder 15032012) → JJJJ-MM-TT.
+        $request->merge(['dayofbirth' => self::normalizeBirthday($request->input('dayofbirth'))]);
 
         $data = $request->validate([
             'name' => ['required', 'string', 'max:50'],
             'lastname' => ['required', 'string', 'max:50'],
             'email' => ['nullable', 'email', 'max:150'],
-            'dayofbirth' => ['nullable', 'date', 'before_or_equal:today', 'after:1900-01-01'],
+            'dayofbirth' => ['nullable', 'date_format:Y-m-d', 'before_or_equal:today', 'after:1900-01-01'],
             'gender' => ['nullable', 'in:weiblich,männlich,divers'],
             'address_same_as_guardian' => ['boolean'],
             'street' => [$sameAsGuardian ? 'nullable' : 'required', 'string', 'max:100'],
@@ -276,6 +303,10 @@ class PlayerController extends Controller
                 Rule::requiredIf(fn () => ! $request->boolean('self')),
                 'boolean',
             ],
+        ], [
+            'dayofbirth.date_format' => 'Bitte ein gültiges Geburtsdatum im Format TT.MM.JJJJ eingeben.',
+            'dayofbirth.before_or_equal' => 'Das Geburtsdatum darf nicht in der Zukunft liegen.',
+            'dayofbirth.after' => 'Bitte ein gültiges Geburtsdatum im Format TT.MM.JJJJ eingeben.',
         ]);
 
         // Gesundheitsdaten-Consent → Timestamp.
