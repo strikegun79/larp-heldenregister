@@ -457,6 +457,11 @@ class NextcloudTalkClient
         $message = $action.': '.($messages['ocs:'.$ocsCode] ?? $messages[$response->status()] ?? $this->errorMessage($response, $path));
         $this->log($method, $path, $action, $response->status(), false, $message);
 
+        // Benutzername beim Anlegen schon vergeben → eigene Ausnahme (Spieler-Konten bieten dann Auswege an).
+        if ($ocsCode === 102 && strtolower($method) === 'post' && trim($path, '/') === 'cloud/users') {
+            throw new NextcloudUserExistsException($message);
+        }
+
         throw new NextcloudTalkException($message);
     }
 

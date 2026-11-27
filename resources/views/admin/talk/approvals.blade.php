@@ -117,6 +117,28 @@
                                                         <button type="submit" class="ui mini button"><i class="redo icon"></i> Erneut versuchen</button>
                                                     </form>
                                                 @endif
+                                                {{-- Benutzername war schon vergeben: neues Konto unter dem nächsten freien Namen --}}
+                                                @if ($player->talk_error && blank($player->nextcloud_user_id) && $player->talkReadyForAccount())
+                                                    <form method="POST" action="{{ route('admin.talk.approvals.new-name', $player) }}"
+                                                          data-confirm="Für {{ $player->full_name }} ein neues Nextcloud-Konto mit anderem Benutzernamen (z. B. mit angehängter Zahl) anlegen? Nur wählen, wenn das vorhandene Konto einer anderen Person gehört.">
+                                                        @csrf
+                                                        <button type="submit" class="ui mini button"><i class="user plus icon"></i> Neues Konto mit anderem Namen anlegen</button>
+                                                    </form>
+                                                @endif
+                                                {{-- Bewusst mit einem vorhandenen Konto verknüpfen --}}
+                                                @if (blank($player->nextcloud_user_id))
+                                                    <details class="text-left w-full sm:w-auto">
+                                                        <summary class="cursor-pointer text-xs underline">Mit vorhandenem Konto verknüpfen</summary>
+                                                        <form method="POST" action="{{ route('admin.talk.approvals.link', $player) }}" class="flex flex-wrap items-center gap-1 mt-1">
+                                                            @csrf
+                                                            <label for="nc-link-{{ $player->id }}" class="sr-only">Nextcloud-Benutzername für {{ $player->full_name }}</label>
+                                                            <input type="text" id="nc-link-{{ $player->id }}" name="nextcloud_user_id" maxlength="64" required
+                                                                   placeholder="Nextcloud-Benutzername" autocomplete="off"
+                                                                   class="border border-stone-300 rounded px-2 py-1 text-sm w-44">
+                                                            <button type="submit" class="ui mini button"><i class="linkify icon"></i> Verknüpfen</button>
+                                                        </form>
+                                                    </details>
+                                                @endif
                                                 <form method="POST" action="{{ route('admin.talk.approvals.revoke', $player) }}"
                                                       data-confirm="Talk-Freigabe für {{ $player->full_name }} zurücknehmen? Ein vom Heldenregister angelegtes Konto wird deaktiviert.">
                                                     @csrf @method('DELETE')

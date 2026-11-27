@@ -87,7 +87,19 @@ class PlayerTalkService
         }
     }
 
-    public function provision(Player $player): void
+    /** Neues Konto unter dem nächsten freien Namen einplanen (vorhandener Name gehört jemand anderem). */
+    public static function queueProvisionWithNewName(Player $player): void
+    {
+        if ($player->talkReadyForAccount() && NextcloudTalkClient::fromConfig()->isActive()) {
+            PlayerTalkAccountJob::dispatch($player->id, PlayerTalkAccountJob::PROVISION_NEW_NAME);
+        }
+    }
+
+    /** Text bei vergebenem Benutzernamen – nennt die Auswege. */
+    public const USERNAME_TAKEN_HINT = 'Gehört das Konto derselben Person: in Nextcloud in die TALK-Gruppe aufnehmen und „Erneut versuchen“ '
+        .'oder hier „Mit vorhandenem Konto verknüpfen“. Sonst „Neues Konto mit anderem Namen anlegen“.';
+
+    public function provision(Player $player, bool $newName = false): void
     {
         $this->client->forContext(player: $player);
         if (! $this->client->isActive() || ! $player->talkReadyForAccount()) {
@@ -103,7 +115,7 @@ class PlayerTalkService
             }
 
             if (blank($player->nextcloud_user_id)) {
-                $this->linkOrCreate($player, $group);
+                $this->linkOrCreate($player, $group, $newName);
             } elseif ($player->nextcloud_account_created) {
                 // Nach einer Rücknahme deaktiviertes Konto wieder einschalten.
                 $this->client->enableUser($player->nextcloud_user_id);
@@ -121,10 +133,39 @@ class PlayerTalkService
             }
 
             return;
+        } catch (NextcloudUserExistsException $e) {
+            $player->talk_error = mb_substr($e->getMessage().' '.self::USERNAME_TAKEN_HINT, 0, 500);
         } catch (NextcloudTalkException $e) {
             $player->talk_error = mb_substr($e->getMessage(), 0, 500);
         }
 
+        $player->save();
+    }
+
+    /**
+     * Spieler bewusst mit einem vorhandenen Nextcloud-Konto verknüpfen (Eingabe in den Talk-Freigaben).
+     * Das Konto muss für das technische Konto sichtbar sein (in einer TALK-Gruppe) und darf keinem
+     * anderen Spieler gehören.
+     */
+    public function linkExisting(Player $player, string $userId): void
+    {
+        $userId = trim($userId);
+        $this->client->forContext(player: $player);
+
+        $other = Player::withTrashed()->where('nextcloud_user_id', $userId)->whereKeyNot($player->id)->first();
+        if ($other) {
+            throw new NextcloudTalkException('Das Nextcloud-Konto „'.$userId.'“ ist bereits mit '.$other->full_name.' verknüpft.');
+        }
+        if (! $this->client->userExists($userId)) {
+            throw new NextcloudTalkException('Das Nextcloud-Konto „'.$userId.'“ gibt es nicht oder es ist in keiner TALK-Gruppe '
+                .'(das technische Konto sieht nur Konten in den Talk-Gruppen). In Nextcloud zuerst in die passende Gruppe aufnehmen.');
+        }
+
+        $this->client->note('Mit vorhandenem Konto verknüpft: '.$userId);
+        $player->nextcloud_user_id = $userId;
+        $player->nextcloud_account_created = false;
+        $player->nextcloud_group = null;
+        $player->talk_error = null;
         $player->save();
     }
 
@@ -277,11 +318,12 @@ class PlayerTalkService
         return $player->users()->wherePivot('self', true)->first();
     }
 
-    private function linkOrCreate(Player $player, string $group): void
+    private function linkOrCreate(Player $player, string $group, bool $newName = false): void
     {
         $email = self::accountEmail($player);
 
-        $found = $email ? $this->client->findUserIdByEmail($email) : null;
+        // Bei „anderem Namen“ nicht per E-Mail verknüpfen – es soll ausdrücklich ein neues Konto werden.
+        $found = $email && ! $newName ? $this->client->findUserIdByEmail($email) : null;
         if ($found !== null) {
             $player->nextcloud_user_id = $found;
             $player->nextcloud_account_created = false;
@@ -297,7 +339,23 @@ class PlayerTalkService
         }
 
         $userId = $this->uniqueUserId($player);
-        $this->client->createUser($userId, $player->full_name, $email, $group);
+        if ($newName) {
+            // Nicht sichtbare, aber vergebene Namen überspringen: name2, name3 …
+            $base = preg_replace('/\d+$/', '', $userId);
+            for ($i = 2; ; $i++) {
+                try {
+                    $this->client->createUser($userId, $player->full_name, $email, $group);
+                    break;
+                } catch (NextcloudUserExistsException $e) {
+                    if ($i > 50) {
+                        throw $e;
+                    }
+                    $userId = $base.$i;
+                }
+            }
+        } else {
+            $this->client->createUser($userId, $player->full_name, $email, $group);
+        }
 
         $player->nextcloud_user_id = $userId;
         $player->nextcloud_account_created = true;

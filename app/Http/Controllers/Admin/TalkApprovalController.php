@@ -7,6 +7,7 @@ use App\Models\Player;
 use App\Notifications\TalkAccessEnded;
 use App\Services\AuditLogger;
 use App\Services\NextcloudTalk\NextcloudTalkClient;
+use App\Services\NextcloudTalk\NextcloudTalkException;
 use App\Services\NextcloudTalk\PlayerTalkService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
@@ -82,6 +83,35 @@ class TalkApprovalController extends Controller
         AuditLogger::log('talk.revoked', $player);
 
         return back()->with('status', 'Talk-Freigabe für '.$player->full_name.' zurückgenommen.');
+    }
+
+    /** Bewusst mit einem vorhandenen Nextcloud-Konto verknüpfen (z. B. wenn der Name schon vergeben war). */
+    public function link(Request $request, Player $player): RedirectResponse
+    {
+        $data = $request->validate([
+            'nextcloud_user_id' => ['required', 'string', 'max:64', 'regex:/^[\pL\pN_.@-]+$/u'],
+        ], [
+            'nextcloud_user_id.regex' => 'Der Nextcloud-Benutzername enthält unzulässige Zeichen.',
+        ]);
+
+        try {
+            PlayerTalkService::make()->linkExisting($player, $data['nextcloud_user_id']);
+        } catch (NextcloudTalkException $e) {
+            return back()->with('error', $player->full_name.': '.$e->getMessage());
+        }
+
+        AuditLogger::log('talk.linked', $player);
+        PlayerTalkService::queueProvision($player);
+
+        return back()->with('status', $player->full_name.' ist mit dem Nextcloud-Konto „'.$player->nextcloud_user_id.'“ verknüpft.');
+    }
+
+    /** Neues Konto unter dem nächsten freien Benutzernamen anlegen. */
+    public function newName(Player $player): RedirectResponse
+    {
+        PlayerTalkService::queueProvisionWithNewName($player);
+
+        return back()->with('status', 'Für '.$player->full_name.' wird ein neues Konto mit anderem Benutzernamen angelegt.');
     }
 
     /** Verknüpfung mit dem Nextcloud-Konto lösen (nur im Heldenregister). */
