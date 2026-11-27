@@ -540,6 +540,8 @@ Route::prefix('admin')->name('admin.')->middleware(['auth', 'verified', 'can:tal
     Route::delete('talk/approvals/{player}', [Admin\TalkApprovalController::class, 'revoke'])->name('talk.approvals.revoke');
     Route::post('talk/approvals/{player}/retry', [Admin\TalkApprovalController::class, 'retry'])->name('talk.approvals.retry');
     Route::post('talk/approvals/{player}/unlink', [Admin\TalkApprovalController::class, 'unlink'])->name('talk.approvals.unlink');
+    Route::post('talk/approvals/{player}/link', [Admin\TalkApprovalController::class, 'link'])->name('talk.approvals.link');
+    Route::post('talk/approvals/{player}/new-name', [Admin\TalkApprovalController::class, 'newName'])->name('talk.approvals.new-name');
     Route::get('talk/logs', [Admin\TalkLogController::class, 'index'])->name('talk.logs.index');
 });
 

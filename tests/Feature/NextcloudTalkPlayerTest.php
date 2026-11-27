@@ -33,6 +33,9 @@ class NextcloudTalkPlayerTest extends TestCase
     /** Simulierte Nextcloud: Benutzername → ['email' => …, 'groups' => [], 'enabled' => bool]. */
     private array $accounts = [];
 
+    /** Konten, die es gibt, die das technische Konto als Gruppen-Admin aber nicht sieht (keine TALK-Gruppe). */
+    private array $hiddenAccounts = [];
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -62,6 +65,10 @@ class NextcloudTalkPlayerTest extends TestCase
                 return Http::response(['ocs' => ['data' => ['users' => array_map(
                     fn ($id) => ['id' => $id, 'email' => $users[$id]['email']], array_combine(array_keys($users), array_keys($users))
                 )]]]);
+            }
+            if ($method === 'POST' && $path === $prefix
+                && (isset($this->accounts[$request['userid']]) || in_array($request['userid'], $this->hiddenAccounts, true))) {
+                return Http::response(['ocs' => ['meta' => ['statuscode' => 102, 'message' => 'User already exists']]], 400);
             }
             if ($method === 'POST' && $path === $prefix) {
                 $this->accounts[$request['userid']] = ['email' => $request['email'], 'groups' => (array) ($request['groups'] ?? []), 'enabled' => true];
@@ -751,5 +758,92 @@ class NextcloudTalkPlayerTest extends TestCase
         $this->actingAs($this->userWithRole(70))
             ->post(route('admin.talk.approvals.unlink', $player))
             ->assertForbidden();
+    }
+
+    // ── Benutzername schon vergeben ─────────────────────────────────────
+
+    private function readyAdult(): Player
+    {
+        $player = $this->player(25, null, ['name' => 'Richy', 'lastname' => 'Müller', 'email' => 'richy@example.test']);
+        $player->forceFill(['talk_approved_at' => now()])->save();
+
+        return $player;
+    }
+
+    public function test_vergebener_name_nennt_die_auswege(): void
+    {
+        $this->hiddenAccounts = ['richy.mueller'];
+        $player = $this->readyAdult();
+
+        PlayerTalkService::make()->provision($player);
+
+        $player->refresh();
+        $this->assertNull($player->nextcloud_user_id);
+        $this->assertStringContainsString('gibt es in Nextcloud schon', (string) $player->talk_error);
+        $this->assertStringContainsString('Neues Konto mit anderem Namen anlegen', (string) $player->talk_error);
+
+        $this->actingAs($this->registrar())
+            ->get(route('admin.talk.approvals.index'))
+            ->assertSee('Neues Konto mit anderem Namen anlegen')
+            ->assertSee('Mit vorhandenem Konto verknüpfen');
+    }
+
+    public function test_neues_konto_mit_anderem_namen(): void
+    {
+        $this->hiddenAccounts = ['richy.mueller', 'richy.mueller2'];
+        $player = $this->readyAdult();
+        PlayerTalkService::make()->provision($player);
+
+        $this->actingAs($this->registrar())
+            ->post(route('admin.talk.approvals.new-name', $player))
+            ->assertSessionHas('status');
+
+        $player->refresh();
+        $this->assertSame('richy.mueller3', $player->nextcloud_user_id);
+        $this->assertTrue($player->nextcloud_account_created);
+        $this->assertSame('ready', $player->talkStatus());
+        $this->assertSame(['TALK-User'], $this->accounts['richy.mueller3']['groups']);
+    }
+
+    public function test_mit_vorhandenem_konto_verknuepfen(): void
+    {
+        $player = $this->readyAdult();
+        // Vom Nextcloud-Admin in TALK-User aufgenommen → für das technische Konto sichtbar.
+        $this->accounts['richy.alt'] = ['email' => 'anders@example.test', 'groups' => ['TALK-User'], 'enabled' => true];
+
+        $this->actingAs($this->registrar())
+            ->post(route('admin.talk.approvals.link', $player), ['nextcloud_user_id' => 'richy.alt'])
+            ->assertSessionHas('status', fn ($m) => str_contains($m, 'richy.alt'));
+
+        $player->refresh();
+        $this->assertSame('richy.alt', $player->nextcloud_user_id);
+        $this->assertFalse($player->nextcloud_account_created);
+        $this->assertSame('ready', $player->talkStatus());
+        $this->assertDatabaseHas('talk_logs', ['player_id' => $player->id, 'action' => 'Mit vorhandenem Konto verknüpft: richy.alt']);
+    }
+
+    public function test_verknuepfen_nur_mit_sichtbarem_und_freiem_konto(): void
+    {
+        $player = $this->readyAdult();
+        $this->hiddenAccounts = ['richy.mueller'];
+
+        // Unsichtbar (keine TALK-Gruppe) → Fehler, nichts verknüpft.
+        $this->actingAs($this->registrar())
+            ->post(route('admin.talk.approvals.link', $player), ['nextcloud_user_id' => 'richy.mueller'])
+            ->assertSessionHas('error', fn ($m) => str_contains($m, 'in keiner TALK-Gruppe'));
+        $this->assertNull($player->fresh()->nextcloud_user_id);
+
+        // Schon mit einem anderen Spieler verknüpft → Fehler.
+        $this->accounts['vater.mueller'] = ['email' => 'vater@example.test', 'groups' => ['TALK-User'], 'enabled' => true];
+        $this->player(45, null, ['name' => 'Vater', 'nextcloud_user_id' => 'vater.mueller']);
+        $this->actingAs($this->registrar())
+            ->post(route('admin.talk.approvals.link', $player), ['nextcloud_user_id' => 'vater.mueller'])
+            ->assertSessionHas('error', fn ($m) => str_contains($m, 'bereits mit'));
+        $this->assertNull($player->fresh()->nextcloud_user_id);
+
+        // Ungültige Eingabe.
+        $this->actingAs($this->registrar())
+            ->post(route('admin.talk.approvals.link', $player), ['nextcloud_user_id' => 'böse<script>'])
+            ->assertSessionHasErrors('nextcloud_user_id');
     }
 }

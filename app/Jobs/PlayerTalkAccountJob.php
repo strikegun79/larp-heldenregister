@@ -23,6 +23,9 @@ class PlayerTalkAccountJob implements ShouldQueue
 
     public const DISABLE = 'disable';
 
+    /** Neues Konto unter dem nächsten freien Benutzernamen anlegen (vorhandener Name gehört jemand anderem). */
+    public const PROVISION_NEW_NAME = 'provision_new_name';
+
     public int $tries = 5;
 
     public function __construct(public readonly int $playerId, public readonly string $action) {}
@@ -44,6 +47,10 @@ class PlayerTalkAccountJob implements ShouldQueue
         }
 
         $service = PlayerTalkService::make();
-        $this->action === self::DISABLE ? $service->disable($player) : $service->provision($player);
+        match ($this->action) {
+            self::DISABLE => $service->disable($player),
+            self::PROVISION_NEW_NAME => $service->provision($player, newName: true),
+            default => $service->provision($player),
+        };
     }
 }
