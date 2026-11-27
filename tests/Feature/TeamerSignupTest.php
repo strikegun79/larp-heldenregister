@@ -190,7 +190,8 @@ class TeamerSignupTest extends TestCase
             ->getContent();
 
         $this->assertStringContainsString('<td data-label="Rolle">Lehrmeister</td>', $html);
-        $this->assertStringContainsString($signup->user->lastname, $html);
+        // Escaped vergleichen: Faker-Namen wie „D'Amore“ stehen im HTML als D&#039;Amore.
+        $this->assertStringContainsString(e($signup->user->lastname), $html);
     }
 
     public function test_teamer_cannot_assign_role(): void
